@@ -266,6 +266,287 @@ pub fn summary_from_cache(current_version: &str, latest: &MavenLatestEntry) -> M
     }
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Full releases support (used by clojure.rs and can be used by maven tests)
+// ──────────────────────────────────────────────────────────────────────
+
+/// All versions and tags extracted from a `maven-metadata.xml`.
+#[derive(Debug, Clone)]
+pub struct MetadataResult {
+    pub versions: Vec<String>,
+    /// Named version tags: `"latest"` and/or `"release"`.
+    pub tags: HashMap<String, String>,
+}
+
+/// Parse ALL `<version>` elements inside `<versioning><versions>` from a
+/// `maven-metadata.xml` string, along with `<latest>` and `<release>` tags.
+///
+/// Top-level `<version>` elements (used in snapshot artifact metadata) are
+/// ignored.  Returns `None` when no versions are found inside `<versions>`.
+pub fn parse_all_versions(xml: &str) -> Option<MetadataResult> {
+    let cursor = BufReader::new(xml.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut versions: Vec<String> = Vec::new();
+    let mut latest: Option<String> = None;
+    let mut release: Option<String> = None;
+    let mut in_versioning = false;
+    let mut in_versions = false;
+    let mut current_tag: Option<String> = None;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let tag =
+                    String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                match tag.as_str() {
+                    "versioning" => in_versioning = true,
+                    "versions" if in_versioning => in_versions = true,
+                    _ => {}
+                }
+                current_tag = Some(tag);
+            }
+            Ok(Event::Text(e)) => {
+                if let Some(ref tag) = current_tag {
+                    let text = e
+                        .decode()
+                        .map(|s| s.trim().to_owned())
+                        .unwrap_or_default();
+                    if !text.is_empty() {
+                        match tag.as_str() {
+                            "version" if in_versions => versions.push(text),
+                            "latest" if in_versioning => latest = Some(text),
+                            "release" if in_versioning => release = Some(text),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            Ok(Event::End(e)) => {
+                let tag =
+                    String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                match tag.as_str() {
+                    "versioning" => in_versioning = false,
+                    "versions" => in_versions = false,
+                    _ => {}
+                }
+                current_tag = None;
+            }
+            Ok(Event::Eof) | Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    if versions.is_empty() {
+        return None;
+    }
+
+    let mut tags = HashMap::new();
+    if let Some(l) = latest {
+        tags.insert("latest".to_string(), l);
+    }
+    if let Some(r) = release {
+        tags.insert("release".to_string(), r);
+    }
+    Some(MetadataResult { versions, tags })
+}
+
+/// Information extracted from a Maven POM file.
+#[derive(Debug, Clone, Default)]
+pub struct PomInfo {
+    pub homepage: Option<String>,
+    pub source_url: Option<String>,
+}
+
+/// Parse a Maven POM XML for `homepage` and `sourceUrl`.
+///
+/// - `homepage` ← `<url>` (skipped if it contains `${...}` placeholders).
+/// - `source_url` ← `<scm><url>` with prefix stripping and placeholder
+///   removal mirroring the TypeScript `getDependencyInfo` behaviour.
+pub fn parse_pom_info(xml: &str) -> PomInfo {
+    let cursor = BufReader::new(xml.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut result = PomInfo::default();
+    let mut in_scm = false;
+    let mut current_tag: Option<String> = None;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let tag =
+                    String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                if tag == "scm" {
+                    in_scm = true;
+                }
+                current_tag = Some(tag);
+            }
+            Ok(Event::Text(e)) => {
+                if let Some(ref tag) = current_tag {
+                    let text = e
+                        .decode()
+                        .map(|s| s.trim().to_owned())
+                        .unwrap_or_default();
+                    if !text.is_empty() && tag == "url" {
+                        if in_scm && result.source_url.is_none() {
+                            result.source_url = process_scm_url(&text);
+                        } else if !in_scm && result.homepage.is_none() {
+                            if !text.contains("${") {
+                                result.homepage = Some(text);
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(Event::End(e)) => {
+                let tag =
+                    String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                if tag == "scm" {
+                    in_scm = false;
+                }
+                current_tag = None;
+            }
+            Ok(Event::Eof) | Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    result
+}
+
+/// Apply the TypeScript `getDependencyInfo` transformations to a raw `<scm><url>` value.
+fn process_scm_url(raw: &str) -> Option<String> {
+    use regex::Regex;
+    // Remove /tree/${...} (the "known placeholder" removal)
+    let re = Regex::new(r"/tree/\$\{[^}]+\}").expect("static regex");
+    let s = re.replace(raw, "").into_owned();
+
+    // Sequential prefix stripping matching TypeScript replace chains
+    let s = s.strip_prefix("scm:").unwrap_or(&s).to_string();
+    let s = s.strip_prefix("git:").unwrap_or(&s).to_string();
+
+    // git@github.com:path  →  https://github.com/path
+    let s = if s.starts_with("git@github.com:") {
+        format!("https://github.com/{}", &s["git@github.com:".len()..])
+    } else if s.starts_with("git@github.com/") {
+        format!("https://github.com/{}", &s["git@github.com/".len()..])
+    } else {
+        s
+    };
+
+    // //path  →  https://path
+    let s = if s.starts_with("//") {
+        format!("https:{s}")
+    } else {
+        s
+    };
+
+    // Skip if any ${...} placeholders remain
+    if s.contains("${") {
+        return None;
+    }
+
+    Some(s)
+}
+
+/// Return the "latest suitable" version: highest stable version, falling back
+/// to highest overall when no stable versions exist.
+pub fn find_latest_suitable(versions: &[String]) -> Option<&str> {
+    use crate::versioning::maven::{compare, is_stable};
+    use std::cmp::Ordering;
+
+    let stable: Vec<&str> = versions.iter().map(String::as_str).filter(|v| is_stable(v)).collect();
+    let pool: Vec<&str> = if stable.is_empty() {
+        versions.iter().map(String::as_str).collect()
+    } else {
+        stable
+    };
+
+    pool.into_iter().reduce(|best, v| {
+        if compare(v, best) == Ordering::Greater { v } else { best }
+    })
+}
+
+/// Full release result for a single Maven-compatible registry lookup.
+#[derive(Debug, Clone)]
+pub struct MavenReleasesResult {
+    pub releases: Vec<String>,
+    pub source_url: Option<String>,
+    pub homepage: Option<String>,
+    pub registry_url: String,
+    pub tags: HashMap<String, String>,
+    pub is_private: bool,
+    pub respect_latest: bool,
+}
+
+/// Fetch all releases for `dep_name` from one Maven-compatible `registry`.
+///
+/// Returns `None` when:
+/// - registry URL is not `http://` or `https://` (unsupported protocol), or
+/// - registry URL is otherwise invalid, or
+/// - the registry returns no versions (404, bad XML, no `<versions>` element).
+pub async fn fetch_releases_from_registry(
+    dep_name: &str,
+    registry: &str,
+    http: &HttpClient,
+    default_registries: &[&str],
+) -> Option<MavenReleasesResult> {
+    // Only http/https registries are supported
+    if !registry.starts_with("http://") && !registry.starts_with("https://") {
+        return None;
+    }
+
+    let (group_id, artifact_id) = dep_name.split_once(':')?;
+    let group_path = group_id.replace('.', "/");
+    let base = registry.trim_end_matches('/');
+    let metadata_url = format!("{base}/{group_path}/{artifact_id}/maven-metadata.xml");
+
+    let resp = http.get_retrying(&metadata_url).await.ok()?;
+    if !resp.status().is_success() {
+        return None;
+    }
+    let body = resp.text().await.ok()?;
+    let metadata = parse_all_versions(&body)?;
+
+    // Fetch POM for the latest suitable version to get homepage / sourceUrl
+    let pom_info = if let Some(latest) = find_latest_suitable(&metadata.versions) {
+        let pom_url =
+            format!("{base}/{group_path}/{artifact_id}/{latest}/{artifact_id}-{latest}.pom");
+        match http.get_retrying(&pom_url).await.ok() {
+            Some(r) if r.status().is_success() => {
+                r.text().await.ok().map(|b| parse_pom_info(&b)).unwrap_or_default()
+            }
+            _ => PomInfo::default(),
+        }
+    } else {
+        PomInfo::default()
+    };
+
+    let registry_url = base.to_string();
+    let is_private = !default_registries
+        .iter()
+        .any(|r| r.trim_end_matches('/') == registry_url);
+    let respect_latest = metadata.tags.contains_key("latest");
+
+    Some(MavenReleasesResult {
+        releases: metadata.versions,
+        source_url: pom_info.source_url,
+        homepage: pom_info.homepage,
+        registry_url,
+        tags: metadata.tags,
+        is_private,
+        respect_latest,
+    })
+}
+
+// ──────────────────────────────────────────────────────────────────────
+
 /// Parse a Maven `maven-metadata.xml` and return the best "latest stable"
 /// version: `<release>` first, then `<latest>`, then last `<version>`.
 fn parse_latest_version(xml: &str) -> Result<Option<String>, quick_xml::Error> {

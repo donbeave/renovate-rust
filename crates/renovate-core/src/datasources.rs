@@ -11,6 +11,7 @@ pub mod bazel;
 pub mod bitbucket_server_tags;
 pub mod bitbucket_tags;
 pub mod bitrise;
+pub mod clojure;
 pub mod buildpacks_registry;
 pub mod cdnjs;
 pub mod cocoapods;
