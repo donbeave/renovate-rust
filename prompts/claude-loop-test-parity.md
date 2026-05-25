@@ -11,11 +11,46 @@ requirement: it must either be covered by an equivalent Rust test or explicitly
 marked `not-applicable` with a documented reason.
 
 The goal is functional equivalence, not a mechanical Node-to-Rust conversion.
-Tests that only verify TypeScript types, Node module behavior, Vitest/Jest
-mocking, or hosted-only infrastructure should not be ported just to mirror the
-original repository. Mark them `not-applicable` with a precise reason. Tests
-that verify Renovate runtime behavior must be covered in Rust, even if the Rust
-test structure, fixtures, names, and module boundaries differ.
+Tests that verify Renovate runtime behavior must be covered in Rust, even if the
+Rust test structure, fixtures, names, and module boundaries differ.
+
+`not-applicable` is for a **small** set of tests that exercise TypeScript or
+test-framework mechanics with no runtime behavior — and nothing else. The
+project scope is a **full drop-in replacement** of the self-hosted `renovate`
+CLI (see `prompts/claude-loop-renovate-rust.md` → In scope). That means the
+following are **in scope and must be ported**, not marked `not-applicable`:
+
+- datasource / version-lookup behavior tested via `httpMock` or the `got`/`Http`
+  client — port it against Rust's HTTP layer with recorded responses;
+- artifact and lockfile updates that invoke external package managers — port the
+  behavior using Rust's process layer and test doubles;
+- git operations (`simple-git`, real-repo tests) — port against Rust's git layer;
+- branch/PR/MR creation and update via platform APIs — port against the platform
+  clients;
+- release-note fetching, dependency-dashboard contents, onboarding, config
+  parsing/migration/validation, template/commit-message rendering.
+
+The fact that the upstream test uses a Node mock, an HTTP mock, a child process,
+or a real git repo is **not** a reason to mark it `not-applicable`. Port the
+runtime behavior; replace the Node mechanism with the Rust equivalent.
+
+### Anti-gaming rules (read every iteration)
+
+`not-applicable` removes a test from the denominator. That makes it the easiest
+way to fake progress, so it is the most tightly controlled status:
+
+- The headline metric is **not** `ported / actionable`. Report `ported / total`
+  alongside the `not-applicable` count and its share of total (see the summary
+  block format). A number that only moves because NA grew is not progress.
+- There is a **NA budget**: across the whole project, `not-applicable` is
+  expected to be a small minority of total tests (well under ~25%). Renovate is
+  overwhelmingly runtime-behavior tests. If the NA share is higher, treat it as a
+  defect to investigate, not as a finished state.
+- Every `not-applicable` row must name one of the allowed mechanics categories in
+  "When to mark `not-applicable`" and give a concrete reason. "out of scope:
+  platform/datasource/artifact/git/exec" is **not** allowed — those are in scope.
+- Marking a test `not-applicable` because the Rust code "does not exist yet" is
+  forbidden. That is `pending`.
 
 This is the minimum bar. The Rust test suite may go further — additional edge
 cases, Rust-specific invariants, performance assertions — but extras do not
@@ -77,7 +112,7 @@ must begin with a summary block updated on every commit:
 ```markdown
 # Renovate Test Map
 
-**Overall progress:** 340 / 1,100 actionable tests ported (31%) — updated 2026-04-29
+**Progress:** 340 / 1,420 total tests ported (24%) · pending 980 · not-applicable 100 (7% of total) — updated 2026-04-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -100,12 +135,20 @@ than `Done` and `Not done`.
 
 - **Total tests** (per spec file): count of `it(`, `test(`, `it.each(`,
   `test.each(`, and tagged-template `it.each\`` / `test.each\`` call sites.
-- **Actionable** (per spec file and global): Total minus `not-applicable` rows.
-  These are the tests that must be ported.
-- **Ported**: rows with Status `ported`. `not-applicable` rows do not count
-  toward Ported but do count as satisfied — a file with all rows either
-  `ported` or `not-applicable` is `Status: ported`.
-- The global summary fraction is `Ported / Actionable`, not `Ported / Total`.
+- **Ported**: rows with Status `ported`.
+- **Pending**: rows with Status `pending` (in scope, not yet ported).
+- **Not-applicable**: rows with Status `not-applicable` (allowed mechanics
+  categories only). `Total = Ported + Pending + Not-applicable`.
+- **Actionable**: `Total − Not-applicable` (= Ported + Pending). Still tracked
+  per file, but it is **not** the headline number.
+- The headline global fraction is **`Ported / Total`**, reported next to the
+  `not-applicable` count and `NA / Total` percentage. Reporting `Ported /
+  Actionable` alone is forbidden: it hides progress made by shrinking the
+  denominator. A file is `Status: ported` only when it has zero `pending` rows
+  **and** its `not-applicable` rows all cite an allowed mechanics category.
+- **NA budget:** `NA / Total` is expected to be a small minority (well under
+  ~25%). If it is higher, the surplus NA rows are suspect — re-audit them
+  (Phase 0.5) before treating the map as closed.
 
 ### Recount commands
 
@@ -283,6 +326,60 @@ Process one Rust file (or a small batch) per iteration, commit, then continue.
 
 ---
 
+### Phase 0.5 — Re-audit `not-applicable` rows against current scope
+
+Existing `not-applicable` rows were classified under a narrower "extraction
+layer only" scope and many parked real, in-scope work (datasource HTTP, platform
+APIs, artifacts/exec, git, PR creation) as NA. The project scope is now a **full
+drop-in replacement**. Those rows are wrong and must be reclassified.
+
+This phase runs until the NA budget is satisfied (NA / Total well under ~25% and
+every remaining NA row cites an allowed mechanics category). Treat it as
+high-priority work alongside Phase 3.
+
+#### Find suspect NA rows
+
+```sh
+# All not-applicable reasons, ranked — anything mentioning platform, datasource,
+# httpMock, artifact, exec, git, PR/branch, release note, dashboard, template,
+# or "yet" is almost certainly mis-classified.
+grep -rhoE "\| not-applicable \|[^|]*\|[^|]*\| [^|]+\|" docs/parity --include='*.spec.ts.md' \
+  | sed -E 's/.*not-applicable \|[^|]*\|[^|]*\| //; s/ *\|$//' \
+  | sort | uniq -c | sort -rn
+```
+
+#### Reclassification rule
+
+For each NA row, ask: *is this behavior reachable from a plain `renovate` CLI run
+on a local repo?* If yes → it is in scope → change Status to `pending` and clear
+the Reason to `—`. Only keep `not-applicable` when the test matches an allowed
+mechanics category in "When to mark `not-applicable`" below.
+
+Reasons that MUST be reclassified to `pending` (non-exhaustive):
+
+- "tests platform HTTP API … via httpMock" → platform clients are in scope.
+- "out of scope: artifact management … external package managers" → in scope.
+- "datasource … HTTP layer yet" / any "… yet" → in scope, not done yet.
+- "tests simple-git / real git repos" → git layer is in scope.
+- "branch update orchestration", "PR creation/update", "dependency dashboard",
+  "release note fetching", "commit message / Handlebars template" → all in scope.
+
+Reasons that may legitimately stay `not-applicable`: genuine TypeScript type-
+system tests, Vitest/Jest mock-framework internals, TS module-resolution tests,
+and Zod/TS-library-specific schema-internals tests (the *behavior* may still need
+a Rust equivalent — only the TS-mechanics assertion is NA).
+
+#### Procedure
+
+1. Pick one detail file (or a small batch) with suspect NA rows.
+2. Reclassify per the rule above; flip mis-scoped NA rows to `pending`.
+3. Update the detail file's Total/Ported/Actionable/Status header and the root
+   index row (`Done` → `Not done` if it now has `pending` rows).
+4. Update the root summary block counts. Commit:
+   `docs(parity): re-audit not-applicable rows in <area> (NA -N, pending +N)`.
+
+---
+
 ### Phase 1 — Inventory a spec file
 
 When a `.spec.ts` file has no detail file in the per-test format yet:
@@ -436,15 +533,33 @@ file:
 ## When to mark `not-applicable`
 
 Use `not-applicable` when a test should **never** be ported. The Reason column
-is mandatory. When in doubt, port the test — Rust can ignore TypeScript
-mechanics and test the underlying runtime behavior directly.
+is mandatory and must name one of the allowed categories below. When in doubt,
+port the test — Rust can ignore TypeScript mechanics and test the underlying
+runtime behavior directly. This is a **small** set; see the NA budget.
+
+**Allowed categories (the only valid `not-applicable` reasons):**
 
 | Situation | Reason text |
 |---|---|
 | Verifies TypeScript type shapes, generics, or type guards | `TypeScript type-system test; no runtime behavior` |
-| Tests Jest/Vitest mock infrastructure or fixture loading helpers | `mocking framework internals` |
+| Tests Jest/Vitest mock infrastructure or fixture-loading helpers | `mocking framework internals` |
 | Tests TypeScript module import/export resolution | `TypeScript module system` |
-| Feature is explicitly out of scope for the Rust CLI | `out of scope: hosted only` / `out of scope: GitHub App` |
+| Tests a Zod/TS-library schema-internal with no Rust runtime analogue | `TS-library-specific; behavior covered by serde elsewhere` |
+| Feature exists only for hosted/managed Renovate | `out of scope: hosted only` / `out of scope: GitHub App` |
+
+**NOT `not-applicable` — these are in scope, mark `pending` and port them:**
+
+- platform HTTP/API interactions (tested via `httpMock`, `got`, `Http`,
+  `GithubHttp`, etc.) — port against the Rust platform/HTTP clients;
+- datasource lookups and version-lookup pipelines — in scope;
+- artifact/lockfile updates and external package-manager / `child_process` exec;
+- git operations (`simple-git`, real-repo tests) — port against the Rust git layer;
+- branch/PR/MR creation and update, commit messages, Handlebars/template
+  rendering, release notes, dependency dashboard, onboarding, config
+  parsing/migration/validation.
+
+The Node mechanism (mock, HTTP stub, child process, real git) is never itself a
+reason to skip — replace it with the Rust equivalent and port the behavior.
 
 **Do not** default `it.skip` / `xit` rows to `not-applicable`. These are
 `pending` with a note. The implementation may have been incomplete when the
@@ -466,6 +581,11 @@ a Phase 2 or Phase 3 task), each committed separately:
 
 1. **Phase 0 batch** — run the unattributed test audit; process one Rust file's
    worth of backfill. Commit the result.
+
+1b. **Phase 0.5 re-audit** — while the NA budget is exceeded (NA / Total over
+   ~25%, which it currently is), prioritize this: reclassify one batch of
+   mis-scoped `not-applicable` rows to `pending`. Commit. This comes before new
+   Phase 3 porting — fix the baseline before adding to it.
 
 2. **Phase 3 work** — pick one spec file where Phase 2 is complete (all rows
    either have Rust links or have been confirmed unmatched) and `pending` rows
@@ -538,6 +658,24 @@ your changes, note it in the commit message or final progress notes.
   - `docs(parity): inventory dockerfile extract spec (40 / 75 rows)`
 
 ---
+
+## Completion
+
+Test parity is **not** complete when the headline percentage looks high. It is
+complete only as part of the shared terminal state in
+`prompts/claude-loop-renovate-rust.md`. For the test side specifically:
+
+- Every `.spec.ts` root row is `Done`; every detail file has zero `pending` rows.
+- Every `not-applicable` row cites an allowed mechanics category, and `NA / Total`
+  is within budget after a Phase 0.5 re-audit.
+- **Source ↔ test cross-check:** no spec is `Done` while a source file it
+  exercises is `partial`/`stub`/`not-started` in `renovate-source-map.md`. If the
+  two maps disagree, stop and reconcile.
+- The differential parity harness is green for the behaviors these tests cover.
+
+If any of these is false, the loop continues. A single committed unit, a clean
+worktree, or a turn limit is never completion — keep working until the operator
+stops you or the full terminal state holds.
 
 ## Start now
 
