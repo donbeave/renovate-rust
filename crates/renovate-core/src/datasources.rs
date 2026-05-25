@@ -20,6 +20,7 @@ pub mod dart_version;
 pub mod devbox;
 pub mod dotnet_version;
 pub mod docker_hub;
+pub mod elm_package;
 pub mod endoflife;
 pub mod flutter_version;
 pub mod github_releases;
