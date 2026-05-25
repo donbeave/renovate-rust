@@ -199,7 +199,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/git-refs/index.spec.ts` | Not done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
 | `lib/modules/datasource/dotnet-version/index.spec.ts` | Done | [details](lib/modules/datasource/dotnet-version/index.spec.ts.md) |
 | `lib/modules/datasource/elm-package/index.spec.ts` | Done | [details](lib/modules/datasource/elm-package/index.spec.ts.md) |
-| `lib/modules/datasource/ruby-version/index.spec.ts` | Not done | [details](lib/modules/datasource/ruby-version/index.spec.ts.md) |
+| `lib/modules/datasource/ruby-version/index.spec.ts` | Done | [details](lib/modules/datasource/ruby-version/index.spec.ts.md) |
 | `lib/modules/datasource/rust-version/index.spec.ts` | Done | [details](lib/modules/datasource/rust-version/index.spec.ts.md) |
 | `lib/modules/datasource/rust-version/parse.spec.ts` | Done | [details](lib/modules/datasource/rust-version/parse.spec.ts.md) |
 | `lib/modules/datasource/custom/index.spec.ts` | Not done | [details](lib/modules/datasource/custom/index.spec.ts.md) |

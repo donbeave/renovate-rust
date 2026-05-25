@@ -1047,7 +1047,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/python-version/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/repology/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/rpm/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/ruby-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/ruby-version/index.ts` | `crates/renovate-core/src/datasources/ruby_version.rs` | done | HTML table parsing with regex; stable X.Y.Z versions only; 404 → Err |
 | `lib/modules/datasource/rust-version/index.ts` | `crates/renovate-core/src/datasources/rust_version.rs` | partial | Core manifests.txt parsing, version deduplication, nightly encoding ported; package-cache not ported |
 | `lib/modules/datasource/sbt-package/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/sbt-plugin/index.ts` | — | not-started | Not ported |
