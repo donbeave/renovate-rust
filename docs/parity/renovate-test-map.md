@@ -456,7 +456,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/rez/index.spec.ts` | Not done | [details](lib/modules/versioning/rez/index.spec.ts.md) |
 | `lib/modules/versioning/rust-release-channel/index.spec.ts` | Done | [details](lib/modules/versioning/rust-release-channel/index.spec.ts.md) |
 | `lib/modules/versioning/rust-release-channel/parse.spec.ts` | Done | [details](lib/modules/versioning/rust-release-channel/parse.spec.ts.md) |
-| `lib/modules/versioning/apk/index.spec.ts` | Not done | [details](lib/modules/versioning/apk/index.spec.ts.md) |
+| `lib/modules/versioning/apk/index.spec.ts` | Done | [details](lib/modules/versioning/apk/index.spec.ts.md) |
 | `lib/modules/versioning/loose/index.spec.ts` | Done | [details](lib/modules/versioning/loose/index.spec.ts.md) |
 | `lib/modules/versioning/same-major/index.spec.ts` | Done | [details](lib/modules/versioning/same-major/index.spec.ts.md) |
 | `lib/modules/versioning/hex/index.spec.ts` | Not done | [details](lib/modules/versioning/hex/index.spec.ts.md) |
