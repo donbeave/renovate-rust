@@ -256,7 +256,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/conan/index.spec.ts` | Not done | [details](lib/modules/datasource/conan/index.spec.ts.md) |
 | `lib/modules/datasource/rubygems/schema.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/schema.spec.ts.md) |
 | `lib/modules/datasource/rubygems/index.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/index.spec.ts.md) |
-| `lib/modules/datasource/crate/index.spec.ts` | Not done | [details](lib/modules/datasource/crate/index.spec.ts.md) |
+| `lib/modules/datasource/crate/index.spec.ts` | Done | [details](lib/modules/datasource/crate/index.spec.ts.md) |
 | `lib/modules/datasource/maven/schema.spec.ts` | Not done | [details](lib/modules/datasource/maven/schema.spec.ts.md) |
 | `lib/modules/datasource/maven/util.spec.ts` | Not done | [details](lib/modules/datasource/maven/util.spec.ts.md) |
 | `lib/modules/datasource/maven/s3.spec.ts` | Not done | [details](lib/modules/datasource/maven/s3.spec.ts.md) |
