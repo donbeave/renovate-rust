@@ -4,7 +4,9 @@
 //! and update planning. The Cargo module is first; others will follow.
 
 pub mod apk;
+pub mod aws_eks_addon;
 pub mod aws_machine_image;
+pub mod azure_rest_api;
 pub mod cargo;
 pub mod deno;
 pub mod devbox;
@@ -13,6 +15,7 @@ pub mod git;
 pub mod github_actions;
 pub mod glasskube;
 pub mod hashicorp;
+pub mod hermit;
 pub mod kubernetes_api;
 pub mod same_major;
 pub mod loose;

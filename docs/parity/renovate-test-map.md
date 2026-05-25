@@ -473,7 +473,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/cargo/index.spec.ts` | Done | [details](lib/modules/versioning/cargo/index.spec.ts.md) |
 | `lib/modules/versioning/maven/compare.spec.ts` | Done | [details](lib/modules/versioning/maven/compare.spec.ts.md) |
 | `lib/modules/versioning/maven/index.spec.ts` | Done | [details](lib/modules/versioning/maven/index.spec.ts.md) |
-| `lib/modules/versioning/aws-eks-addon/index.spec.ts` | Not done | [details](lib/modules/versioning/aws-eks-addon/index.spec.ts.md) |
+| `lib/modules/versioning/aws-eks-addon/index.spec.ts` | Done | [details](lib/modules/versioning/aws-eks-addon/index.spec.ts.md) |
 | `lib/modules/versioning/composer/index.spec.ts` | Not done | [details](lib/modules/versioning/composer/index.spec.ts.md) |
 | `lib/modules/versioning/perl/index.spec.ts` | Done | [details](lib/modules/versioning/perl/index.spec.ts.md) |
 | `lib/modules/versioning/hermit/index.spec.ts` | Done | [details](lib/modules/versioning/hermit/index.spec.ts.md) |
@@ -497,7 +497,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/nuget/index.spec.ts` | Not done | [details](lib/modules/versioning/nuget/index.spec.ts.md) |
 | `lib/modules/versioning/conan/index.spec.ts` | Not done | [details](lib/modules/versioning/conan/index.spec.ts.md) |
 | `lib/modules/versioning/unity3d-packages/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d-packages/index.spec.ts.md) |
-| `lib/modules/versioning/azure-rest-api/index.spec.ts` | Not done | [details](lib/modules/versioning/azure-rest-api/index.spec.ts.md) |
+| `lib/modules/versioning/azure-rest-api/index.spec.ts` | Done | [details](lib/modules/versioning/azure-rest-api/index.spec.ts.md) |
 | `lib/modules/versioning/unity3d/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d/index.spec.ts.md) |
 | `lib/modules/versioning/exact/index.spec.ts` | Done | [details](lib/modules/versioning/exact/index.spec.ts.md) |
 | `lib/modules/versioning/aws-machine-image/index.spec.ts` | Done | [details](lib/modules/versioning/aws-machine-image/index.spec.ts.md) |
