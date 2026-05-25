@@ -16,16 +16,16 @@
 //!   redis:
 //!     - name: redis
 //!       version: 17.0.0
-//!       ...
-//!     - name: redis
-//!       version: 16.0.0
+//!       created: "2024-01-01T00:00:00Z"
+//!       digest: abc123
+//!       home: https://redis.io
+//!       sources:
+//!         - https://github.com/redis/redis
 //! ```
-//!
-//! Entries under each chart name are sorted newest-first; we take the first
-//! `version:` value we encounter under the target chart name.
 
 use std::sync::Arc;
 
+use serde::Deserialize;
 use thiserror::Error;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
@@ -39,6 +39,8 @@ pub enum HelmError {
     Http(#[from] crate::http::HttpError),
     #[error("failed to fetch index.yaml from {0}")]
     IndexFetch(String),
+    #[error("external host error")]
+    ExternalHost,
 }
 
 /// Input for a single Helm chart lookup.
@@ -66,12 +68,226 @@ pub struct HelmUpdateResult {
     pub summary: Result<HelmUpdateSummary, HelmError>,
 }
 
-// ── Fetch functions ───────────────────────────────────────────────────────────
+/// A single chart release entry from `fetch_releases`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct HelmRelease {
+    pub version: String,
+    pub release_timestamp: Option<String>,
+    pub new_digest: Option<String>,
+}
+
+/// Full result from `fetch_releases`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct HelmReleasesResult {
+    pub releases: Vec<HelmRelease>,
+    pub homepage: Option<String>,
+    pub source_url: Option<String>,
+    pub registry_url: String,
+}
+
+// ── YAML schema types ──────────────────────────────────────────────────────────
+
+#[derive(Debug, Deserialize)]
+struct IndexYaml {
+    entries: std::collections::HashMap<String, serde_yaml::Value>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RawChartEntry {
+    version: Option<String>,
+    created: Option<String>,
+    digest: Option<String>,
+    home: Option<String>,
+    #[serde(default)]
+    sources: Vec<String>,
+    #[serde(default)]
+    urls: Vec<String>,
+}
+
+// ── Source URL extraction (mirrors schema.ts getSourceUrl) ───────────────────
+
+fn is_possible_chart_repo(url: &str) -> bool {
+    let url_lower = url.to_lowercase();
+    // Must be a known git host
+    let is_git_host = url_lower.contains("github.com")
+        || url_lower.contains("gitlab.com")
+        || url_lower.contains("bitbucket.org");
+    if !is_git_host {
+        return false;
+    }
+    // Repo name must match chart/helm patterns
+    let last_segment = url_lower.rsplit('/').find(|s| !s.is_empty()).unwrap_or("");
+    last_segment.contains("chart") || last_segment.contains("helm")
+}
+
+fn get_source_url(entry: &RawChartEntry) -> Option<String> {
+    // Check if the first URL is a GitHub release URL
+    if let Some(first_url) = entry.urls.first() {
+        if let Some(captures) = {
+            // match https://github.com/{owner}/{repo}/releases/
+            let prefix = "https://github.com/";
+            if first_url.starts_with(prefix) {
+                let rest = &first_url[prefix.len()..];
+                let parts: Vec<&str> = rest.splitn(4, '/').collect();
+                if parts.len() >= 3 && parts[2] == "releases" {
+                    Some(format!("{prefix}{}/{}", parts[0], parts[1]))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } {
+            return Some(captures);
+        }
+    }
+
+    // Check home URL
+    if let Some(home) = &entry.home {
+        if is_possible_chart_repo(home) {
+            return Some(home.clone());
+        }
+    }
+
+    // Check sources
+    for source in &entry.sources {
+        if is_possible_chart_repo(source) {
+            return Some(source.clone());
+        }
+    }
+
+    // Fallback: first source
+    entry.sources.first().cloned()
+}
+
+// ── Parse functions ───────────────────────────────────────────────────────────
+
+/// Parse all versions for `chart_name` from index.yaml text.
+///
+/// Returns `None` if the chart is not found or has no valid versions.
+pub fn parse_all_versions(
+    index_yaml: &str,
+    chart_name: &str,
+) -> Option<HelmReleasesResult> {
+    parse_all_versions_with_registry(index_yaml, chart_name, "")
+}
+
+pub fn parse_all_versions_with_registry(
+    index_yaml: &str,
+    chart_name: &str,
+    registry_url: &str,
+) -> Option<HelmReleasesResult> {
+    if index_yaml.trim().is_empty() {
+        return None;
+    }
+
+    let parsed: IndexYaml = serde_yaml::from_str(index_yaml).ok()?;
+    let chart_entries = parsed.entries.get(chart_name)?;
+
+    // Deserialize the chart entry list
+    let raw_entries: Vec<RawChartEntry> = serde_yaml::from_value(chart_entries.clone()).ok()?;
+
+    // Filter to entries with a valid version
+    let valid: Vec<&RawChartEntry> = raw_entries.iter().filter(|e| e.version.is_some()).collect();
+    if valid.is_empty() {
+        return None;
+    }
+
+    let first = valid[0];
+    let homepage = first.home.clone();
+    let source_url = get_source_url(first);
+
+    let releases = valid
+        .iter()
+        .map(|e| HelmRelease {
+            version: e.version.clone().unwrap(),
+            release_timestamp: e.created.clone().and_then(|s| normalize_timestamp(&s)),
+            new_digest: e.digest.clone().filter(|d| !d.is_empty()),
+        })
+        .collect();
+
+    Some(HelmReleasesResult {
+        releases,
+        homepage,
+        source_url,
+        registry_url: registry_url.to_owned(),
+    })
+}
+
+/// Normalize a Helm `created` timestamp to ISO 8601.
+///
+/// Helm uses `2019-06-02T08:56:36.116031089Z` (with nanoseconds) which
+/// we trim to millisecond precision.
+fn normalize_timestamp(s: &str) -> Option<String> {
+    if s.is_empty() {
+        return None;
+    }
+    // Already ISO 8601 - just trim nano/pico-second precision beyond 3 digits
+    // e.g. "2019-06-02T08:56:36.116031089Z" → "2019-06-02T08:56:36.116Z"
+    if let Some(dot_pos) = s.find('.') {
+        let (before_dot, after_dot) = s.split_at(dot_pos);
+        // after_dot starts with '.'
+        let rest = &after_dot[1..]; // digits + 'Z' or timezone
+        let (digits, suffix) = rest
+            .find(|c: char| !c.is_ascii_digit())
+            .map(|i| rest.split_at(i))
+            .unwrap_or((rest, ""));
+        let millis = &digits[..digits.len().min(3)];
+        let padded = format!("{millis:0<3}");
+        return Some(format!("{before_dot}.{padded}{suffix}"));
+    }
+    Some(s.to_owned())
+}
+
+/// Parse the latest version and its `created` timestamp from a Helm
+/// `index.yaml` for the given `chart_name`.
+pub fn parse_latest_version(
+    index_yaml: &str,
+    chart_name: &str,
+) -> Option<(String, Option<String>)> {
+    parse_all_versions(index_yaml, chart_name)
+        .and_then(|r| r.releases.into_iter().next())
+        .map(|rel| (rel.version, rel.release_timestamp))
+}
+
+/// Fetch all releases of a Helm chart from a repository's `index.yaml`.
+///
+/// - 4xx → `Ok(None)`
+/// - 5xx → `Err(HelmError::ExternalHost)`
+/// - network error → `Ok(None)` (fallback: true semantics)
+/// - chart not found → `Ok(None)`
+pub async fn fetch_releases(
+    chart_name: &str,
+    repository_url: &str,
+    http: &HttpClient,
+) -> Result<Option<HelmReleasesResult>, HelmError> {
+    let base = repository_url.trim_end_matches('/');
+    let url = format!("{base}/index.yaml");
+
+    let resp = match http.get(&url).send().await {
+        Ok(r) => r,
+        Err(_) => return Ok(None),
+    };
+
+    let status = resp.status();
+    if status.is_server_error() {
+        return Err(HelmError::ExternalHost);
+    }
+    if !status.is_success() {
+        return Ok(None);
+    }
+
+    let text = match resp.text().await {
+        Ok(t) => t,
+        Err(_) => return Ok(None),
+    };
+
+    Ok(parse_all_versions_with_registry(&text, chart_name, repository_url))
+}
 
 /// Fetch the latest version of a Helm chart from a repository's `index.yaml`.
 ///
-/// Returns `(version, created_at)` where `created_at` is the chart entry's
-/// `created` timestamp from `index.yaml`.
+/// Returns `(version, created_at)` or `Err` if the fetch/parse fails.
 pub async fn fetch_latest(
     chart_name: &str,
     repository_url: &str,
@@ -149,94 +365,6 @@ async fn fetch_update_summary(
     })
 }
 
-// ── index.yaml line-scanner ───────────────────────────────────────────────────
-
-/// Parse the latest version and its `created` timestamp from a Helm
-/// `index.yaml` for the given `chart_name`.
-///
-/// The scanner uses three states:
-/// 1. Searching for `entries:` at indent 0.
-/// 2. Searching for `  {chart_name}:` at indent 2.
-/// 3. Collecting `version:` and `created:` from the first entry (newest).
-///
-/// Returns `Some((version, created_at))` or `None` if the chart is not found.
-pub fn parse_latest_version(
-    index_yaml: &str,
-    chart_name: &str,
-) -> Option<(String, Option<String>)> {
-    #[derive(PartialEq)]
-    enum State {
-        Entries,
-        Chart,
-        Version,
-    }
-
-    let chart_key = format!("{chart_name}:");
-    let mut state = State::Entries;
-    let mut found_version: Option<String> = None;
-    let mut found_created: Option<String> = None;
-
-    for line in index_yaml.lines() {
-        let trimmed = line.trim();
-        if trimmed.is_empty() || trimmed.starts_with('#') {
-            continue;
-        }
-
-        let indent = leading_spaces(line);
-
-        match state {
-            State::Entries => {
-                if indent == 0 && trimmed == "entries:" {
-                    state = State::Chart;
-                }
-            }
-            State::Chart => {
-                // The chart key is at indent 2 inside `entries`.
-                if indent == 2 && trimmed == chart_key {
-                    state = State::Version;
-                }
-                // Back to top-level key → we've passed entries.
-                if indent == 0 && trimmed != "entries:" {
-                    break;
-                }
-            }
-            State::Version => {
-                // Collect version and created fields from the first chart entry.
-                if indent >= 4 {
-                    if let Some(rest) = trimmed.strip_prefix("version:") {
-                        let val = rest.trim().trim_matches('"');
-                        if !val.is_empty() && found_version.is_none() {
-                            found_version = Some(val.to_owned());
-                        }
-                    } else if let Some(rest) = trimmed.strip_prefix("created:") {
-                        let val = rest.trim().trim_matches('"');
-                        if !val.is_empty() && found_created.is_none() {
-                            found_created = Some(val.to_owned());
-                        }
-                    }
-                }
-                // Stop collecting when we reach the second entry (indent 2, starts with `-`).
-                if indent == 2
-                    && (trimmed == "-" || trimmed.starts_with('-'))
-                    && found_version.is_some()
-                {
-                    break; // first entry complete
-                }
-                // If we hit another indent-2 non-list key, we've left this chart's block.
-                if indent == 2 && trimmed != "-" && !trimmed.starts_with('-') {
-                    break;
-                }
-            }
-        }
-    }
-
-    found_version.map(|v| (v, found_created))
-}
-
-fn leading_spaces(line: &str) -> usize {
-    line.len() - line.trim_start().len()
-}
-
 fn strip_constraint_operators(constraint: &str) -> &str {
     constraint
         .trim()
@@ -254,58 +382,223 @@ mod tests {
 
     use super::*;
 
-    fn index_yaml(charts: &[(&str, &[&str])]) -> String {
+    const INDEX_YAML: &str = include_str!(
+        "../../../../../renovate/lib/modules/datasource/helm/__fixtures__/index.yaml"
+    );
+    const INDEX_EMPTY_PACKAGE_YAML: &str = include_str!(
+        "../../../../../renovate/lib/modules/datasource/helm/__fixtures__/index_emptypackage.yaml"
+    );
+    const INDEX_BLANK_DIGEST_YAML: &str = include_str!(
+        "../../../../../renovate/lib/modules/datasource/helm/__fixtures__/index_blank-digest.yaml"
+    );
+
+    fn make_index_yaml(charts: &[(&str, &[&str])]) -> String {
         let mut out = "apiVersion: v1\nentries:\n".to_owned();
         for (name, versions) in charts {
             out.push_str(&format!("  {name}:\n"));
             for v in *versions {
-                out.push_str(&format!("    - name: {name}\n      version: {v}\n"));
+                out.push_str(&format!("  - name: {name}\n    version: {v}\n"));
             }
         }
         out
     }
 
+    // Ported: "returns null if packageName was not provided" — datasource/helm/index.spec.ts line 12
+    #[test]
+    fn returns_null_if_package_name_not_provided() {
+        let result = parse_all_versions(INDEX_YAML, "");
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if repository was not provided" — datasource/helm/index.spec.ts line 22
+    #[tokio::test]
+    async fn returns_null_if_repository_not_provided() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/index.yaml"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases("some_chart", &server.uri(), &http).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null for empty response" — datasource/helm/index.spec.ts line 37
+    // Ported: "returns null for missing response body" — datasource/helm/index.spec.ts line 51
+    #[tokio::test]
+    async fn fetch_releases_empty_body_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/index.yaml"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases("non_existent_chart", &server.uri(), &http).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null for 404" — datasource/helm/index.spec.ts line 65
+    #[tokio::test]
+    async fn fetch_releases_404_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/index.yaml"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases("some_chart", &server.uri(), &http).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "throws for 5xx" — datasource/helm/index.spec.ts line 79
+    #[tokio::test]
+    async fn fetch_releases_5xx_returns_err() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/index.yaml"))
+            .respond_with(ResponseTemplate::new(502))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases("some_chart", &server.uri(), &http).await;
+        assert!(result.is_err());
+    }
+
+    // Ported: "returns null for unknown error" — datasource/helm/index.spec.ts line 93
+    #[tokio::test]
+    async fn fetch_releases_network_error_returns_none() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases("some_chart", "http://127.0.0.1:1", &http).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if index.yaml in response is empty" — datasource/helm/index.spec.ts line 107
+    #[test]
+    fn parse_comment_only_index_returns_none() {
+        assert!(parse_all_versions("# A comment", "redis").is_none());
+    }
+
+    // Ported: "returns null if index.yaml in response is invalid" — datasource/helm/index.spec.ts line 120
+    #[test]
+    fn parse_invalid_yaml_returns_none() {
+        let invalid = "some\n  invalid:\n  [\n  yaml";
+        assert!(parse_all_versions(invalid, "non_existent_chart").is_none());
+    }
+
+    // Ported: "returns null if packageName is not in index.yaml" — datasource/helm/index.spec.ts line 139
+    #[test]
+    fn parse_returns_none_for_unknown_chart() {
+        assert!(parse_all_versions(INDEX_YAML, "non_existent_chart").is_none());
+    }
+
+    // Ported: "returns list of versions for normal response" — datasource/helm/index.spec.ts line 152
+    #[tokio::test]
+    async fn fetch_releases_returns_versions() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/index.yaml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(INDEX_YAML))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result =
+            fetch_releases("ambassador", &server.uri(), &http).await.unwrap().unwrap();
+
+        assert!(!result.releases.is_empty());
+        assert_eq!(result.releases.len(), 27);
+    }
+
+    // Ported: "returns list of versions for other packages if one packages has no versions" — datasource/helm/index.spec.ts line 166
+    #[tokio::test]
+    async fn fetch_releases_skips_empty_package() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/index.yaml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(INDEX_EMPTY_PACKAGE_YAML))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases("ambassador", &server.uri(), &http).await.unwrap().unwrap();
+
+        assert_eq!(result.releases.len(), 1);
+        assert_eq!(result.homepage.as_deref(), Some("https://www.getambassador.io/"));
+        assert_eq!(result.source_url.as_deref(), Some("https://github.com/datawire/ambassador"));
+    }
+
+    // Ported: "adds trailing slash to subdirectories" — datasource/helm/index.spec.ts line 184
+    #[tokio::test]
+    async fn fetch_releases_from_subdirectory() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/subdir/index.yaml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(INDEX_YAML))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let repository_url = format!("{}/subdir", server.uri());
+        let result = fetch_releases("ambassador", &repository_url, &http).await.unwrap().unwrap();
+
+        assert_eq!(result.releases.len(), 27);
+        assert_eq!(result.homepage.as_deref(), Some("https://www.getambassador.io/"));
+        assert_eq!(result.source_url.as_deref(), Some("https://github.com/datawire/ambassador"));
+    }
+
+    // Ported: "uses undefined as the newDigest when no digest is provided" — datasource/helm/index.spec.ts line 203
+    #[tokio::test]
+    async fn fetch_releases_blank_digest_is_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/index.yaml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(INDEX_BLANK_DIGEST_YAML))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result =
+            fetch_releases("blank-digest", &server.uri(), &http).await.unwrap().unwrap();
+
+        assert_eq!(result.releases.len(), 1);
+        assert_eq!(result.releases[0].version, "3.2.1");
+        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2023-09-05T13:24:19.046Z"));
+        assert!(result.releases[0].new_digest.is_none());
+    }
+
     #[test]
     fn parse_finds_first_version() {
-        let yaml = index_yaml(&[("redis", &["17.0.0", "16.0.0", "15.0.0"])]);
+        let yaml = make_index_yaml(&[("redis", &["17.0.0", "16.0.0", "15.0.0"])]);
         assert_eq!(
             parse_latest_version(&yaml, "redis").map(|(v, _)| v),
             Some("17.0.0".to_owned())
         );
     }
 
-    // Ported: "returns null if index.yaml in response is empty" — lib/modules/datasource/helm/index.spec.ts line 107
-    #[test]
-    fn parse_comment_only_index_returns_none() {
-        assert_eq!(parse_latest_version("# A comment", "redis"), None);
-    }
-
-    #[test]
-    fn parse_returns_none_for_unknown_chart() {
-        let yaml = index_yaml(&[("redis", &["17.0.0"])]);
-        assert_eq!(parse_latest_version(&yaml, "postgresql"), None);
-    }
-
     #[test]
     fn parse_handles_multiple_charts() {
-        let yaml = index_yaml(&[
+        let yaml = make_index_yaml(&[
             ("redis", &["17.0.0"]),
             ("postgresql", &["12.0.0", "11.0.0"]),
         ]);
-        assert_eq!(
-            parse_latest_version(&yaml, "postgresql").map(|(v, _)| v),
-            Some("12.0.0".to_owned())
-        );
+        let result = parse_all_versions(&yaml, "postgresql").unwrap();
+        assert_eq!(result.releases.len(), 2);
+        assert_eq!(result.releases[0].version, "12.0.0");
     }
 
     #[test]
     fn parse_extracts_created_timestamp() {
-        let yaml = "apiVersion: v1\nentries:\n  redis:\n    - name: redis\n      version: 17.0.0\n      created: \"2024-01-15T10:30:00.000Z\"\n";
-        let result = parse_latest_version(yaml, "redis");
-        assert!(result.is_some());
-        let (version, created) = result.unwrap();
-        assert_eq!(version, "17.0.0");
-        assert_eq!(created.as_deref(), Some("2024-01-15T10:30:00.000Z"));
+        let yaml = "apiVersion: v1\nentries:\n  redis:\n  - name: redis\n    version: 17.0.0\n    created: \"2024-01-15T10:30:00.000Z\"\n";
+        let result = parse_all_versions(yaml, "redis").unwrap();
+        assert_eq!(result.releases[0].version, "17.0.0");
+        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2024-01-15T10:30:00.000Z"));
     }
 
     #[test]
@@ -315,11 +608,9 @@ mod tests {
         assert_eq!(strip_constraint_operators("17.0.0"), "17.0.0");
     }
 
-    // Ported: "returns null for missing response body" — datasource/helm/index.spec.ts line 51
     #[tokio::test]
     async fn fetch_latest_empty_body_returns_none() {
         let server = MockServer::start().await;
-
         Mock::given(method("GET"))
             .and(path("/index.yaml"))
             .respond_with(ResponseTemplate::new(200))
@@ -334,7 +625,7 @@ mod tests {
     #[tokio::test]
     async fn fetch_latest_from_mock_server() {
         let server = MockServer::start().await;
-        let yaml = index_yaml(&[("redis", &["17.5.0", "17.0.0"])]);
+        let yaml = make_index_yaml(&[("redis", &["17.5.0", "17.0.0"])]);
 
         Mock::given(method("GET"))
             .and(path("/index.yaml"))
@@ -347,11 +638,10 @@ mod tests {
         assert_eq!(result.map(|(v, _)| v), Some("17.5.0".to_owned()));
     }
 
-    // Ported: "adds trailing slash to subdirectories" — lib/modules/datasource/helm/index.spec.ts line 184
     #[tokio::test]
     async fn fetch_latest_from_subdirectory_repository() {
         let server = MockServer::start().await;
-        let yaml = index_yaml(&[("redis", &["17.5.0"])]);
+        let yaml = make_index_yaml(&[("redis", &["17.5.0"])]);
 
         Mock::given(method("GET"))
             .and(path("/subdir/index.yaml"))
@@ -382,7 +672,7 @@ mod tests {
     #[tokio::test]
     async fn concurrent_fetch_returns_all() {
         let server = MockServer::start().await;
-        let yaml = index_yaml(&[("redis", &["17.5.0"]), ("nginx", &["1.2.0"])]);
+        let yaml = make_index_yaml(&[("redis", &["17.5.0"]), ("nginx", &["1.2.0"])]);
 
         Mock::given(method("GET"))
             .and(path("/index.yaml"))
@@ -412,5 +702,21 @@ mod tests {
 
         let nginx = results.iter().find(|r| r.name == "nginx").unwrap();
         assert!(nginx.summary.as_ref().unwrap().update_available);
+    }
+
+    #[test]
+    fn normalize_timestamp_trims_nanoseconds() {
+        assert_eq!(
+            normalize_timestamp("2019-06-02T08:56:36.116031089Z").as_deref(),
+            Some("2019-06-02T08:56:36.116Z")
+        );
+        assert_eq!(
+            normalize_timestamp("2024-01-15T10:30:00.000Z").as_deref(),
+            Some("2024-01-15T10:30:00.000Z")
+        );
+        assert_eq!(
+            normalize_timestamp("2023-09-05T13:24:19.046604000Z").as_deref(),
+            Some("2023-09-05T13:24:19.046Z")
+        );
     }
 }
