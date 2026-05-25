@@ -482,7 +482,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/pep440/range.spec.ts` | Not done | [details](lib/modules/versioning/pep440/range.spec.ts.md) |
 | `lib/modules/versioning/pep440/index.spec.ts` | Not done | [details](lib/modules/versioning/pep440/index.spec.ts.md) |
 | `lib/modules/versioning/regex/index.spec.ts` | Not done | [details](lib/modules/versioning/regex/index.spec.ts.md) |
-| `lib/modules/versioning/lambda-node/index.spec.ts` | Not done | [details](lib/modules/versioning/lambda-node/index.spec.ts.md) |
+| `lib/modules/versioning/lambda-node/index.spec.ts` | Done | [details](lib/modules/versioning/lambda-node/index.spec.ts.md) |
 | `lib/modules/versioning/gradle/index.spec.ts` | Not done | [details](lib/modules/versioning/gradle/index.spec.ts.md) |
 | `lib/modules/versioning/devbox/index.spec.ts` | Done | [details](lib/modules/versioning/devbox/index.spec.ts.md) |
 | `lib/modules/versioning/nixpkgs/index.spec.ts` | Done | [details](lib/modules/versioning/nixpkgs/index.spec.ts.md) |
@@ -501,7 +501,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/unity3d/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d/index.spec.ts.md) |
 | `lib/modules/versioning/exact/index.spec.ts` | Done | [details](lib/modules/versioning/exact/index.spec.ts.md) |
 | `lib/modules/versioning/aws-machine-image/index.spec.ts` | Done | [details](lib/modules/versioning/aws-machine-image/index.spec.ts.md) |
-| `lib/modules/versioning/node/index.spec.ts` | Not done | [details](lib/modules/versioning/node/index.spec.ts.md) |
+| `lib/modules/versioning/node/index.spec.ts` | Done | [details](lib/modules/versioning/node/index.spec.ts.md) |
 | `lib/modules/versioning/redhat/index.spec.ts` | Done | [details](lib/modules/versioning/redhat/index.spec.ts.md) |
 | `lib/modules/versioning/pvp/range.spec.ts` | Done | [details](lib/modules/versioning/pvp/range.spec.ts.md) |
 | `lib/modules/versioning/pvp/index.spec.ts` | Done | [details](lib/modules/versioning/pvp/index.spec.ts.md) |
