@@ -95,13 +95,21 @@ pub struct GitlabTagsReleasesResult {
 /// Strip `/api/v4` suffix from a registry URL to get the GitLab instance host.
 ///
 /// Mirrors `getDepHost` from `gitlab-tags/util.ts`.
-fn get_dep_host(registry_url: &str) -> String {
+pub fn get_dep_host(registry_url: &str) -> String {
     let trimmed = registry_url.trim_end_matches('/');
     if let Some(stripped) = trimmed.strip_suffix("/api/v4") {
         stripped.to_owned()
     } else {
         trimmed.to_owned()
     }
+}
+
+/// Build the source URL for a GitLab repository.
+///
+/// Mirrors `getSourceUrl` from `gitlab-tags/util.ts`.
+pub fn get_source_url(package_name: &str, registry_url: Option<&str>) -> String {
+    let dep_host = get_dep_host(registry_url.unwrap_or(DEFAULT_REGISTRY_URL));
+    format!("{dep_host}/{package_name}")
 }
 
 /// Fetch all tags for `package_name` from a GitLab instance.
@@ -502,5 +510,32 @@ mod tests {
         let s = results[0].summary.as_ref().unwrap();
         assert!(s.update_available);
         assert_eq!(s.latest.as_deref(), Some("2.0.0"));
+    }
+
+    // Ported: "works" — datasource/gitlab-tags/util.spec.ts line 5
+    #[test]
+    fn get_dep_host_works() {
+        assert_eq!(get_dep_host("https://gitlab.com"), "https://gitlab.com");
+        assert_eq!(
+            get_dep_host("https://gitlab.domain.test/api/v4"),
+            "https://gitlab.domain.test"
+        );
+        assert_eq!(
+            get_dep_host("https://domain.test/gitlab/api/v4"),
+            "https://domain.test/gitlab"
+        );
+    }
+
+    // Ported: "works" — datasource/gitlab-tags/util.spec.ts line 17
+    #[test]
+    fn get_source_url_works() {
+        assert_eq!(
+            get_source_url("some/repo", None),
+            "https://gitlab.com/some/repo"
+        );
+        assert_eq!(
+            get_source_url("some/repo", Some("https://gitlab.domain.test/api/v4")),
+            "https://gitlab.domain.test/some/repo"
+        );
     }
 }
