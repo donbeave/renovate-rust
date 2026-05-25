@@ -16,30 +16,63 @@ below is actually satisfied, or until the operator explicitly stops the work.
 
 ## Definition Of Done
 
-The implementation goal is complete only when the Rust CLI preserves
-Renovate-compatible observable behavior for common self-hosted CLI usage,
-including:
+The end state is an **exact behavioral drop-in replacement** for the self-hosted
+`renovatebot/renovate` CLI: given the same repository, the same configuration,
+and the same environment, `renovate-rust` produces the same observable results
+as the TypeScript Renovate it replaces — same config file names and semantics,
+same flags and environment variables, same update decisions, same exit codes,
+and the same machine-readable output contract.
 
-- CLI command names, flags, aliases, help behavior, and exit codes.
-- Environment variable names and parsing.
-- Config file discovery, precedence, parsing, migration, and validation.
-- Repository scanning and package manager detection.
-- Dependency extraction for supported managers.
-- Datasource lookup and versioning/range update decisions.
-- Manifest and lockfile update planning where in scope.
-- Dry-run behavior, logging levels, JSON/machine-readable output, and human
-  output.
-- Parity documentation in `docs/parity/renovate-source-map.md`,
-  `docs/parity/renovate-test-map.md`, and per-spec detail files.
-- Intentional divergences recorded in
-  `docs/parity/compatibility-decisions.md`.
+### Terminal state — the ONLY conditions that permit stopping
 
-Do not consider the goal complete just because one coherent slice is committed.
-One slice is progress, not completion.
+You may stop the loop **only** when every check below is simultaneously true.
+Until then the goal is not done. Each time you believe you are finished, re-run
+these checks; if any one is false, choose the next highest-value slice and
+continue working.
 
-Do not consider the goal complete just because `git status --short` is clean. A
-clean worktree after a commit is required iteration hygiene, not proof that the
-Rust CLI is a drop-in replacement.
+1. **Source map fully closed.** `docs/parity/renovate-source-map.md` has **zero**
+   `not-started`, `partial`, and `stub` rows among in-scope source files. Every
+   in-scope row is `full`. Every `out-of-scope` row names the specific
+   hosted-only reason it is excluded (see In scope / Out of scope below).
+2. **Test map fully closed.** Every `.spec.ts` root row is `Done`; every detail
+   file has **zero** `pending` rows; every `not-applicable` row falls in an
+   allowed mechanics category (see the test-parity prompt) and cites a concrete
+   reason. The `not-applicable` share is within the documented budget and has
+   been re-audited against the In scope definition below — a large NA fraction is
+   a defect to investigate, never evidence of completion.
+3. **Source ↔ test cross-check holds.** No spec file is `Done` while any source
+   file it exercises is still `partial`, `stub`, or `not-started`. Test parity
+   for a behavior requires that the behavior is actually implemented in Rust.
+4. **Differential harness green.** The differential parity harness (see
+   "Differential parity harness") runs upstream Renovate and `renovate-rust` over
+   every fixture repository and reports an empty observable diff — or every
+   remaining diff is recorded as an intentional divergence in
+   `docs/parity/compatibility-decisions.md`.
+5. **Quality gates pass.** `cargo build --workspace --all-features`,
+   `cargo fmt --all --check`, `cargo clippy --workspace --all-targets
+   --all-features -- -D warnings`, and `cargo nextest run --workspace
+   --all-features` all pass (see Verification).
+
+When all five hold, report the terminal state with the supporting counts and
+the harness result, then stop. If the operator has not said to stop and any
+check is false, keep going.
+
+### What is NOT completion
+
+None of the following is the terminal state. Treat each as a signal to continue,
+never as a reason to stop:
+
+- One coherent slice committed. One slice is progress, not completion.
+- A clean `git status --short`. A clean worktree is iteration hygiene, not parity.
+- A high parity percentage such as "100% of actionable tests". A percentage
+  computed against a denominator you can shrink by marking work
+  `not-applicable` is not proof. See the test-parity prompt's anti-gaming rules.
+- A turn limit, token budget, elapsed time, or the feeling that the work "looks
+  done". Only the five terminal-state checks decide completion.
+- The extraction layer working. Dependency extraction is a small fraction of
+  Renovate. A drop-in replacement also resolves datasources, decides version and
+  range updates, edits manifests and lockfiles, and drives branch/PR operations
+  for the platforms the self-hosted CLI supports.
 
 Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Never stop because of missing credentials, unavailable network, or an external service requirement. Document the blocker, skip that blocked slice, and continue with another local/offline slice that can move the project forward.
 
@@ -93,15 +126,42 @@ Primary outcome:
   `NO_COLOR` plus CLI/config switches when compatibility allows.
 - When compatibility and improved UX conflict, keep compatibility available through flags or config and document the tradeoff.
 
-Out of scope for now:
-- Hosted Renovate bots, GitHub Apps, GitHub Actions plugins, hosted dashboards,
-  SaaS services, marketplace integrations, webhook processors, and other
-  surrounding infrastructure.
-- Features that only make sense for hosted or managed Renovate deployments unless
-  they are needed to preserve ordinary CLI behavior.
+In scope (full drop-in — never classify these as out of scope or not-applicable):
+- Everything a self-hosted `renovate` invocation does end to end on a real
+  repository, not just dependency extraction. Extraction is one stage of a
+  pipeline; the whole pipeline is in scope.
+- Datasource lookups: HTTP clients for npm, crates, PyPI, Docker registries,
+  GitHub/GitLab releases and tags, Maven, Go proxy, and the rest. "Rust has no
+  datasource HTTP layer yet" is a `not-started`/`partial` source row and a
+  `pending` test, never `not-applicable`.
+- Versioning and range-update decisions across every versioning scheme Renovate
+  supports (semver, npm ranges, pep440, maven, docker, etc.).
+- Manifest editing and lockfile/artifact updates for supported managers,
+  including invoking the underlying package managers where Renovate does.
+- Branch creation, commit message and PR/MR title/body generation, and
+  create/update operations against the platforms the self-hosted CLI targets
+  (GitHub, GitLab, Gitea, Bitbucket, Azure, etc.) via their REST/GraphQL APIs.
+- Dependency dashboard issue contents, onboarding branch/PR contents, config
+  migration and validation, and release-note fetching as the CLI performs them.
+- Behavior reached through Renovate's `httpMock`, `got`/`Http` client, git
+  operations, or `child_process`/exec in the TypeScript tests. The fact that the
+  upstream test uses a Node mock is not a reason to skip it — port the runtime
+  behavior using Rust's HTTP/git/process layers and Rust test doubles.
+
+Out of scope (hosted/managed infrastructure only):
+- Hosted Renovate bots, the GitHub App, the Mend-hosted service, GitHub Actions
+  marketplace plugins, hosted web dashboards, SaaS billing, marketplace
+  integrations, and inbound webhook processors.
+- Features that exist only for hosted or managed deployments and are never
+  exercised by a self-hosted `renovate` CLI run.
 - Building replacement infrastructure around the CLI before the local Rust CLI is
-  useful, compatible, fast, and well-tested. Record future infrastructure ideas
-  in docs if useful, but keep implementation work on the CLI.
+  a complete, compatible, fast, well-tested drop-in. Record future infrastructure
+  ideas in docs if useful, but keep implementation work on the CLI.
+
+Scope guard: if you are about to mark a source file `out-of-scope` or a test
+`not-applicable`, it must fall under the hosted/managed list above. If the
+behavior is reachable from a plain `renovate` CLI run on a local repo, it is in
+scope — implement it. When unsure, treat it as in scope.
 
 Rust project standards:
 - Use the latest stable Rust release as the project toolchain. As of 2026-04-28,
@@ -193,6 +253,11 @@ Verification:
 - Do not run verification commands automatically before or after every commit.
   Run checks only when the operator explicitly asks for them, or when a task
   instruction names a specific command.
+- **Exception — completion check.** Terminal-state gate #5 requires the quality
+  gates to actually pass. Before reporting the terminal state as reached (and
+  whenever you believe the loop is finished), run the full gate set below and the
+  differential harness. You may not declare done on unverified code, even though
+  routine per-slice verification stays operator-gated.
 - When the operator requests Rust verification, use the strongest applicable
   local checks that fit the iteration:
   - `cargo build --workspace --all-features`
@@ -208,6 +273,45 @@ Verification:
 - If the project does not yet have the required Rust scaffolding, create it first, including `Cargo.toml`, a latest-stable Rust toolchain policy, rustfmt/clippy/nextest configuration where useful, and CI-ready commands.
 - Never claim formatting, Clippy, build, or tests passed unless you ran the
   relevant command in this turn.
+
+Differential parity harness:
+
+This harness is the objective proof of "works exactly like the TypeScript
+version" and is terminal-state gate #4. Hand-ported tests encode what you
+*believe* Renovate does; the differential harness checks it against what
+Renovate *actually* does on the same inputs.
+
+- Goal: for each fixture repository, run upstream Renovate and `renovate-rust`
+  with equivalent invocations and assert their observable output is identical.
+- Invocation: prefer a dry-run, machine-readable mode for both (for Renovate,
+  `renovate --platform=local --dry-run` style with JSON logging; for
+  `renovate-rust`, the matching flags). Compare the observable contract: detected
+  managers, extracted dependencies, datasource/current/target versions, update
+  types, branch and PR/commit names, skip reasons, and exit codes. Ignore
+  volatile fields (timestamps, durations, absolute paths, log ordering) via a
+  documented normalizer.
+- Determinism and offline: the harness MUST run offline and deterministically.
+  Record upstream datasource/platform HTTP responses once as cassettes/fixtures
+  and replay them identically to both implementations. No live network in the
+  harness. A missing recording is a `pending` recording task, not a reason to
+  skip the harness.
+- Layout:
+  - `tests/parity/fixtures/<repo-name>/` — a minimal input repo plus the recorded
+    HTTP cassettes and the expected normalized output.
+  - `tests/parity/` (or a dedicated crate/test target) — the runner that executes
+    both implementations, normalizes, and diffs.
+  - `docs/parity/differential-harness.md` — lists every fixture repo, the
+    behavior it covers, and current pass/fail status. Create it if missing.
+- Coverage grows with scope: add a fixture repo for each manager and each major
+  pipeline behavior (extraction → datasource → update decision → manifest/lock
+  edit → branch/PR content) as you implement it. The harness is "green" only when
+  every fixture diff is empty or recorded as an intentional divergence in
+  `docs/parity/compatibility-decisions.md`.
+- If upstream Renovate cannot be executed in the environment (no Node, no
+  install), record that blocker, keep building Rust behavior and recorded
+  expected-output fixtures, and run the Rust side against the recorded expected
+  output so the harness still guards regressions. Restore the live two-sided diff
+  as soon as Node is available.
 
 Parity tracking files:
 
@@ -245,13 +349,36 @@ They are the primary tool for understanding what is done and what remains.
   files.**
   - One row per TypeScript source file. Track which Rust file implements it.
   - When you implement behavior from a TypeScript source file, update its status.
-  - Use status: `full` · `partial` · `stub` · `not-started` · `out-of-scope`.
-  - Status reflects observable behavior coverage, not line count.
+  - Status reflects observable behavior coverage, not line count. Definitions:
+    - `full` — every observable behavior of the source file is implemented in
+      Rust and covered by tests. This is the only status that counts as done.
+    - `partial` — some behavior implemented, some missing. **A `partial` row
+      MUST include a `Missing:` note in the Notes column enumerating the
+      specific behaviors not yet ported** (e.g. `Missing: lockfile update,
+      registry auth`). A `partial` row with a vague note like "core ported" is a
+      defect — make the gap explicit so the row is closeable.
+    - `stub` — type/shape exists but behavior is not implemented.
+    - `not-started` — no Rust counterpart yet.
+    - `out-of-scope` — excluded under the hosted/managed Out of scope list only;
+      the Notes column must name the hosted-only reason.
+  - For the terminal state, `partial`, `stub`, and `not-started` all count as
+    **not done**. Only `full` and a justified `out-of-scope` are terminal.
   - **Enforcement:** Before committing, verify no row references a `.spec.ts`
     file. If you find one, move it to `renovate-test-map.md`.
 
 - `docs/parity/compatibility-decisions.md` — documents explicit decisions where
   the Rust implementation intentionally diverges from Renovate and why.
+
+Source ↔ test cross-check (run before claiming any spec `Done`):
+- A `.spec.ts` root row may be `Done` only when every source file it exercises is
+  `full` or justified `out-of-scope` in `renovate-source-map.md`. If a behavior's
+  source is `partial`/`stub`/`not-started`, its tests stay `pending` — you cannot
+  reach test parity for behavior that is not implemented.
+- Conversely, a source row may be `full` only when the upstream spec's actionable
+  tests for that behavior are `ported` (not parked as `not-applicable`).
+- These two maps must tell the same story. If the test map says 100% while the
+  source map shows `partial`/`not-started` rows, the test map is wrong — stop and
+  reconcile before doing anything else.
 
 Updating this prompt file:
 
