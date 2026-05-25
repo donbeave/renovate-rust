@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3179 / 11677 total tests ported (27%) · pending 8495 · not-applicable 6 (0% of total) — updated 2026-05-25
+**Progress:** 3186 / 11677 total tests ported (27%) · pending 8488 · not-applicable 7 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -154,7 +154,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/flutter-version/index.spec.ts` | Done | [details](lib/modules/datasource/flutter-version/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-packages/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-packages/index.spec.ts.md) |
 | `lib/modules/datasource/hexpm-bob/index.spec.ts` | Done | [details](lib/modules/datasource/hexpm-bob/index.spec.ts.md) |
-| `lib/modules/datasource/sbt-plugin/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
+| `lib/modules/datasource/sbt-plugin/index.spec.ts` | Done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/index.spec.ts` | Done | [details](lib/modules/datasource/sbt-package/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/util.spec.ts` | Done | [details](lib/modules/datasource/sbt-package/util.spec.ts.md) |
 | `lib/modules/datasource/node-version/index.spec.ts` | Done | [details](lib/modules/datasource/node-version/index.spec.ts.md) |

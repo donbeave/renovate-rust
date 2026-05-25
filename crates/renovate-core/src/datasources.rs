@@ -70,6 +70,7 @@ pub mod rubygems;
 pub mod ruby_version;
 pub mod rust_version;
 pub mod sbt_package;
+pub mod sbt_plugin;
 pub mod terraform;
 pub mod typst;
 pub mod unity3d;
