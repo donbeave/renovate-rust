@@ -142,7 +142,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/datasource.spec.ts` | Not done | [details](lib/modules/datasource/datasource.spec.ts.md) |
 | `lib/modules/datasource/azure-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
 | `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/schema.spec.ts.md) |
-| `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) |
+| `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) |
 | `lib/modules/datasource/cpan/schema.spec.ts` | Done | [details](lib/modules/datasource/cpan/schema.spec.ts.md) |
 | `lib/modules/datasource/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/datasource/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/datasource/nextcloud/index.spec.ts` | Done | [details](lib/modules/datasource/nextcloud/index.spec.ts.md) |
@@ -163,7 +163,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/forgejo-releases/index.spec.ts` | Done | [details](lib/modules/datasource/forgejo-releases/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-releases/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-releases/index.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-tags/index.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-tags/index.spec.ts.md) |
-| `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
+| `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy-collection/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy-collection/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy/index.spec.ts.md) |
 | `lib/modules/datasource/repology/index.spec.ts` | Done | [details](lib/modules/datasource/repology/index.spec.ts.md) |
