@@ -445,10 +445,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/util.spec.ts` | Not done | [details](lib/modules/manager/util.spec.ts.md) |
 | `lib/modules/manager/fingerprint.spec.ts` | Not done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
 | `lib/modules/manager/metadata.spec.ts` | Not done | [details](lib/modules/manager/metadata.spec.ts.md) |
-| `lib/modules/versioning/schema.spec.ts` | Not done | [details](lib/modules/versioning/schema.spec.ts.md) |
-| `lib/modules/versioning/index.spec.ts` | Not done | [details](lib/modules/versioning/index.spec.ts.md) |
-| `lib/modules/versioning/versioning-metadata.spec.ts` | Not done | [details](lib/modules/versioning/versioning-metadata.spec.ts.md) |
-| `lib/modules/versioning/generic.spec.ts` | Not done | [details](lib/modules/versioning/generic.spec.ts.md) |
+| `lib/modules/versioning/schema.spec.ts` | Done | [details](lib/modules/versioning/schema.spec.ts.md) |
+| `lib/modules/versioning/index.spec.ts` | Done | [details](lib/modules/versioning/index.spec.ts.md) |
+| `lib/modules/versioning/versioning-metadata.spec.ts` | Done | [details](lib/modules/versioning/versioning-metadata.spec.ts.md) |
+| `lib/modules/versioning/generic.spec.ts` | Done | [details](lib/modules/versioning/generic.spec.ts.md) |
 | `lib/modules/versioning/distro.spec.ts` | Not done | [details](lib/modules/versioning/distro.spec.ts.md) |
 | `lib/modules/versioning/kubernetes-api/index.spec.ts` | Not done | [details](lib/modules/versioning/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/versioning/deno/index.spec.ts` | Done | [details](lib/modules/versioning/deno/index.spec.ts.md) |
@@ -466,13 +466,13 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/python/index.spec.ts` | Not done | [details](lib/modules/versioning/python/index.spec.ts.md) |
 | `lib/modules/versioning/conda/index.spec.ts` | Not done | [details](lib/modules/versioning/conda/index.spec.ts.md) |
 | `lib/modules/versioning/hashicorp/index.spec.ts` | Done | [details](lib/modules/versioning/hashicorp/index.spec.ts.md) |
-| `lib/modules/versioning/hashicorp/convertor.spec.ts` | Not done | [details](lib/modules/versioning/hashicorp/convertor.spec.ts.md) |
+| `lib/modules/versioning/hashicorp/convertor.spec.ts` | Done | [details](lib/modules/versioning/hashicorp/convertor.spec.ts.md) |
 | `lib/modules/versioning/glasskube/index.spec.ts` | Done | [details](lib/modules/versioning/glasskube/index.spec.ts.md) |
 | `lib/modules/versioning/bazel-module/index.spec.ts` | Not done | [details](lib/modules/versioning/bazel-module/index.spec.ts.md) |
 | `lib/modules/versioning/bazel-module/bzlmod-version.spec.ts` | Not done | [details](lib/modules/versioning/bazel-module/bzlmod-version.spec.ts.md) |
 | `lib/modules/versioning/cargo/index.spec.ts` | Done | [details](lib/modules/versioning/cargo/index.spec.ts.md) |
-| `lib/modules/versioning/maven/compare.spec.ts` | Not done | [details](lib/modules/versioning/maven/compare.spec.ts.md) |
-| `lib/modules/versioning/maven/index.spec.ts` | Not done | [details](lib/modules/versioning/maven/index.spec.ts.md) |
+| `lib/modules/versioning/maven/compare.spec.ts` | Done | [details](lib/modules/versioning/maven/compare.spec.ts.md) |
+| `lib/modules/versioning/maven/index.spec.ts` | Done | [details](lib/modules/versioning/maven/index.spec.ts.md) |
 | `lib/modules/versioning/aws-eks-addon/index.spec.ts` | Not done | [details](lib/modules/versioning/aws-eks-addon/index.spec.ts.md) |
 | `lib/modules/versioning/composer/index.spec.ts` | Not done | [details](lib/modules/versioning/composer/index.spec.ts.md) |
 | `lib/modules/versioning/perl/index.spec.ts` | Done | [details](lib/modules/versioning/perl/index.spec.ts.md) |
