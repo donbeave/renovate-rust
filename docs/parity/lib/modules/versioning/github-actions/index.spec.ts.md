@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/github-actions/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/github-actions/index.spec.ts
-**Total tests:** 29 | **Ported:** 28 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 28 | **Actionable:** 28 | **Status:** ported
 
 ### `modules/versioning/github-actions/index`
 
@@ -39,7 +39,7 @@
 | returns newVersion when newVersion is a floating tag and allVersions is not set | 675 | ported | `github_actions.rs` | `get_new_value_returns_floating_new_version_without_all_versions` | — |
 | returns the floating newVersion when it exists in allVersions | 685 | ported | `github_actions.rs` | `get_new_value_returns_existing_floating_new_version` | — |
 | newVersion is returned anyway | 698 | ported | `github_actions.rs` | `get_new_value_returns_missing_new_version_anyway` | — |
-| debug logs | 709 | pending | - | - | — |
+| debug logs | 709 | not-applicable | — | — | Log spy test — no runtime behavior to verify in Rust |
 
 ---
 

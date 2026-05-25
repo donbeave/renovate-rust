@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3154 / 11677 total tests ported (27%) · pending 8521 · not-applicable 2 (0% of total) — updated 2026-05-25
+**Progress:** 3169 / 11677 total tests ported (27%) · pending 8505 · not-applicable 3 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -457,7 +457,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/rust-release-channel/index.spec.ts` | Not done | [details](lib/modules/versioning/rust-release-channel/index.spec.ts.md) |
 | `lib/modules/versioning/rust-release-channel/parse.spec.ts` | Not done | [details](lib/modules/versioning/rust-release-channel/parse.spec.ts.md) |
 | `lib/modules/versioning/apk/index.spec.ts` | Not done | [details](lib/modules/versioning/apk/index.spec.ts.md) |
-| `lib/modules/versioning/loose/index.spec.ts` | Not done | [details](lib/modules/versioning/loose/index.spec.ts.md) |
+| `lib/modules/versioning/loose/index.spec.ts` | Done | [details](lib/modules/versioning/loose/index.spec.ts.md) |
 | `lib/modules/versioning/same-major/index.spec.ts` | Not done | [details](lib/modules/versioning/same-major/index.spec.ts.md) |
 | `lib/modules/versioning/hex/index.spec.ts` | Not done | [details](lib/modules/versioning/hex/index.spec.ts.md) |
 | `lib/modules/versioning/debian/index.spec.ts` | Not done | [details](lib/modules/versioning/debian/index.spec.ts.md) |
@@ -487,7 +487,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/devbox/index.spec.ts` | Not done | [details](lib/modules/versioning/devbox/index.spec.ts.md) |
 | `lib/modules/versioning/nixpkgs/index.spec.ts` | Not done | [details](lib/modules/versioning/nixpkgs/index.spec.ts.md) |
 | `lib/modules/versioning/poetry/index.spec.ts` | Not done | [details](lib/modules/versioning/poetry/index.spec.ts.md) |
-| `lib/modules/versioning/semver/index.spec.ts` | Not done | [details](lib/modules/versioning/semver/index.spec.ts.md) |
+| `lib/modules/versioning/semver/index.spec.ts` | Done | [details](lib/modules/versioning/semver/index.spec.ts.md) |
 | `lib/modules/versioning/semver/common.spec.ts` | Done | [details](lib/modules/versioning/semver/common.spec.ts.md) |
 | `lib/modules/versioning/swift/index.spec.ts` | Not done | [details](lib/modules/versioning/swift/index.spec.ts.md) |
 | `lib/modules/versioning/go-mod-directive/index.spec.ts` | Not done | [details](lib/modules/versioning/go-mod-directive/index.spec.ts.md) |
