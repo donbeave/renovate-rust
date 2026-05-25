@@ -1096,4 +1096,26 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | TypeScript source | Rust file | Status | Notes |
 |---|---|---|---|
+| `lib/modules/versioning/aws-machine-image/index.ts` | `crates/renovate-core/src/versioning/aws_machine_image.rs` | partial | Core version comparison ported |
 | `lib/modules/versioning/cargo/index.ts` | `crates/renovate-core/src/versioning/cargo.rs` | full | Full VersioningApi: matches, isValid, isVersion, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, isSingleVersion, getPinnedValue, getNewValue, isBreaking |
+| `lib/modules/versioning/deno/index.ts` | `crates/renovate-core/src/versioning/deno.rs` | done | isValid, getSatisfyingVersion, isSingleVersion, subset, getNewValue |
+| `lib/modules/versioning/devbox/index.ts` | `crates/renovate-core/src/versioning/devbox.rs` | done | isValid, isVersion, isCompatible, getNewValue |
+| `lib/modules/versioning/exact/index.ts` | `crates/renovate-core/src/versioning/exact.rs` | partial | Exact version matching ported |
+| `lib/modules/versioning/git/index.ts` | `crates/renovate-core/src/versioning/git.rs` | partial | Git hash versioning ported |
+| `lib/modules/versioning/github-actions/index.ts` | `crates/renovate-core/src/versioning/github_actions.rs` | partial | GitHub Actions versioning ported |
+| `lib/modules/versioning/glasskube/index.ts` | `crates/renovate-core/src/versioning/glasskube.rs` | done | isValid, isVersion, getMajor, getNewValue |
+| `lib/modules/versioning/hashicorp/index.ts` | `crates/renovate-core/src/versioning/hashicorp.rs` | done | Full HashiCorp constraint versioning: parseConstraint, satisfies, isValid, getNewValue, getSatisfying |
+| `lib/modules/versioning/helm/index.ts` | `crates/renovate-core/src/versioning/helm.rs` | partial | Helm chart versioning ported |
+| `lib/modules/versioning/loose/index.ts` | `crates/renovate-core/src/versioning/loose.rs` | partial | Loose semver comparison ported |
+| `lib/modules/versioning/maven/index.ts` | `crates/renovate-core/src/versioning/maven.rs` | partial | Maven version ordering ported |
+| `lib/modules/versioning/nixpkgs/index.ts` | `crates/renovate-core/src/versioning/nixpkgs.rs` | done | isValid, isVersion, getMajor, getNewValue for nixpkgs date-based versions |
+| `lib/modules/versioning/npm/index.ts` | `crates/renovate-core/src/versioning/npm.rs` | partial | npm semver ranges ported |
+| `lib/modules/versioning/nuget/index.ts` | `crates/renovate-core/src/versioning/nuget.rs` | partial | NuGet versioning ported |
+| `lib/modules/versioning/pep440/index.ts` | `crates/renovate-core/src/versioning/pep440.rs` | partial | PEP 440 Python versioning ported |
+| `lib/modules/versioning/perl/index.ts` | `crates/renovate-core/src/versioning/perl.rs` | done | isValid, isVersion, getMajor, getNewValue for Perl versions |
+| `lib/modules/versioning/pvp/index.ts` | `crates/renovate-core/src/versioning/pvp.rs` | partial | PVP Haskell versioning ported |
+| `lib/modules/versioning/redhat/index.ts` | `crates/renovate-core/src/versioning/redhat.rs` | partial | Red Hat RPM versioning ported |
+| `lib/modules/versioning/rpm/index.ts` | `crates/renovate-core/src/versioning/rpm.rs` | partial | RPM versioning ported |
+| `lib/modules/versioning/semver-coerced/index.ts` | `crates/renovate-core/src/versioning/semver_coerced.rs` | partial | Coerced semver ported |
+| `lib/modules/versioning/unity3d/index.ts` | `crates/renovate-core/src/versioning/unity3d.rs` | partial | Unity3D versioning ported |
+| `lib/modules/versioning/unity3d-packages/index.ts` | `crates/renovate-core/src/versioning/unity3d_packages.rs` | partial | Unity3D packages versioning ported |

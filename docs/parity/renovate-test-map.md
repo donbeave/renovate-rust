@@ -451,7 +451,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/generic.spec.ts` | Not done | [details](lib/modules/versioning/generic.spec.ts.md) |
 | `lib/modules/versioning/distro.spec.ts` | Not done | [details](lib/modules/versioning/distro.spec.ts.md) |
 | `lib/modules/versioning/kubernetes-api/index.spec.ts` | Not done | [details](lib/modules/versioning/kubernetes-api/index.spec.ts.md) |
-| `lib/modules/versioning/deno/index.spec.ts` | Not done | [details](lib/modules/versioning/deno/index.spec.ts.md) |
+| `lib/modules/versioning/deno/index.spec.ts` | Done | [details](lib/modules/versioning/deno/index.spec.ts.md) |
 | `lib/modules/versioning/docker/index.spec.ts` | Not done | [details](lib/modules/versioning/docker/index.spec.ts.md) |
 | `lib/modules/versioning/rez/index.spec.ts` | Not done | [details](lib/modules/versioning/rez/index.spec.ts.md) |
 | `lib/modules/versioning/rust-release-channel/index.spec.ts` | Not done | [details](lib/modules/versioning/rust-release-channel/index.spec.ts.md) |
@@ -465,9 +465,9 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/ivy/index.spec.ts` | Not done | [details](lib/modules/versioning/ivy/index.spec.ts.md) |
 | `lib/modules/versioning/python/index.spec.ts` | Not done | [details](lib/modules/versioning/python/index.spec.ts.md) |
 | `lib/modules/versioning/conda/index.spec.ts` | Not done | [details](lib/modules/versioning/conda/index.spec.ts.md) |
-| `lib/modules/versioning/hashicorp/index.spec.ts` | Not done | [details](lib/modules/versioning/hashicorp/index.spec.ts.md) |
+| `lib/modules/versioning/hashicorp/index.spec.ts` | Done | [details](lib/modules/versioning/hashicorp/index.spec.ts.md) |
 | `lib/modules/versioning/hashicorp/convertor.spec.ts` | Not done | [details](lib/modules/versioning/hashicorp/convertor.spec.ts.md) |
-| `lib/modules/versioning/glasskube/index.spec.ts` | Not done | [details](lib/modules/versioning/glasskube/index.spec.ts.md) |
+| `lib/modules/versioning/glasskube/index.spec.ts` | Done | [details](lib/modules/versioning/glasskube/index.spec.ts.md) |
 | `lib/modules/versioning/bazel-module/index.spec.ts` | Not done | [details](lib/modules/versioning/bazel-module/index.spec.ts.md) |
 | `lib/modules/versioning/bazel-module/bzlmod-version.spec.ts` | Not done | [details](lib/modules/versioning/bazel-module/bzlmod-version.spec.ts.md) |
 | `lib/modules/versioning/cargo/index.spec.ts` | Done | [details](lib/modules/versioning/cargo/index.spec.ts.md) |
@@ -475,7 +475,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/maven/index.spec.ts` | Not done | [details](lib/modules/versioning/maven/index.spec.ts.md) |
 | `lib/modules/versioning/aws-eks-addon/index.spec.ts` | Not done | [details](lib/modules/versioning/aws-eks-addon/index.spec.ts.md) |
 | `lib/modules/versioning/composer/index.spec.ts` | Not done | [details](lib/modules/versioning/composer/index.spec.ts.md) |
-| `lib/modules/versioning/perl/index.spec.ts` | Not done | [details](lib/modules/versioning/perl/index.spec.ts.md) |
+| `lib/modules/versioning/perl/index.spec.ts` | Done | [details](lib/modules/versioning/perl/index.spec.ts.md) |
 | `lib/modules/versioning/hermit/index.spec.ts` | Not done | [details](lib/modules/versioning/hermit/index.spec.ts.md) |
 | `lib/modules/versioning/semver-partial/index.spec.ts` | Not done | [details](lib/modules/versioning/semver-partial/index.spec.ts.md) |
 | `lib/modules/versioning/elm/index.spec.ts` | Not done | [details](lib/modules/versioning/elm/index.spec.ts.md) |
@@ -484,8 +484,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/regex/index.spec.ts` | Not done | [details](lib/modules/versioning/regex/index.spec.ts.md) |
 | `lib/modules/versioning/lambda-node/index.spec.ts` | Not done | [details](lib/modules/versioning/lambda-node/index.spec.ts.md) |
 | `lib/modules/versioning/gradle/index.spec.ts` | Not done | [details](lib/modules/versioning/gradle/index.spec.ts.md) |
-| `lib/modules/versioning/devbox/index.spec.ts` | Not done | [details](lib/modules/versioning/devbox/index.spec.ts.md) |
-| `lib/modules/versioning/nixpkgs/index.spec.ts` | Not done | [details](lib/modules/versioning/nixpkgs/index.spec.ts.md) |
+| `lib/modules/versioning/devbox/index.spec.ts` | Done | [details](lib/modules/versioning/devbox/index.spec.ts.md) |
+| `lib/modules/versioning/nixpkgs/index.spec.ts` | Done | [details](lib/modules/versioning/nixpkgs/index.spec.ts.md) |
 | `lib/modules/versioning/poetry/index.spec.ts` | Not done | [details](lib/modules/versioning/poetry/index.spec.ts.md) |
 | `lib/modules/versioning/semver/index.spec.ts` | Done | [details](lib/modules/versioning/semver/index.spec.ts.md) |
 | `lib/modules/versioning/semver/common.spec.ts` | Done | [details](lib/modules/versioning/semver/common.spec.ts.md) |

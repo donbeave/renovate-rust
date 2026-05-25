@@ -5,16 +5,21 @@
 
 pub mod aws_machine_image;
 pub mod cargo;
+pub mod deno;
+pub mod devbox;
 pub mod exact;
 pub mod git;
 pub mod github_actions;
+pub mod glasskube;
 pub mod hashicorp;
 pub mod loose;
 pub mod helm;
 pub mod maven;
+pub mod nixpkgs;
 pub mod npm;
 pub mod nuget;
 pub mod pep440;
+pub mod perl;
 pub mod pvp;
 pub mod redhat;
 pub mod rpm;
