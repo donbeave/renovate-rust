@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3136 / 11677 total tests ported (27%) · pending 8540 · not-applicable 1 (0% of total) — updated 2026-05-25
+**Progress:** 3150 / 11677 total tests ported (27%) · pending 8526 · not-applicable 1 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -204,7 +204,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/rust-version/parse.spec.ts` | Done | [details](lib/modules/datasource/rust-version/parse.spec.ts.md) |
 | `lib/modules/datasource/custom/index.spec.ts` | Not done | [details](lib/modules/datasource/custom/index.spec.ts.md) |
 | `lib/modules/datasource/rpm/index.spec.ts` | Not done | [details](lib/modules/datasource/rpm/index.spec.ts.md) |
-| `lib/modules/datasource/golang-version/index.spec.ts` | Not done | [details](lib/modules/datasource/golang-version/index.spec.ts.md) |
+| `lib/modules/datasource/golang-version/index.spec.ts` | Done | [details](lib/modules/datasource/golang-version/index.spec.ts.md) |
 | `lib/modules/datasource/git-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/git-tags/index.spec.ts.md) |
 | `lib/modules/datasource/github-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/github-tags/index.spec.ts.md) |
 | `lib/modules/datasource/orb/index.spec.ts` | Not done | [details](lib/modules/datasource/orb/index.spec.ts.md) |
@@ -240,7 +240,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-pipelines-tasks/index.spec.ts.md) |
 | `lib/modules/datasource/helm/schema.spec.ts` | Not done | [details](lib/modules/datasource/helm/schema.spec.ts.md) |
 | `lib/modules/datasource/npm/schema.spec.ts` | Not done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
-| `lib/modules/datasource/nuget/common.spec.ts` | Not done | [details](lib/modules/datasource/nuget/common.spec.ts.md) |
+| `lib/modules/datasource/nuget/common.spec.ts` | Done | [details](lib/modules/datasource/nuget/common.spec.ts.md) |
 | `lib/modules/datasource/maven/cache.spec.ts` | Not done | [details](lib/modules/datasource/maven/cache.spec.ts.md) |
 | `lib/modules/datasource/maven/common.spec.ts` | Done | [details](lib/modules/datasource/maven/common.spec.ts.md) |
 | `lib/modules/datasource/docker/dockerhub-cache.spec.ts` | Not done | [details](lib/modules/datasource/docker/dockerhub-cache.spec.ts.md) |
@@ -334,10 +334,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/migrations/custom/branch-name-migration.spec.ts` | Done | [details](lib/config/migrations/custom/branch-name-migration.spec.ts.md) |
 | `lib/config/migrations/custom/branch-prefix-migration.spec.ts` | Done | [details](lib/config/migrations/custom/branch-prefix-migration.spec.ts.md) |
 | `lib/config/migrations/custom/automerge-migration.spec.ts` | Done | [details](lib/config/migrations/custom/automerge-migration.spec.ts.md) |
-| `lib/config/migrations/custom/automerge-major-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/automerge-major-migration.spec.ts.md) |
-| `lib/config/migrations/custom/automerge-minor-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/automerge-minor-migration.spec.ts.md) |
-| `lib/config/migrations/custom/automerge-patch-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/automerge-patch-migration.spec.ts.md) |
-| `lib/config/migrations/custom/automerge-type-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/automerge-type-migration.spec.ts.md) |
+| `lib/config/migrations/custom/automerge-major-migration.spec.ts` | Done | [details](lib/config/migrations/custom/automerge-major-migration.spec.ts.md) |
+| `lib/config/migrations/custom/automerge-minor-migration.spec.ts` | Done | [details](lib/config/migrations/custom/automerge-minor-migration.spec.ts.md) |
+| `lib/config/migrations/custom/automerge-patch-migration.spec.ts` | Done | [details](lib/config/migrations/custom/automerge-patch-migration.spec.ts.md) |
+| `lib/config/migrations/custom/automerge-type-migration.spec.ts` | Done | [details](lib/config/migrations/custom/automerge-type-migration.spec.ts.md) |
 | `lib/config/migrations/custom/dry-run-migration.spec.ts` | Done | [details](lib/config/migrations/custom/dry-run-migration.spec.ts.md) |
 | `lib/config/migrations/custom/recreate-closed-migration.spec.ts` | Done | [details](lib/config/migrations/custom/recreate-closed-migration.spec.ts.md) |
 | `lib/config/migrations/custom/require-config-migration.spec.ts` | Done | [details](lib/config/migrations/custom/require-config-migration.spec.ts.md) |

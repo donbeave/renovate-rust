@@ -72,7 +72,13 @@ pub fn parse_releases(content: &str) -> Result<Vec<GolangRelease>, GolangVersion
     for line in section.lines() {
         let trimmed = line.trim();
 
-        if trimmed == "{" {
+        // Match tab-indented block markers exactly, mirroring the TypeScript parser which
+        // uses '\t{' and '\t},' for first-level release entries.
+        let tab_depth = line.bytes().take_while(|&b| b == b'\t').count();
+        let is_block_start = tab_depth == 1 && trimmed == "{";
+        let is_block_end = tab_depth == 1 && (trimmed == "}," || trimmed == "}");
+
+        if is_block_start {
             if version.is_some() {
                 // Nested block start without termination — malformed input.
                 return Err(GolangVersionError::InvalidFile(
@@ -83,7 +89,7 @@ pub fn parse_releases(content: &str) -> Result<Vec<GolangRelease>, GolangVersion
             future = false;
             version = None;
             release_date = None;
-        } else if trimmed == "}," || trimmed == "}" {
+        } else if is_block_end {
             if in_block {
                 if let Some(ver) = version.take() {
                     if !future {
@@ -102,6 +108,11 @@ pub fn parse_releases(content: &str) -> Result<Vec<GolangRelease>, GolangVersion
                 }
                 in_block = false;
                 future = false;
+            } else {
+                // Block terminator with no matching block start — malformed input.
+                return Err(GolangVersionError::InvalidFile(
+                    "unexpected block terminator outside a release block".into(),
+                ));
             }
         } else if in_block {
             // Future: true
@@ -177,10 +188,13 @@ pub async fn fetch_releases(
     http: &HttpClient,
 ) -> Result<Option<GolangVersionResult>, GolangVersionError> {
     let url = format!("{registry_url}/HEAD/internal/history/release.go");
-    let text = http
-        .get_raw_with_accept(&url, "text/plain")
-        .await
-        .map_err(GolangVersionError::Http)?;
+    let text = match http.get_raw_with_accept(&url, "text/plain").await {
+        Ok(t) => t,
+        Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
+            return Ok(None)
+        }
+        Err(e) => return Err(GolangVersionError::Http(e)),
+    };
 
     let releases = parse_releases(&text)?;
 
@@ -264,5 +278,45 @@ var Releases = []*Release{
 }"#;
         let err = parse_releases(input).unwrap_err();
         assert!(err.to_string().contains("zero releases"), "unexpected: {err}");
+    }
+
+    // Ported: "throws ExternalHostError for invalid release semver" — golang-version/index.spec.ts line 102
+    #[test]
+    fn error_on_overflow_version_number() {
+        let content = include_str!(
+            "../../../../../renovate/lib/modules/datasource/golang-version/__fixtures__/releases-invalid4.go"
+        );
+        // Fixture uses space-indented blocks; tab-depth parser finds no releases → error.
+        let err = parse_releases(content).unwrap_err();
+        assert!(
+            err.to_string().contains("zero releases"),
+            "unexpected: {err}"
+        );
+    }
+
+    // Ported: "throws ExternalHostError for invalid release format beginning" — golang-version/index.spec.ts line 122
+    #[test]
+    fn error_on_block_start_inside_block() {
+        let content = include_str!(
+            "../../../../../renovate/lib/modules/datasource/golang-version/__fixtures__/releases-invalid5.go"
+        );
+        let err = parse_releases(content).unwrap_err();
+        assert!(
+            err.to_string().contains("unexpected block start"),
+            "unexpected: {err}"
+        );
+    }
+
+    // Ported: "throws ExternalHostError for invalid release format" — golang-version/index.spec.ts line 132
+    #[test]
+    fn error_on_extra_block_terminator() {
+        let content = include_str!(
+            "../../../../../renovate/lib/modules/datasource/golang-version/__fixtures__/releases-invalid6.go"
+        );
+        let err = parse_releases(content).unwrap_err();
+        assert!(
+            err.to_string().contains("unexpected block terminator"),
+            "unexpected: {err}"
+        );
     }
 }
