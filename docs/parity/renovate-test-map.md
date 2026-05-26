@@ -495,7 +495,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/nuget/version.spec.ts` | Done | [details](lib/modules/versioning/nuget/version.spec.ts.md) |
 | `lib/modules/versioning/nuget/parser.spec.ts` | Not done | [details](lib/modules/versioning/nuget/parser.spec.ts.md) |
 | `lib/modules/versioning/nuget/index.spec.ts` | Not done | [details](lib/modules/versioning/nuget/index.spec.ts.md) |
-| `lib/modules/versioning/conan/index.spec.ts` | Not done | [details](lib/modules/versioning/conan/index.spec.ts.md) |
+| `lib/modules/versioning/conan/index.spec.ts` | Done | [details](lib/modules/versioning/conan/index.spec.ts.md) |
 | `lib/modules/versioning/unity3d-packages/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d-packages/index.spec.ts.md) |
 | `lib/modules/versioning/azure-rest-api/index.spec.ts` | Done | [details](lib/modules/versioning/azure-rest-api/index.spec.ts.md) |
 | `lib/modules/versioning/unity3d/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d/index.spec.ts.md) |
