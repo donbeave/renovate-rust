@@ -8,6 +8,7 @@ pub mod aws_eks_addon;
 pub mod aws_machine_image;
 pub mod azure_rest_api;
 pub mod cargo;
+pub mod conan;
 pub mod conda;
 pub mod deno;
 pub mod devbox;
