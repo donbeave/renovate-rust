@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3842 / 11677 total tests ported (33%) · pending 7767 · not-applicable 68 (1% of total) — updated 2026-05-27
+**Progress:** 3845 / 11677 total tests ported (33%) · pending 7763 · not-applicable 69 (1% of total) — updated 2026-05-27
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -33,7 +33,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/github-actions/extract.spec.ts` | Done | [details](lib/modules/manager/github-actions/extract.spec.ts.md) |
 | `lib/modules/manager/github-actions/integration.spec.ts` | Not done | [details](lib/modules/manager/github-actions/integration.spec.ts.md) |
 | `lib/modules/manager/github-actions/parse.spec.ts` | Done | [details](lib/modules/manager/github-actions/parse.spec.ts.md) |
-| `lib/modules/manager/gitlabci/extract.spec.ts` | Not done | [details](lib/modules/manager/gitlabci/extract.spec.ts.md) |
+| `lib/modules/manager/gitlabci/extract.spec.ts` | Done | [details](lib/modules/manager/gitlabci/extract.spec.ts.md) |
 | `lib/modules/manager/gomod/extract.spec.ts` | Not done | [details](lib/modules/manager/gomod/extract.spec.ts.md) |
 | `lib/modules/manager/gradle/extract.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract.spec.ts.md) |
 | `lib/modules/manager/helm-values/extract.spec.ts` | Done | [details](lib/modules/manager/helm-values/extract.spec.ts.md) |
@@ -136,7 +136,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/artifactory/index.spec.ts` | Done | [details](lib/modules/datasource/artifactory/index.spec.ts.md) |
 | `lib/modules/datasource/bazel/schema.spec.ts` | Done | [details](lib/modules/datasource/bazel/schema.spec.ts.md) |
 | `lib/modules/datasource/aws-eks-addon/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-eks-addon/index.spec.ts.md) |
-| `lib/modules/datasource/aws-eks-addon/schema.spec.ts` | Not done | [details](lib/modules/datasource/aws-eks-addon/schema.spec.ts.md) |
+| `lib/modules/datasource/aws-eks-addon/schema.spec.ts` | Done | [details](lib/modules/datasource/aws-eks-addon/schema.spec.ts.md) |
 | `lib/modules/datasource/aws-machine-image/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-machine-image/index.spec.ts.md) |
 | `lib/modules/datasource/aws-rds/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-rds/index.spec.ts.md) |
 | `lib/modules/datasource/datasource.spec.ts` | Not done | [details](lib/modules/datasource/datasource.spec.ts.md) |
@@ -238,8 +238,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/github-releases/index.spec.ts` | Done | [details](lib/modules/datasource/github-releases/index.spec.ts.md) |
 | `lib/modules/datasource/bazel/index.spec.ts` | Done | [details](lib/modules/datasource/bazel/index.spec.ts.md) |
 | `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts` | Done | [details](lib/modules/datasource/azure-pipelines-tasks/index.spec.ts.md) |
-| `lib/modules/datasource/helm/schema.spec.ts` | Not done | [details](lib/modules/datasource/helm/schema.spec.ts.md) |
-| `lib/modules/datasource/npm/schema.spec.ts` | Not done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
+| `lib/modules/datasource/helm/schema.spec.ts` | Done | [details](lib/modules/datasource/helm/schema.spec.ts.md) |
+| `lib/modules/datasource/npm/schema.spec.ts` | Done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
 | `lib/modules/datasource/nuget/common.spec.ts` | Done | [details](lib/modules/datasource/nuget/common.spec.ts.md) |
 | `lib/modules/datasource/maven/cache.spec.ts` | Not done | [details](lib/modules/datasource/maven/cache.spec.ts.md) |
 | `lib/modules/datasource/maven/common.spec.ts` | Done | [details](lib/modules/datasource/maven/common.spec.ts.md) |
@@ -437,7 +437,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/scm.spec.ts` | Not done | [details](lib/modules/platform/scm.spec.ts.md) |
 | `lib/modules/platform/pr-body.spec.ts` | Not done | [details](lib/modules/platform/pr-body.spec.ts.md) |
 | `lib/modules/platform/index.spec.ts` | Not done | [details](lib/modules/platform/index.spec.ts.md) |
-| `lib/modules/platform/types.spec.ts` | Not done | [details](lib/modules/platform/types.spec.ts.md) |
+| `lib/modules/platform/types.spec.ts` | Done | [details](lib/modules/platform/types.spec.ts.md) |
 | `lib/modules/platform/util.spec.ts` | Not done | [details](lib/modules/platform/util.spec.ts.md) |
 | `lib/modules/platform/default-scm.spec.ts` | Not done | [details](lib/modules/platform/default-scm.spec.ts.md) |
 | `lib/modules/manager/range.spec.ts` | Not done | [details](lib/modules/manager/range.spec.ts.md) |
@@ -603,7 +603,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/hermit/update.spec.ts` | Done | [details](lib/modules/manager/hermit/update.spec.ts.md) |
 | `lib/modules/manager/homebrew/handlers/github.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/github.spec.ts.md) |
 | `lib/modules/manager/homebrew/handlers/index.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/index.spec.ts.md) |
-| `lib/modules/manager/homebrew/handlers/npm.spec.ts` | Not done | [details](lib/modules/manager/homebrew/handlers/npm.spec.ts.md) |
+| `lib/modules/manager/homebrew/handlers/npm.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/npm.spec.ts.md) |
 | `lib/modules/manager/homebrew/update.spec.ts` | Not done | [details](lib/modules/manager/homebrew/update.spec.ts.md) |
 | `lib/modules/manager/jsonnet-bundler/artifacts.spec.ts` | Not done | [details](lib/modules/manager/jsonnet-bundler/artifacts.spec.ts.md) |
 | `lib/modules/manager/kustomize/artifacts.spec.ts` | Not done | [details](lib/modules/manager/kustomize/artifacts.spec.ts.md) |

@@ -74,6 +74,9 @@ pub fn extract(content: &str) -> Vec<GitlabCiDep> {
     let mut out = Vec::new();
     let mut in_image_block = false;
     let mut in_services_block = false;
+    let mut seeking_service_name = false;
+    // Indent level of the first service list item (filters out nested list items).
+    let mut service_list_indent: Option<usize> = None;
     // Track indentation level of the `image:` key to detect when the block ends.
     let mut image_indent: usize = 0;
 
@@ -92,27 +95,74 @@ pub fn extract(content: &str) -> Vec<GitlabCiDep> {
         if trimmed == "services:" {
             in_services_block = true;
             in_image_block = false;
+            seeking_service_name = false;
+            service_list_indent = None;
             continue;
         }
 
         // Collect service list items (only when inside `services:` block).
         if in_services_block {
             if let Some(cap) = SERVICE_ITEM.captures(line) {
-                let image_str = cap[1].trim().trim_matches('"').trim_matches('\'');
-                let effective = if image_str.starts_with('$') {
-                    strip_dependency_proxy_prefix(image_str)
-                } else if image_str.is_empty() {
-                    None
+                // Only process service items at the established list indent level.
+                let list_indent = *service_list_indent.get_or_insert(indent);
+                if indent != list_indent {
+                    // Nested list item (e.g. command: sub-list) — ignore.
                 } else {
-                    Some(image_str)
-                };
-                if let Some(eff) = effective {
-                    let dep = classify_image_ref(eff);
-                    out.push(GitlabCiDep { dep });
+                    seeking_service_name = false;
+                    let captured = cap[1].trim();
+                    if let Some(name_val) = captured.strip_prefix("name:").map(str::trim) {
+                        // "- name: IMAGE"
+                        let image = name_val.trim_matches('"').trim_matches('\'');
+                        if !image.is_empty() {
+                            let effective = if image.starts_with('$') {
+                                strip_dependency_proxy_prefix(image)
+                            } else {
+                                Some(image)
+                            };
+                            if let Some(eff) = effective {
+                                let dep = classify_image_ref(eff);
+                                out.push(GitlabCiDep { dep });
+                            }
+                        }
+                    } else if is_service_yaml_key(captured) {
+                        // Other service-object key (alias, command, …) — name may follow
+                        seeking_service_name = true;
+                    } else {
+                        // Plain image reference
+                        let image_str = captured.trim_matches('"').trim_matches('\'');
+                        if !image_str.is_empty() {
+                            let effective = if image_str.starts_with('$') {
+                                strip_dependency_proxy_prefix(image_str)
+                            } else {
+                                Some(image_str)
+                            };
+                            if let Some(eff) = effective {
+                                let dep = classify_image_ref(eff);
+                                out.push(GitlabCiDep { dep });
+                            }
+                        }
+                    }
+                }
+            } else if seeking_service_name {
+                if let Some(cap) = IMAGE_NAME.captures(line) {
+                    let value = cap[1].trim().trim_matches('"').trim_matches('\'');
+                    if !value.is_empty() {
+                        let effective = if value.starts_with('$') {
+                            strip_dependency_proxy_prefix(value)
+                        } else {
+                            Some(value)
+                        };
+                        if let Some(eff) = effective {
+                            let dep = classify_image_ref(eff);
+                            out.push(GitlabCiDep { dep });
+                        }
+                        seeking_service_name = false;
+                    }
                 }
             } else if indent == 0 {
                 // New top-level key exits services block.
                 in_services_block = false;
+                service_list_indent = None;
             }
         }
 
@@ -173,6 +223,8 @@ pub fn extract_docker_with_registry_aliases(
     let mut out = Vec::new();
     let mut in_image_block = false;
     let mut in_services_block = false;
+    let mut seeking_service_name = false;
+    let mut service_list_indent: Option<usize> = None;
     let mut image_indent: usize = 0;
 
     for raw in content.lines() {
@@ -187,25 +239,44 @@ pub fn extract_docker_with_registry_aliases(
         if trimmed == "services:" {
             in_services_block = true;
             in_image_block = false;
+            seeking_service_name = false;
+            service_list_indent = None;
             continue;
         }
 
         if in_services_block {
             if let Some(cap) = SERVICE_ITEM.captures(line) {
-                let value = cap[1].trim();
-                if let Some(name) = value.strip_prefix("name:") {
-                    let image = unquote(name.trim());
-                    if !image.is_empty() {
-                        out.push(gitlab_docker_dep(image, "service-image", registry_aliases));
-                    }
+                let list_indent = *service_list_indent.get_or_insert(indent);
+                if indent != list_indent {
+                    // Nested list item — ignore.
                 } else {
-                    let image = unquote(value);
+                    seeking_service_name = false;
+                    let captured = cap[1].trim();
+                    if let Some(name_val) = captured.strip_prefix("name:").map(str::trim) {
+                        let image = unquote(name_val);
+                        if !image.is_empty() {
+                            out.push(gitlab_docker_dep(image, "service-image", registry_aliases));
+                        }
+                    } else if is_service_yaml_key(captured) {
+                        seeking_service_name = true;
+                    } else {
+                        let image = unquote(captured);
+                        if !image.is_empty() {
+                            out.push(gitlab_docker_dep(image, "service-image", registry_aliases));
+                        }
+                    }
+                }
+            } else if seeking_service_name {
+                if let Some(cap) = IMAGE_NAME.captures(line) {
+                    let image = unquote(cap[1].trim());
                     if !image.is_empty() {
                         out.push(gitlab_docker_dep(image, "service-image", registry_aliases));
+                        seeking_service_name = false;
                     }
                 }
             } else if indent == 0 {
                 in_services_block = false;
+                service_list_indent = None;
             }
         }
 
@@ -242,6 +313,22 @@ pub fn extract_docker_with_registry_aliases(
 
 fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
+}
+
+/// True when a service list-item capture looks like a YAML key attribute
+/// (not a Docker image reference). These attribute names indicate we are
+/// inside a service-object block, not a plain string reference.
+fn is_service_yaml_key(s: &str) -> bool {
+    let key = s.split(':').next().unwrap_or("");
+    !key.is_empty()
+        && !key.contains('/')
+        && !key.contains(' ')
+        && !key.contains('@')
+        && matches!(
+            key,
+            "name" | "alias" | "command" | "entrypoint"
+                | "variables" | "pull_policy" | "docker"
+        )
 }
 
 /// A GitLab CI component reference extracted from `include: - component:`.
@@ -1073,5 +1160,63 @@ services:
             dep.auto_replace_string_template,
             DEFAULT_AUTO_REPLACE_TEMPLATE
         );
+    }
+
+    // Ported: "returns null for empty" — gitlabci/extract.spec.ts line 28
+    #[test]
+    fn extract_all_returns_empty_for_empty_content() {
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "extracts multiple named services" — gitlabci/extract.spec.ts line 66
+    #[test]
+    fn extracts_multiple_named_services() {
+        let content = r#"image:
+  # comment
+  name: renovate/renovate:19.70.8-slim
+
+services:
+  # comment
+  - name: other/image1:1.0.0
+    alias: imagealias1
+  # another comment
+  - alias: imagealias2
+    name: other/image2:1.0.0
+job1:
+    services:
+        - name: mooseagency/postgresql:12.3-1@sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778
+          command:
+              - something:thatIsNotAnImage
+              - -something2
+job2:
+    services:
+      - "mariadb:10.4.11"
+      - postgres:11.7
+      - redis:latest
+      - name: "registry.example.com/myimage:latest"
+      - myimage@sha256:0ecb2ad60
+      - tomcat:7-jre8
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 10);
+        assert!(deps.iter().any(|d| d.dep.image == "renovate/renovate"));
+        assert!(deps.iter().any(|d| d.dep.image == "other/image1"));
+        assert!(deps.iter().any(|d| d.dep.image == "other/image2"));
+        assert!(deps.iter().any(|d| d.dep.image == "mooseagency/postgresql"));
+        assert!(deps.iter().any(|d| d.dep.image == "mariadb"));
+        assert!(deps.iter().any(|d| d.dep.image == "postgres"));
+        assert!(deps.iter().any(|d| d.dep.image == "redis"));
+        assert!(deps.iter().any(|d| d.dep.image == "registry.example.com/myimage"));
+        assert!(deps.iter().any(|d| d.dep.image == "myimage"));
+        assert!(deps.iter().any(|d| d.dep.image == "tomcat"));
+    }
+
+    // Ported: "catches errors" — gitlabci/extract.spec.ts line 110
+    #[test]
+    fn catches_errors_returns_empty() {
+        // Invalid YAML with duplicate key and unknown tags — extractor returns empty
+        let content = "include:\n  - local: 'some/file.yml'\n\ntest: test:\n  script:\n    - !abc [.setup, script]\n";
+        let deps = extract(content);
+        assert!(deps.is_empty());
     }
 }
