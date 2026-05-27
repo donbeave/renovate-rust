@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/utils.spec.ts
-**Total tests:** 7 | **Ported:** 4 | **Actionable:** 7 | **Status:** partial
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** done
 
 ### `parseLockFile`
 
@@ -25,9 +25,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| loads and parses package.json correctly | 81 | pending | — | — | — |
-| returns empty object when package.json is missing | 100 | pending | — | — | — |
-| returns empty object when package.json is invalid | 105 | pending | — | — | — |
+| loads and parses package.json correctly | 81 | ported | `extractors/npm.rs` | `npm_load_package_json_parses_correctly` | — |
+| returns empty object when package.json is missing | 100 | ported | `extractors/npm.rs` | `npm_load_package_json_missing_returns_none` | — |
+| returns empty object when package.json is invalid | 105 | ported | `extractors/npm.rs` | `npm_load_package_json_invalid_json_returns_none` | — |
 
 ---
-

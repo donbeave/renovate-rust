@@ -27,7 +27,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/droneci/extract.spec.ts` | Done | [details](lib/modules/manager/droneci/extract.spec.ts.md) |
 | `lib/modules/manager/fvm/extract.spec.ts` | Done | [details](lib/modules/manager/fvm/extract.spec.ts.md) |
 | `lib/modules/manager/glasskube/extract.spec.ts` | Not done | [details](lib/modules/manager/glasskube/extract.spec.ts.md) |
-| `lib/modules/manager/gleam/extract.spec.ts` | Not done | [details](lib/modules/manager/gleam/extract.spec.ts.md) |
+| `lib/modules/manager/gleam/extract.spec.ts` | Done | [details](lib/modules/manager/gleam/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/extract.spec.ts` | Done | [details](lib/modules/manager/git-submodules/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/artifact.spec.ts.md) |
 | `lib/modules/manager/github-actions/extract.spec.ts` | Done | [details](lib/modules/manager/github-actions/extract.spec.ts.md) |
@@ -38,7 +38,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/gradle/extract.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract.spec.ts.md) |
 | `lib/modules/manager/helm-values/extract.spec.ts` | Done | [details](lib/modules/manager/helm-values/extract.spec.ts.md) |
 | `lib/modules/manager/helmsman/extract.spec.ts` | Done | [details](lib/modules/manager/helmsman/extract.spec.ts.md) |
-| `lib/modules/manager/hermit/extract.spec.ts` | Not done | [details](lib/modules/manager/hermit/extract.spec.ts.md) |
+| `lib/modules/manager/hermit/extract.spec.ts` | Done | [details](lib/modules/manager/hermit/extract.spec.ts.md) |
 | `lib/modules/manager/bitbucket-pipelines/extract.spec.ts` | Done | [details](lib/modules/manager/bitbucket-pipelines/extract.spec.ts.md) |
 | `lib/modules/manager/bitrise/extract.spec.ts` | Done | [details](lib/modules/manager/bitrise/extract.spec.ts.md) |
 | `lib/modules/manager/gradle-wrapper/extract.spec.ts` | Done | [details](lib/modules/manager/gradle-wrapper/extract.spec.ts.md) |
@@ -113,7 +113,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/homeassistant-manifest/extract.spec.ts` | Done | [details](lib/modules/manager/homeassistant-manifest/extract.spec.ts.md) |
 | `lib/modules/manager/setup-cfg/extract.spec.ts` | Done | [details](lib/modules/manager/setup-cfg/extract.spec.ts.md) |
 | `lib/modules/manager/mix/extract.spec.ts` | Done | [details](lib/modules/manager/mix/extract.spec.ts.md) |
-| `lib/modules/manager/leiningen/extract.spec.ts` | Not done | [details](lib/modules/manager/leiningen/extract.spec.ts.md) |
+| `lib/modules/manager/leiningen/extract.spec.ts` | Done | [details](lib/modules/manager/leiningen/extract.spec.ts.md) |
 | `lib/modules/manager/pep723/extract.spec.ts` | Done | [details](lib/modules/manager/pep723/extract.spec.ts.md) |
 | `lib/modules/manager/unity3d/extract.spec.ts` | Done | [details](lib/modules/manager/unity3d/extract.spec.ts.md) |
 | `lib/modules/manager/quadlet/extract.spec.ts` | Done | [details](lib/modules/manager/quadlet/extract.spec.ts.md) |
@@ -641,11 +641,11 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/update/locked-dependency/index.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/index.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts.md) |
-| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts.md) |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts.md) |
 | `lib/modules/manager/npm/update/package-version/index.spec.ts` | Done | [details](lib/modules/manager/npm/update/package-version/index.spec.ts.md) |
-| `lib/modules/manager/npm/utils.spec.ts` | Not done | [details](lib/modules/manager/npm/utils.spec.ts.md) |
+| `lib/modules/manager/npm/utils.spec.ts` | Done | [details](lib/modules/manager/npm/utils.spec.ts.md) |
 | `lib/modules/manager/nuget/artifacts.spec.ts` | Not done | [details](lib/modules/manager/nuget/artifacts.spec.ts.md) |
 | `lib/modules/manager/nuget/config-formatter.spec.ts` | Not done | [details](lib/modules/manager/nuget/config-formatter.spec.ts.md) |
 | `lib/modules/manager/nuget/package-tree.spec.ts` | Not done | [details](lib/modules/manager/nuget/package-tree.spec.ts.md) |

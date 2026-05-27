@@ -5,16 +5,16 @@
 ## `lib/modules/manager/leiningen/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/leiningen/extract.spec.ts
-**Total tests:** 4 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** done
 
 ### `modules/manager/leiningen/extract`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| trimAtKey | 10 | pending | — | — | — |
-| extractFromVectors | 22 | pending | — | — | — |
+| trimAtKey | 10 | ported | `leiningen.rs` | `trim_at_key_cases` | — |
+| extractFromVectors | 22 | ported | `leiningen.rs` | `extract_from_vectors_cases` | — |
 | extractPackageFile | 74 | ported | `leiningen.rs` | `extracts_dependencies` (+ extracts_managed_dependencies, extracts_plugins, dev_profile_dependencies_also_extracted) | — |
-| extractVariables | 239 | pending | — | — | — |
+| extractVariables | 239 | ported | `leiningen.rs` | `extract_variables_cases` | — |
 
 ---
 

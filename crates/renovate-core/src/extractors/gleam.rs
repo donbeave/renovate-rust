@@ -20,12 +20,16 @@
 
 use std::collections::HashMap;
 
+use semver::Version;
+
 /// A single extracted Gleam dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GleamDep {
     pub name: String,
     pub version: String,
     pub dev: bool,
+    /// Locked version from `manifest.toml`, if available and satisfies the constraint.
+    pub locked_version: Option<String>,
 }
 
 /// Parse `gleam.toml` and extract all Hex.pm dependencies.
@@ -62,6 +66,7 @@ pub fn extract(content: &str) -> Vec<GleamDep> {
                     name: name.to_owned(),
                     version: version.to_owned(),
                     dev: in_dev_deps,
+                    locked_version: None,
                 });
             }
         }
@@ -139,6 +144,100 @@ pub fn extract_gleam_lock_file_versions_opt(
     content: Option<&str>,
 ) -> Option<HashMap<String, Vec<String>>> {
     extract_gleam_lock_file_versions(content?)
+}
+
+/// Check whether `version` satisfies a Hex-style range string.
+///
+/// Handles constraints like `>= 1.0.0 and < 2.0.0` or `~> 1.2`.
+/// Returns `false` for unparseable versions or constraints.
+pub fn hex_version_satisfies(version_str: &str, constraint: &str) -> bool {
+    let Ok(ver) = Version::parse(version_str) else {
+        return false;
+    };
+    // Split on ` and ` / ` or ` / `&&` / `||`
+    let parts: Vec<&str> = constraint
+        .split(" and ")
+        .flat_map(|s| s.split(" or "))
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    // Collect comparators; all must be satisfied (treat as AND for each segment)
+    for part in &parts {
+        if !single_constraint_matches(&ver, part) {
+            return false;
+        }
+    }
+    true
+}
+
+fn single_constraint_matches(ver: &Version, constraint: &str) -> bool {
+    let trimmed = constraint.trim();
+    // Pessimistic range: `~> X.Y` means `>= X.Y.0 and < X+1.0.0`
+    //                    `~> X.Y.Z` means `>= X.Y.Z and < X.Y+1.0`
+    if let Some(rest) = trimmed.strip_prefix("~>").map(str::trim) {
+        let parts: Vec<u64> = rest.split('.').filter_map(|s| s.parse().ok()).collect();
+        return match parts.as_slice() {
+            [major, minor] => {
+                *ver >= Version::new(*major, *minor, 0)
+                    && *ver < Version::new(*major + 1, 0, 0)
+            }
+            [major, minor, patch] => {
+                *ver >= Version::new(*major, *minor, *patch)
+                    && *ver < Version::new(*major, *minor + 1, 0)
+            }
+            _ => false,
+        };
+    }
+    // Standard operators: >=, <=, >, <, ==, !=
+    let (op, ver_str) = if let Some(r) = trimmed.strip_prefix(">=").map(str::trim) {
+        (">=", r)
+    } else if let Some(r) = trimmed.strip_prefix("<=").map(str::trim) {
+        ("<=", r)
+    } else if let Some(r) = trimmed.strip_prefix("!=").map(str::trim) {
+        ("!=", r)
+    } else if let Some(r) = trimmed.strip_prefix('>').map(str::trim) {
+        (">", r)
+    } else if let Some(r) = trimmed.strip_prefix('<').map(str::trim) {
+        ("<", r)
+    } else if let Some(r) = trimmed.strip_prefix("==").map(str::trim) {
+        ("==", r)
+    } else {
+        ("==", trimmed)
+    };
+    let Ok(bound) = Version::parse(ver_str) else {
+        return false;
+    };
+    match op {
+        ">=" => *ver >= bound,
+        "<=" => *ver <= bound,
+        ">" => *ver > bound,
+        "<" => *ver < bound,
+        "!=" => *ver != bound,
+        _ => *ver == bound,
+    }
+}
+
+/// Extract deps from `gleam.toml` and populate `locked_version` from an
+/// optional `manifest.toml` content.
+///
+/// Mirrors the async `extractPackageFile` in TypeScript that reads the sibling
+/// lock file and calls `getLockedVersion`.
+pub fn extract_with_lock(toml_content: &str, lock_content: Option<&str>) -> Vec<GleamDep> {
+    let mut deps = extract(toml_content);
+    let versions = extract_gleam_lock_file_versions_opt(lock_content);
+    if let Some(ref vmap) = versions {
+        for dep in &mut deps {
+            if let Some(candidates) = vmap.get(&dep.name) {
+                // Find the first candidate version that satisfies the constraint.
+                let locked = candidates
+                    .iter()
+                    .find(|v| hex_version_satisfies(v, &dep.version));
+                dep.locked_version = locked.cloned();
+            }
+        }
+    }
+    deps
 }
 
 /// Determine the effective Gleam range strategy.
@@ -238,6 +337,78 @@ gleeunit = "~> 1.0"
     fn gleam_range_defaults_to_widen() {
         let result = get_range_strategy("auto", None);
         assert_eq!(result, "widen");
+    }
+
+    const GLEAM_TOML: &str = "name = \"test_gleam_toml\"\nversion = \"1.0.0\"\n\n[dependencies]\nfoo = \">= 1.0.0 and < 2.0.0\"\n";
+
+    const LOCK_FILE_SATISFYING: &str = concat!(
+        "packages = [\n",
+        "  { name = \"foo\", version = \"1.0.4\", build_tools = [\"gleam\"], requirements = [\"bar\"], otp_app = \"foo\", source = \"hex\", outer_checksum = \"AAA\" },\n",
+        "  { name = \"bar\", version = \"2.1.0\", build_tools = [\"rebar3\"], requirements = [], otp_app = \"bar\", source = \"hex\", outer_checksum = \"BBB\" },\n",
+        "]\n\n[requirements]\nfoo = { version = \">= 1.0.0 and < 2.0.0\" }\n"
+    );
+
+    const LOCK_FILE_OUT_OF_RANGE: &str = concat!(
+        "packages = [\n",
+        "  { name = \"foo\", version = \"2.0.1\", build_tools = [\"gleam\"], requirements = [], otp_app = \"foo\", source = \"hex\", outer_checksum = \"AAA\" },\n",
+        "]\n\n[requirements]\nfoo = { version = \">= 1.0.0 and < 2.0.0\" }\n"
+    );
+
+    const LOCK_FILE_INVALID_VERSION: &str = concat!(
+        "packages = [\n",
+        "  { name = \"foo\", version = \"fooey\", build_tools = [\"gleam\"], requirements = [], otp_app = \"foo\", source = \"hex\", outer_checksum = \"AAA\" },\n",
+        "]\n\n[requirements]\nfoo = { version = \">= 1.0.0 and < 2.0.0\" }\n"
+    );
+
+    // Ported: "should return locked versions" — gleam/extract.spec.ts line 91
+    #[test]
+    fn gleam_extract_returns_locked_versions() {
+        let deps = extract_with_lock(GLEAM_TOML, Some(LOCK_FILE_SATISFYING));
+        assert!(!deps.is_empty(), "expected deps");
+        assert!(
+            deps.iter().all(|d| d.locked_version.is_some()),
+            "all deps should have lockedVersion"
+        );
+        let foo = deps.iter().find(|d| d.name == "foo").unwrap();
+        assert_eq!(foo.locked_version.as_deref(), Some("1.0.4"));
+    }
+
+    // Ported: "should fail to extract locked version" — gleam/extract.spec.ts line 119
+    #[test]
+    fn gleam_extract_no_lock_file_no_locked_version() {
+        let deps = extract_with_lock(GLEAM_TOML, None);
+        assert!(!deps.is_empty(), "expected deps");
+        assert!(
+            deps.iter().all(|d| d.locked_version.is_none()),
+            "no deps should have lockedVersion"
+        );
+    }
+
+    // Ported: "should fail to find locked version in range" — gleam/extract.spec.ts line 138
+    #[test]
+    fn gleam_extract_locked_version_out_of_range() {
+        let deps = extract_with_lock(GLEAM_TOML, Some(LOCK_FILE_OUT_OF_RANGE));
+        assert!(!deps.is_empty(), "expected deps");
+        let foo = deps.iter().find(|d| d.name == "foo").unwrap();
+        assert!(foo.locked_version.is_none(), "out-of-range version not set");
+    }
+
+    // Ported: "should handle invalid versions in lock file" — gleam/extract.spec.ts line 166
+    #[test]
+    fn gleam_extract_invalid_lock_version() {
+        let deps = extract_with_lock(GLEAM_TOML, Some(LOCK_FILE_INVALID_VERSION));
+        assert!(!deps.is_empty(), "expected deps");
+        let foo = deps.iter().find(|d| d.name == "foo").unwrap();
+        assert!(foo.locked_version.is_none(), "invalid version not set");
+    }
+
+    // Ported: "should handle lock file parsing and extracting errors" — gleam/extract.spec.ts line 193
+    #[test]
+    fn gleam_extract_invalid_lock_toml() {
+        let deps = extract_with_lock(GLEAM_TOML, Some("invalid"));
+        assert!(!deps.is_empty(), "expected deps");
+        let foo = deps.iter().find(|d| d.name == "foo").unwrap();
+        assert!(foo.locked_version.is_none(), "parse error: no locked version");
     }
 
     const LOCK_FILE: &str = r#"packages = [

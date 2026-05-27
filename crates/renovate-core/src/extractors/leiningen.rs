@@ -21,6 +21,7 @@
 //! - `~varName` version references (def-level variables)
 //! - Custom `:repositories` registry URLs
 
+use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -71,6 +72,152 @@ static DEP_VECTOR: LazyLock<Regex> = LazyLock::new(|| {
 static SECTION_KEY: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r":(dependencies|managed-dependencies|plugins|pom-plugins|coords)").unwrap()
 });
+
+/// Extracted dep from `extract_from_vectors` — mirrors TypeScript `PackageDependency`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LeinExtractedDep {
+    pub dep_name: String,
+    pub current_value: String,
+    pub shared_variable_name: Option<String>,
+}
+
+/// Mirrors TypeScript `trimAtKey`.
+///
+/// Finds `:kw_name` (followed by whitespace) in `s` and returns the slice
+/// starting at the first non-whitespace character after the keyword.
+pub fn trim_at_key<'a>(s: &'a str, kw_name: &str) -> Option<&'a str> {
+    let keyword = format!(":{kw_name}");
+    let mut search_from = 0;
+    while search_from < s.len() {
+        let Some(rel) = s[search_from..].find(&keyword) else {
+            return None;
+        };
+        let abs = search_from + rel;
+        let after = abs + keyword.len();
+        if s[after..].starts_with(|c: char| c.is_ascii_whitespace()) {
+            let rest = &s[after..];
+            let value_start = rest.find(|c: char| !c.is_ascii_whitespace())?;
+            return Some(&rest[value_start..]);
+        }
+        search_from = abs + 1;
+    }
+    None
+}
+
+static DEF_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(concat!(
+        r"^[\s,]*\([\s,]*def[\s,]+",
+        r"(?P<varName>[-+*=<>.!?#$%&_|a-zA-Z][-+*=<>.!?#$%&_|a-zA-Z0-9']+)",
+        r#"[\s,]*"(?P<stringValue>[^"]*)"[\s,]*\)[\s,]*$"#,
+    ))
+    .unwrap()
+});
+
+/// Mirrors TypeScript `extractVariables`.
+pub fn extract_variables(content: &str) -> HashMap<String, String> {
+    let mut result = HashMap::new();
+    for line in content.lines() {
+        if let Some(caps) = DEF_RE.captures(line) {
+            let k = caps.name("varName").unwrap().as_str().to_owned();
+            let v = caps.name("stringValue").unwrap().as_str().to_owned();
+            result.insert(k, v);
+        }
+    }
+    result
+}
+
+/// Mirrors TypeScript `extractFromVectors`.
+///
+/// `dimensions=2` parses nested `[[dep "version"] ...]`.
+/// `dimensions=1` parses a flat `[dep "version"]`.
+pub fn extract_from_vectors(
+    s: &str,
+    vars: &HashMap<String, String>,
+    dimensions: u8,
+) -> Vec<LeinExtractedDep> {
+    if !s.starts_with('[') {
+        return Vec::new();
+    }
+    let dim = dimensions as i32;
+    let chars: Vec<char> = s.chars().collect();
+    let mut balance: i32 = 0;
+    let mut result = Vec::new();
+    let mut idx = 0;
+    let mut vec_pos: u32 = 0;
+    let mut artifact_id = String::new();
+    let mut version = String::new();
+    let mut comment_level: Option<i32> = None;
+    let mut prev_char = '['; // irrelevant before first `[` at depth `dim`
+
+    while idx < chars.len() {
+        let ch = chars[idx];
+
+        if idx + 2 < chars.len() && ch == '#' && chars[idx + 1] == '_' && chars[idx + 2] == '[' {
+            comment_level = Some(balance);
+        }
+
+        if ch == '[' {
+            balance += 1;
+            if balance == dim {
+                vec_pos = 0;
+            }
+        } else if ch == ']' {
+            balance -= 1;
+
+            if comment_level == Some(balance) {
+                artifact_id.clear();
+                version.clear();
+                comment_level = None;
+            }
+
+            if balance == dim - 1 {
+                if comment_level.is_none() && !artifact_id.is_empty() && !version.is_empty() {
+                    let name = artifact_id.trim_matches('"');
+                    let dep_name = expand_dep_name(name);
+                    if let Some(var_name) = version.strip_prefix('~') {
+                        let var_name = var_name.trim_start();
+                        if let Some(current_value) = vars.get(var_name) {
+                            result.push(LeinExtractedDep {
+                                dep_name,
+                                current_value: current_value.clone(),
+                                shared_variable_name: Some(var_name.to_owned()),
+                            });
+                        }
+                    } else {
+                        result.push(LeinExtractedDep {
+                            dep_name,
+                            current_value: version.trim_matches('"').to_owned(),
+                            shared_variable_name: None,
+                        });
+                    }
+                }
+                artifact_id.clear();
+                version.clear();
+            }
+
+            if balance == 0 {
+                break;
+            }
+        } else if balance == dim {
+            let is_sp = matches!(ch, ' ' | '\t' | '\n' | '\r' | ',');
+            let prev_sp = matches!(prev_char, ' ' | '\t' | '\n' | '\r' | ',');
+            if is_sp {
+                if !prev_sp {
+                    vec_pos += 1;
+                }
+            } else if vec_pos == 0 {
+                artifact_id.push(ch);
+            } else if vec_pos == 1 {
+                version.push(ch);
+            }
+        }
+
+        prev_char = ch;
+        idx += 1;
+    }
+
+    result
+}
 
 /// Expands a Clojure dep symbol to Maven `group:artifact` form.
 fn expand_dep_name(symbol: &str) -> String {
@@ -261,6 +408,83 @@ mod tests {
     #[test]
     fn expand_dep_name_bare_form() {
         assert_eq!(expand_dep_name("ring"), "ring:ring");
+    }
+
+    // Ported: "trimAtKey" — manager/leiningen/extract.spec.ts line 10
+    #[test]
+    fn trim_at_key_cases() {
+        assert_eq!(trim_at_key("foo", "bar"), None);
+        assert_eq!(trim_at_key(":dependencies    ", "dependencies"), None);
+        assert_eq!(
+            trim_at_key(":dependencies \nfoobar", "dependencies"),
+            Some("foobar")
+        );
+        assert_eq!(
+            trim_at_key(
+                ":parent-project {:coords [my-org/my-parent \"4.3.0\"]\n:inherit [:profiles]}",
+                "coords"
+            ),
+            Some("[my-org/my-parent \"4.3.0\"]\n:inherit [:profiles]}")
+        );
+    }
+
+    // Ported: "extractFromVectors" — manager/leiningen/extract.spec.ts line 22
+    #[test]
+    fn extract_from_vectors_cases() {
+        let empty: HashMap<String, String> = HashMap::new();
+
+        assert!(extract_from_vectors("", &empty, 2).is_empty());
+        assert!(extract_from_vectors("[]", &empty, 2).is_empty());
+        assert!(extract_from_vectors("[[]]", &empty, 2).is_empty());
+        assert!(extract_from_vectors("[#_[foo/bar \"1.2.3\"]]", &empty, 2).is_empty());
+
+        let res = extract_from_vectors("[[foo/bar \"1.2.3\"]]", &empty, 2);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0].dep_name, "foo:bar");
+        assert_eq!(res[0].current_value, "1.2.3");
+        assert_eq!(res[0].shared_variable_name, None);
+
+        let mut vars = HashMap::new();
+        vars.insert("baz".to_owned(), "1.2.3".to_owned());
+        let res = extract_from_vectors("[[foo/bar ~baz]]", &vars, 2);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0].dep_name, "foo:bar");
+        assert_eq!(res[0].current_value, "1.2.3");
+        assert_eq!(res[0].shared_variable_name, Some("baz".to_owned()));
+
+        let res = extract_from_vectors(
+            "[\t[foo/bar \"1.2.3\"]\n[\"foo/baz\"  \"4.5.6\"] ]",
+            &empty,
+            2,
+        );
+        assert_eq!(res.len(), 2);
+        assert_eq!(res[0].dep_name, "foo:bar");
+        assert_eq!(res[0].current_value, "1.2.3");
+        assert_eq!(res[1].dep_name, "foo:baz");
+        assert_eq!(res[1].current_value, "4.5.6");
+
+        let res = extract_from_vectors(
+            "[my-org/my-parent \"4.3.0\"]\n:inherit [:profiles]}",
+            &empty,
+            1,
+        );
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0].dep_name, "my-org:my-parent");
+        assert_eq!(res[0].current_value, "4.3.0");
+    }
+
+    // Ported: "extractVariables" — manager/leiningen/extract.spec.ts line 239
+    #[test]
+    fn extract_variables_cases() {
+        let res = extract_variables("(def foo \"1\")");
+        assert_eq!(res.get("foo"), Some(&"1".to_owned()));
+
+        let res = extract_variables("(def foo\"2\")");
+        assert_eq!(res.get("foo"), Some(&"2".to_owned()));
+
+        let res = extract_variables("(def foo \"3\")\n(def bar \"4\")");
+        assert_eq!(res.get("foo"), Some(&"3".to_owned()));
+        assert_eq!(res.get("bar"), Some(&"4".to_owned()));
     }
 
     #[test]
