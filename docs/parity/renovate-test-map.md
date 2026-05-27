@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3931 / 11677 total tests ported (33%) · pending 7676 · not-applicable 72 (1% of total) — updated 2026-05-27
+**Progress:** 3964 / 11677 total tests ported (34%) · pending 7643 · not-applicable 72 (1% of total) — updated 2026-05-27
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -453,7 +453,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/versioning/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/versioning/deno/index.spec.ts` | Done | [details](lib/modules/versioning/deno/index.spec.ts.md) |
 | `lib/modules/versioning/docker/index.spec.ts` | Done | [details](lib/modules/versioning/docker/index.spec.ts.md) |
-| `lib/modules/versioning/rez/index.spec.ts` | Not done | [details](lib/modules/versioning/rez/index.spec.ts.md) |
+| `lib/modules/versioning/rez/index.spec.ts` | Done | [details](lib/modules/versioning/rez/index.spec.ts.md) |
 | `lib/modules/versioning/rust-release-channel/index.spec.ts` | Done | [details](lib/modules/versioning/rust-release-channel/index.spec.ts.md) |
 | `lib/modules/versioning/rust-release-channel/parse.spec.ts` | Done | [details](lib/modules/versioning/rust-release-channel/parse.spec.ts.md) |
 | `lib/modules/versioning/apk/index.spec.ts` | Done | [details](lib/modules/versioning/apk/index.spec.ts.md) |
@@ -494,7 +494,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/deb/index.spec.ts` | Not done | [details](lib/modules/versioning/deb/index.spec.ts.md) |
 | `lib/modules/versioning/nuget/version.spec.ts` | Done | [details](lib/modules/versioning/nuget/version.spec.ts.md) |
 | `lib/modules/versioning/nuget/parser.spec.ts` | Done | [details](lib/modules/versioning/nuget/parser.spec.ts.md) |
-| `lib/modules/versioning/nuget/index.spec.ts` | Not done | [details](lib/modules/versioning/nuget/index.spec.ts.md) |
+| `lib/modules/versioning/nuget/index.spec.ts` | Done | [details](lib/modules/versioning/nuget/index.spec.ts.md) |
 | `lib/modules/versioning/conan/index.spec.ts` | Done | [details](lib/modules/versioning/conan/index.spec.ts.md) |
 | `lib/modules/versioning/unity3d-packages/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d-packages/index.spec.ts.md) |
 | `lib/modules/versioning/azure-rest-api/index.spec.ts` | Done | [details](lib/modules/versioning/azure-rest-api/index.spec.ts.md) |

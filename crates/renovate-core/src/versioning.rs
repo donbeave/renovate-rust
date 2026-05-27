@@ -35,6 +35,7 @@ pub mod pep440;
 pub mod perl;
 pub mod pvp;
 pub mod redhat;
+pub mod rez;
 pub mod rpm;
 pub mod rust_release_channel;
 pub mod same_major;
