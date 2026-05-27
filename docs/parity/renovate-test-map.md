@@ -129,7 +129,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/extract/npm.spec.ts` | Done | [details](lib/modules/manager/npm/extract/npm.spec.ts.md) |
 | `lib/modules/manager/npm/extract/pnpm.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/pnpm.spec.ts.md) |
 | `lib/modules/manager/npm/extract/yarn.spec.ts` | Done | [details](lib/modules/manager/npm/extract/yarn.spec.ts.md) |
-| `lib/modules/manager/bazel-module/bazelrc.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/bazelrc.spec.ts.md) |
+| `lib/modules/manager/bazel-module/bazelrc.spec.ts` | Done | [details](lib/modules/manager/bazel-module/bazelrc.spec.ts.md) |
 | `lib/modules/manager/bazel-module/lockfile.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/lockfile.spec.ts.md) |
 | `lib/modules/manager/bazel-module/parser/fragments.spec.ts` | Done | [details](lib/modules/manager/bazel-module/parser/fragments.spec.ts.md) |
 | `lib/modules/manager/bazel-module/parser/context.spec.ts` | Done | [details](lib/modules/manager/bazel-module/parser/context.spec.ts.md) |

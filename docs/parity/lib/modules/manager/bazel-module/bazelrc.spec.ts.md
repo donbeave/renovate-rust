@@ -5,7 +5,7 @@
 ## `lib/modules/manager/bazel-module/bazelrc.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/bazelrc.spec.ts
-**Total tests:** 19 | **Ported:** 9 | **Actionable:** 19 | **Status:** partial
+**Total tests:** 19 | **Ported:** 19 | **Actionable:** 19 | **Status:** done
 
 ### `modules/manager/bazel-module/bazelrc › BazelOption`
 
@@ -29,16 +29,16 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| when .bazelrc does not exist | 103 | pending | — | — | — |
-| when .bazelrc has invalid lines | 110 | pending | — | — | — |
-| when .bazelrc has no imports | 128 | pending | — | — | — |
-| when .bazelrc has import and try-import, try-import exists | 148 | pending | — | — | — |
-| when .bazelrc has import and try-import, try-import does not exist | 173 | pending | — | — | — |
-| when .bazelrc multi-level import | 188 | pending | — | — | — |
-| when bazlerc files recursively import each other | 213 | pending | — | — | — |
-| when .bazelrc refers to a non-local file | 239 | pending | — | — | — |
-| when bazelrc has %workspace% paths in options | 255 | pending | — | — | — |
-| when bazelrc has %workspace% paths in imported files | 274 | pending | — | — | — |
+| when .bazelrc does not exist | 103 | ported | `bazel_module.rs` | `bazelrc_read_bazelrc_not_exist` | — |
+| when .bazelrc has invalid lines | 110 | ported | `bazel_module.rs` | `bazelrc_read_invalid_lines_ignored` | — |
+| when .bazelrc has no imports | 128 | ported | `bazel_module.rs` | `bazelrc_read_no_imports` | — |
+| when .bazelrc has import and try-import, try-import exists | 148 | ported | `bazel_module.rs` | `bazelrc_read_import_and_try_import_both_exist` | — |
+| when .bazelrc has import and try-import, try-import does not exist | 173 | ported | `bazel_module.rs` | `bazelrc_read_try_import_not_exist_skipped` | — |
+| when .bazelrc multi-level import | 188 | ported | `bazel_module.rs` | `bazelrc_read_multi_level_import` | — |
+| when bazlerc files recursively import each other | 213 | ported | `bazel_module.rs` | `bazelrc_read_cycle_returns_error` | — |
+| when .bazelrc refers to a non-local file | 239 | ported | `bazel_module.rs` | `bazelrc_read_non_local_import_skipped` | — |
+| when bazelrc has %workspace% paths in options | 255 | ported | `bazel_module.rs` | `bazelrc_read_workspace_paths_in_options` | — |
+| when bazelrc has %workspace% paths in imported files | 274 | ported | `bazel_module.rs` | `bazelrc_read_workspace_paths_in_imported_files` | — |
 
 ### `modules/manager/bazel-module/bazelrc › expandWorkspacePath`
 
