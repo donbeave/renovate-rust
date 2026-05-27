@@ -17,11 +17,15 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
     for gemfile_path in manager_files(detected, "bundler") {
         match client.get_raw_file(owner, repo, &gemfile_path).await {
             Ok(Some(raw)) => {
-                let deps = bundler_extractor::extract(&raw.content);
-                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                let pkg = bundler_extractor::extract(&raw.content);
+                let all_deps = pkg.as_ref().map(|p| p.deps.as_slice()).unwrap_or(&[]);
+                let actionable: Vec<_> = all_deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && d.datasource == "rubygems")
+                    .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %gemfile_path,
-                    total = deps.len(), actionable = actionable.len(),
+                    total = all_deps.len(), actionable = actionable.len(),
                     "extracted bundler gems"
                 );
                 let dep_inputs: Vec<rubygems_datasource::GemDepInput> = actionable
@@ -43,7 +47,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: gemfile_path.clone(),
                     manager: "bundler".into(),
-                    deps: build_dep_reports_bundler(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_bundler(all_deps, &actionable, &update_map),
                 });
             }
             Ok(None) => tracing::warn!(repo=%repo_slug, file=%gemfile_path, "Gemfile not found"),

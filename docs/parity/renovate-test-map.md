@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3850 / 11677 total tests ported (33%) · pending 7757 · not-applicable 72 (1% of total) — updated 2026-05-27
+**Progress:** 3864 / 11677 total tests ported (33%) · pending 7743 · not-applicable 72 (1% of total) — updated 2026-05-27
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -479,8 +479,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/hermit/index.spec.ts` | Done | [details](lib/modules/versioning/hermit/index.spec.ts.md) |
 | `lib/modules/versioning/semver-partial/index.spec.ts` | Not done | [details](lib/modules/versioning/semver-partial/index.spec.ts.md) |
 | `lib/modules/versioning/elm/index.spec.ts` | Not done | [details](lib/modules/versioning/elm/index.spec.ts.md) |
-| `lib/modules/versioning/pep440/range.spec.ts` | Not done | [details](lib/modules/versioning/pep440/range.spec.ts.md) |
-| `lib/modules/versioning/pep440/index.spec.ts` | Not done | [details](lib/modules/versioning/pep440/index.spec.ts.md) |
+| `lib/modules/versioning/pep440/range.spec.ts` | Done | [details](lib/modules/versioning/pep440/range.spec.ts.md) |
+| `lib/modules/versioning/pep440/index.spec.ts` | Done | [details](lib/modules/versioning/pep440/index.spec.ts.md) |
 | `lib/modules/versioning/regex/index.spec.ts` | Not done | [details](lib/modules/versioning/regex/index.spec.ts.md) |
 | `lib/modules/versioning/lambda-node/index.spec.ts` | Done | [details](lib/modules/versioning/lambda-node/index.spec.ts.md) |
 | `lib/modules/versioning/gradle/index.spec.ts` | Not done | [details](lib/modules/versioning/gradle/index.spec.ts.md) |
