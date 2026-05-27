@@ -29,7 +29,7 @@ toml = "1.1.2"
 serde_yaml = "0.9.34"
 quick-xml = "0.39.2"
 globset = "0.4.18"
-tokio = { version = "1.52.1", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.52.1", features = ["rt-multi-thread", "macros", "fs", "sync", "io-util"] }
 reqwest = { version = "0.13.3", features = ["json"] }
 
 # Dev / test

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3186 / 11677 total tests ported (27%) · pending 8488 · not-applicable 7 (0% of total) — updated 2026-05-25
+**Progress:** 3825 / 11677 total tests ported (33%) · pending 7784 · not-applicable 68 (1% of total) — updated 2026-05-27
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -20,7 +20,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | Not done | [details](lib/modules/manager/batect-wrapper/artifacts.spec.ts.md) |
 | `lib/modules/manager/batect/extract.spec.ts` | Not done | [details](lib/modules/manager/batect/extract.spec.ts.md) |
 | `lib/modules/manager/buildpacks/extract.spec.ts` | Done | [details](lib/modules/manager/buildpacks/extract.spec.ts.md) |
-| `lib/modules/manager/cargo/extract.spec.ts` | Not done | [details](lib/modules/manager/cargo/extract.spec.ts.md) |
+| `lib/modules/manager/cargo/extract.spec.ts` | Done | [details](lib/modules/manager/cargo/extract.spec.ts.md) |
 | `lib/modules/manager/cloudbuild/extract.spec.ts` | Done | [details](lib/modules/manager/cloudbuild/extract.spec.ts.md) |
 | `lib/modules/manager/cocoapods/extract.spec.ts` | Done | [details](lib/modules/manager/cocoapods/extract.spec.ts.md) |
 | `lib/modules/manager/deps-edn/extract.spec.ts` | Done | [details](lib/modules/manager/deps-edn/extract.spec.ts.md) |
@@ -748,7 +748,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/package/impl/file.spec.ts` | Not done | [details](lib/util/cache/package/impl/file.spec.ts.md) |
 | `lib/util/cache/package/impl/redis.spec.ts` | Not done | [details](lib/util/cache/package/impl/redis.spec.ts.md) |
 | `lib/util/cache/package/impl/sqlite.spec.ts` | Not done | [details](lib/util/cache/package/impl/sqlite.spec.ts.md) |
-| `lib/util/cache/package/index.spec.ts` | Not done | [details](lib/util/cache/package/index.spec.ts.md) |
+| `lib/util/cache/package/index.spec.ts` | Done | [details](lib/util/cache/package/index.spec.ts.md) |
 | `lib/util/cache/package/key.spec.ts` | Done | [details](lib/util/cache/package/key.spec.ts.md) |
 | `lib/util/cache/package/ttl.spec.ts` | Not done | [details](lib/util/cache/package/ttl.spec.ts.md) |
 | `lib/util/cache/package/with-cache.spec.ts` | Not done | [details](lib/util/cache/package/with-cache.spec.ts.md) |
