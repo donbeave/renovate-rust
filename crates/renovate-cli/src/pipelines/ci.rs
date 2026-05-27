@@ -719,11 +719,6 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 latest: s.latest.unwrap_or_default(),
                             },
                             Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
-                            Err(renovate_core::datasources::azure_pipelines_tasks::AzureTasksError::NotFound(_)) => {
-                                output::DepStatus::Skipped {
-                                    reason: "task not found in registry".into(),
-                                }
-                            }
                             Err(e) => output::DepStatus::LookupError {
                                 message: e.to_string(),
                             },

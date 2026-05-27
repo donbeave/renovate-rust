@@ -108,16 +108,38 @@ struct RawChartEntry {
 
 fn is_possible_chart_repo(url: &str) -> bool {
     let url_lower = url.to_lowercase();
-    // Must be a known git host
-    let is_git_host = url_lower.contains("github.com")
-        || url_lower.contains("gitlab.com")
-        || url_lower.contains("bitbucket.org");
+    // Must be a known git-hosting platform (mirrors TypeScript detectPlatform).
+    let is_git_host = url_lower.contains("github")
+        || url_lower.contains("gitlab")
+        || url_lower.contains("bitbucket");
     if !is_git_host {
         return false;
     }
-    // Repo name must match chart/helm patterns
-    let last_segment = url_lower.rsplit('/').find(|s| !s.is_empty()).unwrap_or("");
-    last_segment.contains("chart") || last_segment.contains("helm")
+    // Extract the repository name, mirroring TypeScript `parseGitUrl(url).name`.
+    //
+    // For GitHub-style URLs: `/{owner}/{repo}/...` → repo is 2nd path segment.
+    // For GitLab-style URLs: `/{group[/subgroup]}/{repo}/-/...` → repo is the
+    //   segment immediately before `/-/`.
+    let path_after_host = url_lower
+        .find("://")
+        .and_then(|i| url_lower[i + 3..].find('/').map(|j| &url_lower[i + 3 + j + 1..]))
+        .unwrap_or("");
+
+    let repo_name = if url_lower.contains("/-/") {
+        // GitLab: last segment before `/-/`
+        url_lower
+            .split("/-/")
+            .next()
+            .and_then(|s| s.rsplit('/').find(|seg| !seg.is_empty()))
+            .unwrap_or("")
+    } else {
+        // GitHub / Bitbucket: 2nd path segment (after owner) = repo name
+        let after_owner = path_after_host.find('/').map(|i| &path_after_host[i + 1..]).unwrap_or("");
+        let repo = after_owner.find('/').map(|i| &after_owner[..i]).unwrap_or(after_owner);
+        repo.strip_suffix(".git").unwrap_or(repo)
+    };
+    // Match: chart/charts/helm/helm-charts — mirrors /charts?|helm|helm-charts/i
+    repo_name.contains("chart") || repo_name.contains("helm")
 }
 
 fn get_source_url(entry: &RawChartEntry) -> Option<String> {
@@ -401,6 +423,56 @@ mod tests {
             }
         }
         out
+    }
+
+    const SAMPLE_YAML: &str = include_str!(
+        "../../../../../renovate/lib/modules/datasource/helm/__fixtures__/sample.yaml"
+    );
+
+    // Ported: "works" — datasource/helm/schema.spec.ts line 7
+    #[test]
+    fn schema_source_url_extraction() {
+        let cases: &[(&str, Option<&str>, Option<&str>)] = &[
+            (
+                "airflow",
+                Some("https://github.com/bitnami/charts/tree/master/bitnami/airflow"),
+                Some("https://github.com/bitnami/charts/tree/master/bitnami/airflow"),
+            ),
+            (
+                "coredns",
+                Some("https://coredns.io"),
+                Some("https://github.com/coredns/helm"),
+            ),
+            (
+                "pgadmin4",
+                Some("https://www.pgadmin.org/"),
+                Some("https://github.com/rowanruseler/helm-charts"),
+            ),
+            (
+                "private-chart-github",
+                Some("https://github.example.com/some-org/charts/tree/master/private-chart"),
+                Some("https://github.example.com/some-org/charts/tree/master/private-chart"),
+            ),
+            (
+                "private-chart-gitlab",
+                Some("https://gitlab.example.com/some/group/charts/-/tree/master/private-chart"),
+                Some("https://gitlab.example.com/some/group/charts/-/tree/master/private-chart"),
+            ),
+        ];
+        for (chart_name, expected_homepage, expected_source_url) in cases {
+            let result = parse_all_versions(SAMPLE_YAML, chart_name)
+                .unwrap_or_else(|| panic!("chart '{chart_name}' not found in sample.yaml"));
+            assert_eq!(
+                result.homepage.as_deref(),
+                *expected_homepage,
+                "homepage mismatch for {chart_name}"
+            );
+            assert_eq!(
+                result.source_url.as_deref(),
+                *expected_source_url,
+                "source_url mismatch for {chart_name}"
+            );
+        }
     }
 
     // Ported: "returns null if packageName was not provided" — datasource/helm/index.spec.ts line 12

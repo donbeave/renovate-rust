@@ -78,7 +78,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             .await
                             {
                                 Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
-                                    current: s.current_value,
+                                    current: dep.current_value.clone(),
                                     latest: s.latest.unwrap_or_default(),
                                 },
                                 Ok(s) => output::DepStatus::UpToDate { latest: s.latest },

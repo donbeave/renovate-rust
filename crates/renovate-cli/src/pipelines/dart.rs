@@ -45,7 +45,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 let updates = pub_datasource::fetch_updates_concurrent(
                     http,
                     &dep_inputs,
-                    pub_datasource::PUB_DEV_API,
+                    pub_datasource::DEFAULT_REGISTRY,
                     10,
                 )
                 .await;

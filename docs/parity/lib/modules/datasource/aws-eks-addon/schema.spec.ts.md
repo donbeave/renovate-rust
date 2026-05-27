@@ -5,13 +5,13 @@
 ## `lib/modules/datasource/aws-eks-addon/schema.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/aws-eks-addon/schema.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** done
 
 ### `modules/datasource/aws-eks-addon/schema › EksAddonsFilter`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| safeParse("$input") === $expected | 5 | pending | — | — | — |
+| safeParse("$input") === $expected | 5 | ported | `versioning/aws_eks_addon.rs` | `eks_addons_filter_safe_parse` | — |
 
 ---
 

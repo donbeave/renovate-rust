@@ -6,6 +6,62 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
+use serde::Deserialize;
+use serde_json::Value;
+
+// ── EksAddonsFilter ───────────────────────────────────────────────────────────
+
+/// Validated input for an AWS EKS addon filter.
+/// Mirrors TypeScript `EksAddonsFilter` schema in
+/// `lib/modules/datasource/aws-eks-addon/schema.ts`.
+#[derive(Debug, Clone, Deserialize)]
+pub struct EksAddonsFilter {
+    #[serde(rename = "addonName")]
+    pub addon_name: String,
+    #[serde(rename = "kubernetesVersion")]
+    pub kubernetes_version: Option<String>,
+    #[serde(default, deserialize_with = "deserialize_default_field")]
+    pub default: Option<bool>,
+    pub region: Option<String>,
+    pub profile: Option<String>,
+}
+
+fn deserialize_default_field<'de, D>(de: D) -> Result<Option<bool>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let v = Option::<Value>::deserialize(de)?;
+    Ok(match v {
+        None => None,
+        Some(Value::Bool(b)) => Some(b),
+        Some(Value::String(s)) => Some(s == "true"),
+        Some(_) => return Err(serde::de::Error::custom("expected bool or bool-string")),
+    })
+}
+
+static ADDON_NAME_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[a-z0-9][a-z0-9-]*[a-z0-9]$").unwrap());
+
+static K8S_VERSION_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\d+\.\d+$").unwrap());
+
+/// Parse and validate an EKS addon filter from a JSON string.
+/// Returns `Ok(filter)` on valid input, `Err` on invalid.
+pub fn parse_eks_addons_filter(json: &str) -> Result<EksAddonsFilter, String> {
+    let filter: EksAddonsFilter =
+        serde_json::from_str(json).map_err(|e| e.to_string())?;
+    if !ADDON_NAME_RE.is_match(&filter.addon_name) {
+        return Err(format!("invalid addonName: {:?}", filter.addon_name));
+    }
+    if let Some(ref kv) = filter.kubernetes_version {
+        if !K8S_VERSION_RE.is_match(kv) {
+            return Err(format!("invalid kubernetesVersion: {:?}", kv));
+        }
+    }
+    Ok(filter)
+}
+
+// ── Versioning ────────────────────────────────────────────────────────────────
 
 static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
@@ -256,5 +312,32 @@ mod tests {
             ),
             None
         );
+    }
+
+    // Ported: "safeParse(\"$input\") === $expected" — datasource/aws-eks-addon/schema.spec.ts line 5
+    #[test]
+    fn eks_addons_filter_safe_parse() {
+        let cases: &[(&str, bool)] = &[
+            (r#"{"kubernetesVersion":"1.30","addonName":"kube_proxy"}"#, false),
+            (r#"{"kubernetesVersion":"130","addonName":"kube_proxy"}"#, false),
+            (r#"{"addonName":"kube_proxy","default":"abrakadabra"}"#, false),
+            (r#"{"kubernetesVersion":"1.30"}"#, false),
+            (r#"{"addonName":"kube-proxy","default":"false"}"#, true),
+            (r#"{"addonName":"kube-proxy","default":"true"}"#, true),
+            (r#"{"addonName":"kube-proxy","default":false}"#, true),
+            (r#"{"addonName":"aws-cloudwatch-controller","default":false}"#, true),
+            (r#"{"addonName":"aws-cloudwatch-controller","profile":"abc"}"#, true),
+            (r#"{"kubernetesVersion":"1.30","addonName":"vpc-cni"}"#, true),
+            (r#"{"addonName":"vpc-cni"}"#, true),
+        ];
+        for (input, expected) in cases {
+            let result = parse_eks_addons_filter(input);
+            assert_eq!(
+                result.is_ok(),
+                *expected,
+                "input={input}: expected is_ok={expected}, got {:?}",
+                result
+            );
+        }
     }
 }
