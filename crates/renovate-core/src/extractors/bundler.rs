@@ -77,9 +77,8 @@ static GEM_MATCH: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// TypeScript `variableMatchRegex`.
-static VARIABLE_MATCH: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"^(?P<key>\w+)\s*=\s*['"](?P<value>[^'"]+)['"]"#).unwrap()
-});
+static VARIABLE_MATCH: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^(?P<key>\w+)\s*=\s*['"](?P<value>[^'"]+)['"]"#).unwrap());
 
 /// Inline `source:` option on gem lines.
 static SOURCE_MATCH: LazyLock<Regex> = LazyLock::new(|| {
@@ -99,37 +98,30 @@ static GIT_REFS_MATCH: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Ruby version line: `ruby '2.6.5'` or `ruby "2.6.5"`.
-static RUBY_VERSION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"^ruby\s+['"](?P<ver>[^'"]+)['"]\s*$"#).unwrap()
-});
+static RUBY_VERSION: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^ruby\s+['"](?P<ver>[^'"]+)['"]\s*$"#).unwrap());
 
 /// Top-level `source 'url'` (no `do`).
 static SOURCE_LINE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"^source\s+(?:['"](?P<registryUrl>[^'"]+)['"]|(?P<sourceName>\w+))\s*$"#)
-        .unwrap()
+    Regex::new(r#"^source\s+(?:['"](?P<registryUrl>[^'"]+)['"]|(?P<sourceName>\w+))\s*$"#).unwrap()
 });
 
 /// `source 'url' do` block header.
 static SOURCE_BLOCK: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r#"^source\s+(?:['"](?P<registryUrl>[^'"]+)['"]|(?P<sourceName>\w+))\s+do\s*$"#,
-    )
-    .unwrap()
+    Regex::new(r#"^source\s+(?:['"](?P<registryUrl>[^'"]+)['"]|(?P<sourceName>\w+))\s+do\s*$"#)
+        .unwrap()
 });
 
 /// `group :dev, :test do` block header.
-static GROUP_START: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^group\s+(.*?)\s+do\s*(?:#.*)?$").unwrap()
-});
+static GROUP_START: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^group\s+(.*?)\s+do\s*(?:#.*)?$").unwrap());
 
 /// `platforms :ruby do` block header.
-static PLATFORMS_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^platforms?\s+(.*?)\s+do\s*(?:#.*)?$").unwrap()
-});
+static PLATFORMS_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^platforms?\s+(.*?)\s+do\s*(?:#.*)?$").unwrap());
 
 /// `if condition` (no `do`).
-static IF_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(?:if|unless)\s+").unwrap());
+static IF_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(?:if|unless)\s+").unwrap());
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
@@ -1090,14 +1082,33 @@ end
         assert_eq!(pkg.deps.len(), 4);
         let url = "https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/";
         for dep in &pkg.deps {
-            assert_eq!(dep.registry_urls, vec![url], "dep {} missing registry url", dep.name);
+            assert_eq!(
+                dep.registry_urls,
+                vec![url],
+                "dep {} missing registry url",
+                dep.name
+            );
         }
-        assert!(pkg.deps.iter().any(|d| d.name == "internal_test_gem"
-            && d.current_value == r#""~> 1""#));
-        assert!(pkg.deps.iter().any(|d| d.name == "internal_production_gem"
-            && d.current_value == r#""~> 1""#));
-        assert!(pkg.deps.iter().any(|d| d.name == "sfn_my_dep1" && d.current_value == r#""~> 1""#));
-        assert!(pkg.deps.iter().any(|d| d.name == "sfn_my_dep2" && d.current_value == r#""~> 1""#));
+        assert!(
+            pkg.deps
+                .iter()
+                .any(|d| d.name == "internal_test_gem" && d.current_value == r#""~> 1""#)
+        );
+        assert!(
+            pkg.deps
+                .iter()
+                .any(|d| d.name == "internal_production_gem" && d.current_value == r#""~> 1""#)
+        );
+        assert!(
+            pkg.deps
+                .iter()
+                .any(|d| d.name == "sfn_my_dep1" && d.current_value == r#""~> 1""#)
+        );
+        assert!(
+            pkg.deps
+                .iter()
+                .any(|d| d.name == "sfn_my_dep2" && d.current_value == r#""~> 1""#)
+        );
     }
 
     // Ported: "parses source variable in Gemfile" — bundler/extract.spec.ts line 146
@@ -1108,10 +1119,7 @@ end
         assert_eq!(pkg.registry_urls, vec!["https://gems.foo.com"]);
         assert_eq!(pkg.deps.len(), 1);
         assert_eq!(pkg.deps[0].name, "some_internal_gem");
-        assert_eq!(
-            pkg.deps[0].registry_urls,
-            vec!["https://gems.bar.com"]
-        );
+        assert_eq!(pkg.deps[0].registry_urls, vec!["https://gems.bar.com"]);
     }
 
     // Ported: "parses inline source in Gemfile" — bundler/extract.spec.ts line 171

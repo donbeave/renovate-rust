@@ -535,7 +535,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bun-version/index.spec.ts` | Done | [details](lib/modules/manager/bun-version/index.spec.ts.md) |
 | `lib/modules/manager/bundler/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bundler/artifacts.spec.ts.md) |
 | `lib/modules/manager/bundler/common.spec.ts` | Not done | [details](lib/modules/manager/bundler/common.spec.ts.md) |
-| `lib/modules/manager/bundler/extract.spec.ts` | Not done | [details](lib/modules/manager/bundler/extract.spec.ts.md) |
+| `lib/modules/manager/bundler/extract.spec.ts` | Done | [details](lib/modules/manager/bundler/extract.spec.ts.md) |
 | `lib/modules/manager/bundler/gemfile.spec.ts` | Done | [details](lib/modules/manager/bundler/gemfile.spec.ts.md) |
 | `lib/modules/manager/bundler/host-rules.spec.ts` | Not done | [details](lib/modules/manager/bundler/host-rules.spec.ts.md) |
 | `lib/modules/manager/bundler/locked-version.spec.ts` | Done | [details](lib/modules/manager/bundler/locked-version.spec.ts.md) |

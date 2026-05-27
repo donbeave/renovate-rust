@@ -60,7 +60,9 @@ pub fn is_valid(input: &str) -> bool {
 
 /// Whether `input` is a stable (non-pre-release, non-dev) version.
 pub fn is_stable(input: &str) -> bool {
-    Version::from_str(input).map(|v| v.is_stable()).unwrap_or(false)
+    Version::from_str(input)
+        .map(|v| v.is_stable())
+        .unwrap_or(false)
 }
 
 /// Whether two version strings are semantically equal.
@@ -411,7 +413,11 @@ fn has_zero_specifier(clauses: &[RangeClause]) -> bool {
 /// `policy` controls which component increments; `usize::MAX` copies all.
 /// `base_release` provides the shape (length) of the output; when `None`
 /// the shape comes from `new_release` and the policy index is NOT incremented.
-fn get_future_version(policy: usize, new_release: &[u64], base_release: Option<&[u64]>) -> Vec<u64> {
+fn get_future_version(
+    policy: usize,
+    new_release: &[u64],
+    base_release: Option<&[u64]>,
+) -> Vec<u64> {
     let (effective_base, increment) = match base_release {
         Some(b) => (b, true),
         None => (new_release, false),
@@ -447,7 +453,8 @@ fn divide_compatible_release(clause: &RangeClause) -> Vec<RangeClause> {
         upper.pop();
     }
     *upper.last_mut().unwrap() += 1;
-    let upper_ver = Version::from_str(&fmt_parts(&upper)).unwrap_or_else(|_| clause.version.clone());
+    let upper_ver =
+        Version::from_str(&fmt_parts(&upper)).unwrap_or_else(|_| clause.version.clone());
     vec![
         RangeClause {
             op: Operator::GreaterThanEqual,
@@ -463,7 +470,11 @@ fn divide_compatible_release(clause: &RangeClause) -> Vec<RangeClause> {
 }
 
 /// Shared single-clause update logic (used by bump and as fallback).
-fn update_range_value(new_version: &str, new_ver: &Version, clause: &RangeClause) -> Option<String> {
+fn update_range_value(
+    new_version: &str,
+    new_ver: &Version,
+    clause: &RangeClause,
+) -> Option<String> {
     let op = clause.op;
 
     // !=  → preserve unchanged
@@ -502,7 +513,11 @@ fn update_range_value(new_version: &str, new_ver: &Version, clause: &RangeClause
 
     // == and <=
     if matches!(op, Operator::Equal | Operator::LessThanEqual) {
-        let op_str = if matches!(op, Operator::Equal) { "==" } else { "<=" };
+        let op_str = if matches!(op, Operator::Equal) {
+            "=="
+        } else {
+            "<="
+        };
         if new_ver <= &clause.version {
             return Some(format_clause(clause));
         }
@@ -523,7 +538,7 @@ fn update_range_value(new_version: &str, new_ver: &Version, clause: &RangeClause
     // > and >= lower bound
     if matches!(op, Operator::GreaterThan | Operator::GreaterThanEqual) {
         if new_ver <= &clause.version {
-            return Some(format!(">={}",  new_version));
+            return Some(format!(">={}", new_version));
         }
         return Some(format_clause(clause));
     }
@@ -540,7 +555,7 @@ fn handle_bump_strategy(
         .iter()
         .map(|c| {
             if matches!(c.op, Operator::GreaterThanEqual) {
-                Some(format!(">={}",  new_version))
+                Some(format!(">={}", new_version))
             } else {
                 update_range_value(new_version, new_ver, c)
             }
@@ -577,7 +592,7 @@ fn handle_replace_strategy(
             // > and >= lower bound
             if matches!(c.op, Operator::GreaterThan | Operator::GreaterThanEqual) {
                 if new_ver <= &c.version {
-                    return Some(format!(">={}",  new_version));
+                    return Some(format!(">={}", new_version));
                 }
                 let lower_len = c.version.release().len();
                 let lp = lower_len.saturating_sub(1);
@@ -591,7 +606,15 @@ fn handle_replace_strategy(
                 {
                     new_base.pop();
                 }
-                return Some(format!("{}{}", if matches!(c.op, Operator::GreaterThan) { ">" } else { ">=" }, fmt_parts(&new_base)));
+                return Some(format!(
+                    "{}{}",
+                    if matches!(c.op, Operator::GreaterThan) {
+                        ">"
+                    } else {
+                        ">="
+                    },
+                    fmt_parts(&new_base)
+                ));
             }
 
             update_range_value(new_version, new_ver, c)
@@ -613,13 +636,12 @@ fn handle_widen_strategy(
     let trim_zeros = has_zero_specifier(clauses);
 
     // Expand ~= into its two-bound equivalent for widen.
-    let effective: Vec<RangeClause> = if clauses.len() == 1
-        && matches!(clauses[0].op, Operator::TildeEqual)
-    {
-        divide_compatible_release(&clauses[0])
-    } else {
-        clauses.to_vec()
-    };
+    let effective: Vec<RangeClause> =
+        if clauses.len() == 1 && matches!(clauses[0].op, Operator::TildeEqual) {
+            divide_compatible_release(&clauses[0])
+        } else {
+            clauses.to_vec()
+        };
 
     effective
         .iter()
@@ -853,10 +875,34 @@ mod tests {
             (">2.0.0", "replace", "1.0.0", "1.2.3", Some(">=1.2.3")),
             (">=2.0.0", "bump", "1.0.0", "1.2.3", Some(">=1.2.3")),
             (">=2.0.0", "replace", "1.0.0", "1.2.3", Some(">=1.2.3")),
-            ("~=1.1.0, !=1.1.1", "bump", "1.0.0", "1.2.3", Some("~=1.2.3, !=1.1.1")),
-            ("~=1.1.0, !=1.1.1", "replace", "1.0.0", "1.2.3", Some("~=1.2.3, !=1.1.1")),
-            ("~=1.1.0,!=1.1.1", "bump", "1.0.0", "1.2.3", Some("~=1.2.3,!=1.1.1")),
-            ("~=1.1.0,!=1.1.1", "replace", "1.0.0", "1.2.3", Some("~=1.2.3,!=1.1.1")),
+            (
+                "~=1.1.0, !=1.1.1",
+                "bump",
+                "1.0.0",
+                "1.2.3",
+                Some("~=1.2.3, !=1.1.1"),
+            ),
+            (
+                "~=1.1.0, !=1.1.1",
+                "replace",
+                "1.0.0",
+                "1.2.3",
+                Some("~=1.2.3, !=1.1.1"),
+            ),
+            (
+                "~=1.1.0,!=1.1.1",
+                "bump",
+                "1.0.0",
+                "1.2.3",
+                Some("~=1.2.3,!=1.1.1"),
+            ),
+            (
+                "~=1.1.0,!=1.1.1",
+                "replace",
+                "1.0.0",
+                "1.2.3",
+                Some("~=1.2.3,!=1.1.1"),
+            ),
             (" ", "bump", "1.0.0", "1.2.3", Some(" ")),
             (" ", "replace", "1.0.0", "1.2.3", Some(" ")),
             ("invalid", "bump", "1.0.0", "1.2.3", None),
@@ -865,29 +911,131 @@ mod tests {
             ("===1.0.3", "replace", "1.0.0", "1.2.3", None),
             ("!=1.2.3", "bump", "1.0.0", "1.2.3", None),
             ("!=1.2.3", "replace", "1.0.0", "1.2.3", None),
-            ("~=1.1.0,!=1.1.1", "unsupported", "1.0.0", "1.2.3", Some("~=1.2.3,!=1.1.1")),
-            (">=19.12.2,<20.13.9", "replace", "19.12.2", "21.3.1", Some(">=21.3.1,<22.0.0")),
-            (">=19.12.2,<19.13.9", "replace", "19.12.2", "20.3.1", Some(">=20.3.1,<20.4.0")),
-            (">=19.12.2,<19.13.0", "replace", "19.12.2", "20.3.1", Some(">=20.3.1,<20.4.0")),
-            (">=19.12.2,<19.13.0", "replace", "19.12.2", "20.3.0", Some(">=20.3.0,<20.4.0")),
-            (">=19.12.2,<19.13.0", "replace", "19.12.2", "19.13.1", Some(">=19.13.1,<19.14.0")),
-            (">=19.12.2,<19.13.0", "replace", "19.12.2", "19.13.0", Some(">=19.13.0,<19.14.0")),
-            (">=19.12.2,<19.13.0", "auto", "19.12.2", "19.13.0", Some(">=19.13.0,<19.14.0")),
-            (">=19.12.2,<20.13.9", "widen", "19.12.2", "21.3.1", Some(">=19.12.2,<21.3.2")),
-            (">=19.12.2,<19.13.9", "widen", "19.12.2", "20.3.1", Some(">=19.12.2,<20.3.2")),
-            (">=19.12.2,<19.13.0", "widen", "19.12.2", "20.3.1", Some(">=19.12.2,<20.4.0")),
-            (">=19.12.2,<19.13.0", "widen", "19.12.2", "20.3.0", Some(">=19.12.2,<20.4.0")),
-            (">=19.12.2,<19.13.0", "widen", "19.12.2", "19.13.1", Some(">=19.12.2,<19.14.0")),
-            (">=19.12.2,<19.13.0", "widen", "19.12.2", "19.13.0", Some(">=19.12.2,<19.14.0")),
+            (
+                "~=1.1.0,!=1.1.1",
+                "unsupported",
+                "1.0.0",
+                "1.2.3",
+                Some("~=1.2.3,!=1.1.1"),
+            ),
+            (
+                ">=19.12.2,<20.13.9",
+                "replace",
+                "19.12.2",
+                "21.3.1",
+                Some(">=21.3.1,<22.0.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.9",
+                "replace",
+                "19.12.2",
+                "20.3.1",
+                Some(">=20.3.1,<20.4.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "replace",
+                "19.12.2",
+                "20.3.1",
+                Some(">=20.3.1,<20.4.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "replace",
+                "19.12.2",
+                "20.3.0",
+                Some(">=20.3.0,<20.4.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "replace",
+                "19.12.2",
+                "19.13.1",
+                Some(">=19.13.1,<19.14.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "replace",
+                "19.12.2",
+                "19.13.0",
+                Some(">=19.13.0,<19.14.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "auto",
+                "19.12.2",
+                "19.13.0",
+                Some(">=19.13.0,<19.14.0"),
+            ),
+            (
+                ">=19.12.2,<20.13.9",
+                "widen",
+                "19.12.2",
+                "21.3.1",
+                Some(">=19.12.2,<21.3.2"),
+            ),
+            (
+                ">=19.12.2,<19.13.9",
+                "widen",
+                "19.12.2",
+                "20.3.1",
+                Some(">=19.12.2,<20.3.2"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "widen",
+                "19.12.2",
+                "20.3.1",
+                Some(">=19.12.2,<20.4.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "widen",
+                "19.12.2",
+                "20.3.0",
+                Some(">=19.12.2,<20.4.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "widen",
+                "19.12.2",
+                "19.13.1",
+                Some(">=19.12.2,<19.14.0"),
+            ),
+            (
+                ">=19.12.2,<19.13.0",
+                "widen",
+                "19.12.2",
+                "19.13.0",
+                Some(">=19.12.2,<19.14.0"),
+            ),
             ("~=7.2", "replace", "7.2.0", "8.0.1", Some("~=8.0")),
             ("~=7.2", "replace", "7.2.0", "8", Some("~=8.0")),
             ("~=7.2.0", "replace", "7.2.0", "8.2", Some("~=8.2.0")),
             ("~=7.2", "widen", "7.2.0", "8.0.1", Some(">=7.2,<9")),
             ("~=7.2", "widen", "7.2.0", "8", Some(">=7.2,<9")),
             ("~=7.2.0", "widen", "7.2.0", "8.2", Some(">=7.2.0,<8.3")),
-            ("==3.2.*,>=3.2.2", "replace", "3.2.2", "4.1.1", Some("==4.1.*")),
-            ("==3.2.*,>=3.2.2", "replace", "3.2.2", "4.0.0", Some("==4.0.*")),
-            (">=1.0.0,<1.1.0", "replace", "1.0.0", "1.2.0", Some(">=1.2.0,<1.3.0")),
+            (
+                "==3.2.*,>=3.2.2",
+                "replace",
+                "3.2.2",
+                "4.1.1",
+                Some("==4.1.*"),
+            ),
+            (
+                "==3.2.*,>=3.2.2",
+                "replace",
+                "3.2.2",
+                "4.0.0",
+                Some("==4.0.*"),
+            ),
+            (
+                ">=1.0.0,<1.1.0",
+                "replace",
+                "1.0.0",
+                "1.2.0",
+                Some(">=1.2.0,<1.3.0"),
+            ),
             ("<1.3.0", "bump", "1.3.0", "0.9.2", Some("<1.3.0")),
             ("<1.3.0", "bump", "0.9.0", "0.9.2", Some("<1.3.0")),
             ("<=1.3.0", "bump", "0.9.0", "0.9.2", Some("<=1.3.0")),
