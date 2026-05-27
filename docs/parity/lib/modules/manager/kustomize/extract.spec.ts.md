@@ -5,13 +5,13 @@
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 39 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 43 | **Actionable:** 44 | **Status:** done
 
 ### `parseKustomize` (top-level)
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should successfully parse a valid kustomize file | 16 | pending | — | — | — |
+| should successfully parse a valid kustomize file | 16 | ported | `kustomize.rs` | `parse_kustomize_returns_some_for_valid_file` | — |
 | return null on an invalid file | 33 | ported | `kustomize.rs` | `empty_content_returns_empty` | — |
 | should return null when header has invalid resource kind | 38 | ported | `kustomize.rs` | `invalid_resource_kind_returns_none` | — |
 | should fall back to default resource kind when header is missing | 47 | ported | `kustomize.rs` | `missing_kind_defaults_to_kustomization` | — |
@@ -38,7 +38,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return null on a null input | 208 | pending | — | — | — |
+| should return null on a null input | 208 | ported | `kustomize.rs` | `extract_helm_chart_null_on_empty_name` | — |
 | should correctly extract a chart | 217 | ported | `kustomize.rs` | `extracts_helm_charts` | — |
 | should correctly extract an OCI chart | 233 | ported | `kustomize.rs` | `extracts_oci_helm_chart` | — |
 | should correctly extract an OCI chart with registryAliases | 249 | ported | `kustomize.rs` | `extracts_oci_helm_chart_with_registry_aliases` | — |
@@ -47,8 +47,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return null on a null input | 270 | pending | — | — | — |
-| should return null on invalid input | 278 | pending | — | — | — |
+| should return null on a null input | 270 | ported | `kustomize.rs` | `extract_image_null_on_empty_name` | — |
+| should return null on invalid input | 278 | not-applicable | — | — | TypeScript-only type guard (`name: 3` via @ts-expect-error), no runtime equivalent in Rust |
 | should correctly extract a default image | 287 | ported | `kustomize.rs` | `extracts_images` | — |
 | should correctly extract an image in a repo | 305 | ported | `kustomize.rs` | `extracts_image_in_repo` | — |
 | should correctly extract from a different registry | 323 | ported | `kustomize.rs` | `extracts_image_from_different_registry` | — |
@@ -79,7 +79,7 @@
 | extracts from digest | 710 | ported | `kustomize.rs` | `extracts_images_from_digest` | — |
 | extracts newName | 757 | ported | `kustomize.rs` | `extracts_new_name_override` | — |
 | parses helmChart field | 799 | ported | `kustomize.rs` | `mixed_images_and_helm` | — |
-| extracts from various URL forms (it.each) | 1104 | pending | — | — | — |
+| extracts from various URL forms (it.each) | 1104 | ported | `kustomize.rs` | `extract_resource_url_forms` | — |
 
 ---
 

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3845 / 11677 total tests ported (33%) · pending 7763 · not-applicable 69 (1% of total) — updated 2026-05-27
+**Progress:** 3849 / 11677 total tests ported (33%) · pending 7759 · not-applicable 70 (1% of total) — updated 2026-05-27
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -11,7 +11,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 
 | Spec file | Status | Details |
 |---|---|---|
-| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | Not done | [details](lib/modules/manager/ansible-galaxy/extract.spec.ts.md) |
+| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | Done | [details](lib/modules/manager/ansible-galaxy/extract.spec.ts.md) |
 | `lib/modules/manager/ansible/extract.spec.ts` | Done | [details](lib/modules/manager/ansible/extract.spec.ts.md) |
 | `lib/modules/manager/asdf/extract.spec.ts` | Done | [details](lib/modules/manager/asdf/extract.spec.ts.md) |
 | `lib/modules/manager/asdf/index.spec.ts` | Done | [details](lib/modules/manager/asdf/index.spec.ts.md) |
@@ -34,7 +34,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/github-actions/integration.spec.ts` | Not done | [details](lib/modules/manager/github-actions/integration.spec.ts.md) |
 | `lib/modules/manager/github-actions/parse.spec.ts` | Done | [details](lib/modules/manager/github-actions/parse.spec.ts.md) |
 | `lib/modules/manager/gitlabci/extract.spec.ts` | Done | [details](lib/modules/manager/gitlabci/extract.spec.ts.md) |
-| `lib/modules/manager/gomod/extract.spec.ts` | Not done | [details](lib/modules/manager/gomod/extract.spec.ts.md) |
+| `lib/modules/manager/gomod/extract.spec.ts` | Done | [details](lib/modules/manager/gomod/extract.spec.ts.md) |
 | `lib/modules/manager/gradle/extract.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract.spec.ts.md) |
 | `lib/modules/manager/helm-values/extract.spec.ts` | Done | [details](lib/modules/manager/helm-values/extract.spec.ts.md) |
 | `lib/modules/manager/helmsman/extract.spec.ts` | Done | [details](lib/modules/manager/helmsman/extract.spec.ts.md) |
@@ -100,7 +100,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/mise/extract.spec.ts` | Done | [details](lib/modules/manager/mise/extract.spec.ts.md) |
 | `lib/modules/manager/nuget/extract.spec.ts` | Done | [details](lib/modules/manager/nuget/extract.spec.ts.md) |
 | `lib/modules/manager/ant/extract.spec.ts` | Done | [details](lib/modules/manager/ant/extract.spec.ts.md) |
-| `lib/modules/manager/kustomize/extract.spec.ts` | Not done | [details](lib/modules/manager/kustomize/extract.spec.ts.md) |
+| `lib/modules/manager/kustomize/extract.spec.ts` | Done | [details](lib/modules/manager/kustomize/extract.spec.ts.md) |
 | `lib/modules/manager/nix/extract.spec.ts` | Done | [details](lib/modules/manager/nix/extract.spec.ts.md) |
 | `lib/modules/manager/flux/extract.spec.ts` | Done | [details](lib/modules/manager/flux/extract.spec.ts.md) |
 | `lib/modules/manager/bazel-module/extract.spec.ts` | Done | [details](lib/modules/manager/bazel-module/extract.spec.ts.md) |

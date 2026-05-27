@@ -871,6 +871,7 @@ pub fn get_extra_deps_notice(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::versioning::semver_coerced;
 
     // Ported: "extracts single-line requires" — gomod/extract.spec.ts line 16
     #[test]
@@ -1912,5 +1913,43 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             "v0.0.0-20260219031232-e6910bd8fb97"
         );
         assert!(replacement.skip_reason.is_none());
+    }
+
+    // Ported: "the extracted version can be used as a SemVer constraint" — gomod/extract.spec.ts line 582
+    #[test]
+    fn go_directive_constraint_is_valid_semver_coerced() {
+        // `go 1.19` → constraint `~1.19.x` (semver-coerced compatible)
+        let constraint = "~1.19.x";
+        assert!(
+            semver_coerced::is_valid(constraint),
+            "~1.19.x should be valid semver-coerced"
+        );
+    }
+
+    // Ported: "matches version 1.19, even though it is not valid SemVer" — gomod/extract.spec.ts line 586
+    #[test]
+    fn go_directive_constraint_matches_1_19_non_semver() {
+        assert!(semver_coerced::matches("1.19", "~1.19.x"));
+    }
+
+    // Ported: "matches the current SemVer minor" — gomod/extract.spec.ts line 590
+    #[test]
+    fn go_directive_constraint_matches_current_minor() {
+        assert!(semver_coerced::matches("1.19.0", "~1.19.x"));
+        assert!(semver_coerced::matches("1.19.10", "~1.19.x"));
+    }
+
+    // Ported: "does not match the next SemVer minor" — gomod/extract.spec.ts line 595
+    #[test]
+    fn go_directive_constraint_no_match_next_minor() {
+        assert!(!semver_coerced::matches("1.20.0", "~1.19.x"));
+        assert!(!semver_coerced::matches("1.20.10", "~1.19.x"));
+    }
+
+    // Ported: "does not match the previous SemVer minor" — gomod/extract.spec.ts line 600
+    #[test]
+    fn go_directive_constraint_no_match_prev_minor() {
+        assert!(!semver_coerced::matches("1.18.0", "~1.19.x"));
+        assert!(!semver_coerced::matches("1.18.5", "~1.19.x"));
     }
 }

@@ -24,6 +24,10 @@
 //!     version: 6.5.0
 //! ```
 
+use std::sync::LazyLock;
+
+use regex::Regex;
+
 /// A remote Kustomize base/resource/component reference.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KustomizeResourceDep {
@@ -349,76 +353,77 @@ pub fn parse_kustomize(content: &str) -> Option<ParsedKustomize> {
     Some(ParsedKustomize { kind, chart_home })
 }
 
+// Four regexes matching the Hashicorp URL spec used by kustomize.
+// Priority: _git > .git > // (gitUrlWithPath) > plain (gitUrl).
+// Ported from lib/modules/manager/kustomize/extract.ts.
+
+static KUST_UNDERSCORE_GIT_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^(?:git::)?(?P<url>(?:(?:(?:http|https|ssh)://)?(?:.*@)?)?(?P<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?P<project>[^?\s]*_git/[^/\s]+)))(?P<subdir>[^?\s]*)\?(?P<qs>.+)$",
+    ).unwrap()
+});
+
+static KUST_DOT_GIT_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^(?:git::)?(?P<url>(?:(?:(?:http|https|ssh)://)?(?:.*@)?)?(?P<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?P<project>[^?\s]*\.git)))(?P<subdir>[^?\s]*)\?(?P<qs>.+)$",
+    ).unwrap()
+});
+
+static KUST_WITH_PATH_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^(?:git::)?(?P<url>(?:(?:(?:http|https|ssh)://)?(?:.*@)?)?(?P<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?P<project>[^?\s]+)))(?://)(?P<subdir>[^?\s]+)\?(?P<qs>.+)$",
+    ).unwrap()
+});
+
+static KUST_GIT_URL_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^(?:git::)?(?P<url>(?:(?:(?:http|https|ssh)://)?(?:.*@)?)?(?P<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?P<project>[^/\s]+/[^/\s]+)))(?P<subdir>[^?\s]*)\?(?P<qs>.+)$",
+    ).unwrap()
+});
+
 /// Extract a remote Kustomize base/resource/component reference.
 pub fn extract_resource(raw: &str) -> Option<KustomizeResourceDep> {
     let raw = raw.trim();
-    if raw.is_empty() || raw.starts_with("./") || raw.starts_with("../") || !raw.contains('?') {
+    if raw.is_empty() || raw.starts_with("./") || raw.starts_with("../") {
         return None;
     }
 
-    let (base, query) = raw.split_once('?')?;
-    let current_value =
-        first_query_value(query, "ref").or_else(|| first_query_value(query, "version"))?;
+    let caps = if raw.contains("_git") {
+        KUST_UNDERSCORE_GIT_RE.captures(raw)
+    } else if raw.contains(".git") {
+        KUST_DOT_GIT_RE.captures(raw)
+    } else if KUST_WITH_PATH_RE.is_match(raw) {
+        KUST_WITH_PATH_RE.captures(raw)
+    } else {
+        KUST_GIT_URL_RE.captures(raw)
+    }?;
+
+    let path = caps.name("path")?.as_str();
+    let project = caps.name("project")?.as_str();
+    let url = caps.name("url")?.as_str();
+    let qs = caps.name("qs")?.as_str();
+
+    let current_value = first_query_value(qs, "ref")
+        .or_else(|| first_query_value(qs, "version"))?;
     if current_value.is_empty() {
         return None;
     }
 
-    if let Some(rest) = base.strip_prefix("https://github.com/") {
-        let dep_name = github_dep_name(rest)?;
+    if path.contains("github.com:") || path.contains("github.com/") {
         return Some(KustomizeResourceDep {
-            dep_name,
-            package_name: Some(format!(
-                "https://{}",
-                repo_base(&format!("github.com/{rest}"))?
-            )),
-            current_value,
-            datasource: "github-tags",
-        });
-    }
-
-    if let Some(rest) = base.strip_prefix("github.com/") {
-        let dep_name = github_dep_name(rest)?;
-        return Some(KustomizeResourceDep {
-            dep_name,
+            dep_name: project.replace(".git", ""),
             package_name: None,
             current_value,
             datasource: "github-tags",
         });
     }
 
-    if let Some(rest) = base.strip_prefix("git@github.com:") {
-        let dep_name = github_dep_name(rest)?;
-        return Some(KustomizeResourceDep {
-            dep_name,
-            package_name: None,
-            current_value,
-            datasource: "github-tags",
-        });
-    }
-
-    if let Some(rest) = base.strip_prefix("ssh://git@") {
-        let package_name = format!("ssh://git@{}", repo_base(rest)?);
-        let dep_name = dep_name_from_remote_path(rest)?;
-        return Some(KustomizeResourceDep {
-            dep_name,
-            package_name: Some(package_name),
-            current_value,
-            datasource: "git-tags",
-        });
-    }
-
-    if let Some(rest) = base.strip_prefix("https://") {
-        let package_name = format!("https://{}", repo_base(rest)?);
-        let dep_name = dep_name_from_remote_path(rest)?;
-        return Some(KustomizeResourceDep {
-            dep_name,
-            package_name: Some(package_name),
-            current_value,
-            datasource: "git-tags",
-        });
-    }
-
-    None
+    Some(KustomizeResourceDep {
+        dep_name: path.replace(".git", ""),
+        package_name: Some(url.to_owned()),
+        current_value,
+        datasource: "git-tags",
+    })
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -428,44 +433,6 @@ fn first_query_value(query: &str, key: &str) -> Option<String> {
         let (candidate, value) = part.split_once('=')?;
         (candidate == key).then(|| value.to_owned())
     })
-}
-
-fn github_dep_name(path: &str) -> Option<String> {
-    let clean = repo_base(&format!("github.com/{path}"))?;
-    let clean = clean.strip_prefix("github.com/").unwrap_or(clean.as_str());
-    let clean = clean.strip_suffix(".git").unwrap_or(clean);
-    let mut parts = clean.split('/');
-    let owner = parts.next()?;
-    let repo = parts.next()?;
-    if owner.is_empty() || repo.is_empty() {
-        return None;
-    }
-    Some(format!("{owner}/{repo}"))
-}
-
-fn dep_name_from_remote_path(path: &str) -> Option<String> {
-    let clean = repo_base(path)?;
-    let clean = clean.strip_suffix(".git").unwrap_or(clean.as_str());
-    let parts = clean.split('/').collect::<Vec<_>>();
-    match parts.as_slice() {
-        [owner, repo] if !owner.is_empty() && !repo.is_empty() => Some(format!("{owner}/{repo}")),
-        [host, owner, repo, ..] if !host.is_empty() && !owner.is_empty() && !repo.is_empty() => {
-            Some(format!("{host}/{owner}/{repo}"))
-        }
-        _ => None,
-    }
-}
-
-fn repo_base(path: &str) -> Option<String> {
-    let without_subdir = path.split("//").next().unwrap_or(path);
-    if let Some((before_git, _)) = without_subdir.split_once(".git") {
-        return Some(format!("{before_git}.git"));
-    }
-    let parts = without_subdir.split('/').take(3).collect::<Vec<_>>();
-    if parts.len() < 2 {
-        return None;
-    }
-    Some(parts.join("/"))
 }
 
 fn leading_spaces(s: &str) -> usize {
@@ -1392,5 +1359,104 @@ spec:
     name: http
 "#;
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "should successfully parse a valid kustomize file" — kustomize/extract.spec.ts line 16
+    #[test]
+    fn parse_kustomize_returns_some_for_valid_file() {
+        let content = r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - git@github.com:moredhel/remote-kustomize.git?ref=v0.0.1
+
+namespace: testing-namespace
+
+resources:
+  - deployment.yaml
+"#;
+        let parsed = parse_kustomize(content);
+        assert!(parsed.is_some());
+    }
+
+    // Ported: "should return null on a null input" — kustomize/extract.spec.ts line 208
+    #[test]
+    fn extract_helm_chart_null_on_empty_name() {
+        let deps = extract("helmCharts:\n  - name: ''\n    repo: ''\n    version: ''\n");
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "should return null on a null input" — kustomize/extract.spec.ts line 270
+    #[test]
+    fn extract_image_null_on_empty_name() {
+        let deps = extract("images:\n  - name: ''\n    newTag: v1.0.0\n");
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "extracts correct project from $name" (it.each) — kustomize/extract.spec.ts line 1104
+    #[test]
+    fn extract_resource_url_forms() {
+        struct Case {
+            url: &'static str,
+            is_github: bool,
+            dep_name: &'static str,
+            package_name: Option<&'static str>,
+        }
+        let cases: &[Case] = &[
+            Case { url: "https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somedir", is_github: false, dep_name: "git-codecommit.us-east-2.amazonaws.com/someorg/somerepo", package_name: Some("https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo") },
+            Case { url: "https://fabrikops2.visualstudio.com/someorg/somerepo", is_github: false, dep_name: "fabrikops2.visualstudio.com/someorg/somerepo", package_name: Some("https://fabrikops2.visualstudio.com/someorg/somerepo") },
+            Case { url: "http://github.com/someorg/somerepo/somedir", is_github: true, dep_name: "someorg/somerepo", package_name: None },
+            Case { url: "git@github.com:someorg/somerepo/somedir", is_github: true, dep_name: "someorg/somerepo", package_name: None },
+            Case { url: "http://github.com/someorg/somerepo.git/somedir", is_github: true, dep_name: "someorg/somerepo", package_name: None },
+            Case { url: "git@github.com:someorg/somerepo.git/somedir", is_github: true, dep_name: "someorg/somerepo", package_name: None },
+            Case { url: "git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git", is_github: false, dep_name: "gitlab2.sqtools.ru:infra/kubernetes/thanos-base", package_name: Some("git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git") },
+            Case { url: "git@bitbucket.org:company/project.git//path", is_github: false, dep_name: "bitbucket.org:company/project", package_name: Some("git@bitbucket.org:company/project.git") },
+            Case { url: "git@bitbucket.org/company/project.git//path", is_github: false, dep_name: "bitbucket.org/company/project", package_name: Some("git@bitbucket.org/company/project.git") },
+            Case { url: "ssh://git@bitbucket.org/company/project.git//path", is_github: false, dep_name: "bitbucket.org/company/project", package_name: Some("ssh://git@bitbucket.org/company/project.git") },
+            Case { url: "https://itfs.mycompany.com/collection/project/_git/somerepos", is_github: false, dep_name: "itfs.mycompany.com/collection/project/_git/somerepos", package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos") },
+            Case { url: "https://itfs.mycompany.com/collection/project/_git/somerepos", is_github: false, dep_name: "itfs.mycompany.com/collection/project/_git/somerepos", package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos") },
+            Case { url: "https://itfs.mycompany.com/collection/project/_git/somerepos/somedir", is_github: false, dep_name: "itfs.mycompany.com/collection/project/_git/somerepos", package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos") },
+            Case { url: "git::https://itfs.mycompany.com/collection/project/_git/somerepos", is_github: false, dep_name: "itfs.mycompany.com/collection/project/_git/somerepos", package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos") },
+            Case { url: "https://bitbucket.example.com/scm/project/repository.git", is_github: false, dep_name: "bitbucket.example.com/scm/project/repository", package_name: Some("https://bitbucket.example.com/scm/project/repository.git") },
+            Case { url: "ssh://git@git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somepath", is_github: false, dep_name: "git-codecommit.us-east-2.amazonaws.com/someorg/somerepo", package_name: Some("ssh://git@git-codecommit.us-east-2.amazonaws.com/someorg/somerepo") },
+            Case { url: "git@github.com/someorg/somerepo/somepath", is_github: true, dep_name: "someorg/somerepo", package_name: None },
+            Case { url: "https://github.com/kubernetes-sigs/kustomize//examples/multibases/dev/", is_github: true, dep_name: "kubernetes-sigs/kustomize", package_name: None },
+            Case { url: "ssh://git@github.com/kubernetes-sigs/kustomize//examples/multibases/dev", is_github: true, dep_name: "kubernetes-sigs/kustomize", package_name: None },
+            Case { url: "https://example.org/path/to/repo//examples/multibases/dev", is_github: false, dep_name: "example.org/path/to/repo", package_name: Some("https://example.org/path/to/repo") },
+            Case { url: "https://example.org/path/to/repo.git/examples/multibases/dev", is_github: false, dep_name: "example.org/path/to/repo", package_name: Some("https://example.org/path/to/repo.git") },
+            Case { url: "ssh://alice@example.com/path/to/repo//examples/multibases/dev", is_github: false, dep_name: "example.com/path/to/repo", package_name: Some("ssh://alice@example.com/path/to/repo") },
+            Case { url: "https://authority/org/repo/%-invalid-uri-so-not-parsable-by-net/url.Parse", is_github: false, dep_name: "authority/org/repo", package_name: Some("https://authority/org/repo") },
+            Case { url: "ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git//path", is_github: false, dep_name: "bitbucket.org/ourteamname/ourrepositoryname", package_name: Some("ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git") },
+            Case { url: "http://git@home.com/path/to/repository.git//path", is_github: false, dep_name: "home.com/path/to/repository", package_name: Some("http://git@home.com/path/to/repository.git") },
+            Case { url: "https://git@home.com/path/to/repository.git//path", is_github: false, dep_name: "home.com/path/to/repository", package_name: Some("https://git@home.com/path/to/repository.git") },
+            Case { url: "ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git", is_github: true, dep_name: "YOUR-USERNAME/YOUR-REPOSITORY", package_name: None },
+            Case { url: "git@gitlab.com/user:name/YOUR-REPOSITORY.git/path", is_github: false, dep_name: "gitlab.com/user:name/YOUR-REPOSITORY", package_name: Some("git@gitlab.com/user:name/YOUR-REPOSITORY.git") },
+            Case { url: "git@gitlab.com:gitlab-tests/sample-project.git", is_github: false, dep_name: "gitlab.com:gitlab-tests/sample-project", package_name: Some("git@gitlab.com:gitlab-tests/sample-project.git") },
+            Case { url: "git@gitlab.com:gitlab-tests/sample-project", is_github: false, dep_name: "gitlab.com:gitlab-tests/sample-project", package_name: Some("git@gitlab.com:gitlab-tests/sample-project") },
+            Case { url: "https://username@dev.azure.com/org/project/_git/repo//path/to/kustomization/root", is_github: false, dep_name: "dev.azure.com/org/project/_git/repo", package_name: Some("https://username@dev.azure.com/org/project/_git/repo") },
+            Case { url: "https://org.visualstudio.com/project/_git/repo/path/to/kustomization/root", is_github: false, dep_name: "org.visualstudio.com/project/_git/repo", package_name: Some("https://org.visualstudio.com/project/_git/repo") },
+            Case { url: "ssh://org-12345@github.com/kubernetes-sigs/kustomize", is_github: true, dep_name: "kubernetes-sigs/kustomize", package_name: None },
+            Case { url: "org-12345@github.com/kubernetes-sigs/kustomize", is_github: true, dep_name: "kubernetes-sigs/kustomize", package_name: None },
+        ];
+        for case in cases {
+            let full_url = format!("{}?ref=v1.0.0", case.url);
+            let dep = extract_resource(&full_url).unwrap_or_else(|| {
+                panic!("extract_resource returned None for: {}", case.url)
+            });
+            assert_eq!(dep.current_value, "v1.0.0", "url: {}", case.url);
+            assert_eq!(dep.dep_name, case.dep_name, "url: {}", case.url);
+            assert_eq!(
+                dep.package_name.as_deref(),
+                case.package_name,
+                "url: {}",
+                case.url
+            );
+            if case.is_github {
+                assert_eq!(dep.datasource, "github-tags", "url: {}", case.url);
+            } else {
+                assert_eq!(dep.datasource, "git-tags", "url: {}", case.url);
+            }
+        }
     }
 }

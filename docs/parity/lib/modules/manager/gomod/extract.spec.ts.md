@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gomod/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
-**Total tests:** 22 | **Ported:** 17 | **Actionable:** 22 | **Status:** partial
+**Total tests:** 22 | **Ported:** 22 | **Actionable:** 22 | **Status:** done
 
 ### `extractPackageFile()`
 
@@ -28,11 +28,11 @@
 | ignores directives unrelated to dependencies | 402 | ported | `gomod.rs` | `unrelated_directives_ignored` | — |
 | marks placeholder pseudo versions with skipReason invalid-version | 426 | ported | `gomod.rs` | `placeholder_pseudo_versions_have_skip_reason` | — |
 | parses go $version directive | 528 | ported | `gomod.rs` | `go_directive_extracted` | — |
-| the extracted version can be used as a SemVer constraint | 582 | pending | — | — | — |
-| matches version 1.19, even though it is not valid SemVer | 586 | pending | — | — | — |
-| matches the current SemVer minor | 590 | pending | — | — | — |
-| does not match the next SemVer minor | 595 | pending | — | — | — |
-| does not match the previous SemVer minor | 600 | pending | — | — | — |
+| the extracted version can be used as a SemVer constraint | 582 | ported | `gomod.rs` | `go_directive_constraint_is_valid_semver_coerced` | — |
+| matches version 1.19, even though it is not valid SemVer | 586 | ported | `gomod.rs` | `go_directive_constraint_matches_1_19_non_semver` | — |
+| matches the current SemVer minor | 590 | ported | `gomod.rs` | `go_directive_constraint_matches_current_minor` | — |
+| does not match the next SemVer minor | 595 | ported | `gomod.rs` | `go_directive_constraint_no_match_next_minor` | — |
+| does not match the previous SemVer minor | 600 | ported | `gomod.rs` | `go_directive_constraint_no_match_prev_minor` | — |
 
 ---
 

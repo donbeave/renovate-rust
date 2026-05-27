@@ -55,6 +55,74 @@ pub struct AnsibleGalaxyDep {
     pub skip_reason: Option<AnsibleGalaxySkipReason>,
 }
 
+/// Mirrors TypeScript `getSliceEndNumber`.
+///
+/// Given a `start` index into a sequence of `number_of_lines` lines, and a
+/// sorted list of block boundaries, returns the nearest boundary strictly
+/// after `start`. Returns `-1` if `start` is out of range.
+pub fn get_slice_end_number(start: i32, number_of_lines: i32, blocks: &[i32]) -> i32 {
+    if start < 0 || start > number_of_lines - 1 {
+        return -1;
+    }
+    let mut nearest_end = number_of_lines;
+    for &b in blocks {
+        if start < b && b < nearest_end {
+            nearest_end = b;
+        }
+    }
+    nearest_end
+}
+
+/// Extract dependencies from a Ansible Galaxy `galaxy.yml` metadata file.
+///
+/// Reads the `dependencies:` block which has the form:
+/// ```yaml
+/// dependencies:
+///   namespace.collection: "version"
+/// ```
+pub fn extract_galaxy_metadata(content: &str) -> Vec<AnsibleGalaxyDep> {
+    use std::sync::LazyLock;
+    use regex::Regex;
+    static GALAXY_DEP_RE: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r#"^\s+["']?([\w.]+)["']?:\s*["']?(.+?)["']?\s*(?:\s#.*)?$"#).unwrap()
+    });
+    let mut out = Vec::new();
+    let mut in_deps = false;
+    for raw in content.lines() {
+        let trimmed = raw.trim();
+        if trimmed.starts_with('#') {
+            continue;
+        }
+        let line_without_comment = raw.split(" #").next().unwrap_or(raw);
+        let trimmed_no_comment = line_without_comment.trim();
+        if trimmed_no_comment == "dependencies:" {
+            in_deps = true;
+            continue;
+        }
+        if !in_deps {
+            continue;
+        }
+        if trimmed_no_comment.is_empty() {
+            continue;
+        }
+        // A non-indented, non-empty line ends the dependencies block.
+        if !raw.starts_with(' ') && !raw.starts_with('\t') {
+            break;
+        }
+        if let Some(caps) = GALAXY_DEP_RE.captures(line_without_comment) {
+            let name = caps[1].to_owned();
+            let version = caps[2].trim().trim_matches('\'').trim_matches('"').to_owned();
+            out.push(AnsibleGalaxyDep {
+                dep_name: name,
+                current_value: version,
+                source: AnsibleGalaxySource::Galaxy,
+                skip_reason: Some(AnsibleGalaxySkipReason::GalaxyHosted),
+            });
+        }
+    }
+    out
+}
+
 /// Extract dependencies from an Ansible Galaxy `requirements.yml`.
 pub fn extract(content: &str) -> Vec<AnsibleGalaxyDep> {
     let mut out = Vec::new();
@@ -538,5 +606,72 @@ collections:
             deps.iter()
                 .all(|d| d.skip_reason == Some(AnsibleGalaxySkipReason::GalaxyHosted))
         );
+    }
+
+    const GALAXY_YML: &str = r#"---
+namespace: "foo"
+name: "bar"
+version: "1.2.7"
+readme: "readme_galaxy.md"
+authors:
+  - ""
+  - ""
+description: Administer Veeam Software
+license_file: "LICENSE"
+tags:
+  - availability
+  - suite
+  - backup
+dependencies:
+  ansible.posix: "1.5.4"
+  ansible.posix_with_comment: "1.5.4" # This is a comment
+  ansible.windows: '1.4.0'
+  ansible.windows_with_comment: '1.4.0' #   This is a comment
+  community.general: 7.3.0
+  community.general_with_comment: 7.3.0   # This is a comment
+  community.windows: '>=1.0.0,<2.0.0'
+  "community.general_quoted": 7.3.0
+  "community.general_with_comment_quoted": 7.3.0   # This is a comment
+  "community.windows_quoted": '>=1.0.0,<2.0.0'
+repository: "https://github.com/foo/bar"
+issues: "https://github.com/foo/bar/issues"
+"#;
+
+    // Ported: "check galaxy definition file" — ansible-galaxy/extract.spec.ts line 79
+    #[test]
+    fn galaxy_definition_file_extracts_ten_deps() {
+        let deps = extract_galaxy_metadata(GALAXY_YML);
+        assert_eq!(deps.len(), 10, "expected 10 deps from galaxy.yml");
+        let posix = deps.iter().find(|d| d.dep_name == "ansible.posix").unwrap();
+        assert_eq!(posix.current_value, "1.5.4");
+        let windows = deps
+            .iter()
+            .find(|d| d.dep_name == "community.windows")
+            .unwrap();
+        assert_eq!(windows.current_value, ">=1.0.0,<2.0.0");
+    }
+
+    // Ported: "negative start number returns -1" — ansible-galaxy/extract.spec.ts line 87
+    #[test]
+    fn get_slice_end_number_negative_start() {
+        assert_eq!(get_slice_end_number(-1, 10, &[5]), -1);
+    }
+
+    // Ported: "a start number bigger then number of lines return -1" — ansible-galaxy/extract.spec.ts line 92
+    #[test]
+    fn get_slice_end_number_start_too_big() {
+        assert_eq!(get_slice_end_number(20, 10, &[5]), -1);
+    }
+
+    // Ported: "choose first block" — ansible-galaxy/extract.spec.ts line 97
+    #[test]
+    fn get_slice_end_number_first_block() {
+        assert_eq!(get_slice_end_number(0, 10, &[5]), 5);
+    }
+
+    // Ported: "choose second block" — ansible-galaxy/extract.spec.ts line 102
+    #[test]
+    fn get_slice_end_number_second_block() {
+        assert_eq!(get_slice_end_number(5, 10, &[5]), 10);
     }
 }
