@@ -11,6 +11,7 @@ pub mod cargo;
 pub mod conan;
 pub mod conda;
 pub mod deno;
+pub mod elm;
 pub mod devbox;
 pub mod docker;
 pub mod exact;
