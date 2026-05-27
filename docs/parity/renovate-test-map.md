@@ -688,7 +688,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts.md) |
 | `lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts.md) |
 | `lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts.md) |
-| `lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts` | Not done | [details](lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts.md) |
+| `lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts.md) |
 | `lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts.md) |
 | `lib/modules/manager/terraform/hcl/index.spec.ts` | Not done | [details](lib/modules/manager/terraform/hcl/index.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/hash.spec.ts` | Not done | [details](lib/modules/manager/terraform/lockfile/hash.spec.ts.md) |
