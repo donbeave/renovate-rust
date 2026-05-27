@@ -122,7 +122,9 @@ mod tests {
     // Ported: "removes all approval-all-pending-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 20
     #[test]
     fn read_only_removes_approve_all_pending_prs() {
-        assert!(!read_only_issue_body(ISSUE_BODY).contains("Create all pending approval PRs at once"));
+        assert!(
+            !read_only_issue_body(ISSUE_BODY).contains("Create all pending approval PRs at once")
+        );
     }
 
     // Ported: "removes the create-all-rate-limited-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 26
@@ -134,13 +136,17 @@ mod tests {
     // Ported: "removes create-config-migration-pr" — modules/platform/utils/read-only-issue-body.spec.ts line 33
     #[test]
     fn read_only_removes_create_config_migration_pr() {
-        assert!(!read_only_issue_body(ISSUE_BODY).contains("create an automated Config Migration PR"));
+        assert!(
+            !read_only_issue_body(ISSUE_BODY).contains("create an automated Config Migration PR")
+        );
     }
 
     // Ported: "removes the create-all-awaiting-schedule-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 40
     #[test]
     fn read_only_removes_create_all_awaiting_schedule_prs() {
-        assert!(!read_only_issue_body(ISSUE_BODY).contains("Create all awaiting schedule PRs at once"));
+        assert!(
+            !read_only_issue_body(ISSUE_BODY).contains("Create all awaiting schedule PRs at once")
+        );
     }
 
     // Ported: "truncates to 1000" — modules/platform/utils/pr-body.spec.ts line 9

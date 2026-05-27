@@ -102,7 +102,7 @@ pub async fn fetch_releases(
     let index: ReleasesIndex = match http.get_json(registry_url).await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(DotnetVersionError::Http(e)),
@@ -114,7 +114,7 @@ pub async fn fetch_releases(
         let channel: ChannelReleases = match http.get_json(&entry.releases_json).await {
             Ok(v) => v,
             Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-                continue
+                continue;
             }
             Err(crate::http::HttpError::Request(_)) => continue,
             Err(e) => return Err(DotnetVersionError::Http(e)),
@@ -219,9 +219,11 @@ mod tests {
         let json = r#"{"releases-index":[{"channel-version":"7.0","releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/7.0/releases.json"}]}"#;
         let idx: ReleasesIndex = serde_json::from_str(json).unwrap();
         assert_eq!(idx.releases_index.len(), 1);
-        assert!(idx.releases_index[0]
-            .releases_json
-            .contains("7.0/releases.json"));
+        assert!(
+            idx.releases_index[0]
+                .releases_json
+                .contains("7.0/releases.json")
+        );
     }
 
     // Ported: "returns real data for sdk" — dotnet-version/index.spec.ts line 108
@@ -258,8 +260,14 @@ mod tests {
                 .find(|r| r.version == ver)
                 .and_then(|r| r.release_timestamp.as_deref())
         };
-        assert_eq!(ts("3.1.100-preview1-014459"), Some("2019-10-15T00:00:00.000Z"));
-        assert_eq!(ts("7.0.100-rc.1.22431.12"), Some("2022-09-14T00:00:00.000Z"));
+        assert_eq!(
+            ts("3.1.100-preview1-014459"),
+            Some("2019-10-15T00:00:00.000Z")
+        );
+        assert_eq!(
+            ts("7.0.100-rc.1.22431.12"),
+            Some("2022-09-14T00:00:00.000Z")
+        );
     }
 
     // Ported: "returns real data for runtime" — dotnet-version/index.spec.ts line 159
@@ -294,7 +302,10 @@ mod tests {
                 .find(|r| r.version == ver)
                 .and_then(|r| r.release_timestamp.as_deref())
         };
-        assert_eq!(ts("3.1.0-preview1.19506.1"), Some("2019-10-15T00:00:00.000Z"));
+        assert_eq!(
+            ts("3.1.0-preview1.19506.1"),
+            Some("2019-10-15T00:00:00.000Z")
+        );
         assert_eq!(ts("7.0.0-rc.1.22426.10"), Some("2022-09-14T00:00:00.000Z"));
     }
 

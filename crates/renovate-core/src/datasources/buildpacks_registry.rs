@@ -73,8 +73,11 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let mut releases: Vec<BuildpacksRelease> =
-        api.versions.into_iter().map(|v| BuildpacksRelease { version: v.version }).collect();
+    let mut releases: Vec<BuildpacksRelease> = api
+        .versions
+        .into_iter()
+        .map(|v| BuildpacksRelease { version: v.version })
+        .collect();
 
     // Sort ascending by semver (matches Renovate's sortAndRemoveDuplicates).
     releases.sort_by(|a, b| {
@@ -90,7 +93,11 @@ pub async fn fetch_releases(
 
     let source_url = api.latest.and_then(|l| l.homepage);
 
-    Ok(Some(BuildpacksResult { releases, source_url, registry_url: base.to_string() }))
+    Ok(Some(BuildpacksResult {
+        releases,
+        source_url,
+        registry_url: base.to_string(),
+    }))
 }
 
 /// Update summary used by pipeline.
@@ -108,8 +115,14 @@ pub async fn fetch_latest(
 ) -> Result<BuildpacksUpdateSummary, BuildpacksError> {
     let result = fetch_releases(DEFAULT_REGISTRY, package_name, http).await?;
     let latest = result.and_then(|r| r.releases.last().map(|rel| rel.version.clone()));
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-    Ok(BuildpacksUpdateSummary { latest, update_available })
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
+    Ok(BuildpacksUpdateSummary {
+        latest,
+        update_available,
+    })
 }
 
 #[cfg(test)]
@@ -153,13 +166,19 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "heroku/python", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "heroku/python", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 2);
         // Sorted ascending
         assert_eq!(result.releases[0].version, "0.17.0");
         assert_eq!(result.releases[1].version, "0.17.1");
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/heroku/buildpacks-python"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/heroku/buildpacks-python")
+        );
     }
 
     // Ported: "returns null on empty result" — datasource/buildpacks-registry/index.spec.ts line 48
@@ -173,7 +192,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "heroku/empty", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "heroku/empty", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -188,7 +209,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "heroku/notexisting", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "heroku/notexisting", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 }

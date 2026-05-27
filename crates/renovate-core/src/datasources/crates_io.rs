@@ -408,9 +408,7 @@ struct ApiCrateResponse {
 ///
 /// Returns `None` for unrecognised schemes (e.g. plain `"3"`).
 fn parse_registry_url(registry_url: &str) -> Option<&str> {
-    let raw = registry_url
-        .strip_prefix("sparse+")
-        .unwrap_or(registry_url);
+    let raw = registry_url.strip_prefix("sparse+").unwrap_or(registry_url);
     if raw.starts_with("http://") || raw.starts_with("https://") {
         Some(raw)
     } else {
@@ -430,8 +428,7 @@ fn should_delete_homepage(source_url: &str, homepage: &str) -> bool {
         Some(host_and_path[slash..].trim_end_matches('/'))
     }
 
-    let is_git_host =
-        homepage.contains("github.com") || homepage.contains("gitlab.com");
+    let is_git_host = homepage.contains("github.com") || homepage.contains("gitlab.com");
 
     if is_git_host {
         match (path_of(source_url), path_of(homepage)) {
@@ -548,8 +545,7 @@ pub async fn get_releases(
         format!("{}/{package_name}", raw_url.trim_end_matches('/'))
     };
 
-    let (homepage_raw, source_url) =
-        fetch_crate_metadata(raw_url, package_name, http).await;
+    let (homepage_raw, source_url) = fetch_crate_metadata(raw_url, package_name, http).await;
 
     let homepage = match (homepage_raw.as_deref(), source_url.as_deref()) {
         (Some(h), Some(s)) if should_delete_homepage(s, h) => None,
@@ -971,15 +967,16 @@ mod tests {
             .await;
         Mock::given(method("GET"))
             .and(path("/api/v1/crates/libc"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(libc_json),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(libc_json))
             .mount(&api_server)
             .await;
 
         let http = HttpClient::new().unwrap();
         let registry = format!("sparse+{}/", index_server.uri());
-        let result = get_releases("libc", &registry, &http).await.unwrap().unwrap();
+        let result = get_releases("libc", &registry, &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         // dependency_url uses crates.io form when raw_url contains "index.crates.io";
         // in tests we use a wiremock server so dependency_url uses the server base.
@@ -1002,7 +999,11 @@ mod tests {
             .collect();
         assert_eq!(with_ts, vec!["0.2.50"]);
 
-        let v051 = result.releases.iter().find(|r| r.version == "0.2.51").unwrap();
+        let v051 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "0.2.51")
+            .unwrap();
         assert_eq!(v051.version_orig.as_deref(), Some("0.2.51+metadata"));
 
         assert_eq!(
@@ -1030,15 +1031,16 @@ mod tests {
             .await;
         Mock::given(method("GET"))
             .and(path("/api/v1/crates/amethyst"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(amethyst_json),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(amethyst_json))
             .mount(&api_server)
             .await;
 
         let http = HttpClient::new().unwrap();
         let registry = format!("sparse+{}/", index_server.uri());
-        let result = get_releases("amethyst", &registry, &http).await.unwrap().unwrap();
+        let result = get_releases("amethyst", &registry, &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert!(result.dependency_url.contains("amethyst"));
         assert_eq!(result.releases.len(), 19);
@@ -1055,10 +1057,7 @@ mod tests {
             result.source_url.as_deref(),
             Some("https://github.com/amethyst/amethyst")
         );
-        assert_eq!(
-            result.homepage.as_deref(),
-            Some("https://amethyst.rs/")
-        );
+        assert_eq!(result.homepage.as_deref(), Some("https://amethyst.rs/"));
     }
 
     // Ported: "uses cached registry config for subsequent packages" — datasource/crate/index.spec.ts line 299

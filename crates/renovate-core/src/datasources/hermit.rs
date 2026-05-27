@@ -133,7 +133,10 @@ pub async fn fetch_releases(
     };
 
     // Find the entry for this package
-    let Some(entry) = entries.iter().find(|e| e.name.eq_ignore_ascii_case(package_name)) else {
+    let Some(entry) = entries
+        .iter()
+        .find(|e| e.name.eq_ignore_ascii_case(package_name))
+    else {
         return Ok(None);
     };
 
@@ -148,7 +151,10 @@ pub async fn fetch_releases(
         })
         .collect();
 
-    Ok(Some(HermitReleasesResult { releases, source_url }))
+    Ok(Some(HermitReleasesResult {
+        releases,
+        source_url,
+    }))
 }
 
 /// Compatibility wrapper for ci.rs — fetch latest version via Hermit index.
@@ -202,7 +208,10 @@ mod tests {
     use super::*;
 
     fn release_with_index(server: &MockServer) -> serde_json::Value {
-        let asset_url = format!("{}/repos/cashapp/hermit-packages/releases/assets/38492", server.uri());
+        let asset_url = format!(
+            "{}/repos/cashapp/hermit-packages/releases/assets/38492",
+            server.uri()
+        );
         serde_json::json!({
             "assets": [
                 { "name": "source.tar.gz", "url": format!("{}/repos/cashapp/hermit-packages/releases/assets/99999", server.uri()) },
@@ -240,16 +249,32 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("go", Some("https://github.com/cashapp/hermit-packages"), &http, &server.uri())
-            .await
-            .unwrap()
-            .unwrap();
+        let result = fetch_releases(
+            "go",
+            Some("https://github.com/cashapp/hermit-packages"),
+            &http,
+            &server.uri(),
+        )
+        .await
+        .unwrap()
+        .unwrap();
 
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/golang/golang"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/golang/golang")
+        );
         assert_eq!(result.releases.len(), 6);
         let versions: Vec<&str> = result.releases.iter().map(|r| r.version.as_str()).collect();
-        assert_eq!(versions, vec!["1.17.9", "1.17.10", "1.18", "1.18.1", "@1.17", "@1.18"]);
-        assert!(result.releases.iter().all(|r| r.source_url.as_deref() == Some("https://github.com/golang/golang")));
+        assert_eq!(
+            versions,
+            vec!["1.17.9", "1.17.10", "1.18", "1.18.1", "@1.17", "@1.18"]
+        );
+        assert!(
+            result
+                .releases
+                .iter()
+                .all(|r| r.source_url.as_deref() == Some("https://github.com/golang/golang"))
+        );
     }
 
     // Ported: "should fail on no result found" — datasource/hermit/index.spec.ts line 82
@@ -270,9 +295,14 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("go", Some("https://github.com/cashapp/hermit-packages"), &http, &server.uri())
-            .await
-            .unwrap();
+        let result = fetch_releases(
+            "go",
+            Some("https://github.com/cashapp/hermit-packages"),
+            &http,
+            &server.uri(),
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -294,8 +324,13 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("go", Some("https://github.com/cashapp/hermit-packages"), &http, &server.uri())
-            .await;
+        let result = fetch_releases(
+            "go",
+            Some("https://github.com/cashapp/hermit-packages"),
+            &http,
+            &server.uri(),
+        )
+        .await;
         assert!(result.is_err());
     }
 
@@ -303,9 +338,14 @@ mod tests {
     #[tokio::test]
     async fn should_get_null_on_non_github_url() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("go", Some("https://gitlab.com/owner/project"), &http, "https://api.github.com")
-            .await
-            .unwrap();
+        let result = fetch_releases(
+            "go",
+            Some("https://gitlab.com/owner/project"),
+            &http,
+            "https://api.github.com",
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -314,10 +354,12 @@ mod tests {
     async fn should_get_null_on_missing_repo_or_owner() {
         let http = HttpClient::new().unwrap();
         let r1 = fetch_releases("go", Some("https://github.com/test"), &http, "")
-            .await.unwrap();
+            .await
+            .unwrap();
         assert!(r1.is_none());
         let r2 = fetch_releases("go", Some("https://github.com/"), &http, "")
-            .await.unwrap();
+            .await
+            .unwrap();
         assert!(r2.is_none());
     }
 
@@ -325,8 +367,14 @@ mod tests {
     #[tokio::test]
     async fn should_get_null_for_extra_path() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("go", Some("https://github.com/test/repo/extra-path"), &http, "")
-            .await.unwrap();
+        let result = fetch_releases(
+            "go",
+            Some("https://github.com/test/repo/extra-path"),
+            &http,
+            "",
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -334,8 +382,7 @@ mod tests {
     #[tokio::test]
     async fn should_get_null_on_empty_registry_url() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("go", None, &http, "")
-            .await.unwrap();
+        let result = fetch_releases("go", None, &http, "").await.unwrap();
         assert!(result.is_none());
     }
 
@@ -353,8 +400,14 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("go", Some("https://github.com/cashapp/hermit-packages"), &http, &server.uri())
-            .await.unwrap();
+        let result = fetch_releases(
+            "go",
+            Some("https://github.com/cashapp/hermit-packages"),
+            &http,
+            &server.uri(),
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -376,8 +429,14 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("go", Some("https://github.com/cashapp/hermit-packages"), &http, &server.uri())
-            .await.unwrap();
+        let result = fetch_releases(
+            "go",
+            Some("https://github.com/cashapp/hermit-packages"),
+            &http,
+            &server.uri(),
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -386,7 +445,8 @@ mod tests {
     async fn should_get_null_on_invalid_registry_url() {
         let http = HttpClient::new().unwrap();
         let result = fetch_releases("go", Some("invalid url"), &http, "")
-            .await.unwrap();
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 }

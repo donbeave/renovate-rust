@@ -71,10 +71,13 @@ pub async fn fetch_releases(
     let base = registry_url.trim_end_matches('/');
     let versions_url = format!("{}/{}/versions.yaml", base, package_name);
 
-    let versions_text = match http.get_raw_with_accept(&versions_url, "application/yaml").await {
+    let versions_text = match http
+        .get_raw_with_accept(&versions_url, "application/yaml")
+        .await
+    {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(GlasskubeError::Http(e)),
@@ -103,10 +106,13 @@ pub async fn fetch_releases(
         base, package_name, versions.latest_version
     );
 
-    let manifest_text = match http.get_raw_with_accept(&manifest_url, "application/yaml").await {
+    let manifest_text = match http
+        .get_raw_with_accept(&manifest_url, "application/yaml")
+        .await
+    {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(GlasskubeError::Http(e)),
@@ -154,7 +160,10 @@ pub async fn fetch_latest(
 ) -> Result<GlasskubeUpdateSummary, GlasskubeError> {
     let result = fetch_releases(GLASSKUBE_REGISTRY_BASE, package_name, http).await?;
     let latest = result.and_then(|r| r.tags.and_then(|t| t.get("latest").cloned()));
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
     Ok(GlasskubeUpdateSummary {
         latest,
         update_available,
@@ -275,7 +284,14 @@ mod tests {
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "v1.22.0+1");
         assert_eq!(result.releases[1].version, "v1.23.1+1");
-        assert_eq!(result.tags.as_ref().and_then(|t| t.get("latest")).map(|s| s.as_str()), Some("v1.23.1+1"));
+        assert_eq!(
+            result
+                .tags
+                .as_ref()
+                .and_then(|t| t.get("latest"))
+                .map(|s| s.as_str()),
+            Some("v1.23.1+1")
+        );
         assert!(result.source_url.is_none());
         assert!(result.homepage.is_none());
     }
@@ -300,10 +316,23 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/cloudnative-pg/cloudnative-pg"));
-        assert_eq!(result.homepage.as_deref(), Some("https://cloudnative-pg.io/"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/cloudnative-pg/cloudnative-pg")
+        );
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://cloudnative-pg.io/")
+        );
         assert_eq!(result.releases.len(), 2);
-        assert_eq!(result.tags.as_ref().and_then(|t| t.get("latest")).map(|s| s.as_str()), Some("v1.23.1+1"));
+        assert_eq!(
+            result
+                .tags
+                .as_ref()
+                .and_then(|t| t.get("latest"))
+                .map(|s| s.as_str()),
+            Some("v1.23.1+1")
+        );
     }
 
     // Ported: "should handle package manifest with references and custom url" — datasource/glasskube-packages/index.spec.ts line 119
@@ -326,7 +355,13 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/cloudnative-pg/cloudnative-pg"));
-        assert_eq!(result.homepage.as_deref(), Some("https://cloudnative-pg.io/"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/cloudnative-pg/cloudnative-pg")
+        );
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://cloudnative-pg.io/")
+        );
     }
 }

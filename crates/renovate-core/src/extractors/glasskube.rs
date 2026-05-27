@@ -128,6 +128,12 @@ spec:
         assert_eq!(deps[0].kind, "ClusterPackage");
     }
 
+    // Ported: "should return null for empty packageFiles" — glasskube/extract.spec.ts line 62
+    #[test]
+    fn extract_all_returns_empty_for_empty_input() {
+        assert!(extract("").is_empty());
+    }
+
     // Ported: "should skip package with non-existing repo" — glasskube/extract.spec.ts line 67
     #[test]
     fn skips_non_glasskube_files() {

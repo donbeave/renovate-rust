@@ -61,7 +61,11 @@ pub fn parse_ls_remote(output: &str) -> Vec<RawRef> {
         let refpath = refpath.trim();
 
         if refpath == "HEAD" {
-            raw.push(RawRef { type_: String::new(), value: "HEAD".to_string(), hash });
+            raw.push(RawRef {
+                type_: String::new(),
+                value: "HEAD".to_string(),
+                hash,
+            });
         } else if let Some(rest) = refpath.strip_prefix("refs/") {
             if let Some((type_, value)) = rest.split_once('/') {
                 if let Some(base) = value.strip_suffix("^{}") {
@@ -122,7 +126,10 @@ pub fn get_releases(package_name: &str, ls_remote: Option<&str>) -> Option<GitRe
         }
     }
 
-    Some(GitRefsResult { releases, source_url })
+    Some(GitRefsResult {
+        releases,
+        source_url,
+    })
 }
 
 /// Get the commit digest for a specific ref or HEAD from `git ls-remote` output.
@@ -210,11 +217,8 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
     // Ported: "returns versions filtered from tags" — datasource/git-refs/index.spec.ts line 68
     #[test]
     fn returns_versions_filtered_from_tags() {
-        let result = get_releases(
-            "https://github.com/example/example.git",
-            Some(LS_REMOTE_1),
-        )
-        .unwrap();
+        let result =
+            get_releases("https://github.com/example/example.git", Some(LS_REMOTE_1)).unwrap();
 
         assert_eq!(result.source_url, "https://github.com/example/example");
 
@@ -234,13 +238,19 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
         // refs/for/ must be excluded (not heads/tags type)
         let no_for_master = result.releases.iter().all(|r| {
             !(r.version == "master"
-                && r.new_digest.as_deref()
-                    == Some("46fd703d4738905cd55e1c5c36a70e5d43432b9c"))
+                && r.new_digest.as_deref() == Some("46fd703d4738905cd55e1c5c36a70e5d43432b9c"))
         });
-        assert!(no_for_master, "refs/for/master hash must not appear in releases");
+        assert!(
+            no_for_master,
+            "refs/for/master hash must not appear in releases"
+        );
 
         // Annotated tag: v1.0.5 should use the dereferenced hash
-        let v1_0_5 = result.releases.iter().find(|r| r.version == "v1.0.5").unwrap();
+        let v1_0_5 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "v1.0.5")
+            .unwrap();
         assert_eq!(
             v1_0_5.new_digest.as_deref(),
             Some("6d7a933c2e6b7b39e992b1f93b6b42de083b28f0")

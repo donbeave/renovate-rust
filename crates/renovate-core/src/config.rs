@@ -780,8 +780,8 @@ mod tests {
     use serde_json::json;
 
     use super::{
-        BinarySource, ConfigDefaultValue, ConfigOptionType, GLOBAL_CONFIG_OPTIONS,
-        GlobalConfig, INHERIT_CONFIG_OPTIONS, InheritConfig, InheritedValue, default_repo_config,
+        BinarySource, ConfigDefaultValue, ConfigOptionType, GLOBAL_CONFIG_OPTIONS, GlobalConfig,
+        INHERIT_CONFIG_OPTIONS, InheritConfig, InheritedValue, default_repo_config,
         default_value_for_type, filter_config, get_manager_config, merge_child_config,
         remove_global_config,
     };

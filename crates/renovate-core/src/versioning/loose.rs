@@ -21,9 +21,8 @@ struct LooseVersion {
 /// `numericPattern = /^[0-9]+$/`
 fn parse(v: &str) -> Option<LooseVersion> {
     let len = v.len();
-    let is_commit_hash = len >= 7
-        && len <= 40
-        && v.chars().all(|c| matches!(c, '0'..='9' | 'a'..='f'));
+    let is_commit_hash =
+        len >= 7 && len <= 40 && v.chars().all(|c| matches!(c, '0'..='9' | 'a'..='f'));
     let is_pure_numeric = v.chars().all(|c| c.is_ascii_digit());
     if is_commit_hash && !is_pure_numeric {
         return None;
@@ -39,9 +38,7 @@ fn parse(v: &str) -> Option<LooseVersion> {
     let mut pos = 0;
     loop {
         let start = pos;
-        while pos < stripped.len()
-            && stripped.as_bytes()[pos].is_ascii_digit()
-        {
+        while pos < stripped.len() && stripped.as_bytes()[pos].is_ascii_digit() {
             pos += 1;
         }
         if pos == start {
@@ -237,8 +234,16 @@ mod tests {
             ("2.4.0", "2.4.beta", true),
             ("2.4.beta", "2.4", false),
             ("2.4.beta", "2.4.0", false),
-            ("2024-07-21T11-33-05.abc123", "2023-06-21T11-33-05.abc123", true),
-            ("2023-07-21T11-33-05.abc123", "2023-07-21T11-33-04.abc123", true),
+            (
+                "2024-07-21T11-33-05.abc123",
+                "2023-06-21T11-33-05.abc123",
+                true,
+            ),
+            (
+                "2023-07-21T11-33-05.abc123",
+                "2023-07-21T11-33-04.abc123",
+                true,
+            ),
             ("2023-07-21-113305-abc123", "2023-07-21-113304-abc123", true),
             ("1.1.5-100", "1.1.5-99", true),
         ];

@@ -153,10 +153,7 @@ fn parse_date_field(line: &str) -> Option<String> {
     let year: u32 = parts[0].trim().parse().ok()?;
     let month: u32 = parts[1].trim().parse().ok()?;
     let day: u32 = parts[2].trim().parse().ok()?;
-    Some(format!(
-        "{:04}-{:02}-{:02}T00:00:00.000Z",
-        year, month, day
-    ))
+    Some(format!("{:04}-{:02}-{:02}T00:00:00.000Z", year, month, day))
 }
 
 /// Parse `Version: Version{1, 18, 1}` → `"1.18.1"`.
@@ -191,7 +188,7 @@ pub async fn fetch_releases(
     let text = match http.get_raw_with_accept(&url, "text/plain").await {
         Ok(t) => t,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(e) => return Err(GolangVersionError::Http(e)),
     };
@@ -262,10 +259,7 @@ var Releases = []*Release{
 	},
 }"#;
         let err = parse_releases(input).unwrap_err();
-        assert!(
-            err.to_string().contains("no version"),
-            "unexpected: {err}"
-        );
+        assert!(err.to_string().contains("no version"), "unexpected: {err}");
     }
 
     #[test]
@@ -277,7 +271,10 @@ var Releases = []*Release{
 	},
 }"#;
         let err = parse_releases(input).unwrap_err();
-        assert!(err.to_string().contains("zero releases"), "unexpected: {err}");
+        assert!(
+            err.to_string().contains("zero releases"),
+            "unexpected: {err}"
+        );
     }
 
     // Ported: "throws ExternalHostError for invalid release semver" — golang-version/index.spec.ts line 102

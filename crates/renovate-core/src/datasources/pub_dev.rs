@@ -120,7 +120,11 @@ pub async fn fetch_releases(
     let homepage = pubspec.and_then(|p| p.homepage.clone());
     let source_url = pubspec.and_then(|p| p.repository.clone());
 
-    Ok(Some(DartResult { releases, homepage, source_url }))
+    Ok(Some(DartResult {
+        releases,
+        homepage,
+        source_url,
+    }))
 }
 
 // ── Pipeline helpers ───────────────────────────────────────────────────────
@@ -171,7 +175,10 @@ pub async fn fetch_updates_concurrent(
         set.spawn(async move {
             let _permit = sem.acquire_owned().await.expect("semaphore closed");
             let result = fetch_dep_summary(&dep, &http, &registry_url).await;
-            PubUpdateResult { name: dep.name.clone(), summary: result }
+            PubUpdateResult {
+                name: dep.name.clone(),
+                summary: result,
+            }
         });
     }
 
@@ -195,11 +202,17 @@ async fn fetch_dep_summary(
         None => (None, None),
         Some(r) => {
             let latest = r.releases.last().map(|rel| rel.version.clone());
-            let ts = r.releases.last().and_then(|rel| rel.release_timestamp.clone());
+            let ts = r
+                .releases
+                .last()
+                .and_then(|rel| rel.release_timestamp.clone());
             (latest, ts)
         }
     };
-    let update_available = latest.as_deref().map(|l| l != dep.current_value).unwrap_or(false);
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != dep.current_value)
+        .unwrap_or(false);
     Ok(PubUpdateSummary {
         current_value: dep.current_value.clone(),
         latest,
@@ -230,7 +243,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "non_sense", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "non_sense", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -241,14 +256,16 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/api/packages/shared_preferences"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                r#"{"latest":{"pubspec":{}}}"#,
-            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(r#"{"latest":{"pubspec":{}}}"#),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "shared_preferences", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "shared_preferences", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
 
         // Missing latest field
@@ -261,7 +278,9 @@ mod tests {
             .mount(&server2)
             .await;
 
-        let result2 = fetch_releases(&server2.uri(), "shared_preferences", &http).await.unwrap();
+        let result2 = fetch_releases(&server2.uri(), "shared_preferences", &http)
+            .await
+            .unwrap();
         assert!(result2.is_none());
     }
 
@@ -276,7 +295,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "shared_preferences", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "shared_preferences", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -301,7 +322,9 @@ mod tests {
     async fn returns_null_for_unknown_error() {
         let http = HttpClient::new().unwrap();
         // Use an invalid URL to trigger a network error.
-        let result = fetch_releases("http://127.0.0.1:1", "pkg", &http).await.unwrap();
+        let result = fetch_releases("http://127.0.0.1:1", "pkg", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -328,11 +351,19 @@ mod tests {
             result.releases[0].release_timestamp.as_deref(),
             Some("2017-05-09T18:25:24.268Z")
         );
-        assert_eq!(result.releases.last().map(|r| r.version.as_str()), Some("0.5.8"));
+        assert_eq!(
+            result.releases.last().map(|r| r.version.as_str()),
+            Some("0.5.8")
+        );
         assert_eq!(
             result.homepage.as_deref(),
-            Some("https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences")
+            Some(
+                "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences"
+            )
         );
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/flutter/plugins"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/flutter/plugins")
+        );
     }
 }

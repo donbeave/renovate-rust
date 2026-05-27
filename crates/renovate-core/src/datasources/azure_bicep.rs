@@ -62,7 +62,9 @@ pub struct BicepReleasesResult {
 }
 
 fn changelog_base(package_name_lower: &str) -> String {
-    let slash = package_name_lower.find('/').unwrap_or(package_name_lower.len());
+    let slash = package_name_lower
+        .find('/')
+        .unwrap_or(package_name_lower.len());
     let namespace = &package_name_lower[..slash];
     let type_ = &package_name_lower[slash + 1..];
     format!(
@@ -94,7 +96,11 @@ pub async fn fetch_releases(
         .filter_map(|k| {
             let lower = k.to_lowercase();
             let (type_name, version) = lower.split_once('@')?;
-            if type_name == pkg_lower { Some(version.to_owned()) } else { None }
+            if type_name == pkg_lower {
+                Some(version.to_owned())
+            } else {
+                None
+            }
         })
         .collect();
 
@@ -106,7 +112,10 @@ pub async fn fetch_releases(
     let base = changelog_base(&pkg_lower);
     let releases = versions
         .into_iter()
-        .map(|v| BicepRelease { changelog_url: format!("{}#{}", base, v), version: v })
+        .map(|v| BicepRelease {
+            changelog_url: format!("{}#{}", base, v),
+            version: v,
+        })
         .collect();
 
     Ok(Some(BicepReleasesResult { releases }))
@@ -206,7 +215,9 @@ mod tests {
         mock_index(&server, r#"{"resources":{},"resourceFunctions":{}}"#).await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&index_url(&server), "unknown", &http).await.unwrap();
+        let result = fetch_releases(&index_url(&server), "unknown", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -218,7 +229,9 @@ mod tests {
         mock_index(&server, body).await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&index_url(&server), "unknown", &http).await.unwrap();
+        let result = fetch_releases(&index_url(&server), "unknown", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 

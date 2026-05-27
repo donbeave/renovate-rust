@@ -32,9 +32,8 @@ fn parse(v: &str) -> Option<U3dPkgVersion> {
         return None;
     }
 
-    let is_unstable = label.starts_with("exp.")
-        || label.starts_with("pre.")
-        || label.starts_with("preview.");
+    let is_unstable =
+        label.starts_with("exp.") || label.starts_with("pre.") || label.starts_with("preview.");
 
     Some(U3dPkgVersion {
         major,
@@ -68,12 +67,8 @@ fn natural_compare(a: &str, b: &str) -> Ordering {
         let b_digit = bi.starts_with(|c: char| c.is_ascii_digit());
 
         if a_digit && b_digit {
-            let a_end = ai
-                .find(|c: char| !c.is_ascii_digit())
-                .unwrap_or(ai.len());
-            let b_end = bi
-                .find(|c: char| !c.is_ascii_digit())
-                .unwrap_or(bi.len());
+            let a_end = ai.find(|c: char| !c.is_ascii_digit()).unwrap_or(ai.len());
+            let b_end = bi.find(|c: char| !c.is_ascii_digit()).unwrap_or(bi.len());
             let a_n: u64 = ai[..a_end].parse().unwrap_or(0);
             let b_n: u64 = bi[..b_end].parse().unwrap_or(0);
             match a_n.cmp(&b_n) {

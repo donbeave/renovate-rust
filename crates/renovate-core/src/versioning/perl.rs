@@ -35,8 +35,7 @@ fn parse_decimal(v: &str) -> Option<PerlVersion> {
         if before.is_empty() || after.is_empty() {
             return None;
         }
-        if !before.chars().all(|c| c.is_ascii_digit())
-            || !after.chars().all(|c| c.is_ascii_digit())
+        if !before.chars().all(|c| c.is_ascii_digit()) || !after.chars().all(|c| c.is_ascii_digit())
         {
             return None;
         }
@@ -71,7 +70,10 @@ fn parse_decimal(v: &str) -> Option<PerlVersion> {
     let mut release = vec![int_part];
     release.append(&mut components);
 
-    Some(PerlVersion { release, prerelease })
+    Some(PerlVersion {
+        release,
+        prerelease,
+    })
 }
 
 /// `^v?(\d+(?:\.\d+)*(?:_\d+)?)$` — dotted-decimal format
@@ -114,7 +116,10 @@ fn parse_dotted(v: &str) -> Option<PerlVersion> {
 
     let release: Vec<u64> = parts.iter().map(|p| p.parse().unwrap_or(0)).collect();
 
-    Some(PerlVersion { release, prerelease })
+    Some(PerlVersion {
+        release,
+        prerelease,
+    })
 }
 
 fn parse(v: &str) -> Option<PerlVersion> {
@@ -252,7 +257,11 @@ mod tests {
             // undefined (None parse) > any valid version
         ];
         for (a, b, expected) in cases {
-            assert_eq!(is_greater_than(a, b), expected, "is_greater_than({a:?}, {b:?})");
+            assert_eq!(
+                is_greater_than(a, b),
+                expected,
+                "is_greater_than({a:?}, {b:?})"
+            );
         }
         // special: undefined > "1.2.0"
         assert!(is_greater_than("not_a_version_at_all_xyz", "1.2.0"));

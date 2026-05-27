@@ -85,8 +85,14 @@ mod tests {
         cache.set("normal-key", Value::String("value".to_string()));
         cache.set("another-key", Value::String("data".to_string()));
         cache.clean_datasource_keys();
-        assert_eq!(cache.get("normal-key"), Some(&Value::String("value".to_string())));
-        assert_eq!(cache.get("another-key"), Some(&Value::String("data".to_string())));
+        assert_eq!(
+            cache.get("normal-key"),
+            Some(&Value::String("value".to_string()))
+        );
+        assert_eq!(
+            cache.get("another-key"),
+            Some(&Value::String("data".to_string()))
+        );
     }
 
     // Ported: "removes keys that start with datasource-mem:pkg-fetch:" — util/cache/memory/index.spec.ts line 28
@@ -94,11 +100,17 @@ mod tests {
     fn clean_datasource_keys_removes_pkg_fetch_prefix() {
         let mut cache = MemCache::new();
         cache.init();
-        cache.set("datasource-mem:pkg-fetch:test", Value::String("value".to_string()));
+        cache.set(
+            "datasource-mem:pkg-fetch:test",
+            Value::String("value".to_string()),
+        );
         cache.set("normal-key", Value::String("data".to_string()));
         cache.clean_datasource_keys();
         assert_eq!(cache.get("datasource-mem:pkg-fetch:test"), None);
-        assert_eq!(cache.get("normal-key"), Some(&Value::String("data".to_string())));
+        assert_eq!(
+            cache.get("normal-key"),
+            Some(&Value::String("data".to_string()))
+        );
     }
 
     // Ported: "removes keys that start with datasource-releases" — util/cache/memory/index.spec.ts line 36
@@ -106,11 +118,17 @@ mod tests {
     fn clean_datasource_keys_removes_releases_prefix() {
         let mut cache = MemCache::new();
         cache.init();
-        cache.set("datasource-mem:releases:npm", Value::String("value".to_string()));
+        cache.set(
+            "datasource-mem:releases:npm",
+            Value::String("value".to_string()),
+        );
         cache.set("normal-key", Value::String("data".to_string()));
         cache.clean_datasource_keys();
         assert_eq!(cache.get("datasource-mem:releases:npm"), None);
-        assert_eq!(cache.get("normal-key"), Some(&Value::String("data".to_string())));
+        assert_eq!(
+            cache.get("normal-key"),
+            Some(&Value::String("data".to_string()))
+        );
     }
 
     // Ported: "removes all matching keys while keeping others" — util/cache/memory/index.spec.ts line 44
@@ -118,10 +136,22 @@ mod tests {
     fn clean_datasource_keys_removes_all_matching_keeps_others() {
         let mut cache = MemCache::new();
         cache.init();
-        cache.set("datasource-mem:pkg-fetch:test1", Value::String("value1".to_string()));
-        cache.set("datasource-mem:pkg-fetch:test2", Value::String("value2".to_string()));
-        cache.set("datasource-mem:pkg-fetch:npm", Value::String("npm-data".to_string()));
-        cache.set("datasource-mem:pkg-fetch:docker", Value::String("docker-data".to_string()));
+        cache.set(
+            "datasource-mem:pkg-fetch:test1",
+            Value::String("value1".to_string()),
+        );
+        cache.set(
+            "datasource-mem:pkg-fetch:test2",
+            Value::String("value2".to_string()),
+        );
+        cache.set(
+            "datasource-mem:pkg-fetch:npm",
+            Value::String("npm-data".to_string()),
+        );
+        cache.set(
+            "datasource-mem:pkg-fetch:docker",
+            Value::String("docker-data".to_string()),
+        );
         cache.set("normal-key1", Value::String("normal1".to_string()));
         cache.set("normal-key2", Value::String("normal2".to_string()));
         cache.clean_datasource_keys();
@@ -129,7 +159,13 @@ mod tests {
         assert_eq!(cache.get("datasource-mem:pkg-fetch:test2"), None);
         assert_eq!(cache.get("datasource-mem:pkg-fetch:npm"), None);
         assert_eq!(cache.get("datasource-mem:pkg-fetch:docker"), None);
-        assert_eq!(cache.get("normal-key1"), Some(&Value::String("normal1".to_string())));
-        assert_eq!(cache.get("normal-key2"), Some(&Value::String("normal2".to_string())));
+        assert_eq!(
+            cache.get("normal-key1"),
+            Some(&Value::String("normal1".to_string()))
+        );
+        assert_eq!(
+            cache.get("normal-key2"),
+            Some(&Value::String("normal2".to_string()))
+        );
     }
 }

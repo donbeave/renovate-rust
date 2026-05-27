@@ -14,8 +14,7 @@ use serde::Deserialize;
 
 use crate::http::HttpClient;
 
-pub const BASE_URL: &str =
-    "https://services.api.unity.com/unity/editor/release/v1/releases";
+pub const BASE_URL: &str = "https://services.api.unity.com/unity/editor/release/v1/releases";
 pub const STREAM_LTS: &str =
     "https://services.api.unity.com/unity/editor/release/v1/releases?stream=LTS";
 pub const STREAM_TECH: &str =
@@ -162,7 +161,10 @@ pub async fn fetch_latest_lts(
     let result = fetch_releases(STREAM_LTS, with_revision, http).await?;
     let latest = result.releases.first().map(|r| r.version.clone());
     let latest_plain = result.releases.first().map(|r| {
-        r.version.split_once(' ').map(|(v, _)| v.to_string()).unwrap_or_else(|| r.version.clone())
+        r.version
+            .split_once(' ')
+            .map(|(v, _)| v.to_string())
+            .unwrap_or_else(|| r.version.clone())
     });
     Ok(Unity3dUpdateSummary {
         latest: latest.clone(),
@@ -269,10 +271,15 @@ mod tests {
     const API_PATH: &str = "/unity/editor/release/v1/releases";
 
     fn stream_param(stream: &str) -> &'static str {
-        if stream.contains("LTS") { "LTS" }
-        else if stream.contains("TECH") { "TECH" }
-        else if stream.contains("ALPHA") { "ALPHA" }
-        else { "BETA" }
+        if stream.contains("LTS") {
+            "LTS"
+        } else if stream.contains("TECH") {
+            "TECH"
+        } else if stream.contains("ALPHA") {
+            "ALPHA"
+        } else {
+            "BETA"
+        }
     }
 
     async fn mount_stream(server: &MockServer, stream: &str, fixture: serde_json::Value) {
@@ -287,7 +294,12 @@ mod tests {
     }
 
     fn make_stream_url(server: &MockServer, stream: &str) -> String {
-        format!("{}{}?stream={}", server.uri(), API_PATH, stream_param(stream))
+        format!(
+            "{}{}?stream={}",
+            server.uri(),
+            API_PATH,
+            stream_param(stream)
+        )
     }
 
     // Ported: "returns lts if requested %s" — datasource/unity3d/index.spec.ts line 55
@@ -411,7 +423,11 @@ mod tests {
 
         // All versions should have 'f' or 'p' (LTS), not 'b' or 'a' (prerelease)
         assert!(result.releases.iter().all(|r| {
-            let v = r.version.split_once(' ').map(|(v, _)| v).unwrap_or(&r.version);
+            let v = r
+                .version
+                .split_once(' ')
+                .map(|(v, _)| v)
+                .unwrap_or(&r.version);
             v.contains('f') || v.contains('p')
         }));
     }
@@ -468,7 +484,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let stream_url = format!("{}/unity/editor/release/v1/releases?stream=LTS", server.uri());
+        let stream_url = format!(
+            "{}/unity/editor/release/v1/releases?stream=LTS",
+            server.uri()
+        );
         let result = fetch_releases(&stream_url, false, &http).await.unwrap();
 
         assert_eq!(result.releases.len(), 30);

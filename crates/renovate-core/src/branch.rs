@@ -402,7 +402,10 @@ pub fn pr_title(
                 .replace("{{depName}}", dep_name)
         }
     } else {
-        let starts_with_digit = new_version.chars().next().is_some_and(|c| c.is_ascii_digit());
+        let starts_with_digit = new_version
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_digit());
         if is_major && starts_with_digit {
             let major = crate::versioning::semver_generic::parse_padded(new_version)
                 .map(|v| v.major)

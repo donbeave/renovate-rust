@@ -219,8 +219,8 @@ fn parse_repository_dep(
     }
 
     // Validate URL is parseable and has http/https scheme.
-    let is_valid_url = repository_url.starts_with("https://")
-        || repository_url.starts_with("http://");
+    let is_valid_url =
+        repository_url.starts_with("https://") || repository_url.starts_with("http://");
 
     if !is_valid_url {
         // Non-parseable / unrecognized scheme → invalid-url.
@@ -988,7 +988,10 @@ dependencies:
         let mut aliases = HashMap::new();
         aliases.insert("placeholder".into(), "https://my-registry.gcr.io/".into());
         aliases.insert("longalias".into(), "https://registry.example.com/".into());
-        aliases.insert("ociRegistry".into(), "oci://quay.example.com/organization".into());
+        aliases.insert(
+            "ociRegistry".into(),
+            "oci://quay.example.com/organization".into(),
+        );
         let result = extract_package_file(content, "Chart.yaml", &aliases).unwrap();
         assert!(result.deps.iter().all(|d| d.skip_reason.is_none()));
     }

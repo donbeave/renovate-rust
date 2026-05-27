@@ -407,14 +407,20 @@ mod tests {
     fn caret_range_not_flagged_when_latest_within_range() {
         let versions = avail(&["18.0.0", "18.2.0"]);
         let s = npm_update_summary("^18.0.0", &versions, Some("18.2.0"));
-        assert!(!s.update_available, "^18.0.0 with latest 18.2.0 is within range");
+        assert!(
+            !s.update_available,
+            "^18.0.0 with latest 18.2.0 is within range"
+        );
     }
 
     #[test]
     fn caret_range_flagged_when_latest_outside_range() {
         let versions = avail(&["18.0.0", "18.2.0", "19.0.0"]);
         let s = npm_update_summary("^18.0.0", &versions, Some("19.0.0"));
-        assert!(s.update_available, "^18.0.0 with latest 19.0.0 needs update");
+        assert!(
+            s.update_available,
+            "^18.0.0 with latest 19.0.0 needs update"
+        );
         assert_eq!(s.latest.as_deref(), Some("19.0.0"));
     }
 
@@ -423,7 +429,10 @@ mod tests {
         let versions = avail(&["18.0.0", "18.1.0"]);
         let s = npm_update_summary("~18.0.0", &versions, Some("18.1.0"));
         // ~18.0.0 means >=18.0.0 <18.1.0; 18.1.0 is outside → update
-        assert!(s.update_available, "~18.0.0 with latest 18.1.0 needs update");
+        assert!(
+            s.update_available,
+            "~18.0.0 with latest 18.1.0 needs update"
+        );
     }
 
     #[test]
@@ -431,7 +440,10 @@ mod tests {
         let versions = avail(&["18.0.0", "18.2.0", "19.0.0"]);
         let s = npm_update_summary(">=18", &versions, Some("19.0.0"));
         // >=18 is open-ended: every future version satisfies it
-        assert!(!s.update_available, ">=18 should not flag update for 19.0.0");
+        assert!(
+            !s.update_available,
+            ">=18 should not flag update for 19.0.0"
+        );
     }
 
     #[test]

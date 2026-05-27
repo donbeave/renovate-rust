@@ -85,9 +85,10 @@ fn to_ms_timestamp(s: &str) -> Option<String> {
 }
 
 fn parse_release(source: SourceEntry) -> Option<CpanRelease> {
-    let version = source.module?.into_iter().find_map(|m| {
-        m.version.filter(|v| !v.is_empty())
-    })?;
+    let version = source
+        .module?
+        .into_iter()
+        .find_map(|m| m.version.filter(|v| !v.is_empty()))?;
     let distribution = source.distribution?;
     // status must be one of backpan/cpan/latest; missing or unknown → skip
     let status = source.status.as_deref()?;
@@ -134,7 +135,7 @@ pub async fn fetch_releases(
     let resp: HitsWrapper = match http.post_json(&search_url, &body_str).await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(CpanError::Http(e)),
@@ -154,7 +155,10 @@ pub async fn fetch_releases(
     }
 
     let latest_distribution = releases[0].distribution.clone();
-    let latest_version = releases.iter().find(|r| r.is_latest).map(|r| r.version.clone());
+    let latest_version = releases
+        .iter()
+        .find(|r| r.is_latest)
+        .map(|r| r.version.clone());
 
     // Sort ascending by timestamp so newest is last (matches Renovate framework behavior).
     releases.sort_by(|a, b| a.release_timestamp.cmp(&b.release_timestamp));
@@ -168,7 +172,10 @@ pub async fn fetch_releases(
 
     Ok(Some(CpanResult {
         releases,
-        changelog_url: Some(format!("https://metacpan.org/dist/{}/changes", latest_distribution)),
+        changelog_url: Some(format!(
+            "https://metacpan.org/dist/{}/changes",
+            latest_distribution
+        )),
         homepage: Some(format!("https://metacpan.org/pod/{}", package_name)),
         tags,
     }))
@@ -190,10 +197,14 @@ pub async fn fetch_latest(
 ) -> Result<CpanUpdateSummary, CpanError> {
     let result = fetch_releases(DEFAULT_REGISTRY_URL, module_name, http).await?;
     let latest = result.and_then(|r| {
-        r.tags.and_then(|t| t.get("latest").cloned())
+        r.tags
+            .and_then(|t| t.get("latest").cloned())
             .or_else(|| r.releases.into_iter().next().map(|rel| rel.version))
     });
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
     Ok(CpanUpdateSummary {
         current_value: current_value.to_owned(),
         latest,
@@ -228,7 +239,9 @@ mod tests {
     #[test]
     fn schema_filters_empty_version() {
         let source = SourceEntry {
-            module: Some(vec![ModuleEntry { version: Some("".into()) }]),
+            module: Some(vec![ModuleEntry {
+                version: Some("".into()),
+            }]),
             distribution: Some("Test-Package".into()),
             date: Some("2023-01-01T00:00:00".into()),
             deprecated: Some(false),
@@ -242,7 +255,9 @@ mod tests {
     #[test]
     fn schema_includes_valid_entries() {
         let source = SourceEntry {
-            module: Some(vec![ModuleEntry { version: Some("1.0".into()) }]),
+            module: Some(vec![ModuleEntry {
+                version: Some("1.0".into()),
+            }]),
             distribution: Some("Test-Package".into()),
             date: Some("2023-01-01T00:00:00".into()),
             deprecated: Some(false),
@@ -356,20 +371,33 @@ mod tests {
             result.homepage.as_deref(),
             Some("https://metacpan.org/pod/Plack")
         );
-        assert_eq!(result.tags.as_ref().and_then(|t| t.get("latest")).map(|s| s.as_str()), Some("1.0048"));
+        assert_eq!(
+            result
+                .tags
+                .as_ref()
+                .and_then(|t| t.get("latest"))
+                .map(|s| s.as_str()),
+            Some("1.0048")
+        );
 
         // releases[1]: isDeprecated=false, isStable=false, releaseTimestamp="2016-04-01T16:58:21.000Z", version="1.0040"
         let r1 = &result.releases[1];
         assert!(!r1.is_deprecated);
         assert!(!r1.is_stable);
-        assert_eq!(r1.release_timestamp.as_deref(), Some("2016-04-01T16:58:21.000Z"));
+        assert_eq!(
+            r1.release_timestamp.as_deref(),
+            Some("2016-04-01T16:58:21.000Z")
+        );
         assert_eq!(r1.version, "1.0040");
 
         // releases[9]: isDeprecated=false, isStable=true, releaseTimestamp="2020-11-30T00:21:36.000Z", version="1.0048"
         let r9 = &result.releases[9];
         assert!(!r9.is_deprecated);
         assert!(r9.is_stable);
-        assert_eq!(r9.release_timestamp.as_deref(), Some("2020-11-30T00:21:36.000Z"));
+        assert_eq!(
+            r9.release_timestamp.as_deref(),
+            Some("2020-11-30T00:21:36.000Z")
+        );
         assert_eq!(r9.version, "1.0048");
     }
 }

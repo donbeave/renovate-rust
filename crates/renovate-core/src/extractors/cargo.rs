@@ -430,7 +430,13 @@ pub fn extract_with_context(
     ] {
         if let Some(deps) = section {
             for (name, raw) in deps {
-                out.push(convert_dep(name.clone(), raw, dep_type, &registry_map, &lock_map));
+                out.push(convert_dep(
+                    name.clone(),
+                    raw,
+                    dep_type,
+                    &registry_map,
+                    &lock_map,
+                ));
             }
         }
     }
@@ -502,7 +508,11 @@ fn convert_dep(
             } else if let Some(reg_name) = &t.registry {
                 let (urls, unknown) = resolve_registry_urls(reg_name, registry_map);
                 if unknown {
-                    (Some(SkipReason::UnknownRegistry), vec![], Some(reg_name.clone()))
+                    (
+                        Some(SkipReason::UnknownRegistry),
+                        vec![],
+                        Some(reg_name.clone()),
+                    )
                 } else {
                     (None, urls, Some(reg_name.clone()))
                 }
@@ -982,8 +992,7 @@ replace-with = "private-crates"
 
         // All deps should resolve to private-crates URL via the chain:
         // crates-io → mcorbin → private-crates
-        let private_url =
-            "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git";
+        let private_url = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git";
 
         let prop = deps
             .iter()
@@ -1094,10 +1103,7 @@ features = ["AudioBuffer"]
         let deps = extract_with_context(cargo5_toml, &ctx).unwrap();
         assert_eq!(deps.len(), 4);
 
-        let wasm = deps
-            .iter()
-            .find(|d| d.dep_name == "wasm-bindgen")
-            .unwrap();
+        let wasm = deps.iter().find(|d| d.dep_name == "wasm-bindgen").unwrap();
         assert_eq!(wasm.current_value, "0.2.37");
         assert!(wasm.skip_reason.is_none());
 

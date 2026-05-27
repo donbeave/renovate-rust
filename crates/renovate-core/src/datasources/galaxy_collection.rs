@@ -105,9 +105,15 @@ pub fn construct_base_url(registry_url: &str, package_name: &str) -> Option<Stri
     let name = parts[1];
 
     // Ansible protocol: matches /^\S+\/api\/ansible\/.+/
-    if regex::Regex::new(r"^\S+/api/ansible/.+").unwrap().is_match(registry_url) {
+    if regex::Regex::new(r"^\S+/api/ansible/.+")
+        .unwrap()
+        .is_match(registry_url)
+    {
         let base = registry_url.trim_end_matches('/');
-        return Some(format!("{}/api/v3/collections/{}/{}/", base, namespace, name));
+        return Some(format!(
+            "{}/api/v3/collections/{}/{}/",
+            base, namespace, name
+        ));
     }
 
     // Galaxy content URL: extract repository from /api/galaxy/content/<repo>/
@@ -171,7 +177,7 @@ pub async fn fetch_releases(
                 Err(_) => return Ok(None),
             },
             Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-                return Ok(None)
+                return Ok(None);
             }
             Err(crate::http::HttpError::Request(_)) => return Ok(None),
             Err(e) => return Err(GalaxyCollectionError::Http(e)),
@@ -186,7 +192,7 @@ pub async fn fetch_releases(
                 Err(_) => continue,
             },
             Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-                continue
+                continue;
             }
             Err(crate::http::HttpError::Request(_)) => continue,
             Err(e) => return Err(GalaxyCollectionError::Http(e)),
@@ -209,7 +215,10 @@ pub async fn fetch_releases(
         .find(|r| r.version == base.highest_version.version)
         .map(|r| r.source_url.clone());
 
-    Ok(Some(GalaxyCollectionResult { releases, source_url }))
+    Ok(Some(GalaxyCollectionResult {
+        releases,
+        source_url,
+    }))
 }
 
 #[cfg(test)]
@@ -219,8 +228,7 @@ mod tests {
 
     use super::*;
 
-    const COLLECTION_API_PATH: &str =
-        "/v3/plugin/ansible/content/published/collections/index";
+    const COLLECTION_API_PATH: &str = "/v3/plugin/ansible/content/published/collections/index";
 
     fn base_fixture() -> serde_json::Value {
         serde_json::from_str(include_str!(
@@ -298,10 +306,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&format!("{}/", server.uri()), "community.kubernetes", &http)
-                .await
-                .unwrap();
+        let result = fetch_releases(&format!("{}/", server.uri()), "community.kubernetes", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -327,10 +334,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&format!("{}/", server.uri()), "community.kubernetes", &http)
-                .await
-                .unwrap();
+        let result = fetch_releases(&format!("{}/", server.uri()), "community.kubernetes", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -416,7 +422,9 @@ mod tests {
     #[tokio::test]
     async fn returns_null_for_empty_package_name() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(DEFAULT_REGISTRY_URL, "", &http).await.unwrap();
+        let result = fetch_releases(DEFAULT_REGISTRY_URL, "", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -424,7 +432,9 @@ mod tests {
     #[tokio::test]
     async fn returns_null_for_null_package_name() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(DEFAULT_REGISTRY_URL, "", &http).await.unwrap();
+        let result = fetch_releases(DEFAULT_REGISTRY_URL, "", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -487,15 +497,18 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&format!("{}/", server.uri()), "community.kubernetes", &http)
-                .await
-                .unwrap()
-                .unwrap();
+        let result = fetch_releases(&format!("{}/", server.uri()), "community.kubernetes", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 3);
         assert!(result.source_url.is_some());
-        let v121 = result.releases.iter().find(|r| r.version == "1.2.1").unwrap();
+        let v121 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "1.2.1")
+            .unwrap();
         assert_eq!(
             v121.source_url,
             "https://github.com/ansible-collections/community.kubernetes"

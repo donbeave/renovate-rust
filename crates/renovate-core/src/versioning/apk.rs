@@ -25,17 +25,13 @@ static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 
-static ALPHA_NUM_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"([a-zA-Z]+)|(\d+)").unwrap());
+static ALPHA_NUM_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"([a-zA-Z]+)|(\d+)").unwrap());
 
-static OPERATOR_STRIP_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[=><~][=]?").unwrap());
+static OPERATOR_STRIP_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[=><~][=]?").unwrap());
 
-static RANGE_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^([><=~]+)(.+)$").unwrap());
+static RANGE_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^([><=~]+)(.+)$").unwrap());
 
-static REVISION_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"-r[0-9]+$").unwrap());
+static REVISION_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"-r[0-9]+$").unwrap());
 
 #[derive(Debug, Clone)]
 struct ParsedApk {
@@ -102,7 +98,12 @@ fn parse(version: &str) -> Option<ParsedApk> {
 
     let release_string = release_num.unwrap_or("").to_owned();
 
-    Some(ParsedApk { version: version_str, release, prerelease, release_string })
+    Some(ParsedApk {
+        version: version_str,
+        release,
+        prerelease,
+        release_string,
+    })
 }
 
 fn compare_version_parts(v1: &str, v2: &str) -> i32 {
@@ -192,10 +193,8 @@ fn compare(a: &str, b: &str) -> i32 {
                 }
                 let pc = pre1.as_deref().unwrap().cmp(pre2.as_deref().unwrap());
                 if pc != Ordering::Equal {
-                    let pc_i: i32 = compare_version_parts(
-                        pre1.as_deref().unwrap(),
-                        pre2.as_deref().unwrap(),
-                    );
+                    let pc_i: i32 =
+                        compare_version_parts(pre1.as_deref().unwrap(), pre2.as_deref().unwrap());
                     if pc_i != 0 {
                         return pc_i;
                     }
@@ -222,7 +221,9 @@ fn compare(a: &str, b: &str) -> i32 {
 }
 
 fn strip_operator(version: &str) -> &str {
-    OPERATOR_STRIP_RE.find(version).map_or(version, |m| &version[m.end()..])
+    OPERATOR_STRIP_RE
+        .find(version)
+        .map_or(version, |m| &version[m.end()..])
 }
 
 pub fn is_valid(version: &str) -> bool {
@@ -345,14 +346,23 @@ pub fn get_satisfying_version(versions: &[&str], range: &str) -> Option<String> 
 
         satisfying.sort_by(|a, b| {
             let cmp = sort_versions(b, a); // reverse for max
-            if cmp < 0 { Ordering::Less } else if cmp > 0 { Ordering::Greater } else { Ordering::Equal }
+            if cmp < 0 {
+                Ordering::Less
+            } else if cmp > 0 {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
         });
 
         return satisfying.first().map(|s| s.to_string());
     }
 
     // Exact match fallback
-    versions.iter().find(|&&v| equals(v, range)).map(|s| s.to_string())
+    versions
+        .iter()
+        .find(|&&v| equals(v, range))
+        .map(|s| s.to_string())
 }
 
 pub fn get_new_value(current_value: &str, new_version: &str) -> String {
@@ -436,13 +446,28 @@ mod tests {
         assert_eq!(sort_versions("2.39.0", "2.39.0-r0").signum(), -1);
         assert_eq!(sort_versions("2.39.0_beta", "2.39.0").signum(), 1);
         assert_eq!(sort_versions("2.39.0", "2.39.0_beta").signum(), -1);
-        assert_eq!(sort_versions("0.3.4_pre20061029", "0.3.4_pre20061030").signum(), -1);
-        assert_eq!(sort_versions("0.3.4_pre20061029", "0.3.4_pre20061028").signum(), 1);
-        assert_eq!(sort_versions("0.3.4_pre20061029", "0.3.4_alpha").signum(), 1);
-        assert_eq!(sort_versions("0.3.4_alpha", "0.3.4_pre20061029").signum(), -1);
+        assert_eq!(
+            sort_versions("0.3.4_pre20061029", "0.3.4_pre20061030").signum(),
+            -1
+        );
+        assert_eq!(
+            sort_versions("0.3.4_pre20061029", "0.3.4_pre20061028").signum(),
+            1
+        );
+        assert_eq!(
+            sort_versions("0.3.4_pre20061029", "0.3.4_alpha").signum(),
+            1
+        );
+        assert_eq!(
+            sort_versions("0.3.4_alpha", "0.3.4_pre20061029").signum(),
+            -1
+        );
         assert_eq!(sort_versions("0.3.4_pre20061029", "0.4.0").signum(), -1);
         assert_eq!(sort_versions("0.4.0", "0.3.4_pre20061029").signum(), 1);
-        assert_eq!(sort_versions("2.9.11_pre20061021-r2", "5.36-r1").signum(), -1);
+        assert_eq!(
+            sort_versions("2.9.11_pre20061021-r2", "5.36-r1").signum(),
+            -1
+        );
         assert_eq!(sort_versions("0.3.4_alpha", "0.3.4_beta").signum(), -1);
         assert_eq!(sort_versions("0.3.4_beta", "0.3.4_alpha").signum(), 1);
     }
@@ -469,37 +494,98 @@ mod tests {
     // Ported: "getSatisfyingVersion with exact match ($range) === $expected" — versioning/apk/index.spec.ts line 115
     #[test]
     fn get_satisfying_version_exact_matches_renovate_apk_index_spec() {
-        let versions = &["2.39.0-r0", "2.39.0-r1", "2.39.1-r0", "2.40.0-r0", "2.40.0-r1", "3.0.0-r0"];
-        assert_eq!(get_satisfying_version(versions, "2.39.0-r0").as_deref(), Some("2.39.0-r0"));
-        assert_eq!(get_satisfying_version(versions, "2.39.0-r1").as_deref(), Some("2.39.0-r1"));
-        assert_eq!(get_satisfying_version(versions, "2.40.0-r0").as_deref(), Some("2.40.0-r0"));
+        let versions = &[
+            "2.39.0-r0",
+            "2.39.0-r1",
+            "2.39.1-r0",
+            "2.40.0-r0",
+            "2.40.0-r1",
+            "3.0.0-r0",
+        ];
+        assert_eq!(
+            get_satisfying_version(versions, "2.39.0-r0").as_deref(),
+            Some("2.39.0-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, "2.39.0-r1").as_deref(),
+            Some("2.39.0-r1")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, "2.40.0-r0").as_deref(),
+            Some("2.40.0-r0")
+        );
         assert_eq!(get_satisfying_version(versions, "nonexistent"), None);
     }
 
     // Ported: "getSatisfyingVersion with range operator ($range) === $expected" — versioning/apk/index.spec.ts line 130
     #[test]
     fn get_satisfying_version_range_operator_matches_renovate_apk_index_spec() {
-        let versions = &["2.39.0-r0", "2.39.0-r1", "2.39.1-r0", "2.40.0-r0", "2.40.0-r1", "3.0.0-r0"];
-        assert_eq!(get_satisfying_version(versions, ">2.39.0-r0").as_deref(), Some("3.0.0-r0"));
-        assert_eq!(get_satisfying_version(versions, ">=2.39.0-r0").as_deref(), Some("3.0.0-r0"));
-        assert_eq!(get_satisfying_version(versions, "<2.40.0-r0").as_deref(), Some("2.39.1-r0"));
-        assert_eq!(get_satisfying_version(versions, "<=2.40.0-r0").as_deref(), Some("2.40.0-r0"));
-        assert_eq!(get_satisfying_version(versions, "=2.39.0-r0").as_deref(), Some("2.39.0-r0"));
-        assert_eq!(get_satisfying_version(versions, "==2.39.0-r0").as_deref(), Some("2.39.0-r0"));
+        let versions = &[
+            "2.39.0-r0",
+            "2.39.0-r1",
+            "2.39.1-r0",
+            "2.40.0-r0",
+            "2.40.0-r1",
+            "3.0.0-r0",
+        ];
+        assert_eq!(
+            get_satisfying_version(versions, ">2.39.0-r0").as_deref(),
+            Some("3.0.0-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, ">=2.39.0-r0").as_deref(),
+            Some("3.0.0-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, "<2.40.0-r0").as_deref(),
+            Some("2.39.1-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, "<=2.40.0-r0").as_deref(),
+            Some("2.40.0-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, "=2.39.0-r0").as_deref(),
+            Some("2.39.0-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, "==2.39.0-r0").as_deref(),
+            Some("2.39.0-r0")
+        );
     }
 
     // Ported: "getSatisfyingVersion with tilde range ($range) === $expected" — versioning/apk/index.spec.ts line 144
     #[test]
     fn get_satisfying_version_tilde_matches_renovate_apk_index_spec() {
-        let versions = &["2.39.0-r0", "2.39.0-r1", "2.39.1-r0", "2.40.0-r0", "2.40.0-r1", "3.0.0-r0"];
-        assert_eq!(get_satisfying_version(versions, "~2.39.0-r0").as_deref(), Some("2.39.1-r0"));
-        assert_eq!(get_satisfying_version(versions, "~2.40.0-r0").as_deref(), Some("2.40.0-r1"));
+        let versions = &[
+            "2.39.0-r0",
+            "2.39.0-r1",
+            "2.39.1-r0",
+            "2.40.0-r0",
+            "2.40.0-r1",
+            "3.0.0-r0",
+        ];
+        assert_eq!(
+            get_satisfying_version(versions, "~2.39.0-r0").as_deref(),
+            Some("2.39.1-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, "~2.40.0-r0").as_deref(),
+            Some("2.40.0-r1")
+        );
     }
 
     // Ported: "should return null for invalid range operators" — versioning/apk/index.spec.ts line 152
     #[test]
     fn get_satisfying_version_null_invalid_range_matches_renovate_apk_index_spec() {
-        let versions = &["2.39.0-r0", "2.39.0-r1", "2.39.1-r0", "2.40.0-r0", "2.40.0-r1", "3.0.0-r0"];
+        let versions = &[
+            "2.39.0-r0",
+            "2.39.0-r1",
+            "2.39.1-r0",
+            "2.40.0-r0",
+            "2.40.0-r1",
+            "3.0.0-r0",
+        ];
         assert_eq!(get_satisfying_version(versions, "invalid-range"), None);
     }
 
@@ -513,7 +599,10 @@ mod tests {
     #[test]
     fn get_satisfying_version_filter_invalid_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "invalid", "2.40.0-r0"];
-        assert_eq!(get_satisfying_version(versions, ">2.39.0-r0").as_deref(), Some("2.40.0-r0"));
+        assert_eq!(
+            get_satisfying_version(versions, ">2.39.0-r0").as_deref(),
+            Some("2.40.0-r0")
+        );
     }
 
     // Ported: "isSingleVersion($version) === $expected" — versioning/apk/index.spec.ts line 169
@@ -546,9 +635,18 @@ mod tests {
         let mut versions = vec!["2.40.0-r0", "2.39.0-r1", "2.39.0-r0", "2.39.1-r0"];
         versions.sort_by(|a, b| {
             let cmp = sort_versions(a, b);
-            if cmp < 0 { Ordering::Less } else if cmp > 0 { Ordering::Greater } else { Ordering::Equal }
+            if cmp < 0 {
+                Ordering::Less
+            } else if cmp > 0 {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
         });
-        assert_eq!(versions, vec!["2.39.0-r0", "2.39.0-r1", "2.39.1-r0", "2.40.0-r0"]);
+        assert_eq!(
+            versions,
+            vec!["2.39.0-r0", "2.39.0-r1", "2.39.1-r0", "2.40.0-r0"]
+        );
     }
 
     // Ported: "should compare release numbers when version parts are equal" — versioning/apk/index.spec.ts line 210
@@ -588,8 +686,14 @@ mod tests {
         assert_eq!(sort_versions("2.39.0", "2.39.0-r0").signum(), -1);
         assert_eq!(sort_versions("2.39.0_beta", "2.39.0").signum(), 1);
         assert_eq!(sort_versions("2.39.0", "2.39.0_beta").signum(), -1);
-        assert_eq!(sort_versions("2.39.0_rc1-r0", "2.39.0_alpha-r0").signum(), 1);
-        assert_eq!(sort_versions("2.39.0_alpha-r0", "2.39.0_rc1-r0").signum(), -1);
+        assert_eq!(
+            sort_versions("2.39.0_rc1-r0", "2.39.0_alpha-r0").signum(),
+            1
+        );
+        assert_eq!(
+            sort_versions("2.39.0_alpha-r0", "2.39.0_rc1-r0").signum(),
+            -1
+        );
     }
 
     // Ported: "should handle invalid version parsing gracefully" — versioning/apk/index.spec.ts line 265
@@ -632,15 +736,24 @@ mod tests {
     #[test]
     fn get_satisfying_version_tilde_major_matches_renovate_apk_index_spec() {
         let versions = &["1.0.0-r0", "2.0.0-r0", "2.1.0-r0"];
-        assert_eq!(get_satisfying_version(versions, "~1.0.0-r0").as_deref(), Some("1.0.0-r0"));
-        assert_eq!(get_satisfying_version(versions, "~2.0.0-r0").as_deref(), Some("2.0.0-r0"));
+        assert_eq!(
+            get_satisfying_version(versions, "~1.0.0-r0").as_deref(),
+            Some("1.0.0-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, "~2.0.0-r0").as_deref(),
+            Some("2.0.0-r0")
+        );
     }
 
     // Ported: "should handle versions with different minor versions in tilde range" — versioning/apk/index.spec.ts line 305
     #[test]
     fn get_satisfying_version_tilde_minor_matches_renovate_apk_index_spec() {
         let versions = &["2.0.0-r0", "2.1.0-r0", "2.2.0-r0", "3.0.0-r0"];
-        assert_eq!(get_satisfying_version(versions, "~2.1.0-r0").as_deref(), Some("2.1.0-r0"));
+        assert_eq!(
+            get_satisfying_version(versions, "~2.1.0-r0").as_deref(),
+            Some("2.1.0-r0")
+        );
     }
 
     // Ported: "should handle invalid target versions in ranges" — versioning/apk/index.spec.ts line 311
@@ -655,8 +768,14 @@ mod tests {
     #[test]
     fn get_satisfying_version_prerelease_ranges_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "2.39.0_rc1-r0", "2.40.0-r0"];
-        assert_eq!(get_satisfying_version(versions, ">2.39.0-r0").as_deref(), Some("2.40.0-r0"));
-        assert_eq!(get_satisfying_version(versions, ">=2.39.0_rc1-r0").as_deref(), Some("2.40.0-r0"));
+        assert_eq!(
+            get_satisfying_version(versions, ">2.39.0-r0").as_deref(),
+            Some("2.40.0-r0")
+        );
+        assert_eq!(
+            get_satisfying_version(versions, ">=2.39.0_rc1-r0").as_deref(),
+            Some("2.40.0-r0")
+        );
     }
 
     // Ported: "should return null for versions with _p package fix suffix" — versioning/apk/index.spec.ts line 327
@@ -760,7 +879,10 @@ mod tests {
     #[test]
     fn get_satisfying_version_tilde_invalid_in_list_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "invalid", "2.40.0-r0"];
-        assert_eq!(get_satisfying_version(versions, "~2.39.0-r0").as_deref(), Some("2.39.0-r0"));
+        assert_eq!(
+            get_satisfying_version(versions, "~2.39.0-r0").as_deref(),
+            Some("2.39.0-r0")
+        );
     }
 
     // Ported: "should handle major-only versions without minor/patch" — versioning/apk/index.spec.ts line 435

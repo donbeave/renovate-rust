@@ -74,7 +74,7 @@ pub async fn fetch_releases(
     let text = match http.get_raw_with_accept(&url, "application/json").await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(e) => return Err(DevboxError::Http(e)),
     };
@@ -122,7 +122,10 @@ pub async fn fetch_latest(
 ) -> Result<DevboxUpdateSummary, DevboxError> {
     let result = fetch_releases(DEVBOX_API_BASE, package, http).await?;
     let latest = result.and_then(|r| r.releases.into_iter().last().map(|rel| rel.version));
-    let update_available = latest.as_deref().map(|l| l != current_version).unwrap_or(false);
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_version)
+        .unwrap_or(false);
     Ok(DevboxUpdateSummary {
         update_available,
         current_version: current_version.to_owned(),
@@ -230,7 +233,8 @@ mod tests {
         Mock::given(method("GET"))
             .and(path("/pkg"))
             .and(query_param("name", "nodejs"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"{
                 "name": "nodejs",
                 "summary": "Event-driven I/O framework for the V8 JavaScript engine",
                 "homepage_url": "https://nodejs.org",
@@ -240,7 +244,8 @@ mod tests {
                     {"version": "22.0.0", "last_updated": "2024-05-12T16:19:40Z"},
                     {"version": "21.7.3", "last_updated": "2024-04-19T21:36:04Z"}
                 ]
-            }"#))
+            }"#,
+            ))
             .mount(&server)
             .await;
 
@@ -254,11 +259,20 @@ mod tests {
         assert_eq!(result.releases.len(), 3);
         // sorted ascending by timestamp
         assert_eq!(result.releases[0].version, "21.7.3");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2024-04-19T21:36:04.000Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2024-04-19T21:36:04.000Z")
+        );
         assert_eq!(result.releases[1].version, "22.0.0");
-        assert_eq!(result.releases[1].release_timestamp.as_deref(), Some("2024-05-12T16:19:40.000Z"));
+        assert_eq!(
+            result.releases[1].release_timestamp.as_deref(),
+            Some("2024-05-12T16:19:40.000Z")
+        );
         assert_eq!(result.releases[2].version, "22.2.0");
-        assert_eq!(result.releases[2].release_timestamp.as_deref(), Some("2024-05-22T06:18:38.000Z"));
+        assert_eq!(
+            result.releases[2].release_timestamp.as_deref(),
+            Some("2024-05-22T06:18:38.000Z")
+        );
     }
 
     // Ported: "processes empty data" — datasource/devbox/index.spec.ts line 115
@@ -268,13 +282,15 @@ mod tests {
         Mock::given(method("GET"))
             .and(path("/pkg"))
             .and(query_param("name", "nodejs"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"{
                 "name": "nodejs",
                 "summary": "...",
                 "homepage_url": "https://nodejs.org",
                 "license": "MIT",
                 "releases": []
-            }"#))
+            }"#,
+            ))
             .mount(&server)
             .await;
 
@@ -310,14 +326,16 @@ mod tests {
         Mock::given(method("GET"))
             .and(path("/pkg"))
             .and(query_param("name", "nodejs"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"{
                 "name": "nodejs",
                 "summary": "...",
                 "license": "MIT",
                 "releases": [
                     {"version": "22.2.0", "last_updated": "2024-05-22T06:18:38Z"}
                 ]
-            }"#))
+            }"#,
+            ))
             .mount(&server)
             .await;
 

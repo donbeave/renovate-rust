@@ -314,13 +314,14 @@ pub fn get_filtered_range(range: &str) -> String {
 /// Check if `version` satisfies an npm range string.
 fn npm_satisfies(version: &str, npm_range: &str) -> bool {
     let ver_str = pad_to_semver(version.trim_start_matches('v'));
-    let Ok(ver) = Version::parse(&ver_str) else { return false; };
+    let Ok(ver) = Version::parse(&ver_str) else {
+        return false;
+    };
     // Normalize npm range: space-separated comparators → comma-separated
-    let req_str = npm_range
-        .split_whitespace()
-        .collect::<Vec<_>>()
-        .join(", ");
-    let Ok(req) = VersionReq::parse(&req_str) else { return false; };
+    let req_str = npm_range.split_whitespace().collect::<Vec<_>>().join(", ");
+    let Ok(req) = VersionReq::parse(&req_str) else {
+        return false;
+    };
     req.matches(&ver)
 }
 
@@ -499,7 +500,9 @@ pub fn matches(version: &str, range: &str) -> bool {
         return false;
     }
     let filtered = get_filtered_range(range);
-    let Some(npm) = hashicorp2npm(&filtered) else { return false; };
+    let Some(npm) = hashicorp2npm(&filtered) else {
+        return false;
+    };
     npm_satisfies(version, &npm)
 }
 
@@ -544,7 +547,9 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
         return false;
     }
     let filtered = get_filtered_range(range);
-    let Some(npm) = hashicorp2npm(&filtered) else { return false; };
+    let Some(npm) = hashicorp2npm(&filtered) else {
+        return false;
+    };
     if npm_satisfies(version, &npm) {
         return false;
     }
@@ -563,7 +568,9 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
         bound
     };
     let ver_padded = pad_to_semver(version.trim_start_matches('v'));
-    let Ok(ver) = Version::parse(&ver_padded) else { return false; };
+    let Ok(ver) = Version::parse(&ver_padded) else {
+        return false;
+    };
     lb.map(|lb| ver < lb).unwrap_or(false)
 }
 
@@ -692,7 +699,11 @@ mod tests {
             ("4.2.6", "~> 4.0, != 4.2.0", true),
         ];
         for (version, range, expected) in cases {
-            assert_eq!(matches(version, range), expected, "matches({version:?}, {range:?})");
+            assert_eq!(
+                matches(version, range),
+                expected,
+                "matches({version:?}, {range:?})"
+            );
         }
     }
 
@@ -702,7 +713,10 @@ mod tests {
         let versions = ["0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"];
         assert_eq!(get_satisfying_version(&versions, "~> 4.0"), Some("4.2.0"));
         assert_eq!(get_satisfying_version(&versions, "~> 4.0.0"), Some("4.0.0"));
-        assert_eq!(get_satisfying_version(&versions, "!=4.2.0, > 4.0.0"), Some("5.0.0"));
+        assert_eq!(
+            get_satisfying_version(&versions, "!=4.2.0, > 4.0.0"),
+            Some("5.0.0")
+        );
     }
 
     // Ported: "isValid(\"$input\") === $expected" — versioning/hashicorp/index.spec.ts line 29
@@ -742,7 +756,10 @@ mod tests {
         assert_eq!(min_satisfying_version(&v1, "~> 4.0.0"), None);
         assert_eq!(min_satisfying_version(&v1, "~> 4.0, != 4.2.0"), None);
         let v2 = ["0.4.0", "0.5.0", "4.2.0", "4.1.0"];
-        assert_eq!(min_satisfying_version(&v2, "~> 4.0, != 4.2.0"), Some("4.1.0"));
+        assert_eq!(
+            min_satisfying_version(&v2, "~> 4.0, != 4.2.0"),
+            Some("4.1.0")
+        );
     }
 
     // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/hashicorp/index.spec.ts line 72
@@ -754,23 +771,83 @@ mod tests {
             ("~> 1.2", "replace", "1.2.3", "1.2.3", Some("~> 1.2")),
             ("~> 1.2", "replace", "1.2.3", "1.2.4", Some("~> 1.2")),
             ("~> 1.2.0", "replace", "1.2.3", "1.2.3", Some("~> 1.2.0")),
-            ("~> 0.14.0", "replace", "0.14.1", "0.15.0", Some("~> 0.15.0")),
-            ("~> 0.14.0", "replace", "0.14.1", "0.15.1", Some("~> 0.15.0")),
-            ("~> 0.14.6", "replace", "0.14.6", "0.15.0", Some("~> 0.15.0")),
-            ("~> 0.14.0", "replace", "0.14.1", "0.14.2", Some("~> 0.14.0")),
-            ("~> 0.14.6", "replace", "0.14.6", "0.14.7", Some("~> 0.14.0")),
+            (
+                "~> 0.14.0",
+                "replace",
+                "0.14.1",
+                "0.15.0",
+                Some("~> 0.15.0"),
+            ),
+            (
+                "~> 0.14.0",
+                "replace",
+                "0.14.1",
+                "0.15.1",
+                Some("~> 0.15.0"),
+            ),
+            (
+                "~> 0.14.6",
+                "replace",
+                "0.14.6",
+                "0.15.0",
+                Some("~> 0.15.0"),
+            ),
+            (
+                "~> 0.14.0",
+                "replace",
+                "0.14.1",
+                "0.14.2",
+                Some("~> 0.14.0"),
+            ),
+            (
+                "~> 0.14.6",
+                "replace",
+                "0.14.6",
+                "0.14.7",
+                Some("~> 0.14.0"),
+            ),
             ("~> 2.3.4", "replace", "2.3.4", "2.3.5", Some("~> 2.3.0")),
             ("~> 0.14.0", "bump", "0.14.1", "0.14.2", Some("~> 0.14.2")),
             ("~> 0.14.6", "bump", "0.14.6", "0.14.7", Some("~> 0.14.7")),
             ("~> 0.14.6", "bump", "0.14.6", "0.15.1", Some("~> 0.15.1")),
             ("~> 0.14.6", "bump", "0.14.6", "2.0.7", Some("~> 2.0.7")),
-            (">= 1.0.0, <= 2.0.0", "widen", "1.2.3", "2.0.7", Some(">= 1.0.0, <= 2.0.7")),
+            (
+                ">= 1.0.0, <= 2.0.0",
+                "widen",
+                "1.2.3",
+                "2.0.7",
+                Some(">= 1.0.0, <= 2.0.7"),
+            ),
             ("0.14", "replace", "0.14.2", "0.15.0", Some("0.15")),
             ("~> 0.14", "replace", "0.14.2", "0.15.0", Some("~> 0.15")),
-            ("~> 0.14", "update-lockfile", "0.14.2", "0.14.6", Some("~> 0.14")),
-            ("~> 0.14", "update-lockfile", "0.14.2", "0.15.0", Some("~> 0.15")),
-            ("~> 2.62.0", "update-lockfile", "2.62.0", "2.62.1", Some("~> 2.62.0")),
-            ("~> 2.62.0", "update-lockfile", "2.62.0", "2.67.0", Some("~> 2.67.0")),
+            (
+                "~> 0.14",
+                "update-lockfile",
+                "0.14.2",
+                "0.14.6",
+                Some("~> 0.14"),
+            ),
+            (
+                "~> 0.14",
+                "update-lockfile",
+                "0.14.2",
+                "0.15.0",
+                Some("~> 0.15"),
+            ),
+            (
+                "~> 2.62.0",
+                "update-lockfile",
+                "2.62.0",
+                "2.62.1",
+                Some("~> 2.62.0"),
+            ),
+            (
+                "~> 2.62.0",
+                "update-lockfile",
+                "2.62.0",
+                "2.67.0",
+                Some("~> 2.67.0"),
+            ),
             ("v0.14", "replace", "v0.14.2", "v0.15.0", Some("v0.15")),
         ];
         for &(cv, strategy, cur, nv, expected) in cases {
@@ -839,16 +916,8 @@ mod tests {
             "1.0.0-a--.b",
         ];
         for v in versions {
-            assert_eq!(
-                hashicorp2npm(v).as_deref(),
-                Some(v),
-                "hashicorp2npm({v:?})"
-            );
-            assert_eq!(
-                npm2hashicorp(v).as_deref(),
-                Some(v),
-                "npm2hashicorp({v:?})"
-            );
+            assert_eq!(hashicorp2npm(v).as_deref(), Some(v), "hashicorp2npm({v:?})");
+            assert_eq!(npm2hashicorp(v).as_deref(), Some(v), "npm2hashicorp({v:?})");
         }
     }
 

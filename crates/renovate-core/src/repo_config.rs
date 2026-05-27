@@ -1279,7 +1279,11 @@ impl CustomManager {
             .remove("extractVersion")
             .or_else(|| self.extract_version_template.clone());
         let indentation = merged.remove("indentation").map(|v| {
-            if v.chars().all(char::is_whitespace) { v } else { String::new() }
+            if v.chars().all(char::is_whitespace) {
+                v
+            } else {
+                String::new()
+            }
         });
 
         vec![CustomExtractedDep {
@@ -4774,7 +4778,10 @@ impl RepoConfig {
             dependency_dashboard_report_abandonment: bool,
             #[serde(rename = "internalChecksAsSuccess", default)]
             internal_checks_as_success: bool,
-            #[serde(rename = "internalChecksFilter", default = "default_internal_checks_filter")]
+            #[serde(
+                rename = "internalChecksFilter",
+                default = "default_internal_checks_filter"
+            )]
             internal_checks_filter: String,
             /// Deprecated: Renovate migrates stabilityDays → minimumReleaseAge.
             /// Accepted here for backward-compat; values: 0 (unset), 1 ("1 day"), N ("N days").
@@ -4861,7 +4868,10 @@ impl RepoConfig {
             commit_message_action: String,
             #[serde(rename = "commitMessagePrefix")]
             commit_message_prefix: Option<String>,
-            #[serde(rename = "commitMessageTopic", default = "default_commit_message_topic")]
+            #[serde(
+                rename = "commitMessageTopic",
+                default = "default_commit_message_topic"
+            )]
             commit_message_topic: String,
             #[serde(
                 rename = "commitMessageLowerCase",
@@ -5176,7 +5186,9 @@ impl RepoConfig {
             );
             map.insert(
                 "artifactErrorWarning".to_owned(),
-                serde_json::Value::String("You probably do not want to merge this PR as-is.".to_owned()),
+                serde_json::Value::String(
+                    "You probably do not want to merge this PR as-is.".to_owned(),
+                ),
             );
             map
         }
@@ -10077,7 +10089,9 @@ mod tests {
             c.pr_body_definitions
                 .get("Package")
                 .and_then(serde_json::Value::as_str),
-            Some("{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}")
+            Some(
+                "{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}"
+            )
         );
         assert_eq!(
             c.pr_body_heading_definitions
@@ -10122,10 +10136,7 @@ mod tests {
             c.log_level_remap[0]["matchMessage"].as_str(),
             Some("timeout")
         );
-        assert_eq!(
-            c.log_level_remap[0]["newLogLevel"].as_str(),
-            Some("debug")
-        );
+        assert_eq!(c.log_level_remap[0]["newLogLevel"].as_str(), Some("debug"));
         assert_eq!(c.milestone, Some(7));
     }
 
@@ -14690,10 +14701,7 @@ mod rule_effects_tests {
             effects.override_dep_name.as_deref(),
             Some("left-pad-renamed")
         );
-        assert_eq!(
-            effects.override_package_name.as_deref(),
-            Some("right-pad")
-        );
+        assert_eq!(effects.override_package_name.as_deref(), Some("right-pad"));
     }
 
     #[test]
@@ -14867,7 +14875,8 @@ mod rule_effects_tests {
         let cm = CustomManager {
             custom_type: "regex".to_owned(),
             match_strings: vec![
-                r"(?P<depName>\S+) (?P<currentValue>\S+) (?P<registryUrl>not-a-valid-url)".to_owned(),
+                r"(?P<depName>\S+) (?P<currentValue>\S+) (?P<registryUrl>not-a-valid-url)"
+                    .to_owned(),
             ],
             match_strings_strategy: "any".to_owned(),
             datasource_template: Some("npm".to_owned()),
@@ -14937,9 +14946,7 @@ mod rule_effects_tests {
     fn custom_manager_sets_dep_name_from_capture_group() {
         let cm = CustomManager {
             custom_type: "regex".to_owned(),
-            match_strings: vec![
-                r"(?P<depName>my-package) (?P<currentValue>\S+)".to_owned(),
-            ],
+            match_strings: vec![r"(?P<depName>my-package) (?P<currentValue>\S+)".to_owned()],
             match_strings_strategy: "any".to_owned(),
             datasource_template: Some("npm".to_owned()),
             ..Default::default()

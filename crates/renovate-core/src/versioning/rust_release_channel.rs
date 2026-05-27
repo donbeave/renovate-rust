@@ -93,19 +93,23 @@ pub fn parse(input: &str) -> Option<Toolchain> {
                     .name("betaNumber")
                     .map(|m| m.as_str().parse::<u32>().ok())
                     .flatten();
-                Some(Prerelease { name: "beta", number })
+                Some(Prerelease {
+                    name: "beta",
+                    number,
+                })
             } else {
                 None
             };
-            Channel::Version(VersionChannel { major, minor, patch, prerelease })
+            Channel::Version(VersionChannel {
+                major,
+                minor,
+                patch,
+                prerelease,
+            })
         }
     };
 
-    let date = match (
-        caps.name("year"),
-        caps.name("month"),
-        caps.name("day"),
-    ) {
+    let date = match (caps.name("year"), caps.name("month"), caps.name("day")) {
         (Some(y), Some(mo), Some(d)) => {
             let year: i32 = y.as_str().parse().ok()?;
             let month: u32 = mo.as_str().parse().ok()?;
@@ -117,7 +121,11 @@ pub fn parse(input: &str) -> Option<Toolchain> {
 
     let host = caps.name("host").map(|m| m.as_str().to_owned());
 
-    Some(Toolchain { channel, date, host })
+    Some(Toolchain {
+        channel,
+        date,
+        host,
+    })
 }
 
 fn sort_parsed(a: &Toolchain, b: &Toolchain) -> i32 {
@@ -345,30 +353,54 @@ pub fn matches(version: &str, range: &str) -> bool {
 }
 
 pub fn get_satisfying_version(versions: &[&str], range: &str) -> Option<String> {
-    let mut matching: Vec<&str> = versions.iter().copied().filter(|v| matches(v, range)).collect();
+    let mut matching: Vec<&str> = versions
+        .iter()
+        .copied()
+        .filter(|v| matches(v, range))
+        .collect();
     if matching.is_empty() {
         return None;
     }
     matching.sort_by(|a, b| {
         let cmp = sort_versions(a, b);
-        if cmp < 0 { Ordering::Less } else if cmp > 0 { Ordering::Greater } else { Ordering::Equal }
+        if cmp < 0 {
+            Ordering::Less
+        } else if cmp > 0 {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
     });
     matching.last().map(|s| s.to_string())
 }
 
 pub fn min_satisfying_version(versions: &[&str], range: &str) -> Option<String> {
-    let mut matching: Vec<&str> = versions.iter().copied().filter(|v| matches(v, range)).collect();
+    let mut matching: Vec<&str> = versions
+        .iter()
+        .copied()
+        .filter(|v| matches(v, range))
+        .collect();
     if matching.is_empty() {
         return None;
     }
     matching.sort_by(|a, b| {
         let cmp = sort_versions(a, b);
-        if cmp < 0 { Ordering::Less } else if cmp > 0 { Ordering::Greater } else { Ordering::Equal }
+        if cmp < 0 {
+            Ordering::Less
+        } else if cmp > 0 {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
     });
     matching.first().map(|s| s.to_string())
 }
 
-pub fn get_new_value(current_value: &str, range_strategy: &str, new_version: &str) -> Option<String> {
+pub fn get_new_value(
+    current_value: &str,
+    range_strategy: &str,
+    new_version: &str,
+) -> Option<String> {
     let parsed_current = parse(current_value)?;
     let parsed_new = parse(new_version)?;
 
@@ -433,49 +465,113 @@ mod tests {
     #[test]
     fn parse_full_versions_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("1.82.0").unwrap();
-        assert_eq!(p.channel, Channel::Version(VersionChannel { major: 1, minor: 82, patch: Some(0), prerelease: None }));
+        assert_eq!(
+            p.channel,
+            Channel::Version(VersionChannel {
+                major: 1,
+                minor: 82,
+                patch: Some(0),
+                prerelease: None
+            })
+        );
 
         let p2 = parse("1.0.0").unwrap();
-        assert_eq!(p2.channel, Channel::Version(VersionChannel { major: 1, minor: 0, patch: Some(0), prerelease: None }));
+        assert_eq!(
+            p2.channel,
+            Channel::Version(VersionChannel {
+                major: 1,
+                minor: 0,
+                patch: Some(0),
+                prerelease: None
+            })
+        );
 
         let p3 = parse("2.5.10").unwrap();
-        assert_eq!(p3.channel, Channel::Version(VersionChannel { major: 2, minor: 5, patch: Some(10), prerelease: None }));
+        assert_eq!(
+            p3.channel,
+            Channel::Version(VersionChannel {
+                major: 2,
+                minor: 5,
+                patch: Some(10),
+                prerelease: None
+            })
+        );
     }
 
     // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 28
     #[test]
     fn parse_partial_versions_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("1.82").unwrap();
-        assert_eq!(p.channel, Channel::Version(VersionChannel { major: 1, minor: 82, patch: None, prerelease: None }));
+        assert_eq!(
+            p.channel,
+            Channel::Version(VersionChannel {
+                major: 1,
+                minor: 82,
+                patch: None,
+                prerelease: None
+            })
+        );
 
         let p2 = parse("1.0").unwrap();
-        assert_eq!(p2.channel, Channel::Version(VersionChannel { major: 1, minor: 0, patch: None, prerelease: None }));
+        assert_eq!(
+            p2.channel,
+            Channel::Version(VersionChannel {
+                major: 1,
+                minor: 0,
+                patch: None,
+                prerelease: None
+            })
+        );
     }
 
     // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 39
     #[test]
     fn parse_beta_versions_with_number_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("1.83.0-beta.5").unwrap();
-        assert_eq!(p.channel, Channel::Version(VersionChannel {
-            major: 1, minor: 83, patch: Some(0),
-            prerelease: Some(Prerelease { name: "beta", number: Some(5) })
-        }));
+        assert_eq!(
+            p.channel,
+            Channel::Version(VersionChannel {
+                major: 1,
+                minor: 83,
+                patch: Some(0),
+                prerelease: Some(Prerelease {
+                    name: "beta",
+                    number: Some(5)
+                })
+            })
+        );
 
         let p2 = parse("2.0.0-beta.10").unwrap();
-        assert_eq!(p2.channel, Channel::Version(VersionChannel {
-            major: 2, minor: 0, patch: Some(0),
-            prerelease: Some(Prerelease { name: "beta", number: Some(10) })
-        }));
+        assert_eq!(
+            p2.channel,
+            Channel::Version(VersionChannel {
+                major: 2,
+                minor: 0,
+                patch: Some(0),
+                prerelease: Some(Prerelease {
+                    name: "beta",
+                    number: Some(10)
+                })
+            })
+        );
     }
 
     // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 50
     #[test]
     fn parse_beta_ranges_without_number_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("1.83.0-beta").unwrap();
-        assert_eq!(p.channel, Channel::Version(VersionChannel {
-            major: 1, minor: 83, patch: Some(0),
-            prerelease: Some(Prerelease { name: "beta", number: None })
-        }));
+        assert_eq!(
+            p.channel,
+            Channel::Version(VersionChannel {
+                major: 1,
+                minor: 83,
+                patch: Some(0),
+                prerelease: Some(Prerelease {
+                    name: "beta",
+                    number: None
+                })
+            })
+        );
     }
 
     // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 60
@@ -483,17 +579,45 @@ mod tests {
     fn parse_dated_channels_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("stable-2025-11-24").unwrap();
         assert_eq!(p.channel, Channel::Stable);
-        assert_eq!(p.date, Some(DateObj { year: 2025, month: 11, day: 24 }));
+        assert_eq!(
+            p.date,
+            Some(DateObj {
+                year: 2025,
+                month: 11,
+                day: 24
+            })
+        );
 
         let n = parse("nightly-2025-11-24").unwrap();
         assert_eq!(n.channel, Channel::Nightly);
-        assert_eq!(n.date, Some(DateObj { year: 2025, month: 11, day: 24 }));
+        assert_eq!(
+            n.date,
+            Some(DateObj {
+                year: 2025,
+                month: 11,
+                day: 24
+            })
+        );
 
         let n2 = parse("nightly-2015-05-15").unwrap();
-        assert_eq!(n2.date, Some(DateObj { year: 2015, month: 5, day: 15 }));
+        assert_eq!(
+            n2.date,
+            Some(DateObj {
+                year: 2015,
+                month: 5,
+                day: 15
+            })
+        );
 
         let n3 = parse("nightly-2025-01-01").unwrap();
-        assert_eq!(n3.date, Some(DateObj { year: 2025, month: 1, day: 1 }));
+        assert_eq!(
+            n3.date,
+            Some(DateObj {
+                year: 2025,
+                month: 1,
+                day: 1
+            })
+        );
     }
 
     // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 74
@@ -504,12 +628,27 @@ mod tests {
         assert_eq!(p.host.as_deref(), Some("x86_64-pc-windows-msvc"));
 
         let p2 = parse("1.82.0-x86_64-pc-windows-msvc").unwrap();
-        assert_eq!(p2.channel, Channel::Version(VersionChannel { major: 1, minor: 82, patch: Some(0), prerelease: None }));
+        assert_eq!(
+            p2.channel,
+            Channel::Version(VersionChannel {
+                major: 1,
+                minor: 82,
+                patch: Some(0),
+                prerelease: None
+            })
+        );
         assert_eq!(p2.host.as_deref(), Some("x86_64-pc-windows-msvc"));
 
         let p3 = parse("nightly-2025-11-24-x86_64-pc-windows-msvc").unwrap();
         assert_eq!(p3.channel, Channel::Nightly);
-        assert_eq!(p3.date, Some(DateObj { year: 2025, month: 11, day: 24 }));
+        assert_eq!(
+            p3.date,
+            Some(DateObj {
+                year: 2025,
+                month: 11,
+                day: 24
+            })
+        );
         assert_eq!(p3.host.as_deref(), Some("x86_64-pc-windows-msvc"));
     }
 
@@ -645,7 +784,10 @@ mod tests {
         assert_eq!(sort_versions("1.83.0-beta.1", "1.83.0-beta.5"), -4);
         assert_eq!(sort_versions("1.83.0-beta.1", "1.83.0"), -1);
         assert_eq!(sort_versions("1.82.0", "nightly-2025-11-24"), -1);
-        assert_eq!(sort_versions("nightly-2025-11-23", "nightly-2025-11-24"), -1);
+        assert_eq!(
+            sort_versions("nightly-2025-11-23", "nightly-2025-11-24"),
+            -1
+        );
         assert_eq!(sort_versions("bar", "foo"), -1);
     }
 
@@ -712,8 +854,14 @@ mod tests {
     // Ported: "isCompatible("$version", "$current") === $expected" — versioning/rust-release-channel/index.spec.ts line 204
     #[test]
     fn is_compatible_matches_renovate_rust_release_channel_index_spec() {
-        assert!(is_compatible("nightly-2025-11-24", Some("nightly-2025-11-23")));
-        assert!(is_compatible("nightly-2025-11-25", Some("nightly-2025-11-24")));
+        assert!(is_compatible(
+            "nightly-2025-11-24",
+            Some("nightly-2025-11-23")
+        ));
+        assert!(is_compatible(
+            "nightly-2025-11-25",
+            Some("nightly-2025-11-24")
+        ));
         assert!(is_compatible("1.83.0", Some("1.82.0")));
         assert!(is_compatible("1.83.0-beta.5", Some("1.82.0")));
         assert!(is_compatible("1.83.0", Some("1.82.0-beta.1")));
@@ -722,23 +870,69 @@ mod tests {
         assert!(is_compatible("1.82.0", None));
         assert!(!is_compatible("invalid", Some("1.82.0")));
         assert!(!is_compatible("1.82.0", Some("invalid")));
-        assert!(is_compatible("1.83.0-x86_64-unknown-linux-gnu", Some("1.82.0-x86_64-unknown-linux-gnu")));
-        assert!(!is_compatible("1.83.0-x86_64-unknown-linux-gnu", Some("1.82.0-aarch64-apple-darwin")));
-        assert!(!is_compatible("1.83.0-x86_64-unknown-linux-gnu", Some("1.82.0")));
-        assert!(!is_compatible("1.83.0", Some("1.82.0-x86_64-unknown-linux-gnu")));
-        assert!(is_compatible("nightly-2025-11-24-x86_64-unknown-linux-gnu", Some("nightly-2025-11-23-x86_64-unknown-linux-gnu")));
-        assert!(!is_compatible("nightly-2025-11-24-x86_64-unknown-linux-gnu", Some("nightly-2025-11-23-aarch64-apple-darwin")));
+        assert!(is_compatible(
+            "1.83.0-x86_64-unknown-linux-gnu",
+            Some("1.82.0-x86_64-unknown-linux-gnu")
+        ));
+        assert!(!is_compatible(
+            "1.83.0-x86_64-unknown-linux-gnu",
+            Some("1.82.0-aarch64-apple-darwin")
+        ));
+        assert!(!is_compatible(
+            "1.83.0-x86_64-unknown-linux-gnu",
+            Some("1.82.0")
+        ));
+        assert!(!is_compatible(
+            "1.83.0",
+            Some("1.82.0-x86_64-unknown-linux-gnu")
+        ));
+        assert!(is_compatible(
+            "nightly-2025-11-24-x86_64-unknown-linux-gnu",
+            Some("nightly-2025-11-23-x86_64-unknown-linux-gnu")
+        ));
+        assert!(!is_compatible(
+            "nightly-2025-11-24-x86_64-unknown-linux-gnu",
+            Some("nightly-2025-11-23-aarch64-apple-darwin")
+        ));
     }
 
     // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/rust-release-channel/index.spec.ts line 229
     #[test]
     fn get_satisfying_version_matches_renovate_rust_release_channel_index_spec() {
-        assert_eq!(get_satisfying_version(&["1.82.0", "1.83.0", "1.84.0"], "stable").as_deref(), Some("1.84.0"));
-        assert_eq!(get_satisfying_version(&["1.82.0", "1.83.0-beta.1", "1.83.0-beta.5"], "beta").as_deref(), Some("1.83.0-beta.5"));
-        assert_eq!(get_satisfying_version(&["1.82.0", "1.82.1", "1.83.0"], "1.82").as_deref(), Some("1.82.1"));
-        assert_eq!(get_satisfying_version(&["1.83.0-beta.1", "1.83.0-beta.5", "1.84.0-beta.10"], "1.83.0-beta").as_deref(), Some("1.83.0-beta.5"));
-        assert_eq!(get_satisfying_version(&["nightly-2025-11-22", "nightly-2025-11-23", "1.82.0"], "nightly").as_deref(), Some("nightly-2025-11-23"));
-        assert_eq!(get_satisfying_version(&["1.82.0", "1.83.0-beta.5", "nightly-2025-11-24"], "stable").as_deref(), Some("1.82.0"));
+        assert_eq!(
+            get_satisfying_version(&["1.82.0", "1.83.0", "1.84.0"], "stable").as_deref(),
+            Some("1.84.0")
+        );
+        assert_eq!(
+            get_satisfying_version(&["1.82.0", "1.83.0-beta.1", "1.83.0-beta.5"], "beta")
+                .as_deref(),
+            Some("1.83.0-beta.5")
+        );
+        assert_eq!(
+            get_satisfying_version(&["1.82.0", "1.82.1", "1.83.0"], "1.82").as_deref(),
+            Some("1.82.1")
+        );
+        assert_eq!(
+            get_satisfying_version(
+                &["1.83.0-beta.1", "1.83.0-beta.5", "1.84.0-beta.10"],
+                "1.83.0-beta"
+            )
+            .as_deref(),
+            Some("1.83.0-beta.5")
+        );
+        assert_eq!(
+            get_satisfying_version(
+                &["nightly-2025-11-22", "nightly-2025-11-23", "1.82.0"],
+                "nightly"
+            )
+            .as_deref(),
+            Some("nightly-2025-11-23")
+        );
+        assert_eq!(
+            get_satisfying_version(&["1.82.0", "1.83.0-beta.5", "nightly-2025-11-24"], "stable")
+                .as_deref(),
+            Some("1.82.0")
+        );
         assert_eq!(get_satisfying_version(&["1.82.0", "1.83.0"], "beta"), None);
         assert_eq!(get_satisfying_version(&[], "stable"), None);
     }
@@ -746,12 +940,40 @@ mod tests {
     // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/rust-release-channel/index.spec.ts line 248
     #[test]
     fn min_satisfying_version_matches_renovate_rust_release_channel_index_spec() {
-        assert_eq!(min_satisfying_version(&["1.82.0", "1.83.0", "1.84.0"], "stable").as_deref(), Some("1.82.0"));
-        assert_eq!(min_satisfying_version(&["1.82.0", "1.83.0-beta.1", "1.83.0-beta.5"], "beta").as_deref(), Some("1.83.0-beta.1"));
-        assert_eq!(min_satisfying_version(&["1.82.0", "1.82.1", "1.83.0"], "1.82").as_deref(), Some("1.82.0"));
-        assert_eq!(min_satisfying_version(&["1.82.0-beta.1", "1.83.0-beta.5", "1.83.0-beta.10"], "1.83.0-beta").as_deref(), Some("1.83.0-beta.5"));
-        assert_eq!(min_satisfying_version(&["nightly-2025-11-22", "nightly-2025-11-23", "1.82.0"], "nightly").as_deref(), Some("nightly-2025-11-22"));
-        assert_eq!(min_satisfying_version(&["1.82.0", "1.83.0-beta.5", "nightly-2025-11-24"], "stable").as_deref(), Some("1.82.0"));
+        assert_eq!(
+            min_satisfying_version(&["1.82.0", "1.83.0", "1.84.0"], "stable").as_deref(),
+            Some("1.82.0")
+        );
+        assert_eq!(
+            min_satisfying_version(&["1.82.0", "1.83.0-beta.1", "1.83.0-beta.5"], "beta")
+                .as_deref(),
+            Some("1.83.0-beta.1")
+        );
+        assert_eq!(
+            min_satisfying_version(&["1.82.0", "1.82.1", "1.83.0"], "1.82").as_deref(),
+            Some("1.82.0")
+        );
+        assert_eq!(
+            min_satisfying_version(
+                &["1.82.0-beta.1", "1.83.0-beta.5", "1.83.0-beta.10"],
+                "1.83.0-beta"
+            )
+            .as_deref(),
+            Some("1.83.0-beta.5")
+        );
+        assert_eq!(
+            min_satisfying_version(
+                &["nightly-2025-11-22", "nightly-2025-11-23", "1.82.0"],
+                "nightly"
+            )
+            .as_deref(),
+            Some("nightly-2025-11-22")
+        );
+        assert_eq!(
+            min_satisfying_version(&["1.82.0", "1.83.0-beta.5", "nightly-2025-11-24"], "stable")
+                .as_deref(),
+            Some("1.82.0")
+        );
         assert_eq!(min_satisfying_version(&["1.82.0", "1.83.0"], "beta"), None);
         assert_eq!(min_satisfying_version(&[], "stable"), None);
     }
@@ -759,21 +981,66 @@ mod tests {
     // Ported: "getNewValue({ currentValue: "$currentValue", rangeStrategy: "$rangeStrategy", newVersion: "$newVersion" }) === $expected" — versioning/rust-release-channel/index.spec.ts line 267
     #[test]
     fn get_new_value_matches_renovate_rust_release_channel_index_spec() {
-        assert_eq!(get_new_value("stable", "replace", "1.83.0").as_deref(), Some("stable"));
-        assert_eq!(get_new_value("beta", "replace", "1.83.0-beta.5").as_deref(), Some("beta"));
-        assert_eq!(get_new_value("nightly", "replace", "nightly-2025-11-24").as_deref(), Some("nightly"));
-        assert_eq!(get_new_value("nightly-2025-11-23", "replace", "nightly-2025-11-24").as_deref(), Some("nightly-2025-11-24"));
-        assert_eq!(get_new_value("1.82", "replace", "1.83.0").as_deref(), Some("1.83"));
-        assert_eq!(get_new_value("1.82.0", "replace", "1.83.0").as_deref(), Some("1.83.0"));
-        assert_eq!(get_new_value("1.83.0-beta", "replace", "1.83.0-beta.5").as_deref(), Some("1.83.0-beta"));
-        assert_eq!(get_new_value("1.83.0-beta.1", "replace", "1.83.0-beta.5").as_deref(), Some("1.83.0-beta.5"));
-        assert_eq!(get_new_value("1.83.0-beta", "replace", "1.84.0-beta.5").as_deref(), Some("1.84.0-beta"));
-        assert_eq!(get_new_value("1.83.0-beta", "replace", "1.84-beta.1").as_deref(), Some("1.84.0-beta"));
-        assert_eq!(get_new_value("stable", "pin", "1.83.0").as_deref(), Some("1.83.0"));
-        assert_eq!(get_new_value("beta", "pin", "1.83.0-beta.5").as_deref(), Some("1.83.0-beta.5"));
-        assert_eq!(get_new_value("nightly", "pin", "nightly-2025-11-24").as_deref(), Some("nightly-2025-11-24"));
-        assert_eq!(get_new_value("1.82", "pin", "1.82.0").as_deref(), Some("1.82.0"));
-        assert_eq!(get_new_value("1.82.0", "pin", "1.82.0").as_deref(), Some("1.82.0"));
+        assert_eq!(
+            get_new_value("stable", "replace", "1.83.0").as_deref(),
+            Some("stable")
+        );
+        assert_eq!(
+            get_new_value("beta", "replace", "1.83.0-beta.5").as_deref(),
+            Some("beta")
+        );
+        assert_eq!(
+            get_new_value("nightly", "replace", "nightly-2025-11-24").as_deref(),
+            Some("nightly")
+        );
+        assert_eq!(
+            get_new_value("nightly-2025-11-23", "replace", "nightly-2025-11-24").as_deref(),
+            Some("nightly-2025-11-24")
+        );
+        assert_eq!(
+            get_new_value("1.82", "replace", "1.83.0").as_deref(),
+            Some("1.83")
+        );
+        assert_eq!(
+            get_new_value("1.82.0", "replace", "1.83.0").as_deref(),
+            Some("1.83.0")
+        );
+        assert_eq!(
+            get_new_value("1.83.0-beta", "replace", "1.83.0-beta.5").as_deref(),
+            Some("1.83.0-beta")
+        );
+        assert_eq!(
+            get_new_value("1.83.0-beta.1", "replace", "1.83.0-beta.5").as_deref(),
+            Some("1.83.0-beta.5")
+        );
+        assert_eq!(
+            get_new_value("1.83.0-beta", "replace", "1.84.0-beta.5").as_deref(),
+            Some("1.84.0-beta")
+        );
+        assert_eq!(
+            get_new_value("1.83.0-beta", "replace", "1.84-beta.1").as_deref(),
+            Some("1.84.0-beta")
+        );
+        assert_eq!(
+            get_new_value("stable", "pin", "1.83.0").as_deref(),
+            Some("1.83.0")
+        );
+        assert_eq!(
+            get_new_value("beta", "pin", "1.83.0-beta.5").as_deref(),
+            Some("1.83.0-beta.5")
+        );
+        assert_eq!(
+            get_new_value("nightly", "pin", "nightly-2025-11-24").as_deref(),
+            Some("nightly-2025-11-24")
+        );
+        assert_eq!(
+            get_new_value("1.82", "pin", "1.82.0").as_deref(),
+            Some("1.82.0")
+        );
+        assert_eq!(
+            get_new_value("1.82.0", "pin", "1.82.0").as_deref(),
+            Some("1.82.0")
+        );
         assert_eq!(get_new_value("invalid", "replace", "1.83.0"), None);
         assert_eq!(get_new_value("1.82.0", "replace", "invalid"), None);
     }

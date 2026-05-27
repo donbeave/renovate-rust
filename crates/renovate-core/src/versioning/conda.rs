@@ -29,7 +29,10 @@ fn is_valid_version(s: &str) -> bool {
 }
 
 fn is_glob_spec(s: &str) -> bool {
-    s.ends_with(".*") && s[..s.len() - 2].chars().all(|c| c.is_ascii_digit() || c == '.')
+    s.ends_with(".*")
+        && s[..s.len() - 2]
+            .chars()
+            .all(|c| c.is_ascii_digit() || c == '.')
 }
 
 fn parse_component_parts(s: &str) -> Vec<CondaPart> {
@@ -79,7 +82,13 @@ fn parse_for_compare(s: &str) -> Option<(u64, Vec<CondaPart>)> {
 fn compare_parts(a: &CondaPart, b: &CondaPart) -> i32 {
     match (a, b) {
         (CondaPart::Num(av), CondaPart::Num(bv)) => {
-            if av > bv { 1 } else if av < bv { -1 } else { 0 }
+            if av > bv {
+                1
+            } else if av < bv {
+                -1
+            } else {
+                0
+            }
         }
         (CondaPart::Str(as_), CondaPart::Str(bs)) => match as_.cmp(bs) {
             Ordering::Less => -1,
@@ -116,7 +125,11 @@ fn compare_versions_str(a: &str, b: &str) -> i32 {
 
 fn extract_leading_num(s: &str) -> Option<u64> {
     let digits: String = s.chars().take_while(|c| c.is_ascii_digit()).collect();
-    if digits.is_empty() { None } else { digits.parse().ok() }
+    if digits.is_empty() {
+        None
+    } else {
+        digits.parse().ok()
+    }
 }
 
 fn get_numeric_parts(s: &str) -> Option<Vec<u64>> {
@@ -132,8 +145,12 @@ fn get_numeric_parts(s: &str) -> Option<Vec<u64>> {
 }
 
 fn version_has_prefix(version: &str, prefix: &str) -> bool {
-    let Some(v_nums) = get_numeric_parts(version) else { return false; };
-    let Some(p_nums) = get_numeric_parts(prefix) else { return false; };
+    let Some(v_nums) = get_numeric_parts(version) else {
+        return false;
+    };
+    let Some(p_nums) = get_numeric_parts(prefix) else {
+        return false;
+    };
     p_nums
         .iter()
         .enumerate()
@@ -287,7 +304,11 @@ pub fn is_single_version(s: &str) -> bool {
     if !s.starts_with('=') {
         return false;
     }
-    let stripped = if s.starts_with("==") { &s[2..] } else { &s[1..] };
+    let stripped = if s.starts_with("==") {
+        &s[2..]
+    } else {
+        &s[1..]
+    };
     let rest = stripped.trim_start();
     is_valid_version(rest)
 }
@@ -541,10 +562,7 @@ mod tests {
         let versions = &[
             "0.9.4", "1.0.0", "1.1.5", "1.2.1", "1.2.2", "1.2.3", "1.3.4", "2.0.3",
         ];
-        let cases: &[(&str, Option<&str>)] = &[
-            ("~=1.2.1", Some("1.2.3")),
-            ("~=2.1", None),
-        ];
+        let cases: &[(&str, Option<&str>)] = &[("~=1.2.1", Some("1.2.3")), ("~=2.1", None)];
         for &(range, expected) in cases {
             assert_eq!(
                 get_satisfying_version(versions, range),
@@ -560,10 +578,7 @@ mod tests {
         let versions = &[
             "0.9.4", "1.0.0", "1.1.5", "1.2.1", "1.2.2", "1.2.3", "1.3.4", "2.0.3",
         ];
-        let cases: &[(&str, Option<&str>)] = &[
-            ("~=1.2.1", Some("1.2.1")),
-            ("~=2.1", None),
-        ];
+        let cases: &[(&str, Option<&str>)] = &[("~=1.2.1", Some("1.2.1")), ("~=2.1", None)];
         for &(range, expected) in cases {
             assert_eq!(
                 min_satisfying_version(versions, range),
@@ -576,12 +591,13 @@ mod tests {
     // Ported: "isGreaterThan("$a", "$b") === $result" — versioning/conda/index.spec.ts line 168
     #[test]
     fn is_greater_than_matches_renovate_conda_index_spec() {
-        let cases = [
-            ("1.2.1", "1.2.0", true),
-            ("1!1.0.0", "3.1.2", true),
-        ];
+        let cases = [("1.2.1", "1.2.0", true), ("1!1.0.0", "3.1.2", true)];
         for (a, b, expected) in cases {
-            assert_eq!(is_greater_than(a, b), expected, "is_greater_than({a:?}, {b:?})");
+            assert_eq!(
+                is_greater_than(a, b),
+                expected,
+                "is_greater_than({a:?}, {b:?})"
+            );
         }
     }
 
@@ -595,12 +611,12 @@ mod tests {
     #[test]
     fn get_new_value_matches_renovate_conda_index_spec() {
         let cases: &[(&str, &str, &str, &str, Option<&str>)] = &[
-            ("*",      "bump",  "1.0.0", "1.2.3", Some(">=1.2.3")),
-            ("*",      "widen", "1.0.0", "1.2.3", None),
-            ("*",      "widen", "1.0.0", "1.2.3", None),
-            ("1.0.*",  "bump",  "1.0.0", "1.2.3", Some("1.2.*")),
-            ("1.2.*",  "widen", "1.0.0", "1.2.3", Some("1.2.*")),
-            (">=1.0.0","bump",  "1.0.0", "1.2.3", Some(">=1.2.3")),
+            ("*", "bump", "1.0.0", "1.2.3", Some(">=1.2.3")),
+            ("*", "widen", "1.0.0", "1.2.3", None),
+            ("*", "widen", "1.0.0", "1.2.3", None),
+            ("1.0.*", "bump", "1.0.0", "1.2.3", Some("1.2.*")),
+            ("1.2.*", "widen", "1.0.0", "1.2.3", Some("1.2.*")),
+            (">=1.0.0", "bump", "1.0.0", "1.2.3", Some(">=1.2.3")),
         ];
         for &(cv, rs, cur, nv, expected) in cases {
             assert_eq!(

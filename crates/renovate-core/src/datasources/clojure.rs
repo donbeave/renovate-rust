@@ -52,13 +52,9 @@ pub async fn fetch_releases_merged(
     let mut first_result: Option<MavenReleasesResult> = None;
 
     for &registry in registries {
-        let Some(res) = maven::fetch_releases_from_registry(
-            dep_name,
-            registry,
-            http,
-            DEFAULT_REGISTRIES,
-        )
-        .await else {
+        let Some(res) =
+            maven::fetch_releases_from_registry(dep_name, registry, http, DEFAULT_REGISTRIES).await
+        else {
             continue;
         };
 
@@ -161,12 +157,7 @@ mod tests {
 </project>"#;
 
     /// Mount metadata.xml and pom.xml mocks for `dep = "org.example:package"` on `server`.
-    async fn mount_package(
-        server: &MockServer,
-        metadata: &str,
-        pom: Option<&str>,
-        latest: &str,
-    ) {
+    async fn mount_package(server: &MockServer, metadata: &str, pom: Option<&str>, latest: &str) {
         Mock::given(method("GET"))
             .and(path("/org/example/package/maven-metadata.xml"))
             .respond_with(ResponseTemplate::new(200).set_body_string(metadata))
@@ -174,7 +165,9 @@ mod tests {
             .await;
         if let Some(pom_body) = pom {
             Mock::given(method("GET"))
-                .and(path(format!("/org/example/package/{latest}/package-{latest}.pom")))
+                .and(path(format!(
+                    "/org/example/package/{latest}/package-{latest}.pom"
+                )))
                 .respond_with(ResponseTemplate::new(200).set_body_string(pom_body))
                 .mount(server)
                 .await;
@@ -188,23 +181,25 @@ mod tests {
         mount_package(&server, METADATA_XML, Some(POM_XML), "2.0.0").await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases_merged(
-            "org.example:package",
-            &[server.uri().as_str()],
-            &http,
-        )
-        .await
-        .unwrap();
+        let result = fetch_releases_merged("org.example:package", &[server.uri().as_str()], &http)
+            .await
+            .unwrap();
 
         assert_eq!(result.releases.len(), 8);
         assert_eq!(result.releases[0], "0.0.1");
         assert_eq!(result.releases[7], "2.0.0");
-        assert_eq!(result.homepage.as_deref(), Some("https://package.example.org/about"));
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://package.example.org/about")
+        );
         assert_eq!(result.registry_url, server.uri().trim_end_matches('/'));
         assert!(result.is_private, "custom registry should be is_private");
         assert!(result.respect_latest, "latest tag present → respect_latest");
         assert_eq!(result.tags.get("latest").map(String::as_str), Some("2.0.0"));
-        assert_eq!(result.tags.get("release").map(String::as_str), Some("2.0.0"));
+        assert_eq!(
+            result.tags.get("release").map(String::as_str),
+            Some("2.0.0")
+        );
     }
 
     // Ported: "collects releases from all registry urls" — datasource/clojure/index.spec.ts line 101
@@ -232,9 +227,15 @@ mod tests {
         assert_eq!(
             versions,
             vec![
-                "0.0.1", "1.0.0", "1.0.1", "1.0.2",
-                "1.0.3-SNAPSHOT", "1.0.4-SNAPSHOT", "1.0.5-SNAPSHOT",
-                "2.0.0", "3.0.0",
+                "0.0.1",
+                "1.0.0",
+                "1.0.1",
+                "1.0.2",
+                "1.0.3-SNAPSHOT",
+                "1.0.4-SNAPSHOT",
+                "1.0.5-SNAPSHOT",
+                "2.0.0",
+                "3.0.0",
             ]
         );
     }
@@ -356,24 +357,17 @@ mod tests {
 
         // Without trailing slash
         mount_package(&server, METADATA_XML, Some(POM_XML), "2.0.0").await;
-        let res_a = fetch_releases_merged(
-            "org.example:package",
-            &[base.trim_end_matches('/')],
-            &http,
-        )
-        .await
-        .unwrap();
+        let res_a =
+            fetch_releases_merged("org.example:package", &[base.trim_end_matches('/')], &http)
+                .await
+                .unwrap();
 
         // With trailing slash
         let with_slash = format!("{}/", base.trim_end_matches('/'));
         mount_package(&server, METADATA_XML, Some(POM_XML), "2.0.0").await;
-        let res_b = fetch_releases_merged(
-            "org.example:package",
-            &[with_slash.as_str()],
-            &http,
-        )
-        .await
-        .unwrap();
+        let res_b = fetch_releases_merged("org.example:package", &[with_slash.as_str()], &http)
+            .await
+            .unwrap();
 
         assert!(!res_a.releases.is_empty());
         assert!(!res_b.releases.is_empty());
@@ -410,14 +404,14 @@ mod tests {
         mount_package(&pom_server, METADATA_XML, Some(POM_SCM_PREFIX_XML), "2.0.0").await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases_merged(
-            "org.example:package",
-            &[pom_server.uri().as_str()],
-            &http,
-        )
-        .await
-        .unwrap();
+        let result =
+            fetch_releases_merged("org.example:package", &[pom_server.uri().as_str()], &http)
+                .await
+                .unwrap();
 
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/example/test"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/example/test")
+        );
     }
 }

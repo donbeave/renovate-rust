@@ -27,7 +27,9 @@ pub fn is_valid(input: &str) -> bool {
     if parts.len() < 2 || parts.len() > 3 {
         return false;
     }
-    parts.iter().all(|p| p.chars().all(|c| c.is_ascii_digit()) && !p.is_empty())
+    parts
+        .iter()
+        .all(|p| p.chars().all(|c| c.is_ascii_digit()) && !p.is_empty())
 }
 
 pub fn is_version(input: &str) -> bool {
@@ -74,11 +76,7 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
     v < floor
 }
 
-pub fn get_new_value(
-    current_value: &str,
-    range_strategy: &str,
-    new_version: &str,
-) -> String {
+pub fn get_new_value(current_value: &str, range_strategy: &str, new_version: &str) -> String {
     if range_strategy == "bump" {
         let v_1_20 = Version::new(1, 20, 0);
         if let Ok(nv) = Version::parse(new_version) {
@@ -110,7 +108,11 @@ mod tests {
             ("1.22.2", "1.21.9", true),
         ];
         for (version, range, expected) in cases {
-            assert_eq!(matches(version, range), expected, "matches({version:?}, {range:?})");
+            assert_eq!(
+                matches(version, range),
+                expected,
+                "matches({version:?}, {range:?})"
+            );
         }
     }
 

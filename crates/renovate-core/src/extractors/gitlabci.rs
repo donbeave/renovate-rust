@@ -326,8 +326,7 @@ fn is_service_yaml_key(s: &str) -> bool {
         && !key.contains('@')
         && matches!(
             key,
-            "name" | "alias" | "command" | "entrypoint"
-                | "variables" | "pull_policy" | "docker"
+            "name" | "alias" | "command" | "entrypoint" | "variables" | "pull_policy" | "docker"
         )
 }
 
@@ -1206,7 +1205,10 @@ job2:
         assert!(deps.iter().any(|d| d.dep.image == "mariadb"));
         assert!(deps.iter().any(|d| d.dep.image == "postgres"));
         assert!(deps.iter().any(|d| d.dep.image == "redis"));
-        assert!(deps.iter().any(|d| d.dep.image == "registry.example.com/myimage"));
+        assert!(
+            deps.iter()
+                .any(|d| d.dep.image == "registry.example.com/myimage")
+        );
         assert!(deps.iter().any(|d| d.dep.image == "myimage"));
         assert!(deps.iter().any(|d| d.dep.image == "tomcat"));
     }

@@ -171,7 +171,10 @@ pub async fn fetch_digest_by_tag(
         return Ok(None);
     }
     let tags: Vec<ApiTag> = resp.json().await.map_err(GithubReleasesError::Json)?;
-    Ok(tags.into_iter().find(|t| t.name == new_value).map(|t| t.commit.sha))
+    Ok(tags
+        .into_iter()
+        .find(|t| t.name == new_value)
+        .map(|t| t.commit.sha))
 }
 
 /// Fetch the latest stable (non-prerelease, non-draft) release tag for `owner/repo`.
@@ -343,9 +346,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    fn full_releases_json(
-        items: &[(&str, bool, bool, Option<&str>)],
-    ) -> String {
+    fn full_releases_json(items: &[(&str, bool, bool, Option<&str>)]) -> String {
         let values: Vec<serde_json::Value> = items
             .iter()
             .map(|(tag, pre, draft, ts)| {
@@ -374,13 +375,15 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/repos/some/dep/releases"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(full_releases_json(&[
-                ("a", false, false, None),
-                ("v", false, false, None),
-                ("1.0.0", false, false, Some("2020-03-09T11:00:00.000Z")),
-                ("v1.1.0", false, false, Some("2020-03-09T10:00:00.000Z")),
-                ("2.0.0", true, false, Some("2020-04-09T10:00:00.000Z")),
-            ])))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(full_releases_json(&[
+                    ("a", false, false, None),
+                    ("v", false, false, None),
+                    ("1.0.0", false, false, Some("2020-03-09T11:00:00.000Z")),
+                    ("v1.1.0", false, false, Some("2020-03-09T10:00:00.000Z")),
+                    ("2.0.0", true, false, Some("2020-04-09T10:00:00.000Z")),
+                ])),
+            )
             .mount(&server)
             .await;
 
@@ -394,10 +397,16 @@ mod tests {
         assert_eq!(res.source_url, "https://github.com/some/dep");
         assert_eq!(res.releases.len(), 3);
         assert_eq!(res.releases[0].version, "1.0.0");
-        assert_eq!(res.releases[0].release_timestamp.as_deref(), Some("2020-03-09T11:00:00.000Z"));
+        assert_eq!(
+            res.releases[0].release_timestamp.as_deref(),
+            Some("2020-03-09T11:00:00.000Z")
+        );
         assert_eq!(res.releases[0].is_stable, None);
         assert_eq!(res.releases[1].version, "v1.1.0");
-        assert_eq!(res.releases[1].release_timestamp.as_deref(), Some("2020-03-09T10:00:00.000Z"));
+        assert_eq!(
+            res.releases[1].release_timestamp.as_deref(),
+            Some("2020-03-09T10:00:00.000Z")
+        );
         assert_eq!(res.releases[2].version, "2.0.0");
         assert_eq!(res.releases[2].is_stable, Some(false));
     }
@@ -408,10 +417,12 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/repos/some/dep/tags"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
-                ("v1.0.0", "sha-of-v1"),
-                ("v15.0.0", "sha-of-v15"),
-            ])))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
+                    ("v1.0.0", "sha-of-v1"),
+                    ("v15.0.0", "sha-of-v15"),
+                ])),
+            )
             .mount(&server)
             .await;
 
@@ -428,10 +439,12 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/repos/some/dep/tags"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
-                ("v1.0.0", "sha-of-v1"),
-                ("v15.0.0", "sha-of-v15"),
-            ])))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
+                    ("v1.0.0", "sha-of-v1"),
+                    ("v15.0.0", "sha-of-v15"),
+                ])),
+            )
             .mount(&server)
             .await;
 
@@ -448,10 +461,12 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/repos/some/dep/tags"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
-                ("v1.0.0", "sha-of-v1"),
-                ("v15.0.0", "sha-of-v15"),
-            ])))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
+                    ("v1.0.0", "sha-of-v1"),
+                    ("v15.0.0", "sha-of-v15"),
+                ])),
+            )
             .mount(&server)
             .await;
 
@@ -468,10 +483,12 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/repos/some/dep/tags"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
-                ("v1.0.0", "sha-of-v1"),
-                ("v15.0.0", "sha-of-v15"),
-            ])))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
+                    ("v1.0.0", "sha-of-v1"),
+                    ("v15.0.0", "sha-of-v15"),
+                ])),
+            )
             .mount(&server)
             .await;
 

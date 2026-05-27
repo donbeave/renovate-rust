@@ -89,7 +89,7 @@ pub async fn fetch_releases(
     let entries: Vec<ApiRelease> = match http.get_json(&url).await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(GiteaReleasesError::Http(e)),
@@ -132,7 +132,7 @@ pub async fn get_digest(
         let entry: ApiTagEntry = match http.get_json(&url).await {
             Ok(v) => v,
             Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-                return Ok(None)
+                return Ok(None);
             }
             Err(crate::http::HttpError::Request(_)) => return Ok(None),
             Err(e) => return Err(GiteaReleasesError::Http(e)),
@@ -147,7 +147,7 @@ pub async fn get_digest(
     let commits: Vec<ApiCommitEntry> = match http.get_json(&url).await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(GiteaReleasesError::Http(e)),
@@ -230,11 +230,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&server.uri(), "forgejo-contrib/forgejo-helm", &http)
-                .await
-                .unwrap()
-                .unwrap();
+        let result = fetch_releases(&server.uri(), "forgejo-contrib/forgejo-helm", &http)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(result.releases.len(), 3);
         assert_eq!(result.releases[0].version, "0.11.0");
         assert_eq!(result.releases[1].version, "v0.10.1");
@@ -251,9 +250,7 @@ mod tests {
     async fn returns_commits_from_codeberg_org() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path(
-                "/api/v1/repos/forgejo-contrib/forgejo-helm/commits",
-            ))
+            .and(path("/api/v1/repos/forgejo-contrib/forgejo-helm/commits"))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
                 {
                     "sha": "7eb7edcfd00ffab9dddbae9e9b2deace305c9a84",
@@ -263,14 +260,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_digest(
-            &server.uri(),
-            "forgejo-contrib/forgejo-helm",
-            None,
-            &http,
-        )
-        .await
-        .unwrap();
+        let result = get_digest(&server.uri(), "forgejo-contrib/forgejo-helm", None, &http)
+            .await
+            .unwrap();
         assert_eq!(
             result.as_deref(),
             Some("7eb7edcfd00ffab9dddbae9e9b2deace305c9a84")
@@ -311,14 +303,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_digest(
-            &server.uri(),
-            "gitea/helm-chart",
-            Some("v9.0.1"),
-            &http,
-        )
-        .await
-        .unwrap();
+        let result = get_digest(&server.uri(), "gitea/helm-chart", Some("v9.0.1"), &http)
+            .await
+            .unwrap();
         assert_eq!(
             result.as_deref(),
             Some("29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed")

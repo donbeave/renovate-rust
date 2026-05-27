@@ -179,8 +179,7 @@ fn single_constraint_matches(ver: &Version, constraint: &str) -> bool {
         let parts: Vec<u64> = rest.split('.').filter_map(|s| s.parse().ok()).collect();
         return match parts.as_slice() {
             [major, minor] => {
-                *ver >= Version::new(*major, *minor, 0)
-                    && *ver < Version::new(*major + 1, 0, 0)
+                *ver >= Version::new(*major, *minor, 0) && *ver < Version::new(*major + 1, 0, 0)
             }
             [major, minor, patch] => {
                 *ver >= Version::new(*major, *minor, *patch)
@@ -408,7 +407,10 @@ gleeunit = "~> 1.0"
         let deps = extract_with_lock(GLEAM_TOML, Some("invalid"));
         assert!(!deps.is_empty(), "expected deps");
         let foo = deps.iter().find(|d| d.name == "foo").unwrap();
-        assert!(foo.locked_version.is_none(), "parse error: no locked version");
+        assert!(
+            foo.locked_version.is_none(),
+            "parse error: no locked version"
+        );
     }
 
     const LOCK_FILE: &str = r#"packages = [

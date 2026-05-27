@@ -84,14 +84,23 @@ fn parse(version: &str) -> Option<KubeVersion> {
     if let Some(pos) = alpha_pos {
         let major: u32 = s[..pos].parse().ok()?;
         let num: u32 = s[pos + 5..].parse().ok()?;
-        Some(KubeVersion { major, prerelease: Prerelease::Alpha(num) })
+        Some(KubeVersion {
+            major,
+            prerelease: Prerelease::Alpha(num),
+        })
     } else if let Some(pos) = beta_pos {
         let major: u32 = s[..pos].parse().ok()?;
         let num: u32 = s[pos + 4..].parse().ok()?;
-        Some(KubeVersion { major, prerelease: Prerelease::Beta(num) })
+        Some(KubeVersion {
+            major,
+            prerelease: Prerelease::Beta(num),
+        })
     } else {
         let major: u32 = s.parse().ok()?;
-        Some(KubeVersion { major, prerelease: Prerelease::Stable })
+        Some(KubeVersion {
+            major,
+            prerelease: Prerelease::Stable,
+        })
     }
 }
 
@@ -179,10 +188,10 @@ mod tests {
     #[test]
     fn get_major_minor_patch_matches_renovate_kubernetes_api_index_spec() {
         let cases: &[(&str, i64, i64, i64)] = &[
-            ("v1",      1, 0, 0),
-            ("v2",      2, 0, 0),
-            ("v1alpha1",1, 0, 0),
-            ("v1alpha2",1, 0, 0),
+            ("v1", 1, 0, 0),
+            ("v2", 2, 0, 0),
+            ("v1alpha1", 1, 0, 0),
+            ("v1alpha2", 1, 0, 0),
             ("v1beta1", 1, 0, 0),
             ("v1beta2", 1, 0, 0),
         ];
@@ -247,13 +256,16 @@ mod tests {
     #[test]
     fn sort_versions_matches_renovate_kubernetes_api_index_spec() {
         let mut versions = vec![
-            "v10", "v2", "v2beta2", "v2beta1", "v2alpha2", "v2alpha1",
-            "v1", "v1beta2", "v1beta1", "v1alpha2", "v1alpha1",
+            "v10", "v2", "v2beta2", "v2beta1", "v2alpha2", "v2alpha1", "v1", "v1beta2", "v1beta1",
+            "v1alpha2", "v1alpha1",
         ];
         versions.sort_by(|a, b| sort_versions(a, b));
-        assert_eq!(versions, vec![
-            "v1alpha1", "v1alpha2", "v1beta1", "v1beta2", "v1",
-            "v2alpha1", "v2alpha2", "v2beta1", "v2beta2", "v2", "v10",
-        ]);
+        assert_eq!(
+            versions,
+            vec![
+                "v1alpha1", "v1alpha2", "v1beta1", "v1beta2", "v1", "v2alpha1", "v2alpha2",
+                "v2beta1", "v2beta2", "v2", "v10",
+            ]
+        );
     }
 }

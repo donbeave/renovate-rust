@@ -15,24 +15,68 @@ struct NodeSchedule {
 }
 
 static SCHEDULE: &[NodeSchedule] = &[
-    NodeSchedule { major: 4,  codename: Some("Argon"),    lts: Some("2015-10-12") },
-    NodeSchedule { major: 6,  codename: Some("Boron"),    lts: Some("2016-10-18") },
-    NodeSchedule { major: 8,  codename: Some("Carbon"),   lts: Some("2017-10-31") },
-    NodeSchedule { major: 10, codename: Some("Dubnium"),  lts: Some("2018-10-30") },
-    NodeSchedule { major: 12, codename: Some("Erbium"),   lts: Some("2019-10-21") },
-    NodeSchedule { major: 14, codename: Some("Fermium"),  lts: Some("2020-10-27") },
-    NodeSchedule { major: 16, codename: Some("Gallium"),  lts: Some("2021-10-26") },
-    NodeSchedule { major: 18, codename: Some("Hydrogen"), lts: Some("2022-10-25") },
-    NodeSchedule { major: 20, codename: Some("Iron"),     lts: Some("2023-10-24") },
-    NodeSchedule { major: 22, codename: Some("Jod"),      lts: Some("2024-10-29") },
-    NodeSchedule { major: 24, codename: Some("Krypton"),  lts: Some("2025-10-28") },
+    NodeSchedule {
+        major: 4,
+        codename: Some("Argon"),
+        lts: Some("2015-10-12"),
+    },
+    NodeSchedule {
+        major: 6,
+        codename: Some("Boron"),
+        lts: Some("2016-10-18"),
+    },
+    NodeSchedule {
+        major: 8,
+        codename: Some("Carbon"),
+        lts: Some("2017-10-31"),
+    },
+    NodeSchedule {
+        major: 10,
+        codename: Some("Dubnium"),
+        lts: Some("2018-10-30"),
+    },
+    NodeSchedule {
+        major: 12,
+        codename: Some("Erbium"),
+        lts: Some("2019-10-21"),
+    },
+    NodeSchedule {
+        major: 14,
+        codename: Some("Fermium"),
+        lts: Some("2020-10-27"),
+    },
+    NodeSchedule {
+        major: 16,
+        codename: Some("Gallium"),
+        lts: Some("2021-10-26"),
+    },
+    NodeSchedule {
+        major: 18,
+        codename: Some("Hydrogen"),
+        lts: Some("2022-10-25"),
+    },
+    NodeSchedule {
+        major: 20,
+        codename: Some("Iron"),
+        lts: Some("2023-10-24"),
+    },
+    NodeSchedule {
+        major: 22,
+        codename: Some("Jod"),
+        lts: Some("2024-10-29"),
+    },
+    NodeSchedule {
+        major: 24,
+        codename: Some("Krypton"),
+        lts: Some("2025-10-28"),
+    },
 ];
 
 fn find_by_codename(name: &str) -> Option<&'static NodeSchedule> {
     let upper = name.to_uppercase();
-    SCHEDULE.iter().find(|s| {
-        s.codename.map_or(false, |c| c.to_uppercase() == upper)
-    })
+    SCHEDULE
+        .iter()
+        .find(|s| s.codename.map_or(false, |c| c.to_uppercase() == upper))
 }
 
 fn find_by_major(major: u64) -> Option<&'static NodeSchedule> {
@@ -53,8 +97,7 @@ fn normalize_value(value: &str) -> String {
 }
 
 fn npm_is_stable(version: &str) -> bool {
-    Version::parse(version.trim_start_matches('v'))
-        .is_ok_and(|v| v.pre.is_empty())
+    Version::parse(version.trim_start_matches('v')).is_ok_and(|v| v.pre.is_empty())
 }
 
 fn npm_get_new_value(
@@ -69,7 +112,10 @@ fn npm_get_new_value(
         return Some(new_version.to_string());
     }
     // Tilde range with replace → ~{major}.{minor}.0
-    if current_value.starts_with('~') && !current_value.starts_with("~>") && range_strategy == "replace" {
+    if current_value.starts_with('~')
+        && !current_value.starts_with("~>")
+        && range_strategy == "replace"
+    {
         let new = Version::parse(new_stripped).ok()?;
         return Some(format!("~{}.{}.0", new.major, new.minor));
     }
@@ -84,10 +130,18 @@ pub(crate) fn is_stable_at(version: &str, now: NaiveDate) -> bool {
     if !npm_is_stable(version) {
         return false;
     }
-    let Some(major) = get_major_from_version(version) else { return false; };
-    let Some(sched) = find_by_major(major) else { return false; };
-    let Some(lts_str) = sched.lts else { return false; };
-    let Ok(lts) = NaiveDate::parse_from_str(lts_str, "%Y-%m-%d") else { return false; };
+    let Some(major) = get_major_from_version(version) else {
+        return false;
+    };
+    let Some(sched) = find_by_major(major) else {
+        return false;
+    };
+    let Some(lts_str) = sched.lts else {
+        return false;
+    };
+    let Ok(lts) = NaiveDate::parse_from_str(lts_str, "%Y-%m-%d") else {
+        return false;
+    };
     now > lts
 }
 
@@ -97,13 +151,17 @@ pub fn is_stable(version: &str) -> bool {
 
 pub fn matches(version: &str, range: &str) -> bool {
     let normalized = normalize_value(range);
-    let Ok(ver) = Version::parse(version.trim_start_matches('v')) else { return false; };
+    let Ok(ver) = Version::parse(version.trim_start_matches('v')) else {
+        return false;
+    };
     VersionReq::parse(&normalized).is_ok_and(|req| req.matches(&ver))
 }
 
 pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
     let normalized = normalize_value(range);
-    let Ok(req) = VersionReq::parse(&normalized) else { return None; };
+    let Ok(req) = VersionReq::parse(&normalized) else {
+        return None;
+    };
     versions
         .iter()
         .filter_map(|&v| {
@@ -118,7 +176,9 @@ pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
 
 pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
     let normalized = normalize_value(range);
-    let Ok(req) = VersionReq::parse(&normalized) else { return None; };
+    let Ok(req) = VersionReq::parse(&normalized) else {
+        return None;
+    };
     versions
         .iter()
         .filter_map(|&v| {
@@ -166,16 +226,17 @@ mod tests {
     #[test]
     fn get_new_value_matches_renovate_node_index_spec() {
         let cases = [
-            ("1.0.0",   "replace", "1.0.0",  "v1.1.0",  "1.1.0"),
-            ("~8.0.0",  "replace", "8.0.2",  "v8.2.0",  "~8.2.0"),
-            ("erbium",  "replace", "12.0.0", "v14.1.4", "fermium"),
+            ("1.0.0", "replace", "1.0.0", "v1.1.0", "1.1.0"),
+            ("~8.0.0", "replace", "8.0.2", "v8.2.0", "~8.2.0"),
+            ("erbium", "replace", "12.0.0", "v14.1.4", "fermium"),
             ("Fermium", "replace", "14.0.0", "v16.1.6", "gallium"),
-            ("gallium", "bump",    "16.0.0", "v16.1.6", "gallium"),
-            ("gallium", "auto",    "16.1.6", "v16.1.6", "gallium"),
+            ("gallium", "bump", "16.0.0", "v16.1.6", "gallium"),
+            ("gallium", "auto", "16.1.6", "v16.1.6", "gallium"),
         ];
         for (current_value, range_strategy, current_version, new_version, expected) in cases {
             assert_eq!(
-                get_new_value(current_value, range_strategy, current_version, new_version).as_deref(),
+                get_new_value(current_value, range_strategy, current_version, new_version)
+                    .as_deref(),
                 Some(expected),
                 "get_new_value({current_value:?}, {range_strategy:?}, {current_version:?}, {new_version:?})"
             );
@@ -188,19 +249,19 @@ mod tests {
         let t1 = d("2020-09-01");
         let t2 = d("2021-06-01");
         let cases: &[(&str, NaiveDate, bool)] = &[
-            ("16.0.0",   t1, false),
-            ("15.0.0",   t1, false),
-            ("14.9.0",   t1, false),
-            ("14.0.0",   t2, true),
-            ("12.0.3",   t1, true),
-            ("v12.0.3",  t1, true),
-            ("12.0.3a",  t1, false),
-            ("11.0.0",   t1, false),
-            ("10.0.0",   t1, true),
+            ("16.0.0", t1, false),
+            ("15.0.0", t1, false),
+            ("14.9.0", t1, false),
+            ("14.0.0", t2, true),
+            ("12.0.3", t1, true),
+            ("v12.0.3", t1, true),
+            ("12.0.3a", t1, false),
+            ("11.0.0", t1, false),
+            ("10.0.0", t1, true),
             ("10.0.999", t1, true),
-            ("10.1.0",   t1, true),
-            ("10.0.0a",  t1, false),
-            ("9.0.0",    t1, false),
+            ("10.1.0", t1, true),
+            ("10.0.0a", t1, false),
+            ("9.0.0", t1, false),
         ];
         for &(version, now, expected) in cases {
             assert_eq!(
@@ -215,11 +276,11 @@ mod tests {
     #[test]
     fn is_valid_matches_renovate_node_index_spec() {
         let cases = [
-            ("16.0.0",   true),
-            ("erbium",   true),
-            ("bogus",    false),
-            ("^10.0.0",  true),
-            ("10.x",     true),
+            ("16.0.0", true),
+            ("erbium", true),
+            ("bogus", false),
+            ("^10.0.0", true),
+            ("10.x", true),
             ("10.9.8.7", false),
         ];
         for (version, expected) in cases {
@@ -230,12 +291,13 @@ mod tests {
     // Ported: "matches("$version", "$range") === $expected" — versioning/node/index.spec.ts line 75
     #[test]
     fn matches_matches_renovate_node_index_spec() {
-        let cases = [
-            ("16.0.0", "gallium", true),
-            ("16.0.0", "fermium", false),
-        ];
+        let cases = [("16.0.0", "gallium", true), ("16.0.0", "fermium", false)];
         for (version, range, expected) in cases {
-            assert_eq!(matches(version, range), expected, "matches({version:?}, {range:?})");
+            assert_eq!(
+                matches(version, range),
+                expected,
+                "matches({version:?}, {range:?})"
+            );
         }
     }
 
@@ -243,9 +305,9 @@ mod tests {
     #[test]
     fn get_satisfying_version_matches_renovate_node_index_spec() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
-            (&["16.0.0"],                     "gallium", Some("16.0.0")),
+            (&["16.0.0"], "gallium", Some("16.0.0")),
             (&["16.0.0", "14.0.0", "16.9.9"], "gallium", Some("16.9.9")),
-            (&["15.0.0", "14.0.0"],           "gallium", None),
+            (&["15.0.0", "14.0.0"], "gallium", None),
         ];
         for &(versions, range, expected) in cases {
             assert_eq!(
@@ -260,9 +322,9 @@ mod tests {
     #[test]
     fn min_satisfying_version_matches_renovate_node_index_spec() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
-            (&["16.0.0"],                     "gallium", Some("16.0.0")),
+            (&["16.0.0"], "gallium", Some("16.0.0")),
             (&["16.0.0", "14.0.0", "16.9.9"], "gallium", Some("16.0.0")),
-            (&["15.0.0", "14.0.0"],           "gallium", None),
+            (&["15.0.0", "14.0.0"], "gallium", None),
         ];
         for &(versions, range, expected) in cases {
             assert_eq!(

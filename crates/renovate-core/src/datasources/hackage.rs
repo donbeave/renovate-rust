@@ -84,7 +84,9 @@ pub async fn fetch_releases(
 
     let mut releases: Vec<HackageRelease> = versions
         .iter()
-        .map(|(v, status)| version_to_release(v, package_name, registry_url, status == "deprecated"))
+        .map(|(v, status)| {
+            version_to_release(v, package_name, registry_url, status == "deprecated")
+        })
         .collect();
 
     releases.sort_by(|a, b| cmp_pvp(&a.version, &b.version));
@@ -212,12 +214,10 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/package/base.json"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                    "4.19.0.1": "deprecated",
-                    "4.20.0.1": "normal"
-                })),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "4.19.0.1": "deprecated",
+                "4.20.0.1": "normal"
+            })))
             .mount(&server)
             .await;
 
@@ -231,9 +231,11 @@ mod tests {
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "4.19.0.1");
         assert!(result.releases[0].is_deprecated);
-        assert!(result.releases[0]
-            .changelog_url
-            .contains("base-4.19.0.1/changelog"));
+        assert!(
+            result.releases[0]
+                .changelog_url
+                .contains("base-4.19.0.1/changelog")
+        );
         assert_eq!(result.releases[1].version, "4.20.0.1");
         assert!(!result.releases[1].is_deprecated);
     }

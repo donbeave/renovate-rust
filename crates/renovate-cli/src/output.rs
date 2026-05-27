@@ -985,7 +985,10 @@ mod tests {
         let s = format_dep(&dep, false);
         // new_value should appear in the output instead of bare latest
         assert!(s.contains("^5.0.0"), "new_value should appear: {s}");
-        assert!(s.contains("^4.17.21"), "current constraint should appear: {s}");
+        assert!(
+            s.contains("^4.17.21"),
+            "current constraint should appear: {s}"
+        );
     }
 
     #[test]

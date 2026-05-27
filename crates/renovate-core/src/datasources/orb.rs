@@ -100,7 +100,10 @@ pub async fn fetch_releases(
 
     let body = GqlRequest {
         query: ORB_QUERY,
-        variables: GqlVariables { package_name, max_versions: MAX_VERSIONS },
+        variables: GqlVariables {
+            package_name,
+            max_versions: MAX_VERSIONS,
+        },
     };
     let body_str = serde_json::to_string(&body).unwrap_or_default();
 
@@ -145,7 +148,11 @@ pub async fn fetch_releases(
         }
     });
 
-    Ok(Some(OrbResult { releases, homepage: Some(homepage), is_private: orb.is_private }))
+    Ok(Some(OrbResult {
+        releases,
+        homepage: Some(homepage),
+        is_private: orb.is_private,
+    }))
 }
 
 // ── Pipeline helpers ───────────────────────────────────────────────────────
@@ -198,8 +205,10 @@ pub async fn fetch_updates_concurrent(
                 }),
                 Ok(Some(r)) => {
                     let latest = r.releases.last().map(|rel| rel.version.clone());
-                    let update_available =
-                        latest.as_deref().map(|l| l != dep.current_value).unwrap_or(false);
+                    let update_available = latest
+                        .as_deref()
+                        .map(|l| l != dep.current_value)
+                        .unwrap_or(false);
                     Ok(OrbUpdateSummary {
                         current_value: dep.current_value.clone(),
                         latest,
@@ -207,7 +216,10 @@ pub async fn fetch_updates_concurrent(
                     })
                 }
             };
-            OrbUpdateResult { package_name: dep.package_name.clone(), summary }
+            OrbUpdateResult {
+                package_name: dep.package_name.clone(),
+                summary,
+            }
         });
     }
 
@@ -260,9 +272,13 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "hyper-expanse/library-release-workflows", &http)
-            .await
-            .unwrap();
+        let result = fetch_releases(
+            &server.uri(),
+            "hyper-expanse/library-release-workflows",
+            &http,
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -277,9 +293,13 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "hyper-expanse/library-release-wonkflows", &http)
-            .await
-            .unwrap();
+        let result = fetch_releases(
+            &server.uri(),
+            "hyper-expanse/library-release-wonkflows",
+            &http,
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -294,9 +314,13 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "hyper-expanse/library-release-workflows", &http)
-            .await
-            .unwrap();
+        let result = fetch_releases(
+            &server.uri(),
+            "hyper-expanse/library-release-workflows",
+            &http,
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -304,9 +328,13 @@ mod tests {
     #[tokio::test]
     async fn returns_null_for_unknown_error() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("http://127.0.0.1:1", "hyper-expanse/library-release-workflows", &http)
-            .await
-            .unwrap();
+        let result = fetch_releases(
+            "http://127.0.0.1:1",
+            "hyper-expanse/library-release-workflows",
+            &http,
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -330,12 +358,22 @@ mod tests {
         assert_eq!(result.releases.len(), 10);
         // Sorted by semver ascending
         assert_eq!(result.releases[0].version, "3.0.0");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2018-12-11T05:28:14.080Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2018-12-11T05:28:14.080Z")
+        );
         // Version without createdAt has no timestamp
-        let r_411 = result.releases.iter().find(|r| r.version == "4.1.1").unwrap();
+        let r_411 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "4.1.1")
+            .unwrap();
         assert!(r_411.release_timestamp.is_none());
         assert_eq!(result.releases[9].version, "4.2.0");
-        assert_eq!(result.releases[9].release_timestamp.as_deref(), Some("2018-12-13T23:19:09.356Z"));
+        assert_eq!(
+            result.releases[9].release_timestamp.as_deref(),
+            Some("2018-12-13T23:19:09.356Z")
+        );
         // homeUrl empty → default URL
         assert_eq!(
             result.homepage.as_deref(),
@@ -356,10 +394,14 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "hyper-expanse/library-release-workflows", &http)
-            .await
-            .unwrap()
-            .unwrap();
+        let result = fetch_releases(
+            &server.uri(),
+            "hyper-expanse/library-release-workflows",
+            &http,
+        )
+        .await
+        .unwrap()
+        .unwrap();
 
         assert_eq!(result.homepage.as_deref(), Some("https://google.com"));
     }
@@ -376,9 +418,13 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         // Use the mock server as a custom registry
-        let result = fetch_releases(&server.uri(), "hyper-expanse/library-release-workflows", &http)
-            .await
-            .unwrap();
+        let result = fetch_releases(
+            &server.uri(),
+            "hyper-expanse/library-release-workflows",
+            &http,
+        )
+        .await
+        .unwrap();
         assert!(result.is_some());
     }
 }

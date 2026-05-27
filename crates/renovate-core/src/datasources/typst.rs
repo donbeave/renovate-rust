@@ -66,7 +66,10 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let text = match http.get_raw_with_accept(registry_url, "application/json").await {
+    let text = match http
+        .get_raw_with_accept(registry_url, "application/json")
+        .await
+    {
         Ok(v) => v,
         Err(_) => return Ok(None),
     };
@@ -97,7 +100,10 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    Ok(Some(TypstResult { releases, source_url }))
+    Ok(Some(TypstResult {
+        releases,
+        source_url,
+    }))
 }
 
 /// Update summary used by pipeline.
@@ -115,8 +121,14 @@ pub async fn fetch_latest(
 ) -> Result<TypstUpdateSummary, TypstError> {
     let result = fetch_releases(DEFAULT_REGISTRY, package_name, http).await?;
     let latest = result.and_then(|r| r.releases.into_iter().last().map(|rel| rel.version));
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-    Ok(TypstUpdateSummary { latest, update_available })
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
+    Ok(TypstUpdateSummary {
+        latest,
+        update_available,
+    })
 }
 
 #[cfg(test)]
@@ -179,14 +191,26 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/example/repo"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/example/repo")
+        );
         assert_eq!(result.releases.len(), 3);
         assert_eq!(result.releases[0].version, "0.1.0");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2024-01-08T10:13:47.000Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2024-01-08T10:13:47.000Z")
+        );
         assert_eq!(result.releases[1].version, "0.2.0");
-        assert_eq!(result.releases[1].release_timestamp.as_deref(), Some("2024-01-09T14:00:27.000Z"));
+        assert_eq!(
+            result.releases[1].release_timestamp.as_deref(),
+            Some("2024-01-09T14:00:27.000Z")
+        );
         assert_eq!(result.releases[2].version, "1.0.0");
-        assert_eq!(result.releases[2].release_timestamp.as_deref(), Some("2024-01-10T17:47:07.000Z"));
+        assert_eq!(
+            result.releases[2].release_timestamp.as_deref(),
+            Some("2024-01-10T17:47:07.000Z")
+        );
     }
 
     // Ported: "returns null for unsupported namespace" — datasource/typst/index.spec.ts line 74
@@ -242,7 +266,10 @@ mod tests {
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "0.1.0");
         assert_eq!(result.releases[1].version, "0.2.0");
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/example/multi"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/example/multi")
+        );
     }
 
     // Ported: "handles registry fetch errors" — datasource/typst/index.spec.ts line 163

@@ -88,7 +88,7 @@ mod tests {
             ("./foo/..", true),
             ("./foo/..../bar", true),
             ("./..", false),
-            ("\\foo", false),   // backslash → treated as /foo (absolute)
+            ("\\foo", false), // backslash → treated as /foo (absolute)
             ("foo'", true),
             ("fo\"o", true),
             ("fo&o", true),
@@ -105,7 +105,8 @@ mod tests {
                 is_valid_path(path, base),
                 expected,
                 "is_valid_path({:?}, {:?})",
-                path, base
+                path,
+                base
             );
         }
     }

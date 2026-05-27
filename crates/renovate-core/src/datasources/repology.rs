@@ -87,7 +87,11 @@ fn find_package_in_response(
         .map(|p| (*p).clone())
         .collect();
 
-    if with_type.is_empty() { None } else { Some(with_type) }
+    if with_type.is_empty() {
+        None
+    } else {
+        Some(with_type)
+    }
 }
 
 async fn query_packages(url: &str, http: &HttpClient) -> Result<Vec<RepologyPackage>, HttpError> {
@@ -101,7 +105,9 @@ async fn query_packages(url: &str, http: &HttpClient) -> Result<Vec<RepologyPack
 
 fn to_releases(pkgs: Vec<RepologyPackage>) -> Vec<RepologyRelease> {
     pkgs.into_iter()
-        .map(|p| RepologyRelease { version: p.origversion.unwrap_or(p.version) })
+        .map(|p| RepologyRelease {
+            version: p.origversion.unwrap_or(p.version),
+        })
         .collect()
 }
 
@@ -112,7 +118,9 @@ pub async fn fetch_releases(
 ) -> Result<Option<RepologyResult>, RepologyError> {
     let base = registry_url.trim_end_matches('/');
 
-    let slash = package_name.find('/').ok_or(RepologyError::InvalidPackageName)?;
+    let slash = package_name
+        .find('/')
+        .ok_or(RepologyError::InvalidPackageName)?;
     let repo_name = &package_name[..slash];
     let pkg_name = &package_name[slash + 1..];
     if repo_name.is_empty() || pkg_name.is_empty() {
@@ -135,8 +143,12 @@ pub async fn fetch_releases(
 
         match query_packages(&url, http).await {
             Ok(pkgs) => {
-                if let Some(found) = find_package_in_response(&pkgs, repo_name, pkg_name, &[pkg_type]) {
-                    return Ok(Some(RepologyResult { releases: to_releases(found) }));
+                if let Some(found) =
+                    find_package_in_response(&pkgs, repo_name, pkg_name, &[pkg_type])
+                {
+                    return Ok(Some(RepologyResult {
+                        releases: to_releases(found),
+                    }));
                 }
             }
             Err(HttpError::Status { status, .. }) if status.as_u16() == 300 => {
@@ -151,7 +163,9 @@ pub async fn fetch_releases(
                     pkg_name,
                     &[PackageType::BinName, PackageType::SrcName],
                 );
-                return Ok(found.map(|f| RepologyResult { releases: to_releases(f) }));
+                return Ok(found.map(|f| RepologyResult {
+                    releases: to_releases(f),
+                }));
             }
             Err(e) => return Err(RepologyError::Http(e)),
         }
@@ -229,11 +243,29 @@ mod tests {
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
-        mock_resolver(&server, "debian_stable", "nginx", "binname", 200, Some("[]")).await;
-        mock_resolver(&server, "debian_stable", "nginx", "srcname", 200, Some("[]")).await;
+        mock_resolver(
+            &server,
+            "debian_stable",
+            "nginx",
+            "binname",
+            200,
+            Some("[]"),
+        )
+        .await;
+        mock_resolver(
+            &server,
+            "debian_stable",
+            "nginx",
+            "srcname",
+            200,
+            Some("[]"),
+        )
+        .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "debian_stable/nginx", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "debian_stable/nginx", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -245,8 +277,9 @@ mod tests {
         mock_resolver(&server, "this_should", "never-exist", "srcname", 404, None).await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&server.uri(), "this_should/never-exist", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "this_should/never-exist", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -254,7 +287,15 @@ mod tests {
     #[tokio::test]
     async fn throws_error_on_unexpected_api_response() {
         let server = MockServer::start().await;
-        mock_resolver(&server, "debian_stable", "nginx", "binname", 200, Some("[]")).await;
+        mock_resolver(
+            &server,
+            "debian_stable",
+            "nginx",
+            "binname",
+            200,
+            Some("[]"),
+        )
+        .await;
         mock_resolver(&server, "debian_stable", "nginx", "srcname", 403, None).await;
         mock_api(&server, "nginx", 500, None).await;
 
@@ -278,7 +319,15 @@ mod tests {
     #[tokio::test]
     async fn throws_error_on_unexpected_resolver_response_source() {
         let server = MockServer::start().await;
-        mock_resolver(&server, "debian_stable", "nginx", "binname", 200, Some("[]")).await;
+        mock_resolver(
+            &server,
+            "debian_stable",
+            "nginx",
+            "binname",
+            200,
+            Some("[]"),
+        )
+        .await;
         mock_resolver(&server, "debian_stable", "nginx", "srcname", 500, None).await;
 
         let http = HttpClient::new().unwrap();
@@ -290,7 +339,15 @@ mod tests {
     #[tokio::test]
     async fn throws_error_on_api_request_timeout() {
         let server = MockServer::start().await;
-        mock_resolver(&server, "debian_stable", "nginx", "binname", 200, Some("[]")).await;
+        mock_resolver(
+            &server,
+            "debian_stable",
+            "nginx",
+            "binname",
+            200,
+            Some("[]"),
+        )
+        .await;
         mock_resolver(&server, "debian_stable", "nginx", "srcname", 403, None).await;
         // API returns 500 to simulate a failed connection
         mock_api(&server, "nginx", 500, None).await;
@@ -318,7 +375,9 @@ mod tests {
         mock_resolver(&server, "ubuntu_20_04", "git", "binname", 300, Some("[]")).await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "ubuntu_20_04/git", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "ubuntu_20_04/git", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -326,8 +385,7 @@ mod tests {
     #[tokio::test]
     async fn throws_without_repository_and_package_name() {
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases("https://repology.org/", "invalid-lookup-name", &http).await;
+        let result = fetch_releases("https://repology.org/", "invalid-lookup-name", &http).await;
         assert!(matches!(result, Err(RepologyError::InvalidPackageName)));
     }
 
@@ -335,12 +393,21 @@ mod tests {
     #[tokio::test]
     async fn returns_correct_version_for_binary_package() {
         let server = MockServer::start().await;
-        mock_resolver(&server, "debian_stable", "nginx", "binname", 200, Some(FIXTURE_NGINX))
-            .await;
+        mock_resolver(
+            &server,
+            "debian_stable",
+            "nginx",
+            "binname",
+            200,
+            Some(FIXTURE_NGINX),
+        )
+        .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&server.uri(), "debian_stable/nginx", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "debian_stable/nginx", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "1.14.2-2+deb10u1");
@@ -350,7 +417,15 @@ mod tests {
     #[tokio::test]
     async fn returns_correct_version_for_source_package() {
         let server = MockServer::start().await;
-        mock_resolver(&server, "debian_stable", "gcc-defaults", "binname", 404, None).await;
+        mock_resolver(
+            &server,
+            "debian_stable",
+            "gcc-defaults",
+            "binname",
+            404,
+            None,
+        )
+        .await;
         mock_resolver(
             &server,
             "debian_stable",
@@ -375,7 +450,15 @@ mod tests {
     #[tokio::test]
     async fn returns_correct_version_for_api_package() {
         let server = MockServer::start().await;
-        mock_resolver(&server, "debian_stable", "gcc-defaults", "binname", 403, None).await;
+        mock_resolver(
+            &server,
+            "debian_stable",
+            "gcc-defaults",
+            "binname",
+            403,
+            None,
+        )
+        .await;
         mock_api(&server, "gcc-defaults", 200, Some(FIXTURE_GCC_DEFAULTS)).await;
 
         let http = HttpClient::new().unwrap();
@@ -392,11 +475,21 @@ mod tests {
     #[tokio::test]
     async fn returns_correct_version_for_multi_package_same_name() {
         let server = MockServer::start().await;
-        mock_resolver(&server, "alpine_3_12", "gcc", "binname", 200, Some(FIXTURE_GCC)).await;
+        mock_resolver(
+            &server,
+            "alpine_3_12",
+            "gcc",
+            "binname",
+            200,
+            Some(FIXTURE_GCC),
+        )
+        .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&server.uri(), "alpine_3_12/gcc", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "alpine_3_12/gcc", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "9.3.0-r2");
@@ -461,8 +554,9 @@ mod tests {
         mock_resolver(&server, "dummy", "example", "srcname", 200, Some(body)).await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&server.uri(), "dummy/example", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "dummy/example", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 

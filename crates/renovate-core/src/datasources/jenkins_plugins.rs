@@ -73,9 +73,11 @@ fn parse_build_date(s: &str) -> Option<String> {
 
 /// Normalize ISO timestamp to exactly 3ms digits: "2020-05-13T00:11:40.00Z" → "2020-05-13T00:11:40.000Z".
 fn normalize_timestamp(s: &str) -> Option<String> {
-    DateTime::parse_from_rfc3339(s)
-        .ok()
-        .map(|dt| dt.with_timezone(&Utc).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string())
+    DateTime::parse_from_rfc3339(s).ok().map(|dt| {
+        dt.with_timezone(&Utc)
+            .format("%Y-%m-%dT%H:%M:%S%.3fZ")
+            .to_string()
+    })
 }
 
 fn resolve_timestamp(entry: &VersionEntry) -> Option<String> {
@@ -125,9 +127,16 @@ pub async fn fetch_releases(
     };
 
     // None timestamps sort first (oldest/unknown), then ascending by timestamp.
-    releases.sort_by(|a, b| a.release_timestamp.cmp(&b.release_timestamp).then(a.version.cmp(&b.version)));
+    releases.sort_by(|a, b| {
+        a.release_timestamp
+            .cmp(&b.release_timestamp)
+            .then(a.version.cmp(&b.version))
+    });
 
-    Ok(Some(JenkinsResult { releases, source_url }))
+    Ok(Some(JenkinsResult {
+        releases,
+        source_url,
+    }))
 }
 
 /// Update summary used by pipeline.
@@ -145,8 +154,14 @@ pub async fn fetch_latest(
 ) -> Result<JenkinsPluginUpdateSummary, JenkinsPluginsError> {
     let result = fetch_releases(DEFAULT_REGISTRY, plugin_name, http).await?;
     let latest = result.and_then(|r| r.releases.into_iter().last().map(|rel| rel.version));
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-    Ok(JenkinsPluginUpdateSummary { latest, update_available })
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
+    Ok(JenkinsPluginUpdateSummary {
+        latest,
+        update_available,
+    })
 }
 
 #[cfg(test)]
@@ -225,18 +240,30 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(result.source_url.as_deref(), Some("https://source-url.example.com"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://source-url.example.com")
+        );
         assert_eq!(result.releases.len(), 3);
 
         assert_eq!(result.releases[0].version, "1.0.0");
-        assert_eq!(result.releases[0].download_url.as_deref(), Some("https://download.example.com"));
+        assert_eq!(
+            result.releases[0].download_url.as_deref(),
+            Some("https://download.example.com")
+        );
         assert!(result.releases[0].release_timestamp.is_none());
 
         assert_eq!(result.releases[1].version, "2.0.0");
-        assert_eq!(result.releases[1].release_timestamp.as_deref(), Some("2020-01-02T00:00:00.000Z"));
+        assert_eq!(
+            result.releases[1].release_timestamp.as_deref(),
+            Some("2020-01-02T00:00:00.000Z")
+        );
 
         assert_eq!(result.releases[2].version, "3.0.0");
-        assert_eq!(result.releases[2].release_timestamp.as_deref(), Some("2020-05-13T00:11:40.000Z"));
+        assert_eq!(
+            result.releases[2].release_timestamp.as_deref(),
+            Some("2020-05-13T00:11:40.000Z")
+        );
     }
 
     // Ported: "returns package releases for a hit for info and miss for releases" — datasource/jenkins-plugins/index.spec.ts line 104
@@ -260,7 +287,10 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(result.source_url.as_deref(), Some("https://source-url.example.com"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://source-url.example.com")
+        );
         assert!(result.releases.is_empty());
     }
 
@@ -302,12 +332,21 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(result.source_url.as_deref(), Some("https://source-url.example.com"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://source-url.example.com")
+        );
         assert_eq!(result.releases.len(), 3);
         assert_eq!(result.releases[0].version, "1.0.0");
         assert_eq!(result.releases[1].version, "2.0.0");
-        assert_eq!(result.releases[1].release_timestamp.as_deref(), Some("2020-01-02T00:00:00.000Z"));
+        assert_eq!(
+            result.releases[1].release_timestamp.as_deref(),
+            Some("2020-01-02T00:00:00.000Z")
+        );
         assert_eq!(result.releases[2].version, "3.0.0");
-        assert_eq!(result.releases[2].release_timestamp.as_deref(), Some("2020-05-13T00:11:40.000Z"));
+        assert_eq!(
+            result.releases[2].release_timestamp.as_deref(),
+            Some("2020-05-13T00:11:40.000Z")
+        );
     }
 }

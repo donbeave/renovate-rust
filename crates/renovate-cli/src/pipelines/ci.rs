@@ -707,22 +707,21 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 for dep in &deps {
                     if let renovate_core::extractors::azure_pipelines::AzPipelinesDep::Task(t) = dep
                     {
-                        let status = match renovate_core::datasources::azure_pipelines_tasks::fetch_latest(
-                            http,
-                            &t.name,
-                            &t.version,
-                        )
-                        .await
-                        {
-                            Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
-                                current: t.version.clone(),
-                                latest: s.latest.unwrap_or_default(),
-                            },
-                            Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
-                            Err(e) => output::DepStatus::LookupError {
-                                message: e.to_string(),
-                            },
-                        };
+                        let status =
+                            match renovate_core::datasources::azure_pipelines_tasks::fetch_latest(
+                                http, &t.name, &t.version,
+                            )
+                            .await
+                            {
+                                Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                                    current: t.version.clone(),
+                                    latest: s.latest.unwrap_or_default(),
+                                },
+                                Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            };
                         file_deps.push(output::DepReport {
                             branch_name: None,
                             group_name: None,

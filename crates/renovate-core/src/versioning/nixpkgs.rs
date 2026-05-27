@@ -98,9 +98,9 @@ pub fn is_stable(version: &str) -> bool {
 }
 
 pub fn equals(a: &str, b: &str) -> bool {
-    parse(a)
-        .zip(parse(b))
-        .is_some_and(|(a, b)| compare(&a, &b) == Ordering::Equal && a.compatibility == b.compatibility)
+    parse(a).zip(parse(b)).is_some_and(|(a, b)| {
+        compare(&a, &b) == Ordering::Equal && a.compatibility == b.compatibility
+    })
 }
 
 pub fn sort_versions(a: &str, b: &str) -> Ordering {
@@ -194,7 +194,13 @@ mod tests {
         versions.sort_by(|a, b| sort_versions(a, b));
         assert_eq!(
             versions,
-            ["nixos-21.11", "nixos-22.05", "nixos-22.05-small", "nixos-unstable", "nixos-unstable-small"]
+            [
+                "nixos-21.11",
+                "nixos-22.05",
+                "nixos-22.05-small",
+                "nixos-unstable",
+                "nixos-unstable-small"
+            ]
         );
     }
 

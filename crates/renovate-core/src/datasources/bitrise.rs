@@ -37,7 +37,6 @@ pub struct BitriseReleasesResult {
     pub registry_url: String,
 }
 
-
 /// Update summary for the legacy `fetch_latest` API used by ci.rs.
 #[derive(Debug)]
 pub struct BitriseUpdateSummary {
@@ -88,7 +87,11 @@ fn parse_steplib_url(registry_url: &str) -> Option<(String, String, String)> {
     // github.com uses the central API; everything else uses /api/v3 (GHE or test servers)
     if host == "github.com" {
         let registry_url = format!("https://github.com/{full_name}.git");
-        return Some(("https://api.github.com".to_string(), full_name, registry_url));
+        return Some((
+            "https://api.github.com".to_string(),
+            full_name,
+            registry_url,
+        ));
     }
 
     let api_base = format!("{scheme}://{host}/api/v3");
@@ -98,7 +101,10 @@ fn parse_steplib_url(registry_url: &str) -> Option<(String, String, String)> {
 /// Returns true if `name` looks like a semver version (major.minor.patch pattern).
 fn is_semver_version(name: &str) -> bool {
     let parts: Vec<&str> = name.split('.').collect();
-    parts.len() >= 2 && parts.iter().all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
+    parts.len() >= 2
+        && parts
+            .iter()
+            .all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
 }
 
 /// Decode base64-encoded YAML content and extract `published_at` + `source_code_url`.
@@ -176,7 +182,8 @@ pub async fn fetch_releases(
             continue;
         }
 
-        let step_url = format!("{api_base}/repos/{full_name}/contents/steps/{package_name}/{name}/step.yml");
+        let step_url =
+            format!("{api_base}/repos/{full_name}/contents/steps/{package_name}/{name}/step.yml");
         let step_resp = http.get_retrying(&step_url).await?;
         if !step_resp.status().is_success() {
             continue;
@@ -234,11 +241,12 @@ pub async fn fetch_latest(
     registry_url: &str,
 ) -> Result<BitriseUpdateSummary, BitriseError> {
     let result = fetch_releases(step_name, registry_url, http).await?;
-    let latest = result.and_then(|r| {
-        r.releases.into_iter().map(|rel| rel.version).last()
-    });
+    let latest = result.and_then(|r| r.releases.into_iter().map(|rel| rel.version).last());
     let update_available = latest.as_deref() != Some(current_value);
-    Ok(BitriseUpdateSummary { latest, update_available })
+    Ok(BitriseUpdateSummary {
+        latest,
+        update_available,
+    })
 }
 
 #[cfg(test)]
@@ -270,9 +278,13 @@ mod tests {
     #[tokio::test]
     async fn returns_null_for_unsupported_registry_url() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("script", "https://gitlab.com/bitrise-io/bitrise-steplib", &http)
-            .await
-            .unwrap();
+        let result = fetch_releases(
+            "script",
+            "https://gitlab.com/bitrise-io/bitrise-steplib",
+            &http,
+        )
+        .await
+        .unwrap();
         assert!(result.is_none());
     }
 
@@ -284,8 +296,9 @@ mod tests {
 
         Mock::given(method("GET"))
             .and(path("/api/v3/repos/foo/bar/contents/steps/script"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_json(serde_json::json!([dir_item("1.0.0")])))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!([dir_item("1.0.0")])),
+            )
             .mount(&server)
             .await;
 
@@ -299,13 +312,25 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let registry = format!("{base}/foo/bar");
-        let result = fetch_releases("script", &registry, &http).await.unwrap().unwrap();
+        let result = fetch_releases("script", &registry, &http)
+            .await
+            .unwrap()
+            .unwrap();
 
-        assert_eq!(result.homepage, "https://bitrise.io/integrations/steps/script");
+        assert_eq!(
+            result.homepage,
+            "https://bitrise.io/integrations/steps/script"
+        );
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "1.0.0");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2024-03-19T12:54:48.081Z"));
-        assert_eq!(result.releases[0].source_url.as_deref(), Some("https://github.com/bitrise-steplib/bitrise-step-script"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2024-03-19T12:54:48.081Z")
+        );
+        assert_eq!(
+            result.releases[0].source_url.as_deref(),
+            Some("https://github.com/bitrise-steplib/bitrise-step-script")
+        );
     }
 
     // Ported: "returns version and filters out the asset folder" — datasource/bitrise/index.spec.ts line 55
@@ -342,13 +367,22 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let registry = format!("{base}/bitrise-io/bitrise-steplib");
-        let result = fetch_releases("activate-build-cache-for-bazel", &registry, &http).await.unwrap().unwrap();
+        let result = fetch_releases("activate-build-cache-for-bazel", &registry, &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "1.0.0");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2024-03-19T12:54:48.081Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2024-03-19T12:54:48.081Z")
+        );
         assert_eq!(result.releases[1].version, "1.0.1");
-        assert_eq!(result.releases[1].release_timestamp.as_deref(), Some("2024-07-03T08:53:25.668Z"));
+        assert_eq!(
+            result.releases[1].release_timestamp.as_deref(),
+            Some("2024-07-03T08:53:25.668Z")
+        );
     }
 
     // Ported: "returns null if there are no releases" — datasource/bitrise/index.spec.ts line 123
@@ -367,7 +401,9 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let registry = format!("{base}/bitrise-io/bitrise-steplib");
-        let result = fetch_releases("activate-build-cache-for-bazel", &registry, &http).await.unwrap();
+        let result = fetch_releases("activate-build-cache-for-bazel", &registry, &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -387,7 +423,9 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let registry = format!("{base}/bitrise-io/bitrise-steplib");
-        let result = fetch_releases("activate-build-cache-for-bazel", &registry, &http).await.unwrap();
+        let result = fetch_releases("activate-build-cache-for-bazel", &registry, &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -398,14 +436,19 @@ mod tests {
         let base = server.uri();
 
         Mock::given(method("GET"))
-            .and(path("/api/v3/repos/bitrise-io/bitrise-steplib/contents/steps/script"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_json(serde_json::json!([dir_item("1.0.0")])))
+            .and(path(
+                "/api/v3/repos/bitrise-io/bitrise-steplib/contents/steps/script",
+            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!([dir_item("1.0.0")])),
+            )
             .mount(&server)
             .await;
 
         Mock::given(method("GET"))
-            .and(path("/api/v3/repos/bitrise-io/bitrise-steplib/contents/steps/script/1.0.0/step.yml"))
+            .and(path(
+                "/api/v3/repos/bitrise-io/bitrise-steplib/contents/steps/script/1.0.0/step.yml",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "type": "file",
                 "name": "step.yml",
@@ -427,14 +470,19 @@ mod tests {
         let base = server.uri();
 
         Mock::given(method("GET"))
-            .and(path("/api/v3/repos/bitrise-io/bitrise-steplib/contents/steps/script"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_json(serde_json::json!([dir_item("1.0.0")])))
+            .and(path(
+                "/api/v3/repos/bitrise-io/bitrise-steplib/contents/steps/script",
+            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!([dir_item("1.0.0")])),
+            )
             .mount(&server)
             .await;
 
         Mock::given(method("GET"))
-            .and(path("/api/v3/repos/bitrise-io/bitrise-steplib/contents/steps/script/1.0.0/step.yml"))
+            .and(path(
+                "/api/v3/repos/bitrise-io/bitrise-steplib/contents/steps/script/1.0.0/step.yml",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "type": "file",
                 "name": "step.yml",

@@ -299,8 +299,7 @@ pub fn parse_all_versions(xml: &str) -> Option<MetadataResult> {
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(e)) => {
-                let tag =
-                    String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
                 match tag.as_str() {
                     "versioning" => in_versioning = true,
                     "versions" if in_versioning => in_versions = true,
@@ -310,10 +309,7 @@ pub fn parse_all_versions(xml: &str) -> Option<MetadataResult> {
             }
             Ok(Event::Text(e)) => {
                 if let Some(ref tag) = current_tag {
-                    let text = e
-                        .decode()
-                        .map(|s| s.trim().to_owned())
-                        .unwrap_or_default();
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
                     if !text.is_empty() {
                         match tag.as_str() {
                             "version" if in_versions => versions.push(text),
@@ -325,8 +321,7 @@ pub fn parse_all_versions(xml: &str) -> Option<MetadataResult> {
                 }
             }
             Ok(Event::End(e)) => {
-                let tag =
-                    String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
                 match tag.as_str() {
                     "versioning" => in_versioning = false,
                     "versions" => in_versions = false,
@@ -379,8 +374,7 @@ pub fn parse_pom_info(xml: &str) -> PomInfo {
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(e)) => {
-                let tag =
-                    String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
                 if tag == "scm" {
                     in_scm = true;
                 }
@@ -388,10 +382,7 @@ pub fn parse_pom_info(xml: &str) -> PomInfo {
             }
             Ok(Event::Text(e)) => {
                 if let Some(ref tag) = current_tag {
-                    let text = e
-                        .decode()
-                        .map(|s| s.trim().to_owned())
-                        .unwrap_or_default();
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
                     if !text.is_empty() && tag == "url" {
                         if in_scm && result.source_url.is_none() {
                             result.source_url = process_scm_url(&text);
@@ -404,8 +395,7 @@ pub fn parse_pom_info(xml: &str) -> PomInfo {
                 }
             }
             Ok(Event::End(e)) => {
-                let tag =
-                    String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
                 if tag == "scm" {
                     in_scm = false;
                 }
@@ -461,7 +451,11 @@ pub fn find_latest_suitable(versions: &[String]) -> Option<&str> {
     use crate::versioning::maven::{compare, is_stable};
     use std::cmp::Ordering;
 
-    let stable: Vec<&str> = versions.iter().map(String::as_str).filter(|v| is_stable(v)).collect();
+    let stable: Vec<&str> = versions
+        .iter()
+        .map(String::as_str)
+        .filter(|v| is_stable(v))
+        .collect();
     let pool: Vec<&str> = if stable.is_empty() {
         versions.iter().map(String::as_str).collect()
     } else {
@@ -469,7 +463,11 @@ pub fn find_latest_suitable(versions: &[String]) -> Option<&str> {
     };
 
     pool.into_iter().reduce(|best, v| {
-        if compare(v, best) == Ordering::Greater { v } else { best }
+        if compare(v, best) == Ordering::Greater {
+            v
+        } else {
+            best
+        }
     })
 }
 
@@ -519,9 +517,12 @@ pub async fn fetch_releases_from_registry(
         let pom_url =
             format!("{base}/{group_path}/{artifact_id}/{latest}/{artifact_id}-{latest}.pom");
         match http.get_retrying(&pom_url).await.ok() {
-            Some(r) if r.status().is_success() => {
-                r.text().await.ok().map(|b| parse_pom_info(&b)).unwrap_or_default()
-            }
+            Some(r) if r.status().is_success() => r
+                .text()
+                .await
+                .ok()
+                .map(|b| parse_pom_info(&b))
+                .unwrap_or_default(),
             _ => PomInfo::default(),
         }
     } else {

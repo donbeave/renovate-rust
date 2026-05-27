@@ -99,7 +99,10 @@ pub fn parse_git_author(input: &str) -> Option<GitAuthor> {
             } else {
                 String::new()
             };
-            return Some(GitAuthor { name, address: trimmed.to_string() });
+            return Some(GitAuthor {
+                name,
+                address: trimmed.to_string(),
+            });
         }
     }
 

@@ -68,7 +68,7 @@ pub async fn fetch_releases(
     let text = match http.get_raw_with_accept(&url, "application/json").await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.as_u16() == 404 => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(e) => return Err(CdnjsError::Http(e)),
     };
@@ -79,10 +79,18 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let releases = api.versions.into_iter().map(|v| CdnjsRelease { version: v }).collect();
+    let releases = api
+        .versions
+        .into_iter()
+        .map(|v| CdnjsRelease { version: v })
+        .collect();
     let source_url = api.repository.and_then(|r| r.url);
 
-    Ok(Some(CdnjsResult { releases, source_url, homepage: api.homepage }))
+    Ok(Some(CdnjsResult {
+        releases,
+        source_url,
+        homepage: api.homepage,
+    }))
 }
 
 /// Fetch the SRI digest for a specific file and version.
@@ -97,7 +105,9 @@ pub async fn get_digest(
 ) -> Result<Option<String>, CdnjsError> {
     let base = registry_url.trim_end_matches('/');
     let library = package_name.split('/').next().unwrap_or(package_name);
-    let asset_name = package_name.strip_prefix(&format!("{library}/")).unwrap_or(package_name);
+    let asset_name = package_name
+        .strip_prefix(&format!("{library}/"))
+        .unwrap_or(package_name);
     let url = format!("{base}/libraries/{library}/{version}?fields=sri");
 
     let text = match http.get_raw_with_accept(&url, "application/json").await {
@@ -130,8 +140,15 @@ pub async fn fetch_latest(
 ) -> Result<CdnjsUpdateSummary, CdnjsError> {
     let result = fetch_releases(DEFAULT_REGISTRY, library, http).await?;
     let latest = result.and_then(|r| r.releases.last().map(|rel| rel.version.clone()));
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-    Ok(CdnjsUpdateSummary { current_value: current_value.to_owned(), latest, update_available })
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
+    Ok(CdnjsUpdateSummary {
+        current_value: current_value.to_owned(),
+        latest,
+        update_available,
+    })
 }
 
 #[cfg(test)]
@@ -144,9 +161,8 @@ mod tests {
     const D3_FORCE: &str = include_str!(
         "../../../../../renovate/lib/modules/datasource/cdnjs/__fixtures__/d3-force.json"
     );
-    const SRI_JSON: &str = include_str!(
-        "../../../../../renovate/lib/modules/datasource/cdnjs/__fixtures__/sri.json"
-    );
+    const SRI_JSON: &str =
+        include_str!("../../../../../renovate/lib/modules/datasource/cdnjs/__fixtures__/sri.json");
 
     // Ported: "throws for empty result" — datasource/cdnjs/index.spec.ts line 18
     #[tokio::test]
@@ -182,7 +198,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "foo/bar", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "foo/bar", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -197,8 +215,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&server.uri(), "doesnotexist/doesnotexist", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "doesnotexist/doesnotexist", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -266,11 +285,16 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&server.uri(), "d3-force/d3-force.js", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "d3-force/d3-force.js", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert!(!result.releases.is_empty());
-        assert_eq!(result.homepage.as_deref(), Some("https://d3js.org/d3-force/"));
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://d3js.org/d3-force/")
+        );
         assert_eq!(
             result.source_url.as_deref(),
             Some("https://github.com/d3/d3-force.git")
@@ -289,7 +313,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_digest(&server.uri(), "foo/bar", "1.2.0", &http).await.unwrap();
+        let result = get_digest(&server.uri(), "foo/bar", "1.2.0", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -300,14 +326,14 @@ mod tests {
         Mock::given(method("GET"))
             .and(path("/libraries/foo/1.2.0"))
             .and(query_param("fields", "sri"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(r#"{"sri":{}}"#),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"sri":{}}"#))
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_digest(&server.uri(), "foo/bar", "1.2.0", &http).await.unwrap();
+        let result = get_digest(&server.uri(), "foo/bar", "1.2.0", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -318,14 +344,17 @@ mod tests {
         Mock::given(method("GET"))
             .and(path("/libraries/foo/1.2.0"))
             .and(query_param("fields", "sri"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_string(r#"{"sri":{"string":"hash"}}"#))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(r#"{"sri":{"string":"hash"}}"#),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
         // packageName "foo/bar" → asset "bar", but SRI has "string" not "bar"
-        let result = get_digest(&server.uri(), "foo/bar", "1.2.0", &http).await.unwrap();
+        let result = get_digest(&server.uri(), "foo/bar", "1.2.0", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -366,7 +395,9 @@ mod tests {
         .unwrap();
         assert_eq!(
             result.as_deref(),
-            Some("sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g==")
+            Some(
+                "sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
+            )
         );
     }
 }

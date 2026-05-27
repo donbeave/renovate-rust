@@ -173,7 +173,13 @@ fn detect_registry_urls(ctx: &GithubActionsContext) -> Vec<String> {
     // Parse host from endpoint URL: "https://foo.example.com/api/v3" → "foo.example.com"
     let (scheme, host) = match endpoint.split_once("://") {
         Some((s, rest)) if s == "https" || s == "http" => {
-            let host = rest.split('/').next().unwrap_or("").split('?').next().unwrap_or("");
+            let host = rest
+                .split('/')
+                .next()
+                .unwrap_or("")
+                .split('?')
+                .next()
+                .unwrap_or("");
             if host.is_empty() {
                 return vec![]; // invalid URL
             }
@@ -184,7 +190,10 @@ fn detect_registry_urls(ctx: &GithubActionsContext) -> Vec<String> {
     if host == "github.com" || host == "api.github.com" {
         return vec![]; // standard github.com, no custom registry
     }
-    vec![format!("{scheme}://{host}"), "https://github.com".to_owned()]
+    vec![
+        format!("{scheme}://{host}"),
+        "https://github.com".to_owned(),
+    ]
 }
 
 /// Parse a GitHub Actions workflow YAML file and extract `uses:` references.
@@ -193,7 +202,10 @@ pub fn extract(content: &str) -> Vec<GithubActionsExtractedDep> {
 }
 
 /// Parse a GitHub Actions workflow YAML file with endpoint context for registry URL detection.
-pub fn extract_with_context(content: &str, ctx: &GithubActionsContext) -> Vec<GithubActionsExtractedDep> {
+pub fn extract_with_context(
+    content: &str,
+    ctx: &GithubActionsContext,
+) -> Vec<GithubActionsExtractedDep> {
     let registry_urls = detect_registry_urls(ctx);
     let mut deps = Vec::new();
 

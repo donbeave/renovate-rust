@@ -403,8 +403,8 @@ pub fn extract_resource(raw: &str) -> Option<KustomizeResourceDep> {
     let url = caps.name("url")?.as_str();
     let qs = caps.name("qs")?.as_str();
 
-    let current_value = first_query_value(qs, "ref")
-        .or_else(|| first_query_value(qs, "version"))?;
+    let current_value =
+        first_query_value(qs, "ref").or_else(|| first_query_value(qs, "version"))?;
     if current_value.is_empty() {
         return None;
     }
@@ -1404,46 +1404,221 @@ resources:
             package_name: Option<&'static str>,
         }
         let cases: &[Case] = &[
-            Case { url: "https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somedir", is_github: false, dep_name: "git-codecommit.us-east-2.amazonaws.com/someorg/somerepo", package_name: Some("https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo") },
-            Case { url: "https://fabrikops2.visualstudio.com/someorg/somerepo", is_github: false, dep_name: "fabrikops2.visualstudio.com/someorg/somerepo", package_name: Some("https://fabrikops2.visualstudio.com/someorg/somerepo") },
-            Case { url: "http://github.com/someorg/somerepo/somedir", is_github: true, dep_name: "someorg/somerepo", package_name: None },
-            Case { url: "git@github.com:someorg/somerepo/somedir", is_github: true, dep_name: "someorg/somerepo", package_name: None },
-            Case { url: "http://github.com/someorg/somerepo.git/somedir", is_github: true, dep_name: "someorg/somerepo", package_name: None },
-            Case { url: "git@github.com:someorg/somerepo.git/somedir", is_github: true, dep_name: "someorg/somerepo", package_name: None },
-            Case { url: "git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git", is_github: false, dep_name: "gitlab2.sqtools.ru:infra/kubernetes/thanos-base", package_name: Some("git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git") },
-            Case { url: "git@bitbucket.org:company/project.git//path", is_github: false, dep_name: "bitbucket.org:company/project", package_name: Some("git@bitbucket.org:company/project.git") },
-            Case { url: "git@bitbucket.org/company/project.git//path", is_github: false, dep_name: "bitbucket.org/company/project", package_name: Some("git@bitbucket.org/company/project.git") },
-            Case { url: "ssh://git@bitbucket.org/company/project.git//path", is_github: false, dep_name: "bitbucket.org/company/project", package_name: Some("ssh://git@bitbucket.org/company/project.git") },
-            Case { url: "https://itfs.mycompany.com/collection/project/_git/somerepos", is_github: false, dep_name: "itfs.mycompany.com/collection/project/_git/somerepos", package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos") },
-            Case { url: "https://itfs.mycompany.com/collection/project/_git/somerepos", is_github: false, dep_name: "itfs.mycompany.com/collection/project/_git/somerepos", package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos") },
-            Case { url: "https://itfs.mycompany.com/collection/project/_git/somerepos/somedir", is_github: false, dep_name: "itfs.mycompany.com/collection/project/_git/somerepos", package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos") },
-            Case { url: "git::https://itfs.mycompany.com/collection/project/_git/somerepos", is_github: false, dep_name: "itfs.mycompany.com/collection/project/_git/somerepos", package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos") },
-            Case { url: "https://bitbucket.example.com/scm/project/repository.git", is_github: false, dep_name: "bitbucket.example.com/scm/project/repository", package_name: Some("https://bitbucket.example.com/scm/project/repository.git") },
-            Case { url: "ssh://git@git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somepath", is_github: false, dep_name: "git-codecommit.us-east-2.amazonaws.com/someorg/somerepo", package_name: Some("ssh://git@git-codecommit.us-east-2.amazonaws.com/someorg/somerepo") },
-            Case { url: "git@github.com/someorg/somerepo/somepath", is_github: true, dep_name: "someorg/somerepo", package_name: None },
-            Case { url: "https://github.com/kubernetes-sigs/kustomize//examples/multibases/dev/", is_github: true, dep_name: "kubernetes-sigs/kustomize", package_name: None },
-            Case { url: "ssh://git@github.com/kubernetes-sigs/kustomize//examples/multibases/dev", is_github: true, dep_name: "kubernetes-sigs/kustomize", package_name: None },
-            Case { url: "https://example.org/path/to/repo//examples/multibases/dev", is_github: false, dep_name: "example.org/path/to/repo", package_name: Some("https://example.org/path/to/repo") },
-            Case { url: "https://example.org/path/to/repo.git/examples/multibases/dev", is_github: false, dep_name: "example.org/path/to/repo", package_name: Some("https://example.org/path/to/repo.git") },
-            Case { url: "ssh://alice@example.com/path/to/repo//examples/multibases/dev", is_github: false, dep_name: "example.com/path/to/repo", package_name: Some("ssh://alice@example.com/path/to/repo") },
-            Case { url: "https://authority/org/repo/%-invalid-uri-so-not-parsable-by-net/url.Parse", is_github: false, dep_name: "authority/org/repo", package_name: Some("https://authority/org/repo") },
-            Case { url: "ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git//path", is_github: false, dep_name: "bitbucket.org/ourteamname/ourrepositoryname", package_name: Some("ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git") },
-            Case { url: "http://git@home.com/path/to/repository.git//path", is_github: false, dep_name: "home.com/path/to/repository", package_name: Some("http://git@home.com/path/to/repository.git") },
-            Case { url: "https://git@home.com/path/to/repository.git//path", is_github: false, dep_name: "home.com/path/to/repository", package_name: Some("https://git@home.com/path/to/repository.git") },
-            Case { url: "ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git", is_github: true, dep_name: "YOUR-USERNAME/YOUR-REPOSITORY", package_name: None },
-            Case { url: "git@gitlab.com/user:name/YOUR-REPOSITORY.git/path", is_github: false, dep_name: "gitlab.com/user:name/YOUR-REPOSITORY", package_name: Some("git@gitlab.com/user:name/YOUR-REPOSITORY.git") },
-            Case { url: "git@gitlab.com:gitlab-tests/sample-project.git", is_github: false, dep_name: "gitlab.com:gitlab-tests/sample-project", package_name: Some("git@gitlab.com:gitlab-tests/sample-project.git") },
-            Case { url: "git@gitlab.com:gitlab-tests/sample-project", is_github: false, dep_name: "gitlab.com:gitlab-tests/sample-project", package_name: Some("git@gitlab.com:gitlab-tests/sample-project") },
-            Case { url: "https://username@dev.azure.com/org/project/_git/repo//path/to/kustomization/root", is_github: false, dep_name: "dev.azure.com/org/project/_git/repo", package_name: Some("https://username@dev.azure.com/org/project/_git/repo") },
-            Case { url: "https://org.visualstudio.com/project/_git/repo/path/to/kustomization/root", is_github: false, dep_name: "org.visualstudio.com/project/_git/repo", package_name: Some("https://org.visualstudio.com/project/_git/repo") },
-            Case { url: "ssh://org-12345@github.com/kubernetes-sigs/kustomize", is_github: true, dep_name: "kubernetes-sigs/kustomize", package_name: None },
-            Case { url: "org-12345@github.com/kubernetes-sigs/kustomize", is_github: true, dep_name: "kubernetes-sigs/kustomize", package_name: None },
+            Case {
+                url: "https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somedir",
+                is_github: false,
+                dep_name: "git-codecommit.us-east-2.amazonaws.com/someorg/somerepo",
+                package_name: Some(
+                    "https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo",
+                ),
+            },
+            Case {
+                url: "https://fabrikops2.visualstudio.com/someorg/somerepo",
+                is_github: false,
+                dep_name: "fabrikops2.visualstudio.com/someorg/somerepo",
+                package_name: Some("https://fabrikops2.visualstudio.com/someorg/somerepo"),
+            },
+            Case {
+                url: "http://github.com/someorg/somerepo/somedir",
+                is_github: true,
+                dep_name: "someorg/somerepo",
+                package_name: None,
+            },
+            Case {
+                url: "git@github.com:someorg/somerepo/somedir",
+                is_github: true,
+                dep_name: "someorg/somerepo",
+                package_name: None,
+            },
+            Case {
+                url: "http://github.com/someorg/somerepo.git/somedir",
+                is_github: true,
+                dep_name: "someorg/somerepo",
+                package_name: None,
+            },
+            Case {
+                url: "git@github.com:someorg/somerepo.git/somedir",
+                is_github: true,
+                dep_name: "someorg/somerepo",
+                package_name: None,
+            },
+            Case {
+                url: "git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git",
+                is_github: false,
+                dep_name: "gitlab2.sqtools.ru:infra/kubernetes/thanos-base",
+                package_name: Some("git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git"),
+            },
+            Case {
+                url: "git@bitbucket.org:company/project.git//path",
+                is_github: false,
+                dep_name: "bitbucket.org:company/project",
+                package_name: Some("git@bitbucket.org:company/project.git"),
+            },
+            Case {
+                url: "git@bitbucket.org/company/project.git//path",
+                is_github: false,
+                dep_name: "bitbucket.org/company/project",
+                package_name: Some("git@bitbucket.org/company/project.git"),
+            },
+            Case {
+                url: "ssh://git@bitbucket.org/company/project.git//path",
+                is_github: false,
+                dep_name: "bitbucket.org/company/project",
+                package_name: Some("ssh://git@bitbucket.org/company/project.git"),
+            },
+            Case {
+                url: "https://itfs.mycompany.com/collection/project/_git/somerepos",
+                is_github: false,
+                dep_name: "itfs.mycompany.com/collection/project/_git/somerepos",
+                package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos"),
+            },
+            Case {
+                url: "https://itfs.mycompany.com/collection/project/_git/somerepos",
+                is_github: false,
+                dep_name: "itfs.mycompany.com/collection/project/_git/somerepos",
+                package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos"),
+            },
+            Case {
+                url: "https://itfs.mycompany.com/collection/project/_git/somerepos/somedir",
+                is_github: false,
+                dep_name: "itfs.mycompany.com/collection/project/_git/somerepos",
+                package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos"),
+            },
+            Case {
+                url: "git::https://itfs.mycompany.com/collection/project/_git/somerepos",
+                is_github: false,
+                dep_name: "itfs.mycompany.com/collection/project/_git/somerepos",
+                package_name: Some("https://itfs.mycompany.com/collection/project/_git/somerepos"),
+            },
+            Case {
+                url: "https://bitbucket.example.com/scm/project/repository.git",
+                is_github: false,
+                dep_name: "bitbucket.example.com/scm/project/repository",
+                package_name: Some("https://bitbucket.example.com/scm/project/repository.git"),
+            },
+            Case {
+                url: "ssh://git@git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somepath",
+                is_github: false,
+                dep_name: "git-codecommit.us-east-2.amazonaws.com/someorg/somerepo",
+                package_name: Some(
+                    "ssh://git@git-codecommit.us-east-2.amazonaws.com/someorg/somerepo",
+                ),
+            },
+            Case {
+                url: "git@github.com/someorg/somerepo/somepath",
+                is_github: true,
+                dep_name: "someorg/somerepo",
+                package_name: None,
+            },
+            Case {
+                url: "https://github.com/kubernetes-sigs/kustomize//examples/multibases/dev/",
+                is_github: true,
+                dep_name: "kubernetes-sigs/kustomize",
+                package_name: None,
+            },
+            Case {
+                url: "ssh://git@github.com/kubernetes-sigs/kustomize//examples/multibases/dev",
+                is_github: true,
+                dep_name: "kubernetes-sigs/kustomize",
+                package_name: None,
+            },
+            Case {
+                url: "https://example.org/path/to/repo//examples/multibases/dev",
+                is_github: false,
+                dep_name: "example.org/path/to/repo",
+                package_name: Some("https://example.org/path/to/repo"),
+            },
+            Case {
+                url: "https://example.org/path/to/repo.git/examples/multibases/dev",
+                is_github: false,
+                dep_name: "example.org/path/to/repo",
+                package_name: Some("https://example.org/path/to/repo.git"),
+            },
+            Case {
+                url: "ssh://alice@example.com/path/to/repo//examples/multibases/dev",
+                is_github: false,
+                dep_name: "example.com/path/to/repo",
+                package_name: Some("ssh://alice@example.com/path/to/repo"),
+            },
+            Case {
+                url: "https://authority/org/repo/%-invalid-uri-so-not-parsable-by-net/url.Parse",
+                is_github: false,
+                dep_name: "authority/org/repo",
+                package_name: Some("https://authority/org/repo"),
+            },
+            Case {
+                url: "ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git//path",
+                is_github: false,
+                dep_name: "bitbucket.org/ourteamname/ourrepositoryname",
+                package_name: Some(
+                    "ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git",
+                ),
+            },
+            Case {
+                url: "http://git@home.com/path/to/repository.git//path",
+                is_github: false,
+                dep_name: "home.com/path/to/repository",
+                package_name: Some("http://git@home.com/path/to/repository.git"),
+            },
+            Case {
+                url: "https://git@home.com/path/to/repository.git//path",
+                is_github: false,
+                dep_name: "home.com/path/to/repository",
+                package_name: Some("https://git@home.com/path/to/repository.git"),
+            },
+            Case {
+                url: "ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git",
+                is_github: true,
+                dep_name: "YOUR-USERNAME/YOUR-REPOSITORY",
+                package_name: None,
+            },
+            Case {
+                url: "git@gitlab.com/user:name/YOUR-REPOSITORY.git/path",
+                is_github: false,
+                dep_name: "gitlab.com/user:name/YOUR-REPOSITORY",
+                package_name: Some("git@gitlab.com/user:name/YOUR-REPOSITORY.git"),
+            },
+            Case {
+                url: "git@gitlab.com:gitlab-tests/sample-project.git",
+                is_github: false,
+                dep_name: "gitlab.com:gitlab-tests/sample-project",
+                package_name: Some("git@gitlab.com:gitlab-tests/sample-project.git"),
+            },
+            Case {
+                url: "git@gitlab.com:gitlab-tests/sample-project",
+                is_github: false,
+                dep_name: "gitlab.com:gitlab-tests/sample-project",
+                package_name: Some("git@gitlab.com:gitlab-tests/sample-project"),
+            },
+            Case {
+                url: "https://username@dev.azure.com/org/project/_git/repo//path/to/kustomization/root",
+                is_github: false,
+                dep_name: "dev.azure.com/org/project/_git/repo",
+                package_name: Some("https://username@dev.azure.com/org/project/_git/repo"),
+            },
+            Case {
+                url: "https://org.visualstudio.com/project/_git/repo/path/to/kustomization/root",
+                is_github: false,
+                dep_name: "org.visualstudio.com/project/_git/repo",
+                package_name: Some("https://org.visualstudio.com/project/_git/repo"),
+            },
+            Case {
+                url: "ssh://org-12345@github.com/kubernetes-sigs/kustomize",
+                is_github: true,
+                dep_name: "kubernetes-sigs/kustomize",
+                package_name: None,
+            },
+            Case {
+                url: "org-12345@github.com/kubernetes-sigs/kustomize",
+                is_github: true,
+                dep_name: "kubernetes-sigs/kustomize",
+                package_name: None,
+            },
         ];
         for case in cases {
             let full_url = format!("{}?ref=v1.0.0", case.url);
-            let dep = extract_resource(&full_url).unwrap_or_else(|| {
-                panic!("extract_resource returned None for: {}", case.url)
-            });
+            let dep = extract_resource(&full_url)
+                .unwrap_or_else(|| panic!("extract_resource returned None for: {}", case.url));
             assert_eq!(dep.current_value, "v1.0.0", "url: {}", case.url);
             assert_eq!(dep.dep_name, case.dep_name, "url: {}", case.url);
             assert_eq!(

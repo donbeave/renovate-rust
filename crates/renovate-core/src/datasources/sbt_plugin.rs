@@ -14,8 +14,7 @@ use crate::datasources::sbt_package::{extract_page_links, get_latest_version};
 use crate::http::HttpClient;
 use crate::versioning::maven::compare;
 
-pub const SBT_PLUGINS_REPO: &str =
-    "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases";
+pub const SBT_PLUGINS_REPO: &str = "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases";
 pub const MAVEN_REPO: &str = crate::datasources::sbt_package::MAVEN_REPO;
 
 /// A single release entry from an sbt-plugin lookup.
@@ -60,7 +59,11 @@ fn last_segment(href: &str) -> &str {
 /// segment unless it starts with a dot.
 fn non_dot_segment(href: &str) -> Option<String> {
     let seg = last_segment(href);
-    if seg.starts_with('.') { None } else { Some(seg.to_string()) }
+    if seg.starts_with('.') {
+        None
+    } else {
+        Some(seg.to_string())
+    }
 }
 
 /// Navigate the three-level `artifact/scala_VERSION/sbt_VERSION/VERSION/`
@@ -181,7 +184,11 @@ async fn get_package_releases(
 
         let versions = extract_page_links(&content, |href| {
             let path = last_segment(href);
-            if path.starts_with('.') { None } else { Some(path.to_string()) }
+            if path.starts_with('.') {
+                None
+            } else {
+                Some(path.to_string())
+            }
         });
 
         for v in versions {
@@ -395,38 +402,34 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/foundweekends/sbt-bintray/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<html><body>",
-                    "<pre><a href=\"../\">../</a></pre>",
-                    "<pre><a href=\"scala_2.12/\">scala_2.12/</a></pre>",
-                    "</body></html>",
-                )),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<html><body>",
+                "<pre><a href=\"../\">../</a></pre>",
+                "<pre><a href=\"scala_2.12/\">scala_2.12/</a></pre>",
+                "</body></html>",
+            )))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/foundweekends/sbt-bintray/scala_2.12/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<html><body>",
-                    "<pre><a href=\"../\">../</a></pre>",
-                    "<pre><a href=\"sbt_1.0/\">sbt_1.0/</a></pre>",
-                    "</body></html>",
-                )),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<html><body>",
+                "<pre><a href=\"../\">../</a></pre>",
+                "<pre><a href=\"sbt_1.0/\">sbt_1.0/</a></pre>",
+                "</body></html>",
+            )))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
-            .and(path("/maven2/org/foundweekends/sbt-bintray/scala_2.12/sbt_1.0/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<html><body>",
-                    "<pre><a href=\"../\">../</a></pre>",
-                    "<pre><a href=\"0.5.5/\">0.5.5/</a></pre>",
-                    "</body></html>",
-                )),
-            )
+            .and(path(
+                "/maven2/org/foundweekends/sbt-bintray/scala_2.12/sbt_1.0/",
+            ))
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<html><body>",
+                "<pre><a href=\"../\">../</a></pre>",
+                "<pre><a href=\"0.5.5/\">0.5.5/</a></pre>",
+                "</body></html>",
+            )))
             .mount(&server)
             .await;
 
@@ -438,7 +441,9 @@ mod tests {
 
         assert_eq!(result.registry_url, base);
         assert!(
-            result.dependency_url.ends_with("/org/foundweekends/sbt-bintray"),
+            result
+                .dependency_url
+                .ends_with("/org/foundweekends/sbt-bintray"),
             "dependency_url={:?}",
             result.dependency_url
         );
@@ -452,38 +457,34 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/foundweekends/sbt-bintray/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<html><body>",
-                    "<pre><a href=\"../\">../</a></pre>",
-                    "<pre><a href=\"scala_2.12/\">scala_2.12/</a></pre>",
-                    "</body></html>",
-                )),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<html><body>",
+                "<pre><a href=\"../\">../</a></pre>",
+                "<pre><a href=\"scala_2.12/\">scala_2.12/</a></pre>",
+                "</body></html>",
+            )))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/foundweekends/sbt-bintray/scala_2.12/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<html><body>",
-                    "<pre><a href=\"../\">../</a></pre>",
-                    "<pre><a href=\"sbt_1.0/\">sbt_1.0/</a></pre>",
-                    "</body></html>",
-                )),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<html><body>",
+                "<pre><a href=\"../\">../</a></pre>",
+                "<pre><a href=\"sbt_1.0/\">sbt_1.0/</a></pre>",
+                "</body></html>",
+            )))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
-            .and(path("/maven2/org/foundweekends/sbt-bintray/scala_2.12/sbt_1.0/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<html><body>",
-                    "<pre><a href=\"../\">../</a></pre>",
-                    "<pre><a href=\"0.5.5/\">0.5.5/</a></pre>",
-                    "</body></html>",
-                )),
-            )
+            .and(path(
+                "/maven2/org/foundweekends/sbt-bintray/scala_2.12/sbt_1.0/",
+            ))
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<html><body>",
+                "<pre><a href=\"../\">../</a></pre>",
+                "<pre><a href=\"0.5.5/\">0.5.5/</a></pre>",
+                "</body></html>",
+            )))
             .mount(&server)
             .await;
 
@@ -495,7 +496,11 @@ mod tests {
             .expect("expected Some result");
 
         assert_eq!(result.registry_url, base);
-        assert!(result.dependency_url.ends_with("/org/foundweekends/sbt-bintray"));
+        assert!(
+            result
+                .dependency_url
+                .ends_with("/org/foundweekends/sbt-bintray")
+        );
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "0.5.5");
     }
@@ -508,15 +513,13 @@ mod tests {
         // Root listing for io.get-coursier
         Mock::given(method("GET"))
             .and(path("/maven2/io/get-coursier/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<a href=\"../\">../</a>\n",
-                    "<a href=\"sbt-coursier_2.10_0.13/\">sbt-coursier_2.10_0.13/</a>\n",
-                    "<a href=\"sbt-coursier_2.12_1.0/\">sbt-coursier_2.12_1.0/</a>\n",
-                    "<a href=\"sbt-coursier_2.12_1.0.0-M5/\">sbt-coursier_2.12_1.0.0-M5/</a>\n",
-                    "<a href=\"sbt-coursier_2.12_1.0.0-M6/\">sbt-coursier_2.12_1.0.0-M6/</a>",
-                )),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<a href=\"../\">../</a>\n",
+                "<a href=\"sbt-coursier_2.10_0.13/\">sbt-coursier_2.10_0.13/</a>\n",
+                "<a href=\"sbt-coursier_2.12_1.0/\">sbt-coursier_2.12_1.0/</a>\n",
+                "<a href=\"sbt-coursier_2.12_1.0.0-M5/\">sbt-coursier_2.12_1.0.0-M5/</a>\n",
+                "<a href=\"sbt-coursier_2.12_1.0.0-M6/\">sbt-coursier_2.12_1.0.0-M6/</a>",
+            )))
             .mount(&server)
             .await;
 
@@ -530,14 +533,12 @@ mod tests {
         // Version listings for each subdir
         Mock::given(method("GET"))
             .and(path("/maven2/io/get-coursier/sbt-coursier_2.12_1.0/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<a href=\"2.0.0-RC2/\">2.0.0-RC2/</a>\n",
-                    "<a href=\"2.0.0-RC6-1/\">2.0.0-RC6-1/</a>\n",
-                    "<a href=\"2.0.0-RC6-2/\">2.0.0-RC6-2/</a>\n",
-                    "<a href=\"2.0.0-RC6-6/\">2.0.0-RC6-6/</a>",
-                )),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<a href=\"2.0.0-RC2/\">2.0.0-RC2/</a>\n",
+                "<a href=\"2.0.0-RC6-1/\">2.0.0-RC6-1/</a>\n",
+                "<a href=\"2.0.0-RC6-2/\">2.0.0-RC6-2/</a>\n",
+                "<a href=\"2.0.0-RC6-6/\">2.0.0-RC6-6/</a>",
+            )))
             .mount(&server)
             .await;
         // Other subdirs return 404
@@ -592,12 +593,13 @@ mod tests {
             .await
             .expect("expected Some result");
 
-        assert!(result.dependency_url.ends_with("/io/get-coursier/sbt-coursier"));
-        assert_eq!(result.releases.len(), 4);
-        assert_eq!(
-            result.homepage.as_deref(),
-            Some("https://get-coursier.io/")
+        assert!(
+            result
+                .dependency_url
+                .ends_with("/io/get-coursier/sbt-coursier")
         );
+        assert_eq!(result.releases.len(), 4);
+        assert_eq!(result.homepage.as_deref(), Some("https://get-coursier.io/"));
         assert_eq!(
             result.source_url.as_deref(),
             Some("https://github.com/coursier/sbt-coursier")
@@ -701,12 +703,13 @@ mod tests {
             .await
             .expect("expected Some result");
 
-        assert!(result.dependency_url.ends_with("/io/get-coursier/sbt-coursier"));
-        assert_eq!(result.releases.len(), 4);
-        assert_eq!(
-            result.homepage.as_deref(),
-            Some("https://get-coursier.io/")
+        assert!(
+            result
+                .dependency_url
+                .ends_with("/io/get-coursier/sbt-coursier")
         );
+        assert_eq!(result.releases.len(), 4);
+        assert_eq!(result.homepage.as_deref(), Some("https://get-coursier.io/"));
         assert_eq!(
             result.source_url.as_deref(),
             Some("https://github.com/coursier/sbt-coursier")

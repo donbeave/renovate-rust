@@ -26,18 +26,18 @@ static GITHUB_ITEM_URL_RE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Matches an existing Markdown link `[text](url)`.
-static MD_LINK_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\[([^\]]*)\]\(([^)]*)\)").unwrap()
-});
+static MD_LINK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\[([^\]]*)\]\(([^)]*)\)").unwrap());
 
 /// Replace `github.com` (with optional www/to/redirect prefix) → `redirect.github.com`.
 ///
 /// Mirrors `massageLink` in `lib/modules/platform/github/massage-markdown-links.ts`.
 fn massage_link(url: &str) -> String {
-    static GITHUB_HOST_RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r"(?i)(?:redirect\.|www\.|to)?github\.com").unwrap()
-    });
-    GITHUB_HOST_RE.replace(url, "redirect.github.com").into_owned()
+    static GITHUB_HOST_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?i)(?:redirect\.|www\.|to)?github\.com").unwrap());
+    GITHUB_HOST_RE
+        .replace(url, "redirect.github.com")
+        .into_owned()
 }
 
 fn is_github_item_url(url: &str) -> bool {
@@ -80,7 +80,10 @@ pub fn massage_markdown_links(content: &str) -> String {
         let start = mat.start();
         let end = mat.end();
         // Skip if this URL is already inside a markdown link.
-        if link_ranges.iter().any(|(ls, le)| start >= *ls && end <= *le) {
+        if link_ranges
+            .iter()
+            .any(|(ls, le)| start >= *ls && end <= *le)
+        {
             continue;
         }
         // Also skip api.github.com and redirect.github.com.

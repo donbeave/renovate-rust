@@ -75,8 +75,14 @@ pub fn get_repo_url(
 
     let http_url = http_url_to_repo.unwrap();
     let auth_prefix = token.map(|t| format!("oauth2:{t}@")).unwrap_or_default();
-    if let Some(after_scheme) = http_url.find("://").map(|i| (&http_url[..i], &http_url[i + 3..])) {
-        Ok(format!("{}://{}{}", after_scheme.0, auth_prefix, after_scheme.1))
+    if let Some(after_scheme) = http_url
+        .find("://")
+        .map(|i| (&http_url[..i], &http_url[i + 3..]))
+    {
+        Ok(format!(
+            "{}://{}{}",
+            after_scheme.0, auth_prefix, after_scheme.1
+        ))
     } else {
         Ok(http_url.to_owned())
     }
@@ -85,11 +91,15 @@ pub fn get_repo_url(
 fn parse_url(u: &str) -> Option<(String, String, String)> {
     let idx = u.find("://")?;
     let scheme = &u[..idx];
-    if scheme.is_empty() { return None; }
+    if scheme.is_empty() {
+        return None;
+    }
     let rest = &u[idx + 3..];
     let slash_idx = rest.find('/').unwrap_or(rest.len());
     let host = &rest[..slash_idx];
-    if host.is_empty() { return None; }
+    if host.is_empty() {
+        return None;
+    }
     let path = &rest[slash_idx..];
     Some((scheme.to_owned(), host.to_owned(), path.to_owned()))
 }
@@ -629,7 +639,14 @@ mod tests {
     // Ported: "throws on invalid endpoint when gitUrl is endpoint" — modules/platform/gitlab/utils.spec.ts line 42
     #[test]
     fn get_repo_url_throws_on_invalid_endpoint_when_git_url_is_endpoint() {
-        let result = get_repo_url("group/repo", Some("endpoint"), None, None, "not-a-valid-url", None);
+        let result = get_repo_url(
+            "group/repo",
+            Some("endpoint"),
+            None,
+            None,
+            "not-a-valid-url",
+            None,
+        );
         match result {
             Err(GetRepoUrlError::InvalidEndpoint(msg)) => {
                 assert_eq!(msg, "not-a-valid-url");

@@ -92,7 +92,9 @@ pub fn is_valid(version: &str) -> bool {
     if parts.is_empty() || parts.len() > 4 {
         return false;
     }
-    parts.iter().all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
+    parts
+        .iter()
+        .all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
 }
 
 /// Sort comparator for NuGet version strings — mirrors
@@ -175,7 +177,10 @@ mod tests {
         assert_eq!(sort_nuget_versions("invalid", "1.0.0"), Ordering::Less);
         assert_eq!(sort_nuget_versions("1.0.0", "invalid"), Ordering::Greater);
         assert_eq!(sort_nuget_versions("1.0.0-rc.1", "1.0.0"), Ordering::Less);
-        assert_eq!(sort_nuget_versions("1.0.0", "1.0.0-rc.1"), Ordering::Greater);
+        assert_eq!(
+            sort_nuget_versions("1.0.0", "1.0.0-rc.1"),
+            Ordering::Greater
+        );
         assert_eq!(sort_nuget_versions("1.0.0", "1.0.0"), Ordering::Equal);
     }
 

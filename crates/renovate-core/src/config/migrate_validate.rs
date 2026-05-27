@@ -279,7 +279,10 @@ fn migrate_config(input: &Value) -> Value {
         }
         // AutomergeTypeMigration: 'branch-*' → 'branch'
         if matches!(map.get("automergeType"), Some(Value::String(s)) if s.starts_with("branch-")) {
-            map.insert("automergeType".to_owned(), Value::String("branch".to_owned()));
+            map.insert(
+                "automergeType".to_owned(),
+                Value::String("branch".to_owned()),
+            );
         }
         if let Some(extends) = map.get_mut("extends") {
             let presets = match std::mem::take(extends) {
@@ -1028,7 +1031,14 @@ fn validate_host_rules_pre_migration(config: &Value) -> Vec<Value> {
     else {
         return vec![];
     };
-    let host_fields = ["matchHost", "hostName", "domainName", "baseUrl", "endpoint", "host"];
+    let host_fields = [
+        "matchHost",
+        "hostName",
+        "domainName",
+        "baseUrl",
+        "endpoint",
+        "host",
+    ];
     let mut errors = vec![];
     for rule in host_rules {
         let Some(rule_map) = rule.as_object() else {
@@ -2805,14 +2815,18 @@ mod tests {
         );
         assert_eq!(result.warnings.len(), 0);
         assert_eq!(result.errors.len(), 1);
-        assert!(result.errors[0]["message"]
-            .as_str()
-            .unwrap()
-            .contains("datasource-maven:metadata-xml"));
-        assert!(result.errors[0]["message"]
-            .as_str()
-            .unwrap()
-            .contains("does not exist"));
+        assert!(
+            result.errors[0]["message"]
+                .as_str()
+                .unwrap()
+                .contains("datasource-maven:metadata-xml")
+        );
+        assert!(
+            result.errors[0]["message"]
+                .as_str()
+                .unwrap()
+                .contains("does not exist")
+        );
     }
 
     // Ported: "allows a valid cache namespace" — config/validation.spec.ts line 2729
@@ -4762,7 +4776,9 @@ mod tests {
     // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-major-migration.spec.ts line 16
     #[test]
     fn automerge_major_merges_with_existing_major_object() {
-        let result = migrate_config(&json!({"automergeMajor": "some-value", "major": {"matchFileNames": ["test"]}}));
+        let result = migrate_config(
+            &json!({"automergeMajor": "some-value", "major": {"matchFileNames": ["test"]}}),
+        );
         assert_eq!(result.get("automergeMajor"), None);
         assert_eq!(result["major"]["automerge"], json!(true));
         assert_eq!(result["major"]["matchFileNames"], json!(["test"]));
@@ -4787,7 +4803,9 @@ mod tests {
     // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-minor-migration.spec.ts line 16
     #[test]
     fn automerge_minor_merges_with_existing_minor_object() {
-        let result = migrate_config(&json!({"automergeMinor": "some-value", "minor": {"matchFileNames": ["test"]}}));
+        let result = migrate_config(
+            &json!({"automergeMinor": "some-value", "minor": {"matchFileNames": ["test"]}}),
+        );
         assert_eq!(result.get("automergeMinor"), None);
         assert_eq!(result["minor"]["automerge"], json!(true));
         assert_eq!(result["minor"]["matchFileNames"], json!(["test"]));
@@ -4812,7 +4830,9 @@ mod tests {
     // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-patch-migration.spec.ts line 16
     #[test]
     fn automerge_patch_merges_with_existing_patch_object() {
-        let result = migrate_config(&json!({"automergePatch": "some-value", "patch": {"matchFileNames": ["test"]}}));
+        let result = migrate_config(
+            &json!({"automergePatch": "some-value", "patch": {"matchFileNames": ["test"]}}),
+        );
         assert_eq!(result.get("automergePatch"), None);
         assert_eq!(result["patch"]["automerge"], json!(true));
         assert_eq!(result["patch"]["matchFileNames"], json!(["test"]));
@@ -5439,19 +5459,27 @@ mod tests {
             }]
         }));
         let rule = &migrated["packageRules"][0];
-        let keys: Vec<&str> = rule.as_object().unwrap().keys().map(String::as_str).collect();
-        assert_eq!(keys, vec![
-            "matchFileNames",
-            "labels",
-            "matchBaseBranches",
-            "matchCategories",
-            "matchManagers",
-            "matchDatasources",
-            "matchDepTypes",
-            "addLabels",
-            "matchPackageNames",
-            "matchUpdateTypes",
-        ]);
+        let keys: Vec<&str> = rule
+            .as_object()
+            .unwrap()
+            .keys()
+            .map(String::as_str)
+            .collect();
+        assert_eq!(
+            keys,
+            vec![
+                "matchFileNames",
+                "labels",
+                "matchBaseBranches",
+                "matchCategories",
+                "matchManagers",
+                "matchDatasources",
+                "matchDepTypes",
+                "addLabels",
+                "matchPackageNames",
+                "matchUpdateTypes",
+            ]
+        );
     }
 
     // Ported: "should not migrate nested packageRules" — config/migrations/custom/package-rules-migration.spec.ts line 31

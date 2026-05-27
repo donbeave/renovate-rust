@@ -200,7 +200,10 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/nextcloud/user_oidc"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/nextcloud/user_oidc")
+        );
         assert_eq!(result.registry_url, server.uri());
         assert!(result.releases.is_empty());
     }
@@ -285,25 +288,40 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(result.changelog_url.as_deref(), Some("https://github.com/nextcloud-releases/user_oidc"));
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/nextcloud/user_oidc"));
+        assert_eq!(
+            result.changelog_url.as_deref(),
+            Some("https://github.com/nextcloud-releases/user_oidc")
+        );
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/nextcloud/user_oidc")
+        );
         assert_eq!(result.releases.len(), 3);
 
         let r71 = &result.releases[2];
         assert_eq!(r71.version, "7.1.0");
-        assert_eq!(r71.release_timestamp.as_deref(), Some("2025-01-14T09:13:25.123Z"));
+        assert_eq!(
+            r71.release_timestamp.as_deref(),
+            Some("2025-01-14T09:13:25.123Z")
+        );
         assert_eq!(r71.changelog_content, None);
         assert!(r71.is_stable);
 
         let r72 = &result.releases[1];
         assert_eq!(r72.version, "7.2.0");
-        assert_eq!(r72.release_timestamp.as_deref(), Some("2025-04-24T09:24:43.232Z"));
+        assert_eq!(
+            r72.release_timestamp.as_deref(),
+            Some("2025-04-24T09:24:43.232Z")
+        );
         assert_eq!(r72.changelog_content, None);
         assert!(!r72.is_stable);
 
         let r73 = &result.releases[0];
         assert_eq!(r73.version, "7.3.0");
-        assert_eq!(r73.release_timestamp.as_deref(), Some("2025-07-25T09:41:26.318Z"));
+        assert_eq!(
+            r73.release_timestamp.as_deref(),
+            Some("2025-07-25T09:41:26.318Z")
+        );
         assert_eq!(r73.changelog_content.as_deref(), Some("testChangelog"));
         assert!(r73.is_stable);
     }

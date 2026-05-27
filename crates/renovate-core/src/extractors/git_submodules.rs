@@ -333,10 +333,8 @@ mod tests {
 	url = ../../PowerShell/PowerShell-Docs
 	branch = staging
 "#;
-        let deps = extract_with_remote(
-            content,
-            Some("https://github.com/renovatebot/renovate.git"),
-        );
+        let deps =
+            extract_with_remote(content, Some("https://github.com/renovatebot/renovate.git"));
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].url, "https://github.com/PowerShell/PowerShell-Docs");
     }

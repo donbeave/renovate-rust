@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 use renovate_core::config::{
     BinarySource, DryRun, ForkProcessing, GlobalConfig, Platform, RecreateWhen, RequireConfig,
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use crate::config_builder::{parse_json_array, parse_json_object};
 use renovate_core::config::file as config_file;
@@ -54,12 +54,10 @@ pub(crate) fn apply_to_base(
         config.migrate_presets = parse_env_string_map("RENOVATE_MIGRATE_PRESETS", value)?;
     }
     if let Some(value) = env_value(env, prefix, "CUSTOM_ENV_VARIABLES") {
-        config.custom_env_variables =
-            parse_env_string_map("RENOVATE_CUSTOM_ENV_VARIABLES", value)?;
+        config.custom_env_variables = parse_env_string_map("RENOVATE_CUSTOM_ENV_VARIABLES", value)?;
     }
     if let Some(value) = env_value(env, prefix, "CACHE_TTL_OVERRIDE") {
-        config.cache_ttl_override =
-            parse_env_json_object("RENOVATE_CACHE_TTL_OVERRIDE", value)?;
+        config.cache_ttl_override = parse_env_json_object("RENOVATE_CACHE_TTL_OVERRIDE", value)?;
     }
     if let Some(value) = env_value(env, prefix, "TOOL_SETTINGS") {
         config.tool_settings = parse_env_json_object("RENOVATE_TOOL_SETTINGS", value)?;
@@ -91,10 +89,8 @@ pub(crate) fn apply_to_base(
         config.dependency_dashboard = Some(parse_bool("RENOVATE_DEPENDENCY_DASHBOARD", value)?);
     }
     if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD_APPROVAL") {
-        config.dependency_dashboard_approval = Some(parse_bool(
-            "RENOVATE_DEPENDENCY_DASHBOARD_APPROVAL",
-            value,
-        )?);
+        config.dependency_dashboard_approval =
+            Some(parse_bool("RENOVATE_DEPENDENCY_DASHBOARD_APPROVAL", value)?);
     }
     if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD_AUTOCLOSE") {
         config.dependency_dashboard_autoclose = Some(parse_bool(
@@ -188,8 +184,7 @@ pub(crate) fn apply_to_base(
         config.allowed_commands = parse_string_list(value);
     }
     if let Some(value) = env_value(env, prefix, "ALLOW_COMMAND_TEMPLATING") {
-        config.allow_command_templating =
-            parse_bool("RENOVATE_ALLOW_COMMAND_TEMPLATING", value)?;
+        config.allow_command_templating = parse_bool("RENOVATE_ALLOW_COMMAND_TEMPLATING", value)?;
     }
     if let Some(value) = env_value(env, prefix, "ALLOW_PLUGINS") {
         config.allow_plugins = Some(parse_bool("RENOVATE_ALLOW_PLUGINS", value)?);
@@ -197,7 +192,11 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "ALLOW_SCRIPTS") {
         config.allow_scripts = Some(parse_bool("RENOVATE_ALLOW_SCRIPTS", value)?);
     }
-    if let Some(value) = env_value(env, prefix, "ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS") {
+    if let Some(value) = env_value(
+        env,
+        prefix,
+        "ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS",
+    ) {
         config.allow_shell_executor_for_post_upgrade_commands = Some(parse_bool(
             "RENOVATE_ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS",
             value,
@@ -292,9 +291,8 @@ pub(crate) fn apply_to_base(
         "MERGE_CONFIDENCE_DATASOURCES",
         "MERGE_CONFIDENCE_SUPPORTED_DATASOURCES",
     )
-    .or_else(|| {
-        env_value(env, prefix, "X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES")
-    }) {
+    .or_else(|| env_value(env, prefix, "X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES"))
+    {
         config.merge_confidence_datasources = parse_string_list(value);
     }
     if let Some(value) = env_converted_experimental_value(
@@ -334,12 +332,9 @@ pub(crate) fn apply_to_base(
     {
         config.docker_max_pages = Some(pages);
     }
-    if let Some(value) = env_converted_experimental_value(
-        env,
-        prefix,
-        "DELETE_CONFIG_FILE",
-        "X_DELETE_CONFIG_FILE",
-    ) {
+    if let Some(value) =
+        env_converted_experimental_value(env, prefix, "DELETE_CONFIG_FILE", "X_DELETE_CONFIG_FILE")
+    {
         config.delete_config_file = parse_bool("RENOVATE_DELETE_CONFIG_FILE", value)?;
     }
     if let Some(value) = env_value(env, prefix, "DELETE_ADDITIONAL_CONFIG_FILE") {
@@ -408,8 +403,7 @@ pub(crate) fn apply_to_base(
         config.docker_user = Some(value.to_owned());
     }
     if let Some(value) = env_value(env, prefix, "EXECUTION_TIMEOUT") {
-        config.execution_timeout =
-            Some(parse_u32("RENOVATE_EXECUTION_TIMEOUT", value)?);
+        config.execution_timeout = Some(parse_u32("RENOVATE_EXECUTION_TIMEOUT", value)?);
     }
     if let Some(value) = env_value(env, prefix, "GIT_TIMEOUT") {
         config.git_timeout = Some(parse_u32("RENOVATE_GIT_TIMEOUT", value)?);
@@ -418,16 +412,13 @@ pub(crate) fn apply_to_base(
         config.git_url = parse_git_url(value)?.to_owned();
     }
     if let Some(value) = env_value(env, prefix, "HTTP_CACHE_TTL_DAYS") {
-        config.http_cache_ttl_days =
-            Some(parse_u32("RENOVATE_HTTP_CACHE_TTL_DAYS", value)?);
+        config.http_cache_ttl_days = Some(parse_u32("RENOVATE_HTTP_CACHE_TTL_DAYS", value)?);
     }
     if let Some(value) = env_value(env, prefix, "CACHE_HARD_TTL_MINUTES") {
-        config.cache_hard_ttl_minutes =
-            Some(parse_u32("RENOVATE_CACHE_HARD_TTL_MINUTES", value)?);
+        config.cache_hard_ttl_minutes = Some(parse_u32("RENOVATE_CACHE_HARD_TTL_MINUTES", value)?);
     }
     if let Some(value) = env_value(env, prefix, "CACHE_PRIVATE_PACKAGES") {
-        config.cache_private_packages =
-            Some(parse_bool("RENOVATE_CACHE_PRIVATE_PACKAGES", value)?);
+        config.cache_private_packages = Some(parse_bool("RENOVATE_CACHE_PRIVATE_PACKAGES", value)?);
     }
     if let Some(value) = env_value(env, prefix, "PRESET_CACHE_PERSISTENCE") {
         config.preset_cache_persistence =
@@ -749,9 +740,18 @@ mod tests {
         assert_eq!(config.dependency_dashboard, Some(true));
         assert_eq!(config.dependency_dashboard_approval, Some(true));
         assert_eq!(config.dependency_dashboard_autoclose, Some(true));
-        assert_eq!(config.dependency_dashboard_title.as_deref(), Some("Updates"));
-        assert_eq!(config.dependency_dashboard_header.as_deref(), Some("Header"));
-        assert_eq!(config.dependency_dashboard_footer.as_deref(), Some("Footer"));
+        assert_eq!(
+            config.dependency_dashboard_title.as_deref(),
+            Some("Updates")
+        );
+        assert_eq!(
+            config.dependency_dashboard_header.as_deref(),
+            Some("Header")
+        );
+        assert_eq!(
+            config.dependency_dashboard_footer.as_deref(),
+            Some("Footer")
+        );
         assert_eq!(
             config.dependency_dashboard_labels,
             Some(vec!["renovate".to_owned(), "dependencies".to_owned()])
@@ -865,10 +865,7 @@ mod tests {
             Some("/tmp/renovate/containerbase")
         );
         assert_eq!(config.docker_child_prefix.as_deref(), Some("rr_"));
-        assert_eq!(
-            config.docker_cli_options.as_deref(),
-            Some("--network=host")
-        );
+        assert_eq!(config.docker_cli_options.as_deref(), Some("--network=host"));
         assert_eq!(
             config.docker_sidecar_image.as_deref(),
             Some("example/sidecar:1")
@@ -930,9 +927,11 @@ mod tests {
 
     #[test]
     fn host_rules_object_value_is_skipped() {
-        let config =
-            build_from_env(&env(&[("RENOVATE_HOST_RULES", r#"{"matchHost":"github.com"}"#)]))
-                .unwrap();
+        let config = build_from_env(&env(&[(
+            "RENOVATE_HOST_RULES",
+            r#"{"matchHost":"github.com"}"#,
+        )]))
+        .unwrap();
         assert!(config.host_rules.is_empty());
     }
 
@@ -1181,7 +1180,10 @@ mod tests {
             vec!["renovate/a".to_owned(), "renovate/b".to_owned()]
         );
         assert_eq!(config.git_no_verify, vec!["commit".to_owned()]);
-        assert_eq!(config.write_discovered_repos.as_deref(), Some("./repos.json"));
+        assert_eq!(
+            config.write_discovered_repos.as_deref(),
+            Some("./repos.json")
+        );
         assert_eq!(config.s3_endpoint.as_deref(), Some("endpoint"));
         assert!(config.s3_path_style);
         assert_eq!(config.repository_cache_force_local, Some(true));
@@ -1251,9 +1253,15 @@ mod tests {
                 "RENOVATE_ALLOWED_POST_UPGRADE_COMMANDS",
                 "npm install,cargo update",
             ),
-            ("RENOVATE_ALIASES", r#"{"docker.io":"registry.example.com"}"#),
+            (
+                "RENOVATE_ALIASES",
+                r#"{"docker.io":"registry.example.com"}"#,
+            ),
             ("RENOVATE_AZURE_AUTO_COMPLETE", "false"),
-            ("RENOVATE_MERGE_CONFIDENCE_API_BASE_URL", "https://mc.example"),
+            (
+                "RENOVATE_MERGE_CONFIDENCE_API_BASE_URL",
+                "https://mc.example",
+            ),
             (
                 "RENOVATE_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES",
                 r#"["docker","npm"]"#,
@@ -1434,7 +1442,10 @@ mod tests {
                 "RENOVATE_TOOL_SETTINGS",
                 "{jvmMaxMemory:1024,nodeMaxMemory:2048}",
             ),
-            ("RENOVATE_ONBOARDING_CONFIG_FILE_NAME", ".github/renovate.json5"),
+            (
+                "RENOVATE_ONBOARDING_CONFIG_FILE_NAME",
+                ".github/renovate.json5",
+            ),
             ("RENOVATE_ONBOARDING_NO_DEPS", "enabled"),
             ("RENOVATE_ONBOARDING_PR_TITLE", "Configure Renovate"),
             ("RENOVATE_ONBOARDING_REBASE_CHECKBOX", "true"),
@@ -1461,11 +1472,17 @@ mod tests {
             Some("config:new")
         );
         assert_eq!(
-            config.migrate_presets.get("config:removed").map(String::as_str),
+            config
+                .migrate_presets
+                .get("config:removed")
+                .map(String::as_str),
             Some("")
         );
         assert_eq!(
-            config.custom_env_variables.get("EXAMPLE").map(String::as_str),
+            config
+                .custom_env_variables
+                .get("EXAMPLE")
+                .map(String::as_str),
             Some("value")
         );
         assert_eq!(

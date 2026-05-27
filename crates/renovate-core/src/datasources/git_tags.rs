@@ -5,7 +5,7 @@
 //!
 //! Renovate reference: `lib/modules/datasource/git-tags/index.ts`
 
-use crate::datasources::git_refs::{self, GitRelease, GitRefsResult};
+use crate::datasources::git_refs::{self, GitRefsResult, GitRelease};
 
 /// Get releases containing only `refs/tags/` entries for a package.
 ///
@@ -32,7 +32,10 @@ pub fn get_releases(package_name: &str, ls_remote: Option<&str>) -> Option<GitRe
         })
         .collect();
 
-    Some(GitRefsResult { releases, source_url })
+    Some(GitRefsResult {
+        releases,
+        source_url,
+    })
 }
 
 /// Get the commit digest for a specific ref value (or HEAD) from ls-remote output.
@@ -95,27 +98,34 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
     // Ported: "returns versions filtered from tags" — datasource/git-tags/index.spec.ts line 52
     #[test]
     fn returns_versions_filtered_from_tags() {
-        let result = get_releases(
-            "https://github.com/example/example.git",
-            Some(LS_REMOTE_1),
-        )
-        .unwrap();
+        let result =
+            get_releases("https://github.com/example/example.git", Some(LS_REMOTE_1)).unwrap();
 
         assert_eq!(result.source_url, "https://github.com/example/example");
         // Only tags — no heads entries
         assert_eq!(result.releases.len(), 6);
 
-        let versions: Vec<&str> =
-            result.releases.iter().map(|r| r.version.as_str()).collect();
-        assert_eq!(versions, vec!["v1.0.0", "v1.0.1", "v1.0.2", "v1.0.3", "v1.0.4", "v1.0.5"]);
+        let versions: Vec<&str> = result.releases.iter().map(|r| r.version.as_str()).collect();
+        assert_eq!(
+            versions,
+            vec!["v1.0.0", "v1.0.1", "v1.0.2", "v1.0.3", "v1.0.4", "v1.0.5"]
+        );
 
         // Annotated tags use dereferenced hashes
-        let v1_0_0 = result.releases.iter().find(|r| r.version == "v1.0.0").unwrap();
+        let v1_0_0 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "v1.0.0")
+            .unwrap();
         assert_eq!(
             v1_0_0.new_digest.as_deref(),
             Some("7b756026fb2de270240a889a413e7e3a9d4d4d85")
         );
-        let v1_0_5 = result.releases.iter().find(|r| r.version == "v1.0.5").unwrap();
+        let v1_0_5 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "v1.0.5")
+            .unwrap();
         assert_eq!(
             v1_0_5.new_digest.as_deref(),
             Some("6d7a933c2e6b7b39e992b1f93b6b42de083b28f0")

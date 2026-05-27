@@ -145,7 +145,10 @@ pub async fn fetch_releases(
         })
         .collect();
 
-    Ok(Some(GitlabTagsReleasesResult { releases, source_url }))
+    Ok(Some(GitlabTagsReleasesResult {
+        releases,
+        source_url,
+    }))
 }
 
 /// Fetch the commit digest for `package_name`.
@@ -164,8 +167,7 @@ pub async fn fetch_digest(
     let encoded = package_name.replace('/', "%2F");
 
     if let Some(branch) = new_value {
-        let url =
-            format!("{dep_host}/api/v4/projects/{encoded}/repository/commits/{branch}");
+        let url = format!("{dep_host}/api/v4/projects/{encoded}/repository/commits/{branch}");
         let resp = http.get_retrying(&url).await.ok()?;
         if !resp.status().is_success() {
             return None;
@@ -284,7 +286,6 @@ mod tests {
 
     use super::*;
 
-
     fn tags_json(tags: &[&str]) -> String {
         let items: Vec<serde_json::Value> = tags
             .iter()
@@ -366,7 +367,10 @@ mod tests {
         let http = HttpClient::new().unwrap();
         // registry_url = "{server}/api/v4/" → dep_host = "{server}"
         let registry_url = format!("{}/api/v4/", server.uri());
-        let result = fetch_releases(&registry_url, "some/dep2", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&registry_url, "some/dep2", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 3);
         assert_eq!(result.releases[0].version, "v1.0.0");
@@ -394,7 +398,10 @@ mod tests {
         let http = HttpClient::new().unwrap();
         // registry_url = "{server}/gitlab" → dep_host = "{server}/gitlab"
         let registry_url = format!("{}/gitlab", server.uri());
-        let result = fetch_releases(&registry_url, "some/dep2", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&registry_url, "some/dep2", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 3);
     }
@@ -414,7 +421,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "some/dep2", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "some/dep2", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 2);
     }
@@ -445,7 +455,9 @@ mod tests {
         let digest = "abcd00001234";
         let body = serde_json::json!({"id": digest});
         Mock::given(method("GET"))
-            .and(path("/api/v4/projects/some%2Fdep2/repository/commits/branch"))
+            .and(path(
+                "/api/v4/projects/some%2Fdep2/repository/commits/branch",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(&body))
             .mount(&server)
             .await;
@@ -479,7 +491,9 @@ mod tests {
     async fn returns_null_for_unknown_branch() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/api/v4/projects/some%2Fdep2/repository/commits/unknown-branch"))
+            .and(path(
+                "/api/v4/projects/some%2Fdep2/repository/commits/unknown-branch",
+            ))
             .respond_with(ResponseTemplate::new(404).set_body_string("}"))
             .mount(&server)
             .await;

@@ -122,7 +122,11 @@ fn is_possible_chart_repo(url: &str) -> bool {
     //   segment immediately before `/-/`.
     let path_after_host = url_lower
         .find("://")
-        .and_then(|i| url_lower[i + 3..].find('/').map(|j| &url_lower[i + 3 + j + 1..]))
+        .and_then(|i| {
+            url_lower[i + 3..]
+                .find('/')
+                .map(|j| &url_lower[i + 3 + j + 1..])
+        })
         .unwrap_or("");
 
     let repo_name = if url_lower.contains("/-/") {
@@ -134,8 +138,14 @@ fn is_possible_chart_repo(url: &str) -> bool {
             .unwrap_or("")
     } else {
         // GitHub / Bitbucket: 2nd path segment (after owner) = repo name
-        let after_owner = path_after_host.find('/').map(|i| &path_after_host[i + 1..]).unwrap_or("");
-        let repo = after_owner.find('/').map(|i| &after_owner[..i]).unwrap_or(after_owner);
+        let after_owner = path_after_host
+            .find('/')
+            .map(|i| &path_after_host[i + 1..])
+            .unwrap_or("");
+        let repo = after_owner
+            .find('/')
+            .map(|i| &after_owner[..i])
+            .unwrap_or(after_owner);
         repo.strip_suffix(".git").unwrap_or(repo)
     };
     // Match: chart/charts/helm/helm-charts — mirrors /charts?|helm|helm-charts/i
@@ -187,10 +197,7 @@ fn get_source_url(entry: &RawChartEntry) -> Option<String> {
 /// Parse all versions for `chart_name` from index.yaml text.
 ///
 /// Returns `None` if the chart is not found or has no valid versions.
-pub fn parse_all_versions(
-    index_yaml: &str,
-    chart_name: &str,
-) -> Option<HelmReleasesResult> {
+pub fn parse_all_versions(index_yaml: &str, chart_name: &str) -> Option<HelmReleasesResult> {
     parse_all_versions_with_registry(index_yaml, chart_name, "")
 }
 
@@ -304,7 +311,11 @@ pub async fn fetch_releases(
         Err(_) => return Ok(None),
     };
 
-    Ok(parse_all_versions_with_registry(&text, chart_name, repository_url))
+    Ok(parse_all_versions_with_registry(
+        &text,
+        chart_name,
+        repository_url,
+    ))
 }
 
 /// Fetch the latest version of a Helm chart from a repository's `index.yaml`.
@@ -404,9 +415,8 @@ mod tests {
 
     use super::*;
 
-    const INDEX_YAML: &str = include_str!(
-        "../../../../../renovate/lib/modules/datasource/helm/__fixtures__/index.yaml"
-    );
+    const INDEX_YAML: &str =
+        include_str!("../../../../../renovate/lib/modules/datasource/helm/__fixtures__/index.yaml");
     const INDEX_EMPTY_PACKAGE_YAML: &str = include_str!(
         "../../../../../renovate/lib/modules/datasource/helm/__fixtures__/index_emptypackage.yaml"
     );
@@ -493,7 +503,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("some_chart", &server.uri(), &http).await.unwrap();
+        let result = fetch_releases("some_chart", &server.uri(), &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -509,7 +521,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("non_existent_chart", &server.uri(), &http).await.unwrap();
+        let result = fetch_releases("non_existent_chart", &server.uri(), &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -524,7 +538,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("some_chart", &server.uri(), &http).await.unwrap();
+        let result = fetch_releases("some_chart", &server.uri(), &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -547,7 +563,9 @@ mod tests {
     #[tokio::test]
     async fn fetch_releases_network_error_returns_none() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("some_chart", "http://127.0.0.1:1", &http).await.unwrap();
+        let result = fetch_releases("some_chart", "http://127.0.0.1:1", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -581,8 +599,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases("ambassador", &server.uri(), &http).await.unwrap().unwrap();
+        let result = fetch_releases("ambassador", &server.uri(), &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert!(!result.releases.is_empty());
         assert_eq!(result.releases.len(), 27);
@@ -599,11 +619,20 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases("ambassador", &server.uri(), &http).await.unwrap().unwrap();
+        let result = fetch_releases("ambassador", &server.uri(), &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 1);
-        assert_eq!(result.homepage.as_deref(), Some("https://www.getambassador.io/"));
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/datawire/ambassador"));
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://www.getambassador.io/")
+        );
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/datawire/ambassador")
+        );
     }
 
     // Ported: "adds trailing slash to subdirectories" — datasource/helm/index.spec.ts line 184
@@ -618,11 +647,20 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let repository_url = format!("{}/subdir", server.uri());
-        let result = fetch_releases("ambassador", &repository_url, &http).await.unwrap().unwrap();
+        let result = fetch_releases("ambassador", &repository_url, &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 27);
-        assert_eq!(result.homepage.as_deref(), Some("https://www.getambassador.io/"));
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/datawire/ambassador"));
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://www.getambassador.io/")
+        );
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/datawire/ambassador")
+        );
     }
 
     // Ported: "uses undefined as the newDigest when no digest is provided" — datasource/helm/index.spec.ts line 203
@@ -636,12 +674,17 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases("blank-digest", &server.uri(), &http).await.unwrap().unwrap();
+        let result = fetch_releases("blank-digest", &server.uri(), &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "3.2.1");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2023-09-05T13:24:19.046Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2023-09-05T13:24:19.046Z")
+        );
         assert!(result.releases[0].new_digest.is_none());
     }
 
@@ -670,7 +713,10 @@ mod tests {
         let yaml = "apiVersion: v1\nentries:\n  redis:\n  - name: redis\n    version: 17.0.0\n    created: \"2024-01-15T10:30:00.000Z\"\n";
         let result = parse_all_versions(yaml, "redis").unwrap();
         assert_eq!(result.releases[0].version, "17.0.0");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2024-01-15T10:30:00.000Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2024-01-15T10:30:00.000Z")
+        );
     }
 
     #[test]

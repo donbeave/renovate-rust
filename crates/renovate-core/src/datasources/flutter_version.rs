@@ -39,7 +39,10 @@ struct FlutterRelease {
 /// Regex-like check: `X.Y.Z` where every part is purely numeric.
 fn is_stable_pattern(v: &str) -> bool {
     let parts: Vec<&str> = v.split('.').collect();
-    parts.len() == 3 && parts.iter().all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
+    parts.len() == 3
+        && parts
+            .iter()
+            .all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
 }
 
 /// One release entry returned by `fetch_releases`.

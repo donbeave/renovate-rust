@@ -202,7 +202,10 @@ async fn get_sbt_releases(
 
         if let Some(sv) = scala_version {
             let target_suffix = format!("/{artifact_id}_{sv}/");
-            if let Some(matched) = artifact_subdirs.iter().find(|s| s.ends_with(&target_suffix)) {
+            if let Some(matched) = artifact_subdirs
+                .iter()
+                .find(|s| s.ends_with(&target_suffix))
+            {
                 package_urls = vec![matched.clone()];
             } else {
                 package_urls = artifact_subdirs;
@@ -296,8 +299,7 @@ async fn get_maven_fallback(
 ) -> Option<SbtPkgReleasesResult> {
     let (group_id, artifact_id) = package_name.split_once(':')?;
     let group_path = group_id.replace('.', "/");
-    let metadata_url =
-        format!("{registry_base}/{group_path}/{artifact_id}/maven-metadata.xml");
+    let metadata_url = format!("{registry_base}/{group_path}/{artifact_id}/maven-metadata.xml");
 
     let body = download_content(&metadata_url, http).await?;
     let metadata = parse_all_versions(&body)?;
@@ -385,9 +387,7 @@ pub async fn get_pom_release_timestamp(
 
         for prefix in candidates {
             let pom_url = format!("{}{}/{}-{}.pom", pkg_url, version, prefix, version);
-            if let Some((_body, last_modified)) =
-                download_with_headers(&pom_url, http).await
-            {
+            if let Some((_body, last_modified)) = download_with_headers(&pom_url, http).await {
                 if let Some(ts) = last_modified.as_deref().and_then(parse_http_date) {
                     return Some(ts);
                 }
@@ -1012,12 +1012,10 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/maven2/com/example/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    "<a href=\"empty/\">empty_2.12/</a>\n\
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                "<a href=\"empty/\">empty_2.12/</a>\n\
                      <a href=\"empty_but_invalid/\">???</a>",
-                ),
-            )
+            ))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -1053,23 +1051,20 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(concat!(
-                    "<a href=\"../\" title='../'>../</a>\n",
-                    "<a href=\"example/\" title='example/'>example_2.12/</a>\n",
-                    "<a href=\"example_2.12/\" title='example_2.12/'>example_2.12/</a>\n",
-                    "<a href=\"example_native/\" title='example_native/'>example_native/</a>\n",
-                    "<a href=\"example_sjs/\" title='example_sjs/'>example_sjs/</a>",
-                )),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(concat!(
+                "<a href=\"../\" title='../'>../</a>\n",
+                "<a href=\"example/\" title='example/'>example_2.12/</a>\n",
+                "<a href=\"example_2.12/\" title='example_2.12/'>example_2.12/</a>\n",
+                "<a href=\"example_native/\" title='example_native/'>example_native/</a>\n",
+                "<a href=\"example_sjs/\" title='example_sjs/'>example_sjs/</a>",
+            )))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/example/"))
             .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    "<a href='../'>../</a>\n<a href='1.2.0/'>1.2.0/</a>",
-                ),
+                ResponseTemplate::new(200)
+                    .set_body_string("<a href='../'>../</a>\n<a href='1.2.0/'>1.2.0/</a>"),
             )
             .mount(&server)
             .await;
@@ -1088,12 +1083,16 @@ mod tests {
             .mount(&server)
             .await;
         Mock::given(method("GET"))
-            .and(path("/maven2/org/example/example_2.12/1.2.3/example-1.2.3.pom"))
+            .and(path(
+                "/maven2/org/example/example_2.12/1.2.3/example-1.2.3.pom",
+            ))
             .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
-            .and(path("/maven2/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom"))
+            .and(path(
+                "/maven2/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom",
+            ))
             .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
@@ -1122,27 +1121,27 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    "<a href=\"example_2.12/\" title='example_2.12/'>example_2.12/</a>",
-                ),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                "<a href=\"example_2.12/\" title='example_2.12/'>example_2.12/</a>",
+            ))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/example_2.12/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string("<a href='1.2.3/'>1.2.3/</a>"),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string("<a href='1.2.3/'>1.2.3/</a>"))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
-            .and(path("/maven2/org/example/example_2.12/1.2.3/example-1.2.3.pom"))
+            .and(path(
+                "/maven2/org/example/example_2.12/1.2.3/example-1.2.3.pom",
+            ))
             .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
-            .and(path("/maven2/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom"))
+            .and(path(
+                "/maven2/org/example/example_2.12/1.2.3/example_2.12-1.2.3.pom",
+            ))
             .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
@@ -1166,36 +1165,30 @@ mod tests {
         // Use path-absolute hrefs matching the TypeScript fixture behaviour.
         Mock::given(method("GET"))
             .and(path("/maven/io/confluent/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    "<a href=\"/maven/io/confluent/kafka-avro-serializer/\">kafka-avro-serializer/</a>",
-                ),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                "<a href=\"/maven/io/confluent/kafka-avro-serializer/\">kafka-avro-serializer/</a>",
+            ))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/maven/io/confluent/kafka-avro-serializer/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    "<a href=\"/maven/io/confluent/kafka-avro-serializer/7.0.1/\">7.0.1/</a>",
-                ),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                "<a href=\"/maven/io/confluent/kafka-avro-serializer/7.0.1/\">7.0.1/</a>",
+            ))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path(
                 "/maven/io/confluent/kafka-avro-serializer/7.0.1/kafka-avro-serializer-7.0.1.pom",
             ))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    r#"<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns="http://maven.apache.org/POM/4.0.0">
   <artifactId>kafka-avro-serializer</artifactId>
   <packaging>jar</packaging>
   <name>kafka-avro-serializer</name>
 </project>"#,
-                ),
-            )
+            ))
             .mount(&server)
             .await;
 
@@ -1218,29 +1211,24 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/"))
             .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    "<a href=\"example/\" title='example/'>example_2.12/</a>",
-                ),
+                ResponseTemplate::new(200)
+                    .set_body_string("<a href=\"example/\" title='example/'>example_2.12/</a>"),
             )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/example/"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string("<a href='1.2.3/'>1.2.3/</a>"),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string("<a href='1.2.3/'>1.2.3/</a>"))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/example/1.2.3/example-1.2.3.pom"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    "<project>\
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                "<project>\
                        <url>https://package.example.org/about</url>\
                        <scm><url>https://example.org/repo.git</url></scm>\
                      </project>",
-                ),
-            )
+            ))
             .mount(&server)
             .await;
 
@@ -1278,10 +1266,11 @@ xmlns="http://maven.apache.org/POM/4.0.0">
             .mount(&server)
             .await;
         Mock::given(method("GET"))
-            .and(path("/packages/maven/org/example/example_2.13/maven-metadata.xml"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_string(
-                    r#"<?xml version="1.0" encoding="UTF-8"?>
+            .and(path(
+                "/packages/maven/org/example/example_2.13/maven-metadata.xml",
+            ))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>org.example</groupId>
   <artifactId>package</artifactId>
@@ -1293,8 +1282,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
     </versions>
   </versioning>
 </metadata>"#,
-                ),
-            )
+            ))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -1328,8 +1316,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
 
         let http = HttpClient::new().unwrap();
         let pkg_url = format!("{}/maven2/org/example/", server.uri());
-        let ts =
-            get_pom_release_timestamp(&[pkg_url.as_str()], "1.2.3", &http).await;
+        let ts = get_pom_release_timestamp(&[pkg_url.as_str()], "1.2.3", &http).await;
         assert_eq!(ts.as_deref(), Some("2015-10-21T07:28:00.000Z"));
     }
 }

@@ -158,7 +158,11 @@ pub fn update_summary(constraint: &str, available_versions: &[String]) -> Update
         // Pinned: update when absolute latest strictly exceeds the pinned version.
         latest_overall
             .as_ref()
-            .and_then(|lv| Version::parse(stripped).ok().map(|sv| lv.cmp_precedence(&sv).is_gt()))
+            .and_then(|lv| {
+                Version::parse(stripped)
+                    .ok()
+                    .map(|sv| lv.cmp_precedence(&sv).is_gt())
+            })
             .unwrap_or(false)
     } else {
         // Range: update when the absolute latest is NOT satisfied by the current constraint.
@@ -696,9 +700,7 @@ pub fn parse_lock_file(content: &str) -> Option<CargoLock> {
 /// Mirrors `lib/modules/manager/cargo/locked-version.ts` `extractLockFileVersions()`.
 /// Returns `None` when `content` is `None` (file missing) or when the content
 /// is unparseable.
-pub fn extract_lock_file_versions(
-    content: Option<&str>,
-) -> Option<HashMap<String, Vec<String>>> {
+pub fn extract_lock_file_versions(content: Option<&str>) -> Option<HashMap<String, Vec<String>>> {
     extract_lock_file_content_versions(content?)
 }
 
@@ -887,7 +889,10 @@ mod update_summary_tests {
         // ^1.0 covers >=1.0, <2.0 — 1.9.9 is within range.
         let avail = v(&["1.0.0", "1.9.9"]);
         let s = update_summary("^1.0", &avail);
-        assert!(!s.update_available, "^1.0 with 1.9.9 should not flag update");
+        assert!(
+            !s.update_available,
+            "^1.0 with 1.9.9 should not flag update"
+        );
     }
 
     #[test]

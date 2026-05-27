@@ -58,7 +58,7 @@ pub async fn fetch_releases(
     let text = match http.get_raw_with_accept(&url, "application/json").await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.as_u16() == 404 => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(e) => return Err(BazelError::Http(e)),
     };
@@ -93,7 +93,11 @@ pub async fn fetch_releases(
         }
     });
 
-    Ok(Some(BazelResult { releases, source_url: meta.homepage, registry_url: base.to_string() }))
+    Ok(Some(BazelResult {
+        releases,
+        source_url: meta.homepage,
+        registry_url: base.to_string(),
+    }))
 }
 
 /// Update summary used by pipeline.
@@ -112,10 +116,21 @@ pub async fn fetch_latest(
 ) -> Result<BazelUpdateSummary, BazelError> {
     let result = fetch_releases(DEFAULT_REGISTRY, module_name, http).await?;
     let latest = result.and_then(|r| {
-        r.releases.iter().rev().find(|rel| !rel.is_deprecated).map(|rel| rel.version.clone())
+        r.releases
+            .iter()
+            .rev()
+            .find(|rel| !rel.is_deprecated)
+            .map(|rel| rel.version.clone())
     });
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-    Ok(BazelUpdateSummary { current_value: current_value.to_owned(), latest, update_available })
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
+    Ok(BazelUpdateSummary {
+        current_value: current_value.to_owned(),
+        latest,
+        update_available,
+    })
 }
 
 #[cfg(test)]
@@ -152,7 +167,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "rules_foo", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "rules_foo", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -167,7 +184,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "rules_foo", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "rules_foo", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -177,13 +196,17 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/modules/rules_foo/metadata.json"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_string(r#"{"versions":[],"yanked_versions":{}}"#))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"{"versions":[],"yanked_versions":{}}"#),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "rules_foo", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "rules_foo", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -213,7 +236,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "rules_foo", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "rules_foo", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 4);
         assert_eq!(result.releases[0].version, "0.14.8");
@@ -222,7 +248,10 @@ mod tests {
         assert_eq!(result.releases[2].version, "0.15.0");
         assert!(!result.releases[2].is_deprecated);
         assert_eq!(result.releases[3].version, "0.16.0");
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/foo/bar"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/foo/bar")
+        );
     }
 
     // Ported: "metadata with yanked versions" — datasource/bazel/index.spec.ts line 77
@@ -236,7 +265,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "rules_foo", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "rules_foo", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 4);
         assert_eq!(result.releases[0].version, "0.14.8");

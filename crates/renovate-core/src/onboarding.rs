@@ -40,7 +40,12 @@ mod tests {
     // Ported: "returns a full list" — workers/repository/onboarding/pr/config-description.spec.ts line 22
     #[test]
     fn get_config_desc_returns_full_list() {
-        let descriptions = ["description 1", "description two", "something else", "this is Docker-only"];
+        let descriptions = [
+            "description 1",
+            "description two",
+            "something else",
+            "this is Docker-only",
+        ];
         let res = get_config_desc(&descriptions, None);
         assert!(res.contains("Docker-only"));
     }

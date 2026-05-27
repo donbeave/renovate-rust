@@ -85,7 +85,8 @@ pub async fn fetch_releases(
         Err(e) => return Err(BitbucketServerTagsError::Http(e)),
     };
 
-    let response: ApiTagsResponse = serde_json::from_str(&text).unwrap_or(ApiTagsResponse { values: vec![] });
+    let response: ApiTagsResponse =
+        serde_json::from_str(&text).unwrap_or(ApiTagsResponse { values: vec![] });
     if response.values.is_empty() {
         return Ok(None);
     }
@@ -103,7 +104,11 @@ pub async fn fetch_releases(
     let registry = registry_url.trim_end_matches('/').to_owned();
     let source_url = format!("{}/projects/{}/repos/{}", registry, org, repo);
 
-    Ok(Some(BitbucketServerTagsResult { source_url, registry_url: registry, releases }))
+    Ok(Some(BitbucketServerTagsResult {
+        source_url,
+        registry_url: registry,
+        releases,
+    }))
 }
 
 /// Fetch the commit hash for a specific tag.
@@ -188,23 +193,50 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "some-org/some-repo", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "some-org/some-repo", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 3);
         // Check source_url and registry_url
-        assert_eq!(result.source_url, format!("{}/projects/some-org/repos/some-repo", server.uri().trim_end_matches('/')));
+        assert_eq!(
+            result.source_url,
+            format!(
+                "{}/projects/some-org/repos/some-repo",
+                server.uri().trim_end_matches('/')
+            )
+        );
         assert_eq!(result.registry_url, server.uri().trim_end_matches('/'));
 
         // Find each version
-        let v172_deno = result.releases.iter().find(|r| r.version == "v17.7.2-deno").unwrap();
+        let v172_deno = result
+            .releases
+            .iter()
+            .find(|r| r.version == "v17.7.2-deno")
+            .unwrap();
         assert_eq!(v172_deno.git_ref, "v17.7.2-deno");
-        assert_eq!(v172_deno.new_digest.as_deref(), Some("430f18aa2968b244fc91ecd9f374f62301af4b63"));
+        assert_eq!(
+            v172_deno.new_digest.as_deref(),
+            Some("430f18aa2968b244fc91ecd9f374f62301af4b63")
+        );
 
-        let v172 = result.releases.iter().find(|r| r.version == "v17.7.2").unwrap();
+        let v172 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "v17.7.2")
+            .unwrap();
         assert!(v172.new_digest.is_none());
 
-        let v171_deno = result.releases.iter().find(|r| r.version == "v17.7.1-deno").unwrap();
-        assert_eq!(v171_deno.new_digest.as_deref(), Some("974b64a175bf11c81bfabfeb4325c74e49204b77"));
+        let v171_deno = result
+            .releases
+            .iter()
+            .find(|r| r.version == "v17.7.1-deno")
+            .unwrap();
+        assert_eq!(
+            v171_deno.new_digest.as_deref(),
+            Some("974b64a175bf11c81bfabfeb4325c74e49204b77")
+        );
     }
 
     // Ported: "returns null on empty result" — datasource/bitbucket-server-tags/index.spec.ts line 66
@@ -219,7 +251,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "some-org/empty", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "some-org/empty", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -243,14 +277,18 @@ mod tests {
     async fn handles_not_found() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/some-org/repos/notexisting/tags"))
+            .and(path(
+                "/rest/api/1.0/projects/some-org/repos/notexisting/tags",
+            ))
             .and(query_param("limit", "100"))
             .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "some-org/notexisting", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "some-org/notexisting", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -259,7 +297,9 @@ mod tests {
     async fn returns_commit_hash_of_provided_tag() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/some-org/repos/some-repo/tags/v1.0.0"))
+            .and(path(
+                "/rest/api/1.0/projects/some-org/repos/some-repo/tags/v1.0.0",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_string(
                 r#"{"displayId":"v1.0.0","hash":"430f18aa2968b244fc91ecd9f374f62301af4b62"}"#,
             ))
@@ -270,7 +310,10 @@ mod tests {
         let result = fetch_tag_commit(&server.uri(), "some-org/some-repo", "v1.0.0", &http)
             .await
             .unwrap();
-        assert_eq!(result.as_deref(), Some("430f18aa2968b244fc91ecd9f374f62301af4b62"));
+        assert_eq!(
+            result.as_deref(),
+            Some("430f18aa2968b244fc91ecd9f374f62301af4b62")
+        );
     }
 
     // Ported: "missing hash" — datasource/bitbucket-server-tags/index.spec.ts line 124
@@ -278,10 +321,12 @@ mod tests {
     async fn missing_hash() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/some-org/repos/some-repo/tags/v1.0.0"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                r#"{"displayId":"v1.0.0","hash":null}"#,
+            .and(path(
+                "/rest/api/1.0/projects/some-org/repos/some-repo/tags/v1.0.0",
             ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(r#"{"displayId":"v1.0.0","hash":null}"#),
+            )
             .mount(&server)
             .await;
 
@@ -302,7 +347,9 @@ mod tests {
         })
         .to_string();
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/some-org/repos/some-repo/commits"))
+            .and(path(
+                "/rest/api/1.0/projects/some-org/repos/some-repo/commits",
+            ))
             .and(query_param("ignoreMissing", "true"))
             .and(query_param("limit", "1"))
             .respond_with(ResponseTemplate::new(200).set_body_string(body))
@@ -310,8 +357,13 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_latest_commit(&server.uri(), "some-org/some-repo", &http).await.unwrap();
-        assert_eq!(result.as_deref(), Some("0c95f9c79e1810cf9c8964fbf7d139009412f7e7"));
+        let result = fetch_latest_commit(&server.uri(), "some-org/some-repo", &http)
+            .await
+            .unwrap();
+        assert_eq!(
+            result.as_deref(),
+            Some("0c95f9c79e1810cf9c8964fbf7d139009412f7e7")
+        );
     }
 
     // Ported: "no commits" — datasource/bitbucket-server-tags/index.spec.ts line 173
@@ -323,7 +375,9 @@ mod tests {
         })
         .to_string();
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/some-org/repos/some-repo/commits"))
+            .and(path(
+                "/rest/api/1.0/projects/some-org/repos/some-repo/commits",
+            ))
             .and(query_param("ignoreMissing", "true"))
             .and(query_param("limit", "1"))
             .respond_with(ResponseTemplate::new(200).set_body_string(body))
@@ -331,7 +385,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_latest_commit(&server.uri(), "some-org/some-repo", &http).await.unwrap();
+        let result = fetch_latest_commit(&server.uri(), "some-org/some-repo", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -348,7 +404,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_latest_commit(&server.uri(), "some-org/empty", &http).await.unwrap();
+        let result = fetch_latest_commit(&server.uri(), "some-org/empty", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -364,7 +422,9 @@ mod tests {
     async fn get_digest_handles_not_found() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/some-org/repos/notexisting/commits"))
+            .and(path(
+                "/rest/api/1.0/projects/some-org/repos/notexisting/commits",
+            ))
             .and(query_param("ignoreMissing", "true"))
             .and(query_param("limit", "1"))
             .respond_with(ResponseTemplate::new(404))
@@ -392,7 +452,10 @@ mod schema_tests {
 
         let tags: Vec<ApiTag> = serde_json::from_str(json).unwrap();
         assert_eq!(tags[0].display_id, "v17.7.2-deno");
-        assert_eq!(tags[0].hash.as_deref(), Some("430f18aa2968b244fc91ecd9f374f62301af4b63"));
+        assert_eq!(
+            tags[0].hash.as_deref(),
+            Some("430f18aa2968b244fc91ecd9f374f62301af4b63")
+        );
         assert_eq!(tags[1].display_id, "v17.7.2");
         assert!(tags[1].hash.is_none()); // null hash
         assert_eq!(tags[2].display_id, "v17.7.1");

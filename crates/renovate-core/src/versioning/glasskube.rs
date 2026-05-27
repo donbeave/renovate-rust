@@ -26,7 +26,10 @@ fn parse(v: &str) -> Option<GlasskubeVersion> {
     let build_num = if sv.build.is_empty() {
         0
     } else {
-        sv.build.as_str().split('.').next()
+        sv.build
+            .as_str()
+            .split('.')
+            .next()
             .and_then(|s| s.parse::<u64>().ok())
             .unwrap_or(0)
     };
@@ -35,12 +38,18 @@ fn parse(v: &str) -> Option<GlasskubeVersion> {
     } else {
         sv.pre.to_string()
     };
-    Some(GlasskubeVersion { major: sv.major, minor: sv.minor, patch: sv.patch, build_num, prerelease })
+    Some(GlasskubeVersion {
+        major: sv.major,
+        minor: sv.minor,
+        patch: sv.patch,
+        build_num,
+        prerelease,
+    })
 }
 
 fn compare(a: &GlasskubeVersion, b: &GlasskubeVersion) -> Ordering {
-    let rel = (a.major, a.minor, a.patch, a.build_num)
-        .cmp(&(b.major, b.minor, b.patch, b.build_num));
+    let rel =
+        (a.major, a.minor, a.patch, a.build_num).cmp(&(b.major, b.minor, b.patch, b.build_num));
     if rel != Ordering::Equal {
         return rel;
     }

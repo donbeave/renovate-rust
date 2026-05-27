@@ -403,8 +403,7 @@ fn match_pattern(pattern: &str, value: &str) -> bool {
             Some(pos) if pos > 0 => (&inner[..pos], &inner[pos + 1..]),
             _ => return false,
         };
-        return Regex::new(re_src)
-            .map_or(false, |re| re.is_match(value));
+        return Regex::new(re_src).map_or(false, |re| re.is_match(value));
     }
     // Glob (minimatch-compatible via globset with case-insensitive option)
     GlobBuilder::new(pattern)
@@ -423,7 +422,11 @@ fn glob_match(pattern: &str, value: &str) -> bool {
 /// Resolve soft and hard TTL values for a namespace.
 ///
 /// Mirrors `resolveTtlValues` in `lib/util/cache/package/ttl.ts`.
-pub fn resolve_ttl_values(config: &CacheTtlConfig, namespace: &str, ttl_minutes: i64) -> (i64, i64) {
+pub fn resolve_ttl_values(
+    config: &CacheTtlConfig,
+    namespace: &str,
+    ttl_minutes: i64,
+) -> (i64, i64) {
     let soft_ttl = get_ttl_override(config, namespace).unwrap_or(ttl_minutes);
     let hard_ttl = soft_ttl.max(config.hard_ttl_minutes);
     (soft_ttl, hard_ttl)
@@ -473,8 +476,7 @@ where
             let cached_at = cached_at.with_timezone(&Utc);
             let soft_deadline = cached_at + Duration::minutes(soft_ttl);
 
-            let passes_predicate = should_cache_result
-                .map_or(true, |pred| pred(&record.value));
+            let passes_predicate = should_cache_result.map_or(true, |pred| pred(&record.value));
 
             if passes_predicate && Utc::now() < soft_deadline {
                 // still fresh
@@ -552,7 +554,12 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let cache = FilePackageCache::new(dir.path());
         cache
-            .set("_test-namespace", "my-key", Value::String("hello".into()), 60)
+            .set(
+                "_test-namespace",
+                "my-key",
+                Value::String("hello".into()),
+                60,
+            )
             .await;
         let result: Option<String> = cache.get("_test-namespace", "my-key").await;
         assert_eq!(result, Some("hello".to_string()));
@@ -564,12 +571,16 @@ mod tests {
         let cache = FilePackageCache::new(dir.path());
         // write an already-expired entry manually
         let path = cache.entry_path("_test-namespace", "expired-key");
-        tokio::fs::create_dir_all(path.parent().unwrap()).await.unwrap();
+        tokio::fs::create_dir_all(path.parent().unwrap())
+            .await
+            .unwrap();
         let entry = FileEntry {
             value: Value::String("stale".into()),
             expiry: (Utc::now() - Duration::minutes(1)).to_rfc3339(),
         };
-        tokio::fs::write(&path, serde_json::to_string(&entry).unwrap()).await.unwrap();
+        tokio::fs::write(&path, serde_json::to_string(&entry).unwrap())
+            .await
+            .unwrap();
 
         let result: Option<String> = cache.get("_test-namespace", "expired-key").await;
         assert!(result.is_none());
@@ -632,27 +643,17 @@ mod tests {
 
         let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
         let cc = call_count.clone();
-        let result1 = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            move || {
-                cc.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                async { Ok::<_, anyhow::Error>("111".to_string()) }
-            },
-        )
+        let result1 = with_cache(&cache, &cfg, opts.clone(), None, move || {
+            cc.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async { Ok::<_, anyhow::Error>("111".to_string()) }
+        })
         .await
         .unwrap();
 
         // Second call — fn must not be called again
-        let result2 = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            || async { Ok::<_, anyhow::Error>("222".to_string()) },
-        )
+        let result2 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Ok::<_, anyhow::Error>("222".to_string())
+        })
         .await
         .unwrap();
 
@@ -673,30 +674,18 @@ mod tests {
         let counter = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(1));
 
         let c1 = counter.clone();
-        let r1 = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            move || {
-                let v = c1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                async move { Ok::<_, anyhow::Error>(format!("{v}{v}{v}")) }
-            },
-        )
+        let r1 = with_cache(&cache, &cfg, opts.clone(), None, move || {
+            let v = c1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async move { Ok::<_, anyhow::Error>(format!("{v}{v}{v}")) }
+        })
         .await
         .unwrap();
 
         let c2 = counter.clone();
-        let r2 = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            move || {
-                let v = c2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                async move { Ok::<_, anyhow::Error>(format!("{v}{v}{v}")) }
-            },
-        )
+        let r2 = with_cache(&cache, &cfg, opts.clone(), None, move || {
+            let v = c2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async move { Ok::<_, anyhow::Error>(format!("{v}{v}{v}")) }
+        })
         .await
         .unwrap();
 
@@ -718,26 +707,16 @@ mod tests {
 
         let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
         let cc1 = call_count.clone();
-        let r1 = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            move || {
-                cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                async { Ok::<_, anyhow::Error>("111".to_string()) }
-            },
-        )
+        let r1 = with_cache(&cache, &cfg, opts.clone(), None, move || {
+            cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async { Ok::<_, anyhow::Error>("111".to_string()) }
+        })
         .await
         .unwrap();
 
-        let r2 = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            || async { Ok::<_, anyhow::Error>("222".to_string()) },
-        )
+        let r2 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Ok::<_, anyhow::Error>("222".to_string())
+        })
         .await
         .unwrap();
 
@@ -803,13 +782,9 @@ mod tests {
         opts.fallback = true;
 
         // First call: populate cache
-        let r1 = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            || async { Ok::<_, anyhow::Error>("stale-value".to_string()) },
-        )
+        let r1 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Ok::<_, anyhow::Error>("stale-value".to_string())
+        })
         .await
         .unwrap();
         assert_eq!(r1, "stale-value");
@@ -826,13 +801,9 @@ mod tests {
             .await;
 
         // Second call: fn fails, should return stale
-        let r2 = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            || async { Err::<String, _>(anyhow::anyhow!("upstream error")) },
-        )
+        let r2 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Err::<String, _>(anyhow::anyhow!("upstream error"))
+        })
         .await
         .unwrap();
 
@@ -906,7 +877,10 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(45));
-        assert_eq!(get_ttl_override(&cfg, "changelog-github-notes@v2"), Some(45));
+        assert_eq!(
+            get_ttl_override(&cfg, "changelog-github-notes@v2"),
+            Some(45)
+        );
         assert_eq!(get_ttl_override(&cfg, "any-namespace"), Some(45));
     }
 

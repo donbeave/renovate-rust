@@ -52,7 +52,11 @@ struct ForgeRelease {
 fn parse_puppet_timestamp(s: &str) -> Option<String> {
     chrono::DateTime::parse_from_str(s, "%Y-%m-%d %H:%M:%S %z")
         .ok()
-        .map(|dt| dt.with_timezone(&chrono::Utc).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string())
+        .map(|dt| {
+            dt.with_timezone(&chrono::Utc)
+                .format("%Y-%m-%dT%H:%M:%S%.3fZ")
+                .to_string()
+        })
 }
 
 /// Fetch Puppet Forge module releases.
@@ -125,11 +129,21 @@ pub async fn fetch_latest(
     current_value: &str,
     registry_url: &str,
 ) -> Result<PuppetForgeUpdateSummary, PuppetForgeError> {
-    let base = if registry_url.is_empty() { DEFAULT_REGISTRY } else { registry_url };
+    let base = if registry_url.is_empty() {
+        DEFAULT_REGISTRY
+    } else {
+        registry_url
+    };
     let result = fetch_releases(base, module_name, http).await?;
     let latest = result.and_then(|r| r.releases.last().map(|rel| rel.version.clone()));
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-    Ok(PuppetForgeUpdateSummary { latest, update_available })
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
+    Ok(PuppetForgeUpdateSummary {
+        latest,
+        update_available,
+    })
 }
 
 #[cfg(test)]
@@ -196,14 +210,26 @@ mod tests {
 
         let r0 = &result.releases[0];
         assert_eq!(r0.version, "6.4.0");
-        assert_eq!(r0.download_url.as_deref(), Some("/v3/files/puppetlabs-apache-6.4.0.tar.gz"));
-        assert_eq!(r0.release_timestamp.as_deref(), Some("2021-08-02T13:49:41.000Z"));
+        assert_eq!(
+            r0.download_url.as_deref(),
+            Some("/v3/files/puppetlabs-apache-6.4.0.tar.gz")
+        );
+        assert_eq!(
+            r0.release_timestamp.as_deref(),
+            Some("2021-08-02T13:49:41.000Z")
+        );
 
         let r3 = &result.releases[3];
         assert_eq!(r3.version, "7.0.0");
-        assert_eq!(r3.release_timestamp.as_deref(), Some("2021-10-11T14:47:24.000Z"));
+        assert_eq!(
+            r3.release_timestamp.as_deref(),
+            Some("2021-10-11T14:47:24.000Z")
+        );
 
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/puppetlabs/puppetlabs-apache"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/puppetlabs/puppetlabs-apache")
+        );
         assert!(result.deprecation_message.is_none());
     }
 
@@ -224,7 +250,10 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(result.deprecation_message.as_deref(), Some("use another module ..."));
+        assert_eq!(
+            result.deprecation_message.as_deref(),
+            Some("use another module ...")
+        );
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "7.0.0");
     }
@@ -241,7 +270,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "foobar", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "foobar", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -257,7 +288,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "foobar", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "foobar", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -280,9 +313,15 @@ mod tests {
 
         assert_eq!(result.releases.len(), 4);
         assert_eq!(result.releases[0].version, "6.4.0");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2021-08-02T13:49:41.000Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2021-08-02T13:49:41.000Z")
+        );
         assert_eq!(result.releases[3].version, "7.0.0");
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/puppetlabs/puppetlabs-apache"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/puppetlabs/puppetlabs-apache")
+        );
     }
 
     // Ported: "load all possible null values" — datasource/puppet-forge/index.spec.ts line 182
@@ -304,7 +343,10 @@ mod tests {
 
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "7.0.0");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2021-10-11T14:47:24.000Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2021-10-11T14:47:24.000Z")
+        );
         assert!(result.deprecation_message.is_none());
     }
 
@@ -320,7 +362,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "foobar", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "foobar", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 }

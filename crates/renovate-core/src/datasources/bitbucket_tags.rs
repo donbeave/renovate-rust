@@ -98,7 +98,7 @@ pub async fn fetch_releases(
     let paged: PagedTags = match http.get_json(&url).await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(BitbucketTagsError::Http(e)),
@@ -145,7 +145,7 @@ pub async fn get_digest(
         let tag_entry: ApiTag = match http.get_json(&url).await {
             Ok(v) => v,
             Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-                return Ok(None)
+                return Ok(None);
             }
             Err(crate::http::HttpError::Request(_)) => return Ok(None),
             Err(e) => return Err(BitbucketTagsError::Http(e)),
@@ -154,14 +154,11 @@ pub async fn get_digest(
     }
 
     // Fetch main branch name.
-    let repo_url = format!(
-        "{}/2.0/repositories/{}",
-        BITBUCKET_API_URL, package_name
-    );
+    let repo_url = format!("{}/2.0/repositories/{}", BITBUCKET_API_URL, package_name);
     let repo_info: RepoInfo = match http.get_json(&repo_url).await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(BitbucketTagsError::Http(e)),
@@ -175,7 +172,7 @@ pub async fn get_digest(
     let paged_commits: PagedCommits = match http.get_json(&commits_url).await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(BitbucketTagsError::Http(e)),

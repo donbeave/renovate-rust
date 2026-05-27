@@ -216,9 +216,9 @@ fn semver_matches(version: &str, range: &str) -> bool {
 
     // Space-separated AND: ">0.6.0 <0.7.0" — each part must match separately
     if range.contains(' ') {
-        return range.split_whitespace().all(|part| {
-            VersionReq::parse(part).is_ok_and(|req| req.matches(&ver))
-        });
+        return range
+            .split_whitespace()
+            .all(|part| VersionReq::parse(part).is_ok_and(|req| req.matches(&ver)));
     }
 
     VersionReq::parse(range).is_ok_and(|req| req.matches(&ver))
@@ -333,7 +333,11 @@ mod tests {
             ("stable", "stable", true),
         ];
         for (version, other, expected) in cases {
-            assert_eq!(equals(version, other), expected, "equals({version:?}, {other:?})");
+            assert_eq!(
+                equals(version, other),
+                expected,
+                "equals({version:?}, {other:?})"
+            );
         }
     }
 
@@ -488,8 +492,7 @@ mod tests {
         assert_eq!(
             versions,
             vec![
-                "@latest", "@stable", "1.1", "1.2", "1.2.3", "@1.2", "1.3", "@1", "2", "2.1",
-                "@2"
+                "@latest", "@stable", "1.1", "1.2", "1.2.3", "@1.2", "1.3", "@1", "2", "2.1", "@2"
             ]
         );
     }

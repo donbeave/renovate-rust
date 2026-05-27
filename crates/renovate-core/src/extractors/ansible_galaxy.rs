@@ -81,8 +81,8 @@ pub fn get_slice_end_number(start: i32, number_of_lines: i32, blocks: &[i32]) ->
 ///   namespace.collection: "version"
 /// ```
 pub fn extract_galaxy_metadata(content: &str) -> Vec<AnsibleGalaxyDep> {
-    use std::sync::LazyLock;
     use regex::Regex;
+    use std::sync::LazyLock;
     static GALAXY_DEP_RE: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(r#"^\s+["']?([\w.]+)["']?:\s*["']?(.+?)["']?\s*(?:\s#.*)?$"#).unwrap()
     });
@@ -111,7 +111,11 @@ pub fn extract_galaxy_metadata(content: &str) -> Vec<AnsibleGalaxyDep> {
         }
         if let Some(caps) = GALAXY_DEP_RE.captures(line_without_comment) {
             let name = caps[1].to_owned();
-            let version = caps[2].trim().trim_matches('\'').trim_matches('"').to_owned();
+            let version = caps[2]
+                .trim()
+                .trim_matches('\'')
+                .trim_matches('"')
+                .to_owned();
             out.push(AnsibleGalaxyDep {
                 dep_name: name,
                 current_value: version,

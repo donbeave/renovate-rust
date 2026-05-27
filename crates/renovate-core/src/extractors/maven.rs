@@ -2195,7 +2195,9 @@ mod tests {
         let packages = extract_all_package_files(&[("pom.template.xml", content)]);
         assert!(!packages.is_empty(), "pom.template.xml should be processed");
         let deps = &packages[0];
-        let spring = deps.iter().find(|d| d.dep_name.contains("spring-boot-starter-web"));
+        let spring = deps
+            .iter()
+            .find(|d| d.dep_name.contains("spring-boot-starter-web"));
         assert!(spring.is_some());
         assert_eq!(spring.unwrap().current_value, "3.2.0");
         assert!(spring.unwrap().skip_reason.is_none());

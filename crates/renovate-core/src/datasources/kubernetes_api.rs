@@ -14,9 +14,7 @@ pub const DATASOURCE_ID: &str = "kubernetes-api";
 
 static API_DATA: OnceLock<HashMap<String, Vec<String>>> = OnceLock::new();
 
-const RAW_JSON5: &str = include_str!(
-    "../../../../../renovate/data/kubernetes-api.json5"
-);
+const RAW_JSON5: &str = include_str!("../../../../../renovate/data/kubernetes-api.json5");
 
 fn load_api_data() -> HashMap<String, Vec<String>> {
     json5::from_str(RAW_JSON5).unwrap_or_default()

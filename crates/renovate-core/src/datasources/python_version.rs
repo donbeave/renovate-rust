@@ -58,8 +58,17 @@ struct RawPythonRelease {
 }
 
 fn parse_raw(raw: RawPythonRelease) -> PythonRelease {
-    let version = raw.name.strip_prefix("Python ").unwrap_or(&raw.name).to_owned();
-    PythonRelease { version, release_timestamp: raw.release_date, is_stable: !raw.pre_release, is_deprecated: None }
+    let version = raw
+        .name
+        .strip_prefix("Python ")
+        .unwrap_or(&raw.name)
+        .to_owned();
+    PythonRelease {
+        version,
+        release_timestamp: raw.release_date,
+        is_stable: !raw.pre_release,
+        is_deprecated: None,
+    }
 }
 
 fn build_eol_map(eol_result: Option<endoflife::EndoflifeResult>) -> HashMap<String, bool> {
@@ -69,7 +78,12 @@ fn build_eol_map(eol_result: Option<endoflife::EndoflifeResult>) -> HashMap<Stri
             .releases
             .into_iter()
             .map(|r| {
-                let minor = r.version.splitn(3, '.').take(2).collect::<Vec<_>>().join(".");
+                let minor = r
+                    .version
+                    .splitn(3, '.')
+                    .take(2)
+                    .collect::<Vec<_>>()
+                    .join(".");
                 (minor, r.is_deprecated)
             })
             .collect(),
@@ -78,7 +92,12 @@ fn build_eol_map(eol_result: Option<endoflife::EndoflifeResult>) -> HashMap<Stri
 
 fn annotate_with_eol(releases: &mut [PythonRelease], eol_map: &HashMap<String, bool>) {
     for release in releases.iter_mut() {
-        let minor = release.version.splitn(3, '.').take(2).collect::<Vec<_>>().join(".");
+        let minor = release
+            .version
+            .splitn(3, '.')
+            .take(2)
+            .collect::<Vec<_>>()
+            .join(".");
         release.is_deprecated = eol_map.get(&minor).copied();
     }
 }
@@ -107,7 +126,10 @@ pub async fn fetch_releases(
         .map_err(PythonVersionError::Github)?;
     let prebuild_set: HashSet<String> = prebuild.iter().map(|(tag, _)| tag.clone()).collect();
 
-    let eol_result = endoflife::fetch_releases(eol_registry, "python", http).await.ok().flatten();
+    let eol_result = endoflife::fetch_releases(eol_registry, "python", http)
+        .await
+        .ok()
+        .flatten();
     let eol_map = build_eol_map(eol_result);
 
     // Use a non-retrying request so we can detect 429 immediately.
@@ -124,7 +146,12 @@ pub async fn fetch_releases(
         }
         let mut releases: Vec<PythonRelease> = prebuild
             .into_iter()
-            .map(|(tag, ts)| PythonRelease { version: tag, release_timestamp: ts, is_stable: true, is_deprecated: None })
+            .map(|(tag, ts)| PythonRelease {
+                version: tag,
+                release_timestamp: ts,
+                is_stable: true,
+                is_deprecated: None,
+            })
             .collect();
         annotate_with_eol(&mut releases, &eol_map);
         sort_releases(&mut releases);
@@ -223,8 +250,15 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = endoflife::fetch_releases(&server.uri(), "python", &http).await.unwrap().unwrap();
-        let release = result.releases.iter().find(|r| r.version == "3.7.17").unwrap();
+        let result = endoflife::fetch_releases(&server.uri(), "python", &http)
+            .await
+            .unwrap()
+            .unwrap();
+        let release = result
+            .releases
+            .iter()
+            .find(|r| r.version == "3.7.17")
+            .unwrap();
         assert!(release.is_deprecated);
     }
 
@@ -241,7 +275,8 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&registry_url(&server), &server.uri(), &server.uri(), &http).await;
+        let result =
+            fetch_releases(&registry_url(&server), &server.uri(), &server.uri(), &http).await;
         assert!(result.is_err(), "5xx should propagate as Err");
     }
 
@@ -255,7 +290,9 @@ mod tests {
         let bad_url = "http://127.0.0.1:1/api/v2/downloads/release";
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(bad_url, &server.uri(), &server.uri(), &http).await.unwrap();
+        let result = fetch_releases(bad_url, &server.uri(), &server.uri(), &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -283,10 +320,18 @@ mod tests {
         assert!(versions.contains(&"3.12.0"));
         assert!(versions.contains(&"3.7.8"));
 
-        let r78 = result.releases.iter().find(|r| r.version == "3.7.8").unwrap();
+        let r78 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "3.7.8")
+            .unwrap();
         assert_eq!(r78.is_deprecated, Some(true));
 
-        let r121 = result.releases.iter().find(|r| r.version == "3.12.1").unwrap();
+        let r121 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "3.12.1")
+            .unwrap();
         assert_eq!(r121.is_deprecated, Some(false));
     }
 
@@ -350,7 +395,10 @@ mod tests {
         assert_eq!(result.releases[0].version, "3.7.8");
         assert_eq!(result.releases[0].is_deprecated, Some(true));
         assert!(result.releases[0].is_stable);
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2020-06-27T12:55:01Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2020-06-27T12:55:01Z")
+        );
     }
 
     // Ported: "only returns stable versions" — datasource/python-version/index.spec.ts line 147
@@ -423,7 +471,11 @@ mod tests {
 
         assert_eq!(result.releases.len(), 2);
         for release in &result.releases {
-            assert!(release.is_deprecated.is_some(), "release {} should have is_deprecated set", release.version);
+            assert!(
+                release.is_deprecated.is_some(),
+                "release {} should have is_deprecated set",
+                release.version
+            );
         }
     }
 }

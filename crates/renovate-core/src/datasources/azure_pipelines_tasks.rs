@@ -89,16 +89,30 @@ pub async fn fetch_releases(
     // Try builtin map first
     let builtin: FallbackMap = http.get_json(builtin_url).await?;
     if let Some(versions) = builtin.get(&key) {
-        let releases =
-            versions.iter().map(|v| AzureTaskRelease { version: v.clone(), is_deprecated: false, changelog_url: None, changelog_content: None }).collect();
+        let releases = versions
+            .iter()
+            .map(|v| AzureTaskRelease {
+                version: v.clone(),
+                is_deprecated: false,
+                changelog_url: None,
+                changelog_content: None,
+            })
+            .collect();
         return Ok(Some(AzureTasksResult { releases }));
     }
 
     // Try marketplace map
     let marketplace: FallbackMap = http.get_json(marketplace_url).await?;
     if let Some(versions) = marketplace.get(&key) {
-        let releases =
-            versions.iter().map(|v| AzureTaskRelease { version: v.clone(), is_deprecated: false, changelog_url: None, changelog_content: None }).collect();
+        let releases = versions
+            .iter()
+            .map(|v| AzureTaskRelease {
+                version: v.clone(),
+                is_deprecated: false,
+                changelog_url: None,
+                changelog_content: None,
+            })
+            .collect();
         return Ok(Some(AzureTasksResult { releases }));
     }
 
@@ -118,7 +132,7 @@ pub async fn fetch_releases_org(
     auth_token: &str,
     http: &HttpClient,
 ) -> Result<Option<AzureTasksResult>, AzureTasksError> {
-    use base64::{engine::general_purpose::STANDARD, Engine as _};
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
     let auth = STANDARD.encode(format!("renovate:{auth_token}"));
 
     let text = match http
@@ -203,8 +217,15 @@ pub async fn fetch_latest(
         versions.sort_by(|a, b| cmp_version(a, b));
         versions.last().map(|s| s.to_string())
     });
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-    Ok(AzureTaskUpdateSummary { current_value: current_value.to_owned(), latest, update_available })
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
+    Ok(AzureTaskUpdateSummary {
+        current_value: current_value.to_owned(),
+        latest,
+        update_available,
+    })
 }
 
 /// Compare two version strings numerically by components.
@@ -256,8 +277,9 @@ mod tests {
         let http = HttpClient::new().unwrap();
         let builtin_url = format!("{}/builtin-tasks.json", server.uri());
         let marketplace_url = format!("{}/marketplace-tasks.json", server.uri());
-        let result =
-            fetch_releases(&builtin_url, &marketplace_url, "unknown", &http).await.unwrap();
+        let result = fetch_releases(&builtin_url, &marketplace_url, "unknown", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -267,15 +289,19 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/builtin-tasks.json"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_string(r#"{"automatedanalysis":["0.171.0","0.198.0"]}"#))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"{"automatedanalysis":["0.171.0","0.198.0"]}"#),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
         let builtin_url = format!("{}/builtin-tasks.json", server.uri());
-        let result =
-            fetch_releases(&builtin_url, "http://invalid", "AutomatedAnalysis", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&builtin_url, "http://invalid", "AutomatedAnalysis", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "0.171.0");
@@ -293,19 +319,25 @@ mod tests {
             .await;
         Mock::given(method("GET"))
             .and(path("/marketplace-tasks.json"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_string(r#"{"automatedanalysis-marketplace":["0.171.0","0.198.0"]}"#))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"{"automatedanalysis-marketplace":["0.171.0","0.198.0"]}"#),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
         let builtin_url = format!("{}/builtin-tasks.json", server.uri());
         let marketplace_url = format!("{}/marketplace-tasks.json", server.uri());
-        let result =
-            fetch_releases(&builtin_url, &marketplace_url, "AutomatedAnalysis-Marketplace", &http)
-                .await
-                .unwrap()
-                .unwrap();
+        let result = fetch_releases(
+            &builtin_url,
+            &marketplace_url,
+            "AutomatedAnalysis-Marketplace",
+            &http,
+        )
+        .await
+        .unwrap()
+        .unwrap();
 
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "0.171.0");
@@ -318,15 +350,19 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/builtin-tasks.json"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_string(r#"{"automatedanalysis":["0.171.0","0.198.0"]}"#))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"{"automatedanalysis":["0.171.0","0.198.0"]}"#),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
         let builtin_url = format!("{}/builtin-tasks.json", server.uri());
-        let result =
-            fetch_releases(&builtin_url, "http://invalid", "automatedanalysis", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&builtin_url, "http://invalid", "automatedanalysis", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 2);
     }
@@ -343,7 +379,10 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let url = format!("{}/_apis/distributedtask/tasks/", server.uri());
-        let result = fetch_releases_org(&url, "AzurePowerShell", "123test", &http).await.unwrap().unwrap();
+        let result = fetch_releases_org(&url, "AzurePowerShell", "123test", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "5.248.3");
@@ -351,7 +390,10 @@ mod tests {
             result.releases[0].changelog_content.as_deref(),
             Some("Added support for Az Module and cross platform agents.")
         );
-        assert_eq!(result.releases[0].changelog_url.as_deref(), Some(CHANGELOG_URL));
+        assert_eq!(
+            result.releases[0].changelog_url.as_deref(),
+            Some(CHANGELOG_URL)
+        );
     }
 
     // Ported: "identifies task based on task id" — datasource/azure-pipelines-tasks/index.spec.ts line 112
@@ -366,10 +408,15 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let url = format!("{}/_apis/distributedtask/tasks/", server.uri());
-        let result = fetch_releases_org(&url, "5d437bf5-f193-4449-b531-c4c69eebaa48", "123test", &http)
-            .await
-            .unwrap()
-            .unwrap();
+        let result = fetch_releases_org(
+            &url,
+            "5d437bf5-f193-4449-b531-c4c69eebaa48",
+            "123test",
+            &http,
+        )
+        .await
+        .unwrap()
+        .unwrap();
 
         assert_eq!(result.releases.len(), 1);
         assert_eq!(result.releases[0].version, "3.1.11");
@@ -439,7 +486,10 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let url = format!("{}/_apis/distributedtask/tasks/", server.uri());
-        let result = fetch_releases_org(&url, "PowerShell", "123test", &http).await.unwrap().unwrap();
+        let result = fetch_releases_org(&url, "PowerShell", "123test", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "1.2.3");

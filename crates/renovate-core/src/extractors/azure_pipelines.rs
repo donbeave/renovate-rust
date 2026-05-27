@@ -253,7 +253,10 @@ mod tests {
   - container: missingimage
 "#;
         let deps = extract(content);
-        assert!(!deps.is_empty(), "should extract dependencies from valid file");
+        assert!(
+            !deps.is_empty(),
+            "should extract dependencies from valid file"
+        );
     }
 
     // Ported: "should extract container information" — azure-pipelines/extract.spec.ts line 187

@@ -42,14 +42,12 @@ where
 static ADDON_NAME_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-z0-9][a-z0-9-]*[a-z0-9]$").unwrap());
 
-static K8S_VERSION_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\d+\.\d+$").unwrap());
+static K8S_VERSION_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+\.\d+$").unwrap());
 
 /// Parse and validate an EKS addon filter from a JSON string.
 /// Returns `Ok(filter)` on valid input, `Err` on invalid.
 pub fn parse_eks_addons_filter(json: &str) -> Result<EksAddonsFilter, String> {
-    let filter: EksAddonsFilter =
-        serde_json::from_str(json).map_err(|e| e.to_string())?;
+    let filter: EksAddonsFilter = serde_json::from_str(json).map_err(|e| e.to_string())?;
     if !ADDON_NAME_RE.is_match(&filter.addon_name) {
         return Err(format!("invalid addonName: {:?}", filter.addon_name));
     }
@@ -300,7 +298,11 @@ mod tests {
         );
         assert_eq!(
             get_satisfying_version(
-                &["v1.20.7-eksbuild.1", "v1.20.7-eksbuild.2", "v1.20.7-eksbuild.7"],
+                &[
+                    "v1.20.7-eksbuild.1",
+                    "v1.20.7-eksbuild.2",
+                    "v1.20.7-eksbuild.7"
+                ],
                 "v1.20.7-eksbuild.3"
             ),
             None
@@ -318,16 +320,34 @@ mod tests {
     #[test]
     fn eks_addons_filter_safe_parse() {
         let cases: &[(&str, bool)] = &[
-            (r#"{"kubernetesVersion":"1.30","addonName":"kube_proxy"}"#, false),
-            (r#"{"kubernetesVersion":"130","addonName":"kube_proxy"}"#, false),
-            (r#"{"addonName":"kube_proxy","default":"abrakadabra"}"#, false),
+            (
+                r#"{"kubernetesVersion":"1.30","addonName":"kube_proxy"}"#,
+                false,
+            ),
+            (
+                r#"{"kubernetesVersion":"130","addonName":"kube_proxy"}"#,
+                false,
+            ),
+            (
+                r#"{"addonName":"kube_proxy","default":"abrakadabra"}"#,
+                false,
+            ),
             (r#"{"kubernetesVersion":"1.30"}"#, false),
             (r#"{"addonName":"kube-proxy","default":"false"}"#, true),
             (r#"{"addonName":"kube-proxy","default":"true"}"#, true),
             (r#"{"addonName":"kube-proxy","default":false}"#, true),
-            (r#"{"addonName":"aws-cloudwatch-controller","default":false}"#, true),
-            (r#"{"addonName":"aws-cloudwatch-controller","profile":"abc"}"#, true),
-            (r#"{"kubernetesVersion":"1.30","addonName":"vpc-cni"}"#, true),
+            (
+                r#"{"addonName":"aws-cloudwatch-controller","default":false}"#,
+                true,
+            ),
+            (
+                r#"{"addonName":"aws-cloudwatch-controller","profile":"abc"}"#,
+                true,
+            ),
+            (
+                r#"{"kubernetesVersion":"1.30","addonName":"vpc-cni"}"#,
+                true,
+            ),
             (r#"{"addonName":"vpc-cni"}"#, true),
         ];
         for (input, expected) in cases {

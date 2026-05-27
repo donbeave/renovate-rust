@@ -9,7 +9,6 @@ use serde::Deserialize;
 
 use crate::http::HttpClient;
 
-
 pub const DATASOURCE_ID: &str = "gradle-version";
 pub const GRADLE_VERSIONS_URL: &str = "https://services.gradle.org/versions/all";
 pub const HOMEPAGE: &str = "https://gradle.org";
@@ -88,7 +87,10 @@ fn parse_build_time(s: &str) -> Option<String> {
     let hour = &s[8..10];
     let min = &s[10..12];
     let sec = &s[12..14];
-    Some(format!("{}-{}-{}T{}:{}:{}.000Z", year, month, day, hour, min, sec))
+    Some(format!(
+        "{}-{}-{}T{}:{}:{}.000Z",
+        year, month, day, hour, min, sec
+    ))
 }
 
 /// Fetch Gradle releases.
@@ -106,7 +108,7 @@ pub async fn fetch_releases(
         Err(crate::http::HttpError::Status { status, .. })
             if status == reqwest::StatusCode::NOT_FOUND =>
         {
-            return Ok(None)
+            return Ok(None);
         }
         Err(e) => return Err(GradleVersionError::Http(e)),
     };
@@ -232,14 +234,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            &format!("{}/versions/all", server.uri()),
-            "abc",
-            &http,
-        )
-        .await
-        .unwrap()
-        .unwrap();
+        let result = fetch_releases(&format!("{}/versions/all", server.uri()), "abc", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 300);
         assert_eq!(
@@ -264,9 +262,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "abc", &http)
-            .await
-            .unwrap();
+        let result = fetch_releases(&server.uri(), "abc", &http).await.unwrap();
         assert!(result.is_some());
     }
 
@@ -281,13 +277,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            &format!("{}/versions/all", server.uri()),
-            "abc",
-            &http,
-        )
-        .await
-        .unwrap();
+        let result = fetch_releases(&format!("{}/versions/all", server.uri()), "abc", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -302,12 +294,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            &format!("{}/versions/all", server.uri()),
-            "abc",
-            &http,
-        )
-        .await;
+        let result = fetch_releases(&format!("{}/versions/all", server.uri()), "abc", &http).await;
         assert!(result.is_err());
     }
 

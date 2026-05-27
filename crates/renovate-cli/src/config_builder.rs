@@ -14,8 +14,8 @@ use serde_json::{Map, Value};
 
 use crate::cli::{
     BinarySource as CliBinarySource, Cli, DryRunArg, ForkProcessing as CliForkProcessing,
-    Platform as CliPlatform, PlatformCommit as CliPlatformCommit,
-    RecreateWhen as CliRecreateWhen, RequireConfigArg,
+    Platform as CliPlatform, PlatformCommit as CliPlatformCommit, RecreateWhen as CliRecreateWhen,
+    RequireConfigArg,
 };
 
 /// Apply CLI arguments on top of a `base` [`GlobalConfig`].
@@ -711,10 +711,7 @@ mod tests {
             Some("/tmp/renovate/containerbase")
         );
         assert_eq!(config.docker_child_prefix.as_deref(), Some("rr_"));
-        assert_eq!(
-            config.docker_cli_options.as_deref(),
-            Some("--network=host")
-        );
+        assert_eq!(config.docker_cli_options.as_deref(), Some("--network=host"));
         assert_eq!(
             config.docker_sidecar_image.as_deref(),
             Some("example/sidecar:1")
@@ -882,7 +879,10 @@ mod tests {
             vec!["renovate/a".to_owned(), "renovate/b".to_owned()]
         );
         assert_eq!(config.git_no_verify, vec!["commit".to_owned()]);
-        assert_eq!(config.write_discovered_repos.as_deref(), Some("./repos.json"));
+        assert_eq!(
+            config.write_discovered_repos.as_deref(),
+            Some("./repos.json")
+        );
         assert_eq!(config.s3_endpoint.as_deref(), Some("https://s3.example"));
         assert!(config.s3_path_style);
         assert_eq!(config.repository_cache_force_local, Some(false));
@@ -914,7 +914,10 @@ mod tests {
 
     #[test]
     fn print_config_flag_is_parsed() {
-        assert_eq!(parse_and_build(&["--print-config"]).print_config, Some(true));
+        assert_eq!(
+            parse_and_build(&["--print-config"]).print_config,
+            Some(true)
+        );
         assert_eq!(
             parse_and_build(&["--print-config=false"]).print_config,
             Some(false)
@@ -947,11 +950,17 @@ mod tests {
             Some("config:new")
         );
         assert_eq!(
-            config.migrate_presets.get("config:removed").map(String::as_str),
+            config
+                .migrate_presets
+                .get("config:removed")
+                .map(String::as_str),
             Some("")
         );
         assert_eq!(
-            config.custom_env_variables.get("EXAMPLE").map(String::as_str),
+            config
+                .custom_env_variables
+                .get("EXAMPLE")
+                .map(String::as_str),
             Some("value")
         );
         assert_eq!(
@@ -1024,9 +1033,18 @@ mod tests {
         assert_eq!(config.dependency_dashboard, Some(true));
         assert_eq!(config.dependency_dashboard_approval, Some(true));
         assert_eq!(config.dependency_dashboard_autoclose, Some(true));
-        assert_eq!(config.dependency_dashboard_title.as_deref(), Some("Updates"));
-        assert_eq!(config.dependency_dashboard_header.as_deref(), Some("Header"));
-        assert_eq!(config.dependency_dashboard_footer.as_deref(), Some("Footer"));
+        assert_eq!(
+            config.dependency_dashboard_title.as_deref(),
+            Some("Updates")
+        );
+        assert_eq!(
+            config.dependency_dashboard_header.as_deref(),
+            Some("Header")
+        );
+        assert_eq!(
+            config.dependency_dashboard_footer.as_deref(),
+            Some("Footer")
+        );
         assert_eq!(
             config.dependency_dashboard_labels,
             Some(vec!["renovate".to_owned(), "dependencies".to_owned()])
@@ -1136,9 +1154,7 @@ mod tests {
 
     #[test]
     fn onboarding_config_json5_object_is_parsed() {
-        let config = parse_and_build(&[
-            r#"--onboarding-config={extends:['config:recommended'],}"#,
-        ]);
+        let config = parse_and_build(&[r#"--onboarding-config={extends:['config:recommended'],}"#]);
         assert_eq!(config.onboarding_config["extends"][0], "config:recommended");
     }
 

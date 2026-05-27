@@ -104,9 +104,7 @@ pub fn parse_releases(html: &str) -> Vec<RubyRelease> {
 
         // Second td: release date in YYYY-MM-DD format.
         let date_str = tds[1].trim();
-        let release_timestamp = if date_str.len() == 10
-            && date_str.chars().nth(4) == Some('-')
-        {
+        let release_timestamp = if date_str.len() == 10 && date_str.chars().nth(4) == Some('-') {
             Some(format!("{}T00:00:00.000Z", date_str))
         } else {
             None
@@ -196,9 +194,21 @@ mod tests {
             );
         }
         // Spot-check: 2.5.3 should be present.
-        let r = result.releases.iter().find(|r| r.version == "2.5.3").unwrap();
-        assert_eq!(r.release_timestamp.as_deref(), Some("2018-10-18T00:00:00.000Z"));
-        assert!(r.changelog_url.as_deref().unwrap().contains("ruby-lang.org"));
+        let r = result
+            .releases
+            .iter()
+            .find(|r| r.version == "2.5.3")
+            .unwrap();
+        assert_eq!(
+            r.release_timestamp.as_deref(),
+            Some("2018-10-18T00:00:00.000Z")
+        );
+        assert!(
+            r.changelog_url
+                .as_deref()
+                .unwrap()
+                .contains("ruby-lang.org")
+        );
     }
 
     // Ported: "returns null for empty result" — ruby-version/index.spec.ts line 22

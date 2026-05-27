@@ -78,7 +78,9 @@ pub fn extract_file(content: &str, package_file: &str) -> Option<BatectFileExtra
                 let rest = trimmed.strip_prefix("image:").unwrap_or("").trim();
                 let value = rest.trim_matches('"').trim_matches('\'');
                 if !value.is_empty() && !value.starts_with('$') {
-                    result.deps.push(BatectDep::Image(classify_image_ref(value)));
+                    result
+                        .deps
+                        .push(BatectDep::Image(classify_image_ref(value)));
                 }
             }
             continue;
@@ -100,8 +102,9 @@ pub fn extract_file(content: &str, package_file: &str) -> Option<BatectFileExtra
                 if after_dash.is_empty() {
                     // Multi-line block item — type/repo/ref/path will follow.
                 } else if after_dash.starts_with("type:") {
-                    cur_type =
-                        Some(parse_scalar_value(after_dash.strip_prefix("type:").unwrap_or("")));
+                    cur_type = Some(parse_scalar_value(
+                        after_dash.strip_prefix("type:").unwrap_or(""),
+                    ));
                 } else {
                     // Bare string path.
                     let path = after_dash.trim_matches('"').trim_matches('\'');
@@ -362,7 +365,9 @@ include:
             .deps
             .iter()
             .filter_map(|d| match d {
-                BatectDep::GitBundle { repo, ref_value } => Some((repo.as_str(), ref_value.as_str())),
+                BatectDep::GitBundle { repo, ref_value } => {
+                    Some((repo.as_str(), ref_value.as_str()))
+                }
                 _ => None,
             })
             .collect();
@@ -374,8 +379,20 @@ include:
         // "include.yml", "subdir/file.yml", "another-include.yml"
         // type:file with repo is invalid (skipped), type:git is not a file include
         assert_eq!(result.referenced_files.len(), 3);
-        assert!(result.referenced_files.contains(&"valid/include.yml".to_owned()));
-        assert!(result.referenced_files.contains(&"valid/subdir/file.yml".to_owned()));
-        assert!(result.referenced_files.contains(&"valid/another-include.yml".to_owned()));
+        assert!(
+            result
+                .referenced_files
+                .contains(&"valid/include.yml".to_owned())
+        );
+        assert!(
+            result
+                .referenced_files
+                .contains(&"valid/subdir/file.yml".to_owned())
+        );
+        assert!(
+            result
+                .referenced_files
+                .contains(&"valid/another-include.yml".to_owned())
+        );
     }
 }

@@ -194,31 +194,41 @@ mod tests {
         // 0.161.0 returns invalid schema
         Mock::given(method("GET"))
             .and(path("/v2/modules/std/0.161.0"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({ "foo": "bar" })))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({ "foo": "bar" })),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            &server.uri(),
-            "https://deno.land/std",
-            &http,
-        )
-        .await
-        .unwrap()
-        .unwrap();
+        let result = fetch_releases(&server.uri(), "https://deno.land/std", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 3);
 
         let r163 = &result.releases[0];
         assert_eq!(r163.version, "0.163.0");
-        assert_eq!(r163.source_url.as_deref(), Some("https://github.com/denoland/deno_std"));
-        assert_eq!(r163.release_timestamp.as_deref(), Some("2022-11-08T21:10:21.592Z"));
+        assert_eq!(
+            r163.source_url.as_deref(),
+            Some("https://github.com/denoland/deno_std")
+        );
+        assert_eq!(
+            r163.release_timestamp.as_deref(),
+            Some("2022-11-08T21:10:21.592Z")
+        );
 
         let r162 = &result.releases[1];
         assert_eq!(r162.version, "0.162.0");
-        assert_eq!(r162.source_url.as_deref(), Some("https://github.com/denoland/deno_std"));
-        assert_eq!(r162.release_timestamp.as_deref(), Some("2022-10-20T12:10:21.592Z"));
+        assert_eq!(
+            r162.source_url.as_deref(),
+            Some("https://github.com/denoland/deno_std")
+        );
+        assert_eq!(
+            r162.release_timestamp.as_deref(),
+            Some("2022-10-20T12:10:21.592Z")
+        );
 
         // 0.161.0 has no details but version is still present
         let r161 = &result.releases[2];
@@ -226,7 +236,10 @@ mod tests {
         assert_eq!(r161.source_url, None);
         assert_eq!(r161.release_timestamp, None);
 
-        assert_eq!(result.tags.get("popularity").map(|s| s.as_str()), Some("top_5_percent"));
+        assert_eq!(
+            result.tags.get("popularity").map(|s| s.as_str()),
+            Some("top_5_percent")
+        );
     }
 
     // Ported: "throws error if module endpoint fails" — deno/index.spec.ts line 75
@@ -240,12 +253,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            &server.uri(),
-            "https://deno.land/std",
-            &http,
-        )
-        .await;
+        let result = fetch_releases(&server.uri(), "https://deno.land/std", &http).await;
         assert!(result.is_err(), "404 on module endpoint should throw");
     }
 
@@ -283,12 +291,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            &server.uri(),
-            "https://deno.land/std",
-            &http,
-        )
-        .await;
+        let result = fetch_releases(&server.uri(), "https://deno.land/std", &http).await;
         assert!(result.is_err(), "503 on version endpoint should throw");
     }
 
@@ -296,13 +299,9 @@ mod tests {
     #[tokio::test]
     async fn returns_null_for_non_deno_land_package() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            DEFAULT_REGISTRY_URL,
-            "https://myexample.com/std",
-            &http,
-        )
-        .await
-        .unwrap();
+        let result = fetch_releases(DEFAULT_REGISTRY_URL, "https://myexample.com/std", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -349,23 +348,25 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            &server.uri(),
-            "https://deno.land/x/postgres",
-            &http,
-        )
-        .await
-        .unwrap()
-        .unwrap();
+        let result = fetch_releases(&server.uri(), "https://deno.land/x/postgres", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "v0.16.0");
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2022-06-01T20:29:52.413Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2022-06-01T20:29:52.413Z")
+        );
         // gitlab type → no sourceUrl
         assert_eq!(result.releases[0].source_url, None);
 
         assert_eq!(result.releases[1].version, "v0.16.1");
-        assert_eq!(result.releases[1].release_timestamp.as_deref(), Some("2022-06-07T22:43:44.098Z"));
+        assert_eq!(
+            result.releases[1].release_timestamp.as_deref(),
+            Some("2022-06-07T22:43:44.098Z")
+        );
     }
 
     // Ported: "returns releases of a alternative registry server" — deno/index.spec.ts line 184
@@ -411,17 +412,19 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(
-            &server.uri(),
-            "https://deno.land/x/postgres",
-            &http,
-        )
-        .await
-        .unwrap()
-        .unwrap();
+        let result = fetch_releases(&server.uri(), "https://deno.land/x/postgres", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 2);
-        assert_eq!(result.releases[0].release_timestamp.as_deref(), Some("2022-06-01T20:29:52.413Z"));
-        assert_eq!(result.releases[1].release_timestamp.as_deref(), Some("2022-06-07T22:43:44.098Z"));
+        assert_eq!(
+            result.releases[0].release_timestamp.as_deref(),
+            Some("2022-06-01T20:29:52.413Z")
+        );
+        assert_eq!(
+            result.releases[1].release_timestamp.as_deref(),
+            Some("2022-06-07T22:43:44.098Z")
+        );
     }
 }

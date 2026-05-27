@@ -22,16 +22,14 @@ fn get_options(input: &str) -> ConanOptions {
 
 fn clean_version(input: &str) -> String {
     static RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r#"include_prerelease=|include_prerelease|loose=|,|\[|\]|"|True|False"#)
-            .unwrap()
+        Regex::new(r#"include_prerelease=|include_prerelease|loose=|,|\[|\]|"|True|False"#).unwrap()
     });
     RE.replace_all(input, "").trim().to_string()
 }
 
 fn coerce_version(s: &str) -> Option<Version> {
-    static RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r"(\d+)(?:\.(\d+)(?:\.(\d+))?)?").unwrap()
-    });
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(\d+)(?:\.(\d+)(?:\.(\d+))?)?").unwrap());
     let caps = RE.captures(s)?;
     let major: u64 = caps[1].parse().ok()?;
     let minor: u64 = caps
@@ -46,7 +44,11 @@ fn coerce_version(s: &str) -> Option<Version> {
 }
 
 fn parse_version_loose(s: &str) -> Option<Version> {
-    let s = s.trim().trim_start_matches('v').trim_start_matches('=').trim();
+    let s = s
+        .trim()
+        .trim_start_matches('v')
+        .trim_start_matches('=')
+        .trim();
     Version::parse(s).ok().or_else(|| {
         // normalize: strip leading zeros, add hyphen before alpha suffix
         let normalized = normalize_version_str(s);
@@ -82,10 +84,8 @@ fn normalize_version_str(s: &str) -> String {
 }
 
 fn normalize_range_loose(s: &str) -> String {
-    static RE_LEADING: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r"\b0+([1-9]\d*)").unwrap());
-    static RE_PREREL: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r"(\d)([a-zA-Z])").unwrap());
+    static RE_LEADING: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\b0+([1-9]\d*)").unwrap());
+    static RE_PREREL: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\d)([a-zA-Z])").unwrap());
     let s = RE_LEADING.replace_all(s, "$1");
     let s = RE_PREREL.replace_all(&s, "$1-$2");
     s.to_string()
@@ -93,17 +93,15 @@ fn normalize_range_loose(s: &str) -> String {
 
 // Rust semver requires comma-separated AND comparators; convert "1.0 <2.0" → "1.0,<2.0".
 fn normalize_and_range(s: &str) -> String {
-    static RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r"(\d)\s+(>=?|<=?|~>|~=|[~^=])").unwrap()
-    });
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(\d)\s+(>=?|<=?|~>|~=|[~^=])").unwrap());
     RE.replace_all(s, "$1,$2").to_string()
 }
 
 // Returns true for versions like "2.0.0b1", "1.0a2" where prerelease is embedded
 // without a hyphen separator (Python-style).
 fn has_inline_prerelease(s: &str) -> bool {
-    static RE: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r"^\d+(\.\d+)*[a-zA-Z]").unwrap());
+    static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+(\.\d+)*[a-zA-Z]").unwrap());
     RE.is_match(s)
 }
 
@@ -132,9 +130,8 @@ fn split_and_parts(range: &str) -> Vec<String> {
 
 // Convert npm-style hyphen ranges "1.0.0 - 2.0.0" → ">=1.0.0 <=2.0.0".
 fn normalize_hyphen_range(s: &str) -> String {
-    static RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r"^([^\s]+)\s+-\s+([^\s]+)$").unwrap()
-    });
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^([^\s]+)\s+-\s+([^\s]+)$").unwrap());
     if let Some(caps) = RE.captures(s.trim()) {
         format!(">={} <={}", &caps[1], &caps[2])
     } else {
@@ -156,7 +153,11 @@ fn preprocess_single_range(s: &str) -> String {
     let s = s.replace("~=", "~");
     // Plain dotted version (no operator, no wildcard, no spaces, e.g. "3.17.2") → exact match.
     // Rust semver treats bare versions as caret ranges; npm/conan treats them as exact.
-    let s = if s.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false)
+    let s = if s
+        .chars()
+        .next()
+        .map(|c| c.is_ascii_digit())
+        .unwrap_or(false)
         && s.contains('.')
         && !s.contains(' ')
         && !s.contains('*')
@@ -211,9 +212,13 @@ fn try_satisfies_single(version_str: &str, range: &str, opts: &ConanOptions) -> 
             .unwrap_or(true);
     }
 
-    let v = match parse_version_loose(version_str)
-        .or_else(|| if opts.loose { coerce_version(version_str) } else { None })
-    {
+    let v = match parse_version_loose(version_str).or_else(|| {
+        if opts.loose {
+            coerce_version(version_str)
+        } else {
+            None
+        }
+    }) {
         Some(v) => v,
         None => return false,
     };
@@ -340,14 +345,12 @@ fn is_valid_range_part(s: &str, opts: &ConanOptions) -> bool {
     // For strict mode: reject leading zeros and no-hyphen prerelease in ranges
     if !opts.loose {
         // Check for leading zeros in version numbers
-        static RE_LEADING: LazyLock<Regex> =
-            LazyLock::new(|| Regex::new(r"\b0+[1-9]").unwrap());
+        static RE_LEADING: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\b0+[1-9]").unwrap());
         if RE_LEADING.is_match(s) {
             return false;
         }
         // Check for prerelease without hyphen (e.g. ~1.2.3beta)
-        static RE_NOHYPHEN: LazyLock<Regex> =
-            LazyLock::new(|| Regex::new(r"\d[a-zA-Z]").unwrap());
+        static RE_NOHYPHEN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d[a-zA-Z]").unwrap());
         if RE_NOHYPHEN.is_match(s) {
             return false;
         }
@@ -610,10 +613,7 @@ pub fn equals(version: &str, other: &str) -> bool {
 
     if let (Some(a), Some(b)) = (v1, v2) {
         // Compare ignoring build metadata
-        a.major == b.major
-            && a.minor == b.minor
-            && a.patch == b.patch
-            && a.pre == b.pre
+        a.major == b.major && a.minor == b.minor && a.patch == b.patch && a.pre == b.pre
     } else {
         loose::equals(&cv, &co) || try_satisfies_range(&cv, &co, &opts)
     }
@@ -757,7 +757,8 @@ fn inc_patch_str(version: &str) -> Option<String> {
 fn replace_range(clean_range: &str, new_version: &str) -> Option<String> {
     let cv = clean_range.trim();
     let nv = new_version.trim_start_matches('v');
-    let new_v = Version::parse(nv).ok()
+    let new_v = Version::parse(nv)
+        .ok()
         .or_else(|| parse_version_loose(nv))
         .or_else(|| coerce_version(nv));
     let new_major = new_v.as_ref().map(|v| v.major).unwrap_or(0);
@@ -766,7 +767,12 @@ fn replace_range(clean_range: &str, new_version: &str) -> Option<String> {
     let suffix = new_v
         .as_ref()
         .filter(|v| !v.pre.is_empty())
-        .map(|v| format!("-{}", v.pre.as_str().split('.').next().unwrap_or(v.pre.as_str())))
+        .map(|v| {
+            format!(
+                "-{}",
+                v.pre.as_str().split('.').next().unwrap_or(v.pre.as_str())
+            )
+        })
         .unwrap_or_default();
 
     // ~> operator
@@ -886,7 +892,12 @@ fn bump_range_single(clean_range: &str, new_version: &str, _opts: &ConanOptions)
     let suffix = new_v
         .as_ref()
         .filter(|v| !v.pre.is_empty())
-        .map(|v| format!("-{}", v.pre.as_str().split('.').next().unwrap_or(v.pre.as_str())))
+        .map(|v| {
+            format!(
+                "-{}",
+                v.pre.as_str().split('.').next().unwrap_or(v.pre.as_str())
+            )
+        })
         .unwrap_or_default();
 
     // Wildcard ranges: return unchanged
@@ -903,7 +914,10 @@ fn bump_range_single(clean_range: &str, new_version: &str, _opts: &ConanOptions)
         } else if dots == 1 {
             format!("~={new_major}.{new_minor}")
         } else {
-            format!("~={new_major}.{new_minor}.{}", new_v.as_ref().map(|v| v.patch).unwrap_or(0))
+            format!(
+                "~={new_major}.{new_minor}.{}",
+                new_v.as_ref().map(|v| v.patch).unwrap_or(0)
+            )
         });
     }
 
@@ -1081,7 +1095,8 @@ fn widen_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opt
 
     // If multiple AND parts and contains " - ": hyphen range
     if cv.contains(" - ") {
-        let replaced_last = replaced_whole.unwrap_or_else(|| new_version.trim_start_matches('v').to_string());
+        let replaced_last =
+            replaced_whole.unwrap_or_else(|| new_version.trim_start_matches('v').to_string());
         // Split on ' - ', pop last, rejoin and append
         let segments: Vec<&str> = cv.split(" - ").collect();
         if segments.len() >= 2 {
@@ -1143,7 +1158,6 @@ pub fn get_new_value(
     })
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1184,7 +1198,10 @@ mod tests {
             ("https://github.com/renovatebot/renovate.git", false),
             ("[>=01.02.03]", true),
             ("[~1.02.03beta]", true),
-            (r#"[">1.0.0 <1.0.2", loose=False, include_prerelease=True]"#, true),
+            (
+                r#"[">1.0.0 <1.0.2", loose=False, include_prerelease=True]"#,
+                true,
+            ),
             ("[1.0.0 - 2.0.0, loose=False]", true),
             ("[1.0.0, loose=False]", true),
             ("[>=*, loose=False]", true),
@@ -1313,16 +1330,56 @@ mod tests {
         // Sample of the test cases (the spec has ~200 rows, we test a representative subset)
         let cases: Vec<(&str, &str, bool)> = vec![
             ("[>1.1 <2.0]", "1.2.3", true),
-            (r#"["~1.2.3", loose=False, include_prerelease=True]"#, "1.2.3-pre.1", false),
-            (r#"["1.0.0 - 2.0.0", loose=False, include_prerelease=False]"#, "1.2.3", true),
-            (r#"["1.0.0", loose=False, include_prerelease=False]"#, "1.0.0", true),
-            (r#"[">=*", loose=False, include_prerelease=False]"#, "0.2.4", true),
-            (r#"["", loose=False, include_prerelease=False]"#, "1.0.0", true),
-            (r#"["*", loose=False, include_prerelease=False]"#, "1.2.3", true),
-            (r#"[">=1.0.0", loose=False, include_prerelease=False]"#, "1.0.0", true),
-            (r#"[">=1.0.0", loose=False, include_prerelease=False]"#, "1.0.1", true),
-            (r#"[">1.0.0", loose=False, include_prerelease=True]"#, "1.0.1-pre.1", true),
-            (r#"["<=2.0.0", loose=False, include_prerelease=False]"#, "3.0.0", true),
+            (
+                r#"["~1.2.3", loose=False, include_prerelease=True]"#,
+                "1.2.3-pre.1",
+                false,
+            ),
+            (
+                r#"["1.0.0 - 2.0.0", loose=False, include_prerelease=False]"#,
+                "1.2.3",
+                true,
+            ),
+            (
+                r#"["1.0.0", loose=False, include_prerelease=False]"#,
+                "1.0.0",
+                true,
+            ),
+            (
+                r#"[">=*", loose=False, include_prerelease=False]"#,
+                "0.2.4",
+                true,
+            ),
+            (
+                r#"["", loose=False, include_prerelease=False]"#,
+                "1.0.0",
+                true,
+            ),
+            (
+                r#"["*", loose=False, include_prerelease=False]"#,
+                "1.2.3",
+                true,
+            ),
+            (
+                r#"[">=1.0.0", loose=False, include_prerelease=False]"#,
+                "1.0.0",
+                true,
+            ),
+            (
+                r#"[">=1.0.0", loose=False, include_prerelease=False]"#,
+                "1.0.1",
+                true,
+            ),
+            (
+                r#"[">1.0.0", loose=False, include_prerelease=True]"#,
+                "1.0.1-pre.1",
+                true,
+            ),
+            (
+                r#"["<=2.0.0", loose=False, include_prerelease=False]"#,
+                "3.0.0",
+                true,
+            ),
             (r#"["1.0.0 - 2.0.0", loose=False]"#, "2.2.3", true),
             (r#"[">=1.0.0", loose=False]"#, "0.0.0", false),
             (r#"[">=1.0.0", loose=False]"#, "0.0.1", false),
@@ -1353,18 +1410,62 @@ mod tests {
     fn matches_matches_renovate_conan_index_spec() {
         let cases: Vec<(&str, &str, bool)> = vec![
             ("[>1.1 <2.0]", "1.2.3", true),
-            (r#"["~1.2.3", loose=False, include_prerelease=True]"#, "1.2.3-pre.1", true),
-            (r#"["1.0.0 - 2.0.0", loose=False, include_prerelease=False]"#, "1.2.3", true),
-            (r#"["*", loose=False, include_prerelease=False]"#, "1.2.3", true),
-            (r#"[">=1.0.0", loose=False, include_prerelease=False]"#, "1.0.0", true),
-            (r#"[">1.0.0", loose=False, include_prerelease=True]"#, "1.0.1-pre.1", true),
-            (r#"[">=0.2.3 || <0.0.1", loose=False, include_prerelease=False]"#, "0.0.0", true),
-            (r#"[">=0.2.3 || <0.0.1", loose=False, include_prerelease=False]"#, "0.2.3", true),
-            (r#"["^1.2.3-alpha", loose=False, include_prerelease=False]"#, "1.2.3-pre", true),
-            (r#"["^1.2.3-alpha", loose=False, include_prerelease=True]"#, "1.2.4-pre", true),
+            (
+                r#"["~1.2.3", loose=False, include_prerelease=True]"#,
+                "1.2.3-pre.1",
+                true,
+            ),
+            (
+                r#"["1.0.0 - 2.0.0", loose=False, include_prerelease=False]"#,
+                "1.2.3",
+                true,
+            ),
+            (
+                r#"["*", loose=False, include_prerelease=False]"#,
+                "1.2.3",
+                true,
+            ),
+            (
+                r#"[">=1.0.0", loose=False, include_prerelease=False]"#,
+                "1.0.0",
+                true,
+            ),
+            (
+                r#"[">1.0.0", loose=False, include_prerelease=True]"#,
+                "1.0.1-pre.1",
+                true,
+            ),
+            (
+                r#"[">=0.2.3 || <0.0.1", loose=False, include_prerelease=False]"#,
+                "0.0.0",
+                true,
+            ),
+            (
+                r#"[">=0.2.3 || <0.0.1", loose=False, include_prerelease=False]"#,
+                "0.2.3",
+                true,
+            ),
+            (
+                r#"["^1.2.3-alpha", loose=False, include_prerelease=False]"#,
+                "1.2.3-pre",
+                true,
+            ),
+            (
+                r#"["^1.2.3-alpha", loose=False, include_prerelease=True]"#,
+                "1.2.4-pre",
+                true,
+            ),
             ("[>1.1.0 <2.0.0]", "1.2.3-dev.1+abc", false),
-            (r#"[">1.0.0 <1.0.2", loose=False, include_prerelease=True]"#, "1.0.2-beta", false),
-            (r#"[">1.1.0 <2.0.0", include_prerelease=False]"#, "1.2.3-dev.1+abc", false),
+            (
+                r#"[">1.0.0 <1.0.2", loose=False, include_prerelease=True]"#,
+                "1.0.2-beta",
+                false,
+            ),
+            (
+                r#"[">1.1.0 <2.0.0", include_prerelease=False]"#,
+                "1.2.3-dev.1+abc",
+                false,
+            ),
             (r#"["1.0.0 - 2.0.0", loose=False]"#, "2.2.3", false),
             (r#"["^1.2.3+build", loose=False]"#, "2.0.0", false),
             (r#"["^1.2.3+build", loose=False]"#, "1.2.0", false),
@@ -1404,11 +1505,29 @@ mod tests {
         let cases: Vec<(&str, &str, &str, &str, Option<&str>)> = vec![
             ("[<=1.2.3]", "widen", "1.0.0", "1.2.3", Some("[<=1.2.3]")),
             ("[<1.2.3]", "widen", "1.5.5", "1.5.6", Some("[<1.5.7]")),
-            ("[>1.2.7 >3.0.0 5.0]", "widen", "0.1.21", "0.1.24", Some("[>1.2.7 >3.0.0 5.0 || 0.1.24]")),
+            (
+                "[>1.2.7 >3.0.0 5.0]",
+                "widen",
+                "0.1.21",
+                "0.1.24",
+                Some("[>1.2.7 >3.0.0 5.0 || 0.1.24]"),
+            ),
             ("[>=1.2.7 >3.0.0 >5.0]", "widen", "0.1.21", "0.1.24", None),
-            ("[>=1.2.7]", "widen", "0.1.21", "0.1.24", Some("[>=1.2.7 || 0.1.24]")),
+            (
+                "[>=1.2.7]",
+                "widen",
+                "0.1.21",
+                "0.1.24",
+                Some("[>=1.2.7 || 0.1.24]"),
+            ),
             ("[<= 1.2.3]", "widen", "1.0.0", "1.2.4", Some("[<= 1.2.4]")),
-            ("[4.5.5 - 1.2.3 - 2.0]", "widen", "1.0.0", "1.4.8", Some("[4.5.5 - 1.2.3 - 1.4.8]")),
+            (
+                "[4.5.5 - 1.2.3 - 2.0]",
+                "widen",
+                "1.0.0",
+                "1.4.8",
+                Some("[4.5.5 - 1.2.3 - 1.4.8]"),
+            ),
             ("[*]", "widen", "1.0.0", "2.0.0", Some("[*]")),
             ("[>=*]", "widen", "1.0.0", "2.0.0", Some("[>=*]")),
             ("[x]", "widen", "1.0.0", "2.0.0", Some("[x]")),
@@ -1420,15 +1539,45 @@ mod tests {
             ("[1.0.x]", "replace", "1.0.0", "1.1.0", Some("[1.1.x]")),
             ("[1.x]", "replace", "1.0.0", "2.1.0", Some("[2.x]")),
             ("[~0.6]", "replace", "0.6.8", "0.7.0", Some("[~0.7.0]")),
-            ("[~0.6.1]", "replace", "0.7.0", "0.7.0-rc.2", Some("[~0.7.0-rc]")),
-            ("[~>0.6.1]", "replace", "0.7.0", "0.7.0-rc.2", Some("[~> 0.7.0]")),
+            (
+                "[~0.6.1]",
+                "replace",
+                "0.7.0",
+                "0.7.0-rc.2",
+                Some("[~0.7.0-rc]"),
+            ),
+            (
+                "[~>0.6.1]",
+                "replace",
+                "0.7.0",
+                "0.7.0-rc.2",
+                Some("[~> 0.7.0]"),
+            ),
             ("[<=1.2]", "replace", "1.0.0", "1.2.3", Some("[<=1.2]")),
             ("[<=1]", "replace", "1.0.0", "1.2.3", Some("[<=1]")),
-            ("[<1.6.11]", "replace", "0.6.14", "1.6.14", Some("[<1.6.15]")),
+            (
+                "[<1.6.11]",
+                "replace",
+                "0.6.14",
+                "1.6.14",
+                Some("[<1.6.15]"),
+            ),
             ("[0.2.0]", "replace", "0.6.14", "0.3.0", Some("[0.3.0]")),
             ("[< 1]", "replace", "1.0.0", "1.0.1", Some("[< 2]")),
-            ("[<3.6 loose=False, include_prerelease=True]", "replace", "0.1", "3.7.0", Some("[<3.8 loose=False, include_prerelease=True]")),
-            ("[<1.8 loose=False]", "replace", "0.2", "1.17.1", Some("[<1.18 loose=False]")),
+            (
+                "[<3.6 loose=False, include_prerelease=True]",
+                "replace",
+                "0.1",
+                "3.7.0",
+                Some("[<3.8 loose=False, include_prerelease=True]"),
+            ),
+            (
+                "[<1.8 loose=False]",
+                "replace",
+                "0.2",
+                "1.17.1",
+                Some("[<1.18 loose=False]"),
+            ),
             ("[=8.4.0]", "replace", "0.6.14", "8.5.0", Some("[=8.5.0]")),
             ("[>8.0.0]", "replace", "0.6.14", "8.5.0", Some("[>9.0.0]")),
             ("[>8]", "replace", "0.6.14", "8.5.0", Some("[>8]")),
@@ -1437,28 +1586,106 @@ mod tests {
             ("[>=*]", "replace", "1.0.0", "2.0.0", Some("[>=*]")),
             ("[x]", "replace", "1.0.0", "2.0.0", Some("[x]")),
             ("[=8.4.0]", "bump", "0.6.14", "8.5.0", Some("[=8.5.0]")),
-            ("[~8.4.0, loose=False]", "bump", "0.6.14", "8.5.0", Some("[~8.5.0, loose=False]")),
-            ("[~0.7.15, loose=False, include_prerelease=True]", "bump", "0.6.14", "0.9.7", Some("[~0.9.7, loose=False, include_prerelease=True]")),
-            ("[~=1.0 include_prerelease=True]", "bump", "0.2", "1.21.1", Some("[~=1.21 include_prerelease=True]")),
+            (
+                "[~8.4.0, loose=False]",
+                "bump",
+                "0.6.14",
+                "8.5.0",
+                Some("[~8.5.0, loose=False]"),
+            ),
+            (
+                "[~0.7.15, loose=False, include_prerelease=True]",
+                "bump",
+                "0.6.14",
+                "0.9.7",
+                Some("[~0.9.7, loose=False, include_prerelease=True]"),
+            ),
+            (
+                "[~=1.0 include_prerelease=True]",
+                "bump",
+                "0.2",
+                "1.21.1",
+                Some("[~=1.21 include_prerelease=True]"),
+            ),
             ("[~=1.18]", "bump", "0.6.14", "1.20.0", Some("[~=1.20]")),
             ("[0.2.0]", "bump", "0.6.14", "0.3.0", Some("[0.3.0]")),
             ("[~1]", "bump", "2", "1.1.7", Some("[~1]")),
             ("[~1]", "bump", "1.0.0", "2.1.7", Some("[~2]")),
             ("[~1.0]", "bump", "1.0.0", "1.1.7", Some("[~1.1]")),
             ("[~1.0.0]", "bump", "1.0.0", "1.1.7", Some("[~1.1.7]")),
-            ("[~1.0]", "bump", "1.0.0", "1.0.7-prerelease.1", Some("[~1.0.7-prerelease.1]")),
-            ("[~1.0.7-prerelease.1]", "bump", "1.0.0", "1.0.7-prerelease.1", Some("[~1.0.7-prerelease.1]")),
+            (
+                "[~1.0]",
+                "bump",
+                "1.0.0",
+                "1.0.7-prerelease.1",
+                Some("[~1.0.7-prerelease.1]"),
+            ),
+            (
+                "[~1.0.7-prerelease.1]",
+                "bump",
+                "1.0.0",
+                "1.0.7-prerelease.1",
+                Some("[~1.0.7-prerelease.1]"),
+            ),
             ("[5]", "bump", "5.0.0", "6.1.7", Some("[6]")),
             ("[>=1.0.0]", "bump", "1.0.0", "1.1.0", Some("[>=1.1.0]")),
             ("[<1.0.0]", "bump", "1.0.0", "1.1.0", Some("[<1.0.0]")),
-            ("[>1.1 <3.0, include_prerelease=True]", "bump", "0.6.14", "1.1.1l", Some("[>1.1 <3.0, include_prerelease=True]")),
-            ("[>= 0.0.1 < 1]", "bump", "1.0.0", "1.0.1", Some("[>= 1.0.1 < 2]")),
-            ("[>3.0 <3.6 loose=False, include_prerelease=True]", "bump", "0.1", "3.7.0", Some("[>3.7 <3.8 loose=False, include_prerelease=True]")),
-            ("[>1.0 <1.8 loose=False]", "bump", "0.2", "1.17.1", Some("[>1.17 <1.18 loose=False]")),
-            ("[>0.6.7 <1.6.11]", "bump", "0.6.14", "1.6.14", Some("[>1.6.14 <1.6.15]")),
-            ("[3.17.2 || 3.15.7]", "bump", "0.6.14", "3.21.3", Some("[3.17.2 || 3.15.7 || 3.21.3]")),
-            ("[>3.17.2 || 3.15.7]", "bump", "0.6.14", "3.21.3", Some("[>3.21.3 || 3.15.7]")),
-            ("[1.69.0 || >=1.71.0 <1.76.0]", "bump", "0.6.14", "1.76.0", Some("[1.69.0 || >=1.76.0 <1.76.1]")),
+            (
+                "[>1.1 <3.0, include_prerelease=True]",
+                "bump",
+                "0.6.14",
+                "1.1.1l",
+                Some("[>1.1 <3.0, include_prerelease=True]"),
+            ),
+            (
+                "[>= 0.0.1 < 1]",
+                "bump",
+                "1.0.0",
+                "1.0.1",
+                Some("[>= 1.0.1 < 2]"),
+            ),
+            (
+                "[>3.0 <3.6 loose=False, include_prerelease=True]",
+                "bump",
+                "0.1",
+                "3.7.0",
+                Some("[>3.7 <3.8 loose=False, include_prerelease=True]"),
+            ),
+            (
+                "[>1.0 <1.8 loose=False]",
+                "bump",
+                "0.2",
+                "1.17.1",
+                Some("[>1.17 <1.18 loose=False]"),
+            ),
+            (
+                "[>0.6.7 <1.6.11]",
+                "bump",
+                "0.6.14",
+                "1.6.14",
+                Some("[>1.6.14 <1.6.15]"),
+            ),
+            (
+                "[3.17.2 || 3.15.7]",
+                "bump",
+                "0.6.14",
+                "3.21.3",
+                Some("[3.17.2 || 3.15.7 || 3.21.3]"),
+            ),
+            (
+                "[>3.17.2 || 3.15.7]",
+                "bump",
+                "0.6.14",
+                "3.21.3",
+                Some("[>3.21.3 || 3.15.7]"),
+            ),
+            (
+                "[1.69.0 || >=1.71.0 <1.76.0]",
+                "bump",
+                "0.6.14",
+                "1.76.0",
+                Some("[1.69.0 || >=1.76.0 <1.76.1]"),
+            ),
             ("[*]", "bump", "1.0.0", "2.0.0", Some("[*]")),
             ("[>=*]", "bump", "1.0.0", "2.0.0", Some("[>=*]")),
             ("[x]", "bump", "1.0.0", "2.0.0", Some("[x]")),
@@ -1480,26 +1707,85 @@ mod tests {
             vs.to_vec()
         }
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
-            (v(&["1.2.4", "1.2.3", "1.2.5-beta"]), r#"["~1.2.3", loose=False, include_prerelease=True]"#, Some("1.2.5-beta")),
-            (v(&["1.2.4", "1.2.3", "1.2.5-beta"]), r#"["~1.2.3", loose=False, include_prerelease=False]"#, Some("1.2.4")),
-            (v(&["1.2.3", "1.2.4"]), r#"["1.2", loose=False, include_prerelease=False]"#, Some("1.2.4")),
-            (v(&["1.2.4", "1.2.3"]), r#"["1.2", loose=False, include_prerelease=False]"#, Some("1.2.4")),
-            (v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6"]), r#"["~1.2.3", loose=False, include_prerelease=False]"#, Some("1.2.6")),
-            (v(&["1.0.1-beta"]), r#"["1.x", loose=False, include_prerelease=False]"#, None),
-            (v(&["1.0.1-beta"]), r#"["1.x", loose=False, include_prerelease=True]"#, Some("1.0.1-beta")),
-            (v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6", "2.0.1"]), r#"["~1.2.3", loose=False]"#, Some("1.2.6")),
-            (v(&["1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.0.0", "2.1.0"]), "[~2.0.0]", Some("2.0.0")),
-            (v(&["1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.1.0"]), r#"["~2.0.0", loose=False]"#, None),
-            (v(&["1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.0.1", "2.1.0"]), r#"["~2.0.0", loose=False]"#, Some("2.0.1")),
-            (v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6-pre.1", "2.0.1"]), r#"["~1.2.3", loose=False, include_prerelease=True]"#, Some("1.2.6-pre.1")),
-            (v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6-pre.1", "2.0.1"]), r#"["~1.2.3", loose=False, include_prerelease=False]"#, Some("1.2.5")),
-            (v(&["1.1.1", "1.2.0-pre", "1.2.0", "1.1.1-111", "1.1.1-21"]), "[<=1.2]", Some("1.2.0")),
+            (
+                v(&["1.2.4", "1.2.3", "1.2.5-beta"]),
+                r#"["~1.2.3", loose=False, include_prerelease=True]"#,
+                Some("1.2.5-beta"),
+            ),
+            (
+                v(&["1.2.4", "1.2.3", "1.2.5-beta"]),
+                r#"["~1.2.3", loose=False, include_prerelease=False]"#,
+                Some("1.2.4"),
+            ),
+            (
+                v(&["1.2.3", "1.2.4"]),
+                r#"["1.2", loose=False, include_prerelease=False]"#,
+                Some("1.2.4"),
+            ),
+            (
+                v(&["1.2.4", "1.2.3"]),
+                r#"["1.2", loose=False, include_prerelease=False]"#,
+                Some("1.2.4"),
+            ),
+            (
+                v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6"]),
+                r#"["~1.2.3", loose=False, include_prerelease=False]"#,
+                Some("1.2.6"),
+            ),
+            (
+                v(&["1.0.1-beta"]),
+                r#"["1.x", loose=False, include_prerelease=False]"#,
+                None,
+            ),
+            (
+                v(&["1.0.1-beta"]),
+                r#"["1.x", loose=False, include_prerelease=True]"#,
+                Some("1.0.1-beta"),
+            ),
+            (
+                v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6", "2.0.1"]),
+                r#"["~1.2.3", loose=False]"#,
+                Some("1.2.6"),
+            ),
+            (
+                v(&[
+                    "1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.0.0", "2.1.0",
+                ]),
+                "[~2.0.0]",
+                Some("2.0.0"),
+            ),
+            (
+                v(&["1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.1.0"]),
+                r#"["~2.0.0", loose=False]"#,
+                None,
+            ),
+            (
+                v(&[
+                    "1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.0.1", "2.1.0",
+                ]),
+                r#"["~2.0.0", loose=False]"#,
+                Some("2.0.1"),
+            ),
+            (
+                v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6-pre.1", "2.0.1"]),
+                r#"["~1.2.3", loose=False, include_prerelease=True]"#,
+                Some("1.2.6-pre.1"),
+            ),
+            (
+                v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6-pre.1", "2.0.1"]),
+                r#"["~1.2.3", loose=False, include_prerelease=False]"#,
+                Some("1.2.5"),
+            ),
+            (
+                v(&["1.1.1", "1.2.0-pre", "1.2.0", "1.1.1-111", "1.1.1-21"]),
+                "[<=1.2]",
+                Some("1.2.0"),
+            ),
         ];
         for (versions, range, expected) in &cases {
             let result = get_satisfying_version(versions, range);
             assert_eq!(
-                result,
-                *expected,
+                result, *expected,
                 "get_satisfying_version({versions:?}, {range:?}) should be {expected:?}"
             );
         }
@@ -1512,22 +1798,68 @@ mod tests {
             vs.to_vec()
         }
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
-            (v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6", "2.0.1"]), r#"["~1.2.3", loose=False]"#, Some("1.2.3")),
-            (v(&["1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.0.0", "2.1.0"]), "[~2.0.0]", Some("2.0.0")),
-            (v(&["1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.1.0"]), r#"["~2.0.0", loose=False]"#, None),
-            (v(&["1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.0.1", "2.1.0"]), r#"["~2.0.0", loose=False]"#, Some("2.0.1")),
-            (v(&["1.2.3-pre.1", "1.2.4", "1.2.5", "1.2.6-pre.1", "2.0.1"]), r#"["~1.2.3", loose=False, include_prerelease=True]"#, Some("1.2.3-pre.1")),
-            (v(&["1.2.3-pre.1", "1.2.4", "1.2.5", "1.2.6-pre.1", "2.0.1"]), r#"["~1.2.3", loose=False, include_prerelease=False]"#, Some("1.2.4")),
-            (v(&["1.2.3", "1.2.4"]), r#"["1.2", loose=False]"#, Some("1.2.3")),
-            (v(&["1.2.4", "1.2.3"]), r#"["1.2", loose=False]"#, Some("1.2.3")),
-            (v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6"]), "[~1.2.3, loose=False]", Some("1.2.3")),
-            (v(&["1.1.0", "1.2.0", "1.2.1", "1.3.0", "2.0.0b1", "2.0.0b2", "2.0.0b3", "2.0.0", "2.1.0"]), "[~2.0.0, loose=True]", Some("2.0.0")),
+            (
+                v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6", "2.0.1"]),
+                r#"["~1.2.3", loose=False]"#,
+                Some("1.2.3"),
+            ),
+            (
+                v(&[
+                    "1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.0.0", "2.1.0",
+                ]),
+                "[~2.0.0]",
+                Some("2.0.0"),
+            ),
+            (
+                v(&["1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.1.0"]),
+                r#"["~2.0.0", loose=False]"#,
+                None,
+            ),
+            (
+                v(&[
+                    "1.1.0", "1.2.0", "1.3.0", "2.0.0b1", "2.0.0b3", "2.0.1", "2.1.0",
+                ]),
+                r#"["~2.0.0", loose=False]"#,
+                Some("2.0.1"),
+            ),
+            (
+                v(&["1.2.3-pre.1", "1.2.4", "1.2.5", "1.2.6-pre.1", "2.0.1"]),
+                r#"["~1.2.3", loose=False, include_prerelease=True]"#,
+                Some("1.2.3-pre.1"),
+            ),
+            (
+                v(&["1.2.3-pre.1", "1.2.4", "1.2.5", "1.2.6-pre.1", "2.0.1"]),
+                r#"["~1.2.3", loose=False, include_prerelease=False]"#,
+                Some("1.2.4"),
+            ),
+            (
+                v(&["1.2.3", "1.2.4"]),
+                r#"["1.2", loose=False]"#,
+                Some("1.2.3"),
+            ),
+            (
+                v(&["1.2.4", "1.2.3"]),
+                r#"["1.2", loose=False]"#,
+                Some("1.2.3"),
+            ),
+            (
+                v(&["1.2.3", "1.2.4", "1.2.5", "1.2.6"]),
+                "[~1.2.3, loose=False]",
+                Some("1.2.3"),
+            ),
+            (
+                v(&[
+                    "1.1.0", "1.2.0", "1.2.1", "1.3.0", "2.0.0b1", "2.0.0b2", "2.0.0b3", "2.0.0",
+                    "2.1.0",
+                ]),
+                "[~2.0.0, loose=True]",
+                Some("2.0.0"),
+            ),
         ];
         for (versions, range, expected) in &cases {
             let result = min_satisfying_version(versions, range);
             assert_eq!(
-                result,
-                *expected,
+                result, *expected,
                 "min_satisfying_version({versions:?}, {range:?}) should be {expected:?}"
             );
         }
@@ -1588,9 +1920,15 @@ mod tests {
         assert!(equals("1.2.3", "=1.2.3, loose=True"));
         assert!(equals("1.2.3", "v 1.2.3, loose=True"));
         assert!(equals("1.2.3", "= 1.2.3, loose=True"));
-        assert!(equals("1.2.3-beta+build", " = 1.2.3-beta+otherbuild, loose=True"));
+        assert!(equals(
+            "1.2.3-beta+build",
+            " = 1.2.3-beta+otherbuild, loose=True"
+        ));
         assert!(equals("1.2.3+build", " = 1.2.3+otherbuild, loose=True"));
-        assert!(equals("1.2.3-beta+build", "1.2.3-beta+otherbuild, loose=False"));
+        assert!(equals(
+            "1.2.3-beta+build",
+            "1.2.3-beta+otherbuild, loose=False"
+        ));
         assert!(equals("1.2.3+build", "1.2.3+otherbuild, loose=False"));
         assert!(equals("  v1.2.3+build", "1.2.3+otherbuild, loose=False"));
         assert!(!equals("1.3", "1.2"));
@@ -1603,15 +1941,30 @@ mod tests {
         assert!(is_greater_than("19.00", "16.00"));
         assert!(is_greater_than("1.2", "1.0"));
         assert!(is_greater_than("2.3.1", "1.2.3"));
-        assert!(is_greater_than("0.0.0, loose=False", "0.0.0-foo, loose=False"));
+        assert!(is_greater_than(
+            "0.0.0, loose=False",
+            "0.0.0-foo, loose=False"
+        ));
         assert!(is_greater_than("0.0.1, loose=False", "0.0.0, loose=False"));
         assert!(is_greater_than("1.0.0, loose=False", "0.9.9, loose=False"));
         assert!(is_greater_than("2.0.0, loose=False", "1.2.3, loose=False"));
         assert!(is_greater_than("v0.0.0", "0.0.0-foo"));
-        assert!(is_greater_than("1.2.3, loose=False", "1.2.3-asdf, loose=False"));
-        assert!(is_greater_than("1.2.3-5-foo, loose=False", "1.2.3-5, loose=False"));
-        assert!(is_greater_than("1.2.3-5, loose=False", "1.2.3-4, loose=False"));
-        assert!(is_greater_than("3.0.0, loose=False", "2.7.2+asdf, loose=False"));
+        assert!(is_greater_than(
+            "1.2.3, loose=False",
+            "1.2.3-asdf, loose=False"
+        ));
+        assert!(is_greater_than(
+            "1.2.3-5-foo, loose=False",
+            "1.2.3-5, loose=False"
+        ));
+        assert!(is_greater_than(
+            "1.2.3-5, loose=False",
+            "1.2.3-4, loose=False"
+        ));
+        assert!(is_greater_than(
+            "3.0.0, loose=False",
+            "2.7.2+asdf, loose=False"
+        ));
     }
 
     // Ported: "sortVersions("$version", "$other) === "$result"" — lib/modules/versioning/conan/index.spec.ts line 871

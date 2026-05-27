@@ -138,15 +138,21 @@ async fn fetch_prefix_dev(
         let req = PrefixDevRequest {
             operation_name: "search",
             query: PREFIX_DEV_QUERY,
-            variables: PrefixDevVariables { channel, package: package_name, page },
+            variables: PrefixDevVariables {
+                channel,
+                package: package_name,
+                page,
+            },
         };
         let body = serde_json::to_string(&req)?;
 
-        let resp: PrefixDevResponse =
-            match http.post_json("https://prefix.dev/api/graphql", &body).await {
-                Ok(v) => v,
-                Err(_) => return Ok(None),
-            };
+        let resp: PrefixDevResponse = match http
+            .post_json("https://prefix.dev/api/graphql", &body)
+            .await
+        {
+            Ok(v) => v,
+            Err(_) => return Ok(None),
+        };
 
         let current = match resp.data.package.and_then(|p| p.variants) {
             Some(v) => v,
@@ -188,8 +194,7 @@ async fn fetch_prefix_dev(
         });
 
         if release.release_timestamp.is_none() {
-            release.release_timestamp =
-                variant.created_at.as_deref().and_then(normalize_timestamp);
+            release.release_timestamp = variant.created_at.as_deref().and_then(normalize_timestamp);
         }
 
         if release.is_deprecated {
@@ -227,7 +232,11 @@ pub async fn fetch_releases(
     if registry_url.starts_with("https://prefix.dev/")
         || registry_url.starts_with("https://fast.prefix.dev/")
     {
-        let channel = registry_url.trim_end_matches('/').split('/').last().unwrap_or("");
+        let channel = registry_url
+            .trim_end_matches('/')
+            .split('/')
+            .last()
+            .unwrap_or("");
         return fetch_prefix_dev(channel, package_name, registry_url, http).await;
     }
 
@@ -238,7 +247,7 @@ pub async fn fetch_releases(
     let text = match http.get_raw_with_accept(&url, "application/json").await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.as_u16() == 404 => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(e) => return Err(CondaError::Http(e)),
     };
@@ -253,9 +262,9 @@ pub async fn fetch_releases(
     let mut timestamps: HashMap<String, String> = HashMap::new();
     for file in &pkg.files {
         if let (Some(ver), Some(ts)) = (&file.version, &file.upload_time) {
-            timestamps.entry(ver.clone()).or_insert_with(|| {
-                normalize_timestamp(ts).unwrap_or_else(|| ts.clone())
-            });
+            timestamps
+                .entry(ver.clone())
+                .or_insert_with(|| normalize_timestamp(ts).unwrap_or_else(|| ts.clone()));
         }
     }
 
@@ -315,11 +324,20 @@ pub async fn fetch_latest(
     };
     let registry_url = format!("{DEFAULT_REGISTRY}{channel}");
     let result = fetch_releases(&registry_url, name, http).await?;
-    let versions: Vec<String> =
-        result.as_ref().map(|r| r.releases.iter().map(|rel| rel.version.clone()).collect()).unwrap_or_default();
+    let versions: Vec<String> = result
+        .as_ref()
+        .map(|r| r.releases.iter().map(|rel| rel.version.clone()).collect())
+        .unwrap_or_default();
     let latest = versions.last().cloned();
-    let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-    Ok(CondaUpdateSummary { versions, latest, update_available })
+    let update_available = latest
+        .as_deref()
+        .map(|l| l != current_value)
+        .unwrap_or(false);
+    Ok(CondaUpdateSummary {
+        versions,
+        latest,
+        update_available,
+    })
 }
 
 #[cfg(test)]
@@ -352,7 +370,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "main/pytest", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "main/pytest", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -362,15 +382,14 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/main/pytest"))
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .set_body_string(r#"{"versions":[]}"#),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"versions":[]}"#))
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "main/pytest", &http).await.unwrap();
+        let result = fetch_releases(&server.uri(), "main/pytest", &http)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -400,8 +419,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result =
-            fetch_releases(&server.uri(), "main/pytest", &http).await.unwrap().unwrap();
+        let result = fetch_releases(&server.uri(), "main/pytest", &http)
+            .await
+            .unwrap()
+            .unwrap();
 
         assert_eq!(result.releases.len(), 94);
     }
@@ -427,12 +448,14 @@ mod tests {
         // conda-forge/pytest → 200 with data
         Mock::given(method("GET"))
             .and(path("/conda-forge/pytest"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"{
                 "html_url": "http://anaconda.org/anaconda/pytest",
                 "dev_url": "https://github.com/pytest-dev/pytest/",
                 "versions": ["2.7.0", "2.5.1", "2.6.0"],
                 "files": []
-            }"#))
+            }"#,
+            ))
             .mount(&server)
             .await;
 
@@ -455,7 +478,10 @@ mod tests {
             result.source_url.as_deref(),
             Some("https://github.com/pytest-dev/pytest")
         );
-        assert_eq!(result.homepage.as_deref(), Some("http://anaconda.org/anaconda/pytest"));
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("http://anaconda.org/anaconda/pytest")
+        );
         // Releases sorted by versions array order from API
         let versions: Vec<&str> = result.releases.iter().map(|r| r.version.as_str()).collect();
         assert!(versions.contains(&"2.7.0"));
@@ -468,8 +494,10 @@ mod tests {
     async fn prefix_dev_null_response() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_string(r#"{"data":{"package":{"variants":null}}}"#))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"{"data":{"package":{"variants":null}}}"#),
+            )
             .mount(&server)
             .await;
 
@@ -478,7 +506,8 @@ mod tests {
         // The variants: null → empty files → return null.
         // Since prefix.dev URL hardcodes to https://prefix.dev/api/graphql,
         // we test the logic by verifying parse behavior.
-        let resp: PrefixDevResponse = serde_json::from_str(r#"{"data":{"package":{"variants":null}}}"#).unwrap();
+        let resp: PrefixDevResponse =
+            serde_json::from_str(r#"{"data":{"package":{"variants":null}}}"#).unwrap();
         let variants = resp.data.package.and_then(|p| p.variants);
         assert!(variants.is_none());
     }
@@ -492,13 +521,19 @@ mod tests {
                 version: "0.0.5".to_string(),
                 created_at: Some("2020-02-29T01:40:21Z".to_string()),
                 yanked_reason: None,
-                urls: vec![PrefixDevUrl { url: "https://dev/url".to_string(), kind: "DEV".to_string() }],
+                urls: vec![PrefixDevUrl {
+                    url: "https://dev/url".to_string(),
+                    kind: "DEV".to_string(),
+                }],
             },
             PrefixDevVariant {
                 version: "0.0.5".to_string(),
                 created_at: Some("2020-02-29T01:40:20.840Z".to_string()),
                 yanked_reason: None,
-                urls: vec![PrefixDevUrl { url: "https://home/url".to_string(), kind: "HOME".to_string() }],
+                urls: vec![PrefixDevUrl {
+                    url: "https://home/url".to_string(),
+                    kind: "HOME".to_string(),
+                }],
             },
             PrefixDevVariant {
                 version: "0.0.56".to_string(),
@@ -535,7 +570,10 @@ mod tests {
 
         // 0.0.5 deduplication: first occurrence gets timestamp "2020-02-29T01:40:21.000Z"
         let r005 = releases_map.get("0.0.5").unwrap();
-        assert_eq!(r005.release_timestamp.as_deref(), Some("2020-02-29T01:40:21.000Z"));
+        assert_eq!(
+            r005.release_timestamp.as_deref(),
+            Some("2020-02-29T01:40:21.000Z")
+        );
         // 0.0.56 has no timestamp
         let r056 = releases_map.get("0.0.56").unwrap();
         assert!(r056.release_timestamp.is_none());

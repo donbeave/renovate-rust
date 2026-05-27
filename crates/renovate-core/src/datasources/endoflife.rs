@@ -81,7 +81,7 @@ pub async fn fetch_releases(
     let text = match http.get_raw_with_accept(&url, "application/json").await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(e) => return Err(EolError::Http(e)),
     };
@@ -125,12 +125,31 @@ pub async fn fetch_latest(
 ) -> Result<EolUpdateSummary, EolError> {
     let result = fetch_releases(EOL_REGISTRY, product, http).await?;
     match result {
-        None => Ok(EolUpdateSummary { latest: None, is_eol: false, update_available: false }),
+        None => Ok(EolUpdateSummary {
+            latest: None,
+            is_eol: false,
+            update_available: false,
+        }),
         Some(r) => {
-            let latest = r.releases.iter().rev().find(|rel| !rel.is_deprecated).map(|rel| rel.version.clone());
-            let current_eol = r.releases.iter().any(|rel| rel.version == current_value && rel.is_deprecated);
-            let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-            Ok(EolUpdateSummary { latest, is_eol: current_eol, update_available })
+            let latest = r
+                .releases
+                .iter()
+                .rev()
+                .find(|rel| !rel.is_deprecated)
+                .map(|rel| rel.version.clone());
+            let current_eol = r
+                .releases
+                .iter()
+                .any(|rel| rel.version == current_value && rel.is_deprecated);
+            let update_available = latest
+                .as_deref()
+                .map(|l| l != current_value)
+                .unwrap_or(false);
+            Ok(EolUpdateSummary {
+                latest,
+                is_eol: current_eol,
+                update_available,
+            })
         }
     }
 }
@@ -176,12 +195,18 @@ mod tests {
         // except cycle "1.26" which has eol=false
         let r0 = &result.releases[0];
         assert_eq!(r0.version, "1.18-eks-13");
-        assert_eq!(r0.release_timestamp.as_deref(), Some("2020-10-13T00:00:00.000Z"));
+        assert_eq!(
+            r0.release_timestamp.as_deref(),
+            Some("2020-10-13T00:00:00.000Z")
+        );
         assert!(r0.is_deprecated);
 
         let r8 = &result.releases[8];
         assert_eq!(r8.version, "1.26-eks-1");
-        assert_eq!(r8.release_timestamp.as_deref(), Some("2023-04-11T00:00:00.000Z"));
+        assert_eq!(
+            r8.release_timestamp.as_deref(),
+            Some("2023-04-11T00:00:00.000Z")
+        );
         assert!(!r8.is_deprecated);
     }
 
@@ -264,22 +289,34 @@ mod tests {
         // 3.0 and 3.11 are deprecated via discontinued=true (boolean)
         let r0 = &result.releases[0];
         assert_eq!(r0.version, "3.0.29");
-        assert_eq!(r0.release_timestamp.as_deref(), Some("2015-11-09T00:00:00.000Z"));
+        assert_eq!(
+            r0.release_timestamp.as_deref(),
+            Some("2015-11-09T00:00:00.000Z")
+        );
         assert!(r0.is_deprecated);
 
         let r1 = &result.releases[1];
         assert_eq!(r1.version, "3.11.15");
-        assert_eq!(r1.release_timestamp.as_deref(), Some("2017-06-23T00:00:00.000Z"));
+        assert_eq!(
+            r1.release_timestamp.as_deref(),
+            Some("2017-06-23T00:00:00.000Z")
+        );
         assert!(r1.is_deprecated);
 
         // 4.0 and 4.1 have eol dates that are in the past at 2026-05-25
         let r2 = &result.releases[2];
         assert_eq!(r2.version, "4.0.9");
-        assert_eq!(r2.release_timestamp.as_deref(), Some("2021-07-26T00:00:00.000Z"));
+        assert_eq!(
+            r2.release_timestamp.as_deref(),
+            Some("2021-07-26T00:00:00.000Z")
+        );
 
         let r3 = &result.releases[3];
         assert_eq!(r3.version, "4.1.1");
-        assert_eq!(r3.release_timestamp.as_deref(), Some("2022-12-13T00:00:00.000Z"));
+        assert_eq!(
+            r3.release_timestamp.as_deref(),
+            Some("2022-12-13T00:00:00.000Z")
+        );
     }
 
     // Ported: "detects date discontinuation" — datasource/endoflife-date/index.spec.ts line 158
@@ -303,27 +340,42 @@ mod tests {
         // Sorted ascending by releaseDate: 2013, 2015, 2019, 2020, 2021
         let r0 = &result.releases[0];
         assert_eq!(r0.version, "1");
-        assert_eq!(r0.release_timestamp.as_deref(), Some("2013-12-01T00:00:00.000Z"));
+        assert_eq!(
+            r0.release_timestamp.as_deref(),
+            Some("2013-12-01T00:00:00.000Z")
+        );
         assert!(r0.is_deprecated); // discontinued=2017-07-13
 
         let r1 = &result.releases[1];
         assert_eq!(r1.version, "2");
-        assert_eq!(r1.release_timestamp.as_deref(), Some("2015-12-21T00:00:00.000Z"));
+        assert_eq!(
+            r1.release_timestamp.as_deref(),
+            Some("2015-12-21T00:00:00.000Z")
+        );
         assert!(r1.is_deprecated); // discontinued=2019-03-31
 
         let r2 = &result.releases[2];
         assert_eq!(r2.version, "3");
-        assert_eq!(r2.release_timestamp.as_deref(), Some("2019-09-30T00:00:00.000Z"));
+        assert_eq!(
+            r2.release_timestamp.as_deref(),
+            Some("2019-09-30T00:00:00.000Z")
+        );
         assert!(r2.is_deprecated); // discontinued=2021-09-01
 
         let r3 = &result.releases[3];
         assert_eq!(r3.version, "3+");
-        assert_eq!(r3.release_timestamp.as_deref(), Some("2020-09-30T00:00:00.000Z"));
+        assert_eq!(
+            r3.release_timestamp.as_deref(),
+            Some("2020-09-30T00:00:00.000Z")
+        );
         assert!(r3.is_deprecated); // discontinued=2022-11-01
 
         let r4 = &result.releases[4];
         assert_eq!(r4.version, "4");
-        assert_eq!(r4.release_timestamp.as_deref(), Some("2021-09-30T00:00:00.000Z"));
+        assert_eq!(
+            r4.release_timestamp.as_deref(),
+            Some("2021-09-30T00:00:00.000Z")
+        );
         assert!(!r4.is_deprecated); // discontinued=false
     }
 }

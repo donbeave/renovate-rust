@@ -22,7 +22,10 @@ pub struct ApiPageCache<T> {
 
 impl<T> Default for ApiPageCache<T> {
     fn default() -> Self {
-        Self { items: HashMap::new(), last_modified: None }
+        Self {
+            items: HashMap::new(),
+            last_modified: None,
+        }
     }
 }
 
@@ -118,8 +121,12 @@ mod tests {
     }
 
     impl ApiPageItem for TestItem {
-        fn number(&self) -> u64 { self.number }
-        fn updated_at(&self) -> &str { &self.updated_at }
+        fn number(&self) -> u64 {
+            self.number
+        }
+        fn updated_at(&self) -> &str {
+            &self.updated_at
+        }
     }
 
     fn item(number: u64, year: u32) -> TestItem {
@@ -131,8 +138,13 @@ mod tests {
 
     fn cache_from(items: Vec<TestItem>, last_modified: Option<&str>) -> ApiPageCache<TestItem> {
         let mut map = HashMap::new();
-        for i in items { map.insert(i.number, i); }
-        ApiPageCache { items: map, last_modified: last_modified.map(|s| s.to_string()) }
+        for i in items {
+            map.insert(i.number, i);
+        }
+        ApiPageCache {
+            items: map,
+            last_modified: last_modified.map(|s| s.to_string()),
+        }
     }
 
     // Ported: "stores and retrieves items" — modules/platform/github/api-cache.spec.ts line 12
@@ -140,7 +152,10 @@ mod tests {
     fn stores_and_retrieves_items() {
         let item1 = item(1, 2001);
         let item2 = item(2, 2002);
-        let mut api_cache = ApiCache::new(cache_from(vec![item1.clone()], Some("2001-01-01T00:00:00.000Z")));
+        let mut api_cache = ApiCache::new(cache_from(
+            vec![item1.clone()],
+            Some("2001-01-01T00:00:00.000Z"),
+        ));
 
         assert_eq!(api_cache.get_item(1), Some(&item1));
         assert_eq!(api_cache.get_item(2), None);
@@ -170,7 +185,10 @@ mod tests {
     #[test]
     fn get_items_resets_on_item_update() {
         let item1 = item(1, 2001);
-        let item1_updated = TestItem { number: 1, updated_at: "2003-01-01T00:00:00.000Z".to_string() };
+        let item1_updated = TestItem {
+            number: 1,
+            updated_at: "2003-01-01T00:00:00.000Z".to_string(),
+        };
         let mut api_cache = ApiCache::new(cache_from(vec![item1], None));
         api_cache.update_item(item1_updated.clone());
         let items = api_cache.get_items();
@@ -182,7 +200,10 @@ mod tests {
     #[test]
     fn get_items_resets_on_page_reconcile() {
         let item1 = item(1, 2001);
-        let item1_updated = TestItem { number: 1, updated_at: "2003-01-01T00:00:00.000Z".to_string() };
+        let item1_updated = TestItem {
+            number: 1,
+            updated_at: "2003-01-01T00:00:00.000Z".to_string(),
+        };
         let mut api_cache = ApiCache::new(cache_from(vec![item1], None));
         api_cache.reconcile(&[item1_updated.clone()]);
         assert_eq!(api_cache.get_item(1), Some(&item1_updated));
@@ -199,7 +220,10 @@ mod tests {
     #[test]
     fn get_last_modified_returns_stored_value() {
         let api_cache = ApiCache::new(cache_from(vec![], Some("2001-01-01T00:00:00.000Z")));
-        assert_eq!(api_cache.get_last_modified(), Some("2001-01-01T00:00:00.000Z"));
+        assert_eq!(
+            api_cache.get_last_modified(),
+            Some("2001-01-01T00:00:00.000Z")
+        );
     }
 
     // Ported: "returns updated value after reconcile" — modules/platform/github/api-cache.spec.ts line 106
@@ -207,7 +231,10 @@ mod tests {
     fn get_last_modified_returns_updated_after_reconcile() {
         let mut api_cache = ApiCache::new(cache_from(vec![], Some("2001-01-01T00:00:00.000Z")));
         api_cache.reconcile(&[item(1, 2003)]);
-        assert_eq!(api_cache.get_last_modified(), Some("2003-01-01T00:00:00.000Z"));
+        assert_eq!(
+            api_cache.get_last_modified(),
+            Some("2003-01-01T00:00:00.000Z")
+        );
     }
 
     // Ported: "sets lastModified when not present" — modules/platform/github/api-cache.spec.ts line 116
@@ -215,7 +242,10 @@ mod tests {
     fn update_last_modified_sets_when_absent() {
         let mut api_cache = ApiCache::new(cache_from(vec![], None));
         api_cache.update_last_modified("2001-01-01T00:00:00.000Z");
-        assert_eq!(api_cache.get_last_modified(), Some("2001-01-01T00:00:00.000Z"));
+        assert_eq!(
+            api_cache.get_last_modified(),
+            Some("2001-01-01T00:00:00.000Z")
+        );
     }
 
     // Ported: "advances lastModified to newer timestamp" — modules/platform/github/api-cache.spec.ts line 124
@@ -223,7 +253,10 @@ mod tests {
     fn update_last_modified_advances_to_newer() {
         let mut api_cache = ApiCache::new(cache_from(vec![], Some("2001-01-01T00:00:00.000Z")));
         api_cache.update_last_modified("2003-01-01T00:00:00.000Z");
-        assert_eq!(api_cache.get_last_modified(), Some("2003-01-01T00:00:00.000Z"));
+        assert_eq!(
+            api_cache.get_last_modified(),
+            Some("2003-01-01T00:00:00.000Z")
+        );
     }
 
     // Ported: "does not regress lastModified to older timestamp" — modules/platform/github/api-cache.spec.ts line 132
@@ -231,7 +264,10 @@ mod tests {
     fn update_last_modified_does_not_regress() {
         let mut api_cache = ApiCache::new(cache_from(vec![], Some("2003-01-01T00:00:00.000Z")));
         api_cache.update_last_modified("2001-01-01T00:00:00.000Z");
-        assert_eq!(api_cache.get_last_modified(), Some("2003-01-01T00:00:00.000Z"));
+        assert_eq!(
+            api_cache.get_last_modified(),
+            Some("2003-01-01T00:00:00.000Z")
+        );
     }
 
     // Ported: "returns false for empty page" — modules/platform/github/api-cache.spec.ts line 142
@@ -246,7 +282,10 @@ mod tests {
     fn reconcile_appends_new_items() {
         let item1 = item(1, 2001);
         let item2 = item(2, 2002);
-        let mut api_cache = ApiCache::new(cache_from(vec![item1.clone()], Some("2001-01-01T00:00:00.000Z")));
+        let mut api_cache = ApiCache::new(cache_from(
+            vec![item1.clone()],
+            Some("2001-01-01T00:00:00.000Z"),
+        ));
         let result = api_cache.reconcile(&[item2.clone()]);
         assert!(result); // item2 is newer than lastModified
         assert_eq!(api_cache.get_item(1), Some(&item1));
@@ -257,11 +296,18 @@ mod tests {
     #[test]
     fn reconcile_handles_updated_items() {
         let item1 = item(1, 2001);
-        let item1_updated = TestItem { number: 1, updated_at: "2003-01-01T00:00:00.000Z".to_string() };
-        let mut api_cache = ApiCache::new(cache_from(vec![item1], Some("2001-01-01T00:00:00.000Z")));
+        let item1_updated = TestItem {
+            number: 1,
+            updated_at: "2003-01-01T00:00:00.000Z".to_string(),
+        };
+        let mut api_cache =
+            ApiCache::new(cache_from(vec![item1], Some("2001-01-01T00:00:00.000Z")));
         api_cache.reconcile(&[item1_updated.clone()]);
         assert_eq!(api_cache.get_item(1), Some(&item1_updated));
-        assert_eq!(api_cache.get_last_modified(), Some("2003-01-01T00:00:00.000Z"));
+        assert_eq!(
+            api_cache.get_last_modified(),
+            Some("2003-01-01T00:00:00.000Z")
+        );
     }
 
     // Ported: "ignores page overlap" — modules/platform/github/api-cache.spec.ts line 199
@@ -269,7 +315,10 @@ mod tests {
     fn reconcile_ignores_page_overlap() {
         let item1 = item(1, 2001);
         let item2 = item(2, 2002);
-        let mut api_cache = ApiCache::new(cache_from(vec![item1.clone(), item2.clone()], Some("2002-01-01T00:00:00.000Z")));
+        let mut api_cache = ApiCache::new(cache_from(
+            vec![item1.clone(), item2.clone()],
+            Some("2002-01-01T00:00:00.000Z"),
+        ));
         // Reconcile with same items (no changes)
         let result = api_cache.reconcile(&[item2.clone(), item1.clone()]);
         // item2's old time equals its new time, so needNextPage = false for item1

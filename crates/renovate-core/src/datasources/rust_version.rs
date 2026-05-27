@@ -181,9 +181,8 @@ mod tests {
     // Ported: "parses nightly URL" — rust-version/parse.spec.ts line 5
     #[test]
     fn parse_nightly_url() {
-        let result = parse_manifest_url(
-            "static.rust-lang.org/dist/2025-11-24/channel-rust-nightly.toml",
-        );
+        let result =
+            parse_manifest_url("static.rust-lang.org/dist/2025-11-24/channel-rust-nightly.toml");
         assert_eq!(
             result,
             Some(ParsedManifestUrl {
@@ -196,9 +195,8 @@ mod tests {
     // Ported: "parses versioned release URL" — rust-version/parse.spec.ts line 15
     #[test]
     fn parse_versioned_release_url() {
-        let result = parse_manifest_url(
-            "static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml",
-        );
+        let result =
+            parse_manifest_url("static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml");
         assert_eq!(
             result,
             Some(ParsedManifestUrl {
@@ -226,9 +224,8 @@ mod tests {
     // Ported: "parses stable channel URL" — rust-version/parse.spec.ts line 35
     #[test]
     fn parse_stable_channel_url() {
-        let result = parse_manifest_url(
-            "static.rust-lang.org/dist/2025-11-24/channel-rust-stable.toml",
-        );
+        let result =
+            parse_manifest_url("static.rust-lang.org/dist/2025-11-24/channel-rust-stable.toml");
         assert_eq!(
             result,
             Some(ParsedManifestUrl {
@@ -285,17 +282,14 @@ mod tests {
     // Ported: "returns null for URL without date" — rust-version/parse.spec.ts line 75
     #[test]
     fn returns_none_without_date() {
-        let result = parse_manifest_url(
-            "static.rust-lang.org/dist/channel-rust-nightly.toml",
-        );
+        let result = parse_manifest_url("static.rust-lang.org/dist/channel-rust-nightly.toml");
         assert!(result.is_none());
     }
 
     // Ported: "returns null for URL without channel-rust pattern" — rust-version/parse.spec.ts line 82
     #[test]
     fn returns_none_without_channel_rust() {
-        let result =
-            parse_manifest_url("static.rust-lang.org/dist/2025-11-24/something-else.toml");
+        let result = parse_manifest_url("static.rust-lang.org/dist/2025-11-24/something-else.toml");
         assert!(result.is_none());
     }
 
@@ -311,9 +305,8 @@ mod tests {
     fn accepts_out_of_range_date() {
         // 2025-13-45 has an invalid month/day but the correct YYYY-MM-DD format,
         // so parseManifestUrl returns Some (matching TypeScript behaviour).
-        let result = parse_manifest_url(
-            "static.rust-lang.org/dist/2025-13-45/channel-rust-nightly.toml",
-        );
+        let result =
+            parse_manifest_url("static.rust-lang.org/dist/2025-13-45/channel-rust-nightly.toml");
         assert_eq!(
             result,
             Some(ParsedManifestUrl {
@@ -326,9 +319,7 @@ mod tests {
     // Ported: "parses URL with different domain" — rust-version/parse.spec.ts line 104
     #[test]
     fn parse_url_with_different_domain() {
-        let result = parse_manifest_url(
-            "example.com/archives/2025-11-24/channel-rust-1.82.0.toml",
-        );
+        let result = parse_manifest_url("example.com/archives/2025-11-24/channel-rust-1.82.0.toml");
         assert_eq!(
             result,
             Some(ParsedManifestUrl {
@@ -341,9 +332,8 @@ mod tests {
     // Ported: "parses URL with complex version" — rust-version/parse.spec.ts line 114
     #[test]
     fn parse_url_with_complex_version() {
-        let result = parse_manifest_url(
-            "static.rust-lang.org/dist/2020-06-18/channel-rust-1.44.1.toml",
-        );
+        let result =
+            parse_manifest_url("static.rust-lang.org/dist/2020-06-18/channel-rust-1.44.1.toml");
         assert_eq!(
             result,
             Some(ParsedManifestUrl {

@@ -81,16 +81,15 @@ pub async fn fetch_releases(
     let mut body: ApiResponse = match http.get_json(&api_url).await {
         Ok(v) => v,
         Err(crate::http::HttpError::Status { status, .. }) if status.is_client_error() => {
-            return Ok(None)
+            return Ok(None);
         }
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
         Err(e) => return Err(GalaxyError::Http(e)),
     };
 
     if body.results.len() > 1 {
-        body.results.retain(|r| {
-            r.github_user.as_deref() == Some(user_name)
-        });
+        body.results
+            .retain(|r| r.github_user.as_deref() == Some(user_name));
         if body.results.is_empty() {
             return Ok(None);
         }

@@ -239,7 +239,10 @@ pub async fn fetch_releases_full(
     }
 
     let source_url = format!("https://github.com/{owner_repo}");
-    Some(GithubTagsFullResult { releases, source_url })
+    Some(GithubTagsFullResult {
+        releases,
+        source_url,
+    })
 }
 
 /// Fetch all version-like tags for `owner/repo` and return the latest one.
@@ -433,9 +436,15 @@ mod tests {
     // Tests ported from datasource/github-tags/index.spec.ts
     // ─────────────────────────────────────────────────────────────────────────
 
-    fn dep() -> &'static str { "some/dep" }
-    fn dep2() -> &'static str { "some/dep2" }
-    fn dep3() -> &'static str { "some/dep3" }
+    fn dep() -> &'static str {
+        "some/dep"
+    }
+    fn dep2() -> &'static str {
+        "some/dep2"
+    }
+    fn dep3() -> &'static str {
+        "some/dep3"
+    }
 
     fn commit_resp(sha: &str, date: &str) -> serde_json::Value {
         serde_json::json!({
@@ -460,9 +469,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path(format!("/repos/{}/commits", dep())))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                serde_json::json!([{ "sha": "abcdef" }])
-            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!([{ "sha": "abcdef" }])),
+            )
             .mount(&server)
             .await;
 
@@ -492,9 +501,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path(format!("/repos/{}/commits", dep())))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                serde_json::json!([{ "sha": "abcdef" }])
-            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!([{ "sha": "abcdef" }])),
+            )
             .mount(&server)
             .await;
 
@@ -565,16 +574,18 @@ mod tests {
             .await;
         Mock::given(method("GET"))
             .and(path(format!("/repos/{}/commits/123", dep2())))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                commit_resp("123", "2021-01-01T00:00:00Z")
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(commit_resp("123", "2021-01-01T00:00:00Z")),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path(format!("/repos/{}/commits/abc", dep2())))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                commit_resp("abc", "2022-01-01T00:00:00Z")
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(commit_resp("abc", "2022-01-01T00:00:00Z")),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -597,7 +608,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let res = fetch_releases_full(dep2(), &http, &server.uri()).await.unwrap();
+        let res = fetch_releases_full(dep2(), &http, &server.uri())
+            .await
+            .unwrap();
 
         assert_eq!(res.source_url, "https://github.com/some/dep2");
         assert_eq!(res.releases.len(), 2);
@@ -625,9 +638,10 @@ mod tests {
             .await;
         Mock::given(method("GET"))
             .and(path(format!("/repos/{}/commits/sha1", dep3())))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                commit_resp("sha1", "2021-01-01T00:00:00Z")
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(commit_resp("sha1", "2021-01-01T00:00:00Z")),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -639,7 +653,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let res = fetch_releases_full(dep3(), &http, &server.uri()).await.unwrap();
+        let res = fetch_releases_full(dep3(), &http, &server.uri())
+            .await
+            .unwrap();
         assert_eq!(
             res.releases[0].release_timestamp.as_deref(),
             Some("2021-06-15T00:00:00Z")
@@ -659,9 +675,10 @@ mod tests {
             .await;
         Mock::given(method("GET"))
             .and(path(format!("/repos/{}/commits/sha1", dep3())))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                commit_resp("sha1", "2021-06-15T00:00:00Z")
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(commit_resp("sha1", "2021-06-15T00:00:00Z")),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -673,7 +690,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let res = fetch_releases_full(dep3(), &http, &server.uri()).await.unwrap();
+        let res = fetch_releases_full(dep3(), &http, &server.uri())
+            .await
+            .unwrap();
         assert_eq!(
             res.releases[0].release_timestamp.as_deref(),
             Some("2021-06-15T00:00:00Z")
@@ -693,9 +712,10 @@ mod tests {
             .await;
         Mock::given(method("GET"))
             .and(path(format!("/repos/{}/commits/sha1", dep3())))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                commit_resp("sha1", "2021-01-01T00:00:00Z")
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(commit_resp("sha1", "2021-01-01T00:00:00Z")),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -707,7 +727,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let res = fetch_releases_full(dep3(), &http, &server.uri()).await.unwrap();
+        let res = fetch_releases_full(dep3(), &http, &server.uri())
+            .await
+            .unwrap();
         assert_eq!(
             res.releases[0].release_timestamp.as_deref(),
             Some("2021-01-01T00:00:00Z")
@@ -727,9 +749,10 @@ mod tests {
             .await;
         Mock::given(method("GET"))
             .and(path(format!("/repos/{}/commits/sha1", dep3())))
-            .respond_with(ResponseTemplate::new(200).set_body_json(
-                commit_resp("sha1", "2021-01-01T00:00:00Z")
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(commit_resp("sha1", "2021-01-01T00:00:00Z")),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -739,7 +762,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let res = fetch_releases_full(dep3(), &http, &server.uri()).await.unwrap();
+        let res = fetch_releases_full(dep3(), &http, &server.uri())
+            .await
+            .unwrap();
         assert_eq!(
             res.releases[0].release_timestamp.as_deref(),
             Some("2021-01-01T00:00:00Z")

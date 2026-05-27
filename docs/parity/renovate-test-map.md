@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3849 / 11677 total tests ported (33%) · pending 7759 · not-applicable 70 (1% of total) — updated 2026-05-27
+**Progress:** 3850 / 11677 total tests ported (33%) · pending 7757 · not-applicable 72 (1% of total) — updated 2026-05-27
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -26,7 +26,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/deps-edn/extract.spec.ts` | Done | [details](lib/modules/manager/deps-edn/extract.spec.ts.md) |
 | `lib/modules/manager/droneci/extract.spec.ts` | Done | [details](lib/modules/manager/droneci/extract.spec.ts.md) |
 | `lib/modules/manager/fvm/extract.spec.ts` | Done | [details](lib/modules/manager/fvm/extract.spec.ts.md) |
-| `lib/modules/manager/glasskube/extract.spec.ts` | Not done | [details](lib/modules/manager/glasskube/extract.spec.ts.md) |
+| `lib/modules/manager/glasskube/extract.spec.ts` | Done | [details](lib/modules/manager/glasskube/extract.spec.ts.md) |
 | `lib/modules/manager/gleam/extract.spec.ts` | Done | [details](lib/modules/manager/gleam/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/extract.spec.ts` | Done | [details](lib/modules/manager/git-submodules/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/artifact.spec.ts.md) |

@@ -8,9 +8,7 @@ use semver::Version;
 
 use super::node;
 
-pub use node::{
-    get_new_value, get_satisfying_version, is_valid, matches, min_satisfying_version,
-};
+pub use node::{get_new_value, get_satisfying_version, is_valid, matches, min_satisfying_version};
 
 enum LambdaEntry {
     Always,
@@ -80,12 +78,12 @@ mod tests {
     #[test]
     fn get_new_value_matches_renovate_lambda_node_index_spec() {
         let cases = [
-            ("1.0.0",   "replace", "1.0.0",  "v1.1.0",  "1.1.0"),
-            ("~8.0.0",  "replace", "8.0.2",  "v8.2.0",  "~8.2.0"),
-            ("erbium",  "replace", "12.0.0", "v14.1.4", "fermium"),
+            ("1.0.0", "replace", "1.0.0", "v1.1.0", "1.1.0"),
+            ("~8.0.0", "replace", "8.0.2", "v8.2.0", "~8.2.0"),
+            ("erbium", "replace", "12.0.0", "v14.1.4", "fermium"),
             ("Fermium", "replace", "14.0.0", "v16.1.6", "gallium"),
-            ("gallium", "bump",    "16.0.0", "v16.1.6", "gallium"),
-            ("gallium", "auto",    "16.1.6", "v16.1.6", "gallium"),
+            ("gallium", "bump", "16.0.0", "v16.1.6", "gallium"),
+            ("gallium", "auto", "16.1.6", "v16.1.6", "gallium"),
         ];
         for (current_value, range_strategy, current_version, new_version, expected) in cases {
             assert_eq!(
@@ -103,27 +101,27 @@ mod tests {
         let t1 = "2025-03-01";
         let t2 = "2024-03-01";
         let cases: &[(&str, &str, bool)] = &[
-            ("v22.0.0",   t1, false),
-            ("v20.0.0",   t1, true),
-            ("Iron",      t1, false),
-            ("v18.0.3",   t1, true),
-            ("v18.0.0",   t1, true),
-            ("18.0.0",    t1, true),
-            ("18.0.0a",   t1, false),
-            ("16.0.0",    t2, true),
-            ("16.0.0",    t1, false),
-            ("15.0.0",    t1, false),
-            ("14.9.0",    t1, false),
-            ("14.0.0",    t1, false),
-            ("12.0.3",    t1, false),
-            ("v12.0.3",   t1, false),
-            ("12.0.3a",   t1, false),
-            ("11.0.0",    t1, false),
-            ("10.0.0",    t1, false),
-            ("10.0.999",  t1, false),
-            ("10.1.0",    t1, false),
-            ("10.0.0a",   t1, false),
-            ("9.0.0",     t1, false),
+            ("v22.0.0", t1, false),
+            ("v20.0.0", t1, true),
+            ("Iron", t1, false),
+            ("v18.0.3", t1, true),
+            ("v18.0.0", t1, true),
+            ("18.0.0", t1, true),
+            ("18.0.0a", t1, false),
+            ("16.0.0", t2, true),
+            ("16.0.0", t1, false),
+            ("15.0.0", t1, false),
+            ("14.9.0", t1, false),
+            ("14.0.0", t1, false),
+            ("12.0.3", t1, false),
+            ("v12.0.3", t1, false),
+            ("12.0.3a", t1, false),
+            ("11.0.0", t1, false),
+            ("10.0.0", t1, false),
+            ("10.0.999", t1, false),
+            ("10.1.0", t1, false),
+            ("10.0.0a", t1, false),
+            ("9.0.0", t1, false),
         ];
         for &(version, now, expected) in cases {
             assert_eq!(
@@ -138,11 +136,11 @@ mod tests {
     #[test]
     fn is_valid_matches_renovate_lambda_node_index_spec() {
         let cases = [
-            ("16.0.0",   true),
-            ("erbium",   true),
-            ("bogus",    false),
-            ("^10.0.0",  true),
-            ("10.x",     true),
+            ("16.0.0", true),
+            ("erbium", true),
+            ("bogus", false),
+            ("^10.0.0", true),
+            ("10.x", true),
             ("10.9.8.7", false),
         ];
         for (version, expected) in cases {
@@ -153,10 +151,7 @@ mod tests {
     // Ported: "matches("$version", "$range") === $expected" — versioning/lambda-node/index.spec.ts line 112
     #[test]
     fn matches_matches_renovate_lambda_node_index_spec() {
-        let cases = [
-            ("16.0.0", "gallium", true),
-            ("16.0.0", "fermium", false),
-        ];
+        let cases = [("16.0.0", "gallium", true), ("16.0.0", "fermium", false)];
         for (version, range, expected) in cases {
             assert_eq!(
                 matches(version, range),
@@ -170,9 +165,9 @@ mod tests {
     #[test]
     fn get_satisfying_version_matches_renovate_lambda_node_index_spec() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
-            (&["16.0.0"],                     "gallium", Some("16.0.0")),
+            (&["16.0.0"], "gallium", Some("16.0.0")),
             (&["16.0.0", "14.0.0", "16.9.9"], "gallium", Some("16.9.9")),
-            (&["15.0.0", "14.0.0"],           "gallium", None),
+            (&["15.0.0", "14.0.0"], "gallium", None),
         ];
         for &(versions, range, expected) in cases {
             assert_eq!(
@@ -187,9 +182,9 @@ mod tests {
     #[test]
     fn min_satisfying_version_matches_renovate_lambda_node_index_spec() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
-            (&["16.0.0"],                     "gallium", Some("16.0.0")),
+            (&["16.0.0"], "gallium", Some("16.0.0")),
             (&["16.0.0", "14.0.0", "16.9.9"], "gallium", Some("16.0.0")),
-            (&["15.0.0", "14.0.0"],           "gallium", None),
+            (&["15.0.0", "14.0.0"], "gallium", None),
         ];
         for &(versions, range, expected) in cases {
             assert_eq!(

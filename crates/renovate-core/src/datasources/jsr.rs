@@ -68,7 +68,10 @@ fn parse_jsr_scope_name(name: &str) -> Option<&str> {
     if name.len() > 100 || name.len() < 3 {
         return None;
     }
-    if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
+    if !name
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    {
         return None;
     }
     Some(name)
@@ -81,7 +84,10 @@ fn parse_jsr_package_name(name: &str) -> Option<&str> {
     if name.len() > 58 {
         return None;
     }
-    if !name.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-') {
+    if !name
+        .chars()
+        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+    {
         return None;
     }
     Some(name)
@@ -168,19 +174,35 @@ pub async fn fetch_latest(
 ) -> Result<JsrUpdateSummary, JsrError> {
     let result = fetch_releases(JSR_REGISTRY, package_name, http).await?;
     match result {
-        None => Ok(JsrUpdateSummary { latest: None, update_available: false, versions: vec![] }),
+        None => Ok(JsrUpdateSummary {
+            latest: None,
+            update_available: false,
+            versions: vec![],
+        }),
         Some(r) => {
-            let latest = r.releases.iter().find(|rel| rel.is_latest).map(|rel| rel.version.clone());
-            let versions: Vec<String> = r.releases.iter()
+            let latest = r
+                .releases
+                .iter()
+                .find(|rel| rel.is_latest)
+                .map(|rel| rel.version.clone());
+            let versions: Vec<String> = r
+                .releases
+                .iter()
                 .filter(|rel| !rel.is_deprecated)
                 .map(|rel| rel.version.clone())
                 .collect();
-            let update_available = latest.as_deref().map(|l| l != current_value).unwrap_or(false);
-            Ok(JsrUpdateSummary { latest, update_available, versions })
+            let update_available = latest
+                .as_deref()
+                .map(|l| l != current_value)
+                .unwrap_or(false);
+            Ok(JsrUpdateSummary {
+                latest,
+                update_available,
+                versions,
+            })
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -267,9 +289,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/@scope/package-name/meta.json"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                r#"{"latest":"0.0.2","versions":{}}"#,
-            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(r#"{"latest":"0.0.2","versions":{}}"#),
+            )
             .mount(&server)
             .await;
 
@@ -298,7 +320,10 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(result.homepage.as_deref(), Some("https://jsr.io/@scope/package-name"));
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://jsr.io/@scope/package-name")
+        );
         assert_eq!(result.releases.len(), 2);
 
         // releases sorted by version: 0.0.1, 0.0.2
@@ -353,7 +378,8 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&format!("{}/", server.uri()), "@scope/package-name", &http).await;
+        let result =
+            fetch_releases(&format!("{}/", server.uri()), "@scope/package-name", &http).await;
         assert!(result.is_err());
     }
 
@@ -368,7 +394,8 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&format!("{}/", server.uri()), "@scope/package-name", &http).await;
+        let result =
+            fetch_releases(&format!("{}/", server.uri()), "@scope/package-name", &http).await;
         assert!(result.is_err());
     }
 }

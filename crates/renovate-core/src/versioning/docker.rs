@@ -8,14 +8,12 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
-static COMMIT_HASH_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[a-f0-9]{7,40}$").unwrap());
+static COMMIT_HASH_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-f0-9]{7,40}$").unwrap());
 
 static ALL_NUMERIC_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+$").unwrap());
 
-static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^(?P<version>\d+(?:\.\d+)*)(?P<prerelease>\w*)$").unwrap()
-});
+static VERSION_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?P<version>\d+(?:\.\d+)*)(?P<prerelease>\w*)$").unwrap());
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct ParsedVersion {
@@ -44,7 +42,11 @@ fn parse(version: &str) -> Option<ParsedVersion> {
         .split('.')
         .map(|p| p.parse::<u64>().unwrap_or(0))
         .collect();
-    Some(ParsedVersion { release, prerelease, suffix })
+    Some(ParsedVersion {
+        release,
+        prerelease,
+        suffix,
+    })
 }
 
 pub fn is_valid(version: &str) -> bool {
@@ -133,7 +135,11 @@ pub fn value_to_version(value: &str) -> &str {
     value.split('-').next().unwrap_or(value)
 }
 
-pub fn get_new_value<'a>(_current_value: Option<&str>, _range_strategy: Option<&str>, new_version: &'a str) -> &'a str {
+pub fn get_new_value<'a>(
+    _current_value: Option<&str>,
+    _range_strategy: Option<&str>,
+    new_version: &'a str,
+) -> &'a str {
     new_version
 }
 
@@ -203,7 +209,11 @@ mod tests {
             ("1.2.3", "1.2.3", false),
         ];
         for (a, b, expected) in cases {
-            assert_eq!(is_greater_than(a, b), expected, "is_greater_than({a:?}, {b:?})");
+            assert_eq!(
+                is_greater_than(a, b),
+                expected,
+                "is_greater_than({a:?}, {b:?})"
+            );
         }
     }
 
@@ -385,7 +395,11 @@ mod tests {
             ("3.8.2", "3.8.2"),
         ];
         for (value, expected) in cases {
-            assert_eq!(value_to_version(value), expected, "value_to_version({value:?})");
+            assert_eq!(
+                value_to_version(value),
+                expected,
+                "value_to_version({value:?})"
+            );
         }
     }
 }

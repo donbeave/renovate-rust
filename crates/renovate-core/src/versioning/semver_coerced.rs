@@ -50,7 +50,9 @@ fn satisfies_single(version: &Version, range: &str) -> bool {
 
     // Compound range: ">=1.0.0 <2" — all parts must match
     if range.contains(' ') {
-        return range.split_whitespace().all(|part| satisfies_single(version, part));
+        return range
+            .split_whitespace()
+            .all(|part| satisfies_single(version, part));
     }
 
     if let Some(rest) = range.strip_prefix('^') {

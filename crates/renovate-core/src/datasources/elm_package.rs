@@ -81,7 +81,7 @@ pub async fn fetch_releases(
             return Err(ElmPackageError::Http(crate::http::HttpError::Status {
                 status,
                 url: url.clone(),
-            }))
+            }));
         }
         Err(crate::http::HttpError::Status { .. }) => return Ok(None),
         Err(crate::http::HttpError::Request(_)) => return Ok(None),

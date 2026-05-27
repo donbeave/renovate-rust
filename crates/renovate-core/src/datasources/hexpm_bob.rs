@@ -135,10 +135,8 @@ pub async fn fetch_releases(
 
     let body = match http.get_raw_with_accept(&url, "text/plain").await {
         Ok(t) => t,
-        Err(crate::http::HttpError::Status { status, .. })
-            if status == StatusCode::NOT_FOUND =>
-        {
-            return Ok(None)
+        Err(crate::http::HttpError::Status { status, .. }) if status == StatusCode::NOT_FOUND => {
+            return Ok(None);
         }
         Err(e) => return Err(HexpmBobError::Http(e)),
     };
@@ -293,19 +291,28 @@ mod tests {
         let rc1 = rc1.unwrap();
         assert_eq!(rc1.git_ref, "185eeec5ecbc2a0c8d9b8b97cb2d23108615ffdb");
         assert!(!rc1.is_stable);
-        assert_eq!(rc1.release_timestamp.as_deref(), Some("2022-08-15T10:28:05.000Z"));
+        assert_eq!(
+            rc1.release_timestamp.as_deref(),
+            Some("2022-08-15T10:28:05.000Z")
+        );
 
         let v140 = result.releases.iter().find(|r| r.version == "1.14.0");
         assert!(v140.is_some());
         let v140 = v140.unwrap();
         assert!(v140.is_stable);
-        assert_eq!(v140.release_timestamp.as_deref(), Some("2022-09-01T18:24:21.000Z"));
+        assert_eq!(
+            v140.release_timestamp.as_deref(),
+            Some("2022-09-01T18:24:21.000Z")
+        );
 
         let v141 = result.releases.iter().find(|r| r.version == "1.14.1");
         assert!(v141.is_some());
         assert!(v141.unwrap().is_stable);
 
-        let v141_otp25 = result.releases.iter().find(|r| r.version == "1.14.1-otp-25");
+        let v141_otp25 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "1.14.1-otp-25");
         assert!(v141_otp25.is_some());
         assert!(v141_otp25.unwrap().is_stable);
     }
@@ -338,7 +345,10 @@ mod tests {
         let v25_1 = v25_1.unwrap();
         assert!(v25_1.is_stable);
         assert_eq!(v25_1.git_ref, "6efb5e31df6bc512ed6c466584ef15b846dcecab");
-        assert_eq!(v25_1.release_timestamp.as_deref(), Some("2022-09-21T09:54:48.000Z"));
+        assert_eq!(
+            v25_1.release_timestamp.as_deref(),
+            Some("2022-09-21T09:54:48.000Z")
+        );
 
         let v25_1_2 = result.releases.iter().find(|r| r.version == "25.1.2");
         assert!(v25_1_2.is_some());
@@ -369,7 +379,10 @@ mod tests {
             .unwrap();
         // Custom registry URL is honored: we get a non-None result from the mock server.
         assert!(result.is_some());
-        assert_eq!(result.unwrap().registry_url, server.uri().trim_end_matches('/'));
+        assert_eq!(
+            result.unwrap().registry_url,
+            server.uri().trim_end_matches('/')
+        );
     }
 
     // Ported: "returns empty list for invalid package name" — hexpm-bob/index.spec.ts line 172

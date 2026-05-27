@@ -167,7 +167,11 @@ mod tests {
             ("1.2", "1.2.3", false),
         ];
         for (version, range, expected) in cases {
-            assert_eq!(matches(version, range), expected, "matches({version:?}, {range:?})");
+            assert_eq!(
+                matches(version, range),
+                expected,
+                "matches({version:?}, {range:?})"
+            );
         }
     }
 
@@ -190,7 +194,11 @@ mod tests {
             ("1.2", "1.2.3", true),
         ];
         for (version, range, expected) in cases {
-            assert_eq!(equals(version, range), expected, "equals({version:?}, {range:?})");
+            assert_eq!(
+                equals(version, range),
+                expected,
+                "equals({version:?}, {range:?})"
+            );
         }
     }
 }

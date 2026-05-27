@@ -1456,10 +1456,11 @@ pub fn load_package_json_content(json: &str) -> Option<ParsedPackageJson> {
         .get("packageManager")
         .and_then(|v| v.as_str())
         .and_then(|s| {
-            s.rsplit_once('@').map(|(name, version)| PackageManagerInfo {
-                name: name.to_owned(),
-                version: version.to_owned(),
-            })
+            s.rsplit_once('@')
+                .map(|(name, version)| PackageManagerInfo {
+                    name: name.to_owned(),
+                    version: version.to_owned(),
+                })
         });
 
     Some(ParsedPackageJson {
@@ -1497,53 +1498,52 @@ pub fn get_yarn_locked_dependencies(
     let mut current_constraint: Option<String> = None;
     let mut current_entry_version: Option<String> = None;
 
-    let flush = |constraint: &str,
-                 entry_version: Option<&str>,
-                 results: &mut Vec<YarnLockEntrySummary>| {
-        let entry_ver = match entry_version {
-            Some(v) => v,
-            None => return,
-        };
-        if entry_ver != current_version {
-            return;
-        }
-        // Handle comma-separated constraints (Yarn2+) and single constraints.
-        let sub_constraints: Vec<&str> = if constraint.contains(", ") {
-            constraint.split(", ").collect()
-        } else {
-            vec![constraint]
-        };
-        for sub in sub_constraints {
-            let sub = sub.trim().trim_matches('"');
-            if sub == "__metadata" {
-                continue;
+    let flush =
+        |constraint: &str, entry_version: Option<&str>, results: &mut Vec<YarnLockEntrySummary>| {
+            let entry_ver = match entry_version {
+                Some(v) => v,
+                None => return,
+            };
+            if entry_ver != current_version {
+                return;
             }
-            // Parse `name@constraint` or `@scope/name@constraint`.
-            let (entry_name, constraint_part) = if sub.starts_with('@') {
-                // Scoped: `@scope/name@npm:^1.2.3`
-                let rest = &sub[1..];
-                if let Some(at_pos) = rest.find('@') {
-                    let name = format!("@{}", &rest[..at_pos]);
-                    let c = rest[at_pos + 1..].trim_start_matches("npm:");
-                    (name, c.to_owned())
-                } else {
+            // Handle comma-separated constraints (Yarn2+) and single constraints.
+            let sub_constraints: Vec<&str> = if constraint.contains(", ") {
+                constraint.split(", ").collect()
+            } else {
+                vec![constraint]
+            };
+            for sub in sub_constraints {
+                let sub = sub.trim().trim_matches('"');
+                if sub == "__metadata" {
                     continue;
                 }
-            } else if let Some(at_pos) = sub.find('@') {
-                (sub[..at_pos].to_owned(), sub[at_pos + 1..].to_owned())
-            } else {
-                continue;
-            };
-            if entry_name == dep_name {
-                results.push(YarnLockEntrySummary {
-                    dep_name: entry_name,
-                    constraint: constraint_part,
-                    dep_name_constraint: sub.to_owned(),
-                    version: entry_ver.to_owned(),
-                });
+                // Parse `name@constraint` or `@scope/name@constraint`.
+                let (entry_name, constraint_part) = if sub.starts_with('@') {
+                    // Scoped: `@scope/name@npm:^1.2.3`
+                    let rest = &sub[1..];
+                    if let Some(at_pos) = rest.find('@') {
+                        let name = format!("@{}", &rest[..at_pos]);
+                        let c = rest[at_pos + 1..].trim_start_matches("npm:");
+                        (name, c.to_owned())
+                    } else {
+                        continue;
+                    }
+                } else if let Some(at_pos) = sub.find('@') {
+                    (sub[..at_pos].to_owned(), sub[at_pos + 1..].to_owned())
+                } else {
+                    continue;
+                };
+                if entry_name == dep_name {
+                    results.push(YarnLockEntrySummary {
+                        dep_name: entry_name,
+                        constraint: constraint_part,
+                        dep_name_constraint: sub.to_owned(),
+                        version: entry_ver.to_owned(),
+                    });
+                }
             }
-        }
-    };
+        };
 
     for raw_line in content.lines() {
         let line = raw_line.trim_end();
@@ -3268,10 +3268,19 @@ chalk@^2.4.1:
             "packageManager": "npm@8.5.1"
         }"#;
         let pkg = load_package_json_content(json).expect("should parse");
-        assert_eq!(pkg.dependencies.get("leftpad").map(|s| s.as_str()), Some("1.0.0"));
-        assert_eq!(pkg.engines.get("node").map(|s| s.as_str()), Some(">=16.0.0"));
+        assert_eq!(
+            pkg.dependencies.get("leftpad").map(|s| s.as_str()),
+            Some("1.0.0")
+        );
+        assert_eq!(
+            pkg.engines.get("node").map(|s| s.as_str()),
+            Some(">=16.0.0")
+        );
         assert_eq!(pkg.volta.get("yarn").map(|s| s.as_str()), Some("1.22.19"));
-        let pm = pkg.package_manager.as_ref().expect("packageManager should parse");
+        let pm = pkg
+            .package_manager
+            .as_ref()
+            .expect("packageManager should parse");
         assert_eq!(pm.name, "npm");
         assert_eq!(pm.version, "8.5.1");
     }

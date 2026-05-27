@@ -97,15 +97,12 @@ pub async fn fetch_releases(
     package_name: &str,
     http: &HttpClient,
 ) -> Result<Unity3dPackagesResult, Unity3dPackagesError> {
-    let url = format!(
-        "{}/{}",
-        registry_url.trim_end_matches('/'),
-        package_name
-    );
+    let url = format!("{}/{}", registry_url.trim_end_matches('/'), package_name);
 
     let body: PackageReleasesJson = http.get_json(&url).await?;
 
-    let using_default_registry = registry_url.trim_end_matches('/') == DEFAULT_REGISTRY_URL.trim_end_matches('/');
+    let using_default_registry =
+        registry_url.trim_end_matches('/') == DEFAULT_REGISTRY_URL.trim_end_matches('/');
 
     let mut releases = Vec::new();
     let mut homepage: Option<String> = None;
@@ -120,10 +117,7 @@ pub async fn fetch_releases(
 
         if first {
             homepage = pkg_ver.documentation_url.clone();
-            source_url = pkg_ver
-                .repository
-                .as_ref()
-                .and_then(|r| r.url.clone());
+            source_url = pkg_ver.repository.as_ref().and_then(|r| r.url.clone());
             first = false;
         }
 
@@ -179,9 +173,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/com.unity.xr.openxr"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                r#"{ "versions": {}, "time": {} }"#,
-            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(r#"{ "versions": {}, "time": {} }"#),
+            )
             .mount(&server)
             .await;
 
@@ -220,7 +214,10 @@ mod tests {
         assert_eq!(result.releases.len(), 1);
         let r = &result.releases[0];
         assert_eq!(r.version, "1.14.2");
-        assert_eq!(r.release_timestamp.as_deref(), Some("2025-03-27T10:54:45.412Z"));
+        assert_eq!(
+            r.release_timestamp.as_deref(),
+            Some("2025-03-27T10:54:45.412Z")
+        );
         assert!(r.is_stable);
         assert_eq!(r.changelog_url, None);
         assert_eq!(result.registry_url, server.uri().trim_end_matches('/'));
@@ -305,14 +302,49 @@ mod tests {
         assert_eq!(result.releases.len(), 4);
 
         // Stability checks
-        assert!(result.releases.iter().find(|r| r.version == "1.14.3").unwrap().is_stable);
-        assert!(!result.releases.iter().find(|r| r.version == "1.12.0-exp.1").unwrap().is_stable);
-        assert!(!result.releases.iter().find(|r| r.version == "1.0.0-pre.1").unwrap().is_stable);
-        assert!(!result.releases.iter().find(|r| r.version == "0.1.2-preview.2").unwrap().is_stable);
+        assert!(
+            result
+                .releases
+                .iter()
+                .find(|r| r.version == "1.14.3")
+                .unwrap()
+                .is_stable
+        );
+        assert!(
+            !result
+                .releases
+                .iter()
+                .find(|r| r.version == "1.12.0-exp.1")
+                .unwrap()
+                .is_stable
+        );
+        assert!(
+            !result
+                .releases
+                .iter()
+                .find(|r| r.version == "1.0.0-pre.1")
+                .unwrap()
+                .is_stable
+        );
+        assert!(
+            !result
+                .releases
+                .iter()
+                .find(|r| r.version == "0.1.2-preview.2")
+                .unwrap()
+                .is_stable
+        );
 
         // Timestamps
-        let r143 = result.releases.iter().find(|r| r.version == "1.14.3").unwrap();
-        assert_eq!(r143.release_timestamp.as_deref(), Some("2025-04-18T18:06:12.036Z"));
+        let r143 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "1.14.3")
+            .unwrap();
+        assert_eq!(
+            r143.release_timestamp.as_deref(),
+            Some("2025-04-18T18:06:12.036Z")
+        );
 
         // Changelog content
         assert_eq!(
@@ -320,7 +352,12 @@ mod tests {
             Some("### Fixed\n\n* Fixed Multiview Render Regions feature regression.")
         );
         assert_eq!(
-            result.releases.iter().find(|r| r.version == "1.12.0-exp.1").unwrap().changelog_content,
+            result
+                .releases
+                .iter()
+                .find(|r| r.version == "1.12.0-exp.1")
+                .unwrap()
+                .changelog_content,
             None
         );
 
@@ -373,12 +410,26 @@ mod tests {
             result.source_url.as_deref(),
             Some("https://github.cds.internal.unity3d.com/unity/xr.sdk.openxr.git")
         );
-        let r143 = result.releases.iter().find(|r| r.version == "1.14.3").unwrap();
+        let r143 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "1.14.3")
+            .unwrap();
         assert!(r143.is_stable);
-        assert_eq!(r143.release_timestamp.as_deref(), Some("2025-04-18T18:06:12.036Z"));
+        assert_eq!(
+            r143.release_timestamp.as_deref(),
+            Some("2025-04-18T18:06:12.036Z")
+        );
 
-        let r112 = result.releases.iter().find(|r| r.version == "1.12.0-exp.1").unwrap();
+        let r112 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "1.12.0-exp.1")
+            .unwrap();
         assert!(!r112.is_stable);
-        assert_eq!(r112.release_timestamp.as_deref(), Some("2024-07-03T15:24:28.000Z"));
+        assert_eq!(
+            r112.release_timestamp.as_deref(),
+            Some("2024-07-03T15:24:28.000Z")
+        );
     }
 }

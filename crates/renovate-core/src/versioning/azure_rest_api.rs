@@ -97,7 +97,11 @@ mod tests {
     fn is_compatible_matches_renovate_azure_rest_api_index_spec() {
         let cases = [("2023-01-01", true), ("2023-01-01-preview", true)];
         for (version, expected) in cases {
-            assert_eq!(is_compatible(version), expected, "is_compatible({version:?})");
+            assert_eq!(
+                is_compatible(version),
+                expected,
+                "is_compatible({version:?})"
+            );
         }
     }
 
@@ -122,7 +126,11 @@ mod tests {
     fn is_single_version_matches_renovate_azure_rest_api_index_spec() {
         let cases = [("2023-01-01", true), ("2023-01-01-preview", true)];
         for (version, expected) in cases {
-            assert_eq!(is_valid(version), expected, "is_single_version({version:?})");
+            assert_eq!(
+                is_valid(version),
+                expected,
+                "is_single_version({version:?})"
+            );
         }
     }
 
@@ -142,7 +150,10 @@ mod tests {
     // Ported: "getMajor("$version") === 1" — versioning/azure-rest-api/index.spec.ts line 64
     #[test]
     fn get_major_matches_renovate_azure_rest_api_index_spec() {
-        let cases = [("2023-01-01", Some(20230101u64)), ("2023-01-01-preview", Some(20230101))];
+        let cases = [
+            ("2023-01-01", Some(20230101u64)),
+            ("2023-01-01-preview", Some(20230101)),
+        ];
         for (version, expected) in cases {
             assert_eq!(get_major(version), expected, "get_major({version:?})");
         }
@@ -177,7 +188,11 @@ mod tests {
             ("2023-01-01", "2024-01-01", false),
         ];
         for (version, other, expected) in cases {
-            assert_eq!(equals(version, other), expected, "equals({version:?}, {other:?})");
+            assert_eq!(
+                equals(version, other),
+                expected,
+                "equals({version:?}, {other:?})"
+            );
         }
     }
 

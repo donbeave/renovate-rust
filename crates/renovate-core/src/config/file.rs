@@ -298,9 +298,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             .onboarding_config_file_name
             .or(base.onboarding_config_file_name),
         onboarding_no_deps: file_config.onboarding_no_deps.or(base.onboarding_no_deps),
-        onboarding_pr_title: file_config
-            .onboarding_pr_title
-            .or(base.onboarding_pr_title),
+        onboarding_pr_title: file_config.onboarding_pr_title.or(base.onboarding_pr_title),
         onboarding_rebase_checkbox: file_config
             .onboarding_rebase_checkbox
             .or(base.onboarding_rebase_checkbox),
@@ -359,9 +357,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         autodiscover_projects: file_config
             .autodiscover_projects
             .or(base.autodiscover_projects),
-        autodiscover_topics: file_config
-            .autodiscover_topics
-            .or(base.autodiscover_topics),
+        autodiscover_topics: file_config.autodiscover_topics.or(base.autodiscover_topics),
         docker_max_pages: file_config.docker_max_pages.or(base.docker_max_pages),
         delete_config_file: file_config.delete_config_file,
         delete_additional_config_file: file_config.delete_additional_config_file,
@@ -391,9 +387,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         execution_timeout: file_config.execution_timeout.or(base.execution_timeout),
         git_timeout: file_config.git_timeout.or(base.git_timeout),
         git_url: file_config.git_url,
-        http_cache_ttl_days: file_config
-            .http_cache_ttl_days
-            .or(base.http_cache_ttl_days),
+        http_cache_ttl_days: file_config.http_cache_ttl_days.or(base.http_cache_ttl_days),
         cache_hard_ttl_minutes: file_config
             .cache_hard_ttl_minutes
             .or(base.cache_hard_ttl_minutes),

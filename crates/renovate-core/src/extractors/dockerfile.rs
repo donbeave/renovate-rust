@@ -1794,10 +1794,7 @@ FROM $nginx_version as stage2
     #[test]
     fn extract_variables_handles_complex_variable_with_static_default() {
         let vars = extract_variables("${var1:-nginx}:latest");
-        assert_eq!(
-            vars.get("${var1:-nginx}").map(String::as_str),
-            Some("var1")
-        );
+        assert_eq!(vars.get("${var1:-nginx}").map(String::as_str), Some("var1"));
         assert_eq!(vars.len(), 1);
     }
 
@@ -1805,10 +1802,7 @@ FROM $nginx_version as stage2
     #[test]
     fn extract_variables_handles_complex_variable_with_variable_default() {
         let vars = extract_variables("${VAR1:-$var2}:latest");
-        assert_eq!(
-            vars.get("${VAR1:-$var2}").map(String::as_str),
-            Some("VAR1")
-        );
+        assert_eq!(vars.get("${VAR1:-$var2}").map(String::as_str), Some("VAR1"));
         assert_eq!(vars.len(), 1);
     }
 
@@ -1816,10 +1810,7 @@ FROM $nginx_version as stage2
     #[test]
     fn extract_variables_handles_multiple_variables() {
         let vars = extract_variables("${var1:-$var2}:$version");
-        assert_eq!(
-            vars.get("${var1:-$var2}").map(String::as_str),
-            Some("var1")
-        );
+        assert_eq!(vars.get("${var1:-$var2}").map(String::as_str), Some("var1"));
         assert_eq!(vars.get("$version").map(String::as_str), Some("version"));
         assert_eq!(vars.len(), 2);
     }
