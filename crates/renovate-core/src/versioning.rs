@@ -4,6 +4,7 @@
 //! and update planning. The Cargo module is first; others will follow.
 
 pub mod apk;
+pub mod bazel_module;
 pub mod aws_eks_addon;
 pub mod aws_machine_image;
 pub mod azure_rest_api;
