@@ -5,7 +5,7 @@
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 76 | **Ported:** 67 | **Actionable:** 76 | **Status:** partial
+**Total tests:** 76 | **Ported:** 76 | **Actionable:** 76 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -76,8 +76,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| rejects null | 1493 | pending | — | — | — |
-| rejects empty or whitespace | 1497 | pending | — | — | — |
+| rejects null | 1493 | ported | `dockerfile.rs` | `get_dep_rejects_null` | — |
+| rejects empty or whitespace | 1497 | ported | `dockerfile.rs` | `get_dep_rejects_empty_or_whitespace` | — |
 | handles default environment variable values | 1501 | ported | `dockerfile.rs` | `default_variable_value_extracted` | — |
 | skips tag containing a variable | 1563 | ported | `dockerfile.rs` | `tag_with_variable_is_skipped` | — |
 | skips depName containing a non default variable at start | 1574 | ported | `dockerfile.rs` | `arg_variable_is_skipped` | — |
@@ -90,13 +90,13 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles no variable | 1651 | pending | — | — | — |
-| handles simple variable | 1655 | pending | — | — | — |
-| handles escaped variable | 1661 | pending | — | — | — |
-| handles complex variable | 1667 | pending | — | — | — |
-| handles complex variable with static default value | 1673 | pending | — | — | — |
-| handles complex variable with other variable as default value | 1679 | pending | — | — | — |
-| handles multiple variables | 1685 | pending | — | — | — |
+| handles no variable | 1651 | ported | `dockerfile.rs` | `extract_variables_handles_no_variable` | — |
+| handles simple variable | 1655 | ported | `dockerfile.rs` | `extract_variables_handles_simple_variable` | — |
+| handles escaped variable | 1661 | ported | `dockerfile.rs` | `extract_variables_handles_escaped_variable` | — |
+| handles complex variable | 1667 | ported | `dockerfile.rs` | `extract_variables_handles_complex_variable` | — |
+| handles complex variable with static default value | 1673 | ported | `dockerfile.rs` | `extract_variables_handles_complex_variable_with_static_default` | — |
+| handles complex variable with other variable as default value | 1679 | ported | `dockerfile.rs` | `extract_variables_handles_complex_variable_with_variable_default` | — |
+| handles multiple variables | 1685 | ported | `dockerfile.rs` | `extract_variables_handles_multiple_variables` | — |
 
 ---
 

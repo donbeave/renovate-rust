@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3833 / 11677 total tests ported (33%) · pending 7776 · not-applicable 68 (1% of total) — updated 2026-05-27
+**Progress:** 3842 / 11677 total tests ported (33%) · pending 7767 · not-applicable 68 (1% of total) — updated 2026-05-27
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -18,7 +18,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/argocd/extract.spec.ts` | Done | [details](lib/modules/manager/argocd/extract.spec.ts.md) |
 | `lib/modules/manager/batect-wrapper/extract.spec.ts` | Done | [details](lib/modules/manager/batect-wrapper/extract.spec.ts.md) |
 | `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | Not done | [details](lib/modules/manager/batect-wrapper/artifacts.spec.ts.md) |
-| `lib/modules/manager/batect/extract.spec.ts` | Not done | [details](lib/modules/manager/batect/extract.spec.ts.md) |
+| `lib/modules/manager/batect/extract.spec.ts` | Done | [details](lib/modules/manager/batect/extract.spec.ts.md) |
 | `lib/modules/manager/buildpacks/extract.spec.ts` | Done | [details](lib/modules/manager/buildpacks/extract.spec.ts.md) |
 | `lib/modules/manager/cargo/extract.spec.ts` | Done | [details](lib/modules/manager/cargo/extract.spec.ts.md) |
 | `lib/modules/manager/cloudbuild/extract.spec.ts` | Done | [details](lib/modules/manager/cloudbuild/extract.spec.ts.md) |
@@ -52,7 +52,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/devbox/extract.spec.ts` | Done | [details](lib/modules/manager/devbox/extract.spec.ts.md) |
 | `lib/modules/manager/devcontainer/extract.spec.ts` | Done | [details](lib/modules/manager/devcontainer/extract.spec.ts.md) |
 | `lib/modules/manager/docker-compose/extract.spec.ts` | Done | [details](lib/modules/manager/docker-compose/extract.spec.ts.md) |
-| `lib/modules/manager/dockerfile/extract.spec.ts` | Not done | [details](lib/modules/manager/dockerfile/extract.spec.ts.md) |
+| `lib/modules/manager/dockerfile/extract.spec.ts` | Done | [details](lib/modules/manager/dockerfile/extract.spec.ts.md) |
 | `lib/modules/manager/fleet/extract.spec.ts` | Done | [details](lib/modules/manager/fleet/extract.spec.ts.md) |
 | `lib/modules/manager/nvm/extract.spec.ts` | Done | [details](lib/modules/manager/nvm/extract.spec.ts.md) |
 | `lib/modules/manager/pyenv/extract.spec.ts` | Done | [details](lib/modules/manager/pyenv/extract.spec.ts.md) |

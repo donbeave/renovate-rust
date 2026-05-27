@@ -23,7 +23,9 @@
 //! | Image is a prior stage alias (via `AS name`) | `BuildStageRef` |
 
 use std::collections::HashMap;
+use std::sync::LazyLock;
 
+use regex::Regex;
 use thiserror::Error;
 
 /// Why a Dockerfile FROM instruction is being skipped.
@@ -35,6 +37,8 @@ pub enum DockerfileSkipReason {
     ArgVariable,
     /// Image refers to a previously defined build stage (`FROM … AS name`).
     BuildStageRef,
+    /// Input was null, empty, or whitespace-only.
+    InvalidValue,
 }
 
 /// A single extracted container image dependency from a `FROM` instruction.
@@ -502,7 +506,41 @@ fn find_as_keyword(upper: &str) -> Option<usize> {
 /// Convenience wrapper used by the docker-compose extractor, which does not
 /// have multi-stage build context.
 pub fn classify_image_ref(image_ref: &str) -> DockerfileExtractedDep {
+    if image_ref.trim().is_empty() {
+        return DockerfileExtractedDep {
+            image: String::new(),
+            tag: None,
+            digest: None,
+            package_name: None,
+            skip_reason: Some(DockerfileSkipReason::InvalidValue),
+        };
+    }
     classify_from(image_ref, &[])
+}
+
+static EXTRACT_VARS_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(?P<fullvar>\\?\$(?P<simple>\w+)|\\?\$\{(?P<complex>\w+)(?::.+?)?\}+)")
+        .unwrap()
+});
+
+/// Extract `$VAR` / `${VAR}` / `${VAR:-default}` variable expressions from an image string.
+///
+/// Returns a map of full variable expression → variable name,
+/// mirroring TypeScript `extractVariables()`.
+pub fn extract_variables(image: &str) -> HashMap<String, String> {
+    let mut vars = HashMap::new();
+    for cap in EXTRACT_VARS_RE.captures_iter(image) {
+        let full = cap["fullvar"].to_owned();
+        let name = if let Some(s) = cap.name("simple") {
+            s.as_str().to_owned()
+        } else if let Some(c) = cap.name("complex") {
+            c.as_str().to_owned()
+        } else {
+            continue;
+        };
+        vars.insert(full, name);
+    }
+    vars
 }
 
 /// Parse `image[:tag][@digest]` and classify the resulting dep.
@@ -1699,5 +1737,90 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].image, "quay.io/myName/myPackage");
         assert_eq!(deps[0].tag.as_deref(), Some("0.6.2"));
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // ── getDep() / classify_image_ref() ──────────────────────────────────────
+
+    // Ported: "rejects null" — dockerfile/extract.spec.ts line 1493
+    #[test]
+    fn get_dep_rejects_null() {
+        let dep = classify_image_ref("");
+        assert_eq!(dep.skip_reason, Some(DockerfileSkipReason::InvalidValue));
+    }
+
+    // Ported: "rejects empty or whitespace" — dockerfile/extract.spec.ts line 1497
+    #[test]
+    fn get_dep_rejects_empty_or_whitespace() {
+        let dep = classify_image_ref("   ");
+        assert_eq!(dep.skip_reason, Some(DockerfileSkipReason::InvalidValue));
+    }
+
+    // ── extractVariables() ───────────────────────────────────────────────────
+
+    // Ported: "handles no variable" — dockerfile/extract.spec.ts line 1651
+    #[test]
+    fn extract_variables_handles_no_variable() {
+        assert!(extract_variables("nginx:latest").is_empty());
+    }
+
+    // Ported: "handles simple variable" — dockerfile/extract.spec.ts line 1655
+    #[test]
+    fn extract_variables_handles_simple_variable() {
+        let vars = extract_variables("nginx:$version");
+        assert_eq!(vars.get("$version").map(String::as_str), Some("version"));
+        assert_eq!(vars.len(), 1);
+    }
+
+    // Ported: "handles escaped variable" — dockerfile/extract.spec.ts line 1661
+    #[test]
+    fn extract_variables_handles_escaped_variable() {
+        let vars = extract_variables(r"nginx:\$version");
+        assert_eq!(vars.get(r"\$version").map(String::as_str), Some("version"));
+        assert_eq!(vars.len(), 1);
+    }
+
+    // Ported: "handles complex variable" — dockerfile/extract.spec.ts line 1667
+    #[test]
+    fn extract_variables_handles_complex_variable() {
+        let vars = extract_variables("ubuntu:${ubuntu_version}");
+        assert_eq!(
+            vars.get("${ubuntu_version}").map(String::as_str),
+            Some("ubuntu_version")
+        );
+        assert_eq!(vars.len(), 1);
+    }
+
+    // Ported: "handles complex variable with static default value" — dockerfile/extract.spec.ts line 1673
+    #[test]
+    fn extract_variables_handles_complex_variable_with_static_default() {
+        let vars = extract_variables("${var1:-nginx}:latest");
+        assert_eq!(
+            vars.get("${var1:-nginx}").map(String::as_str),
+            Some("var1")
+        );
+        assert_eq!(vars.len(), 1);
+    }
+
+    // Ported: "handles complex variable with other variable as default value" — dockerfile/extract.spec.ts line 1679
+    #[test]
+    fn extract_variables_handles_complex_variable_with_variable_default() {
+        let vars = extract_variables("${VAR1:-$var2}:latest");
+        assert_eq!(
+            vars.get("${VAR1:-$var2}").map(String::as_str),
+            Some("VAR1")
+        );
+        assert_eq!(vars.len(), 1);
+    }
+
+    // Ported: "handles multiple variables" — dockerfile/extract.spec.ts line 1685
+    #[test]
+    fn extract_variables_handles_multiple_variables() {
+        let vars = extract_variables("${var1:-$var2}:$version");
+        assert_eq!(
+            vars.get("${var1:-$var2}").map(String::as_str),
+            Some("var1")
+        );
+        assert_eq!(vars.get("$version").map(String::as_str), Some("version"));
+        assert_eq!(vars.len(), 2);
     }
 }
