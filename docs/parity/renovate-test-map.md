@@ -493,7 +493,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/go-mod-directive/index.spec.ts` | Done | [details](lib/modules/versioning/go-mod-directive/index.spec.ts.md) |
 | `lib/modules/versioning/deb/index.spec.ts` | Not done | [details](lib/modules/versioning/deb/index.spec.ts.md) |
 | `lib/modules/versioning/nuget/version.spec.ts` | Done | [details](lib/modules/versioning/nuget/version.spec.ts.md) |
-| `lib/modules/versioning/nuget/parser.spec.ts` | Not done | [details](lib/modules/versioning/nuget/parser.spec.ts.md) |
+| `lib/modules/versioning/nuget/parser.spec.ts` | Done | [details](lib/modules/versioning/nuget/parser.spec.ts.md) |
 | `lib/modules/versioning/nuget/index.spec.ts` | Not done | [details](lib/modules/versioning/nuget/index.spec.ts.md) |
 | `lib/modules/versioning/conan/index.spec.ts` | Done | [details](lib/modules/versioning/conan/index.spec.ts.md) |
 | `lib/modules/versioning/unity3d-packages/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d-packages/index.spec.ts.md) |
