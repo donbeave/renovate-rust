@@ -38,6 +38,7 @@ pub mod rpm;
 pub mod rust_release_channel;
 pub mod same_major;
 pub mod semver_coerced;
+pub mod semver_partial;
 pub mod semver_generic;
 pub mod semver_node;
 pub mod ubuntu;

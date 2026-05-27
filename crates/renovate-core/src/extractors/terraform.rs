@@ -124,6 +124,8 @@ pub struct TerraformExtractedDep {
     pub package_name: Option<String>,
     pub current_digest: Option<String>,
     pub locked_version: Option<String>,
+    /// Registry URLs for this dependency (e.g. for providers with explicit registry hostname).
+    pub registry_urls: Vec<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<TerraformSkipReason>,
 }
@@ -377,6 +379,7 @@ impl Parser {
                     package_name: None,
                     current_digest: None,
                     locked_version: None,
+                    registry_urls: vec![],
                     skip_reason: None,
                 });
             }
@@ -413,6 +416,7 @@ impl Parser {
                 package_name: None,
                 current_digest: None,
                 locked_version: None,
+                registry_urls: vec![],
                 skip_reason: None,
             });
         }
@@ -432,6 +436,7 @@ impl Parser {
                     package_name: oci.package_name,
                     current_digest: oci.current_digest,
                     locked_version: None,
+                    registry_urls: vec![],
                     skip_reason: oci.skip_reason,
                 });
             } else {
@@ -440,14 +445,17 @@ impl Parser {
                 } else {
                     self.prov_source.clone()
                 };
+                let (registry_urls, package_name) =
+                    parse_provider_source_hostname(&self.prov_source);
                 self.deps.push(TerraformExtractedDep {
                     name,
                     current_value: self.prov_version.clone(),
                     dep_type: TerraformDepType::Provider,
                     datasource: None,
-                    package_name: None,
+                    package_name,
                     current_digest: None,
                     locked_version: None,
+                    registry_urls,
                     skip_reason: None,
                 });
             }
@@ -481,6 +489,7 @@ impl Parser {
                 package_name: source.package_name,
                 current_digest: source.current_digest,
                 locked_version: None,
+                registry_urls: vec![],
                 skip_reason: source.skip_reason,
             });
             self.state = State::TopLevel;
@@ -547,6 +556,7 @@ impl Parser {
                 package_name: Some("hashicorp/terraform".to_owned()),
                 current_digest: None,
                 locked_version: None,
+                registry_urls: vec![],
                 skip_reason,
             });
             self.resource_version.clear();
@@ -863,6 +873,38 @@ fn split_double_slash(path: &str) -> (&str, Option<&str>) {
     }
 }
 
+/// Parses a provider source string and returns (registry_urls, package_name).
+/// If source has a hostname (contains dots before first `/`), extracts it as the registry URL.
+/// Mirrors TypeScript `sourceExtractionRegex` in `base.ts`.
+fn parse_provider_source_hostname(source: &str) -> (Vec<String>, Option<String>) {
+    use std::sync::LazyLock;
+    static SOURCE_RE: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(
+            r"^(?:(?P<hostname>(?:[a-zA-Z0-9\-_]+\.)+[a-zA-Z0-9\-_]+)/)?(?:(?P<namespace>[^/]+)/)?(?P<type>[^/]+)$",
+        )
+        .unwrap()
+    });
+    if source.is_empty() {
+        return (vec![], None);
+    }
+    let Some(cap) = SOURCE_RE.captures(source) else {
+        return (vec![], None);
+    };
+    if let Some(hostname) = cap.name("hostname") {
+        let registry_url = format!("https://{}", hostname.as_str());
+        let namespace = cap.name("namespace").map(|m| m.as_str()).unwrap_or("");
+        let type_name = cap.name("type").map(|m| m.as_str()).unwrap_or("");
+        let package_name = if namespace.is_empty() {
+            type_name.to_owned()
+        } else {
+            format!("{}/{}", namespace, type_name)
+        };
+        (vec![registry_url], Some(package_name))
+    } else {
+        (vec![], None)
+    }
+}
+
 fn query_param(query: &str, key: &str) -> Option<String> {
     query.split('&').find_map(|part| {
         let (name, value) = part.split_once('=')?;
@@ -923,6 +965,7 @@ fn resolve_docker_image(
         package_name,
         current_digest,
         locked_version: None,
+        registry_urls: vec![],
         skip_reason: None,
     }
 }
@@ -939,6 +982,7 @@ fn docker_skip(
         package_name: None,
         current_digest: None,
         locked_version: None,
+        registry_urls: vec![],
         skip_reason: Some(skip_reason),
     }
 }
@@ -989,6 +1033,7 @@ fn resolve_helm_release(
         package_name,
         current_digest: None,
         locked_version: None,
+        registry_urls: vec![],
         skip_reason,
     }
 }
@@ -1131,12 +1176,21 @@ fn parse_provider_lockfile(lockfile: &str) -> BTreeMap<String, String> {
 }
 
 fn normalize_lock_provider_name(provider: &str) -> String {
-    provider
-        .strip_prefix("registry.terraform.io/")
-        .or_else(|| provider.strip_prefix("https://"))
+    // https:// or http:// prefixed = custom registry; strip scheme but keep hostname
+    // (the hostname IS part of the dep name for custom registries).
+    if let Some(rest) = provider
+        .strip_prefix("https://")
         .or_else(|| provider.strip_prefix("http://"))
-        .unwrap_or(provider)
-        .to_owned()
+    {
+        return rest.to_owned();
+    }
+    // Plain {registryHost}/{namespace}/{type}: strip the registry hostname prefix.
+    if let Some((host, rest)) = provider.split_once('/') {
+        if host.contains('.') {
+            return rest.to_owned();
+        }
+    }
+    provider.to_owned()
 }
 
 fn apply_locked_versions(
@@ -1159,6 +1213,26 @@ fn apply_locked_versions(
             .find_map(|candidate| locked_versions.get(candidate))
         {
             dep.locked_version = Some(version.clone());
+        }
+    }
+}
+
+fn apply_registry_urls_from_locks(
+    deps: &mut [TerraformExtractedDep],
+    locks: &[TerraformProviderLock],
+) {
+    const DEFAULT_REGISTRY: &str = "https://registry.terraform.io";
+    for dep in deps
+        .iter_mut()
+        .filter(|d| d.dep_type == TerraformDepType::Provider && d.registry_urls.is_empty())
+    {
+        let search_name = dep.package_name.as_deref().unwrap_or(&dep.name);
+        let found: Vec<_> = locks
+            .iter()
+            .filter(|l| l.package_name == search_name)
+            .collect();
+        if found.len() == 1 && found[0].registry_url != DEFAULT_REGISTRY {
+            dep.registry_urls = vec![found[0].registry_url.clone()];
         }
     }
 }
@@ -1215,11 +1289,48 @@ pub fn extract(content: &str) -> Vec<TerraformExtractedDep> {
     extract_with_lockfile(content, None)
 }
 
+/// Applies locked versions from parsed lock structs, matched by packageName + registryUrl.
+/// Mirrors TypeScript `getLockedVersion` — only sets locked_version when still None.
+fn apply_locked_versions_from_lock_structs(
+    deps: &mut [TerraformExtractedDep],
+    locks: &[TerraformProviderLock],
+) {
+    const DEFAULT_REGISTRY: &str = "https://registry.terraform.io";
+    for dep in deps
+        .iter_mut()
+        .filter(|d| d.dep_type == TerraformDepType::Provider && d.locked_version.is_none())
+    {
+        let mut candidates = vec![dep
+            .package_name
+            .as_deref()
+            .unwrap_or(&dep.name)
+            .to_owned()];
+        if !dep.name.contains('/') {
+            candidates.push(format!("hashicorp/{}", dep.name));
+        }
+        let dep_registry = dep
+            .registry_urls
+            .first()
+            .map(|s| s.as_str())
+            .unwrap_or(DEFAULT_REGISTRY);
+        if let Some(lock) = locks
+            .iter()
+            .find(|l| candidates.contains(&l.package_name) && l.registry_url == dep_registry)
+        {
+            dep.locked_version = Some(lock.version.clone());
+        }
+    }
+}
+
 pub fn extract_with_lockfile(content: &str, lockfile: Option<&str>) -> Vec<TerraformExtractedDep> {
     let mut deps = extract_with_registry_aliases(content, &BTreeMap::new());
     if let Some(lockfile) = lockfile {
         let locked_versions = parse_provider_lockfile(lockfile);
         apply_locked_versions(&mut deps, &locked_versions);
+        if let Some(locks) = extract_terraform_locks(lockfile) {
+            apply_registry_urls_from_locks(&mut deps, &locks);
+            apply_locked_versions_from_lock_structs(&mut deps, &locks);
+        }
     }
     deps
 }
@@ -2526,6 +2637,78 @@ provider "registry.terraform.io/hashicorp/random" {
                 .iter()
                 .any(|d| d.dep_type == TerraformDepType::Provider)
         );
+    }
+
+    // Ported: "extract provider with version and registry url" — terraform/extractors/terraform-block/required-provider.spec.ts line 18
+    #[test]
+    fn required_provider_extract_with_version_and_registry_url() {
+        let content = r#"
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "3.0.1"
+    }
+    sops = {
+      source  = "registry.terraform.io/carlpett/sops"
+      version = "1.3.0"
+    }
+  }
+  required_providers {
+    sops = {
+      source  = "carlpett/sops"
+      version = "1.3.0"
+    }
+  }
+}
+"#;
+        let lockfile = r#"
+provider "registry.opentofu.org/hashicorp/kubernetes" {
+  version     = "3.0.1"
+  constraints = "3.0.1"
+}
+
+provider "registry.terraform.io/carlpett/sops" {
+  version     = "1.3.0"
+  constraints = "1.3.0"
+}
+
+provider "registry.opentofu.org/carlpett/sops" {
+  version     = "1.3.0"
+  constraints = "1.3.0"
+}
+"#;
+        let deps = extract_with_lockfile(content, Some(lockfile));
+        let providers: Vec<_> = deps
+            .iter()
+            .filter(|d| d.dep_type == TerraformDepType::Provider)
+            .collect();
+        assert_eq!(providers.len(), 3);
+
+        let k8s = providers
+            .iter()
+            .find(|d| d.name == "hashicorp/kubernetes")
+            .unwrap();
+        assert_eq!(k8s.current_value, "3.0.1");
+        assert_eq!(k8s.locked_version.as_deref(), Some("3.0.1"));
+        assert_eq!(k8s.registry_urls, vec!["https://registry.opentofu.org"]);
+
+        let sops_hostname = providers
+            .iter()
+            .find(|d| d.name == "registry.terraform.io/carlpett/sops")
+            .unwrap();
+        assert_eq!(sops_hostname.current_value, "1.3.0");
+        assert_eq!(sops_hostname.locked_version.as_deref(), Some("1.3.0"));
+        assert_eq!(sops_hostname.registry_urls, vec!["https://registry.terraform.io"]);
+        assert_eq!(sops_hostname.package_name.as_deref(), Some("carlpett/sops"));
+
+        let sops_no_hostname = providers
+            .iter()
+            .find(|d| d.name == "carlpett/sops")
+            .unwrap();
+        assert_eq!(sops_no_hostname.current_value, "1.3.0");
+        assert_eq!(sops_no_hostname.locked_version.as_deref(), Some("1.3.0"));
+        assert!(sops_no_hostname.registry_urls.is_empty());
     }
 
     // ── terraform/extractors/others/modules.spec.ts ───────────────────────────
