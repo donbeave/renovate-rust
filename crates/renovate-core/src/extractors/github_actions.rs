@@ -55,7 +55,7 @@ pub enum GithubActionsSkipReason {
 }
 
 /// A single extracted GitHub Actions dependency.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct GithubActionsExtractedDep {
     /// `owner/repo` (without sub-path or version).
     pub action: String,
@@ -63,6 +63,17 @@ pub struct GithubActionsExtractedDep {
     pub current_value: String,
     /// Set when the dep should not be looked up in the registry.
     pub skip_reason: Option<GithubActionsSkipReason>,
+    /// Registry URLs to use for this dep (empty = use default github.com).
+    pub registry_urls: Vec<String>,
+}
+
+/// Context for enriched extraction — endpoint and platform for registry URL detection.
+#[derive(Debug, Default)]
+pub struct GithubActionsContext {
+    /// Platform name (e.g., `"github"`, `"gitlab"`, `"bitbucket"`).
+    pub platform: Option<String>,
+    /// API endpoint URL (e.g., `"https://github.enterprise.com"`).
+    pub endpoint: Option<String>,
 }
 
 /// Parsed GitHub Actions `uses:` reference.
@@ -146,8 +157,44 @@ static PARSE_USES_LINE_RE: LazyLock<Regex> =
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
+/// Detect registry URLs to apply to all extracted actions, mirroring TypeScript's
+/// `detectCustomGitHubRegistryUrlsForActions()`.
+///
+/// Returns an empty vec when the default github.com registry should be used,
+/// or `[enterprise_url, "https://github.com"]` for GitHub Enterprise endpoints.
+fn detect_registry_urls(ctx: &GithubActionsContext) -> Vec<String> {
+    let endpoint = match &ctx.endpoint {
+        Some(e) => e.as_str(),
+        None => return vec![],
+    };
+    if ctx.platform.as_deref() != Some("github") {
+        return vec![];
+    }
+    // Parse host from endpoint URL: "https://foo.example.com/api/v3" → "foo.example.com"
+    let (scheme, host) = match endpoint.split_once("://") {
+        Some((s, rest)) if s == "https" || s == "http" => {
+            let host = rest.split('/').next().unwrap_or("").split('?').next().unwrap_or("");
+            if host.is_empty() {
+                return vec![]; // invalid URL
+            }
+            (s, host)
+        }
+        _ => return vec![], // not a valid URL
+    };
+    if host == "github.com" || host == "api.github.com" {
+        return vec![]; // standard github.com, no custom registry
+    }
+    vec![format!("{scheme}://{host}"), "https://github.com".to_owned()]
+}
+
 /// Parse a GitHub Actions workflow YAML file and extract `uses:` references.
 pub fn extract(content: &str) -> Vec<GithubActionsExtractedDep> {
+    extract_with_context(content, &GithubActionsContext::default())
+}
+
+/// Parse a GitHub Actions workflow YAML file with endpoint context for registry URL detection.
+pub fn extract_with_context(content: &str, ctx: &GithubActionsContext) -> Vec<GithubActionsExtractedDep> {
+    let registry_urls = detect_registry_urls(ctx);
     let mut deps = Vec::new();
 
     for cap in USES_LINE.captures_iter(content) {
@@ -158,7 +205,8 @@ pub fn extract(content: &str) -> Vec<GithubActionsExtractedDep> {
         let raw = strip_comment(remainder);
         let raw = raw.trim_matches(|c| c == '\'' || c == '"');
 
-        if let Some(dep) = parse_uses(raw, version_comment) {
+        if let Some(mut dep) = parse_uses(raw, version_comment) {
+            dep.registry_urls = registry_urls.clone();
             deps.push(dep);
         }
     }
@@ -357,6 +405,7 @@ fn parse_uses(raw: &str, version_comment: Option<&str>) -> Option<GithubActionsE
             action: raw.to_owned(),
             current_value: String::new(),
             skip_reason: Some(GithubActionsSkipReason::LocalAction),
+            registry_urls: vec![],
         });
     }
 
@@ -366,6 +415,7 @@ fn parse_uses(raw: &str, version_comment: Option<&str>) -> Option<GithubActionsE
             action: raw.to_owned(),
             current_value: String::new(),
             skip_reason: Some(GithubActionsSkipReason::DockerRef),
+            registry_urls: vec![],
         });
     }
 
@@ -384,12 +434,14 @@ fn parse_uses(raw: &str, version_comment: Option<&str>) -> Option<GithubActionsE
                 action,
                 current_value: vc.to_owned(),
                 skip_reason: None,
+                registry_urls: vec![],
             });
         }
         return Some(GithubActionsExtractedDep {
             action,
             current_value: version.to_owned(),
             skip_reason: Some(GithubActionsSkipReason::ShaPin),
+            registry_urls: vec![],
         });
     }
     if SHA_SHORT.is_match(version) {
@@ -398,12 +450,14 @@ fn parse_uses(raw: &str, version_comment: Option<&str>) -> Option<GithubActionsE
                 action,
                 current_value: vc.to_owned(),
                 skip_reason: None,
+                registry_urls: vec![],
             });
         }
         return Some(GithubActionsExtractedDep {
             action,
             current_value: version.to_owned(),
             skip_reason: Some(GithubActionsSkipReason::ShortShaPin),
+            registry_urls: vec![],
         });
     }
 
@@ -411,6 +465,7 @@ fn parse_uses(raw: &str, version_comment: Option<&str>) -> Option<GithubActionsE
         action,
         current_value: version.to_owned(),
         skip_reason: None,
+        registry_urls: vec![],
     })
 }
 
@@ -1494,6 +1549,7 @@ mod tests {
             action: action.to_owned(),
             current_value: current_value.to_owned(),
             skip_reason: None,
+            registry_urls: vec![],
         }
     }
 
@@ -3092,5 +3148,103 @@ jobs:
         assert_eq!(deps[0].dep_name, "node");
         assert_eq!(deps[0].current_value, None);
         assert_eq!(deps[0].skip_reason, Some("unspecified-version"));
+    }
+
+    // Fixture: first action in workflow_2.yml — actions/bin/shellcheck@master
+    const WORKFLOW_2_FIRST_ACTION: &str = "steps:\n  - uses: actions/bin/shellcheck@master\n";
+
+    // Ported: "use github.com as registry when no settings provided" — github-actions/extract.spec.ts line 79
+    #[test]
+    fn use_github_com_as_registry_when_no_settings_provided() {
+        let deps = extract(WORKFLOW_2_FIRST_ACTION);
+        assert!(!deps.is_empty());
+        assert!(deps[0].registry_urls.is_empty());
+    }
+
+    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com" — github-actions/extract.spec.ts line 87
+    #[test]
+    fn use_enterprise_registry_when_endpoint_is_enterprise() {
+        let ctx = GithubActionsContext {
+            platform: Some("github".to_string()),
+            endpoint: Some("https://github.enterprise.com".to_string()),
+        };
+        let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
+        assert!(!deps.is_empty());
+        assert_eq!(
+            deps[0].registry_urls,
+            vec!["https://github.enterprise.com", "https://github.com"]
+        );
+    }
+
+    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3" — github-actions/extract.spec.ts line 102
+    #[test]
+    fn use_enterprise_registry_when_endpoint_has_api_v3_path() {
+        let ctx = GithubActionsContext {
+            platform: Some("github".to_string()),
+            endpoint: Some("https://github.enterprise.com/api/v3".to_string()),
+        };
+        let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
+        assert!(!deps.is_empty());
+        assert_eq!(
+            deps[0].registry_urls,
+            vec!["https://github.enterprise.com", "https://github.com"]
+        );
+    }
+
+    // Ported: "use github.com only as registry when running against non-GitHub" — github-actions/extract.spec.ts line 117
+    #[test]
+    fn use_no_custom_registry_when_platform_is_not_github() {
+        let ctx = GithubActionsContext {
+            platform: Some("bitbucket".to_string()),
+            endpoint: Some("https://bitbucket.enterprise.com".to_string()),
+        };
+        let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
+        assert!(!deps.is_empty());
+        assert!(deps[0].registry_urls.is_empty());
+    }
+
+    // Ported: "use github.com only as registry when running against github.com" — github-actions/extract.spec.ts line 129
+    #[test]
+    fn use_no_custom_registry_when_endpoint_is_github_com() {
+        let ctx = GithubActionsContext {
+            platform: Some("github".to_string()),
+            endpoint: Some("https://github.com".to_string()),
+        };
+        let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
+        assert!(!deps.is_empty());
+        assert!(deps[0].registry_urls.is_empty());
+    }
+
+    // Ported: "use github.com only as registry when running against api.github.com" — github-actions/extract.spec.ts line 141
+    #[test]
+    fn use_no_custom_registry_when_endpoint_is_api_github_com() {
+        let ctx = GithubActionsContext {
+            platform: Some("github".to_string()),
+            endpoint: Some("https://api.github.com".to_string()),
+        };
+        let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
+        assert!(!deps.is_empty());
+        assert!(deps[0].registry_urls.is_empty());
+    }
+
+    // Ported: "returns undefined registryUrls when endpoint is invalid URL" — github-actions/extract.spec.ts line 153
+    #[test]
+    fn returns_no_registry_urls_when_endpoint_is_invalid() {
+        let ctx = GithubActionsContext {
+            platform: Some("github".to_string()),
+            endpoint: Some("not-a-valid-url".to_string()),
+        };
+        let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
+        assert!(!deps.is_empty());
+        assert!(deps[0].registry_urls.is_empty());
+    }
+
+    // Ported: "logs unknown schema" — github-actions/extract.spec.ts line 1055
+    #[test]
+    fn logs_unknown_schema_returns_empty() {
+        // action.yml with node20 runner has no `uses:` lines → empty result (null in TS)
+        let yaml = "runs:\n  using: 'node20'\n  main: 'index.js'\n";
+        let deps = extract(yaml);
+        assert!(deps.is_empty());
     }
 }

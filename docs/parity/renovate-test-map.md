@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3825 / 11677 total tests ported (33%) · pending 7784 · not-applicable 68 (1% of total) — updated 2026-05-27
+**Progress:** 3833 / 11677 total tests ported (33%) · pending 7776 · not-applicable 68 (1% of total) — updated 2026-05-27
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -30,7 +30,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/gleam/extract.spec.ts` | Not done | [details](lib/modules/manager/gleam/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/extract.spec.ts` | Done | [details](lib/modules/manager/git-submodules/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/artifact.spec.ts.md) |
-| `lib/modules/manager/github-actions/extract.spec.ts` | Not done | [details](lib/modules/manager/github-actions/extract.spec.ts.md) |
+| `lib/modules/manager/github-actions/extract.spec.ts` | Done | [details](lib/modules/manager/github-actions/extract.spec.ts.md) |
 | `lib/modules/manager/github-actions/integration.spec.ts` | Not done | [details](lib/modules/manager/github-actions/integration.spec.ts.md) |
 | `lib/modules/manager/github-actions/parse.spec.ts` | Done | [details](lib/modules/manager/github-actions/parse.spec.ts.md) |
 | `lib/modules/manager/gitlabci/extract.spec.ts` | Not done | [details](lib/modules/manager/gitlabci/extract.spec.ts.md) |
@@ -601,7 +601,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/hermit/artifacts.spec.ts` | Not done | [details](lib/modules/manager/hermit/artifacts.spec.ts.md) |
 | `lib/modules/manager/hermit/default-config.spec.ts` | Done | [details](lib/modules/manager/hermit/default-config.spec.ts.md) |
 | `lib/modules/manager/hermit/update.spec.ts` | Done | [details](lib/modules/manager/hermit/update.spec.ts.md) |
-| `lib/modules/manager/homebrew/handlers/github.spec.ts` | Not done | [details](lib/modules/manager/homebrew/handlers/github.spec.ts.md) |
+| `lib/modules/manager/homebrew/handlers/github.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/github.spec.ts.md) |
 | `lib/modules/manager/homebrew/handlers/index.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/index.spec.ts.md) |
 | `lib/modules/manager/homebrew/handlers/npm.spec.ts` | Not done | [details](lib/modules/manager/homebrew/handlers/npm.spec.ts.md) |
 | `lib/modules/manager/homebrew/update.spec.ts` | Not done | [details](lib/modules/manager/homebrew/update.spec.ts.md) |
