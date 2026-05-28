@@ -942,6 +942,173 @@ pub fn calculate_most_recent_timestamp<'a>(
 }
 
 // ---------------------------------------------------------------------------
+// Error/warning PR text — lib/workers/repository/errors-warnings.ts
+// ---------------------------------------------------------------------------
+
+/// A warning or error entry (topic + message).
+#[derive(Debug, Clone)]
+pub struct WarningOrError<'a> {
+    pub topic: &'a str,
+    pub message: &'a str,
+}
+
+/// One dependency with its warning messages.
+#[derive(Debug, Clone)]
+pub struct DepWithWarnings<'a> {
+    pub warnings: &'a [&'a str],
+}
+
+/// One package file with deps.
+#[derive(Debug, Clone)]
+pub struct PackageFileWarnings<'a> {
+    pub package_file: &'a str,
+    pub deps: &'a [DepWithWarnings<'a>],
+}
+
+/// Generate the Warnings section for a PR/onboarding description.
+///
+/// Mirrors `getWarnings()` from `lib/workers/repository/errors-warnings.ts`.
+pub fn get_warnings(warnings: &[WarningOrError<'_>]) -> String {
+    if warnings.is_empty() {
+        return String::new();
+    }
+    let mut out = format!("\n# Warnings ({})\n\n", warnings.len());
+    out.push_str("Please correct - or verify that you can safely ignore - these warnings before you merge this PR.\n\n");
+    for w in warnings {
+        out.push_str(&format!("-   `{}`: {}\n", w.topic, w.message));
+    }
+    out.push_str("\n---\n");
+    out
+}
+
+/// Generate the Errors section for a PR description.
+///
+/// Mirrors `getErrors()` from `lib/workers/repository/errors-warnings.ts`.
+pub fn get_errors(errors: &[WarningOrError<'_>]) -> String {
+    if errors.is_empty() {
+        return String::new();
+    }
+    let mut out = format!("\n# Errors ({})\n\n", errors.len());
+    out.push_str("Renovate has found errors that you should fix (in this branch) before finishing this PR.\n\n");
+    for e in errors {
+        out.push_str(&format!("-   `{}`: {}\n", e.topic, e.message));
+    }
+    out.push_str("\n---\n");
+    out
+}
+
+/// Collect unique warning messages and affected files from package files.
+fn collect_dep_warnings<'a>(
+    package_files: &'a [PackageFileWarnings<'a>],
+) -> (Vec<&'a str>, Vec<&'a str>) {
+    let mut warnings: Vec<&str> = Vec::new();
+    let mut warning_files: Vec<&str> = Vec::new();
+    for file in package_files {
+        if file.package_file.is_empty() {
+            continue;
+        }
+        for dep in file.deps {
+            for &msg in dep.warnings {
+                if !warnings.contains(&msg) {
+                    warnings.push(msg);
+                }
+                if !warning_files.contains(&file.package_file) {
+                    warning_files.push(file.package_file);
+                }
+            }
+        }
+    }
+    (warnings, warning_files)
+}
+
+/// Generate dep-warning text for a PR.
+///
+/// Mirrors `getDepWarningsPR()` from `lib/workers/repository/errors-warnings.ts`.
+pub fn get_dep_warnings_pr(
+    package_files: &[PackageFileWarnings<'_>],
+    suppress_dep_lookup_warnings: bool,
+    has_dependency_dashboard: bool,
+    dependency_dashboard_issue: Option<u32>,
+) -> String {
+    if suppress_dep_lookup_warnings {
+        return String::new();
+    }
+    let (warnings, _) = collect_dep_warnings(package_files);
+    if warnings.is_empty() {
+        return String::new();
+    }
+    let mut out = "\n---\n\n> \u{26a0}\u{fe0f} **Warning**\n> \n".to_string();
+    out.push_str("> Some dependencies could not be looked up. ");
+    if has_dependency_dashboard {
+        let dep_dash_link = if let Some(issue) = dependency_dashboard_issue {
+            format!("[Dependency Dashboard](../issues/{})", issue)
+        } else {
+            "Dependency Dashboard".to_string()
+        };
+        out.push_str(&format!("Check the {} for more information.\n\n", dep_dash_link));
+    } else {
+        out.push_str("Check the warning logs for more information.\n\n");
+    }
+    out
+}
+
+/// Generate dep-warning text for the dependency dashboard.
+///
+/// Mirrors `getDepWarningsDashboard()` from `lib/workers/repository/errors-warnings.ts`.
+pub fn get_dep_warnings_dashboard(
+    package_files: &[PackageFileWarnings<'_>],
+    suppress_dep_lookup_warnings: bool,
+) -> String {
+    if suppress_dep_lookup_warnings {
+        return String::new();
+    }
+    let (warnings, warning_files) = collect_dep_warnings(package_files);
+    if warnings.is_empty() {
+        return String::new();
+    }
+    // Strip "Failed to look up X dependency " prefixes
+    static STRIP_PREFIX_RE: std::sync::LazyLock<regex::Regex> =
+        std::sync::LazyLock::new(|| {
+            regex::Regex::new(r"^Failed to look up(?: [-\w]+)? dependency ").unwrap()
+        });
+    let dep_list: Vec<String> = warnings
+        .iter()
+        .map(|w| format!("`{}`", STRIP_PREFIX_RE.replace(w, "")))
+        .collect();
+    let files_list: Vec<String> = warning_files.iter().map(|f| format!("`{}`", f)).collect();
+    let mut out = "\n---\n\n> \u{26a0}\u{fe0f} **Warning**\n> \n> Renovate failed to look up the following dependencies: ".to_string();
+    out.push_str(&dep_list.join(", "));
+    out.push_str(".\n> \n> Files affected: ");
+    out.push_str(&files_list.join(", "));
+    out.push_str("\n\n---\n\n");
+    out
+}
+
+/// Generate dep-warning text for the onboarding PR.
+///
+/// Mirrors `getDepWarningsOnboardingPR()` from `lib/workers/repository/errors-warnings.ts`.
+pub fn get_dep_warnings_onboarding_pr(
+    package_files: &[PackageFileWarnings<'_>],
+    suppress_dep_lookup_warnings: bool,
+) -> String {
+    if suppress_dep_lookup_warnings {
+        return String::new();
+    }
+    let (warnings, warning_files) = collect_dep_warnings(package_files);
+    if warnings.is_empty() {
+        return String::new();
+    }
+    let mut out = "\n---\n> \n> \u{26a0}\u{fe0f} **Warning**\n> \n".to_string();
+    out.push_str("> Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.\n> \n");
+    for w in &warnings {
+        out.push_str(&format!("> -   `{}`\n", w));
+    }
+    let files_list: Vec<String> = warning_files.iter().map(|f| format!("`{}`", f)).collect();
+    out.push_str(&format!(">\n> Files affected: {}\n\n", files_list.join(", ")));
+    out
+}
+
+// ---------------------------------------------------------------------------
 // Onboarding PR list — lib/workers/repository/onboarding/pr/pr-list.ts
 // ---------------------------------------------------------------------------
 
@@ -5449,6 +5616,171 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── get_warnings / get_errors / get_dep_warnings_* ───────────────────────
+
+    fn mk_warning<'a>(topic: &'a str, message: &'a str) -> WarningOrError<'a> {
+        WarningOrError { topic, message }
+    }
+
+    fn mk_dep<'a>(msgs: &'a [&'a str]) -> DepWithWarnings<'a> {
+        DepWithWarnings { warnings: msgs }
+    }
+
+    fn mk_pkg<'a>(file: &'a str, deps: &'a [DepWithWarnings<'a>]) -> PackageFileWarnings<'a> {
+        PackageFileWarnings { package_file: file, deps }
+    }
+
+    // Ported: "returns warning text" — workers/repository/errors-warnings.spec.ts line 22
+    #[test]
+    fn test_get_warnings_returns_text() {
+        let warnings = [mk_warning("foo", "Failed to look up dependency")];
+        let result = get_warnings(&warnings);
+        assert!(result.contains("# Warnings (1)"));
+        assert!(result.contains("`foo`: Failed to look up dependency"));
+        assert!(result.contains("---\n"));
+    }
+
+    // Ported: "getWarning returns empty string" — workers/repository/errors-warnings.spec.ts line 39
+    #[test]
+    fn test_get_warnings_empty() {
+        assert_eq!(get_warnings(&[]), "");
+    }
+
+    // Ported: "returns error text" — workers/repository/errors-warnings.spec.ts line 318
+    #[test]
+    fn test_get_errors_returns_text() {
+        let errors = [mk_warning("renovate.json", "Failed to parse")];
+        let result = get_errors(&errors);
+        assert!(result.contains("# Errors (1)"));
+        assert!(result.contains("`renovate.json`: Failed to parse"));
+    }
+
+    // Ported: "getError returns empty string" — workers/repository/errors-warnings.spec.ts line 335
+    #[test]
+    fn test_get_errors_empty() {
+        assert_eq!(get_errors(&[]), "");
+    }
+
+    // Ported: "returns 2 pr warnings text dependencyDashboard true" — errors-warnings.spec.ts line 48
+    #[test]
+    fn test_get_dep_warnings_pr_dashboard_true() {
+        let w1 = ["Warning 1"];
+        let w2 = ["Warning 2"];
+        let empty: [&str; 0] = [];
+        let dep1a = mk_dep(&w1); let dep1b = mk_dep(&empty); let dep1c = mk_dep(&w1); let dep2 = mk_dep(&w2);
+        let pkg1_deps = [dep1a, dep1b]; let pkg2_deps = [dep1c]; let pkg3_deps = [dep2];
+        let files = [
+            mk_pkg("package.json", &pkg1_deps),
+            mk_pkg("backend/package.json", &pkg2_deps),
+            mk_pkg("Dockerfile", &pkg3_deps),
+        ];
+        let result = get_dep_warnings_pr(&files, false, true, None);
+        assert!(result.contains("⚠️ **Warning**"));
+        assert!(result.contains("Check the Dependency Dashboard for more information."));
+        assert!(!result.contains("warning logs"));
+    }
+
+    // Ported: "returns 2 pr warnings text dependencyDashboard true with issue link" — errors-warnings.spec.ts line 73
+    #[test]
+    fn test_get_dep_warnings_pr_with_issue_link() {
+        let w1 = ["Warning 1"];
+        let dep = mk_dep(&w1); let dep_arr = [dep];
+        let files = [mk_pkg("package.json", &dep_arr)];
+        let result = get_dep_warnings_pr(&files, false, true, Some(123));
+        assert!(result.contains("[Dependency Dashboard](../issues/123)"));
+    }
+
+    // Ported: "returns 2 pr warnings text dependencyDashboard false" — errors-warnings.spec.ts line 97
+    #[test]
+    fn test_get_dep_warnings_pr_dashboard_false() {
+        let w1 = ["Warning 1"];
+        let dep = mk_dep(&w1); let dep_arr = [dep];
+        let files = [mk_pkg("package.json", &dep_arr)];
+        let result = get_dep_warnings_pr(&files, false, false, None);
+        assert!(result.contains("Check the warning logs for more information."));
+    }
+
+    // Ported: "PR warning returns empty string" — errors-warnings.spec.ts line 137
+    #[test]
+    fn test_get_dep_warnings_pr_empty() {
+        assert_eq!(get_dep_warnings_pr(&[], false, false, None), "");
+    }
+
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 144
+    #[test]
+    fn test_get_dep_warnings_pr_suppressed() {
+        assert_eq!(get_dep_warnings_pr(&[], true, false, None), "");
+    }
+
+    // Ported: "returns dependency dashboard warning text" — errors-warnings.spec.ts line 153
+    #[test]
+    fn test_get_dep_warnings_dashboard_returns_text() {
+        let d1 = ["dependency-1"];
+        let d2 = ["dependency-2"];
+        let empty: [&str; 0] = [];
+        let dep1a = mk_dep(&d1); let dep1b = mk_dep(&empty); let dep1c = mk_dep(&d1); let dep2 = mk_dep(&d2);
+        let pkg1_deps = [dep1a, dep1b]; let pkg2_deps = [dep1c]; let pkg3_deps = [dep2];
+        let files = [
+            mk_pkg("package.json", &pkg1_deps),
+            mk_pkg("backend/package.json", &pkg2_deps),
+            mk_pkg("Dockerfile", &pkg3_deps),
+        ];
+        let result = get_dep_warnings_dashboard(&files, false);
+        assert!(result.contains("⚠️ **Warning**"));
+        assert!(result.contains("`dependency-1`, `dependency-2`"));
+        assert!(result.contains("`package.json`, `backend/package.json`, `Dockerfile`"));
+    }
+
+    // Ported: "dependency dashboard warning returns empty string" — errors-warnings.spec.ts line 203
+    #[test]
+    fn test_get_dep_warnings_dashboard_empty() {
+        assert_eq!(get_dep_warnings_dashboard(&[], false), "");
+    }
+
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 210
+    #[test]
+    fn test_get_dep_warnings_dashboard_suppressed() {
+        assert_eq!(get_dep_warnings_dashboard(&[], true), "");
+    }
+
+    // Ported: "returns onboarding warning text" — errors-warnings.spec.ts line 218
+    #[test]
+    fn test_get_dep_warnings_onboarding_pr_returns_text() {
+        let w1 = ["Warning 1"];
+        let w2 = ["Warning 2"];
+        let empty: [&str; 0] = [];
+        let dep1a = mk_dep(&w1); let dep1b = mk_dep(&empty); let dep1c = mk_dep(&w1); let dep2 = mk_dep(&w2);
+        let pkg1_deps = [dep1a, dep1b]; let pkg2_deps = [dep1c]; let pkg3_deps = [dep2];
+        let files = [
+            mk_pkg("package.json", &pkg1_deps),
+            mk_pkg("backend/package.json", &pkg2_deps),
+            mk_pkg("Dockerfile", &pkg3_deps),
+        ];
+        let result = get_dep_warnings_onboarding_pr(&files, false);
+        assert!(result.contains("⚠️ **Warning**"));
+        assert!(result.contains("> -   `Warning 1`"));
+        assert!(result.contains("> -   `Warning 2`"));
+        assert!(result.contains("`package.json`, `backend/package.json`, `Dockerfile`"));
+    }
+
+    // Ported: "handle empty package files" — errors-warnings.spec.ts line 273
+    #[test]
+    fn test_get_dep_warnings_onboarding_empty() {
+        assert_eq!(get_dep_warnings_onboarding_pr(&[], false), "");
+    }
+
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 284
+    #[test]
+    fn test_get_dep_warnings_onboarding_suppressed() {
+        assert_eq!(get_dep_warnings_onboarding_pr(&[], true), "");
+    }
+
+    // Ported: "handles undefined" — errors-warnings.spec.ts line 290
+    #[test]
+    fn test_get_dep_warnings_onboarding_handles_undefined() {
+        assert_eq!(get_dep_warnings_onboarding_pr(&[], false), "");
     }
 
     // ── parse_goproxy / parse_noproxy ────────────────────────────────────────

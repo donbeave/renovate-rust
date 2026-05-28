@@ -5,48 +5,47 @@
 ## `lib/workers/repository/errors-warnings.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/errors-warnings.spec.ts
-**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+**Total tests:** 16 | **Ported:** 16 | **Actionable:** 16 | **Status:** done
 
 ### `workers/repository/errors-warnings › getWarnings()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns warning text | 20 | pending | — | — | — |
-| getWarning returns empty string | 41 | pending | — | — | — |
+| returns warning text | 22 | ported | `util.rs` | `test_get_warnings_returns_text` | — |
+| getWarning returns empty string | 39 | ported | `util.rs` | `test_get_warnings_empty` | — |
 
 ### `workers/repository/errors-warnings › getDepWarningsPR()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns 2 pr warnings text dependencyDashboard true | 49 | pending | — | — | — |
-| returns 2 pr warnings text dependencyDashboard true with issue link | 97 | pending | — | — | — |
-| returns 2 pr warnings text dependencyDashboard false | 120 | pending | — | — | — |
-| PR warning returns empty string | 168 | pending | — | — | — |
-| suppress notifications contains dependencyLookupWarnings flag then return empty string | 175 | pending | — | — | — |
+| returns 2 pr warnings text dependencyDashboard true | 48 | ported | `util.rs` | `test_get_dep_warnings_pr_dashboard_true` | — |
+| returns 2 pr warnings text dependencyDashboard true with issue link | 73 | ported | `util.rs` | `test_get_dep_warnings_pr_with_issue_link` | — |
+| returns 2 pr warnings text dependencyDashboard false | 97 | ported | `util.rs` | `test_get_dep_warnings_pr_dashboard_false` | — |
+| PR warning returns empty string | 137 | ported | `util.rs` | `test_get_dep_warnings_pr_empty` | — |
+| suppress notifications contains dependencyLookupWarnings flag then return empty string | 144 | ported | `util.rs` | `test_get_dep_warnings_pr_suppressed` | — |
 
 ### `workers/repository/errors-warnings › getDepWarningsDashboard()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns dependency dashboard warning text | 186 | pending | — | — | — |
-| dependency dashboard warning returns empty string | 236 | pending | — | — | — |
-| suppress notifications contains dependencyLookupWarnings flag then return empty string | 243 | pending | — | — | — |
+| returns dependency dashboard warning text | 153 | ported | `util.rs` | `test_get_dep_warnings_dashboard_returns_text` | — |
+| dependency dashboard warning returns empty string | 203 | ported | `util.rs` | `test_get_dep_warnings_dashboard_empty` | — |
+| suppress notifications contains dependencyLookupWarnings flag then return empty string | 210 | ported | `util.rs` | `test_get_dep_warnings_dashboard_suppressed` | — |
 
 ### `workers/repository/errors-warnings › getErrors()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns error text | 260 | pending | — | — | — |
-| getError returns empty string | 281 | pending | — | — | — |
+| returns error text | 318 | ported | `util.rs` | `test_get_errors_returns_text` | — |
+| getError returns empty string | 335 | ported | `util.rs` | `test_get_errors_empty` | — |
 
 ### `workers/repository/errors-warnings › getDepWarningsOnboardingPR()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns onboarding warning text | 289 | pending | — | — | — |
-| handle empty package files | 345 | pending | — | — | — |
-| suppress notifications contains dependencyLookupWarnings flag then return empty string | 356 | pending | — | — | — |
-| handles undefined | 365 | pending | — | — | — |
+| returns onboarding warning text | 218 | ported | `util.rs` | `test_get_dep_warnings_onboarding_pr_returns_text` | — |
+| handle empty package files | 273 | ported | `util.rs` | `test_get_dep_warnings_onboarding_empty` | — |
+| suppress notifications contains dependencyLookupWarnings flag then return empty string | 284 | ported | `util.rs` | `test_get_dep_warnings_onboarding_suppressed` | — |
+| handles undefined | 290 | ported | `util.rs` | `test_get_dep_warnings_onboarding_handles_undefined` | — |
 
 ---
-

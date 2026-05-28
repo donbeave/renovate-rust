@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4603 / 11677 total tests ported (39%) · pending 4037 · not-applicable 3037 (26% of total) — updated 2026-05-28
+**Progress:** 4619 / 11677 total tests ported (40%) · pending 4021 · not-applicable 3037 (26% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -841,7 +841,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/dependency-dashboard.spec.ts` | Not done | [details](lib/workers/repository/dependency-dashboard.spec.ts.md) |
 | `lib/workers/repository/error-config.spec.ts` | Done | [details](lib/workers/repository/error-config.spec.ts.md) |
 | `lib/workers/repository/error.spec.ts` | Not done | [details](lib/workers/repository/error.spec.ts.md) |
-| `lib/workers/repository/errors-warnings.spec.ts` | Not done | [details](lib/workers/repository/errors-warnings.spec.ts.md) |
+| `lib/workers/repository/errors-warnings.spec.ts` | Done | [details](lib/workers/repository/errors-warnings.spec.ts.md) |
 | `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | Not done | [details](lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) |
 | `lib/workers/repository/extract/file-match.spec.ts` | Done | [details](lib/workers/repository/extract/file-match.spec.ts.md) |
 | `lib/workers/repository/extract/index.spec.ts` | Done | [details](lib/workers/repository/extract/index.spec.ts.md) |
