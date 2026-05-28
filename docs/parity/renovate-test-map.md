@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4474 / 11677 total tests ported (38%) · pending 6988 · not-applicable 215 (2% of total) — updated 2026-05-28
+**Progress:** 4483 / 11677 total tests ported (38%) · pending 6979 · not-applicable 215 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -249,7 +249,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/bitrise/index.spec.ts` | Done | [details](lib/modules/datasource/bitrise/index.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/base.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/index.spec.ts.md) |
-| `lib/modules/datasource/terraform-module/utils.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/utils.spec.ts.md) |
+| `lib/modules/datasource/terraform-module/utils.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/utils.spec.ts.md) |
 | `lib/modules/datasource/terraform-provider/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-provider/index.spec.ts.md) |
 | `lib/modules/datasource/packagist/schema.spec.ts` | Not done | [details](lib/modules/datasource/packagist/schema.spec.ts.md) |
 | `lib/modules/datasource/packagist/index.spec.ts` | Not done | [details](lib/modules/datasource/packagist/index.spec.ts.md) |

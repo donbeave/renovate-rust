@@ -961,6 +961,7 @@ mod tests {
 
     // ── is_within_schedule_at ────────────────────────────────────────────────
 
+    // Ported: "returns true if no schedule" — workers/repository/update/branch/schedule.spec.ts line 154
     #[test]
     fn empty_schedule_always_matches() {
         assert!(is_within_schedule_at(&[], utc(2024, 4, 15, 10)));
