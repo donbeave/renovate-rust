@@ -940,6 +940,45 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(100));
     }
 
+    // Ported: "matches patterns with regex escape sequences" — util/cache/package/ttl.spec.ts line 161
+    #[test]
+    fn get_ttl_override_matches_regex_with_escape_sequences() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("/datasource-\\w+/".to_owned(), 120i64)].into(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(120));
+        assert_eq!(get_ttl_override(&cfg, "datasource-123"), Some(120));
+        assert_eq!(get_ttl_override(&cfg, "datasource-"), None); // no chars after -
+    }
+
+    // Ported: "selects longest matching pattern across all configs" — util/cache/package/ttl.spec.ts line 209
+    #[test]
+    fn get_ttl_override_selects_longest_across_4_patterns() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [
+                ("*".to_owned(), 10i64),
+                ("datasource-*".to_owned(), 20i64),
+                ("datasource-npm*".to_owned(), 30i64),
+                ("datasource-npm-*".to_owned(), 40i64),
+            ]
+            .into(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm-registry"), Some(40));
+        assert_eq!(get_ttl_override(&cfg, "datasource-npmjs"), Some(30));
+    }
+
+    // Ported: "handles negative numbers" — util/cache/package/ttl.spec.ts line 318
+    #[test]
+    fn get_ttl_override_handles_negative_values() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-npm".to_owned(), -1i64)].into(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(-1));
+    }
+
     // ── glob_match ────────────────────────────────────────────────────────
 
     #[test]

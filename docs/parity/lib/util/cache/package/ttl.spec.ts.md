@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/ttl.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/ttl.spec.ts
-**Total tests:** 31 | **Ported:** 18 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 31 | **Ported:** 21 | **Actionable:** 29 | **Status:** partial
 
 ### `util/cache/package/ttl › getTtlOverride › No configuration`
 
@@ -36,7 +36,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | matches regex patterns | 143 | ported | cache/package.rs | `get_ttl_override_matches_regex_pattern` | — |
-| matches patterns with regex escape sequences | 161 | pending | — | — | `\w+` regex pattern test pending |
+| matches patterns with regex escape sequences | 161 | ported | `cache/package.rs` | `get_ttl_override_matches_regex_with_escape_sequences` | — |
 
 ### `util/cache/package/ttl › getTtlOverride › Priority and multiple patterns`
 
@@ -44,7 +44,7 @@
 |---|---|---|---|---|---|
 | prioritizes exact match over glob patterns | 179 | ported | cache/package.rs | `get_ttl_override_exact_beats_glob` | — |
 | returns longest matching pattern when multiple patterns apply | 195 | ported | cache/package.rs | `get_ttl_override_longest_pattern_wins` | — |
-| selects longest matching pattern across all configs | 209 | pending | — | — | Needs 4-pattern test |
+| selects longest matching pattern across all configs | 209 | ported | `cache/package.rs` | `get_ttl_override_selects_longest_across_4_patterns` | — |
 | skips non-numeric values and selects next longest matching pattern | 228 | not-applicable | — | — | Rust types enforce numeric values |
 | returns undefined when no patterns match | 243 | ported | cache/package.rs | `get_ttl_override_matches_simple_glob` | non-matching case covered |
 | applies patterns consistently regardless of case in config order | 256 | pending | — | — | Config order independence not explicitly tested |
@@ -56,7 +56,7 @@
 | handles empty string pattern | 271 | pending | — | — | Empty string glob behavior |
 | treats null and undefined values as invalid | 286 | not-applicable | — | — | Rust HashMap<String,i64> types enforce non-null |
 | handles very large numbers | 306 | not-applicable | — | — | i64::MAX works without special handling |
-| handles negative numbers | 318 | pending | — | — | Negative TTL edge case |
+| handles negative numbers | 318 | ported | `cache/package.rs` | `get_ttl_override_handles_negative_values` | — |
 | treats string numbers as invalid, only accepts number types | 330 | not-applicable | — | — | Rust type system prevents string as i64 |
 
 ### `util/cache/package/ttl › resolveTtlValues › Default values`
