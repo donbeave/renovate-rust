@@ -5,7 +5,7 @@
 ## `lib/util/stats.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/stats.spec.ts
-**Total tests:** 33 | **Ported:** 13 | **Actionable:** 33 | **Status:** partial
+**Total tests:** 33 | **Ported:** 16 | **Actionable:** 33 | **Status:** partial
 
 ### `util/stats › makeTimingReport`
 
@@ -62,9 +62,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty data | 954 | pending | — | — | — |
-| ignores wrong url | 959 | pending | — | — | — |
-| writes data points | 964 | pending | — | — | — |
+| returns empty data | 954 | ported | `util.rs` | `test_http_cache_stats_empty` | — |
+| ignores wrong url | 959 | ported | `util.rs` | `test_http_cache_stats_ignores_invalid_url` | — |
+| writes data points | 964 | ported | `util.rs` | `test_http_cache_stats_writes_data_points` | — |
 | prints report | 989 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
 
 ### `util/stats › AbandonedPackageStats`

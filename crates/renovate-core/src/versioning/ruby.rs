@@ -33,7 +33,7 @@ impl RubyVersion {
                 segs.push(m.as_str().parse().ok()?);
             }
         }
-        let pre = caps.get(4).map(|m| m.as_str().to_string());
+        let pre = caps.get(4).map(|m| m.as_str().to_owned());
         Some(RubyVersion { segs, pre })
     }
 
@@ -160,7 +160,7 @@ fn parse_constraint(s: &str) -> Option<Constraint> {
     let s = s.trim();
     if s.is_empty() { return None; }
     let caps = RE.captures(s)?;
-    let op = caps.name("op").map(|m| m.as_str()).unwrap_or("=").to_string();
+    let op = caps.name("op").map(|m| m.as_str()).unwrap_or("=").to_owned();
     let ver_str = caps.name("ver")?.as_str();
     let ver = RubyVersion::parse(ver_str)?;
     let ver_segs = ver.segs.len();
@@ -200,10 +200,7 @@ fn satisfies_constraint(v: &RubyVersion, c: &Constraint) -> bool {
 }
 
 pub fn matches(version: &str, range: &str) -> bool {
-    let v = match RubyVersion::parse(version) {
-        Some(v) => v,
-        None => return false,
-    };
+    let Some(v) = RubyVersion::parse(version) else { return false; };
     let cs = parse_constraints(range);
     if cs.is_empty() { return false; }
     cs.iter().all(|c| satisfies_constraint(&v, c))
@@ -291,7 +288,7 @@ pub fn is_single_version(input: &str) -> bool {
 }
 
 pub fn get_pinned_value(input: &str) -> String {
-    input.trim_start_matches('v').to_string()
+    input.trim_start_matches('v').to_owned()
 }
 
 #[cfg(test)]

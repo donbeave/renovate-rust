@@ -217,6 +217,64 @@ impl PackageCacheStats {
 /// Mirrors `GitOperationStats` from `lib/util/stats.ts`.
 pub type GitOperationStats = LookupStats;
 
+/// Per-URL HTTP cache entry.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct HttpCacheEntry {
+    pub hit: u32,
+    pub miss: u32,
+    pub local_hit: Option<u32>,
+    pub local_miss: Option<u32>,
+}
+
+/// Accumulates per-URL HTTP cache hit/miss statistics.
+///
+/// Mirrors `HttpCacheStats` from `lib/util/stats.ts`.
+#[derive(Debug, Default)]
+pub struct HttpCacheStats {
+    data: std::collections::HashMap<String, HttpCacheEntry>,
+}
+
+impl HttpCacheStats {
+    pub fn new() -> Self { Self::default() }
+
+    fn get_base_url(url: &str) -> Option<String> {
+        if !url.contains("://") { return None; }
+        let after_scheme = url.split("://").nth(1)?;
+        let host = after_scheme.split('/').next()?;
+        let path = after_scheme.get(host.len()..)?.to_string();
+        let scheme = url.split("://").next()?;
+        Some(format!("{}://{}{}", scheme, host, path))
+    }
+
+    pub fn inc_local_hits(&mut self, url: &str) {
+        if let Some(base) = Self::get_base_url(url) {
+            let e = self.data.entry(base).or_default();
+            *e.local_hit.get_or_insert(0) += 1;
+        }
+    }
+
+    pub fn inc_local_misses(&mut self, url: &str) {
+        if let Some(base) = Self::get_base_url(url) {
+            let e = self.data.entry(base).or_default();
+            *e.local_miss.get_or_insert(0) += 1;
+        }
+    }
+
+    pub fn inc_remote_hits(&mut self, url: &str) {
+        if let Some(base) = Self::get_base_url(url) {
+            self.data.entry(base).or_default().hit += 1;
+        }
+    }
+
+    pub fn inc_remote_misses(&mut self, url: &str) {
+        if let Some(base) = Self::get_base_url(url) {
+            self.data.entry(base).or_default().miss += 1;
+        }
+    }
+
+    pub fn get_data(&self) -> &std::collections::HashMap<String, HttpCacheEntry> { &self.data }
+}
+
 /// Accumulates abandoned-package data points.
 ///
 /// Mirrors `AbandonedPackageStats` from `lib/util/stats.ts`.
@@ -4205,6 +4263,46 @@ mod tests {
         // Total req times: 100 + 200 + 400 + 800 = 1500, avg = 375
         assert_eq!(example_stats.req_avg_ms, 375);
         assert_eq!(example_stats.req_max_ms, 800);
+    }
+
+    // ── HttpCacheStats ────────────────────────────────────────────────────────
+
+    // Ported: "returns empty data" — util/stats.spec.ts line 954
+    #[test]
+    fn test_http_cache_stats_empty() {
+        let stats = HttpCacheStats::new();
+        assert!(stats.get_data().is_empty());
+    }
+
+    // Ported: "ignores wrong url" — util/stats.spec.ts line 959
+    #[test]
+    fn test_http_cache_stats_ignores_invalid_url() {
+        let mut stats = HttpCacheStats::new();
+        stats.inc_local_hits("<invalid>");
+        assert!(stats.get_data().is_empty());
+    }
+
+    // Ported: "writes data points" — util/stats.spec.ts line 964
+    #[test]
+    fn test_http_cache_stats_writes_data_points() {
+        let mut stats = HttpCacheStats::new();
+        stats.inc_local_hits("https://example.com/foo");
+        stats.inc_local_hits("https://example.com/foo");
+        stats.inc_local_misses("https://example.com/foo");
+        stats.inc_local_misses("https://example.com/bar");
+        stats.inc_remote_hits("https://example.com/bar");
+        stats.inc_remote_misses("https://example.com/bar");
+        let data = stats.get_data();
+        let bar = data.get("https://example.com/bar").unwrap();
+        assert_eq!(bar.hit, 1);
+        assert_eq!(bar.miss, 1);
+        assert_eq!(bar.local_miss, Some(1));
+        assert_eq!(bar.local_hit, None);
+        let foo = data.get("https://example.com/foo").unwrap();
+        assert_eq!(foo.hit, 0);
+        assert_eq!(foo.miss, 0);
+        assert_eq!(foo.local_hit, Some(2));
+        assert_eq!(foo.local_miss, Some(1));
     }
 
     // ── PackageCacheStats ─────────────────────────────────────────────────────

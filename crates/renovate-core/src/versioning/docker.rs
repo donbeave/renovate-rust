@@ -37,7 +37,7 @@ fn parse(version: &str) -> Option<ParsedVersion> {
 
     let caps = VERSION_RE.captures(prefix)?;
     let ver_str = &caps["version"];
-    let prerelease = caps["prerelease"].to_string();
+    let prerelease = caps["prerelease"].to_owned();
     let release: Vec<u64> = ver_str
         .split('.')
         .map(|p| p.parse::<u64>().unwrap_or(0))

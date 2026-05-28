@@ -89,7 +89,7 @@ fn parse(version: &str) -> Option<ParsedVersion> {
         minor: caps["minor"].parse().ok()?,
         patch: caps["patch"].parse().ok()?,
         build: caps["build"].parse().ok()?,
-        compatibility: caps["compatibility"].to_string(),
+        compatibility: caps["compatibility"].to_owned(),
     })
 }
 

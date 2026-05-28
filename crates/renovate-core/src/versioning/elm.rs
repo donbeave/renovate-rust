@@ -5,8 +5,8 @@ fn parse_elm_range(input: &str) -> Option<(String, String)> {
         regex::Regex::new(r"^(?P<lower>\d+\.\d+\.\d+)\s*<=\s*v\s*<\s*(?P<upper>\d+\.\d+\.\d+)$")
             .unwrap();
     let caps = re.captures(input.trim())?;
-    let lower = caps["lower"].to_string();
-    let upper = caps["upper"].to_string();
+    let lower = caps["lower"].to_owned();
+    let upper = caps["upper"].to_owned();
     let lv = Version::parse(&lower).ok()?;
     let uv = Version::parse(&upper).ok()?;
     if lv > uv {

@@ -93,7 +93,7 @@ fn detect_rez_range(input: &str) -> Option<RezRange> {
     let s = input.trim();
 
     if let Some(caps) = RE_MATCH_VERSION.captures(s) {
-        return Some(RezRange::MatchVersion(caps["v"].to_string()));
+        return Some(RezRange::MatchVersion(caps["v"].to_owned()));
     }
 
     if let Some(caps) = RE_EXACT_VERSION.captures(s) {
@@ -110,29 +110,29 @@ fn detect_rez_range(input: &str) -> Option<RezRange> {
 
     if let Some(caps) = RE_ASC_PLUS.captures(s) {
         return Some(RezRange::AscPlus {
-            lower_ver: caps["lver"].to_string(),
+            lower_ver: caps["lver"].to_owned(),
             comma: !caps["comma"].is_empty(),
-            upper_pfx: caps["upfx"].to_string(),
-            upper_ver: caps["uver"].to_string(),
+            upper_pfx: caps["upfx"].to_owned(),
+            upper_ver: caps["uver"].to_owned(),
         });
     }
 
     if let Some(caps) = RE_ASC_GTE.captures(s) {
         return Some(RezRange::AscGte {
-            lower_pfx: caps["lpfx"].to_string(),
-            lower_ver: caps["lver"].to_string(),
+            lower_pfx: caps["lpfx"].to_owned(),
+            lower_ver: caps["lver"].to_owned(),
             comma: !caps["comma"].is_empty(),
-            upper_pfx: caps["upfx"].to_string(),
-            upper_ver: caps["uver"].to_string(),
+            upper_pfx: caps["upfx"].to_owned(),
+            upper_ver: caps["uver"].to_owned(),
         });
     }
 
     if let Some(caps) = RE_DESC.captures(s) {
         return Some(RezRange::Desc {
-            upper_pfx: caps["upfx"].to_string(),
-            upper_ver: caps["uver"].to_string(),
-            lower_pfx: caps["lpfx"].to_string(),
-            lower_ver: caps["lver"].to_string(),
+            upper_pfx: caps["upfx"].to_owned(),
+            upper_ver: caps["uver"].to_owned(),
+            lower_pfx: caps["lpfx"].to_owned(),
+            lower_ver: caps["lver"].to_owned(),
         });
     }
 
@@ -152,7 +152,7 @@ fn detect_rez_range(input: &str) -> Option<RezRange> {
 
     if let Some(caps) = RE_UPPER_BOUND.captures(s) {
         return Some(RezRange::UpperBound {
-            prefix: caps["prefix"].to_string(),
+            prefix: caps["prefix"].to_owned(),
             version: caps.name("ver").map(|m| m.as_str().to_owned()),
         });
     }
