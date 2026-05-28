@@ -860,6 +860,8 @@ mod tests {
             (">=1.0 <3.0", "widen", Some("2.9.0"), "2.9.5", ">=1.0 <3.0"),
             (">=1.0 <3.0", "widen", Some("2.9.0"), "3.0", ">=1.0 <3.1"),
             (">=1.0.0 <=3.0.4", "widen", Some("2.9.0"), "3.0.5", ">=1.0.0 <=3.0.5"),
+            // Note: "~1.0 || >=3.0 <=4.0" widen case requires complex OR range handling
+            // This is a more complex case that requires the TypeScript npm range.ts logic
         ];
         for (current_value, range_strategy, current_version, new_version, expected) in cases {
             let result = get_new_value(current_value, range_strategy, *current_version, new_version);
