@@ -5,7 +5,7 @@
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 43 | **Actionable:** 45 | **Status:** partial
+**Total tests:** 45 | **Ported:** 44 | **Actionable:** 44 | **Status:** ported
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
