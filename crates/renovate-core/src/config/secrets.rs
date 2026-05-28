@@ -342,4 +342,55 @@ mod tests {
             Err(SecretsError::ConfigValidation)
         );
     }
+
+    // ── interpolator.spec.ts — replaceInterpolatedValuesInObject ─────────────
+
+    // Ported: "replaces values and deletes secrets" — util/interpolator.spec.ts line 48
+    #[test]
+    fn replaces_values_and_deletes_secrets() {
+        let config = json!({
+            "mode": "{{ secrets.SECRET_MODE }}",
+            "labels": ["{{ secrets.SECRET_LABEL }}", "renovate"],
+            "prBodyDefinitions": {
+                "Package": "{{ secrets.SECRET_PACKAGE }}",
+                "Type": "peer"
+            },
+            "hostRules": [{"matchHost": "{{ secrets.SECRET_HOST }}"}],
+            "secrets": {
+                "SECRET_HOST": "host",
+                "SECRET_MODE": "silent",
+                "SECRET_LABEL": "secret",
+                "SECRET_PACKAGE": "package"
+            }
+        });
+        let result = apply_secrets_and_variables_to_config(&config, true, false).unwrap();
+        assert_eq!(result["mode"], json!("silent"));
+        assert_eq!(result["labels"], json!(["secret", "renovate"]));
+        assert_eq!(result["prBodyDefinitions"]["Package"], json!("package"));
+        assert_eq!(result["hostRules"][0]["matchHost"], json!("host"));
+        assert!(result.get("secrets").is_none(), "secrets should be deleted");
+    }
+
+    // Ported: "replaces values and keeps secrets" — util/interpolator.spec.ts line 97
+    #[test]
+    fn replaces_values_and_keeps_secrets() {
+        let config = json!({
+            "mode": "{{ secrets.SECRET_MODE }}",
+            "secrets": {"SECRET_MODE": "silent"}
+        });
+        let result = apply_secrets_and_variables_to_config(&config, false, false).unwrap();
+        assert_eq!(result["mode"], json!("silent"));
+        assert!(result.get("secrets").is_some(), "secrets should be kept");
+    }
+
+    // Ported: "throws error if secret key is not present in config" — util/interpolator.spec.ts line 175
+    #[test]
+    fn errors_if_secret_key_is_not_present_in_config() {
+        let config = json!({
+            "mode": "{{ secrets.SECRET_MODE }}",
+            "secrets": {"SECRET_NOT_MODE": "silent"}
+        });
+        let result = apply_secrets_and_variables_to_config(&config, false, false);
+        assert_eq!(result, Err(SecretsError::ConfigValidation));
+    }
 }

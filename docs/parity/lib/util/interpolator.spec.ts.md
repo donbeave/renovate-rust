@@ -5,7 +5,7 @@
 ## `lib/util/interpolator.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/interpolator.spec.ts
-**Total tests:** 10 | **Ported:** 5 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 8 | **Actionable:** 10 | **Status:** partial
 
 ### `util/interpolator › validateInterpolatedValues`
 
@@ -21,11 +21,11 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| replaces values and deletes secrets | 48 | pending | — | — | — |
-| replaces values and keeps secrets | 97 | pending | — | — | — |
+| replaces values and deletes secrets | 48 | ported | `config/secrets.rs` | `replaces_values_and_deletes_secrets` | — |
+| replaces values and keeps secrets | 97 | ported | `config/secrets.rs` | `replaces_values_and_keeps_secrets` | — |
 | does not resolve secrets in onboaringConfig | 115 | pending | — | — | — |
 | throws error if secrets are used in disallowed options | 155 | pending | — | — | — |
-| throws error if secret key is not present in config | 175 | pending | — | — | — |
+| throws error if secret key is not present in config | 175 | ported | `config/secrets.rs` | `errors_if_secret_key_is_not_present_in_config` | — |
 
 ---
 
