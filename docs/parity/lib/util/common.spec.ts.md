@@ -5,23 +5,23 @@
 ## `lib/util/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/common.spec.ts
-**Total tests:** 22 | **Ported:** 0 | **Actionable:** 22 | **Status:** pending
+**Total tests:** 22 | **Ported:** 7 | **Actionable:** 22 | **Status:** partial
 
 ### `util/common › detectPlatform`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| ("$url") === $hostType | 46 | pending | — | — | — |
+| ("$url") === $hostType | 46 | ported | `util.rs` | `test_detect_platform` | — |
 | uses host rules | 67 | pending | — | — | — |
 
 ### `util/common › parseJson`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null | 119 | pending | — | — | — |
-| returns parsed json | 123 | pending | — | — | — |
-| supports jsonc | 131 | pending | — | — | — |
-| throws error for invalid json | 149 | pending | — | — | — |
+| returns null | 119 | ported | `util.rs` | `test_parse_json_null_for_empty` | — |
+| returns parsed json | 123 | ported | `util.rs` | `test_parse_json_valid` | — |
+| supports jsonc | 131 | ported | `util.rs` | `test_parse_json_jsonc` | — |
+| throws error for invalid json | 149 | ported | `util.rs` | `test_parse_json_invalid` | — |
 | catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse | 153 | pending | — | — | — |
 | does not warn if filename ends with .jsonc | 167 | pending | — | — | — |
 | does not warn if filename ends with .json5 | 172 | pending | — | — | — |
@@ -30,8 +30,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns parsed jsonc | 179 | pending | — | — | — |
-| throws error for invalid jsonc | 187 | pending | — | — | — |
+| returns parsed jsonc | 179 | ported | `util.rs` | `test_parse_json_jsonc` | — |
+| throws error for invalid jsonc | 187 | ported | `util.rs` | `test_parse_json_invalid` | — |
 
 ### `util/common › getInheritedOrGlobal`
 

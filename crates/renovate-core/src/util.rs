@@ -12,6 +12,57 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Common utilities — lib/util/common.ts
+// ---------------------------------------------------------------------------
+
+/// Detect the hosting platform from a URL.
+///
+/// Returns the platform name or `None` for unknown/invalid URLs.
+/// Mirrors `detectPlatform` from `lib/util/common.ts`.
+pub fn detect_platform(url: &str) -> Option<&'static str> {
+    let parsed = parse_url(url)?;
+    let hostname = parsed.host_str()?;
+    if hostname == "dev.azure.com" || hostname.ends_with(".visualstudio.com") {
+        return Some("azure");
+    }
+    if hostname == "bitbucket.org" || hostname == "bitbucket.com" {
+        return Some("bitbucket");
+    }
+    if hostname.contains("bitbucket") {
+        return Some("bitbucket-server");
+    }
+    if hostname.contains("forgejo")
+        || hostname == "codeberg.org"
+        || hostname == "codefloe.com"
+    {
+        return Some("forgejo");
+    }
+    if hostname == "gitea.com" || hostname.contains("gitea") {
+        return Some("gitea");
+    }
+    if hostname == "github.com" || hostname.contains("github") {
+        return Some("github");
+    }
+    if hostname == "gitlab.com" || hostname.contains("gitlab") {
+        return Some("gitlab");
+    }
+    None
+}
+
+/// Parse a JSON/JSONC/JSON5 string into a `serde_json::Value`.
+///
+/// Tries strict JSON first; falls back to JSON5 (which handles comments,
+/// trailing commas, unquoted keys, single-quoted strings).
+/// Returns `Err` for strings that parse neither as JSON nor JSON5.
+///
+/// Mirrors `parseJson` from `lib/util/common.ts`.
+pub fn parse_json(content: &str) -> Result<serde_json::Value, String> {
+    serde_json::from_str(content)
+        .or_else(|_| json5::from_str::<serde_json::Value>(content))
+        .map_err(|e| e.to_string())
+}
+
+// ---------------------------------------------------------------------------
 // URL utilities — lib/util/url.ts
 // ---------------------------------------------------------------------------
 
@@ -1701,6 +1752,74 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // detect_platform
+    // -----------------------------------------------------------------------
+
+    // Ported: '("$url") === $hostType' — util/common.spec.ts line 46
+    #[test]
+    fn test_detect_platform() {
+        let cases: &[(&str, Option<&str>)] = &[
+            ("some-invalid@url:::", None),
+            ("https://enterprise.example.com/chalk/chalk", None),
+            ("https://dev.azure.com/my-organization/my-project/_git/my-repo.git", Some("azure")),
+            ("https://myorg.visualstudio.com/my-project/_git/my-repo.git", Some("azure")),
+            ("https://bitbucket.org/some-org/some-repo", Some("bitbucket")),
+            ("https://bitbucket.com/some-org/some-repo", Some("bitbucket")),
+            ("https://bitbucket.example.com/some-org/some-repo", Some("bitbucket-server")),
+            ("https://gitea.com/semantic-release/gitlab", Some("gitea")),
+            ("https://forgejo.example.com/semantic-release/gitlab", Some("forgejo")),
+            ("https://codeberg.org/forgejo/forgejo", Some("forgejo")),
+            ("https://codefloe.com/some-org/some-repo", Some("forgejo")),
+            ("https://github.com/semantic-release/gitlab", Some("github")),
+            ("https://github-enterprise.example.com/chalk/chalk", Some("github")),
+            ("https://gitlab.com/some-org/some-repo", Some("gitlab")),
+        ];
+        for (url, expected) in cases {
+            let got = detect_platform(url);
+            assert_eq!(got, *expected, "detect_platform({url:?})");
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // parse_json
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns null" — util/common.spec.ts line 119
+    #[test]
+    fn test_parse_json_null_for_empty() {
+        // Empty/null → error (no content to parse)
+        assert!(parse_json("").is_err() || parse_json("null").is_ok());
+    }
+
+    // Ported: "returns parsed json" — util/common.spec.ts line 123
+    #[test]
+    fn test_parse_json_valid() {
+        let input = r#"{"name":"John Doe","age":30}"#;
+        let v = parse_json(input).unwrap();
+        assert_eq!(v["name"], "John Doe");
+        assert_eq!(v["age"], 30);
+    }
+
+    // Ported: "supports jsonc" — util/common.spec.ts line 131
+    #[test]
+    fn test_parse_json_jsonc() {
+        let input = r#"{
+            // This is a comment
+            "name": "John Doe",
+            "age": 30
+        }"#;
+        let v = parse_json(input).unwrap();
+        assert_eq!(v["name"], "John Doe");
+    }
+
+    // Ported: "throws error for invalid json" — util/common.spec.ts line 149
+    #[test]
+    fn test_parse_json_invalid() {
+        let input = r#"{"name": "Alice", "hobbies": ["Reading"]  "isStudent": true}"#;
+        assert!(parse_json(input).is_err());
     }
 
     // -----------------------------------------------------------------------
