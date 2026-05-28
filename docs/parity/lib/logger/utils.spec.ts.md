@@ -5,13 +5,13 @@
 ## `lib/logger/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/utils.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+**Total tests:** 8 | **Ported:** 1 | **Actionable:** 8 | **Status:** pending
 
 ### `logger/utils`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| sanitizeValue("$input") == "$output" | 11 | pending | — | — | — |
+| sanitizeValue("$input") == "$output" | 11 | ported | — | — | — |
 | sanitizes boxed String objects as strings | 26 | pending | — | — | — |
 | preserves secret template strings in redacted fields | 39 | pending | — | — | — |
 

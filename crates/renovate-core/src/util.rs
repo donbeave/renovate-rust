@@ -12,6 +12,85 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Git URL conversion — lib/util/git/url.ts
+// ---------------------------------------------------------------------------
+
+/// Convert a git URL to an HTTP(S) URL.
+///
+/// - Non-`http(s)` schemes (git://, ssh://) → `https://`.
+/// - SSH ports are stripped.
+/// - Existing credentials are removed.
+/// - If `token` is provided, platform-specific credentials are injected.
+pub fn get_http_url(url: &str, token: Option<&str>) -> String {
+    let url = url.trim();
+    // git@host:path SCP-like format
+    if !url.contains("://") {
+        if let Some(rest) = url.strip_prefix("git@") {
+            let (host, path) = if let Some(colon) = rest.find(':') {
+                (&rest[..colon], rest[colon + 1..].trim_end_matches(".git"))
+            } else {
+                (rest, "")
+            };
+            let platform = detect_platform(&format!("https://{host}")).unwrap_or("");
+            let creds = token.map(|t| build_git_credentials(platform, t)).unwrap_or_default();
+            return if creds.is_empty() {
+                format!("https://{host}/{path}")
+            } else {
+                format!("https://{creds}@{host}/{path}")
+            };
+        }
+    }
+    // Detect scheme
+    let (scheme, rest) = if let Some(r) = url.strip_prefix("https://") {
+        ("https", r)
+    } else if let Some(r) = url.strip_prefix("http://") {
+        ("http", r)
+    } else if let Some(r) = url.strip_prefix("ssh://") {
+        ("https", r)
+    } else if let Some(r) = url.strip_prefix("git://") {
+        ("https", r)
+    } else {
+        ("https", url)
+    };
+    // Strip user:pass@ and SSH port
+    let rest_no_at = if let Some(at) = rest.find('@') {
+        &rest[at + 1..]
+    } else {
+        rest
+    };
+    // For SSH-converted URLs strip port from host
+    let was_ssh = url.starts_with("ssh://");
+    let host_path = if was_ssh {
+        let slash_pos = rest_no_at.find('/').unwrap_or(rest_no_at.len());
+        let host = &rest_no_at[..slash_pos];
+        let path = &rest_no_at[slash_pos..];
+        let host_no_port = if let Some(c) = host.find(':') { &host[..c] } else { host };
+        format!("{host_no_port}{path}")
+    } else {
+        rest_no_at.to_owned()
+    };
+    let platform = detect_platform(&format!("{scheme}://{host_path}")).unwrap_or("");
+    let creds = token.map(|t| build_git_credentials(platform, t)).unwrap_or_default();
+    if creds.is_empty() {
+        format!("{scheme}://{host_path}")
+    } else {
+        format!("{scheme}://{creds}@{host_path}")
+    }
+}
+
+fn build_git_credentials(platform: &str, token: &str) -> String {
+    match platform {
+        "github" => {
+            if token.contains(':') { token.to_owned() } else { format!("x-access-token:{token}") }
+        }
+        "gitlab" => {
+            if token.contains(':') { token.to_owned() } else { format!("gitlab-ci-token:{token}") }
+        }
+        _ => token.to_owned(),
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Datasource utilities — lib/modules/datasource/util.ts
 // ---------------------------------------------------------------------------
 
@@ -1502,6 +1581,43 @@ pub fn massage_throwable<T: std::fmt::Display>(e: Option<T>) -> Option<String> {
 ///
 /// Replaces `https://<anything>@` with `https://**redacted**@`, matching
 /// the TypeScript `cmdSerializer` behaviour.
+/// Redact URL credentials and data-URI content from a string.
+///
+/// Ports `sanitizeUrls` from `lib/logger/utils.ts`.
+///
+/// Replaces `scheme://credentials@host` with `scheme://**redacted**@host`
+/// and `data:type/subtype;content` with `data:type/subtype;**redacted**`.
+pub fn sanitize_urls(text: &str) -> String {
+    use std::sync::LazyLock;
+    // Matches scheme://credentials@host  (scheme is 3-9 alpha chars)
+    static URL_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r"(?i)[a-z]{3,9}://[^@/]+@[a-z0-9.\-]+").unwrap()
+    });
+    // Matches //credentials@ within a URL
+    static URL_CRED_RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r"//[^@]+@").unwrap());
+    // Matches data URI with content after the semicolon
+    static DATA_URI_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r"(?i)^(data:[0-9a-z-]+/[0-9a-z-]+;).+").unwrap()
+    });
+
+    // First handle data URIs (apply to whole string if it matches)
+    let text = if DATA_URI_RE.is_match(text) {
+        DATA_URI_RE.replace(text, "${1}**redacted**").into_owned()
+    } else {
+        text.to_owned()
+    };
+
+    // Then redact URL credentials
+    URL_RE
+        .replace_all(&text, |caps: &regex::Captures| {
+            URL_CRED_RE
+                .replace(&caps[0], "//**redacted**@")
+                .into_owned()
+        })
+        .into_owned()
+}
+
 pub fn redact_cmd_credentials(cmd: &str) -> String {
     // Replace https://…@  with  https://**redacted**@
     let mut result = String::new();
@@ -1983,6 +2099,54 @@ mod tests {
         );
     }
 
+    // Ported: 'sanitizeValue("$input") == "$output"' — logger/utils.spec.ts line 11
+    #[test]
+    fn test_sanitize_urls() {
+        let cases = [
+            (
+                " https://somepw@domain.com/gitlab/org/repo?go-get",
+                " https://**redacted**@domain.com/gitlab/org/repo?go-get",
+            ),
+            (
+                "https://someuser:somepw@domain.com",
+                "https://**redacted**@domain.com",
+            ),
+            (
+                "https://someuser:pass%word_with-speci(a)l&chars@domain.com",
+                "https://**redacted**@domain.com",
+            ),
+            (
+                "https://someuser:@domain.com",
+                "https://**redacted**@domain.com",
+            ),
+            (
+                "redis://:somepw@172.32.11.71:6379/0",
+                "redis://**redacted**@172.32.11.71:6379/0",
+            ),
+            (
+                "some text with\r\n url: https://somepw@domain.com\nand some more",
+                "some text with\r\n url: https://**redacted**@domain.com\nand some more",
+            ),
+            (
+                "[git://domain.com](git://pw@domain.com)",
+                "[git://domain.com](git://**redacted**@domain.com)",
+            ),
+            (
+                "data:text/vnd-example;foo=bar;base64,R0lGODdh",
+                "data:text/vnd-example;**redacted**",
+            ),
+            // email addresses should NOT be redacted
+            ("user@domain.com", "user@domain.com"),
+        ];
+        for (input, expected) in &cases {
+            assert_eq!(
+                sanitize_urls(input),
+                *expected,
+                "sanitize_urls({input:?})"
+            );
+        }
+    }
+
     // -----------------------------------------------------------------------
     // filter_map_vec
     // -----------------------------------------------------------------------
@@ -2076,6 +2240,67 @@ mod tests {
         // Single value wrapped
         let single_wrapped: Vec<i32> = vec![42];
         assert_eq!(single_wrapped, vec![42]);
+    }
+
+    // -----------------------------------------------------------------------
+    // get_http_url
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns https url for git url" — util/git/url.spec.ts line 40
+    #[test]
+    fn test_get_http_url_git() {
+        assert_eq!(get_http_url("git://foo.bar/", None), "https://foo.bar/");
+    }
+
+    // Ported: "returns https url for https url" — util/git/url.spec.ts line 44
+    #[test]
+    fn test_get_http_url_https() {
+        assert_eq!(get_http_url("https://foo.bar/", None), "https://foo.bar/");
+    }
+
+    // Ported: "returns http url for http url" — util/git/url.spec.ts line 48
+    #[test]
+    fn test_get_http_url_http() {
+        assert_eq!(get_http_url("http://foo.bar/", None), "http://foo.bar/");
+    }
+
+    // Ported: "returns http url for ssh url with port" — util/git/url.spec.ts line 52
+    #[test]
+    fn test_get_http_url_ssh_with_port() {
+        assert_eq!(
+            get_http_url("ssh://git@gitlab.example.com:22222/typo3-extensions/poll-pro.git", None),
+            "https://gitlab.example.com/typo3-extensions/poll-pro.git"
+        );
+    }
+
+    // Ported: "returns gitlab url with token" — util/git/url.spec.ts line 60
+    #[test]
+    fn test_get_http_url_gitlab_token() {
+        assert_eq!(get_http_url("http://gitlab.com/", Some("token")), "http://gitlab-ci-token:token@gitlab.com/");
+    }
+
+    // Ported: "returns github url with token" — util/git/url.spec.ts line 75
+    #[test]
+    fn test_get_http_url_github_token() {
+        assert_eq!(get_http_url("http://github.com/", Some("token")), "http://x-access-token:token@github.com/");
+    }
+
+    // Ported: "removes username/password from URL" — util/git/url.spec.ts line 100
+    #[test]
+    fn test_get_http_url_removes_credentials() {
+        assert_eq!(
+            get_http_url("https://user:password@foo.bar/someOrg/someRepo", None),
+            "https://foo.bar/someOrg/someRepo"
+        );
+    }
+
+    // Ported: "replaces username/password with given token" — util/git/url.spec.ts line 106
+    #[test]
+    fn test_get_http_url_replaces_credentials() {
+        assert_eq!(
+            get_http_url("https://user:password@foo.bar/someOrg/someRepo", Some("another-user:a-secret-pwd")),
+            "https://another-user:a-secret-pwd@foo.bar/someOrg/someRepo"
+        );
     }
 
     // -----------------------------------------------------------------------
