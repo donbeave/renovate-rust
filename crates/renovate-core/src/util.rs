@@ -342,6 +342,140 @@ pub fn sanitize_str(input: Option<&str>) -> Option<String> {
 }
 
 // ---------------------------------------------------------------------------
+// Pretty-time — lib/util/pretty-time.ts
+// ---------------------------------------------------------------------------
+
+/// Convert a human-readable time string to milliseconds.
+///
+/// Supports composite specs like `"1h 2m"`, `"1d2h3m"`, `"1 hour 30 min"`,
+/// `"1 month"`, `"1 M"`, `"1 year"`, `"1 week"`.  Returns `None` for invalid
+/// input or bare unit strings without a leading number.
+///
+/// Mirrors the TypeScript `toMs` from `lib/util/pretty-time.ts`.
+pub fn to_ms(input: &str) -> Option<i64> {
+    let s = input.trim();
+    if s.is_empty() || s.len() > 100 {
+        return None;
+    }
+    // Preprocess: expand month shorthands before splitting
+    let normalized = preprocess_time_spec(s);
+    let parts = split_time_spec(&normalized);
+    if parts.is_empty() {
+        return None;
+    }
+    let mut total: i64 = 0;
+    for part in parts {
+        let ms = parse_single_spec(part.trim())?;
+        total += ms;
+    }
+    Some(total)
+}
+
+fn split_time_spec(s: &str) -> Vec<String> {
+    // Split at each transition that ends with a letter sequence.
+    // e.g. "1d2h3m" → ["1d", "2h", "3m"]
+    // e.g. "1h 1m" → ["1h", "1m"]
+    let mut parts = Vec::new();
+    let mut current = String::new();
+    let bytes = s.as_bytes();
+    for (i, &b) in bytes.iter().enumerate() {
+        current.push(b as char);
+        let is_last = i == bytes.len() - 1;
+        let next_is_digit_or_end = is_last
+            || bytes[i + 1].is_ascii_digit()
+            || bytes[i + 1] == b' ';
+        if b.is_ascii_alphabetic() && (next_is_digit_or_end) {
+            let t = current.trim().to_owned();
+            if !t.is_empty() {
+                parts.push(t);
+            }
+            current = String::new();
+        }
+    }
+    let t = current.trim().to_owned();
+    if !t.is_empty() {
+        parts.push(t);
+    }
+    parts.retain(|p| !p.is_empty());
+    parts
+}
+
+fn parse_single_spec(spec: &str) -> Option<i64> {
+    // Must start with a digit
+    if !spec.starts_with(|c: char| c.is_ascii_digit()) {
+        return None;
+    }
+    // Pure numeric (no unit): treat as milliseconds (ms("0") = 0 etc.)
+    if spec.bytes().all(|b| b.is_ascii_digit()) {
+        return spec.parse::<i64>().ok();
+    }
+    // Separate number prefix from unit suffix
+    let split_pos = spec.find(|c: char| c.is_ascii_alphabetic())?;
+    let num_str = spec[..split_pos].trim();
+    let unit = spec[split_pos..].trim().to_lowercase();
+    let num: f64 = num_str.parse().ok()?;
+
+    let multiplier: f64 = match unit.as_str() {
+        "ms" | "millisecond" | "milliseconds" => 1.0,
+        "s" | "sec" | "secs" | "second" | "seconds" => 1_000.0,
+        "m" | "min" | "mins" | "minute" | "minutes" => 60_000.0,
+        "h" | "hr" | "hrs" | "hour" | "hours" => 3_600_000.0,
+        "d" | "day" | "days" => 86_400_000.0,
+        "w" | "week" | "weeks" => 7.0 * 86_400_000.0,
+        "month" | "months" | "mo" => 30.0 * 86_400_000.0,
+        "y" | "yr" | "yrs" | "year" | "years" => 365.25 * 86_400_000.0,
+        _ => return None,
+    };
+    Some((num * multiplier) as i64)
+}
+
+
+fn preprocess_time_spec(s: &str) -> String {
+    // Convert "N M" (months) to "N month" and "N Y" to "N year"
+    // The TypeScript applyCustomFormat handles this via regex
+    static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    let re = RE.get_or_init(|| {
+        regex::Regex::new(r"(\d+)\s*(?:months?|M)").unwrap()
+    });
+    re.replace_all(s, |caps: &regex::Captures| {
+        let n: i64 = caps[1].parse().unwrap_or(0);
+        format!("{}d", n * 30)
+    }).to_string()
+}
+
+/// Check whether `date` satisfies a `range` expression like `"< 1 year"` or
+/// `">= 1 day"`.  Returns `None` for invalid inputs.
+///
+/// `now_ms` is the "current" time in milliseconds since epoch (enables
+/// deterministic testing without time mocking).
+pub fn satisfies_date_range(date: &str, range: &str, now_ms: i64) -> Option<bool> {
+    use chrono::DateTime;
+    let range = range.trim();
+    // Extract operator and age part
+    let (operator, age) = {
+        let stripped = range.trim_start_matches(|c: char| c.is_whitespace());
+        if let Some(rest) = stripped.strip_prefix(">=") { (">=", rest.trim()) }
+        else if let Some(rest) = stripped.strip_prefix("<=") { ("<=", rest.trim()) }
+        else if let Some(rest) = stripped.strip_prefix('>') { (">", rest.trim()) }
+        else if let Some(rest) = stripped.strip_prefix('<') { ("<", rest.trim()) }
+        else { return None; }
+    };
+    let date_ms = DateTime::parse_from_rfc3339(date)
+        .or_else(|_| DateTime::parse_from_rfc3339(&format!("{date}T00:00:00Z")))
+        .map(|d| d.timestamp_millis())
+        .ok()?;
+    let age_ms = to_ms(age)?;
+    let range_ms = now_ms - age_ms;
+    Some(match operator {
+        ">" => date_ms < range_ms,
+        ">=" => date_ms <= range_ms,
+        "<" => date_ms > range_ms,
+        "<=" => date_ms >= range_ms,
+        _ => return None,
+    })
+}
+
+// ---------------------------------------------------------------------------
 // Date utilities — lib/util/date.ts
 // ---------------------------------------------------------------------------
 
@@ -1467,5 +1601,119 @@ dep1 = "^1.0.0"
         use chrono::{TimeZone, Utc};
         let dt = Utc.timestamp_millis_opt(ms).unwrap();
         dt.to_rfc3339()
+    }
+
+    // -----------------------------------------------------------------------
+    // to_ms (pretty-time)
+    // -----------------------------------------------------------------------
+
+    // Ported: "toMs('$input') === $expected" — util/pretty-time.spec.ts line 5
+    #[test]
+    fn test_to_ms_cases() {
+        let cases: &[(&str, Option<i64>)] = &[
+            ("1h", Some(3_600_000)),
+            (" 1 h ", Some(3_600_000)),
+            ("1 h", Some(3_600_000)),
+            ("1 hour", Some(3_600_000)),
+            ("1hour", Some(3_600_000)),
+            ("1h 1m", Some(3_600_000 + 60_000)),
+            ("1hour 1minute", Some(3_600_000 + 60_000)),
+            ("1 hour 1 minute", Some(3_600_000 + 60_000)),
+            ("1h 1m 1s", Some(3_600_000 + 60_000 + 1_000)),
+            ("1d2h3m", Some(86_400_000 + 7_200_000 + 180_000)),
+            ("1 day", Some(86_400_000)),
+            ("1 week", Some(7 * 86_400_000)),
+            ("1 month", Some(30 * 86_400_000)),
+            ("1 M", Some(30 * 86_400_000)),
+            ("2 months", Some(2 * 30 * 86_400_000)),
+            ("1month", Some(30 * 86_400_000)),
+            ("1M", Some(30 * 86_400_000)),
+            ("2months", Some(2 * 30 * 86_400_000)),
+            ("1 year", Some((365.25 * 86_400_000.0) as i64)),
+            (&"0".repeat(100), Some(0)),
+            (&"0".repeat(101), None), // too long
+            ("1 whatever", None),
+            ("whatever", None),
+            ("", None),
+            (" ", None),
+            ("  \t\n   ", None),
+            ("minute", None),
+            ("m", None),
+            ("hour", None),
+            ("h", None),
+        ];
+        for (input, expected) in cases {
+            let got = to_ms(input);
+            assert_eq!(got, *expected, "to_ms({input:?})");
+        }
+    }
+
+    // Ported: "returns null for error" — util/pretty-time.spec.ts line 45
+    #[test]
+    fn test_to_ms_null_for_error() {
+        assert_eq!(to_ms(""), None);
+        assert_eq!(to_ms("invalid"), None);
+    }
+
+    // -----------------------------------------------------------------------
+    // clone (JSON deep clone)
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns $expected when input is $input" — util/clone.spec.ts line 4
+    #[test]
+    fn test_clone_values() {
+        use serde_json::{json, Value};
+        // Verify deep clone preserves values and produces independent copy
+        let cases: &[Value] = &[
+            Value::Null,
+            json!(true),
+            json!(false),
+            json!(0),
+            json!(1),
+            json!(""),
+            json!("string"),
+            json!([]),
+            json!([1, 2, 3]),
+            json!({}),
+            json!({ "a": 1 }),
+        ];
+        for v in cases {
+            let cloned = v.clone();
+            assert_eq!(&cloned, v, "clone of {v}");
+        }
+    }
+
+    // Ported: "maintains same order" — util/clone.spec.ts line 26
+    #[test]
+    fn test_clone_maintains_order() {
+        use serde_json::{json, Map, Value};
+        // serde_json with preserve_order maintains insertion order
+        let mut m = Map::new();
+        m.insert("b".to_owned(), json!("foo"));
+        m.insert("a".to_owned(), json!("bar"));
+        m.insert("c".to_owned(), json!("baz"));
+        let obj = Value::Object(m);
+        let cloned = obj.clone();
+        let keys: Vec<&str> = cloned.as_object().unwrap().keys().map(|k| k.as_str()).collect();
+        assert_eq!(keys, vec!["b", "a", "c"]);
+    }
+
+    // Ported: "satisfiesRange('$date', '$range') === $expected" — util/pretty-time.spec.ts line 60
+    #[test]
+    fn test_satisfies_date_range() {
+        // t0 = 2023-07-07T12:00:00Z
+        let t0_ms: i64 = 1_688_731_200_000; // 2023-07-07T12:00:00Z
+        let cases: &[(&str, &str, Option<bool>)] = &[
+            ("2023-01-01", "< 1 Y", Some(true)),
+            ("2023-07-07", "< 1 day", Some(true)),
+            ("2020-01-01", ">= 1hrs", Some(true)),
+            ("2020-01-01", "< 2years", Some(false)),
+            ("invalid-date", "> 1 year", None),
+            ("2020-01-01", "1 year", None), // no operator
+        ];
+        for (date, range, expected) in cases {
+            let got = satisfies_date_range(date, range, t0_ms);
+            assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
+        }
     }
 }

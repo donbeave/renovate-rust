@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4184 / 11677 total tests ported (36%) · pending 7405 · not-applicable 88 (1% of total) — updated 2026-05-28
+**Progress:** 4213 / 11677 total tests ported (36%) · pending 7375 · not-applicable 89 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -139,7 +139,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/aws-eks-addon/schema.spec.ts` | Done | [details](lib/modules/datasource/aws-eks-addon/schema.spec.ts.md) |
 | `lib/modules/datasource/aws-machine-image/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-machine-image/index.spec.ts.md) |
 | `lib/modules/datasource/aws-rds/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-rds/index.spec.ts.md) |
-| `lib/modules/datasource/datasource.spec.ts` | Not done | [details](lib/modules/datasource/datasource.spec.ts.md) |
+| `lib/modules/datasource/datasource.spec.ts` | Done | [details](lib/modules/datasource/datasource.spec.ts.md) |
 | `lib/modules/datasource/azure-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
 | `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/schema.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) |
@@ -173,7 +173,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/deb/packages.spec.ts` | Not done | [details](lib/modules/datasource/deb/packages.spec.ts.md) |
 | `lib/modules/datasource/deb/url.spec.ts` | Not done | [details](lib/modules/datasource/deb/url.spec.ts.md) |
 | `lib/modules/datasource/utils.spec.ts` | Not done | [details](lib/modules/datasource/utils.spec.ts.md) |
-| `lib/modules/datasource/span-processor.spec.ts` | Not done | [details](lib/modules/datasource/span-processor.spec.ts.md) |
+| `lib/modules/datasource/span-processor.spec.ts` | Done | [details](lib/modules/datasource/span-processor.spec.ts.md) |
 | `lib/modules/datasource/postprocess-release.spec.ts` | Not done | [details](lib/modules/datasource/postprocess-release.spec.ts.md) |
 | `lib/modules/datasource/java-version/index.spec.ts` | Done | [details](lib/modules/datasource/java-version/index.spec.ts.md) |
 | `lib/modules/datasource/unity3d-packages/index.spec.ts` | Done | [details](lib/modules/datasource/unity3d-packages/index.spec.ts.md) |
@@ -395,7 +395,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/streams.spec.ts` | Not done | [details](lib/util/streams.spec.ts.md) |
 | `lib/util/timestamp.spec.ts` | Not done | [details](lib/util/timestamp.spec.ts.md) |
 | `lib/util/sanitize.spec.ts` | Done | [details](lib/util/sanitize.spec.ts.md) |
-| `lib/util/clone.spec.ts` | Not done | [details](lib/util/clone.spec.ts.md) |
+| `lib/util/clone.spec.ts` | Done | [details](lib/util/clone.spec.ts.md) |
 | `lib/util/filter-map.spec.ts` | Done | [details](lib/util/filter-map.spec.ts.md) |
 | `lib/util/env.spec.ts` | Not done | [details](lib/util/env.spec.ts.md) |
 | `lib/util/ignore.spec.ts` | Not done | [details](lib/util/ignore.spec.ts.md) |
@@ -421,7 +421,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/minimatch.spec.ts` | Not done | [details](lib/util/minimatch.spec.ts.md) |
 | `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
 | `lib/util/unicode.spec.ts` | Not done | [details](lib/util/unicode.spec.ts.md) |
-| `lib/util/pretty-time.spec.ts` | Not done | [details](lib/util/pretty-time.spec.ts.md) |
+| `lib/util/pretty-time.spec.ts` | Done | [details](lib/util/pretty-time.spec.ts.md) |
 | `lib/util/array.spec.ts` | Done | [details](lib/util/array.spec.ts.md) |
 | `lib/util/uniq.spec.ts` | Done | [details](lib/util/uniq.spec.ts.md) |
 | `lib/util/object.spec.ts` | Done | [details](lib/util/object.spec.ts.md) |
@@ -443,8 +443,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/range.spec.ts` | Not done | [details](lib/modules/manager/range.spec.ts.md) |
 | `lib/modules/manager/index.spec.ts` | Not done | [details](lib/modules/manager/index.spec.ts.md) |
 | `lib/modules/manager/util.spec.ts` | Not done | [details](lib/modules/manager/util.spec.ts.md) |
-| `lib/modules/manager/fingerprint.spec.ts` | Not done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
-| `lib/modules/manager/metadata.spec.ts` | Not done | [details](lib/modules/manager/metadata.spec.ts.md) |
+| `lib/modules/manager/fingerprint.spec.ts` | Done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
+| `lib/modules/manager/metadata.spec.ts` | Done | [details](lib/modules/manager/metadata.spec.ts.md) |
 | `lib/modules/versioning/schema.spec.ts` | Done | [details](lib/modules/versioning/schema.spec.ts.md) |
 | `lib/modules/versioning/index.spec.ts` | Done | [details](lib/modules/versioning/index.spec.ts.md) |
 | `lib/modules/versioning/versioning-metadata.spec.ts` | Done | [details](lib/modules/versioning/versioning-metadata.spec.ts.md) |
