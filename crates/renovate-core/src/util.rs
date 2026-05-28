@@ -347,6 +347,14 @@ pub fn get_range_strategy(manager: &str, range_strategy: &str, dep_type: Option<
 
 /// Set or update the reconfigure branch cache entry.
 ///
+/// Return the reconfigure branch name for a given prefix.
+///
+/// Mirrors `getReconfigureBranchName` from
+/// `lib/workers/repository/reconfigure/utils.ts`.
+pub fn get_reconfigure_branch_name(prefix: &str) -> String {
+    format!("{prefix}reconfigure")
+}
+
 /// Mirrors `setReconfigureBranchCache` from
 /// `lib/workers/repository/reconfigure/reconfigure-cache.ts`.
 pub fn set_reconfigure_branch_cache(
@@ -2971,6 +2979,13 @@ mod tests {
     // -----------------------------------------------------------------------
     // reconfigure_branch_cache
     // -----------------------------------------------------------------------
+
+    // Ported: "returns reconfigure branch name" — workers/repository/reconfigure/utils.spec.ts line 64
+    #[test]
+    fn test_get_reconfigure_branch_name() {
+        assert_eq!(get_reconfigure_branch_name("renovate/"), "renovate/reconfigure");
+        assert_eq!(get_reconfigure_branch_name("prefix/"), "prefix/reconfigure");
+    }
 
     // Ported: "sets new cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 16
     #[test]
