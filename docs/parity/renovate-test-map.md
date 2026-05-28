@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4601 / 11677 total tests ported (39%) · pending 6433 · not-applicable 643 (6% of total) — updated 2026-05-28
+**Progress:** 4601 / 11677 total tests ported (39%) · pending 6302 · not-applicable 774 (7% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -272,7 +272,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/presets/gitea/index.spec.ts` | Not done | [details](lib/config/presets/gitea/index.spec.ts.md) |
 | `lib/config/presets/github/index.spec.ts` | Not done | [details](lib/config/presets/github/index.spec.ts.md) |
 | `lib/config/presets/gitlab/index.spec.ts` | Not done | [details](lib/config/presets/gitlab/index.spec.ts.md) |
-| `lib/config/presets/http/index.spec.ts` | Not done | [details](lib/config/presets/http/index.spec.ts.md) |
+| `lib/config/presets/http/index.spec.ts` | Done | [details](lib/config/presets/http/index.spec.ts.md) |
 | `lib/config/presets/internal/group.spec.ts` | Not done | [details](lib/config/presets/internal/group.spec.ts.md) |
 | `lib/config/presets/internal/index.spec.ts` | Not done | [details](lib/config/presets/internal/index.spec.ts.md) |
 | `lib/config/presets/internal/monorepos.spec.ts` | Done | [details](lib/config/presets/internal/monorepos.spec.ts.md) |
@@ -844,7 +844,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/errors-warnings.spec.ts` | Not done | [details](lib/workers/repository/errors-warnings.spec.ts.md) |
 | `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | Not done | [details](lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) |
 | `lib/workers/repository/extract/file-match.spec.ts` | Done | [details](lib/workers/repository/extract/file-match.spec.ts.md) |
-| `lib/workers/repository/extract/index.spec.ts` | Not done | [details](lib/workers/repository/extract/index.spec.ts.md) |
+| `lib/workers/repository/extract/index.spec.ts` | Done | [details](lib/workers/repository/extract/index.spec.ts.md) |
 | `lib/workers/repository/extract/manager-files.spec.ts` | Done | [details](lib/workers/repository/extract/manager-files.spec.ts.md) |
 | `lib/workers/repository/extract/supersedes.spec.ts` | Done | [details](lib/workers/repository/extract/supersedes.spec.ts.md) |
 | `lib/workers/repository/finalize/prune.spec.ts` | Not done | [details](lib/workers/repository/finalize/prune.spec.ts.md) |
