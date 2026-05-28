@@ -462,7 +462,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/hex/index.spec.ts` | Done | [details](lib/modules/versioning/hex/index.spec.ts.md) |
 | `lib/modules/versioning/debian/index.spec.ts` | Not done | [details](lib/modules/versioning/debian/index.spec.ts.md) |
 | `lib/modules/versioning/debian/common.spec.ts` | Not done | [details](lib/modules/versioning/debian/common.spec.ts.md) |
-| `lib/modules/versioning/ivy/index.spec.ts` | Not done | [details](lib/modules/versioning/ivy/index.spec.ts.md) |
+| `lib/modules/versioning/ivy/index.spec.ts` | Done | [details](lib/modules/versioning/ivy/index.spec.ts.md) |
 | `lib/modules/versioning/python/index.spec.ts` | Not done | [details](lib/modules/versioning/python/index.spec.ts.md) |
 | `lib/modules/versioning/conda/index.spec.ts` | Done | [details](lib/modules/versioning/conda/index.spec.ts.md) |
 | `lib/modules/versioning/hashicorp/index.spec.ts` | Done | [details](lib/modules/versioning/hashicorp/index.spec.ts.md) |

@@ -22,6 +22,7 @@ pub mod hex;
 pub mod glasskube;
 pub mod go_mod_directive;
 pub mod gradle;
+pub mod ivy;
 pub mod hashicorp;
 pub mod helm;
 pub mod hermit;

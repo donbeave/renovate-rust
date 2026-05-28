@@ -763,6 +763,21 @@ pub fn is_subversion(major_version: &str, minor_version: &str) -> bool {
     true
 }
 
+/// Returns the lowercase value of the last token if it is a qualifier (string), otherwise `None`.
+pub fn last_qualifier(version: &str) -> Option<String> {
+    let tokens = tokenize(version);
+    match tokens.last() {
+        Some(t) if matches!(t.value, TokenValue::Qualifier(_)) => {
+            if let TokenValue::Qualifier(q) = &t.value {
+                Some(q.to_lowercase())
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
