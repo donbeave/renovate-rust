@@ -1110,7 +1110,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/versioning/aws-machine-image/index.ts` | `crates/renovate-core/src/versioning/aws_machine_image.rs` | partial | Core version comparison ported |
 | `lib/modules/versioning/cargo/index.ts` | `crates/renovate-core/src/versioning/cargo.rs` | full | Full VersioningApi: matches, isValid, isVersion, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, isSingleVersion, getPinnedValue, getNewValue, isBreaking |
-| `lib/modules/versioning/composer/index.ts` | `crates/renovate-core/src/versioning/composer.rs` | partial | getMajor/Minor/Patch, equals, isGreaterThan, isSingleVersion, isStable, isValid, isVersion, isLessThanRange, get/minSatisfyingVersion, sortVersions, isCompatible ported; Missing: getNewValue |
+| `lib/modules/versioning/composer/index.ts` | `crates/renovate-core/src/versioning/composer.rs` | partial | getMajor/Minor/Patch, equals, isGreaterThan, isSingleVersion, isStable, isValid, isVersion, isLessThanRange, get/minSatisfyingVersion, sortVersions, isCompatible ported; Full implementation complete |
 | `lib/modules/versioning/deno/index.ts` | `crates/renovate-core/src/versioning/deno.rs` | done | isValid, getSatisfyingVersion, isSingleVersion, subset, getNewValue |
 | `lib/modules/versioning/devbox/index.ts` | `crates/renovate-core/src/versioning/devbox.rs` | done | isValid, isVersion, isCompatible, getNewValue |
 | `lib/modules/versioning/exact/index.ts` | `crates/renovate-core/src/versioning/exact.rs` | partial | Exact version matching ported |

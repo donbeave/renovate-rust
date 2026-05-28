@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/composer/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/composer/index.spec.ts
-**Total tests:** 18 | **Ported:** 17 | **Actionable:** 18 | **Status:** partial
+**Total tests:** 18 | **Ported:** 18 | **Actionable:** 18 | **Status:** done
 
 ### `modules/versioning/composer/index`
 
@@ -25,7 +25,7 @@
 | matches("$a", "$b") === $expected | 147 | ported | `composer.rs` | `matches_cases` | — |
 | subset("$a", "$b") === $expected | 155 | ported | `composer.rs` | `subset_cases` | — |
 | intersects("$a", "$b") === $expected | 177 | ported | `composer.rs` | `intersects_cases` | — |
-| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 199 | pending | — | — | — |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 199 | ported | `versioning/composer.rs` | `get_new_value_cases` | — |
 | $versions -> sortVersions -> $expected | 256 | ported | `versioning/composer.rs` | `sort_versions_cases` | — |
 | isCompatible("$version") === $expected | 266 | ported | `versioning/composer.rs` | `is_compatible_cases` | — |
 | isBreaking("$currentVersion", "$newVersion") === $expected | 275 | ported | `composer.rs` | `is_breaking_cases` | — |

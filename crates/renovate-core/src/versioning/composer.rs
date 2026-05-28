@@ -469,8 +469,21 @@ fn compute_new_value(
         }
     } else if current_version.is_some()
         && super::npm::is_version(&pad_zeroes(&normalize_version(new_version)))
-        && super::npm::is_valid(&normalize_version(current_value))
-        && composer2npm(current_value) == normalize_version(current_value)
+        && {
+            // node-semver accepts space-separated AND (">=1.0 <3.0"), but Rust semver
+            // needs commas. Normalize before validity check.
+            let norm = normalize_version(current_value);
+            let norm_comma = norm.split_whitespace().collect::<Vec<_>>().join(", ");
+            super::npm::is_valid(&norm) || super::npm::is_valid(&norm_comma)
+        }
+        && {
+            // Check that composer2npm doesn't significantly transform the value
+            // (i.e. it's not a composer-specific form like ~0.2 or @stability)
+            let composer_form = composer2npm(current_value);
+            let norm = normalize_version(current_value);
+            composer_form == norm
+                || composer_form == norm.split_whitespace().collect::<Vec<_>>().join(", ")
+        }
     {
         let norm_current = normalize_version(current_value);
         let norm_cur_ver = pad_zeroes(&normalize_version(current_version.unwrap_or("")));
@@ -481,7 +494,12 @@ fn compute_new_value(
     // Handle widen: if new version already satisfies range, keep current
     if range_strategy == "widen" && matches_range(new_version, current_value) {
         new_value = Some(current_value.to_owned());
-    } else {
+    } else if range_strategy == "widen" && !current_value.contains("||") {
+        // Compound range widen: ">=X <Y" or ">=X <=Y" patterns
+        // Expand the upper bound to accommodate the new version.
+        new_value = widen_compound_range(current_value, new_version);
+    }
+    if new_value.is_none() {
         let has_or = current_value.contains(" || ");
         if has_or || range_strategy == "widen" {
             let split_values: Vec<&str> = current_value.split("||").collect();
@@ -506,6 +524,51 @@ fn compute_new_value(
     }
 
     new_value.or_else(|| Some(new_version.to_owned()))
+}
+
+/// Widen a compound range (`>=X <Y` or `>=X <=Y`) to accommodate a new version.
+///
+/// Handles forms like `>=1.0 <3.0` when widen strategy needs to extend the
+/// upper bound to include `new_version`.
+fn widen_compound_range(current_value: &str, new_version: &str) -> Option<String> {
+    use semver::Version;
+
+    let new = Version::parse(&pad_zeroes(&normalize_version(new_version))).ok()?;
+    let parts: Vec<&str> = current_value.split_whitespace().collect();
+
+    // Find the upper bound comparator
+    let mut upper_op: Option<&str> = None;
+    let mut lower_parts: Vec<&str> = Vec::new();
+
+    for part in &parts {
+        if part.starts_with('<') || part.starts_with("<=") {
+            upper_op = Some(part);
+        } else {
+            lower_parts.push(part);
+        }
+    }
+
+    let upper_op = upper_op?;
+    let upper = if upper_op.starts_with("<=") {
+        // `<=Y` → extend to `<= new_version` (preserve exact patch)
+        let cur_upper =
+            Version::parse(&pad_zeroes(&normalize_version(&upper_op[2..]))).ok()?;
+        if new > cur_upper {
+            format!("<={new_version}")
+        } else {
+            return None;
+        }
+    } else {
+        // `<Y` → extend to `< (new.major.new.minor + 1)`
+        format!("<{}.{}", new.major, new.minor + 1)
+    };
+
+    let lower = lower_parts.join(" ");
+    if lower.is_empty() {
+        Some(upper)
+    } else {
+        Some(format!("{} {}", lower, upper))
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -746,6 +809,66 @@ mod tests {
         // Note: "<8.0-DEV" case skipped — Composer dev-stability vs npm pre-release semantics differ
         // "less than 8" not valid → false
         assert!(!intersects("^7.0.0", "less than 8"));
+    }
+
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — composer/index.spec.ts line 199
+    #[test]
+    fn get_new_value_cases() {
+        let cases: &[(&str, &str, Option<&str>, &str, &str)] = &[
+            ("v1.0", "replace", Some("1.0"), "1.1", "v1.1"),
+            ("^1.0", "bump", Some("1.0.0"), "1.0.7", "^1.0.7"),
+            ("^9.4", "bump", Some("9.4.3"), "9.4.8", "^9.4.8"),
+            ("<2.7.14", "bump", Some("2.0.3"), "2.0.4", "<2.7.14"),
+            ("^1.0.0", "bump", Some("1.0.0"), "1.3.5", "^1.3.5"),
+            ("^1", "replace", Some("1.0.0"), "1.3.5", "^1"),
+            ("^1.0", "replace", Some("1.0.0"), "2.3.5", "^2.0"),
+            ("~0.2", "replace", Some("0.2.0"), "0.3.0", "~0.3"),
+            ("~0.2", "replace", Some("0.2.0"), "1.1.0", "~1.0"),
+            ("~4", "replace", Some("4.0.0"), "4.2.0", "~4"),
+            ("~4", "replace", Some("4.0.0"), "5.1.0", "~5"),
+            ("~4.0", "replace", Some("4.0.0"), "5.1.0", "~5.0"),
+            ("~4.0", "replace", Some("4.0.0"), "4.1.0", "~4.1"),
+            ("^1.0.0", "replace", Some("1.0.0"), "1.2.3", "^1.0.0"),
+            ("+4.0.0", "replace", Some("4.0.0"), "4.2.0", "4.2.0"),
+            ("v4.0.0", "replace", Some("4.0.0"), "4.2.0", "v4.2.0"),
+            ("3.6.*", "replace", Some("3.6.0"), "3.7", "3.7.*"),
+            ("v3.1.*", "replace", Some("3.1.10"), "3.2.0", "v3.2.*"),
+            ("^0.1", "update-lockfile", Some("0.1.0"), "0.1.1", "^0.1"),
+            ("^0.1", "update-lockfile", Some("0.1.0"), "0.2.0", "^0.2"),
+            ("^5.1", "update-lockfile", Some("5.1.0"), "5.2.0", "^5.1"),
+            ("^5.1", "update-lockfile", Some("5.1.0"), "6.0.0", "^6.0"),
+            ("^5", "update-lockfile", Some("5.1.0"), "5.2.0", "^5"),
+            ("^5", "update-lockfile", Some("5.1.0"), "6.0.0", "^6"),
+            ("^0.4.0", "replace", Some("0.4"), "0.5", "^0.5.0"),
+            ("^0.4.0", "replace", Some("0.4"), "1.0", "^1.0.0"),
+            ("^0.4.0", "replace", None, "1.0", "1.0"),
+            // OR ranges / widen
+            ("~1.2 || ~2.0", "replace", Some("2.0.0"), "3.1.0", "~3.0"),
+            ("~1.2 || ~2.0 || ~3.0", "widen", Some("2.0.0"), "5.1.0", "~1.2 || ~2.0 || ~3.0 || ~5.0"),
+            ("^1.2", "widen", Some("1.2.0"), "2.0.0", "^1.2 || ^2.0"),
+            ("~1.2", "widen", Some("1.2.0"), "2.4.0", "~1.2 || ~2.0"),
+            ("~1.2", "widen", Some("1.2.0"), "1.9.0", "~1.2"),
+            ("^1.2", "widen", Some("1.2.0"), "1.9.0", "^1.2"),
+            ("^1.0 || ^2.0", "widen", Some("2.0.0"), "2.1.0", "^1.0 || ^2.0"),
+            // stability modifiers
+            ("^v1.0", "bump", Some("1.0.0"), "1.1.7", "^v1.1.7"),
+            ("^v1.0@beta", "bump", Some("1.0.0-beta3"), "1.0.0-beta5", "^v1.0.0-beta5@beta"),
+            ("^v1.0@beta", "replace", Some("1.0.0-beta3"), "2.0.0-beta5", "^v2.0.0-beta5@beta"),
+            ("^4.0@alpha", "replace", Some("4.0.0-alpha1"), "4.0.0-beta5", "^4.0.0-beta5@alpha"),
+            // widen with >=...<= forms
+            (">=1.0 <3.0", "widen", Some("2.9.0"), "4.1.0", ">=1.0 <4.2"),
+            (">=1.0 <3.0", "widen", Some("2.9.0"), "2.9.5", ">=1.0 <3.0"),
+            (">=1.0 <3.0", "widen", Some("2.9.0"), "3.0", ">=1.0 <3.1"),
+            (">=1.0.0 <=3.0.4", "widen", Some("2.9.0"), "3.0.5", ">=1.0.0 <=3.0.5"),
+        ];
+        for (current_value, range_strategy, current_version, new_version, expected) in cases {
+            let result = get_new_value(current_value, range_strategy, *current_version, new_version);
+            assert_eq!(
+                result.as_deref(),
+                Some(*expected),
+                "getNewValue({current_value:?}, {range_strategy:?}, {current_version:?}, {new_version:?})"
+            );
+        }
     }
 
     // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — composer/index.spec.ts line 275

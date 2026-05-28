@@ -474,7 +474,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/maven/compare.spec.ts` | Done | [details](lib/modules/versioning/maven/compare.spec.ts.md) |
 | `lib/modules/versioning/maven/index.spec.ts` | Done | [details](lib/modules/versioning/maven/index.spec.ts.md) |
 | `lib/modules/versioning/aws-eks-addon/index.spec.ts` | Done | [details](lib/modules/versioning/aws-eks-addon/index.spec.ts.md) |
-| `lib/modules/versioning/composer/index.spec.ts` | Not done | [details](lib/modules/versioning/composer/index.spec.ts.md) |
+| `lib/modules/versioning/composer/index.spec.ts` | Done | [details](lib/modules/versioning/composer/index.spec.ts.md) |
 | `lib/modules/versioning/perl/index.spec.ts` | Done | [details](lib/modules/versioning/perl/index.spec.ts.md) |
 | `lib/modules/versioning/hermit/index.spec.ts` | Done | [details](lib/modules/versioning/hermit/index.spec.ts.md) |
 | `lib/modules/versioning/semver-partial/index.spec.ts` | Done | [details](lib/modules/versioning/semver-partial/index.spec.ts.md) |

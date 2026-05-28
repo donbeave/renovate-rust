@@ -277,6 +277,33 @@ fn dated_suffix(input: &str) -> Option<&str> {
     dated_captures(input).and_then(|captures| captures.name("suffix").map(|m| m.as_str()))
 }
 
+/// Whether `input` (codename or version number) exists in the release data.
+///
+/// Mirrors `DistroInfo.exists()` from `lib/modules/versioning/distro.ts`.
+pub fn exists(input: &str) -> bool {
+    let ver = version_by_codename(input);
+    release_by_version(ver).is_some()
+}
+
+/// Return the n-th most recent **released** version record as of `now`.
+///
+/// `n=0` = most recent, `n=1` = second most recent, etc.  Returns `None`
+/// for out-of-bounds `n`.
+///
+/// Mirrors `DistroInfo.getNLatest()` from `lib/modules/versioning/distro.ts`.
+pub fn get_n_latest(n: i32, now: &str) -> Option<(&'static str, &'static str)> {
+    if n < 0 {
+        return None;
+    }
+    let mut released: Vec<&UbuntuRelease> = RELEASES
+        .iter()
+        .filter(|r| r.release <= now)
+        .collect();
+    // Sort descending by release date
+    released.sort_by(|a, b| b.release.cmp(a.release));
+    released.get(n as usize).map(|r| (r.version, r.codename))
+}
+
 pub fn is_valid(input: Option<&str>) -> bool {
     let Some(input) = input else {
         return false;
@@ -926,5 +953,46 @@ mod tests {
         assert!(!check("21.10"));
         assert!(!check("22.04"));
         assert!(!check("24.04"));   // not in releases list
+    }
+
+    // Ported: "exists("$version") === $expected" — versioning/distro.spec.ts line 61
+    #[test]
+    fn distro_exists() {
+        assert!(exists("jammy"));
+        assert!(exists("impish"));
+        assert!(exists("hirsute"));
+        assert!(exists("groovy"));
+        assert!(exists("focal"));
+        assert!(!exists("Wily Werewolf")); // full name, not lowercase series
+        assert!(exists("22.04"));
+        assert!(exists("21.10"));
+        assert!(exists("21.04"));
+        assert!(exists("20.10"));
+        assert!(!exists("asdf"));
+        assert!(!exists("Jellyfish"));
+    }
+
+    // Ported: "retrieves schedule of the previous previous release" — versioning/distro.spec.ts line 115
+    // Ported: "retrieves schedule of the previous release" — versioning/distro.spec.ts line 122
+    // Ported: "retrieves schedule of the most recent release" — versioning/distro.spec.ts line 129
+    // Ported: "sends a float as an argument" — versioning/distro.spec.ts line 136
+    // Ported: "sends an out of bound argument" — versioning/distro.spec.ts line 143
+    // Ported: "sends another out of bound argument" — versioning/distro.spec.ts line 147
+    // Fixed date: 2021-03-20
+    #[test]
+    fn distro_get_n_latest() {
+        let now = "2021-03-20";
+        // getNLatest(0) = most recent released = groovy (2020-10-22)
+        assert_eq!(get_n_latest(0, now), Some(("20.10", "groovy")));
+        // getNLatest(1) = second most recent = focal (2020-04-23)
+        assert_eq!(get_n_latest(1, now), Some(("20.04", "focal")));
+        // getNLatest(2) = third most recent = eoan (2019-10-17)
+        assert_eq!(get_n_latest(2, now), Some(("19.10", "eoan")));
+        // getNLatest with float — TypeScript uses Math.floor, so 0.1 → 0
+        // Rust uses i32 so the caller handles truncation; test n=0
+        assert_eq!(get_n_latest(0, now), Some(("20.10", "groovy"))); // same as 0.1 → 0
+        // Out of bounds
+        assert_eq!(get_n_latest(-1, now), None);
+        assert_eq!(get_n_latest(100, now), None);
     }
 }

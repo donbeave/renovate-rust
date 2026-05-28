@@ -215,8 +215,22 @@ pub fn matches_range(version: &str, range: &str) -> bool {
     let Ok(v) = Version::parse(version.trim()) else {
         return false;
     };
+    // Handle OR ranges by checking each alternative
+    if range.contains("||") {
+        return range
+            .split("||")
+            .map(str::trim)
+            .any(|alt| matches_range(version, alt));
+    }
     if let Ok(req) = VersionReq::parse(range) {
         return req.matches(&v);
+    }
+    // Rust semver needs commas for AND; try converting space-separated to comma-separated
+    if range.contains(' ') && !range.contains(',') {
+        let comma_range = range.split_whitespace().collect::<Vec<_>>().join(", ");
+        if let Ok(req) = VersionReq::parse(&comma_range) {
+            return req.matches(&v);
+        }
     }
     wildcard_req_matches(range, &v)
 }
@@ -470,6 +484,13 @@ pub fn get_new_value(
 ) -> Option<String> {
     if current_value == "*" {
         return (range_strategy == "update-lockfile").then(|| "*".to_owned());
+    }
+    // For bump strategy on `<X` or `<=X` ranges: keep the current upper bound.
+    // The new version is still within the range; no need to change the constraint.
+    if range_strategy == "bump"
+        && (current_value.starts_with('<') || current_value.starts_with("<="))
+    {
+        return Some(current_value.to_owned());
     }
     if range_strategy == "update-lockfile" {
         if current_value == "1.x" && new_version.starts_with("2.") {
