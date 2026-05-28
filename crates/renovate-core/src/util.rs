@@ -12,6 +12,19 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Datasource utilities — lib/modules/datasource/util.ts
+// ---------------------------------------------------------------------------
+
+const JFROG_ARTIFACTORY_HEADER: &str = "x-jfrog-version";
+
+/// Return `true` when the HTTP response headers indicate an Artifactory server.
+///
+/// Mirrors `isArtifactoryServer` from `lib/modules/datasource/util.ts`.
+pub fn is_artifactory_server(headers: &std::collections::HashMap<String, String>) -> bool {
+    headers.contains_key(JFROG_ARTIFACTORY_HEADER)
+}
+
+// ---------------------------------------------------------------------------
 // Helm environment variables — lib/modules/manager/kustomize/common.ts
 // ---------------------------------------------------------------------------
 
@@ -2497,6 +2510,35 @@ mod tests {
         assert_eq!(result[1], json!({ "foo": null }));
     }
 
+    // Ported: "should parse content with multiple documents" (parseSingleYaml throws) — util/yaml.spec.ts line 292
+    #[test]
+    fn test_parse_single_yaml_multidoc_throws() {
+        let content = "myObject:\n  aString: value\n---\nfoo: bar";
+        let result = parse_single_yaml(content, false);
+        assert!(result.is_err(), "multi-doc should return Err");
+    }
+
+    // Ported: "should parse content with template without quotes" (parseSingleYaml) — util/yaml.spec.ts line 326
+    #[test]
+    fn test_parse_single_yaml_template_without_quotes() {
+        use serde_json::json;
+        let input = "myObject:\n  aString: {{value}}\n  {{prefixKey}}anotherString: value\n  {% if test.enabled %}\n  myNestedObject:\n    aNestedString: {{value}}\n    anotherNestedString: value{{value}}:v2\n  {% endif %}";
+        let result = parse_single_yaml(input, true).unwrap().unwrap();
+        assert_eq!(
+            result,
+            json!({
+                "myObject": {
+                    "aString": null,
+                    "anotherString": "value",
+                    "myNestedObject": {
+                        "aNestedString": null,
+                        "anotherNestedString": "value:v2"
+                    }
+                }
+            })
+        );
+    }
+
     // Ported: "should parse invalid content using strict=false" — util/yaml.spec.ts line 239
     // serde_yaml handles inline comments after quoted strings natively.
     #[test]
@@ -3210,4 +3252,5 @@ dep1 = "^1.0.0"
         }
     }
 }
+
 

@@ -5,7 +5,7 @@
 ## `lib/util/yaml.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/yaml.spec.ts
-**Total tests:** 19 | **Ported:** 9 | **Actionable:** 19 | **Status:** partial
+**Total tests:** 19 | **Ported:** 11 | **Actionable:** 19 | **Status:** partial
 
 ### `util/yaml › loadAll`
 
@@ -31,9 +31,9 @@
 | should parse invalid content using strict=false | 239 | ported | — | — | — |
 | should parse content with single document with schema | 253 | pending | — | — | — |
 | should throw with single document with schema if parsing fails | 275 | pending | — | — | — |
-| should parse content with multiple documents | 292 | pending | — | — | — |
+| should parse content with multiple documents | 292 | ported | — | — | — |
 | should parse content with template | 303 | ported | `util.rs` | `test_parse_single_yaml_template` | — |
-| should parse content with template without quotes | 326 | pending | — | — | — |
+| should parse content with template without quotes | 326 | ported | — | — | — |
 | should parse content with yaml tags | 353 | pending | — | — | — |
 
 ---
