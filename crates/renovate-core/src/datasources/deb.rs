@@ -178,6 +178,14 @@ mod tests {
         );
     }
 
+    // Ported: "returns empty array for invalid registry URL" — datasource/deb/url.spec.ts line 41
+    // TypeScript returns [] for invalid URLs; Rust returns Err for the same condition.
+    #[test]
+    fn construct_component_urls_invalid_url() {
+        let result = construct_component_urls("not-a-valid-url");
+        assert!(result.is_err(), "invalid URL should return error");
+    }
+
     // Ported: "throws an error if required parameters are missing" — datasource/deb/url.spec.ts line 33
     #[test]
     fn construct_component_urls_missing_params() {
