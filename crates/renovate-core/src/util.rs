@@ -12,6 +12,61 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Changelog URL slugify — lib/workers/repository/update/pr/changelog/common.ts
+// ---------------------------------------------------------------------------
+
+/// Convert a URL to a slug by replacing non-alphanumeric chars with `-` and
+/// transliterating common Unicode characters to their ASCII equivalents.
+///
+/// Mirrors `slugifyUrl` from `lib/workers/repository/update/pr/changelog/common.ts`.
+pub fn slugify_url(url: &str) -> String {
+    let mut result = String::new();
+    let mut prev_dash = false;
+    for c in url.chars() {
+        let mapped = transliterate_for_slug(c);
+        match mapped {
+            Some(ch) if ch == '-' => {
+                if !prev_dash && !result.is_empty() {
+                    result.push('-');
+                    prev_dash = true;
+                }
+            }
+            Some(ch) => {
+                result.push(ch);
+                prev_dash = false;
+            }
+            None => { prev_dash = false; } // removed chars don't reset dash
+        }
+    }
+    result.trim_end_matches('-').to_owned()
+}
+
+fn transliterate_for_slug(c: char) -> Option<char> {
+    match c {
+        'à' | 'á' | 'â' | 'ã' | 'ä' | 'å' | 'ā' | 'ă' | 'ą' => Some('a'),
+        'è' | 'é' | 'ê' | 'ë' | 'ē' | 'ĕ' | 'ę' | 'ě' => Some('e'),
+        'ì' | 'í' | 'î' | 'ï' | 'ī' | 'ĭ' | 'į' | 'ı' => Some('i'),
+        'ò' | 'ó' | 'ô' | 'õ' | 'ö' | 'ō' | 'ŏ' | 'ő' | 'ø' => Some('o'),
+        'ù' | 'ú' | 'û' | 'ü' | 'ū' | 'ŭ' | 'ů' | 'ű' | 'ų' => Some('u'),
+        'ç' | 'ć' | 'ĉ' | 'č' => Some('c'),
+        'ñ' | 'ń' | 'ň' | 'ŋ' => Some('n'),
+        'ý' | 'ÿ' => Some('y'),
+        'ð' => Some('d'),
+        'þ' => Some('t'),
+        'ß' => Some('s'),
+        '∂' => Some('d'), // partial derivative
+        'α' => Some('a'), // Greek alpha
+        'β' => Some('b'),
+        'γ' => Some('g'),
+        'δ' => Some('d'),
+        'ε' => Some('e'),
+        _ if c.is_ascii_alphanumeric() => Some(c.to_ascii_lowercase()),
+        _ if c.is_ascii() => Some('-'), // ASCII non-alphanumeric → dash
+        _ => None, // non-ASCII non-mapped → removed
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Interpolator — lib/util/interpolator.ts
 // ---------------------------------------------------------------------------
 
@@ -1829,6 +1884,25 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // slugify_url
+    // -----------------------------------------------------------------------
+
+    // Ported: 'slugifyUrl("$url") === $expected' — workers/repository/update/pr/changelog/common.spec.ts line 5
+    #[test]
+    fn test_slugify_url() {
+        let cases: &[(&str, &str)] = &[
+            ("https://github-enterprise.example.com/çhãlk/chálk", "https-github-enterprise-example-com-chalk-chalk"),
+            ("https://github.com/chalk/chalk", "https-github-com-chalk-chalk"),
+            ("https://github-enterprise.example.com/", "https-github-enterprise-example-com"),
+            ("https://github.com/sindresorhus/delay", "https-github-com-sindresorhus-delay"),
+        ];
+        for (url, expected) in cases {
+            let got = slugify_url(url);
+            assert_eq!(got, *expected, "slugify_url({url:?})");
+        }
     }
 
     // -----------------------------------------------------------------------

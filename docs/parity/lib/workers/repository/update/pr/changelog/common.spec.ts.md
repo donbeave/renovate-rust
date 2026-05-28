@@ -5,13 +5,13 @@
 ## `lib/workers/repository/update/pr/changelog/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/common.spec.ts
-**Total tests:** 2 | **Ported:** 1 | **Actionable:** 2 | **Status:** partial
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `workers/repository/update/pr/changelog/common › slugifyUrl()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| slugifyUrl("$url") === $expected | 5 | pending | — | — | — |
+| slugifyUrl("$url") === $expected | 5 | ported | `util.rs` | `test_slugify_url` | — |
 
 ### `workers/repository/update/pr/changelog/common › compareChangelogFilePath()`
 
