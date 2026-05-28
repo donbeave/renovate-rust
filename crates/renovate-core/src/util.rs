@@ -12,6 +12,28 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Repository configuration check — lib/workers/repository/configured.ts
+// ---------------------------------------------------------------------------
+
+/// Check whether the repository configuration allows processing.
+///
+/// Returns `Ok(())` when processing is allowed; `Err(message)` otherwise.
+/// Mirrors `checkIfConfigured` from `lib/workers/repository/configured.ts`.
+pub fn check_if_configured(
+    enabled: bool,
+    is_fork: bool,
+    fork_processing: Option<&str>,
+) -> Result<(), &'static str> {
+    if !enabled {
+        return Err("REPOSITORY_DISABLED_BY_CONFIG");
+    }
+    if is_fork && fork_processing != Some("enabled") {
+        return Err("REPOSITORY_FORKED");
+    }
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
 // Manager utilities — lib/modules/manager/util.ts
 // ---------------------------------------------------------------------------
 
@@ -1978,6 +2000,30 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // check_if_configured
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns" — workers/repository/configured.spec.ts line 16
+    #[test]
+    fn test_check_if_configured_ok() {
+        assert!(check_if_configured(true, false, None).is_ok());
+    }
+
+    // Ported: "throws if disabled" — workers/repository/configured.spec.ts line 20
+    #[test]
+    fn test_check_if_configured_disabled() {
+        assert!(check_if_configured(false, false, None).is_err());
+    }
+
+    // Ported: "throws if unconfigured fork" — workers/repository/configured.spec.ts line 25
+    #[test]
+    fn test_check_if_configured_fork() {
+        assert!(check_if_configured(true, true, Some("auto")).is_err());
+        // If fork_processing is 'enabled', it should NOT throw
+        assert!(check_if_configured(true, true, Some("enabled")).is_ok());
     }
 
     // -----------------------------------------------------------------------
