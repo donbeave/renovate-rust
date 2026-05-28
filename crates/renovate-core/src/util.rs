@@ -942,6 +942,81 @@ pub fn calculate_most_recent_timestamp<'a>(
 }
 
 // ---------------------------------------------------------------------------
+// Datasource metadata URL utilities — lib/modules/datasource/metadata.ts
+// ---------------------------------------------------------------------------
+
+static GIT_PREFIX_RE: std::sync::LazyLock<regex::Regex> =
+    std::sync::LazyLock::new(|| regex::Regex::new(r"^git:/?/?").unwrap());
+static GITHUB_PAGES_RE: std::sync::LazyLock<regex::Regex> =
+    std::sync::LazyLock::new(|| regex::Regex::new(r"^https://([^.]+)\.github\.com/([^/]+)$").unwrap());
+
+fn massage_git_at_url(url: &str) -> String {
+    if url.starts_with("git@") {
+        // git@host:owner/repo → https://host/owner/repo
+        let without_prefix = &url[4..]; // strip "git@"
+        if let Some(colon_pos) = without_prefix.find(':') {
+            let host = &without_prefix[..colon_pos];
+            let path = &without_prefix[colon_pos + 1..];
+            return format!("https://{}/{}", host, path);
+        }
+    }
+    url.to_string()
+}
+
+/// Normalize a GitHub-hosted URL to `https://github.com/owner/repo` form.
+///
+/// Mirrors `massageGithubUrl()` from `lib/modules/datasource/metadata.ts`.
+pub fn massage_github_url(url: &str) -> String {
+    let mut s = massage_git_at_url(url);
+    s = s.replace("http:", "https:");
+    s = s.replace("http+git:", "https:");
+    s = s.replace("https+git:", "https:");
+    s = s.replace("ssh://git@", "https://");
+    s = GIT_PREFIX_RE.replace(&s, "https://").into_owned();
+    s = GITHUB_PAGES_RE.replace(&s, "https://github.com/$1/$2").into_owned();
+    s = s.replace("www.github.com", "github.com");
+    // keep only first 5 path segments
+    let parts: Vec<&str> = s.splitn(6, '/').collect();
+    parts[..parts.len().min(5)].join("/")
+}
+
+/// Normalize a GitLab-hosted URL to canonical `https://host/owner/repo` form.
+///
+/// Mirrors `massageGitlabUrl()` from `lib/modules/datasource/metadata.ts`.
+pub fn massage_gitlab_url(url: &str) -> String {
+    static TREE_RE: std::sync::LazyLock<regex::Regex> =
+        std::sync::LazyLock::new(|| regex::Regex::new(r"(?i)/tree/.*$").unwrap());
+    static TRAILING_SLASH_RE: std::sync::LazyLock<regex::Regex> =
+        std::sync::LazyLock::new(|| regex::Regex::new(r"(?i)/$").unwrap());
+    static DOT_GIT_RE: std::sync::LazyLock<regex::Regex> =
+        std::sync::LazyLock::new(|| regex::Regex::new(r"(?i)\.git$").unwrap());
+
+    let mut s = massage_git_at_url(url);
+    s = s.replace("http:", "https:");
+    s = GIT_PREFIX_RE.replace(&s, "https://").into_owned();
+    s = TREE_RE.replace(&s, "").into_owned();
+    s = TRAILING_SLASH_RE.replace(&s, "").into_owned();
+    s = DOT_GIT_RE.replace(&s, "").into_owned();
+    s
+}
+
+/// Normalize a source URL to canonical `https://host/owner/repo` form.
+///
+/// Mirrors `massageUrl()` from `lib/modules/datasource/metadata.ts`.
+pub fn massage_url(url: &str) -> String {
+    let massaged = massage_git_at_url(url);
+    // Quick validity check: must contain "://"
+    if !massaged.contains("://") && !massaged.starts_with("https://") {
+        return String::new();
+    }
+    // Detect platform
+    if massaged.contains("gitlab.com") || massaged.contains("gitlab-dedicated") {
+        return massage_gitlab_url(url);
+    }
+    massage_github_url(url)
+}
+
+// ---------------------------------------------------------------------------
 // Datasource common utilities — lib/modules/datasource/common.ts
 // ---------------------------------------------------------------------------
 
@@ -5772,6 +5847,100 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── massageUrl / massageGithubUrl / massageGitlabUrl ─────────────────────
+
+    // Ported: "Should return an empty string when massaging an invalid url" — modules/datasource/metadata.spec.ts line 386
+    #[test]
+    fn test_massage_url_invalid() {
+        assert_eq!(massage_url("not a url"), "");
+    }
+
+    // Ported: "Should massage GitHub url $sourceUrl" — modules/datasource/metadata.spec.ts line 391
+    #[test]
+    fn test_massage_url_github() {
+        let cases = [
+            ("git@github.com:user/repo", "https://github.com/user/repo"),
+            ("http://github.com/user/repo", "https://github.com/user/repo"),
+            ("http+git://github.com/user/repo", "https://github.com/user/repo"),
+            ("https+git://github.com/user/repo", "https://github.com/user/repo"),
+            ("ssh://git@github.com/user/repo", "https://github.com/user/repo"),
+            ("git://github.com/user/repo", "https://github.com/user/repo"),
+            ("https://www.github.com/user/repo", "https://github.com/user/repo"),
+            ("https://user.github.com/repo", "https://github.com/user/repo"),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(massage_url(input), expected, "massageUrl({:?})", input);
+        }
+    }
+
+    // Ported: "Should massage GitLab url $sourceUrl" — modules/datasource/metadata.spec.ts line 403
+    #[test]
+    fn test_massage_url_gitlab() {
+        let cases = [
+            ("http://gitlab.com/user/repo", "https://gitlab.com/user/repo"),
+            ("git://gitlab.com/user/repo", "https://gitlab.com/user/repo"),
+            ("https://gitlab.com/user/repo/tree/master", "https://gitlab.com/user/repo"),
+            ("http://gitlab.com/user/repo/", "https://gitlab.com/user/repo"),
+            ("http://gitlab.com/user/repo.git", "https://gitlab.com/user/repo"),
+            ("git@gitlab.com:user/repo.git", "https://gitlab.com/user/repo"),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(massage_url(input), expected, "massageUrl({:?})", input);
+        }
+    }
+
+    // Ported: "Should massage other sourceUrl $sourceUrl" — modules/datasource/metadata.spec.ts line 413
+    #[test]
+    fn test_massage_url_other_host() {
+        let cases = [
+            ("git@example.com:user/repo", "https://example.com/user/repo"),
+            ("http://example.com/user/repo", "https://example.com/user/repo"),
+            ("http+git://example.com/user/repo", "https://example.com/user/repo"),
+            ("https+git://example.com/user/repo", "https://example.com/user/repo"),
+            ("ssh://git@example.com/user/repo", "https://example.com/user/repo"),
+            ("git://example.com/user/repo", "https://example.com/user/repo"),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(massage_url(input), expected, "massageUrl({:?})", input);
+        }
+    }
+
+    // Ported: "Should massage github git@ url to valid https url" — metadata.spec.ts line 429
+    #[test]
+    fn test_massage_github_url_git_at() {
+        assert!(massage_github_url("git@example.com:foo/bar").contains("https://example.com/foo/bar"));
+    }
+
+    // Ported: "Should massage github http url to valid https url" — metadata.spec.ts line 435
+    #[test]
+    fn test_massage_github_url_http() {
+        assert!(massage_github_url("http://example.com/foo/bar").contains("https://example.com/foo/bar"));
+    }
+
+    // Ported: "Should massage github http and git url to valid https url" — metadata.spec.ts line 441
+    #[test]
+    fn test_massage_github_url_http_git() {
+        assert!(massage_github_url("http+git://example.com/foo/bar").contains("https://example.com/foo/bar"));
+    }
+
+    // Ported: "Should massage github ssh git@ url to valid https url" — metadata.spec.ts line 447
+    #[test]
+    fn test_massage_github_url_ssh() {
+        assert!(massage_github_url("ssh://git@example.com/foo/bar").contains("https://example.com/foo/bar"));
+    }
+
+    // Ported: "Should massage github git url to valid https url" — metadata.spec.ts line 453
+    #[test]
+    fn test_massage_github_url_git() {
+        assert!(massage_github_url("git://example.com/foo/bar").contains("https://example.com/foo/bar"));
+    }
+
+    // Ported: "Should massage gitlab git url to valid https url" — metadata.spec.ts line 460
+    #[test]
+    fn test_massage_gitlab_url_git() {
+        assert!(massage_gitlab_url("git://example.gitlab-dedicated.com/foo/bar").contains("https://example.gitlab-dedicated.com/foo/bar"));
     }
 
     // ── datasource common functions ──────────────────────────────────────────
