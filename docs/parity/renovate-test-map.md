@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4535 / 11677 total tests ported (38%) · pending 6879 · not-applicable 263 (2% of total) — updated 2026-05-28
+**Progress:** 4535 / 11677 total tests ported (38%) · pending 6874 · not-applicable 268 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -418,7 +418,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/number.spec.ts` | Done | [details](lib/util/number.spec.ts.md) |
 | `lib/util/assign-keys.spec.ts` | Done | [details](lib/util/assign-keys.spec.ts.md) |
 | `lib/util/check-token.spec.ts` | Done | [details](lib/util/check-token.spec.ts.md) |
-| `lib/util/minimatch.spec.ts` | Not done | [details](lib/util/minimatch.spec.ts.md) |
+| `lib/util/minimatch.spec.ts` | Done | [details](lib/util/minimatch.spec.ts.md) |
 | `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
 | `lib/util/unicode.spec.ts` | Not done | [details](lib/util/unicode.spec.ts.md) |
 | `lib/util/pretty-time.spec.ts` | Done | [details](lib/util/pretty-time.spec.ts.md) |
