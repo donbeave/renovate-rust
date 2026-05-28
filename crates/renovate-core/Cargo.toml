@@ -29,6 +29,7 @@ anyhow.workspace = true
 thiserror.workspace = true
 reqwest.workspace = true
 tokio.workspace = true
+url.workspace = true
 chrono = "0.4.44"
 chrono-tz = "0.10.4"
 sha2 = "0.11.0"

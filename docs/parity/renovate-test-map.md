@@ -427,7 +427,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/object.spec.ts` | Done | [details](lib/util/object.spec.ts.md) |
 | `lib/util/memoize.spec.ts` | Done | [details](lib/util/memoize.spec.ts.md) |
 | `lib/util/mask.spec.ts` | Done | [details](lib/util/mask.spec.ts.md) |
-| `lib/util/host-rules.spec.ts` | Not done | [details](lib/util/host-rules.spec.ts.md) |
+| `lib/util/host-rules.spec.ts` | Done | [details](lib/util/host-rules.spec.ts.md) |
 | `lib/util/stats.spec.ts` | Not done | [details](lib/util/stats.spec.ts.md) |
 | `lib/util/s3.spec.ts` | Not done | [details](lib/util/s3.spec.ts.md) |
 | `lib/util/jsonata.spec.ts` | Not done | [details](lib/util/jsonata.spec.ts.md) |

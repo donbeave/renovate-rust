@@ -5,14 +5,14 @@
 ## `lib/util/github/graphql/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/util.spec.ts
-**Total tests:** 3 | **Ported:** 1 | **Actionable:** 3 | **Status:** partial
+**Total tests:** 3 | **Ported:** 1 | **Actionable:** 0 | **Status:** partial
 
 ### `util/github/graphql/util › prepareQuery`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns valid query for valid payload query | 10 | pending | — | — | — |
-| returns invalid query for invalid payload query | 28 | pending | — | — | — |
+| returns valid query for valid payload query | 10 | not-applicable | — | — | GraphQL parser validation (graphql-parse); not applicable in Rust which uses typed queries |
+| returns invalid query for invalid payload query | 28 | not-applicable | — | — | GraphQL parser validation (graphql-parse); not applicable in Rust which uses typed queries |
 | isDateExpired($currentTime, $initialTimestamp, $duration) === $expected | 35 | ported | `github.rs` | `is_date_expired_hourly_cases`, `is_date_expired_daily_cases` | — |
 
 ---

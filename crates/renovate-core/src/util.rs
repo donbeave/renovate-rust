@@ -3,6 +3,8 @@
 //! This module contains small, pure utility functions used throughout the
 //! Renovate Rust implementation.
 
+pub mod host_rules;
+
 use std::cell::RefCell;
 use std::collections::HashSet;
 

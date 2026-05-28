@@ -1444,6 +1444,7 @@ dependencies = [
  "tokio",
  "toml",
  "tracing",
+ "url",
  "wiremock",
 ]
 
