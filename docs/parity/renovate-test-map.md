@@ -822,7 +822,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/vulnerability/utils.spec.ts` | Done | [details](lib/util/vulnerability/utils.spec.ts.md) |
 | `lib/workers/global/autodiscover.spec.ts` | Not done | [details](lib/workers/global/autodiscover.spec.ts.md) |
 | `lib/workers/global/config/parse/additional-config-file.spec.ts` | Not done | [details](lib/workers/global/config/parse/additional-config-file.spec.ts.md) |
-| `lib/workers/global/config/parse/host-rules-from-env.spec.ts` | Not done | [details](lib/workers/global/config/parse/host-rules-from-env.spec.ts.md) |
+| `lib/workers/global/config/parse/host-rules-from-env.spec.ts` | Done | [details](lib/workers/global/config/parse/host-rules-from-env.spec.ts.md) |
 | `lib/workers/global/config/parse/index.spec.ts` | Not done | [details](lib/workers/global/config/parse/index.spec.ts.md) |
 | `lib/workers/global/config/parse/util.spec.ts` | Done | [details](lib/workers/global/config/parse/util.spec.ts.md) |
 | `lib/workers/global/index.spec.ts` | Not done | [details](lib/workers/global/index.spec.ts.md) |

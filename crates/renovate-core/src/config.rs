@@ -11,6 +11,7 @@ mod platform;
 mod run;
 
 pub mod file;
+pub mod host_rules_from_env;
 pub mod massage;
 pub mod migrate_validate;
 pub mod secrets;
