@@ -44,6 +44,7 @@ pub mod python;
 pub mod redhat;
 pub mod regex_versioning;
 pub mod rez;
+pub mod ruby;
 pub mod rpm;
 pub mod rust_release_channel;
 pub mod same_major;
