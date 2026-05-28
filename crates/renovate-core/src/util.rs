@@ -1295,6 +1295,37 @@ pub struct DatasourceRelease {
     pub version_orig: Option<String>,
 }
 
+/// Apply `versionCompatibility` regex to filter and transform releases.
+///
+/// Mirrors `applyVersionCompatibility()` from `lib/modules/datasource/common.ts`.
+pub fn apply_version_compatibility(
+    releases: Vec<DatasourceRelease>,
+    version_compatibility: Option<&str>,
+    current_compatibility: Option<&str>,
+) -> Vec<DatasourceRelease> {
+    let pattern = match version_compatibility {
+        None | Some("") => return releases,
+        Some(p) => p,
+    };
+    let re = match regex::Regex::new(pattern) {
+        Ok(r) => r,
+        Err(_) => return releases,
+    };
+    releases.into_iter().filter_map(|mut r| {
+        let caps = re.captures(&r.version)?;
+        let version = caps.name("version")?.as_str().to_string();
+        let compatibility = caps.name("compatibility").map(|m| m.as_str());
+        if compatibility != current_compatibility {
+            return None;
+        }
+        if r.version_orig.is_none() {
+            r.version_orig = Some(r.version.clone());
+        }
+        r.version = version;
+        Some(r)
+    }).collect()
+}
+
 /// Apply an `extractVersion` regex to a list of releases.
 ///
 /// Mirrors `applyExtractVersion()` from `lib/modules/datasource/common.ts`.
@@ -6623,6 +6654,53 @@ dep1 = "^1.0.0"
         let result = filter_valid_versions(releases, crate::versioning::npm::is_version);
         assert_eq!(result.len(), 2);
     }
+
+    // ── apply_version_compatibility ───────────────────────────────────────────
+
+    // Ported: "returns immediately if no versionCompatibility" — modules/datasource/common.spec.ts line 378
+    #[test]
+    fn test_apply_version_compatibility_none() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0")];
+        let result = apply_version_compatibility(releases.clone(), None, None);
+        assert_eq!(result, releases);
+    }
+
+    // Ported: "filters out non-matching" — modules/datasource/common.spec.ts line 383
+    #[test]
+    fn test_apply_version_compatibility_filters_non_matching() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("2.0.0-alpine"), mk_release("v3.0.0-alpine")];
+        let result = apply_version_compatibility(releases, Some("^(?<version>[^-]+)$"), None);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].version, "1.0.0");
+        assert_eq!(result[0].version_orig, Some("1.0.0".to_string()));
+        assert_eq!(result[1].version, "2.0.0");
+    }
+
+    // Ported: "filters out incompatible" — modules/datasource/common.spec.ts line 395
+    #[test]
+    fn test_apply_version_compatibility_filters_incompatible() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("2.0.0-alpine"), mk_release("v3.0.0-alpine")];
+        let result = apply_version_compatibility(releases, Some("^(?<version>[^-]+)(?<compatibility>.*)$"), Some("-alpine"));
+        assert_eq!(result.len(), 2, "result: {:?}", result);
+        assert_eq!(result[0].version, "2.0.0");
+        assert_eq!(result[0].version_orig, Some("2.0.0-alpine".to_string()));
+        assert_eq!(result[1].version, "v3.0.0");
+        assert_eq!(result[1].version_orig, Some("v3.0.0-alpine".to_string()));
+    }
+
+    // Ported: "does not override versionOrig from extractVersion" — modules/datasource/common.spec.ts line 407
+    #[test]
+    fn test_apply_version_compatibility_preserves_version_orig() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("2.0.0-alpine"), mk_release("v3.0.0-alpine")];
+        let after_extract = apply_extract_version(releases, Some("^v(?<version>.+)$"));
+        assert_eq!(after_extract.len(), 1);
+        let result = apply_version_compatibility(after_extract, Some("^(?<version>[^-]+)(?<compatibility>.*)$"), Some("-alpine"));
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].version, "3.0.0");
+        assert_eq!(result[0].version_orig, Some("v3.0.0-alpine".to_string()));
+    }
+
+    // ── apply_extract_version / filter_valid_versions / sort_and_remove_duplicates ──
 
     // Ported: "sorts releases by version and removes duplicates" — modules/datasource/common.spec.ts line 162
     #[test]

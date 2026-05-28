@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/common.spec.ts
-**Total tests:** 30 | **Ported:** 6 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 10 | **Actionable:** 30 | **Status:** partial
 
 ### `modules/datasource/common › getDatasourceFor`
 
@@ -72,9 +72,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns immediately if no versionCompatibility | 378 | pending | — | — | — |
-| filters out non-matching | 383 | pending | — | — | — |
-| filters out incompatible | 395 | pending | — | — | — |
-| does not override versionOrig from extractVersion | 407 | pending | — | — | — |
+| returns immediately if no versionCompatibility | 378 | ported | `util.rs` | `test_apply_version_compatibility_none` | — |
+| filters out non-matching | 383 | ported | `util.rs` | `test_apply_version_compatibility_filters_non_matching` | — |
+| filters out incompatible | 395 | ported | `util.rs` | `test_apply_version_compatibility_filters_incompatible` | — |
+| does not override versionOrig from extractVersion | 407 | ported | `util.rs` | `test_apply_version_compatibility_preserves_version_orig` | — |
 
 ---
