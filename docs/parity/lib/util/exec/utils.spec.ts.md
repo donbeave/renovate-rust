@@ -5,7 +5,7 @@
 ## `lib/util/exec/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/utils.spec.ts
-**Total tests:** 21 | **Ported:** 0 | **Actionable:** 21 | **Status:** pending
+**Total tests:** 21 | **Ported:** 4 | **Actionable:** 21 | **Status:** partial
 
 ### `util/exec/utils › isCommandWithOptions › when command is an array of 1 command`
 
@@ -113,25 +113,24 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns array of strings | 189 | pending | — | — | — |
+| returns array of strings | 189 | ported | `util.rs` | `test_as_raw_commands_single_string` | — |
 
 ### `util/exec/utils › asRawCommands › with an array of strings`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns array of strings | 198 | pending | — | — | — |
+| returns array of strings | 198 | ported | `util.rs` | `test_as_raw_commands_array_of_strings` | — |
 
 ### `util/exec/utils › asRawCommands › with many commands`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns an array of many strings | 207 | pending | — | — | — |
+| returns an array of many strings | 207 | ported | `util.rs` | `test_as_raw_commands_many_strings` | — |
 
 ### `util/exec/utils › asRawCommands › with `CommandWithOptions``
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns commands from the `CommandWithOptions` | 220 | pending | — | — | — |
+| returns commands from the `CommandWithOptions` | 220 | ported | `util.rs` | `test_as_raw_commands_with_opts` | — |
 
 ---
-

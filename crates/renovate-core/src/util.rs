@@ -1057,6 +1057,34 @@ fn extract_url_path(url: &str) -> &str {
 }
 
 // ---------------------------------------------------------------------------
+// Exec utilities — lib/util/exec/utils.ts
+// ---------------------------------------------------------------------------
+
+/// A command as either a raw string or structured with options.
+#[derive(Debug, Clone)]
+pub enum ExecCommand {
+    Str(String),
+    WithOpts { command: Vec<String> },
+}
+
+impl ExecCommand {
+    /// Convert to a raw command string (space-join args).
+    pub fn to_raw(&self) -> String {
+        match self {
+            ExecCommand::Str(s) => s.clone(),
+            ExecCommand::WithOpts { command } => command.join(" "),
+        }
+    }
+}
+
+/// Convert a slice of commands to raw strings.
+///
+/// Mirrors `asRawCommands()` from `lib/util/exec/utils.ts`.
+pub fn as_raw_commands(cmds: &[ExecCommand]) -> Vec<String> {
+    cmds.iter().map(|c| c.to_raw()).collect()
+}
+
+// ---------------------------------------------------------------------------
 // Datasource common utilities — lib/modules/datasource/common.ts
 // ---------------------------------------------------------------------------
 
@@ -5887,6 +5915,53 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── as_raw_commands ──────────────────────────────────────────────────────
+
+    // Ported: "returns array of strings" (string) — util/exec/utils.spec.ts line 189
+    #[test]
+    fn test_as_raw_commands_single_string() {
+        let cmds = [ExecCommand::Str("go mod tidy".to_string())];
+        let result = as_raw_commands(&cmds);
+        assert_eq!(result, vec!["go mod tidy"]);
+    }
+
+    // Ported: "returns array of strings" (string) — util/exec/utils.spec.ts line 198
+    #[test]
+    fn test_as_raw_commands_array_of_strings() {
+        let cmds = [
+            ExecCommand::Str("go mod tidy".to_string()),
+            ExecCommand::Str("make tidy".to_string()),
+        ];
+        let result = as_raw_commands(&cmds);
+        assert_eq!(result, vec!["go mod tidy", "make tidy"]);
+    }
+
+    // Ported: "returns an array of many strings" — util/exec/utils.spec.ts line 207
+    #[test]
+    fn test_as_raw_commands_many_strings() {
+        let cmds = [
+            ExecCommand::Str("go mod tidy".to_string()),
+            ExecCommand::Str("make tidy".to_string()),
+            ExecCommand::Str("make generate".to_string()),
+        ];
+        let result = as_raw_commands(&cmds);
+        assert_eq!(result.len(), 3);
+        assert_eq!(result, vec!["go mod tidy", "make tidy", "make generate"]);
+    }
+
+    // Ported: "returns commands from the `CommandWithOptions`" — util/exec/utils.spec.ts line 220
+    #[test]
+    fn test_as_raw_commands_with_opts() {
+        let cmds = [
+            ExecCommand::WithOpts { command: vec!["ls".to_string()] },
+            ExecCommand::WithOpts { command: vec!["go".to_string(), "mod".to_string(), "tidy".to_string()] },
+        ];
+        let result = as_raw_commands(&cmds);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0], "ls");
+        assert_eq!(result[1], "go mod tidy");
     }
 
     // ── shouldDeleteHomepage ─────────────────────────────────────────────────
