@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4103 / 11677 total tests ported (35%) · pending 7490 · not-applicable 84 (1% of total) — updated 2026-05-28
+**Progress:** 4111 / 11677 total tests ported (35%) · pending 7482 · not-applicable 84 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -459,7 +459,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/apk/index.spec.ts` | Done | [details](lib/modules/versioning/apk/index.spec.ts.md) |
 | `lib/modules/versioning/loose/index.spec.ts` | Done | [details](lib/modules/versioning/loose/index.spec.ts.md) |
 | `lib/modules/versioning/same-major/index.spec.ts` | Done | [details](lib/modules/versioning/same-major/index.spec.ts.md) |
-| `lib/modules/versioning/hex/index.spec.ts` | Not done | [details](lib/modules/versioning/hex/index.spec.ts.md) |
+| `lib/modules/versioning/hex/index.spec.ts` | Done | [details](lib/modules/versioning/hex/index.spec.ts.md) |
 | `lib/modules/versioning/debian/index.spec.ts` | Not done | [details](lib/modules/versioning/debian/index.spec.ts.md) |
 | `lib/modules/versioning/debian/common.spec.ts` | Not done | [details](lib/modules/versioning/debian/common.spec.ts.md) |
 | `lib/modules/versioning/ivy/index.spec.ts` | Not done | [details](lib/modules/versioning/ivy/index.spec.ts.md) |

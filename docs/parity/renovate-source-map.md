@@ -1120,6 +1120,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/versioning/helm/index.ts` | `crates/renovate-core/src/versioning/helm.rs` | partial | Helm chart versioning ported |
 | `lib/modules/versioning/gradle/compare.ts` | `crates/renovate-core/src/versioning/gradle.rs` | full | Tokenizer, qualifier ranking, compare, parsePrefixRange, parseMavenBasedRange, parseSingleVersionRange fully ported |
 | `lib/modules/versioning/gradle/index.ts` | `crates/renovate-core/src/versioning/gradle.rs` | full | Full VersioningApi: compare, isVersion, isStable, isValid, isGreaterThan, getMajor/Minor/Patch, matches, getSatisfyingVersion, minSatisfyingVersion, getNewValue (prefix ranges, maven ranges, !!preferred) |
+| `lib/modules/versioning/hex/index.ts` | `crates/renovate-core/src/versioning/hex.rs` | full | Full VersioningApi: matches, isValid, isSingleVersion, getPinnedValue, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, getNewValue (all range strategies including widen/bump); fixed AND compound comparators for Rust semver crate |
 | `lib/modules/versioning/loose/index.ts` | `crates/renovate-core/src/versioning/loose.rs` | partial | Loose semver comparison ported |
 | `lib/modules/versioning/maven/index.ts` | `crates/renovate-core/src/versioning/maven.rs` | partial | Maven version ordering ported |
 | `lib/modules/versioning/nixpkgs/index.ts` | `crates/renovate-core/src/versioning/nixpkgs.rs` | done | isValid, isVersion, getMajor, getNewValue for nixpkgs date-based versions |
