@@ -207,14 +207,8 @@ mod tests {
     // Ported: "getNewValue()" — versioning/bazel-module/index.spec.ts line 100
     #[test]
     fn bzlmod_get_new_value() {
-        assert_eq!(
-            get_new_value("1.0.0", None, "1.0.1"),
-            "1.0.1"
-        );
+        assert_eq!(get_new_value("1.0.0", None, "1.0.1"), "1.0.1");
         // currentVersion == v{currentValue} → strip leading v
-        assert_eq!(
-            get_new_value("1.0.0", Some("v1.0.0"), "v1.0.1"),
-            "1.0.1"
-        );
+        assert_eq!(get_new_value("1.0.0", Some("v1.0.0"), "v1.0.1"), "1.0.1");
     }
 }

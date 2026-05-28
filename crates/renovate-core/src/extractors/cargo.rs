@@ -921,7 +921,7 @@ index = "https://github.com/mcorbin/testregistry"
     #[test]
     fn extracts_registry_urls_from_cargo_config_toml() {
         let ctx = CargoContext {
-            cargo_config: Some(CARGO6_CONFIG_TOML.to_string()),
+            cargo_config: Some(CARGO6_CONFIG_TOML.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(CARGO6_TOML, &ctx).unwrap();
@@ -952,7 +952,7 @@ index = "https://github.com/mcorbin/testregistry"
     fn extracts_registry_urls_from_cargo_config_legacy() {
         // Same behavior — legacy path uses same TOML format
         let ctx = CargoContext {
-            cargo_config: Some(CARGO6_CONFIG_TOML.to_string()),
+            cargo_config: Some(CARGO6_CONFIG_TOML.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(CARGO6_TOML, &ctx).unwrap();
@@ -984,7 +984,7 @@ replace-with = "mcorbin"
 replace-with = "private-crates"
 "#;
         let ctx = CargoContext {
-            cargo_config: Some(config.to_string()),
+            cargo_config: Some(config.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(CARGO6_TOML, &ctx).unwrap();
@@ -1034,7 +1034,7 @@ edition = "2018"
 tokio = "0.2"
 "#;
         let ctx = CargoContext {
-            cargo_config: Some(config.to_string()),
+            cargo_config: Some(config.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(cargo7_toml, &ctx).unwrap();
@@ -1060,7 +1060,7 @@ replace-with = "crates-io"
 replace-with = "mcorbin"
 "#;
         let ctx = CargoContext {
-            cargo_config: Some(config.to_string()),
+            cargo_config: Some(config.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(CARGO6_TOML, &ctx).unwrap();
@@ -1119,12 +1119,12 @@ features = ["AudioBuffer"]
     fn extracts_registry_urls_from_environment() {
         let mut env = HashMap::new();
         env.insert(
-            "PRIVATE_CRATES".to_string(),
-            "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git".to_string(),
+            "PRIVATE_CRATES".to_owned(),
+            "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git".to_owned(),
         );
         env.insert(
-            "MCORBIN".to_string(),
-            "https://github.com/mcorbin/testregistry".to_string(),
+            "MCORBIN".to_owned(),
+            "https://github.com/mcorbin/testregistry".to_owned(),
         );
         let ctx = CargoContext {
             registry_env: env,
@@ -1165,7 +1165,7 @@ features = ["AudioBuffer"]
     #[test]
     fn fails_to_parse_cargo_config_with_invalid_toml() {
         let ctx = CargoContext {
-            cargo_config: Some("[registries".to_string()),
+            cargo_config: Some("[registries".to_owned()),
             ..Default::default()
         };
         // Invalid config is silently ignored; deps still extracted
@@ -1184,7 +1184,7 @@ features = ["AudioBuffer"]
     fn ignore_cargo_config_registries_with_missing_index() {
         let config = "[registries.mine]\nfoo = \"bar\"";
         let ctx = CargoContext {
-            cargo_config: Some(config.to_string()),
+            cargo_config: Some(config.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(CARGO6_TOML, &ctx).unwrap();
@@ -1208,7 +1208,7 @@ foo = "bar"
 replace-with = "mine"
 "#;
         let ctx = CargoContext {
-            cargo_config: Some(config.to_string()),
+            cargo_config: Some(config.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(CARGO6_TOML, &ctx).unwrap();
@@ -1244,7 +1244,7 @@ replace-with = "private-crates"
 replace-with = "mcorbin"
 "#;
         let ctx = CargoContext {
-            cargo_config: Some(config.to_string()),
+            cargo_config: Some(config.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(CARGO6_TOML, &ctx).unwrap();
@@ -1355,7 +1355,7 @@ edition = "2021"
 syn = "2.0"
 "#;
         let ctx = CargoContext {
-            cargo_lock: Some(CARGO3_LOCK.to_string()),
+            cargo_lock: Some(CARGO3_LOCK.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(toml, &ctx).unwrap();
@@ -1375,7 +1375,7 @@ edition = "2021"
 git_dep = { git = "https://github.com/foo/bar" }
 "#;
         let ctx = CargoContext {
-            cargo_lock: Some(CARGO3_LOCK.to_string()),
+            cargo_lock: Some(CARGO3_LOCK.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(toml, &ctx).unwrap();
@@ -1387,7 +1387,7 @@ git_dep = { git = "https://github.com/foo/bar" }
     #[test]
     fn extracts_locked_versions_for_renamed_packages() {
         let ctx = CargoContext {
-            cargo_lock: Some(CARGO1_LOCK.to_string()),
+            cargo_lock: Some(CARGO1_LOCK.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(LOCKFILE_UPDATE_TOML, &ctx).unwrap();
@@ -1402,7 +1402,7 @@ git_dep = { git = "https://github.com/foo/bar" }
     fn handles_missing_locked_versions() {
         // CARGO2_LOCK only has syn 2.0.1; "b" needs syn 1.x which is missing
         let ctx = CargoContext {
-            cargo_lock: Some(CARGO2_LOCK.to_string()),
+            cargo_lock: Some(CARGO2_LOCK.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(LOCKFILE_UPDATE_TOML, &ctx).unwrap();
@@ -1424,7 +1424,7 @@ edition = "2021"
 syn = "2.foo.1"
 "#;
         let ctx = CargoContext {
-            cargo_lock: Some(CARGO3_LOCK.to_string()),
+            cargo_lock: Some(CARGO3_LOCK.to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(toml, &ctx).unwrap();
@@ -1437,7 +1437,7 @@ syn = "2.foo.1"
     #[test]
     fn handles_invalid_lock_file() {
         let ctx = CargoContext {
-            cargo_lock: Some("foo".to_string()),
+            cargo_lock: Some("foo".to_owned()),
             ..Default::default()
         };
         let deps = extract_with_context(LOCKFILE_UPDATE_TOML, &ctx).unwrap();

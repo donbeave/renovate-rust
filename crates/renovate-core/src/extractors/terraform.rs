@@ -1185,11 +1185,10 @@ fn normalize_lock_provider_name(provider: &str) -> String {
         return rest.to_owned();
     }
     // Plain {registryHost}/{namespace}/{type}: strip the registry hostname prefix.
-    if let Some((host, rest)) = provider.split_once('/') {
-        if host.contains('.') {
+    if let Some((host, rest)) = provider.split_once('/')
+        && host.contains('.') {
             return rest.to_owned();
         }
-    }
     provider.to_owned()
 }
 
@@ -1300,11 +1299,7 @@ fn apply_locked_versions_from_lock_structs(
         .iter_mut()
         .filter(|d| d.dep_type == TerraformDepType::Provider && d.locked_version.is_none())
     {
-        let mut candidates = vec![dep
-            .package_name
-            .as_deref()
-            .unwrap_or(&dep.name)
-            .to_owned()];
+        let mut candidates = vec![dep.package_name.as_deref().unwrap_or(&dep.name).to_owned()];
         if !dep.name.contains('/') {
             candidates.push(format!("hashicorp/{}", dep.name));
         }
@@ -2699,7 +2694,10 @@ provider "registry.opentofu.org/carlpett/sops" {
             .unwrap();
         assert_eq!(sops_hostname.current_value, "1.3.0");
         assert_eq!(sops_hostname.locked_version.as_deref(), Some("1.3.0"));
-        assert_eq!(sops_hostname.registry_urls, vec!["https://registry.terraform.io"]);
+        assert_eq!(
+            sops_hostname.registry_urls,
+            vec!["https://registry.terraform.io"]
+        );
         assert_eq!(sops_hostname.package_name.as_deref(), Some("carlpett/sops"));
 
         let sops_no_hostname = providers

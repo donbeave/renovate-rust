@@ -154,10 +154,7 @@ async fn fetch_prefix_dev(
             Err(_) => return Ok(None),
         };
 
-        let current = match resp.data.package.and_then(|p| p.variants) {
-            Some(v) => v,
-            None => break,
-        };
+        let Some(current) = resp.data.package.and_then(|p| p.variants) else { break };
 
         let total_pages = current.pages;
         all_variants.extend(current.page);
@@ -210,7 +207,7 @@ async fn fetch_prefix_dev(
         releases,
         source_url,
         homepage,
-        registry_url: registry_url.to_string(),
+        registry_url: registry_url.to_owned(),
     }))
 }
 
@@ -235,7 +232,7 @@ pub async fn fetch_releases(
         let channel = registry_url
             .trim_end_matches('/')
             .split('/')
-            .last()
+            .next_back()
             .unwrap_or("");
         return fetch_prefix_dev(channel, package_name, registry_url, http).await;
     }
@@ -278,13 +275,13 @@ pub async fn fetch_releases(
         })
         .collect();
 
-    let source_url = pkg.dev_url.map(|u| u.trim_end_matches('/').to_string());
+    let source_url = pkg.dev_url.map(|u| u.trim_end_matches('/').to_owned());
 
     Ok(Some(CondaResult {
         releases,
         source_url,
         homepage: pkg.html_url,
-        registry_url: base.to_string(),
+        registry_url: base.to_owned(),
     }))
 }
 
@@ -518,25 +515,25 @@ mod tests {
         // Verify the de-duplication and url extraction logic with mock data.
         let page1 = vec![
             PrefixDevVariant {
-                version: "0.0.5".to_string(),
-                created_at: Some("2020-02-29T01:40:21Z".to_string()),
+                version: "0.0.5".to_owned(),
+                created_at: Some("2020-02-29T01:40:21Z".to_owned()),
                 yanked_reason: None,
                 urls: vec![PrefixDevUrl {
-                    url: "https://dev/url".to_string(),
-                    kind: "DEV".to_string(),
+                    url: "https://dev/url".to_owned(),
+                    kind: "DEV".to_owned(),
                 }],
             },
             PrefixDevVariant {
-                version: "0.0.5".to_string(),
-                created_at: Some("2020-02-29T01:40:20.840Z".to_string()),
+                version: "0.0.5".to_owned(),
+                created_at: Some("2020-02-29T01:40:20.840Z".to_owned()),
                 yanked_reason: None,
                 urls: vec![PrefixDevUrl {
-                    url: "https://home/url".to_string(),
-                    kind: "HOME".to_string(),
+                    url: "https://home/url".to_owned(),
+                    kind: "HOME".to_owned(),
                 }],
             },
             PrefixDevVariant {
-                version: "0.0.56".to_string(),
+                version: "0.0.56".to_owned(),
                 created_at: None,
                 yanked_reason: None,
                 urls: vec![],

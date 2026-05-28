@@ -11,6 +11,7 @@ use super::node;
 pub use node::{get_new_value, get_satisfying_version, is_valid, matches, min_satisfying_version};
 
 enum LambdaEntry {
+    #[allow(dead_code, reason = "Constructed under cfg(test) and reserved for runtimes without a sunset date")]
     Always,
     Until(&'static str),
 }

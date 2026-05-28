@@ -36,7 +36,7 @@ pub struct SbtPluginReleasesResult {
 /// Download page content, returning `None` on any error or non-2xx response.
 async fn download_content(url: &str, http: &HttpClient) -> Option<String> {
     let url = if url.ends_with('/') {
-        url.to_string()
+        url.to_owned()
     } else {
         format!("{}/", url)
     };
@@ -62,7 +62,7 @@ fn non_dot_segment(href: &str) -> Option<String> {
     if seg.starts_with('.') {
         None
     } else {
-        Some(seg.to_string())
+        Some(seg.to_owned())
     }
 }
 
@@ -150,7 +150,7 @@ async fn get_artifact_subdirs(
             return None;
         }
         if path == artifact || path.starts_with(&format!("{artifact}_")) {
-            Some(path.to_string())
+            Some(path.to_owned())
         } else {
             None
         }
@@ -187,7 +187,7 @@ async fn get_package_releases(
             if path.starts_with('.') {
                 None
             } else {
-                Some(path.to_string())
+                Some(path.to_owned())
             }
         });
 
@@ -317,7 +317,7 @@ pub async fn get_plugin_releases(
         return Some(SbtPluginReleasesResult {
             releases,
             dependency_url,
-            registry_url: base.to_string(),
+            registry_url: base.to_owned(),
             homepage: urls.0,
             source_url: urls.1,
         });
@@ -342,12 +342,12 @@ mod tests {
             if x.starts_with('.') {
                 None
             } else {
-                Some(x.to_string())
+                Some(x.to_owned())
             }
         });
         assert!(!result.is_empty());
-        assert!(result.contains(&"scalatest".to_string()));
-        assert!(result.contains(&"test-interface".to_string()));
+        assert!(result.contains(&"scalatest".to_owned()));
+        assert!(result.contains(&"test-interface".to_owned()));
         assert!(!result.iter().any(|s| s.starts_with('.')));
     }
 
@@ -359,11 +359,11 @@ mod tests {
             if x.starts_with('.') {
                 None
             } else {
-                Some(x.to_string())
+                Some(x.to_owned())
             }
         });
         assert!(!result.is_empty());
-        assert!(result.contains(&"com.eed3si9n".to_string()));
+        assert!(result.contains(&"com.eed3si9n".to_owned()));
         assert!(!result.iter().any(|s| s.starts_with('.')));
     }
 

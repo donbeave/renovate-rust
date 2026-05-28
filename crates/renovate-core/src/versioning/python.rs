@@ -156,7 +156,10 @@ mod tests {
             None
         );
         assert_eq!(
-            min_satisfying_version(&["0.4.0", "0.5.0", "4.2.0", "5.0.0"], "^4.0.0, > 4.1.0, <= 4.3.5"),
+            min_satisfying_version(
+                &["0.4.0", "0.5.0", "4.2.0", "5.0.0"],
+                "^4.0.0, > 4.1.0, <= 4.3.5"
+            ),
             Some("4.2.0".to_owned())
         );
         assert_eq!(
@@ -167,10 +170,7 @@ mod tests {
             min_satisfying_version(&["0.8.0a2", "0.8.0a7"], "^0.8.0-alpha.0"),
             Some("0.8.0-alpha.2".to_owned())
         );
-        assert_eq!(
-            min_satisfying_version(&["1.0.0", "2.0.0"], "^3.0.0"),
-            None
-        );
+        assert_eq!(min_satisfying_version(&["1.0.0", "2.0.0"], "^3.0.0"), None);
         assert_eq!(
             min_satisfying_version(&["1.0.0", "2.0.0"], "== 3.7.*"),
             None
@@ -181,21 +181,24 @@ mod tests {
     #[test]
     fn get_satisfying_version_cases() {
         assert_eq!(
-            get_satisfying_version(&["4.2.1", "0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"], "4.*.0, < 4.2.5"),
+            get_satisfying_version(
+                &["4.2.1", "0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"],
+                "4.*.0, < 4.2.5"
+            ),
             Some("4.2.1".to_owned())
         );
         assert_eq!(
-            get_satisfying_version(&["0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0", "5.0.3"], "5.0, > 5.0.0"),
+            get_satisfying_version(
+                &["0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0", "5.0.3"],
+                "5.0, > 5.0.0"
+            ),
             Some("5.0.3".to_owned())
         );
         assert_eq!(
             get_satisfying_version(&["0.8.0a2", "0.8.0a7"], "^0.8.0-alpha.0"),
             Some("0.8.0-alpha.7".to_owned())
         );
-        assert_eq!(
-            get_satisfying_version(&["1.0.0", "2.0.0"], "^3.0.0"),
-            None
-        );
+        assert_eq!(get_satisfying_version(&["1.0.0", "2.0.0"], "^3.0.0"), None);
         assert_eq!(
             get_satisfying_version(&["1.0.0", "2.0.0"], "== 3.7.*"),
             None
@@ -214,8 +217,11 @@ mod tests {
         ];
         for (cv, rs, curv, nv, expected) in cases {
             let result = get_new_value(cv, rs, *curv, nv);
-            assert_eq!(result.as_deref(), *expected,
-                "get_new_value({cv:?}, {rs:?}, {curv:?}, {nv:?})");
+            assert_eq!(
+                result.as_deref(),
+                *expected,
+                "get_new_value({cv:?}, {rs:?}, {curv:?}, {nv:?})"
+            );
         }
     }
 

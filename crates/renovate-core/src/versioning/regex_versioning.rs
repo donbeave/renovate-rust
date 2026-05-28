@@ -52,11 +52,7 @@ impl RegexVersioning {
     /// `'regex'` uses the default pattern `^(?<major>\\d+)?$`.
     pub fn from_config(config: &str) -> Result<Self, String> {
         let pattern = if let Some(p) = config.strip_prefix("regex:") {
-            if p.is_empty() {
-                r"^(?<major>\d+)?$"
-            } else {
-                p
-            }
+            if p.is_empty() { r"^(?<major>\d+)?$" } else { p }
         } else if config == "regex" {
             r"^(?<major>\d+)?$"
         } else {
@@ -98,9 +94,7 @@ impl RegexVersioning {
             .map(|m| m.as_str().to_owned())
             .filter(|s| !s.is_empty());
 
-        let compatibility = caps
-            .name("compatibility")
-            .map(|m| m.as_str().to_owned());
+        let compatibility = caps.name("compatibility").map(|m| m.as_str().to_owned());
 
         Some(ParsedVersion {
             release,
@@ -110,14 +104,8 @@ impl RegexVersioning {
     }
 
     fn compare(&self, a: &str, b: &str) -> Ordering {
-        let left = match self.parse(a) {
-            Some(v) => v,
-            None => return Ordering::Greater, // invalid → treat as newer
-        };
-        let right = match self.parse(b) {
-            Some(v) => v,
-            None => return Ordering::Greater,
-        };
+        let Some(left) = self.parse(a) else { return Ordering::Greater };
+        let Some(right) = self.parse(b) else { return Ordering::Greater };
 
         // Compare release arrays element-by-element; default to 0.
         let len = left.release.len().max(right.release.len());
@@ -152,8 +140,7 @@ impl RegexVersioning {
     }
 
     pub fn is_stable(&self, version: &str) -> bool {
-        self.parse(version)
-            .is_some_and(|v| v.prerelease.is_none())
+        self.parse(version).is_some_and(|v| v.prerelease.is_none())
     }
 
     pub fn get_major(&self, version: &str) -> Option<i64> {
@@ -451,10 +438,7 @@ mod tests {
             re.get_satisfying_version(&["1.2.3", "1.2.4"], "3.5.0"),
             None
         );
-        assert_eq!(
-            re.get_satisfying_version(&["1.2.3", "1.2.4"], "!@#"),
-            None
-        );
+        assert_eq!(re.get_satisfying_version(&["1.2.3", "1.2.4"], "!@#"), None);
     }
 
     // Ported: 'minSatisfyingVersion($versions, "$range") === "$expected"' — versioning/regex/index.spec.ts line 267
@@ -472,17 +456,17 @@ mod tests {
             re.min_satisfying_version(&["1.2.3", "1.2.4"], "3.5.0"),
             None
         );
-        assert_eq!(
-            re.min_satisfying_version(&["1.2.3", "1.2.4"], "!@#"),
-            None
-        );
+        assert_eq!(re.min_satisfying_version(&["1.2.3", "1.2.4"], "!@#"), None);
     }
 
     // Ported: "returns newVersion" — versioning/regex/index.spec.ts line 282
     #[test]
     fn regex_get_new_value() {
         let re = semver_re();
-        assert_eq!(re.get_new_value("", None, "1.2.3"), Some("1.2.3".to_owned()));
+        assert_eq!(
+            re.get_new_value("", None, "1.2.3"),
+            Some("1.2.3".to_owned())
+        );
     }
 
     // Ported: "sorts versions in an ascending order" — versioning/regex/index.spec.ts line 295

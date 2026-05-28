@@ -6,11 +6,10 @@
 pub fn get_config_desc(descriptions: &[&str], schedule: Option<&str>) -> String {
     let mut desc_arr: Vec<String> = descriptions.iter().map(|s| s.to_string()).collect();
 
-    if let Some(sched) = schedule {
-        if sched != "at any time" {
+    if let Some(sched) = schedule
+        && sched != "at any time" {
             desc_arr.push(format!("Run Renovate on following schedule: {}", sched));
         }
-    }
 
     if desc_arr.is_empty() {
         return String::new();

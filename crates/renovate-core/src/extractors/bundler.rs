@@ -219,11 +219,10 @@ fn extract_lines(
             if source_registry_url.is_none() {
                 if let Some(u) = cap.name("registryUrl") {
                     result.registry_urls.push(u.as_str().to_owned());
-                } else if let Some(n) = cap.name("sourceName") {
-                    if let Some(url) = variables.get(n.as_str()) {
+                } else if let Some(n) = cap.name("sourceName")
+                    && let Some(url) = variables.get(n.as_str()) {
                         result.registry_urls.push(url.clone());
                     }
-                }
             }
             i += 1;
             continue;
@@ -362,11 +361,10 @@ fn extract_lines(
 
         // Gem line
         if let Some(mut dep) = parse_gem_line(trimmed, variables) {
-            if let Some(url) = source_registry_url {
-                if dep.registry_urls.is_empty() {
+            if let Some(url) = source_registry_url
+                && dep.registry_urls.is_empty() {
                     dep.registry_urls = vec![url.to_owned()];
                 }
-            }
             result.deps.push(dep);
         }
 
@@ -426,11 +424,10 @@ fn parse_gem_line(line: &str, variables: &HashMap<String, String>) -> Option<Bun
     if let Some(sc) = SOURCE_MATCH.captures(line) {
         if let Some(url) = sc.name("registryUrl") {
             dep.registry_urls = vec![url.as_str().to_owned()];
-        } else if let Some(n) = sc.name("sourceName") {
-            if let Some(url) = variables.get(n.as_str()) {
+        } else if let Some(n) = sc.name("sourceName")
+            && let Some(url) = variables.get(n.as_str()) {
                 dep.registry_urls = vec![url.clone()];
             }
-        }
     }
 
     Some(dep)

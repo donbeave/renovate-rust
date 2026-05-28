@@ -47,7 +47,7 @@ fn normalize_timestamp(ts: &str) -> String {
         let without_z = &ts[..ts.len() - 1];
         return format!("{}.000Z", without_z);
     }
-    ts.to_string()
+    ts.to_owned()
 }
 
 /// Fetch Devbox package releases.

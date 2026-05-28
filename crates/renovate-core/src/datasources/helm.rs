@@ -154,12 +154,11 @@ fn is_possible_chart_repo(url: &str) -> bool {
 
 fn get_source_url(entry: &RawChartEntry) -> Option<String> {
     // Check if the first URL is a GitHub release URL
-    if let Some(first_url) = entry.urls.first() {
-        if let Some(captures) = {
+    if let Some(first_url) = entry.urls.first()
+        && let Some(captures) = {
             // match https://github.com/{owner}/{repo}/releases/
             let prefix = "https://github.com/";
-            if first_url.starts_with(prefix) {
-                let rest = &first_url[prefix.len()..];
+            if let Some(rest) = first_url.strip_prefix(prefix) {
                 let parts: Vec<&str> = rest.splitn(4, '/').collect();
                 if parts.len() >= 3 && parts[2] == "releases" {
                     Some(format!("{prefix}{}/{}", parts[0], parts[1]))
@@ -172,14 +171,12 @@ fn get_source_url(entry: &RawChartEntry) -> Option<String> {
         } {
             return Some(captures);
         }
-    }
 
     // Check home URL
-    if let Some(home) = &entry.home {
-        if is_possible_chart_repo(home) {
+    if let Some(home) = &entry.home
+        && is_possible_chart_repo(home) {
             return Some(home.clone());
         }
-    }
 
     // Check sources
     for source in &entry.sources {
@@ -293,10 +290,7 @@ pub async fn fetch_releases(
     let base = repository_url.trim_end_matches('/');
     let url = format!("{base}/index.yaml");
 
-    let resp = match http.get(&url).send().await {
-        Ok(r) => r,
-        Err(_) => return Ok(None),
-    };
+    let Ok(resp) = http.get(&url).send().await else { return Ok(None) };
 
     let status = resp.status();
     if status.is_server_error() {
@@ -306,10 +300,7 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let text = match resp.text().await {
-        Ok(t) => t,
-        Err(_) => return Ok(None),
-    };
+    let Ok(text) = resp.text().await else { return Ok(None) };
 
     Ok(parse_all_versions_with_registry(
         &text,

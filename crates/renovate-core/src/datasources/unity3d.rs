@@ -148,8 +148,8 @@ pub async fn fetch_releases(
 
     Ok(UnityReleasesResult {
         releases,
-        homepage: HOMEPAGE.to_string(),
-        registry_url: stream_url.to_string(),
+        homepage: HOMEPAGE.to_owned(),
+        registry_url: stream_url.to_owned(),
     })
 }
 
@@ -163,7 +163,7 @@ pub async fn fetch_latest_lts(
     let latest_plain = result.releases.first().map(|r| {
         r.version
             .split_once(' ')
-            .map(|(v, _)| v.to_string())
+            .map(|(v, _)| v.to_owned())
             .unwrap_or_else(|| r.version.clone())
     });
     Ok(Unity3dUpdateSummary {

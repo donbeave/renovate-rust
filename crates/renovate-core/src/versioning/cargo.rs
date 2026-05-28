@@ -1475,17 +1475,17 @@ mod renovate_compat_tests {
     fn extract_versions_returns_map_of_package_versions() {
         let content = include_str!("../../tests/fixtures/cargo/lockfile-update/Cargo.1.lock");
         let result = extract_lock_file_content_versions(content).unwrap();
-        assert_eq!(result.get("proc-macro2"), Some(&vec!["1.0.66".to_string()]));
-        assert_eq!(result.get("quote"), Some(&vec!["1.0.33".to_string()]));
-        assert_eq!(result.get("test"), Some(&vec!["0.1.0".to_string()]));
+        assert_eq!(result.get("proc-macro2"), Some(&vec!["1.0.66".to_owned()]));
+        assert_eq!(result.get("quote"), Some(&vec!["1.0.33".to_owned()]));
+        assert_eq!(result.get("test"), Some(&vec!["0.1.0".to_owned()]));
         assert_eq!(
             result.get("unicode-ident"),
-            Some(&vec!["1.0.11".to_string()])
+            Some(&vec!["1.0.11".to_owned()])
         );
-        assert_eq!(result.get("unicode-xid"), Some(&vec!["0.2.4".to_string()]));
+        assert_eq!(result.get("unicode-xid"), Some(&vec!["0.2.4".to_owned()]));
         let syn = result.get("syn").unwrap();
-        assert!(syn.contains(&"1.0.1".to_string()));
-        assert!(syn.contains(&"2.0.1".to_string()));
+        assert!(syn.contains(&"1.0.1".to_owned()));
+        assert!(syn.contains(&"2.0.1".to_owned()));
         assert_eq!(syn.len(), 2);
     }
 
@@ -1495,9 +1495,9 @@ mod renovate_compat_tests {
         let lock_file_content =
             include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v1.lock");
         let config = UpdateLockedConfig {
-            dep_name: Some("foo".to_string()),
-            new_version: Some("1.0.4".to_string()),
-            lock_file_content: Some(lock_file_content.to_string()),
+            dep_name: Some("foo".to_owned()),
+            new_version: Some("1.0.4".to_owned()),
+            lock_file_content: Some(lock_file_content.to_owned()),
         };
         assert_eq!(
             update_locked_dependency(&config).as_str(),
@@ -1509,8 +1509,8 @@ mod renovate_compat_tests {
     #[test]
     fn update_locked_unsupported_no_lock_file_content() {
         let config = UpdateLockedConfig {
-            dep_name: Some("foo".to_string()),
-            new_version: Some("1.0.4".to_string()),
+            dep_name: Some("foo".to_owned()),
+            new_version: Some("1.0.4".to_owned()),
             lock_file_content: None,
         };
         assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
@@ -1523,8 +1523,8 @@ mod renovate_compat_tests {
             include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v1.lock");
         let config = UpdateLockedConfig {
             dep_name: None,
-            new_version: Some("1.0.4".to_string()),
-            lock_file_content: Some(lock_file_content.to_string()),
+            new_version: Some("1.0.4".to_owned()),
+            lock_file_content: Some(lock_file_content.to_owned()),
         };
         assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
     }
@@ -1535,9 +1535,9 @@ mod renovate_compat_tests {
         let lock_file_content =
             include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v1.lock");
         let config = UpdateLockedConfig {
-            dep_name: Some("foo".to_string()),
-            new_version: Some("1.0.3".to_string()),
-            lock_file_content: Some(lock_file_content.to_string()),
+            dep_name: Some("foo".to_owned()),
+            new_version: Some("1.0.3".to_owned()),
+            lock_file_content: Some(lock_file_content.to_owned()),
         };
         assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
     }
@@ -1546,9 +1546,9 @@ mod renovate_compat_tests {
     #[test]
     fn update_locked_update_failed_on_invalid_content() {
         let config = UpdateLockedConfig {
-            dep_name: Some("foo".to_string()),
-            new_version: Some("1.0.3".to_string()),
-            lock_file_content: Some("not valid toml {{{".to_string()),
+            dep_name: Some("foo".to_owned()),
+            new_version: Some("1.0.3".to_owned()),
+            lock_file_content: Some("not valid toml {{{".to_owned()),
         };
         assert_eq!(update_locked_dependency(&config).as_str(), "update-failed");
     }

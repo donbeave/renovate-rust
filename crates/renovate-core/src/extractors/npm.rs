@@ -1522,10 +1522,7 @@ pub fn get_yarn_locked_dependencies(
 
     let flush =
         |constraint: &str, entry_version: Option<&str>, results: &mut Vec<YarnLockEntrySummary>| {
-            let entry_ver = match entry_version {
-                Some(v) => v,
-                None => return,
-            };
+            let Some(entry_ver) = entry_version else { return };
             if entry_ver != current_version {
                 return;
             }
@@ -1541,9 +1538,8 @@ pub fn get_yarn_locked_dependencies(
                     continue;
                 }
                 // Parse `name@constraint` or `@scope/name@constraint`.
-                let (entry_name, constraint_part) = if sub.starts_with('@') {
+                let (entry_name, constraint_part) = if let Some(rest) = sub.strip_prefix('@') {
                     // Scoped: `@scope/name@npm:^1.2.3`
-                    let rest = &sub[1..];
                     if let Some(at_pos) = rest.find('@') {
                         let name = format!("@{}", &rest[..at_pos]);
                         let c = rest[at_pos + 1..].trim_start_matches("npm:");
@@ -1590,11 +1586,9 @@ pub fn get_yarn_locked_dependencies(
         if let Some(ver) = trimmed
             .strip_prefix("version ")
             .or_else(|| trimmed.strip_prefix("version:"))
-        {
-            if current_entry_version.is_none() {
+            && current_entry_version.is_none() {
                 current_entry_version = parse_yarn_string_value(ver);
             }
-        }
     }
     // Flush last entry
     if let Some(ref c) = current_constraint {
@@ -3103,12 +3097,12 @@ chalk@^2.4.1:
     fn sample_catalogs() -> Vec<Catalog> {
         vec![
             Catalog {
-                name: "default".to_string(),
-                dependencies: vec![("react".to_string(), "17.0.2".to_string())],
+                name: "default".to_owned(),
+                dependencies: vec![("react".to_owned(), "17.0.2".to_owned())],
             },
             Catalog {
-                name: "custom".to_string(),
-                dependencies: vec![("lodash".to_string(), "4.17.21".to_string())],
+                name: "custom".to_owned(),
+                dependencies: vec![("lodash".to_owned(), "4.17.21".to_owned())],
             },
         ]
     }
@@ -3145,7 +3139,7 @@ chalk@^2.4.1:
     #[test]
     fn catalog_deps_empty_dependencies() {
         let catalogs = vec![Catalog {
-            name: "empty".to_string(),
+            name: "empty".to_owned(),
             dependencies: vec![],
         }];
         assert!(extract_catalog_deps(&catalogs, "pnpm").is_empty());

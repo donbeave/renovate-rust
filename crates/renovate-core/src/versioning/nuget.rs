@@ -192,12 +192,23 @@ pub fn parse_version(input: &str) -> Option<NugetVersionData> {
     let revision = cap.name("revision").and_then(|m| m.as_str().parse().ok());
     let prerelease = cap.name("prerelease").map(|m| m.as_str().to_owned());
     let metadata = cap.name("metadata").map(|m| m.as_str().to_owned());
-    Some(NugetVersionData { major, minor, patch, revision, prerelease, metadata })
+    Some(NugetVersionData {
+        major,
+        minor,
+        patch,
+        revision,
+        prerelease,
+        metadata,
+    })
 }
 
 fn parse_floating_component(input: &str) -> u64 {
     let int_str = input.split('*').next().unwrap_or("");
-    if int_str.is_empty() { 0 } else { int_str.parse::<u64>().unwrap_or(0) * 10 }
+    if int_str.is_empty() {
+        0
+    } else {
+        int_str.parse::<u64>().unwrap_or(0) * 10
+    }
 }
 
 /// Parse a NuGet floating range string (e.g. `1.2.*`) into [`NugetFloatingRangeData`].
@@ -210,7 +221,9 @@ pub fn parse_floating_range(input: &str) -> Option<NugetFloatingRangeData> {
         ).unwrap()
     });
     let cap = FLOATING_RE.captures(input)?;
-    let prerelease = cap.name("floating_prerelease").map(|m| m.as_str().to_owned());
+    let prerelease = cap
+        .name("floating_prerelease")
+        .map(|m| m.as_str().to_owned());
     let mut res = NugetFloatingRangeData {
         major: 0,
         minor: None,
@@ -251,7 +264,11 @@ pub fn parse_floating_range(input: &str) -> Option<NugetFloatingRangeData> {
     if let Some(r) = cap.name("revision") {
         res.revision = Some(r.as_str().parse().unwrap_or(0));
     }
-    if prerelease.is_some() { Some(res) } else { None }
+    if prerelease.is_some() {
+        Some(res)
+    } else {
+        None
+    }
 }
 
 /// Compute the lower bound [`NugetVersionData`] for a floating range.
@@ -282,9 +299,8 @@ pub fn get_floating_range_lower_bound(range: &NugetFloatingRangeData) -> NugetVe
 ///
 /// Mirrors `lib/modules/versioning/nuget/parser.ts` `parseExactRange()`.
 pub fn parse_exact_range(input: &str) -> Option<NugetExactRangeData> {
-    static EXACT_RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r"^\s*\[\s*(?P<version>[^,]+?)\s*\]\s*$").unwrap()
-    });
+    static EXACT_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^\s*\[\s*(?P<version>[^,]+?)\s*\]\s*$").unwrap());
     let version_str = EXACT_RE.captures(input)?.name("version")?.as_str();
     let version = parse_version(version_str)?;
     Some(NugetExactRangeData { version })
@@ -314,7 +330,8 @@ pub fn parse_bracket_range(input: &str) -> Option<NugetBracketRangeData> {
     }
     if let Some(cap) = MIN_RE.captures(input) {
         let min_str = cap.name("min_version")?.as_str();
-        let min = parse_version(min_str).map(NugetBracketMin::Version)
+        let min = parse_version(min_str)
+            .map(NugetBracketMin::Version)
             .or_else(|| parse_floating_range(min_str).map(NugetBracketMin::Floating))?;
         return Some(NugetBracketRangeData {
             min: Some(min),
@@ -325,7 +342,8 @@ pub fn parse_bracket_range(input: &str) -> Option<NugetBracketRangeData> {
     }
     if let Some(cap) = BOTH_RE.captures(input) {
         let min_str = cap.name("min_version")?.as_str();
-        let min = parse_version(min_str).map(NugetBracketMin::Version)
+        let min = parse_version(min_str)
+            .map(NugetBracketMin::Version)
             .or_else(|| parse_floating_range(min_str).map(NugetBracketMin::Floating))?;
         let max = parse_version(cap.name("max_version")?.as_str())?;
         return Some(NugetBracketRangeData {
@@ -342,7 +360,8 @@ pub fn parse_bracket_range(input: &str) -> Option<NugetBracketRangeData> {
 ///
 /// Mirrors `lib/modules/versioning/nuget/parser.ts` `parseRange()`.
 pub fn parse_range(input: &str) -> Option<NugetRangeData> {
-    parse_exact_range(input).map(NugetRangeData::Exact)
+    parse_exact_range(input)
+        .map(NugetRangeData::Exact)
         .or_else(|| parse_bracket_range(input).map(NugetRangeData::Bracket))
         .or_else(|| parse_floating_range(input).map(NugetRangeData::Floating))
 }
@@ -352,17 +371,36 @@ pub fn parse_range(input: &str) -> Option<NugetRangeData> {
 /// Mirrors `lib/modules/versioning/nuget/version.ts` `versionToString()`.
 pub fn version_to_string(v: &NugetVersionData) -> String {
     let mut s = v.major.to_string();
-    if let Some(n) = v.minor { s.push('.'); s.push_str(&n.to_string()); }
-    if let Some(n) = v.patch { s.push('.'); s.push_str(&n.to_string()); }
-    if let Some(n) = v.revision { s.push('.'); s.push_str(&n.to_string()); }
-    if let Some(ref pr) = v.prerelease { s.push('-'); s.push_str(pr); }
-    if let Some(ref md) = v.metadata { s.push('+'); s.push_str(md); }
+    if let Some(n) = v.minor {
+        s.push('.');
+        s.push_str(&n.to_string());
+    }
+    if let Some(n) = v.patch {
+        s.push('.');
+        s.push_str(&n.to_string());
+    }
+    if let Some(n) = v.revision {
+        s.push('.');
+        s.push_str(&n.to_string());
+    }
+    if let Some(ref pr) = v.prerelease {
+        s.push('-');
+        s.push_str(pr);
+    }
+    if let Some(ref md) = v.metadata {
+        s.push('+');
+        s.push_str(md);
+    }
     s
 }
 
 fn floating_component_to_string(component: u64) -> String {
     let int = component / 10;
-    if int == 0 { "*".to_owned() } else { format!("{int}*") }
+    if int == 0 {
+        "*".to_owned()
+    } else {
+        format!("{int}*")
+    }
 }
 
 /// Render a [`NugetRangeData`] back to its canonical string form.
@@ -373,28 +411,38 @@ pub fn range_to_string(range: &NugetRangeData) -> String {
         NugetRangeData::Exact(r) => format!("[{}]", version_to_string(&r.version)),
         NugetRangeData::Floating(r) => {
             let mut s = String::new();
-            if let Some(ref pr) = r.prerelease { s = format!("-{pr}"); }
+            if let Some(ref pr) = r.prerelease {
+                s = format!("-{pr}");
+            }
             if let Some(rev) = r.revision {
                 let part = if r.floating == Some(NugetFloatingField::Revision) {
                     floating_component_to_string(rev)
-                } else { rev.to_string() };
+                } else {
+                    rev.to_string()
+                };
                 s = format!(".{part}{s}");
             }
             if let Some(pat) = r.patch {
                 let part = if r.floating == Some(NugetFloatingField::Patch) {
                     floating_component_to_string(pat)
-                } else { pat.to_string() };
+                } else {
+                    pat.to_string()
+                };
                 s = format!(".{part}{s}");
             }
             if let Some(min) = r.minor {
                 let part = if r.floating == Some(NugetFloatingField::Minor) {
                     floating_component_to_string(min)
-                } else { min.to_string() };
+                } else {
+                    min.to_string()
+                };
                 s = format!(".{part}{s}");
             }
             let maj = if r.floating == Some(NugetFloatingField::Major) {
                 floating_component_to_string(r.major)
-            } else { r.major.to_string() };
+            } else {
+                r.major.to_string()
+            };
             format!("{maj}{s}")
         }
         NugetRangeData::Bracket(r) => {
@@ -402,7 +450,9 @@ pub fn range_to_string(range: &NugetRangeData) -> String {
             let rr = if r.max_inclusive { ']' } else { ')' };
             let min_str = |m: &NugetBracketMin| match m {
                 NugetBracketMin::Version(v) => version_to_string(v),
-                NugetBracketMin::Floating(f) => range_to_string(&NugetRangeData::Floating(f.clone())),
+                NugetBracketMin::Floating(f) => {
+                    range_to_string(&NugetRangeData::Floating(f.clone()))
+                }
             };
             match (&r.min, &r.max) {
                 (Some(mn), Some(mx)) => format!("{l}{},{}{rr}", min_str(mn), version_to_string(mx)),
@@ -423,15 +473,19 @@ fn compare_prerelease_parts(a: &str, b: &str) -> i32 {
     for i in 0..max_len {
         let ap = a_parts.get(i).copied().unwrap_or("");
         let bp = b_parts.get(i).copied().unwrap_or("");
-        let cmp = if ap.bytes().all(|c| c.is_ascii_digit()) && bp.bytes().all(|c| c.is_ascii_digit()) {
-            let an: u64 = ap.parse().unwrap_or(0);
-            let bn: u64 = bp.parse().unwrap_or(0);
-            an.cmp(&bn)
-        } else {
-            ap.to_lowercase().cmp(&bp.to_lowercase())
-        };
+        let cmp =
+            if ap.bytes().all(|c| c.is_ascii_digit()) && bp.bytes().all(|c| c.is_ascii_digit()) {
+                let an: u64 = ap.parse().unwrap_or(0);
+                let bn: u64 = bp.parse().unwrap_or(0);
+                an.cmp(&bn)
+            } else {
+                ap.to_lowercase().cmp(&bp.to_lowercase())
+            };
         if cmp != Ordering::Equal {
-            return match cmp { Ordering::Less => -1, _ => 1 };
+            return match cmp {
+                Ordering::Less => -1,
+                _ => 1,
+            };
         }
     }
     0
@@ -440,7 +494,9 @@ fn compare_prerelease_parts(a: &str, b: &str) -> i32 {
 fn compare_version_data(x: &NugetVersionData, y: &NugetVersionData) -> i32 {
     macro_rules! cmp_component {
         ($xv:expr, $yv:expr) => {
-            if $xv != $yv { return if $xv > $yv { 1 } else { -1 }; }
+            if $xv != $yv {
+                return if $xv > $yv { 1 } else { -1 };
+            }
         };
     }
     cmp_component!(x.major, y.major);
@@ -456,7 +512,9 @@ fn compare_version_data(x: &NugetVersionData, y: &NugetVersionData) -> i32 {
 }
 
 fn matches_floating_range(v: &NugetVersionData, r: &NugetFloatingRangeData) -> bool {
-    if r.prerelease.is_none() && v.prerelease.is_some() { return false; }
+    if r.prerelease.is_none() && v.prerelease.is_some() {
+        return false;
+    }
     compare_version_data(v, &get_floating_range_lower_bound(r)) >= 0
 }
 
@@ -480,11 +538,15 @@ pub fn matches_range(v: &NugetVersionData, r: &NugetRangeData) -> bool {
                     if br.min_inclusive { c >= 0 } else { c > 0 }
                 }
             };
-            if !min_ok { return false; }
+            if !min_ok {
+                return false;
+            }
             match &br.max {
                 None => true,
                 Some(mx) => {
-                    if v.prerelease.is_some() && mx.prerelease.is_none() { return false; }
+                    if v.prerelease.is_some() && mx.prerelease.is_none() {
+                        return false;
+                    }
                     let c = compare_version_data(v, mx);
                     if br.max_inclusive { c <= 0 } else { c < 0 }
                 }
@@ -571,11 +633,11 @@ pub fn nuget_is_greater_than(version: &str, other: &str) -> bool {
 ///
 /// Mirrors `lib/modules/versioning/nuget/index.ts` `isLessThanRange()`.
 pub fn nuget_is_less_than_range(version: &str, range: &str) -> bool {
-    let v = match parse_version(version) { None => return false, Some(v) => v };
+    let Some(v) = parse_version(version) else { return false };
     if let Some(u) = parse_version(range) {
         return compare_version_data(&v, &u) < 0;
     }
-    let r = match parse_range(range) { None => return false, Some(r) => r };
+    let Some(r) = parse_range(range) else { return false };
     match &r {
         NugetRangeData::Exact(er) => compare_version_data(&v, &er.version) < 0,
         NugetRangeData::Bracket(br) => match &br.min {
@@ -610,8 +672,10 @@ pub fn nuget_get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Op
     let mut result: Option<&str> = None;
     let mut v_max: Option<NugetVersionData> = None;
     for &ver in versions {
-        let v = match parse_version(ver) { None => continue, Some(v) => v };
-        if !filter(&v) { continue; }
+        let Some(v) = parse_version(ver) else { continue };
+        if !filter(&v) {
+            continue;
+        }
         if v_max.is_none() || compare_version_data(&v, v_max.as_ref().unwrap()) > 0 {
             v_max = Some(v);
             result = Some(ver);
@@ -634,8 +698,10 @@ pub fn nuget_min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Op
     let mut result: Option<&str> = None;
     let mut v_min: Option<NugetVersionData> = None;
     for &ver in versions {
-        let v = match parse_version(ver) { None => continue, Some(v) => v };
-        if !filter(&v) { continue; }
+        let Some(v) = parse_version(ver) else { continue };
+        if !filter(&v) {
+            continue;
+        }
         if v_min.is_none() || compare_version_data(&v, v_min.as_ref().unwrap()) < 0 {
             v_min = Some(v);
             result = Some(ver);
@@ -667,9 +733,9 @@ pub fn nuget_get_new_value(current_value: &str, new_version: &str) -> Option<Str
         return Some(current_value.to_owned());
     }
     match r {
-        NugetRangeData::Exact(_) => {
-            Some(range_to_string(&NugetRangeData::Exact(NugetExactRangeData { version: v })))
-        }
+        NugetRangeData::Exact(_) => Some(range_to_string(&NugetRangeData::Exact(
+            NugetExactRangeData { version: v },
+        ))),
         NugetRangeData::Floating(fr) => match fr.floating.clone() {
             None => Some(version_to_string(&v)),
             Some(NugetFloatingField::Major) => {
@@ -737,11 +803,11 @@ pub fn nuget_sort_versions(a: &str, b: &str) -> i32 {
 ///
 /// Mirrors `lib/modules/versioning/nuget/index.ts` `matches()`.
 pub fn nuget_matches(version: &str, range: &str) -> bool {
-    let v = match parse_version(version) { None => return false, Some(v) => v };
+    let Some(v) = parse_version(version) else { return false };
     if let Some(u) = parse_version(range) {
         return compare_version_data(&v, &u) >= 0;
     }
-    let r = match parse_range(range) { None => return false, Some(r) => r };
+    let Some(r) = parse_range(range) else { return false };
     matches_range(&v, &r)
 }
 
@@ -1094,69 +1160,202 @@ mod tests {
     fn parse_floating_range_parametrized() {
         macro_rules! fr {
             ($major:expr) => {
-                NugetFloatingRangeData { major: $major, minor: None, patch: None, revision: None, floating: None, prerelease: None }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: None,
+                    patch: None,
+                    revision: None,
+                    floating: None,
+                    prerelease: None,
+                }
             };
             ($major:expr, floating=$f:expr) => {
-                NugetFloatingRangeData { major: $major, minor: None, patch: None, revision: None, floating: Some($f), prerelease: None }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: None,
+                    patch: None,
+                    revision: None,
+                    floating: Some($f),
+                    prerelease: None,
+                }
             };
             ($major:expr, floating=$f:expr, pre=$p:expr) => {
-                NugetFloatingRangeData { major: $major, minor: None, patch: None, revision: None, floating: Some($f), prerelease: Some($p.to_owned()) }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: None,
+                    patch: None,
+                    revision: None,
+                    floating: Some($f),
+                    prerelease: Some($p.to_owned()),
+                }
             };
             ($major:expr, minor=$minor:expr, floating=$f:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: None, revision: None, floating: Some($f), prerelease: None }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: None,
+                    revision: None,
+                    floating: Some($f),
+                    prerelease: None,
+                }
             };
             ($major:expr, minor=$minor:expr, floating=$f:expr, pre=$p:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: None, revision: None, floating: Some($f), prerelease: Some($p.to_owned()) }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: None,
+                    revision: None,
+                    floating: Some($f),
+                    prerelease: Some($p.to_owned()),
+                }
             };
             ($major:expr, minor=$minor:expr, patch=$patch:expr, floating=$f:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: Some($patch), revision: None, floating: Some($f), prerelease: None }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: Some($patch),
+                    revision: None,
+                    floating: Some($f),
+                    prerelease: None,
+                }
             };
             ($major:expr, minor=$minor:expr, patch=$patch:expr, floating=$f:expr, pre=$p:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: Some($patch), revision: None, floating: Some($f), prerelease: Some($p.to_owned()) }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: Some($patch),
+                    revision: None,
+                    floating: Some($f),
+                    prerelease: Some($p.to_owned()),
+                }
             };
             ($major:expr, minor=$minor:expr, patch=$patch:expr, rev=$rev:expr, floating=$f:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: Some($patch), revision: Some($rev), floating: Some($f), prerelease: None }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: Some($patch),
+                    revision: Some($rev),
+                    floating: Some($f),
+                    prerelease: None,
+                }
             };
             ($major:expr, minor=$minor:expr, patch=$patch:expr, rev=$rev:expr, floating=$f:expr, pre=$p:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: Some($patch), revision: Some($rev), floating: Some($f), prerelease: Some($p.to_owned()) }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: Some($patch),
+                    revision: Some($rev),
+                    floating: Some($f),
+                    prerelease: Some($p.to_owned()),
+                }
             };
             ($major:expr, minor=$minor:expr, patch=$patch:expr, rev=$rev:expr, pre=$p:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: Some($patch), revision: Some($rev), floating: None, prerelease: Some($p.to_owned()) }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: Some($patch),
+                    revision: Some($rev),
+                    floating: None,
+                    prerelease: Some($p.to_owned()),
+                }
             };
             ($major:expr, minor=$minor:expr, pre=$p:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: None, revision: None, floating: None, prerelease: Some($p.to_owned()) }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: None,
+                    revision: None,
+                    floating: None,
+                    prerelease: Some($p.to_owned()),
+                }
             };
             ($major:expr, minor=$minor:expr, patch=$patch:expr, pre=$p:expr) => {
-                NugetFloatingRangeData { major: $major, minor: Some($minor), patch: Some($patch), revision: None, floating: None, prerelease: Some($p.to_owned()) }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: Some($patch),
+                    revision: None,
+                    floating: None,
+                    prerelease: Some($p.to_owned()),
+                }
             };
             ($major:expr, pre=$p:expr) => {
-                NugetFloatingRangeData { major: $major, minor: None, patch: None, revision: None, floating: None, prerelease: Some($p.to_owned()) }
+                NugetFloatingRangeData {
+                    major: $major,
+                    minor: None,
+                    patch: None,
+                    revision: None,
+                    floating: None,
+                    prerelease: Some($p.to_owned()),
+                }
             };
         }
         use NugetFloatingField::*;
         let cases: &[(&str, NugetFloatingRangeData)] = &[
-            ("*-*",          fr!(0, floating=Major, pre="*")),
-            ("*-foo*",       fr!(0, floating=Major, pre="foo*")),
-            ("*-foo.bar*",   fr!(0, floating=Major, pre="foo.bar*")),
-            ("*",            fr!(0, floating=Major)),
-            ("1.*",          fr!(1, minor=0, floating=Minor)),
-            ("1.*-*",        fr!(1, minor=0, floating=Minor, pre="*")),
-            ("1.*-foo*",     fr!(1, minor=0, floating=Minor, pre="foo*")),
-            ("1.2.*",        fr!(1, minor=2, patch=0, floating=Patch)),
-            ("1.2.*-*",      fr!(1, minor=2, patch=0, floating=Patch, pre="*")),
-            ("1.2.*-foo*",   fr!(1, minor=2, patch=0, floating=Patch, pre="foo*")),
-            ("1.2.3.*",      fr!(1, minor=2, patch=3, rev=0, floating=Revision)),
-            ("1.2.3.*-*",    fr!(1, minor=2, patch=3, rev=0, floating=Revision, pre="*")),
-            ("1.2.3.*-foo*", fr!(1, minor=2, patch=3, rev=0, floating=Revision, pre="foo*")),
-            ("1.2.3.4-*",    fr!(1, minor=2, patch=3, rev=4, pre="*")),
-            ("1.2.3.4-foo*", fr!(1, minor=2, patch=3, rev=4, pre="foo*")),
-            ("123*",         fr!(1230, floating=Major)),
-            ("1-*",          fr!(1, pre="*")),
-            ("1.2-*",        fr!(1, minor=2, pre="*")),
-            ("1.2.3-*",      fr!(1, minor=2, patch=3, pre="*")),
+            ("*-*", fr!(0, floating = Major, pre = "*")),
+            ("*-foo*", fr!(0, floating = Major, pre = "foo*")),
+            ("*-foo.bar*", fr!(0, floating = Major, pre = "foo.bar*")),
+            ("*", fr!(0, floating = Major)),
+            ("1.*", fr!(1, minor = 0, floating = Minor)),
+            ("1.*-*", fr!(1, minor = 0, floating = Minor, pre = "*")),
+            (
+                "1.*-foo*",
+                fr!(1, minor = 0, floating = Minor, pre = "foo*"),
+            ),
+            ("1.2.*", fr!(1, minor = 2, patch = 0, floating = Patch)),
+            (
+                "1.2.*-*",
+                fr!(1, minor = 2, patch = 0, floating = Patch, pre = "*"),
+            ),
+            (
+                "1.2.*-foo*",
+                fr!(1, minor = 2, patch = 0, floating = Patch, pre = "foo*"),
+            ),
+            (
+                "1.2.3.*",
+                fr!(1, minor = 2, patch = 3, rev = 0, floating = Revision),
+            ),
+            (
+                "1.2.3.*-*",
+                fr!(
+                    1,
+                    minor = 2,
+                    patch = 3,
+                    rev = 0,
+                    floating = Revision,
+                    pre = "*"
+                ),
+            ),
+            (
+                "1.2.3.*-foo*",
+                fr!(
+                    1,
+                    minor = 2,
+                    patch = 3,
+                    rev = 0,
+                    floating = Revision,
+                    pre = "foo*"
+                ),
+            ),
+            (
+                "1.2.3.4-*",
+                fr!(1, minor = 2, patch = 3, rev = 4, pre = "*"),
+            ),
+            (
+                "1.2.3.4-foo*",
+                fr!(1, minor = 2, patch = 3, rev = 4, pre = "foo*"),
+            ),
+            ("123*", fr!(1230, floating = Major)),
+            ("1-*", fr!(1, pre = "*")),
+            ("1.2-*", fr!(1, minor = 2, pre = "*")),
+            ("1.2.3-*", fr!(1, minor = 2, patch = 3, pre = "*")),
         ];
         for (input, expected) in cases {
-            assert_eq!(parse_floating_range(input).as_ref(), Some(expected), "parse_floating_range({input})");
+            assert_eq!(
+                parse_floating_range(input).as_ref(),
+                Some(expected),
+                "parse_floating_range({input})"
+            );
         }
     }
 
@@ -1167,37 +1366,56 @@ mod tests {
     fn get_floating_range_lower_bound_parametrized() {
         macro_rules! vd {
             ($major:expr, $minor:expr, $patch:expr, $rev:expr) => {
-                NugetVersionData { major: $major, minor: Some($minor), patch: Some($patch), revision: Some($rev), prerelease: None, metadata: None }
+                NugetVersionData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: Some($patch),
+                    revision: Some($rev),
+                    prerelease: None,
+                    metadata: None,
+                }
             };
             ($major:expr, $minor:expr, $patch:expr, $rev:expr, pre=$p:expr) => {
-                NugetVersionData { major: $major, minor: Some($minor), patch: Some($patch), revision: Some($rev), prerelease: Some($p.to_owned()), metadata: None }
+                NugetVersionData {
+                    major: $major,
+                    minor: Some($minor),
+                    patch: Some($patch),
+                    revision: Some($rev),
+                    prerelease: Some($p.to_owned()),
+                    metadata: None,
+                }
             };
         }
         let cases: &[(&str, NugetVersionData)] = &[
-            ("*-*",          vd!(0, 0, 0, 0, pre="0")),
-            ("*-foo*",       vd!(0, 0, 0, 0, pre="foo")),
-            ("*-foo.bar*",   vd!(0, 0, 0, 0, pre="foo.bar")),
-            ("*",            vd!(0, 0, 0, 0)),
-            ("1.*",          vd!(1, 0, 0, 0)),
-            ("1.*-*",        vd!(1, 0, 0, 0, pre="0")),
-            ("1.*-foo*",     vd!(1, 0, 0, 0, pre="foo")),
-            ("1.2.*",        vd!(1, 2, 0, 0)),
-            ("1.2.*-*",      vd!(1, 2, 0, 0, pre="0")),
-            ("1.2.*-foo*",   vd!(1, 2, 0, 0, pre="foo")),
-            ("1.2.3.*",      vd!(1, 2, 3, 0)),
-            ("1.2.3.*-*",    vd!(1, 2, 3, 0, pre="0")),
-            ("1.2.3.*-foo*", vd!(1, 2, 3, 0, pre="foo")),
-            ("1.2.3.4-*",    vd!(1, 2, 3, 4, pre="0")),
-            ("1.2.3.4-foo*", vd!(1, 2, 3, 4, pre="foo")),
-            ("1234*",        vd!(12340, 0, 0, 0)),
-            ("1.234*",       vd!(1, 2340, 0, 0)),
-            ("1.2.34*",      vd!(1, 2, 340, 0)),
-            ("1.2.3.4*",     vd!(1, 2, 3, 40)),
-            ("1.2.3-4.5.*",  vd!(1, 2, 3, 0, pre="4.5.0")),
+            ("*-*", vd!(0, 0, 0, 0, pre = "0")),
+            ("*-foo*", vd!(0, 0, 0, 0, pre = "foo")),
+            ("*-foo.bar*", vd!(0, 0, 0, 0, pre = "foo.bar")),
+            ("*", vd!(0, 0, 0, 0)),
+            ("1.*", vd!(1, 0, 0, 0)),
+            ("1.*-*", vd!(1, 0, 0, 0, pre = "0")),
+            ("1.*-foo*", vd!(1, 0, 0, 0, pre = "foo")),
+            ("1.2.*", vd!(1, 2, 0, 0)),
+            ("1.2.*-*", vd!(1, 2, 0, 0, pre = "0")),
+            ("1.2.*-foo*", vd!(1, 2, 0, 0, pre = "foo")),
+            ("1.2.3.*", vd!(1, 2, 3, 0)),
+            ("1.2.3.*-*", vd!(1, 2, 3, 0, pre = "0")),
+            ("1.2.3.*-foo*", vd!(1, 2, 3, 0, pre = "foo")),
+            ("1.2.3.4-*", vd!(1, 2, 3, 4, pre = "0")),
+            ("1.2.3.4-foo*", vd!(1, 2, 3, 4, pre = "foo")),
+            ("1234*", vd!(12340, 0, 0, 0)),
+            ("1.234*", vd!(1, 2340, 0, 0)),
+            ("1.2.34*", vd!(1, 2, 340, 0)),
+            ("1.2.3.4*", vd!(1, 2, 3, 40)),
+            ("1.2.3-4.5.*", vd!(1, 2, 3, 0, pre = "4.5.0")),
         ];
         for (input, expected) in cases {
-            let range = parse_floating_range(input).unwrap_or_else(|| panic!("parse_floating_range({input}) returned None"));
-            assert_eq!(get_floating_range_lower_bound(&range), *expected, "lower_bound({input})");
+            let range = parse_floating_range(input)
+                .unwrap_or_else(|| panic!("parse_floating_range({input}) returned None"));
+            assert_eq!(
+                get_floating_range_lower_bound(&range),
+                *expected,
+                "lower_bound({input})"
+            );
         }
     }
 
@@ -1220,8 +1438,12 @@ mod tests {
             parse_exact_range("[1.2.3]"),
             Some(NugetExactRangeData {
                 version: NugetVersionData {
-                    major: 1, minor: Some(2), patch: Some(3),
-                    revision: None, prerelease: None, metadata: None,
+                    major: 1,
+                    minor: Some(2),
+                    patch: Some(3),
+                    revision: None,
+                    prerelease: None,
+                    metadata: None,
                 }
             })
         );
@@ -1248,7 +1470,14 @@ mod tests {
             parse_bracket_range("(,1.2.3]"),
             Some(NugetBracketRangeData {
                 min: None,
-                max: Some(NugetVersionData { major: 1, minor: Some(2), patch: Some(3), revision: None, prerelease: None, metadata: None }),
+                max: Some(NugetVersionData {
+                    major: 1,
+                    minor: Some(2),
+                    patch: Some(3),
+                    revision: None,
+                    prerelease: None,
+                    metadata: None
+                }),
                 min_inclusive: false,
                 max_inclusive: true,
             })
@@ -1261,7 +1490,14 @@ mod tests {
         assert_eq!(
             parse_bracket_range("[1.2.3,)"),
             Some(NugetBracketRangeData {
-                min: Some(NugetBracketMin::Version(NugetVersionData { major: 1, minor: Some(2), patch: Some(3), revision: None, prerelease: None, metadata: None })),
+                min: Some(NugetBracketMin::Version(NugetVersionData {
+                    major: 1,
+                    minor: Some(2),
+                    patch: Some(3),
+                    revision: None,
+                    prerelease: None,
+                    metadata: None
+                })),
                 max: None,
                 min_inclusive: true,
                 max_inclusive: false,
@@ -1272,8 +1508,22 @@ mod tests {
     // Ported: "$input" — versioning/nuget/parser.spec.ts line 168
     #[test]
     fn parse_bracket_range_bounds_inclusivity() {
-        let v1 = || NugetVersionData { major: 1, minor: None, patch: None, revision: None, prerelease: None, metadata: None };
-        let v2 = || NugetVersionData { major: 2, minor: None, patch: None, revision: None, prerelease: None, metadata: None };
+        let v1 = || NugetVersionData {
+            major: 1,
+            minor: None,
+            patch: None,
+            revision: None,
+            prerelease: None,
+            metadata: None,
+        };
+        let v2 = || NugetVersionData {
+            major: 2,
+            minor: None,
+            patch: None,
+            revision: None,
+            prerelease: None,
+            metadata: None,
+        };
         let cases = [
             ("(1,2)", false, false),
             ("[1,2)", true, false),
@@ -1300,8 +1550,22 @@ mod tests {
         assert_eq!(
             parse_bracket_range(" [ 1 , 2 ] "),
             Some(NugetBracketRangeData {
-                min: Some(NugetBracketMin::Version(NugetVersionData { major: 1, minor: None, patch: None, revision: None, prerelease: None, metadata: None })),
-                max: Some(NugetVersionData { major: 2, minor: None, patch: None, revision: None, prerelease: None, metadata: None }),
+                min: Some(NugetBracketMin::Version(NugetVersionData {
+                    major: 1,
+                    minor: None,
+                    patch: None,
+                    revision: None,
+                    prerelease: None,
+                    metadata: None
+                })),
+                max: Some(NugetVersionData {
+                    major: 2,
+                    minor: None,
+                    patch: None,
+                    revision: None,
+                    prerelease: None,
+                    metadata: None
+                }),
                 min_inclusive: true,
                 max_inclusive: true,
             })
@@ -1312,14 +1576,25 @@ mod tests {
     #[test]
     fn parse_bracket_range_floating_lower_bound() {
         let float_1_minor = NugetFloatingRangeData {
-            major: 1, minor: Some(0), patch: None, revision: None,
-            floating: Some(NugetFloatingField::Minor), prerelease: None,
+            major: 1,
+            minor: Some(0),
+            patch: None,
+            revision: None,
+            floating: Some(NugetFloatingField::Minor),
+            prerelease: None,
         };
         assert_eq!(
             parse_bracket_range("[1.*,2]"),
             Some(NugetBracketRangeData {
                 min: Some(NugetBracketMin::Floating(float_1_minor.clone())),
-                max: Some(NugetVersionData { major: 2, minor: None, patch: None, revision: None, prerelease: None, metadata: None }),
+                max: Some(NugetVersionData {
+                    major: 2,
+                    minor: None,
+                    patch: None,
+                    revision: None,
+                    prerelease: None,
+                    metadata: None
+                }),
                 min_inclusive: true,
                 max_inclusive: true,
             })
@@ -1341,13 +1616,24 @@ mod tests {
     #[test]
     fn version_to_string_roundtrip() {
         let cases = [
-            "1", "1.2", "1.2.3", "1.2.3.4",
-            "1-beta", "1.2-beta", "1.2.3-beta", "1.2.3.4-beta",
+            "1",
+            "1.2",
+            "1.2.3",
+            "1.2.3.4",
+            "1-beta",
+            "1.2-beta",
+            "1.2.3-beta",
+            "1.2.3.4-beta",
             "1.2.3.4-beta+ABC",
         ];
         for v in cases {
-            let parsed = parse_version(v).unwrap_or_else(|| panic!("parse_version({v}) returned None"));
-            assert_eq!(version_to_string(&parsed), v, "version_to_string(parse_version({v}))");
+            let parsed =
+                parse_version(v).unwrap_or_else(|| panic!("parse_version({v}) returned None"));
+            assert_eq!(
+                version_to_string(&parsed),
+                v,
+                "version_to_string(parse_version({v}))"
+            );
         }
     }
 
@@ -1357,20 +1643,55 @@ mod tests {
     #[test]
     fn range_to_string_roundtrip() {
         let cases = [
-            "[1]", "[1.2]", "[1.2.3]", "[1.2.3.4]",
-            "[1-foo]", "[1.2-bar]", "[1.2.3-baz]", "[1.2.3.4-qux]",
-            "*", "1.*", "1.2.*", "1.2.3.*",
-            "1.2.3.4-*", "1.2.3.*-*", "1.2.*-*", "1.*-*", "*-*",
-            "1234*", "1.234*", "1.2.34*", "1.2.3.4*",
-            "(1,2)", "[1,2)", "(1,2]", "[1,2]",
-            "(*,2)", "[*,2)", "(*,2]", "[*,2]",
-            "(1,)", "(1,]", "[1,]", "[1,)",
-            "(*,)", "(*,]", "[*,]", "[*,)",
-            "(,1)", "(,1]", "[,1]", "[,1)",
+            "[1]",
+            "[1.2]",
+            "[1.2.3]",
+            "[1.2.3.4]",
+            "[1-foo]",
+            "[1.2-bar]",
+            "[1.2.3-baz]",
+            "[1.2.3.4-qux]",
+            "*",
+            "1.*",
+            "1.2.*",
+            "1.2.3.*",
+            "1.2.3.4-*",
+            "1.2.3.*-*",
+            "1.2.*-*",
+            "1.*-*",
+            "*-*",
+            "1234*",
+            "1.234*",
+            "1.2.34*",
+            "1.2.3.4*",
+            "(1,2)",
+            "[1,2)",
+            "(1,2]",
+            "[1,2]",
+            "(*,2)",
+            "[*,2)",
+            "(*,2]",
+            "[*,2]",
+            "(1,)",
+            "(1,]",
+            "[1,]",
+            "[1,)",
+            "(*,)",
+            "(*,]",
+            "[*,]",
+            "[*,)",
+            "(,1)",
+            "(,1]",
+            "[,1]",
+            "[,1)",
         ];
         for v in cases {
             let parsed = parse_range(v).unwrap_or_else(|| panic!("parse_range({v}) returned None"));
-            assert_eq!(range_to_string(&parsed), v, "range_to_string(parse_range({v}))");
+            assert_eq!(
+                range_to_string(&parsed),
+                v,
+                "range_to_string(parse_range({v}))"
+            );
         }
     }
 
@@ -1387,7 +1708,11 @@ mod tests {
             ("foobar", false),
         ];
         for &(input, expected) in cases {
-            assert_eq!(nuget_is_single_version(input), expected, "is_single_version({input})");
+            assert_eq!(
+                nuget_is_single_version(input),
+                expected,
+                "is_single_version({input})"
+            );
         }
     }
 
@@ -1573,7 +1898,12 @@ mod tests {
             ("   19   ", Some(19), None, None),
             ("   19   .   19   ", Some(19), Some(19), None),
             ("   19   .   19   .   19   ", Some(19), Some(19), Some(19)),
-            ("   19   .   19   .   19   .   19   ", Some(19), Some(19), Some(19)),
+            (
+                "   19   .   19   .   19   .   19   ",
+                Some(19),
+                Some(19),
+                Some(19),
+            ),
             ("01.1.1.1", Some(1), Some(1), Some(1)),
             ("1.01.1.1", Some(1), Some(1), Some(1)),
             ("1.1.01.1", Some(1), Some(1), Some(1)),
@@ -1626,7 +1956,11 @@ mod tests {
             ("1.0.0-BETA", "1.0.0-beta2", false),
             ("1.0.0+AA", "1.0.0-beta+aa", false),
             ("1.0.0-BETA+AA", "1.0.0-beta", true),
-            ("1.0.0-BETA.X.y.5.77.0+AA", "1.0.0-beta.x.y.5.79.0+aa", false),
+            (
+                "1.0.0-BETA.X.y.5.77.0+AA",
+                "1.0.0-beta.x.y.5.79.0+aa",
+                false,
+            ),
             ("1.2.3.4-RC+99", "1.2.3.4-RC+99", true),
             ("1.2.3", "1.2.3", true),
             ("1.2.3-Pre.2", "1.2.3-Pre.2", true),
@@ -1679,10 +2013,18 @@ mod tests {
             ("1.0.0+aa", "1.0.0-beta+AA", true),
             ("1.0.0-beta.1+AA", "1.0.0-BETA", true),
             ("1.0.0-beta.x.y.5.79.0+aa", "1.0.0-BETA.X.y.5.77.0+AA", true),
-            ("1.0.0-beta.x.y.5.790.0+abc", "1.0.0-BETA.X.y.5.79.0+AA", true),
+            (
+                "1.0.0-beta.x.y.5.790.0+abc",
+                "1.0.0-BETA.X.y.5.79.0+AA",
+                true,
+            ),
         ];
         for &(a, b, expected) in cases {
-            assert_eq!(nuget_is_greater_than(a, b), expected, "is_greater_than({a}, {b})");
+            assert_eq!(
+                nuget_is_greater_than(a, b),
+                expected,
+                "is_greater_than({a}, {b})"
+            );
         }
     }
 
@@ -1696,23 +2038,48 @@ mod tests {
             (&["foobar"], "[1,2)", None),
             (&["1", "2", "3"], "foobar", None),
             (&["0.1", "1", "1.1", "2-beta", "2"], "[1,2)", Some("1.1")),
-            (&["0.1.0", "1.0.0-alpha.2", "2.0.0", "2.2.0", "3.0.0"], "[1.0.*, 2.0.0)", None),
+            (
+                &["0.1.0", "1.0.0-alpha.2", "2.0.0", "2.2.0", "3.0.0"],
+                "[1.0.*, 2.0.0)",
+                None,
+            ),
             (&["0.1.0", "0.2.0", "1.0.0-alpha.2"], "[1.0.*, 2.0.0)", None),
             (&["2.0.0", "2.0.0-alpha.2", "3.1.0"], "[1.0.*, 2.0.0)", None),
             (&["0.1.0", "0.2.0", "1.0.0-alpha.2"], "[1.0.*, )", None),
-            (&["0.1.0", "0.2.0", "1.0.0-alpha.2", "101.0.0"], "[1.0.*, )", Some("101.0.0")),
+            (
+                &["0.1.0", "0.2.0", "1.0.0-alpha.2", "101.0.0"],
+                "[1.0.*, )",
+                Some("101.0.0"),
+            ),
             (&["1.0.0", "1.0.1", "2.0.0"], "1.0.0", Some("2.0.0")),
             (&["0.1.0", "1.0.0", "1.2.0", "2.0.0"], "1.*", Some("2.0.0")),
             (&["0.1.0", "2.0.0", "2.5.0", "3.3.0"], "*", Some("3.3.0")),
-            (&["0.1.0-alpha", "1.0.0-alpha01", "1.0.0-alpha02", "2.0.0-beta", "2.0.1"], "1.0.0-alpha*", Some("2.0.1")),
+            (
+                &[
+                    "0.1.0-alpha",
+                    "1.0.0-alpha01",
+                    "1.0.0-alpha02",
+                    "2.0.0-beta",
+                    "2.0.1",
+                ],
+                "1.0.0-alpha*",
+                Some("2.0.1"),
+            ),
             (&["1.0.0", "2.0.0"], "[2.0.0, )", Some("2.0.0")),
             (&["1.0.0"], "[2.0.0, )", None),
             (&["1.0.1-beta.1", "1.0.1"], "1.0.0-*", Some("1.0.1")),
-            (&["foobar", "0.9.0", "1.0.1-beta.1", "1.0.1"], "1.0.0", Some("1.0.1")),
+            (
+                &["foobar", "0.9.0", "1.0.1-beta.1", "1.0.1"],
+                "1.0.0",
+                Some("1.0.1"),
+            ),
         ];
         for &(versions, range, expected) in cases {
-            assert_eq!(nuget_get_satisfying_version(versions, range), expected,
-                "get_satisfying_version({versions:?}, {range})");
+            assert_eq!(
+                nuget_get_satisfying_version(versions, range),
+                expected,
+                "get_satisfying_version({versions:?}, {range})"
+            );
         }
     }
 
@@ -1725,12 +2092,23 @@ mod tests {
             (&[], "[1,2)", None),
             (&["foobar"], "[1,2)", None),
             (&["1", "2", "3"], "foobar", None),
-            (&["0.1", "1-beta", "1", "1.1", "2-beta", "2"], "[1,2)", Some("1")),
-            (&["foobar", "0.9.0", "1.0.0", "1.0.1"], "1.0.0", Some("1.0.0")),
+            (
+                &["0.1", "1-beta", "1", "1.1", "2-beta", "2"],
+                "[1,2)",
+                Some("1"),
+            ),
+            (
+                &["foobar", "0.9.0", "1.0.0", "1.0.1"],
+                "1.0.0",
+                Some("1.0.0"),
+            ),
         ];
         for &(versions, range, expected) in cases {
-            assert_eq!(nuget_min_satisfying_version(versions, range), expected,
-                "min_satisfying_version({versions:?}, {range})");
+            assert_eq!(
+                nuget_min_satisfying_version(versions, range),
+                expected,
+                "min_satisfying_version({versions:?}, {range})"
+            );
         }
     }
 
@@ -1749,7 +2127,10 @@ mod tests {
     // Ported: "returns newVersion if the range is version too" — versioning/nuget/index.spec.ts line 441
     #[test]
     fn nuget_get_new_value_version_range_returns_new_version() {
-        assert_eq!(nuget_get_new_value("1.0.0", "1.2.3"), Some("1.2.3".to_owned()));
+        assert_eq!(
+            nuget_get_new_value("1.0.0", "1.2.3"),
+            Some("1.2.3".to_owned())
+        );
     }
 
     // Ported: "returns null if version is invalid" — versioning/nuget/index.spec.ts line 451
@@ -1834,7 +2215,11 @@ mod tests {
             ("foo", "bar", 0),
         ];
         for &(a, b, expected) in cases {
-            assert_eq!(nuget_sort_versions(a, b), expected, "sort_versions({a}, {b})");
+            assert_eq!(
+                nuget_sort_versions(a, b),
+                expected,
+                "sort_versions({a}, {b})"
+            );
         }
     }
 
@@ -1902,7 +2287,11 @@ mod tests {
             ("2.0.0-alpha", "(1.0.0,2.0.0]", false),
         ];
         for &(version, range, expected) in cases {
-            assert_eq!(nuget_matches(version, range), expected, "matches({version}, {range})");
+            assert_eq!(
+                nuget_matches(version, range),
+                expected,
+                "matches({version}, {range})"
+            );
         }
     }
 
@@ -1946,8 +2335,11 @@ mod tests {
             ("1.2.3-beta", "1.2.3.*-*", false),
         ];
         for &(version, range, expected) in cases {
-            assert_eq!(nuget_is_less_than_range(version, range), expected,
-                "is_less_than_range({version}, {range})");
+            assert_eq!(
+                nuget_is_less_than_range(version, range),
+                expected,
+                "is_less_than_range({version}, {range})"
+            );
         }
     }
 }

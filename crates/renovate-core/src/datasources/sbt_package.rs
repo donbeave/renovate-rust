@@ -81,7 +81,7 @@ async fn download_with_headers(url: &str, http: &HttpClient) -> Option<(String, 
         .headers()
         .get("last-modified")
         .and_then(|v| v.to_str().ok())
-        .map(|s| s.to_string());
+        .map(|s| s.to_owned());
     let body = resp.text().await.ok()?;
     Some((body, last_modified))
 }
@@ -177,9 +177,9 @@ async fn get_sbt_releases(
             continue;
         };
 
-        dependency_url = Some(root_url.trim_end_matches('/').to_string());
+        dependency_url = Some(root_url.trim_end_matches('/').to_owned());
 
-        let root_path = url_pathname(root_url).to_string();
+        let root_path = url_pathname(root_url).to_owned();
 
         let artifact_subdirs = extract_page_links(&content, |href| {
             let path = if href.starts_with(&root_path) {
@@ -230,7 +230,7 @@ async fn get_sbt_releases(
             continue;
         };
 
-        let root_path = url_pathname(pkg_url).to_string();
+        let root_path = url_pathname(pkg_url).to_owned();
         let versions = extract_page_links(&content, |href| {
             let path = if href.starts_with(&root_path) {
                 href.strip_prefix(&root_path).unwrap_or(href)
@@ -240,7 +240,7 @@ async fn get_sbt_releases(
             if path.starts_with('.') {
                 None
             } else {
-                Some(path.to_string())
+                Some(path.to_owned())
             }
         });
 
@@ -283,7 +283,7 @@ async fn get_sbt_releases(
     Some(SbtPkgReleasesResult {
         releases,
         dependency_url: dependency_url.unwrap_or_default(),
-        registry_url: registry_base.to_string(),
+        registry_url: registry_base.to_owned(),
         homepage,
         source_url,
     })
@@ -330,7 +330,7 @@ async fn get_maven_fallback(
     Some(SbtPkgReleasesResult {
         releases,
         dependency_url: format!("{registry_base}/{group_path}"),
-        registry_url: registry_base.to_string(),
+        registry_url: registry_base.to_owned(),
         homepage,
         source_url,
     })
@@ -422,7 +422,7 @@ mod tests {
             if x.starts_with('.') {
                 None
             } else {
-                Some(x.to_string())
+                Some(x.to_owned())
             }
         });
         assert_eq!(
@@ -623,7 +623,7 @@ mod tests {
             if x.starts_with('.') {
                 None
             } else {
-                Some(x.to_string())
+                Some(x.to_owned())
             }
         });
         assert_eq!(

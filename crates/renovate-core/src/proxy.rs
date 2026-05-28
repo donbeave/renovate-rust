@@ -29,17 +29,15 @@ pub fn bootstrap(env: &mut HashMap<String, String>) -> bool {
     for upper in &["HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY"] {
         let lower = upper.to_lowercase();
         // Uppercase missing but lowercase present → copy up
-        if !env.contains_key(*upper) {
-            if let Some(v) = env.get(lower.as_str()).cloned() {
+        if !env.contains_key(*upper)
+            && let Some(v) = env.get(lower.as_str()).cloned() {
                 env.insert(upper.to_string(), v);
             }
-        }
         // Uppercase present → copy down
-        if let Some(v) = env.get(*upper).cloned() {
-            if !v.is_empty() {
+        if let Some(v) = env.get(*upper).cloned()
+            && !v.is_empty() {
                 env.insert(lower.clone(), v);
             }
-        }
     }
     has_proxy_in_env(env)
 }
@@ -49,7 +47,10 @@ mod tests {
     use super::*;
 
     fn env(pairs: &[(&str, &str)]) -> HashMap<String, String> {
-        pairs.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect()
+        pairs
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect()
     }
 
     // Ported: "respects HTTP_PROXY" — proxy.spec.ts line 15

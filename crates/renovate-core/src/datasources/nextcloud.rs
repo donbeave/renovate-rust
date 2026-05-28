@@ -66,7 +66,7 @@ fn derive_changelog_url(website: &str) -> String {
     if let Some(rest) = website.strip_prefix("https://github.com/nextcloud/") {
         return format!("https://github.com/nextcloud-releases/{}", rest);
     }
-    website.to_string()
+    website.to_owned()
 }
 
 fn is_github_nextcloud(website: &str) -> bool {
@@ -108,10 +108,7 @@ pub async fn fetch_releases(
         Err(e) => return Err(NextcloudError::Http(e)),
     };
 
-    let app = match apps.into_iter().find(|a| a.id == package_name) {
-        Some(a) => a,
-        None => return Ok(None),
-    };
+    let Some(app) = apps.into_iter().find(|a| a.id == package_name) else { return Ok(None) };
 
     let source_url = if is_github_nextcloud(&app.website) {
         Some(app.website.clone())
@@ -129,7 +126,7 @@ pub async fn fetch_releases(
                 .get("en")
                 .and_then(|t| t.changelog.as_deref())
                 .filter(|s| !s.is_empty())
-                .map(|s| s.to_string());
+                .map(|s| s.to_owned());
             NextcloudRelease {
                 version: r.version,
                 release_timestamp: to_ms_timestamp(&r.created),
@@ -140,7 +137,7 @@ pub async fn fetch_releases(
         .collect();
 
     Ok(Some(NextcloudResult {
-        registry_url: registry_url.to_string(),
+        registry_url: registry_url.to_owned(),
         source_url,
         changelog_url,
         releases,

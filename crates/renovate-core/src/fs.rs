@@ -63,7 +63,7 @@ fn normalize_path(path: &str) -> String {
 pub fn get_sibling_file_name(file_name: &str, sibling_name: &str) -> String {
     let parent = get_parent_dir(file_name);
     match parent.as_str() {
-        "" | "." => sibling_name.to_string(),
+        "" | "." => sibling_name.to_owned(),
         _ => format!("{}/{}", parent, sibling_name),
     }
 }
@@ -87,8 +87,7 @@ pub fn ensure_base_path(path: &str, base_dir: &str) -> Result<String, &'static s
     };
     // Require resolved == base OR resolved starts with base + '/' to prevent
     // prefix confusion ("/foo" matching "/foobar").
-    let within = resolved == base
-        || resolved.starts_with(&format!("{}/", base));
+    let within = resolved == base || resolved.starts_with(&format!("{}/", base));
     if !within {
         return Err(FILE_ACCESS_VIOLATION_ERROR);
     }
@@ -109,8 +108,14 @@ mod tests {
         assert_eq!(ensure_base_path("", local_dir), Ok("/foo".to_owned()));
         assert_eq!(ensure_base_path("", cache_dir), Ok("/bar".to_owned()));
         // Relative subpath → joined with base
-        assert_eq!(ensure_base_path("baz", local_dir), Ok("/foo/baz".to_owned()));
-        assert_eq!(ensure_base_path("baz", cache_dir), Ok("/bar/baz".to_owned()));
+        assert_eq!(
+            ensure_base_path("baz", local_dir),
+            Ok("/foo/baz".to_owned())
+        );
+        assert_eq!(
+            ensure_base_path("baz", cache_dir),
+            Ok("/bar/baz".to_owned())
+        );
     }
 
     // Ported: "ensureLocalPath('$path', '${localDir}') - throws" — util/fs/util.spec.ts line 22
@@ -119,17 +124,42 @@ mod tests {
     fn ensure_base_path_rejects_escaping_paths() {
         let local_dir = "/foo";
         let cache_dir = "/bar";
-        for path in &["..", "../etc/passwd", "/foo/../bar", "/foo/../../etc/passwd", "/baz"] {
-            assert_eq!(ensure_base_path(path, local_dir), Err(FILE_ACCESS_VIOLATION_ERROR),
-                "ensure_base_path({path:?}, {local_dir:?}) should be Err");
+        for path in &[
+            "..",
+            "../etc/passwd",
+            "/foo/../bar",
+            "/foo/../../etc/passwd",
+            "/baz",
+        ] {
+            assert_eq!(
+                ensure_base_path(path, local_dir),
+                Err(FILE_ACCESS_VIOLATION_ERROR),
+                "ensure_base_path({path:?}, {local_dir:?}) should be Err"
+            );
         }
-        for path in &["..", "../etc/passwd", "/bar/../foo", "/bar/../../etc/passwd", "/baz", r#"/baz""#] {
-            assert_eq!(ensure_base_path(path, cache_dir), Err(FILE_ACCESS_VIOLATION_ERROR),
-                "ensure_base_path({path:?}, {cache_dir:?}) should be Err");
+        for path in &[
+            "..",
+            "../etc/passwd",
+            "/bar/../foo",
+            "/bar/../../etc/passwd",
+            "/baz",
+            r#"/baz""#,
+        ] {
+            assert_eq!(
+                ensure_base_path(path, cache_dir),
+                Err(FILE_ACCESS_VIOLATION_ERROR),
+                "ensure_base_path({path:?}, {cache_dir:?}) should be Err"
+            );
         }
         // Prefix confusion guard: /foobar must not match when base is /foo
-        assert_eq!(ensure_base_path("/foobar", "/foo"), Err(FILE_ACCESS_VIOLATION_ERROR));
-        assert_eq!(ensure_base_path("../foobar/x", "/foo"), Err(FILE_ACCESS_VIOLATION_ERROR));
+        assert_eq!(
+            ensure_base_path("/foobar", "/foo"),
+            Err(FILE_ACCESS_VIOLATION_ERROR)
+        );
+        assert_eq!(
+            ensure_base_path("../foobar/x", "/foo"),
+            Err(FILE_ACCESS_VIOLATION_ERROR)
+        );
     }
 
     // Ported: "isValidPath($value) == $expected" — util/fs/util.spec.ts line 53

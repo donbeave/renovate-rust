@@ -57,22 +57,15 @@ pub async fn fetch_releases(
     package_name: &str,
     http: &HttpClient,
 ) -> Result<Option<TypstResult>, TypstError> {
-    let (namespace, pkg) = match package_name.split_once('/') {
-        Some(parts) => parts,
-        None => return Ok(None),
-    };
+    let Some((namespace, pkg)) = package_name.split_once('/') else { return Ok(None) };
 
     if namespace != "preview" {
         return Ok(None);
     }
 
-    let text = match http
+    let Ok(text) = http
         .get_raw_with_accept(registry_url, "application/json")
-        .await
-    {
-        Ok(v) => v,
-        Err(_) => return Ok(None),
-    };
+        .await else { return Ok(None) };
 
     let entries: Vec<TypstEntry> = match serde_json::from_str(&text) {
         Ok(v) => v,

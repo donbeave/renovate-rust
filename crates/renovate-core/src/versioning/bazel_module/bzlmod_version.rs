@@ -18,7 +18,7 @@ pub struct Identifier {
 impl Identifier {
     pub fn new(value: &str) -> Result<Self, String> {
         if value.is_empty() {
-            return Err("Identifier value cannot be empty.".to_string());
+            return Err("Identifier value cannot be empty.".to_owned());
         }
         let is_digits_only = value.chars().all(|c| c.is_ascii_digit());
         let as_number = if is_digits_only {
@@ -27,7 +27,7 @@ impl Identifier {
             0
         };
         Ok(Identifier {
-            as_string: value.to_string(),
+            as_string: value.to_owned(),
             as_number,
             is_digits_only,
         })
@@ -69,7 +69,11 @@ impl VersionPart {
     }
 
     pub fn as_string(&self) -> String {
-        self.0.iter().map(|i| i.as_string.as_str()).collect::<Vec<_>>().join(".")
+        self.0
+            .iter()
+            .map(|i| i.as_string.as_str())
+            .collect::<Vec<_>>()
+            .join(".")
     }
 
     pub fn major(&self) -> u64 {
@@ -154,7 +158,7 @@ impl BzlmodVersion {
         };
 
         Ok(BzlmodVersion {
-            original: version.to_string(),
+            original: version.to_owned(),
             release,
             prerelease,
             build,
@@ -284,7 +288,10 @@ mod tests {
     #[test]
     fn version_part_as_string() {
         assert_eq!(VersionPart::create(&[]).unwrap().as_string(), "");
-        assert_eq!(VersionPart::create(&["1", "2", "3"]).unwrap().as_string(), "1.2.3");
+        assert_eq!(
+            VersionPart::create(&["1", "2", "3"]).unwrap().as_string(),
+            "1.2.3"
+        );
     }
 
     // Ported: ".major" — versioning/bazel-module/bzlmod-version.spec.ts line 68
@@ -362,7 +369,12 @@ mod tests {
             ("", "", "", ""),
             ("1.2.3-pre.20230417.1", "1.2.3", "pre.20230417.1", ""),
             ("1.2.3+build5", "1.2.3", "", "build5"),
-            ("1.2.3-pre.20230417.1+build5", "1.2.3", "pre.20230417.1", "build5"),
+            (
+                "1.2.3-pre.20230417.1+build5",
+                "1.2.3",
+                "pre.20230417.1",
+                "build5",
+            ),
         ];
         for (v, rexp, pexp, bexp) in cases {
             let bv = BzlmodVersion::new(v).unwrap();
@@ -375,7 +387,15 @@ mod tests {
     // Ported: "bad versions $a" — versioning/bazel-module/bzlmod-version.spec.ts line 153
     #[test]
     fn bzlmod_version_bad_versions() {
-        let bad = ["-abc", "-1_2", "ßážëł", "1.0-pre?", "1.0-pre///", "1..0", "1.0-pre..erp"];
+        let bad = [
+            "-abc",
+            "-1_2",
+            "ßážëł",
+            "1.0-pre?",
+            "1.0-pre///",
+            "1..0",
+            "1.0-pre..erp",
+        ];
         for v in bad {
             assert!(BzlmodVersion::new(v).is_err(), "{v} should be invalid");
         }
@@ -392,8 +412,18 @@ mod tests {
             ("1.2.3", "1.2.3+build5", Some(false), false),
             ("1.2.3", "1.2.3+build5", Some(true), true),
             ("1.2.3", "1.2.3-pre.20230417.1+build5", None, false),
-            ("1.2.3-pre.20230417.1+build5", "1.2.3-pre.20230417.1+build5", None, true),
-            ("1.2.3-pre.20230417.1+build4", "1.2.3-pre.20230417.1+build5", None, false),
+            (
+                "1.2.3-pre.20230417.1+build5",
+                "1.2.3-pre.20230417.1+build5",
+                None,
+                true,
+            ),
+            (
+                "1.2.3-pre.20230417.1+build4",
+                "1.2.3-pre.20230417.1+build5",
+                None,
+                false,
+            ),
             ("1.2.3", "foo1.2.3", None, false),
             ("1.2.3", "", None, false),
             ("", "", None, true),
@@ -402,7 +432,11 @@ mod tests {
             let av = BzlmodVersion::new(a).unwrap();
             let bv = BzlmodVersion::new(b).unwrap();
             let ib = ignore_build.unwrap_or(false);
-            assert_eq!(av.equals(&bv, ib), exp, "{a} equals {b} (ignore_build={ib})");
+            assert_eq!(
+                av.equals(&bv, ib),
+                exp,
+                "{a} equals {b} (ignore_build={ib})"
+            );
         }
     }
 
@@ -417,8 +451,16 @@ mod tests {
             ("", "1.2.3", false),
             ("1.2.3", "", true),
             ("", "", false),
-            ("1.2.3-pre.20230417.1+build5", "1.2.3-pre.20230417.1+build5", false),
-            ("1.2.3-pre.20230417.1+build4", "1.2.3-pre.20230417.1+build5", false),
+            (
+                "1.2.3-pre.20230417.1+build5",
+                "1.2.3-pre.20230417.1+build5",
+                false,
+            ),
+            (
+                "1.2.3-pre.20230417.1+build4",
+                "1.2.3-pre.20230417.1+build5",
+                false,
+            ),
             ("4", "a", true),
             ("abc", "abd", true),
             ("pre", "pre.foo", true),
@@ -484,7 +526,11 @@ mod tests {
         for (a, b, exp) in cases {
             let av = BzlmodVersion::new(a).unwrap();
             let bv = BzlmodVersion::new(b).unwrap();
-            assert_eq!(BzlmodVersion::default_compare(&av, &bv), exp, "compare({a}, {b})");
+            assert_eq!(
+                BzlmodVersion::default_compare(&av, &bv),
+                exp,
+                "compare({a}, {b})"
+            );
         }
     }
 }

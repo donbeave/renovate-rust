@@ -79,17 +79,16 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
 pub fn get_new_value(current_value: &str, range_strategy: &str, new_version: &str) -> String {
     if range_strategy == "bump" {
         let v_1_20 = Version::new(1, 20, 0);
-        if let Ok(nv) = Version::parse(new_version) {
-            if nv >= v_1_20 {
-                return new_version.to_string();
+        if let Ok(nv) = Version::parse(new_version)
+            && nv >= v_1_20 {
+                return new_version.to_owned();
             }
-        }
         return shorten(new_version);
     }
     if range_strategy == "replace" && !matches(new_version, current_value) {
-        return new_version.to_string();
+        return new_version.to_owned();
     }
-    current_value.to_string()
+    current_value.to_owned()
 }
 
 #[cfg(test)]

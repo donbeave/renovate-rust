@@ -96,7 +96,7 @@ pub async fn fetch_releases(
     Ok(Some(BazelResult {
         releases,
         source_url: meta.homepage,
-        registry_url: base.to_string(),
+        registry_url: base.to_owned(),
     }))
 }
 

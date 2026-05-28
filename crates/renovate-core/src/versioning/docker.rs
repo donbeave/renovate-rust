@@ -33,7 +33,7 @@ fn parse(version: &str) -> Option<ParsedVersion> {
     let stripped = version.strip_prefix('v').unwrap_or(version);
     let mut pieces = stripped.splitn(2, '-');
     let prefix = pieces.next().unwrap_or("");
-    let suffix = pieces.next().unwrap_or("").to_string();
+    let suffix = pieces.next().unwrap_or("").to_owned();
 
     let caps = VERSION_RE.captures(prefix)?;
     let ver_str = &caps["version"];

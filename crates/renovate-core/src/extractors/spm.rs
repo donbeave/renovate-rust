@@ -939,11 +939,10 @@ mod tests {
         let content = include_str!("../../tests/fixtures/spm/SamplePackage.swift");
         let deps = extract_package_file(content).unwrap();
 
-        let github_deps: Vec<_> = deps
+        
+        assert_eq!(deps
             .iter()
-            .filter(|d| d.datasource == "github-tags")
-            .collect();
-        assert_eq!(github_deps.len(), 10);
+            .filter(|d| d.datasource == "github-tags").count(), 10);
         assert_eq!(deps.len(), 10);
 
         // CountedSet uses .branch("master") → currentValue starts with `"master"`
@@ -1230,9 +1229,7 @@ let package = Package(
         assert!(extract_package_file(&format!("{base}from:]")).is_some());
         assert!(extract_package_file(&format!("{base}from:.package(")).is_some());
         assert!(
-            extract_package_file(&format!(
-                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]"#
-            ))
+            extract_package_file(&r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]"#.to_string())
             .is_some()
         );
     }
@@ -1242,9 +1239,7 @@ let package = Package(
     fn index_parses_package_descriptions() {
         let base = r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","#;
         assert_eq!(
-            extract_package_file(&format!(
-                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]"#
-            ))
+            extract_package_file(&r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]"#.to_string())
             .unwrap()[0]
                 .current_value,
             r#"from:"1.2.3""#

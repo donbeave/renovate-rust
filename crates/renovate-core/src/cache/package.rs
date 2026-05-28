@@ -128,11 +128,11 @@ impl FilePackageCache {
         ttl_minutes: i64,
     ) {
         let path = self.entry_path(namespace, key);
-        if let Some(parent) = path.parent() {
-            if let Err(e) = tokio::fs::create_dir_all(parent).await {
-                debug!(namespace, key, "cache mkdir error: {e}");
-                return;
-            }
+        if let Some(parent) = path.parent()
+            && let Err(e) = tokio::fs::create_dir_all(parent).await
+        {
+            debug!(namespace, key, "cache mkdir error: {e}");
+            return;
         }
         let expiry = Utc::now() + Duration::minutes(ttl_minutes);
         let entry = FileEntry {
@@ -167,11 +167,9 @@ impl FilePackageCache {
                             let expired = serde_json::from_str::<FileEntry>(&contents)
                                 .ok()
                                 .and_then(|e| DateTime::parse_from_rfc3339(&e.expiry).ok())
-                                .map_or(true, |exp| now >= exp);
-                            if expired {
-                                if tokio::fs::remove_file(&file).await.is_ok() {
-                                    deleted += 1;
-                                }
+                                .is_none_or(|exp| now >= exp);
+                            if expired && tokio::fs::remove_file(&file).await.is_ok() {
+                                deleted += 1;
                             }
                         }
                     }
@@ -403,13 +401,13 @@ fn match_pattern(pattern: &str, value: &str) -> bool {
             Some(pos) if pos > 0 => (&inner[..pos], &inner[pos + 1..]),
             _ => return false,
         };
-        return Regex::new(re_src).map_or(false, |re| re.is_match(value));
+        return Regex::new(re_src).is_ok_and(|re| re.is_match(value));
     }
     // Glob (minimatch-compatible via globset with case-insensitive option)
     GlobBuilder::new(pattern)
         .case_insensitive(true)
         .build()
-        .and_then(|g| Ok(g.compile_matcher().is_match(value)))
+        .map(|g| g.compile_matcher().is_match(value))
         .unwrap_or(false)
 }
 
@@ -471,23 +469,23 @@ where
 
     let mut fallback_value: Option<Value> = None;
 
-    if let Some(record) = cached {
-        if let Ok(cached_at) = DateTime::parse_from_rfc3339(&record.cached_at) {
-            let cached_at = cached_at.with_timezone(&Utc);
-            let soft_deadline = cached_at + Duration::minutes(soft_ttl);
+    if let Some(record) = cached
+        && let Ok(cached_at) = DateTime::parse_from_rfc3339(&record.cached_at)
+    {
+        let cached_at = cached_at.with_timezone(&Utc);
+        let soft_deadline = cached_at + Duration::minutes(soft_ttl);
 
-            let passes_predicate = should_cache_result.map_or(true, |pred| pred(&record.value));
+        let passes_predicate = should_cache_result.is_none_or(|pred| pred(&record.value));
 
-            if passes_predicate && Utc::now() < soft_deadline {
-                // still fresh
-                return serde_json::from_value(record.value).map_err(anyhow::Error::from);
-            }
+        if passes_predicate && Utc::now() < soft_deadline {
+            // still fresh
+            return serde_json::from_value(record.value).map_err(anyhow::Error::from);
+        }
 
-            if options.fallback && passes_predicate {
-                let hard_deadline = cached_at + Duration::minutes(final_hard_ttl);
-                if Utc::now() < hard_deadline {
-                    fallback_value = Some(record.value);
-                }
+        if options.fallback && passes_predicate {
+            let hard_deadline = cached_at + Duration::minutes(final_hard_ttl);
+            if Utc::now() < hard_deadline {
+                fallback_value = Some(record.value);
             }
         }
     }
@@ -498,7 +496,7 @@ where
     match result {
         Ok(value) => {
             let json_value = serde_json::to_value(&value)?;
-            let do_cache = should_cache_result.map_or(true, |pred| pred(&json_value));
+            let do_cache = should_cache_result.is_none_or(|pred| pred(&json_value));
             if do_cache && json_value != Value::Null {
                 // Renovate: don't cache `undefined`; `null` IS cached
                 // In Rust: skip caching only if predicate rejects
@@ -562,7 +560,7 @@ mod tests {
             )
             .await;
         let result: Option<String> = cache.get("_test-namespace", "my-key").await;
-        assert_eq!(result, Some("hello".to_string()));
+        assert_eq!(result, Some("hello".to_owned()));
     }
 
     #[tokio::test]
@@ -604,14 +602,14 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let cache = make_cache(&dir);
         cache
-            .set("_test-namespace", "key", "cached-value".to_string(), 30)
+            .set("_test-namespace", "key", "cached-value".to_owned(), 30)
             .await;
 
         // Both calls should return the same value
         let r1: Option<String> = cache.get("_test-namespace", "key").await;
         let r2: Option<String> = cache.get("_test-namespace", "key").await;
-        assert_eq!(r1, Some("cached-value".to_string()));
-        assert_eq!(r2, Some("cached-value".to_string()));
+        assert_eq!(r1, Some("cached-value".to_owned()));
+        assert_eq!(r2, Some("cached-value".to_owned()));
     }
 
     // Ported: "setWithRawTtl updates memCache" — util/cache/package/index.spec.ts line 83
@@ -620,11 +618,11 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let cache = make_cache(&dir);
         cache
-            .set_with_raw_ttl("_test-namespace", "key", "new-value".to_string(), 30)
+            .set_with_raw_ttl("_test-namespace", "key", "new-value".to_owned(), 30)
             .await;
         // Reading back via get should hit mem cache, not file backend
         let result: Option<String> = cache.get("_test-namespace", "key").await;
-        assert_eq!(result, Some("new-value".to_string()));
+        assert_eq!(result, Some("new-value".to_owned()));
     }
 
     // ── with_cache ────────────────────────────────────────────────────────
@@ -645,14 +643,14 @@ mod tests {
         let cc = call_count.clone();
         let result1 = with_cache(&cache, &cfg, opts.clone(), None, move || {
             cc.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-            async { Ok::<_, anyhow::Error>("111".to_string()) }
+            async { Ok::<_, anyhow::Error>("111".to_owned()) }
         })
         .await
         .unwrap();
 
         // Second call — fn must not be called again
         let result2 = with_cache(&cache, &cfg, opts.clone(), None, || async {
-            Ok::<_, anyhow::Error>("222".to_string())
+            Ok::<_, anyhow::Error>("222".to_owned())
         })
         .await
         .unwrap();
@@ -709,13 +707,13 @@ mod tests {
         let cc1 = call_count.clone();
         let r1 = with_cache(&cache, &cfg, opts.clone(), None, move || {
             cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-            async { Ok::<_, anyhow::Error>("111".to_string()) }
+            async { Ok::<_, anyhow::Error>("111".to_owned()) }
         })
         .await
         .unwrap();
 
         let r2 = with_cache(&cache, &cfg, opts.clone(), None, || async {
-            Ok::<_, anyhow::Error>("222".to_string())
+            Ok::<_, anyhow::Error>("222".to_owned())
         })
         .await
         .unwrap();
@@ -783,7 +781,7 @@ mod tests {
 
         // First call: populate cache
         let r1 = with_cache(&cache, &cfg, opts.clone(), None, || async {
-            Ok::<_, anyhow::Error>("stale-value".to_string())
+            Ok::<_, anyhow::Error>("stale-value".to_owned())
         })
         .await
         .unwrap();
@@ -816,7 +814,7 @@ mod tests {
     #[test]
     fn resolve_ttl_values_applies_override_and_hard_min() {
         let cfg = CacheTtlConfig {
-            ttl_override: [("_test-namespace".to_string(), 2i64)].into(),
+            ttl_override: [("_test-namespace".to_owned(), 2i64)].into(),
             hard_ttl_minutes: 3,
             ..Default::default()
         };
@@ -848,7 +846,7 @@ mod tests {
     #[test]
     fn get_ttl_override_returns_exact_match() {
         let cfg = CacheTtlConfig {
-            ttl_override: [("datasource-npm".to_string(), 120i64)].into(),
+            ttl_override: [("datasource-npm".to_owned(), 120i64)].into(),
             ..Default::default()
         };
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(120));
@@ -859,7 +857,7 @@ mod tests {
     #[test]
     fn get_ttl_override_matches_simple_glob() {
         let cfg = CacheTtlConfig {
-            ttl_override: [("datasource-*".to_string(), 90i64)].into(),
+            ttl_override: [("datasource-*".to_owned(), 90i64)].into(),
             ..Default::default()
         };
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(90));
@@ -873,7 +871,7 @@ mod tests {
     #[test]
     fn get_ttl_override_matches_wildcard_all() {
         let cfg = CacheTtlConfig {
-            ttl_override: [("*".to_string(), 45i64)].into(),
+            ttl_override: [("*".to_owned(), 45i64)].into(),
             ..Default::default()
         };
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(45));
@@ -889,7 +887,7 @@ mod tests {
     #[test]
     fn get_ttl_override_matches_brace_glob() {
         let cfg = CacheTtlConfig {
-            ttl_override: [("datasource-{npm,docker}".to_string(), 150i64)].into(),
+            ttl_override: [("datasource-{npm,docker}".to_owned(), 150i64)].into(),
             ..Default::default()
         };
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(150));
@@ -901,7 +899,7 @@ mod tests {
     #[test]
     fn get_ttl_override_matches_regex_pattern() {
         let cfg = CacheTtlConfig {
-            ttl_override: [("/^datasource-/".to_string(), 75i64)].into(),
+            ttl_override: [("/^datasource-/".to_owned(), 75i64)].into(),
             ..Default::default()
         };
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(75));
@@ -915,9 +913,9 @@ mod tests {
     fn get_ttl_override_exact_beats_glob() {
         let cfg = CacheTtlConfig {
             ttl_override: [
-                ("datasource-*".to_string(), 90i64),
-                ("datasource-npm".to_string(), 120i64),
-                ("*".to_string(), 45i64),
+                ("datasource-*".to_owned(), 90i64),
+                ("datasource-npm".to_owned(), 120i64),
+                ("*".to_owned(), 45i64),
             ]
             .into(),
             ..Default::default()
@@ -932,9 +930,9 @@ mod tests {
     fn get_ttl_override_longest_pattern_wins() {
         let cfg = CacheTtlConfig {
             ttl_override: [
-                ("datasource-*".to_string(), 90i64),
-                ("datasource-n*".to_string(), 100i64),
-                ("*".to_string(), 45i64),
+                ("datasource-*".to_owned(), 90i64),
+                ("datasource-n*".to_owned(), 100i64),
+                ("*".to_owned(), 45i64),
             ]
             .into(),
             ..Default::default()

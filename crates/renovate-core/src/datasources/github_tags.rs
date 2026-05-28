@@ -206,7 +206,7 @@ pub async fn fetch_releases_full(
         releases.push(GithubTagRelease {
             version: tag.name.clone(),
             git_ref: tag.name.clone(),
-            hash: sha.map(str::to_string),
+            hash: sha.map(str::to_owned),
             release_timestamp: timestamp,
             is_stable: None,
         });

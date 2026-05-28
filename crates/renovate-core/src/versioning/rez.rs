@@ -39,8 +39,9 @@ static RE_DESC: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 
-static RE_LOWER_BOUND: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(&format!(r"^(?P<prefix>>|>=)?(?P<ver>{VG})?(?P<plus>\+)?$")).unwrap());
+static RE_LOWER_BOUND: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(&format!(r"^(?P<prefix>>|>=)?(?P<ver>{VG})?(?P<plus>\+)?$")).unwrap()
+});
 
 static RE_UPPER_BOUND: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(&format!(r"^(?P<prefix><=|<)(?P<ver>{VG})?$")).unwrap());
@@ -96,14 +97,14 @@ fn detect_rez_range(input: &str) -> Option<RezRange> {
     }
 
     if let Some(caps) = RE_EXACT_VERSION.captures(s) {
-        let v = caps.name("v").map_or("", |m| m.as_str()).to_string();
+        let v = caps.name("v").map_or("", |m| m.as_str()).to_owned();
         return Some(RezRange::ExactVersion(v));
     }
 
     if let Some(caps) = RE_INCLUSIVE_BOUND.captures(s) {
         return Some(RezRange::InclusiveBound {
-            lower: caps.name("lower").map(|m| m.as_str().to_string()),
-            upper: caps.name("upper").map(|m| m.as_str().to_string()),
+            lower: caps.name("lower").map(|m| m.as_str().to_owned()),
+            upper: caps.name("upper").map(|m| m.as_str().to_owned()),
         });
     }
 
@@ -136,8 +137,8 @@ fn detect_rez_range(input: &str) -> Option<RezRange> {
     }
 
     if let Some(caps) = RE_LOWER_BOUND.captures(s) {
-        let prefix = caps.name("prefix").map_or("", |m| m.as_str()).to_string();
-        let version = caps.name("ver").map(|m| m.as_str().to_string());
+        let prefix = caps.name("prefix").map_or("", |m| m.as_str()).to_owned();
+        let version = caps.name("ver").map(|m| m.as_str().to_owned());
         let has_plus = caps.name("plus").is_some_and(|m| !m.as_str().is_empty());
         if prefix.is_empty() && version.is_none() && !has_plus {
             return None;
@@ -152,7 +153,7 @@ fn detect_rez_range(input: &str) -> Option<RezRange> {
     if let Some(caps) = RE_UPPER_BOUND.captures(s) {
         return Some(RezRange::UpperBound {
             prefix: caps["prefix"].to_string(),
-            version: caps.name("ver").map(|m| m.as_str().to_string()),
+            version: caps.name("ver").map(|m| m.as_str().to_owned()),
         });
     }
 
@@ -163,7 +164,7 @@ fn detect_rez_range(input: &str) -> Option<RezRange> {
 
 fn pad_zeroes(input: &str) -> String {
     if input.contains(['~', '^', '*']) {
-        return input.to_string();
+        return input.to_owned();
     }
     let (base, stability) = if let Some(idx) = input.find('-') {
         (&input[..idx], format!("-{}", &input[idx + 1..]))
@@ -226,7 +227,7 @@ fn rez2npm(input: &str) -> String {
         }) => {
             format!("{}{} {}{}", lower_pfx, lower_ver, upper_pfx, upper_ver)
         }
-        None => input.to_string(),
+        None => input.to_owned(),
     }
 }
 
@@ -280,7 +281,7 @@ fn rez2pep440(input: &str) -> String {
             // Descending in rez = ascending order for pep440
             format!("{}{}, {}{}", lower_pfx, lower_ver, upper_pfx, upper_ver)
         }
-        None => input.to_string(),
+        None => input.to_owned(),
     }
 }
 
@@ -289,7 +290,7 @@ fn pep4402rez_inclusive_bound(pep440_val: &str) -> String {
         .split(',')
         .map(|part| {
             part.trim()
-                .trim_start_matches(|c: char| c == '<' || c == '>' || c == '=')
+                .trim_start_matches(['<', '>', '='])
         })
         .collect::<Vec<_>>()
         .join("..")
@@ -305,18 +306,18 @@ fn npm2rezplus(input: &str) -> String {
 fn extract_first_version_group(s: &str) -> String {
     RE_VG_FIRST
         .find(s)
-        .map(|m| m.as_str().to_string())
+        .map(|m| m.as_str().to_owned())
         .unwrap_or_default()
 }
 
 // ── Semver matching helpers ───────────────────────────────────────────────────
 
 fn pad_partial_version(v: &str) -> String {
-    let parts: Vec<&str> = v.split('.').collect();
-    match parts.len() {
+    
+    match v.split('.').count() {
         1 => format!("{}.0.0", v),
         2 => format!("{}.0", v),
-        _ => v.to_string(),
+        _ => v.to_owned(),
     }
 }
 
@@ -369,7 +370,7 @@ fn npm_to_version_req(npm_range: &str) -> Option<VersionReq> {
 
     // Split on whitespace and/or commas
     let constraints: Vec<&str> = trimmed
-        .split(|c: char| c == ' ' || c == ',')
+        .split([' ', ','])
         .filter(|s| !s.is_empty())
         .collect();
 
@@ -419,7 +420,8 @@ fn is_valid_rez_version_str(v: &str) -> bool {
         } else {
             // Non-numeric component must start with a letter (not a digit like "3foo")
             p.starts_with(|c: char| c.is_alphabetic() || c == '_')
-                && p.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+                && p.chars()
+                    .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
                 && !p.is_empty()
         }
     })
@@ -430,14 +432,14 @@ fn is_valid_range_content(range: &RezRange) -> bool {
         RezRange::MatchVersion(v) => is_valid_rez_version_str(v),
         RezRange::ExactVersion(v) => v.is_empty() || is_valid_rez_version_str(v),
         RezRange::InclusiveBound { lower, upper } => {
-            lower.as_deref().map_or(true, is_valid_rez_version_str)
-                && upper.as_deref().map_or(true, is_valid_rez_version_str)
+            lower.as_deref().is_none_or(is_valid_rez_version_str)
+                && upper.as_deref().is_none_or(is_valid_rez_version_str)
         }
         RezRange::LowerBound { version, .. } => {
-            version.as_deref().map_or(true, is_valid_rez_version_str)
+            version.as_deref().is_none_or(is_valid_rez_version_str)
         }
         RezRange::UpperBound { version, .. } => {
-            version.as_deref().map_or(true, is_valid_rez_version_str)
+            version.as_deref().is_none_or(is_valid_rez_version_str)
         }
         RezRange::AscPlus {
             lower_ver,
@@ -505,7 +507,7 @@ fn compute_desc_new_value(
 pub fn is_valid(input: &str) -> bool {
     detect_rez_range(input.trim())
         .as_ref()
-        .map_or(false, is_valid_range_content)
+        .is_some_and(is_valid_range_content)
 }
 
 pub fn is_version(input: &str) -> bool {
@@ -567,15 +569,9 @@ pub fn is_greater_than(a: &str, b: &str) -> bool {
 
 pub fn is_less_than_range(version: &str, range: &str) -> bool {
     let padded = pad_zeroes(version);
-    let ver = match Version::parse(&padded) {
-        Ok(v) => v,
-        Err(_) => return false,
-    };
+    let Ok(ver) = Version::parse(&padded) else { return false };
     let npm = rez2npm(range);
-    let req = match npm_to_version_req(&npm) {
-        Some(r) => r,
-        None => return false,
-    };
+    let Some(req) = npm_to_version_req(&npm) else { return false };
     // If version satisfies range, it is not less than it
     if req.matches(&ver) {
         return false;
@@ -598,10 +594,7 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
 
 pub fn matches_range(version: &str, range: &str) -> bool {
     let padded = pad_zeroes(version);
-    let ver = match Version::parse(&padded) {
-        Ok(v) => v,
-        Err(_) => return false,
-    };
+    let Ok(ver) = Version::parse(&padded) else { return false };
     let npm = rez2npm(range);
     version_satisfies_npm_range(&ver, &npm)
 }
@@ -625,9 +618,7 @@ pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
         .iter()
         .filter_map(|v| {
             let padded = pad_zeroes(v);
-            Version::parse(&padded)
-                .ok()
-                .map(|parsed| (*v, parsed))
+            Version::parse(&padded).ok().map(|parsed| (*v, parsed))
         })
         .filter(|(_, parsed)| version_satisfies_npm_range(parsed, &npm))
         .max_by(|(_, a), (_, b)| a.cmp(b))
@@ -640,9 +631,7 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
         .iter()
         .filter_map(|v| {
             let padded = pad_zeroes(v);
-            Version::parse(&padded)
-                .ok()
-                .map(|parsed| (*v, parsed))
+            Version::parse(&padded).ok().map(|parsed| (*v, parsed))
         })
         .filter(|(_, parsed)| version_satisfies_npm_range(parsed, &npm))
         .min_by(|(_, a), (_, b)| a.cmp(b))
@@ -662,9 +651,9 @@ pub fn get_new_value(
     let pep440_range = rez2pep440(current_value);
     let pep440_opt = pep440::get_new_value(&pep440::NewValueParams {
         current_value: pep440_range,
-        range_strategy: range_strategy.to_string(),
-        current_version: current_version.to_string(),
-        new_version: new_version.to_string(),
+        range_strategy: range_strategy.to_owned(),
+        current_version: current_version.to_owned(),
+        new_version: new_version.to_owned(),
         is_replacement: false,
     });
 
@@ -856,11 +845,7 @@ mod tests {
             ("==1.2.3", true),
         ];
         for (input, expected) in cases {
-            assert_eq!(
-                is_valid(input),
-                expected,
-                "isValid({input:?})"
-            );
+            assert_eq!(is_valid(input), expected, "isValid({input:?})");
         }
     }
 
@@ -901,7 +886,11 @@ mod tests {
             (&["0.4.0", "0.5.0", "4.2.0", "5.0.0"], "4..5.0", "4.2.0"),
             (&["0.4.0", "0.5.0", "4.2.0", "5.0.0"], "4.2..5.0", "4.2.0"),
             (&["0.4.0", "0.5.0", "4.2.0", "5.0.0"], "4.2.0..5.0", "4.2.0"),
-            (&["0.4.0", "0.5.0", "4.2.0", "5.0.0"], "4.2.0..5.0.0", "4.2.0"),
+            (
+                &["0.4.0", "0.5.0", "4.2.0", "5.0.0"],
+                "4.2.0..5.0.0",
+                "4.2.0",
+            ),
         ];
         for (versions, range, expected) in cases {
             assert_eq!(
@@ -915,11 +904,8 @@ mod tests {
     // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/rez/index.spec.ts line 135
     #[test]
     fn get_satisfying_version_table() {
-        let cases: &[(&[&str], &str, &str)] = &[(
-            &["1.2.3", "1.2.4", "1.2.5"],
-            "1.2.3..1.2.4",
-            "1.2.3",
-        )];
+        let cases: &[(&[&str], &str, &str)] =
+            &[(&["1.2.3", "1.2.4", "1.2.5"], "1.2.3..1.2.4", "1.2.3")];
         for (versions, range, expected) in cases {
             assert_eq!(
                 get_satisfying_version(versions, range),
@@ -991,11 +977,7 @@ mod tests {
                 std::cmp::Ordering::Equal => 0,
                 std::cmp::Ordering::Greater => 1,
             };
-            assert_eq!(
-                rez_sorted,
-                semver_sorted,
-                "sortVersions({a:?}, {b:?})"
-            );
+            assert_eq!(rez_sorted, semver_sorted, "sortVersions({a:?}, {b:?})");
         }
     }
 
@@ -1016,7 +998,13 @@ mod tests {
             ("7.2.3..8", "replace", "7.2.3", "8.2.5", Some("8.2.5..9")),
             ("7..8.0", "replace", "7.2.3", "8.2.5", Some("8..8.3")),
             ("7.2..8.0", "replace", "7.2.3", "8.2.5", Some("8.2..8.3")),
-            ("7.2.3..8.0", "replace", "7.2.3", "8.2.5", Some("8.2.5..8.3")),
+            (
+                "7.2.3..8.0",
+                "replace",
+                "7.2.3",
+                "8.2.5",
+                Some("8.2.5..8.3"),
+            ),
             ("7..8.0.0", "replace", "7.2.3", "8.2.5", Some("8..8.3")),
             ("7.2..8.0.0", "replace", "7.2.3", "8.2.5", Some("8.2..8.3")),
             (
@@ -1110,7 +1098,13 @@ mod tests {
             ("7.2.3+<8", "replace", "7.2.3", "8.2.5", Some("8.2.5+<9")),
             ("7+<8.0", "replace", "7.2.3", "8.2.5", Some("8+<8.3")),
             ("7.2+<8.0", "replace", "7.2.3", "8.2.5", Some("8.2+<8.3")),
-            ("7.2.3+<8.0", "replace", "7.2.3", "8.2.5", Some("8.2.5+<8.3")),
+            (
+                "7.2.3+<8.0",
+                "replace",
+                "7.2.3",
+                "8.2.5",
+                Some("8.2.5+<8.3"),
+            ),
             ("7+<8.0.0", "replace", "7.2.3", "8.2.5", Some("8+<8.3")),
             ("7.2+<8.0.0", "replace", "7.2.3", "8.2.5", Some("8.2+<8.3")),
             (
@@ -1149,9 +1143,21 @@ mod tests {
             // ascending range, >= lower, with comma
             (">=7,<8", "replace", "7.2.3", "8.2.5", Some(">=8,<9")),
             (">=7.2,<8", "replace", "7.2.3", "8.2.5", Some(">=8.2,<9")),
-            (">=7.2.3,<8", "replace", "7.2.3", "8.2.5", Some(">=8.2.5,<9")),
+            (
+                ">=7.2.3,<8",
+                "replace",
+                "7.2.3",
+                "8.2.5",
+                Some(">=8.2.5,<9"),
+            ),
             (">=7,<8.0", "replace", "7.2.3", "8.2.5", Some(">=8,<8.3")),
-            (">=7.2,<8.0", "replace", "7.2.3", "8.2.5", Some(">=8.2,<8.3")),
+            (
+                ">=7.2,<8.0",
+                "replace",
+                "7.2.3",
+                "8.2.5",
+                Some(">=8.2,<8.3"),
+            ),
             (
                 ">=7.2.3,<8.0",
                 "replace",
@@ -1257,20 +1263,8 @@ mod tests {
             (">=5.2.3<6", "bump", "5.2.3", "5.2.5", Some(">=5.2.5<6")),
             (">=5<6.0", "bump", "5.2.3", "6.2.5", Some(">=6.2.5<6.3")),
             (">=5.2<6.0", "bump", "5.2.3", "6.2.5", Some(">=6.2.5<6.3")),
-            (
-                ">=5.2.3<6.0",
-                "bump",
-                "5.2.3",
-                "5.2.5",
-                Some(">=5.2.5<6.0"),
-            ),
-            (
-                ">=5<6.0.0",
-                "bump",
-                "5.2.3",
-                "5.2.5",
-                Some(">=5.2.5<6.0.0"),
-            ),
+            (">=5.2.3<6.0", "bump", "5.2.3", "5.2.5", Some(">=5.2.5<6.0")),
+            (">=5<6.0.0", "bump", "5.2.3", "5.2.5", Some(">=5.2.5<6.0.0")),
             (
                 ">=5.2<6.0.0",
                 "bump",
@@ -1335,21 +1329,9 @@ mod tests {
             (">5.2.0,<6", "bump", "5.2.3", "5.2.5", Some(">5.2.0,<6")),
             (">5,<6.0", "bump", "5.2.3", "6.2.5", Some(">5,<6.3")),
             (">5.1,<6.0", "bump", "5.2.3", "6.2.5", Some(">5.1,<6.3")),
-            (
-                ">5.2.0,<6.0",
-                "bump",
-                "5.2.3",
-                "5.2.5",
-                Some(">5.2.0,<6.0"),
-            ),
+            (">5.2.0,<6.0", "bump", "5.2.3", "5.2.5", Some(">5.2.0,<6.0")),
             (">5,<6.0.0", "bump", "5.2.3", "5.2.5", Some(">5,<6.0.0")),
-            (
-                ">5.1,<6.0.0",
-                "bump",
-                "5.2.3",
-                "5.2.5",
-                Some(">5.1,<6.0.0"),
-            ),
+            (">5.1,<6.0.0", "bump", "5.2.3", "5.2.5", Some(">5.1,<6.0.0")),
             (
                 ">5.2.0,<6.0.0",
                 "bump",
@@ -1380,21 +1362,9 @@ mod tests {
             (">7.2.0<8", "replace", "7.2.3", "8.2.5", Some(">8.2<9")),
             (">6<8.0", "replace", "7.2.3", "8.2.5", Some(">8<8.3")),
             (">7.1<8.0", "replace", "7.2.3", "8.2.5", Some(">8.2<8.3")),
-            (
-                ">7.2.0<8.0",
-                "replace",
-                "7.2.3",
-                "8.2.5",
-                Some(">8.2<8.3"),
-            ),
+            (">7.2.0<8.0", "replace", "7.2.3", "8.2.5", Some(">8.2<8.3")),
             (">6<8.0.0", "replace", "7.2.3", "8.2.5", Some(">8<8.3")),
-            (
-                ">7.1<8.0.0",
-                "replace",
-                "7.2.3",
-                "8.2.5",
-                Some(">8.2<8.3"),
-            ),
+            (">7.1<8.0.0", "replace", "7.2.3", "8.2.5", Some(">8.2<8.3")),
             (
                 ">7.2.0<8.0.0",
                 "replace",
@@ -1407,21 +1377,9 @@ mod tests {
             (">5.2.0<6", "bump", "5.2.3", "5.2.5", Some(">5.2.0<6")),
             (">5<6.0", "bump", "5.2.3", "6.2.5", Some(">5<6.3")),
             (">5.1<6.0", "bump", "5.2.3", "6.2.5", Some(">5.1<6.3")),
-            (
-                ">5.2.0<6.0",
-                "bump",
-                "5.2.3",
-                "5.2.5",
-                Some(">5.2.0<6.0"),
-            ),
+            (">5.2.0<6.0", "bump", "5.2.3", "5.2.5", Some(">5.2.0<6.0")),
             (">4<6.0.0", "bump", "5.2.3", "5.2.5", Some(">4<6.0.0")),
-            (
-                ">5.1<6.0.0",
-                "bump",
-                "5.2.3",
-                "5.2.5",
-                Some(">5.1<6.0.0"),
-            ),
+            (">5.1<6.0.0", "bump", "5.2.3", "5.2.5", Some(">5.1<6.0.0")),
             (
                 ">5.2.0<6.0.0",
                 "bump",
@@ -1432,13 +1390,7 @@ mod tests {
             (">1<2", "widen", "1.2.3", "2.2.5", Some(">1<3")),
             (">1.1<2", "widen", "1.2.3", "2.2.5", Some(">1.1<3")),
             (">1.1<2.0", "widen", "1.2.3", "2.2.5", Some(">1.1<2.3")),
-            (
-                ">1.2.0<2.0",
-                "widen",
-                "1.2.3",
-                "2.2.5",
-                Some(">1.2.0<2.3"),
-            ),
+            (">1.2.0<2.0", "widen", "1.2.3", "2.2.5", Some(">1.2.0<2.3")),
             (
                 ">1.2.0<2.0.0",
                 "widen",
@@ -1449,9 +1401,21 @@ mod tests {
             // descending range (upper,lower), with comma
             ("<8,>=7", "replace", "7.2.3", "8.2.5", Some("<9,>=8")),
             ("<8,>=7.2", "replace", "7.2.3", "8.2.5", Some("<9,>=8.2")),
-            ("<8,>=7.2.3", "replace", "7.2.3", "8.2.5", Some("<9,>=8.2.5")),
+            (
+                "<8,>=7.2.3",
+                "replace",
+                "7.2.3",
+                "8.2.5",
+                Some("<9,>=8.2.5"),
+            ),
             ("<8.0,>=7", "replace", "7.2.3", "8.2.5", Some("<8.3,>=8")),
-            ("<8.0,>=7.2", "replace", "7.2.3", "8.2.5", Some("<8.3,>=8.2")),
+            (
+                "<8.0,>=7.2",
+                "replace",
+                "7.2.3",
+                "8.2.5",
+                Some("<8.3,>=8.2"),
+            ),
             (
                 "<8.0,>=7.2.3",
                 "replace",

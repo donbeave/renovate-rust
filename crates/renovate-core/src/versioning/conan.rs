@@ -24,7 +24,7 @@ fn clean_version(input: &str) -> String {
     static RE: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(r#"include_prerelease=|include_prerelease|loose=|,|\[|\]|"|True|False"#).unwrap()
     });
-    RE.replace_all(input, "").trim().to_string()
+    RE.replace_all(input, "").trim().to_owned()
 }
 
 fn coerce_version(s: &str) -> Option<Version> {
@@ -79,7 +79,7 @@ fn normalize_version_str(s: &str) -> String {
             format!("{major}.{minor}.{patch}-{pre}")
         }
     } else {
-        s.to_string()
+        s.to_owned()
     }
 }
 
@@ -121,7 +121,7 @@ fn split_and_parts(range: &str) -> Vec<String> {
             parts.push(format!("{} {}", tok, tokens[i + 1]));
             i += 2;
         } else {
-            parts.push(tok.to_string());
+            parts.push(tok.to_owned());
             i += 1;
         }
     }
@@ -135,17 +135,17 @@ fn normalize_hyphen_range(s: &str) -> String {
     if let Some(caps) = RE.captures(s.trim()) {
         format!(">={} <={}", &caps[1], &caps[2])
     } else {
-        s.to_string()
+        s.to_owned()
     }
 }
 
 fn preprocess_single_range(s: &str) -> String {
     let s = s.trim();
     if s.is_empty() || s == "||" || s == "*" || s == "x" || s == "X" {
-        return "*".to_string();
+        return "*".to_owned();
     }
     if s == ">=*" || s == ">=x" || s == ">=X" {
-        return "*".to_string();
+        return "*".to_owned();
     }
     // ~> → ~
     let s = s.replace("~>", "~");
@@ -172,6 +172,7 @@ fn preprocess_single_range(s: &str) -> String {
     s
 }
 
+#[expect(dead_code, reason = "Reserved for future range validation use")]
 fn try_parse_range_part(s: &str) -> bool {
     let preprocessed = preprocess_single_range(s);
     if preprocessed == "*" {
@@ -212,16 +213,13 @@ fn try_satisfies_single(version_str: &str, range: &str, opts: &ConanOptions) -> 
             .unwrap_or(true);
     }
 
-    let v = match parse_version_loose(version_str).or_else(|| {
+    let Some(v) = parse_version_loose(version_str).or_else(|| {
         if opts.loose {
             coerce_version(version_str)
         } else {
             None
         }
-    }) {
-        Some(v) => v,
-        None => return false,
-    };
+    }) else { return false };
 
     // No prerelease coercion here — that belongs in matches_with_opts only.
     let v_for_check = v;
@@ -440,15 +438,13 @@ pub fn matches(version: &str, range: &str) -> bool {
 }
 
 fn matches_with_opts(version: &str, clean_range: &str, opts: &ConanOptions) -> bool {
-    let mut cv = version.to_string();
+    let mut cv = version.to_owned();
     // If includePrerelease and version has prerelease: coerce to base version
-    if opts.include_prerelease {
-        if let Ok(v) = Version::parse(version) {
-            if !v.pre.is_empty() {
+    if opts.include_prerelease
+        && let Ok(v) = Version::parse(version)
+            && !v.pre.is_empty() {
                 cv = format!("{}.{}.{}", v.major, v.minor, v.patch);
             }
-        }
-    }
     try_satisfies_range(&cv, clean_range, opts)
 }
 
@@ -464,15 +460,14 @@ pub fn is_compatible(version: &str, range: &str) -> bool {
     // if false (not null): isCompatible returns false
     // We need: if version has prerelease and !include_prerelease → return false
     let v_parsed = Version::parse(&cv).ok();
-    if let Some(ref v) = v_parsed {
-        if !v.pre.is_empty() && !opts.include_prerelease {
+    if let Some(ref v) = v_parsed
+        && !v.pre.is_empty() && !opts.include_prerelease {
             let first_char = v.pre.as_str().chars().next();
             if first_char.map(|c| !c.is_ascii_digit()).unwrap_or(false) {
                 // prerelease starts with alpha → makeVersion returns false → isCompatible = false
                 return false;
             }
         }
-    }
 
     // makeVersion is truthy → check !isLessThanRange
     if v_parsed.is_some() || coerce_version(&cv).is_some() {
@@ -523,10 +518,7 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
     }
 
     // Try to parse version
-    let v = match parse_version_loose(&cv) {
-        Some(v) => v,
-        None => return false,
-    };
+    let Some(v) = parse_version_loose(&cv) else { return false };
 
     // For each OR part, check if there's a part with no lower bound
     // If any OR part has no lower bound (like <X), version can't be less than that part
@@ -871,15 +863,15 @@ fn replace_range(clean_range: &str, new_version: &str) -> Option<String> {
         });
     }
     if cv == "x" || cv == "X" {
-        return Some(cv.to_string());
+        return Some(cv.to_owned());
     }
 
     // Plain version or number
-    let parts: Vec<&str> = cv.split('.').collect();
-    Some(match parts.len() {
+    
+    Some(match cv.split('.').count() {
         1 => format!("{new_major}"),
         2 => format!("{new_major}.{new_minor}"),
-        _ => nv.to_string(),
+        _ => nv.to_owned(),
     })
 }
 
@@ -902,7 +894,7 @@ fn bump_range_single(clean_range: &str, new_version: &str, _opts: &ConanOptions)
 
     // Wildcard ranges: return unchanged
     if cv == "*" || cv == "x" || cv == "X" || cv == ">=*" {
-        return Some(cv.to_string());
+        return Some(cv.to_owned());
     }
 
     // ~= operator
@@ -951,7 +943,7 @@ fn bump_range_single(clean_range: &str, new_version: &str, _opts: &ConanOptions)
 
     // < operator: return unchanged (don't bump upper bound in bump strategy)
     if cv.starts_with('<') {
-        return Some(cv.to_string());
+        return Some(cv.to_owned());
     }
 
     // No operator: use replace
@@ -963,7 +955,7 @@ fn bump_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opti
 
     // Wildcard check
     if cv == "*" || cv == "x" || cv == "X" || cv == ">=*" {
-        return Some(cv.to_string());
+        return Some(cv.to_owned());
     }
 
     // OR ranges with no operators: use widen
@@ -988,7 +980,7 @@ fn bump_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opti
             .iter()
             .map(|part| {
                 if part.is_empty() {
-                    return "".to_string();
+                    return "".to_owned();
                 }
                 // Check if this part has operators
                 let has_op = part.starts_with(|c: char| "<>=~^".contains(c));
@@ -1000,11 +992,10 @@ fn bump_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opti
                 let and_sub = split_and_parts(part);
                 if and_sub.len() == 1 {
                     let bumped = bump_range_single(part, new_version, opts);
-                    if let Some(b) = &bumped {
-                        if try_satisfies_single(new_version, b, opts) {
+                    if let Some(b) = &bumped
+                        && try_satisfies_single(new_version, b, opts) {
                             return b.clone();
                         }
-                    }
                     replace_range(part, new_version).unwrap_or_else(|| part.to_string())
                 } else {
                     // AND sub-range
@@ -1051,7 +1042,7 @@ fn bump_and_range(and_parts: &[String], new_version: &str, opts: &ConanOptions) 
                     return b;
                 }
             }
-            replace_range(part, new_version).unwrap_or_else(|| part.to_string())
+            replace_range(part, new_version).unwrap_or_else(|| part.to_owned())
         })
         .collect();
     result.join(" ")
@@ -1062,12 +1053,12 @@ fn widen_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opt
 
     // Wildcard
     if cv == "*" || cv == "x" || cv == "X" || cv == ">=*" {
-        return Some(cv.to_string());
+        return Some(cv.to_owned());
     }
 
     // If newVersion already satisfies → return unchanged
     if try_satisfies_range(new_version, cv, opts) {
-        return Some(cv.to_string());
+        return Some(cv.to_owned());
     }
 
     let nv_clean = new_version.trim_start_matches('v');
@@ -1096,7 +1087,7 @@ fn widen_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opt
     // If multiple AND parts and contains " - ": hyphen range
     if cv.contains(" - ") {
         let replaced_last =
-            replaced_whole.unwrap_or_else(|| new_version.trim_start_matches('v').to_string());
+            replaced_whole.unwrap_or_else(|| new_version.trim_start_matches('v').to_owned());
         // Split on ' - ', pop last, rejoin and append
         let segments: Vec<&str> = cv.split(" - ").collect();
         if segments.len() >= 2 {
@@ -1122,7 +1113,7 @@ pub fn get_new_value(
 ) -> Option<String> {
     // Plain version (no brackets)
     if is_version(current_value) {
-        return Some(new_version.trim_start_matches('v').to_string());
+        return Some(new_version.trim_start_matches('v').to_owned());
     }
 
     let clean_range = clean_version(current_value);

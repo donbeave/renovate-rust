@@ -112,12 +112,9 @@ pub async fn fetch_releases(
         Err(_) => return Ok(None),
     };
 
-    let orb = match resp.data.and_then(|d| d.orb) {
-        Some(o) => o,
-        None => return Ok(None),
-    };
+    let Some(orb) = resp.data.and_then(|d| d.orb) else { return Ok(None) };
 
-    let homepage_str = orb.home_url.as_deref().unwrap_or("").trim().to_string();
+    let homepage_str = orb.home_url.as_deref().unwrap_or("").trim().to_owned();
     let homepage = if homepage_str.is_empty() {
         format!("https://circleci.com/developer/orbs/orb/{package_name}")
     } else {

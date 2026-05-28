@@ -59,8 +59,8 @@ pub fn extract_jsr_package_name(package_name: &str) -> Option<JsrPackageName> {
     parse_jsr_scope_name(scope)?;
     parse_jsr_package_name(name)?;
     Some(JsrPackageName {
-        scope: scope.to_string(),
-        name: name.to_string(),
+        scope: scope.to_owned(),
+        name: name.to_owned(),
     })
 }
 
@@ -145,7 +145,7 @@ pub async fn fetch_releases(
             release_timestamp: info
                 .created_at
                 .clone()
-                .unwrap_or_else(|| MINIMUM_RELEASE_TIMESTAMP.to_string()),
+                .unwrap_or_else(|| MINIMUM_RELEASE_TIMESTAMP.to_owned()),
             is_deprecated: info.yanked,
             is_latest: meta.latest.as_deref() == Some(version),
         })

@@ -216,7 +216,6 @@ pub(crate) fn build_dep_reports_npm(
                     .current_constraint
                     .trim()
                     .trim_start_matches('=')
-                    .trim()
                     .split_whitespace()
                     .next()
                     .unwrap_or("")

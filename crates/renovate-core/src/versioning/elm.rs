@@ -1,10 +1,9 @@
 use semver::Version;
 
 fn parse_elm_range(input: &str) -> Option<(String, String)> {
-    let re = regex::Regex::new(
-        r"^(?P<lower>\d+\.\d+\.\d+)\s*<=\s*v\s*<\s*(?P<upper>\d+\.\d+\.\d+)$",
-    )
-    .unwrap();
+    let re =
+        regex::Regex::new(r"^(?P<lower>\d+\.\d+\.\d+)\s*<=\s*v\s*<\s*(?P<upper>\d+\.\d+\.\d+)$")
+            .unwrap();
     let caps = re.captures(input.trim())?;
     let lower = caps["lower"].to_string();
     let upper = caps["upper"].to_string();
@@ -168,7 +167,7 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
             let new_upper = if nv >= uv {
                 next_major(new_ver)
             } else {
-                upper.clone()
+                upper
             };
             Some(format!("{lower} <= v < {new_upper}"))
         }
@@ -398,8 +397,16 @@ mod tests {
     #[test]
     fn get_satisfying_version_table() {
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
-            (vec!["1.0.0", "1.5.0", "2.0.0"], "1.0.0 <= v < 2.0.0", Some("1.5.0")),
-            (vec!["1.0.0", "1.0.1", "1.0.2"], "1.0.0 <= v < 2.0.0", Some("1.0.2")),
+            (
+                vec!["1.0.0", "1.5.0", "2.0.0"],
+                "1.0.0 <= v < 2.0.0",
+                Some("1.5.0"),
+            ),
+            (
+                vec!["1.0.0", "1.0.1", "1.0.2"],
+                "1.0.0 <= v < 2.0.0",
+                Some("1.0.2"),
+            ),
             (vec!["0.5.0", "0.9.0"], "1.0.0 <= v < 2.0.0", None),
             (vec!["2.0.0", "3.0.0"], "1.0.0 <= v < 2.0.0", None),
             (vec!["1.0.0"], "1.0.0", Some("1.0.0")),
@@ -418,8 +425,16 @@ mod tests {
     #[test]
     fn min_satisfying_version_table() {
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
-            (vec!["1.0.0", "1.5.0", "2.0.0"], "1.0.0 <= v < 2.0.0", Some("1.0.0")),
-            (vec!["1.5.0", "1.6.0", "1.7.0"], "1.0.0 <= v < 2.0.0", Some("1.5.0")),
+            (
+                vec!["1.0.0", "1.5.0", "2.0.0"],
+                "1.0.0 <= v < 2.0.0",
+                Some("1.0.0"),
+            ),
+            (
+                vec!["1.5.0", "1.6.0", "1.7.0"],
+                "1.0.0 <= v < 2.0.0",
+                Some("1.5.0"),
+            ),
             (vec!["0.5.0", "0.9.0"], "1.0.0 <= v < 2.0.0", None),
             (vec!["2.0.0", "3.0.0"], "1.0.0 <= v < 2.0.0", None),
         ];
@@ -436,22 +451,22 @@ mod tests {
     #[test]
     fn get_new_value_exact_replace() {
         let result = get_new_value(&NewValueParams {
-            current_value: "1.0.0".to_string(),
-            range_strategy: "replace".to_string(),
-            new_version: "1.0.5".to_string(),
+            current_value: "1.0.0".to_owned(),
+            range_strategy: "replace".to_owned(),
+            new_version: "1.0.5".to_owned(),
         });
-        assert_eq!(result, Some("1.0.5".to_string()));
+        assert_eq!(result, Some("1.0.5".to_owned()));
     }
 
     // Ported: "handles bump strategy for exact version" — versioning/elm/index.spec.ts line 225
     #[test]
     fn get_new_value_exact_bump() {
         let result = get_new_value(&NewValueParams {
-            current_value: "1.0.0".to_string(),
-            range_strategy: "bump".to_string(),
-            new_version: "2.0.0".to_string(),
+            current_value: "1.0.0".to_owned(),
+            range_strategy: "bump".to_owned(),
+            new_version: "2.0.0".to_owned(),
         });
-        assert_eq!(result, Some("2.0.0".to_string()));
+        assert_eq!(result, Some("2.0.0".to_owned()));
     }
 
     // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$newVersion") === "$expected"" — versioning/elm/index.spec.ts line 237
@@ -463,23 +478,53 @@ mod tests {
             ("1.0.0 <= v < 2.0.0", "widen", "1.5.0", "1.0.0 <= v < 2.0.0"),
             ("1.0.0 <= v < 2.0.0", "widen", "2.0.0", "1.0.0 <= v < 3.0.0"),
             ("1.0.0 <= v < 2.0.0", "widen", "2.5.0", "1.0.0 <= v < 3.0.0"),
-            ("1.0.0 <= v < 2.0.0", "replace", "1.5.0", "1.5.0 <= v < 2.0.0"),
-            ("1.0.0 <= v < 2.0.0", "replace", "2.0.0", "2.0.0 <= v < 3.0.0"),
-            ("0.19.0 <= v < 0.20.0", "bump", "0.19.1", "0.19.1 <= v < 0.20.0"),
-            ("0.19.0 <= v < 0.20.0", "replace", "0.20.0", "0.20.0 <= v < 1.0.0"),
-            ("1.0.0 <= v < 2.0.0", "update-lockfile", "1.5.0", "1.0.0 <= v < 2.0.0"),
-            ("1.0.0 <= v < 2.0.0", "update-lockfile", "2.0.0", "2.0.0 <= v < 3.0.0"),
+            (
+                "1.0.0 <= v < 2.0.0",
+                "replace",
+                "1.5.0",
+                "1.5.0 <= v < 2.0.0",
+            ),
+            (
+                "1.0.0 <= v < 2.0.0",
+                "replace",
+                "2.0.0",
+                "2.0.0 <= v < 3.0.0",
+            ),
+            (
+                "0.19.0 <= v < 0.20.0",
+                "bump",
+                "0.19.1",
+                "0.19.1 <= v < 0.20.0",
+            ),
+            (
+                "0.19.0 <= v < 0.20.0",
+                "replace",
+                "0.20.0",
+                "0.20.0 <= v < 1.0.0",
+            ),
+            (
+                "1.0.0 <= v < 2.0.0",
+                "update-lockfile",
+                "1.5.0",
+                "1.0.0 <= v < 2.0.0",
+            ),
+            (
+                "1.0.0 <= v < 2.0.0",
+                "update-lockfile",
+                "2.0.0",
+                "2.0.0 <= v < 3.0.0",
+            ),
             ("1.0.0 <= v < 2.0.0", "pin", "1.5.0", "1.5.0"),
         ];
         for (current_value, range_strategy, new_version, expected) in cases {
             let result = get_new_value(&NewValueParams {
-                current_value: current_value.to_string(),
-                range_strategy: range_strategy.to_string(),
-                new_version: new_version.to_string(),
+                current_value: current_value.to_owned(),
+                range_strategy: range_strategy.to_owned(),
+                new_version: new_version.to_owned(),
             });
             assert_eq!(
                 result,
-                Some(expected.to_string()),
+                Some(expected.to_owned()),
                 "get_new_value({current_value:?}, {range_strategy:?}, {new_version:?})"
             );
         }
@@ -489,9 +534,9 @@ mod tests {
     #[test]
     fn get_new_value_invalid_new_version_returns_none() {
         let result = get_new_value(&NewValueParams {
-            current_value: "1.0.0 <= v < 2.0.0".to_string(),
-            range_strategy: "bump".to_string(),
-            new_version: "invalid".to_string(),
+            current_value: "1.0.0 <= v < 2.0.0".to_owned(),
+            range_strategy: "bump".to_owned(),
+            new_version: "invalid".to_owned(),
         });
         assert_eq!(result, None);
     }
@@ -500,9 +545,9 @@ mod tests {
     #[test]
     fn get_new_value_invalid_current_value_returns_none() {
         let result = get_new_value(&NewValueParams {
-            current_value: "invalid".to_string(),
-            range_strategy: "bump".to_string(),
-            new_version: "1.5.0".to_string(),
+            current_value: "invalid".to_owned(),
+            range_strategy: "bump".to_owned(),
+            new_version: "1.5.0".to_owned(),
         });
         assert_eq!(result, None);
     }
@@ -511,9 +556,9 @@ mod tests {
     #[test]
     fn get_new_value_unknown_strategy_returns_none() {
         let result = get_new_value(&NewValueParams {
-            current_value: "1.0.0 <= v < 2.0.0".to_string(),
-            range_strategy: "auto".to_string(),
-            new_version: "1.5.0".to_string(),
+            current_value: "1.0.0 <= v < 2.0.0".to_owned(),
+            range_strategy: "auto".to_owned(),
+            new_version: "1.5.0".to_owned(),
         });
         assert_eq!(result, None);
     }
@@ -522,44 +567,44 @@ mod tests {
     #[test]
     fn get_new_value_widen_equals_upper() {
         let result = get_new_value(&NewValueParams {
-            current_value: "1.0.0 <= v < 2.0.0".to_string(),
-            range_strategy: "widen".to_string(),
-            new_version: "2.0.0".to_string(),
+            current_value: "1.0.0 <= v < 2.0.0".to_owned(),
+            range_strategy: "widen".to_owned(),
+            new_version: "2.0.0".to_owned(),
         });
-        assert_eq!(result, Some("1.0.0 <= v < 3.0.0".to_string()));
+        assert_eq!(result, Some("1.0.0 <= v < 3.0.0".to_owned()));
     }
 
     // Ported: "widens elm-version range for new compiler release" — versioning/elm/index.spec.ts line 307
     #[test]
     fn get_new_value_widen_elm_compiler() {
         let result = get_new_value(&NewValueParams {
-            current_value: "0.19.0 <= v < 0.20.0".to_string(),
-            range_strategy: "widen".to_string(),
-            new_version: "0.20.0".to_string(),
+            current_value: "0.19.0 <= v < 0.20.0".to_owned(),
+            range_strategy: "widen".to_owned(),
+            new_version: "0.20.0".to_owned(),
         });
-        assert_eq!(result, Some("0.19.0 <= v < 1.0.0".to_string()));
+        assert_eq!(result, Some("0.19.0 <= v < 1.0.0".to_owned()));
     }
 
     // Ported: "keeps elm-version range unchanged when version is already satisfied" — versioning/elm/index.spec.ts line 318
     #[test]
     fn get_new_value_update_lockfile_satisfied() {
         let result = get_new_value(&NewValueParams {
-            current_value: "0.19.0 <= v < 0.20.0".to_string(),
-            range_strategy: "update-lockfile".to_string(),
-            new_version: "0.19.1".to_string(),
+            current_value: "0.19.0 <= v < 0.20.0".to_owned(),
+            range_strategy: "update-lockfile".to_owned(),
+            new_version: "0.19.1".to_owned(),
         });
-        assert_eq!(result, Some("0.19.0 <= v < 0.20.0".to_string()));
+        assert_eq!(result, Some("0.19.0 <= v < 0.20.0".to_owned()));
     }
 
     // Ported: "replaces elm-version range when explicitly requested" — versioning/elm/index.spec.ts line 328
     #[test]
     fn get_new_value_replace_elm_version() {
         let result = get_new_value(&NewValueParams {
-            current_value: "0.19.0 <= v < 0.20.0".to_string(),
-            range_strategy: "replace".to_string(),
-            new_version: "0.19.1".to_string(),
+            current_value: "0.19.0 <= v < 0.20.0".to_owned(),
+            range_strategy: "replace".to_owned(),
+            new_version: "0.19.1".to_owned(),
         });
-        assert_eq!(result, Some("0.19.1 <= v < 1.0.0".to_string()));
+        assert_eq!(result, Some("0.19.1 <= v < 1.0.0".to_owned()));
     }
 
     // Ported: "finds highest satisfying version for elm-version range" — versioning/elm/index.spec.ts line 341

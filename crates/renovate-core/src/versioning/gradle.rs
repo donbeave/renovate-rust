@@ -91,12 +91,11 @@ fn tokenize(s: &str) -> Option<Vec<Token>> {
             }
             Some(c) => {
                 // digit ↔ letter transition → implicit separator
-                if let Some(p) = prev {
-                    if !is_separator(p) && is_transition(p, c) {
+                if let Some(p) = prev
+                    && !is_separator(p) && is_transition(p, c) {
                         yield_token(&current_val, &mut result);
                         current_val.clear();
                     }
-                }
                 current_val.push(c);
             }
         }
@@ -209,16 +208,23 @@ pub fn is_version(input: &str) -> bool {
 // ── isStable ──────────────────────────────────────────────────────────────────
 
 const UNSTABLE: &[&str] = &[
-    "dev", "a", "alpha", "b", "beta", "m", "mt", "milestone", "rc", "cr",
-    "preview", "snapshot",
+    "dev",
+    "a",
+    "alpha",
+    "b",
+    "beta",
+    "m",
+    "mt",
+    "milestone",
+    "rc",
+    "cr",
+    "preview",
+    "snapshot",
 ];
 
 /// Returns `true` when the version contains no known pre-release qualifier.
 pub fn is_stable(version: &str) -> bool {
-    let tokens = match parse(version) {
-        Some(t) => t,
-        None => return false,
-    };
+    let Some(tokens) = parse(version) else { return false };
     for token in &tokens {
         if let Token::Str(s) = token {
             let lower = s.to_lowercase();
@@ -234,7 +240,9 @@ pub fn is_stable(version: &str) -> bool {
 
 /// Returns the major component, stripping a leading `v`/`V`.
 pub fn get_major(version: &str) -> Option<i64> {
-    let stripped = version.strip_prefix(|c| c == 'v' || c == 'V').unwrap_or(version);
+    let stripped = version
+        .strip_prefix(|c| c == 'v' || c == 'V')
+        .unwrap_or(version);
     let tokens = parse(stripped)?;
     match tokens.first() {
         Some(Token::Number(n)) => Some(*n as i64),
@@ -243,7 +251,9 @@ pub fn get_major(version: &str) -> Option<i64> {
 }
 
 pub fn get_minor(version: &str) -> Option<i64> {
-    let stripped = version.strip_prefix(|c| c == 'v' || c == 'V').unwrap_or(version);
+    let stripped = version
+        .strip_prefix(|c| c == 'v' || c == 'V')
+        .unwrap_or(version);
     let tokens = parse(stripped)?;
     match (tokens.first(), tokens.get(1)) {
         (Some(Token::Number(_)), Some(Token::Number(n))) => Some(*n as i64),
@@ -253,12 +263,12 @@ pub fn get_minor(version: &str) -> Option<i64> {
 }
 
 pub fn get_patch(version: &str) -> Option<i64> {
-    let stripped = version.strip_prefix(|c| c == 'v' || c == 'V').unwrap_or(version);
+    let stripped = version
+        .strip_prefix(|c| c == 'v' || c == 'V')
+        .unwrap_or(version);
     let tokens = parse(stripped)?;
     match (tokens.first(), tokens.get(1), tokens.get(2)) {
-        (Some(Token::Number(_)), Some(Token::Number(_)), Some(Token::Number(n))) => {
-            Some(*n as i64)
-        }
+        (Some(Token::Number(_)), Some(Token::Number(_)), Some(Token::Number(n))) => Some(*n as i64),
         (Some(Token::Number(_)), ..) => Some(0),
         _ => None,
     }
@@ -439,11 +449,10 @@ fn parse_maven_based_range(input: &str) -> Option<MavenBasedRange> {
     };
 
     // Left must be ≤ right when both are present.
-    if let (Some(lv), Some(rv)) = (&left_val, &right_val) {
-        if compare(lv, rv) == Ordering::Greater {
+    if let (Some(lv), Some(rv)) = (&left_val, &right_val)
+        && compare(lv, rv) == Ordering::Greater {
             return None;
         }
-    }
 
     Some(MavenBasedRange {
         left_bound,
@@ -487,10 +496,7 @@ pub fn is_valid(s: &str) -> bool {
 
 /// Returns `true` when `version` matches `range`.
 pub fn matches_range(version: &str, range: &str) -> bool {
-    let version_tokens = match parse(version) {
-        Some(t) => t,
-        None => return false,
-    };
+    let Some(version_tokens) = parse(version) else { return false };
     if version.is_empty() || range.is_empty() {
         return false;
     }
@@ -515,12 +521,24 @@ pub fn matches_range(version: &str, range: &str) -> bool {
         let ver_prefix: Vec<u64> = version_tokens
             .iter()
             .take(n)
-            .filter_map(|t| if let Token::Number(v) = t { Some(*v) } else { None })
+            .filter_map(|t| {
+                if let Token::Number(v) = t {
+                    Some(*v)
+                } else {
+                    None
+                }
+            })
             .collect();
         let rng_prefix: Vec<u64> = prefix
             .tokens
             .iter()
-            .filter_map(|t| if let Token::Number(v) = t { Some(*v) } else { None })
+            .filter_map(|t| {
+                if let Token::Number(v) = t {
+                    Some(*v)
+                } else {
+                    None
+                }
+            })
             .collect();
         if ver_prefix.len() < n || rng_prefix.len() < n {
             // Fall back to string join comparison (handles non-numeric tokens).
@@ -559,10 +577,7 @@ pub fn matches_range(version: &str, range: &str) -> bool {
     }
 
     // Maven-based range.
-    let mbr = match parse_maven_based_range(range) {
-        Some(r) => r,
-        None => return false,
-    };
+    let Some(mbr) = parse_maven_based_range(range) else { return false };
     let left_ok = match &mbr.left_val {
         None => true,
         Some(lv) => match mbr.left_bound {
@@ -588,7 +603,7 @@ pub fn is_greater_than(a: &str, b: &str) -> bool {
 
 // ── getSatisfyingVersion / minSatisfyingVersion ───────────────────────────────
 
-pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<String> {
+pub fn get_satisfying_version(versions: &[&str], range: &str) -> Option<String> {
     versions.iter().fold(None, |best: Option<String>, &v| {
         if matches_range(v, range) {
             match best {
@@ -660,8 +675,8 @@ pub fn get_new_value(
     }
 
     // Maven-based range with `!!preferred`.
-    if let Some(mbr) = parse_maven_based_range(current_value) {
-        if let Some(ref preferred) = mbr.preferred_val {
+    if let Some(mbr) = parse_maven_based_range(current_value)
+        && let Some(ref preferred) = mbr.preferred_val {
             let preferred = preferred.clone();
             // Strip `!!preferred` from the end to get the base range.
             let suffix = format!("!!{preferred}");
@@ -669,12 +684,10 @@ pub fn get_new_value(
                 Some(idx) => &current_value[..idx],
                 None => return Some(current_value.to_owned()),
             };
-            let new_base_range =
-                maven::get_new_value(base_range, range_strategy, new_version);
+            let new_base_range = maven::get_new_value(base_range, range_strategy, new_version);
 
-            let preferred_is_boundary =
-                mbr.left_val.as_deref() == Some(&preferred)
-                    || mbr.right_val.as_deref() == Some(&preferred);
+            let preferred_is_boundary = mbr.left_val.as_deref() == Some(&preferred)
+                || mbr.right_val.as_deref() == Some(&preferred);
 
             let new_parsed_mbr = parse_maven_based_range(&new_base_range);
             let preferred_still_present = new_parsed_mbr
@@ -688,14 +701,17 @@ pub fn get_new_value(
             let new_preferred = if preferred_is_boundary && !preferred_still_present {
                 new_version.to_owned()
             } else {
-                preferred.clone()
+                preferred
             };
             return Some(format!("{new_base_range}!!{new_preferred}"));
         }
-    }
 
     // Delegate to Maven for all other range forms.
-    Some(maven::get_new_value(current_value, range_strategy, new_version))
+    Some(maven::get_new_value(
+        current_value,
+        range_strategy,
+        new_version,
+    ))
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -1003,10 +1019,7 @@ mod tests {
     #[test]
     fn gradle_get_new_value() {
         // Plain version → returns new version.
-        assert_eq!(
-            get_new_value("1", None, "1.1"),
-            Some("1.1".to_owned())
-        );
+        assert_eq!(get_new_value("1", None, "1.1"), Some("1.1".to_owned()));
         // Maven ranges without preferred — delegate to Maven.
         assert_eq!(
             get_new_value("[1.2.3,]", None, "1.2.4"),
@@ -1039,18 +1052,9 @@ mod tests {
         // Bare '+' → None.
         assert_eq!(get_new_value("+", None, "1.2.4"), None);
         // Prefix ranges.
-        assert_eq!(
-            get_new_value("1.+", None, "1.2.4"),
-            Some("1.+".to_owned())
-        );
-        assert_eq!(
-            get_new_value("1.+", None, "2.1.2"),
-            Some("2.+".to_owned())
-        );
-        assert_eq!(
-            get_new_value("1.+", None, "2"),
-            Some("2.+".to_owned())
-        );
+        assert_eq!(get_new_value("1.+", None, "1.2.4"), Some("1.+".to_owned()));
+        assert_eq!(get_new_value("1.+", None, "2.1.2"), Some("2.+".to_owned()));
+        assert_eq!(get_new_value("1.+", None, "2"), Some("2.+".to_owned()));
         assert_eq!(
             get_new_value("1.3.+", None, "1.3.4"),
             Some("1.3.+".to_owned())
@@ -1059,10 +1063,7 @@ mod tests {
             get_new_value("1.3.+", None, "1.5.2"),
             Some("1.5.+".to_owned())
         );
-        assert_eq!(
-            get_new_value("1.3.+", None, "2"),
-            Some("2".to_owned())
-        );
+        assert_eq!(get_new_value("1.3.+", None, "2"), Some("2".to_owned()));
         // Single-version range → bump strategy.
         assert_eq!(
             get_new_value("[1.2.3]", Some("bump"), "1.2.4"),

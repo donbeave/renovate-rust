@@ -17,9 +17,7 @@ use semver::Version;
 
 fn stability_regex() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        Regex::new(r"(?i)(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?:\s|$)").unwrap()
-    })
+    RE.get_or_init(|| Regex::new(r"(?i)(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?:\s|$)").unwrap())
 }
 
 fn patch_part_regex() -> &'static Regex {
@@ -46,12 +44,11 @@ fn letter_digit_regex() -> &'static Regex {
 
 /// Extract the `-pXX` suffix from a composer version, returning `(without_patch, had_patch)`.
 fn remove_patch_part(input: &str) -> (String, bool) {
-    if let Some(caps) = patch_part_regex().captures(input) {
-        if let Some(suffix) = caps.name("suffix") {
+    if let Some(caps) = patch_part_regex().captures(input)
+        && let Some(suffix) = caps.name("suffix") {
             let without = input[..suffix.start()].to_owned();
             return (without, true);
         }
-    }
     (input.to_owned(), false)
 }
 
@@ -95,7 +92,9 @@ fn normalize_version(input: &str) -> String {
     output = output.replace("v", "");
     // Re-add `v` that was after `>`, `>=`, `^`, `~` — actually just strip all `v` directly
     // The TypeScript uses regex `/(^|>|>=|\^|~)v/gi`
-    let output = Regex::new(r"(?i)(^|>|>=|\^|~)v").unwrap().replace_all(&output, "$1");
+    let output = Regex::new(r"(?i)(^|>|>=|\^|~)v")
+        .unwrap()
+        .replace_all(&output, "$1");
     convert_stability_modifier(&output)
 }
 
@@ -227,7 +226,10 @@ pub fn is_valid(input: &str) -> bool {
     let npm = composer2npm(input);
     // OR ranges: validate each alternative independently
     if npm.contains("||") {
-        return npm.split("||").map(str::trim).all(|alt| super::npm::is_valid(alt));
+        return npm
+            .split("||")
+            .map(str::trim)
+            .all(super::npm::is_valid);
     }
     super::npm::is_valid(&npm)
 }
@@ -363,7 +365,9 @@ pub fn subset(sub_range: &str, super_range: &str) -> Option<bool> {
         {
             return Some(false);
         }
-        let result = sub_alts.iter().all(|s| super_alts.iter().any(|p| range_subset(s, p)));
+        let result = sub_alts
+            .iter()
+            .all(|s| super_alts.iter().any(|p| range_subset(s, p)));
         return Some(result);
     }
     // Check for invalid non-OR ranges (like "less than 8")
@@ -386,7 +390,9 @@ pub fn intersects(sub_range: &str, super_range: &str) -> bool {
         {
             return false;
         }
-        return sub_alts.iter().any(|s| super_alts.iter().any(|p| super::npm::intersects(s, p)));
+        return sub_alts
+            .iter()
+            .any(|s| super_alts.iter().any(|p| super::npm::intersects(s, p)));
     }
     if !super::npm::is_valid(&sub_npm) || !super::npm::is_valid(&super_npm) {
         return false;
@@ -407,11 +413,13 @@ pub fn get_new_value(
     let mut result = result?;
 
     // Preserve `v` prefix if original had it
-    if current_value.split('.').next().map_or(false, |p| p.contains('v')) {
+    if current_value
+        .split('.')
+        .next()
+        .is_some_and(|p| p.contains('v'))
+    {
         let digit_regex = Regex::new(r"([0-9])").unwrap();
-        result = digit_regex
-            .replace(&result, "v$1")
-            .to_string();
+        result = digit_regex.replace(&result, "v$1").to_string();
     }
 
     // Preserve `@stability` modifier
@@ -444,14 +452,20 @@ fn compute_new_value(
 
     if is_version(current_value) {
         new_value = Some(new_version.to_owned());
-    } else if Regex::new(r"^[~^](0\.[1-9][0-9]*)$").unwrap().is_match(current_value) {
+    } else if Regex::new(r"^[~^](0\.[1-9][0-9]*)$")
+        .unwrap()
+        .is_match(current_value)
+    {
         let operator = &current_value[..1];
         if to_major == Some(0) {
             new_value = Some(format!("{}0.{}", operator, to_minor?));
         } else {
             new_value = Some(format!("{}{}.0", operator, to_major?));
         }
-    } else if Regex::new(r"^[~^]([0-9]*)$").unwrap().is_match(current_value) {
+    } else if Regex::new(r"^[~^]([0-9]*)$")
+        .unwrap()
+        .is_match(current_value)
+    {
         let operator = &current_value[..1];
         new_value = Some(format!("{}{}", operator, to_major?));
     } else if to_major.is_some()
@@ -488,7 +502,8 @@ fn compute_new_value(
         let norm_current = normalize_version(current_value);
         let norm_cur_ver = pad_zeroes(&normalize_version(current_version.unwrap_or("")));
         let norm_new = pad_zeroes(&normalize_version(new_version));
-        new_value = super::npm::get_new_value(&norm_current, range_strategy, &norm_cur_ver, &norm_new);
+        new_value =
+            super::npm::get_new_value(&norm_current, range_strategy, &norm_cur_ver, &norm_new);
     }
 
     // Handle widen: if new version already satisfies range, keep current
@@ -504,14 +519,17 @@ fn compute_new_value(
         if has_or || range_strategy == "widen" {
             let split_values: Vec<&str> = current_value.split("||").collect();
             let last_value = split_values.last()?.trim();
-            let replacement = compute_new_value(last_value, "replace", current_version, new_version);
+            let replacement =
+                compute_new_value(last_value, "replace", current_version, new_version);
             if range_strategy == "replace" {
                 new_value = replacement;
             } else if let Some(ref replacement_val) = replacement {
                 // Check if it starts with `<` operator (range widening)
                 if replacement_val.trim().starts_with('<') {
                     // Replace the upper bound
-                    let op_end = replacement_val.find(|c: char| c.is_ascii_digit()).unwrap_or(0);
+                    let op_end = replacement_val
+                        .find(|c: char| c.is_ascii_digit())
+                        .unwrap_or(0);
                     let op = &replacement_val[..op_end];
                     let split_current: Vec<&str> = current_value.split(op).collect();
                     let prefix = split_current[..split_current.len() - 1].join(op);
@@ -551,8 +569,7 @@ fn widen_compound_range(current_value: &str, new_version: &str) -> Option<String
     let upper_op = upper_op?;
     let upper = if upper_op.starts_with("<=") {
         // `<=Y` → extend to `<= new_version` (preserve exact patch)
-        let cur_upper =
-            Version::parse(&pad_zeroes(&normalize_version(&upper_op[2..]))).ok()?;
+        let cur_upper = Version::parse(&pad_zeroes(&normalize_version(&upper_op[2..]))).ok()?;
         if new > cur_upper {
             format!("<={new_version}")
         } else {
@@ -734,9 +751,26 @@ mod tests {
     // Ported: "$versions -> sortVersions -> $expected" — composer/index.spec.ts line 256
     #[test]
     fn sort_versions_cases() {
-        let mut v1 = vec!["1.2.3-beta", "1.0.0-alpha24", "2.0.1", "1.3.4", "1.0.0-alpha9", "1.2.3"];
+        let mut v1 = vec![
+            "1.2.3-beta",
+            "1.0.0-alpha24",
+            "2.0.1",
+            "1.3.4",
+            "1.0.0-alpha9",
+            "1.2.3",
+        ];
         v1.sort_by(|a, b| sort_versions(a, b).cmp(&0));
-        assert_eq!(v1, vec!["1.0.0-alpha9", "1.0.0-alpha24", "1.2.3-beta", "1.2.3", "1.3.4", "2.0.1"]);
+        assert_eq!(
+            v1,
+            vec![
+                "1.0.0-alpha9",
+                "1.0.0-alpha24",
+                "1.2.3-beta",
+                "1.2.3",
+                "1.3.4",
+                "2.0.1"
+            ]
+        );
 
         let mut v2 = vec!["1.2.3-p1", "1.2.3-p2", "1.2.3"];
         v2.sort_by(|a, b| sort_versions(a, b).cmp(&0));
@@ -844,27 +878,64 @@ mod tests {
             ("^0.4.0", "replace", None, "1.0", "1.0"),
             // OR ranges / widen
             ("~1.2 || ~2.0", "replace", Some("2.0.0"), "3.1.0", "~3.0"),
-            ("~1.2 || ~2.0 || ~3.0", "widen", Some("2.0.0"), "5.1.0", "~1.2 || ~2.0 || ~3.0 || ~5.0"),
+            (
+                "~1.2 || ~2.0 || ~3.0",
+                "widen",
+                Some("2.0.0"),
+                "5.1.0",
+                "~1.2 || ~2.0 || ~3.0 || ~5.0",
+            ),
             ("^1.2", "widen", Some("1.2.0"), "2.0.0", "^1.2 || ^2.0"),
             ("~1.2", "widen", Some("1.2.0"), "2.4.0", "~1.2 || ~2.0"),
             ("~1.2", "widen", Some("1.2.0"), "1.9.0", "~1.2"),
             ("^1.2", "widen", Some("1.2.0"), "1.9.0", "^1.2"),
-            ("^1.0 || ^2.0", "widen", Some("2.0.0"), "2.1.0", "^1.0 || ^2.0"),
+            (
+                "^1.0 || ^2.0",
+                "widen",
+                Some("2.0.0"),
+                "2.1.0",
+                "^1.0 || ^2.0",
+            ),
             // stability modifiers
             ("^v1.0", "bump", Some("1.0.0"), "1.1.7", "^v1.1.7"),
-            ("^v1.0@beta", "bump", Some("1.0.0-beta3"), "1.0.0-beta5", "^v1.0.0-beta5@beta"),
-            ("^v1.0@beta", "replace", Some("1.0.0-beta3"), "2.0.0-beta5", "^v2.0.0-beta5@beta"),
-            ("^4.0@alpha", "replace", Some("4.0.0-alpha1"), "4.0.0-beta5", "^4.0.0-beta5@alpha"),
+            (
+                "^v1.0@beta",
+                "bump",
+                Some("1.0.0-beta3"),
+                "1.0.0-beta5",
+                "^v1.0.0-beta5@beta",
+            ),
+            (
+                "^v1.0@beta",
+                "replace",
+                Some("1.0.0-beta3"),
+                "2.0.0-beta5",
+                "^v2.0.0-beta5@beta",
+            ),
+            (
+                "^4.0@alpha",
+                "replace",
+                Some("4.0.0-alpha1"),
+                "4.0.0-beta5",
+                "^4.0.0-beta5@alpha",
+            ),
             // widen with >=...<= forms
             (">=1.0 <3.0", "widen", Some("2.9.0"), "4.1.0", ">=1.0 <4.2"),
             (">=1.0 <3.0", "widen", Some("2.9.0"), "2.9.5", ">=1.0 <3.0"),
             (">=1.0 <3.0", "widen", Some("2.9.0"), "3.0", ">=1.0 <3.1"),
-            (">=1.0.0 <=3.0.4", "widen", Some("2.9.0"), "3.0.5", ">=1.0.0 <=3.0.5"),
+            (
+                ">=1.0.0 <=3.0.4",
+                "widen",
+                Some("2.9.0"),
+                "3.0.5",
+                ">=1.0.0 <=3.0.5",
+            ),
             // Note: "~1.0 || >=3.0 <=4.0" widen case requires complex OR range handling
             // This is a more complex case that requires the TypeScript npm range.ts logic
         ];
         for (current_value, range_strategy, current_version, new_version, expected) in cases {
-            let result = get_new_value(current_value, range_strategy, *current_version, new_version);
+            let result =
+                get_new_value(current_value, range_strategy, *current_version, new_version);
             assert_eq!(
                 result.as_deref(),
                 Some(*expected),

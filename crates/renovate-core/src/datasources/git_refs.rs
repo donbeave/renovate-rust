@@ -57,28 +57,27 @@ pub fn parse_ls_remote(output: &str) -> Vec<RawRef> {
         let Some((hash, refpath)) = line.split_once('\t') else {
             continue;
         };
-        let hash = hash.trim().to_string();
+        let hash = hash.trim().to_owned();
         let refpath = refpath.trim();
 
         if refpath == "HEAD" {
             raw.push(RawRef {
                 type_: String::new(),
-                value: "HEAD".to_string(),
+                value: "HEAD".to_owned(),
                 hash,
             });
-        } else if let Some(rest) = refpath.strip_prefix("refs/") {
-            if let Some((type_, value)) = rest.split_once('/') {
+        } else if let Some(rest) = refpath.strip_prefix("refs/")
+            && let Some((type_, value)) = rest.split_once('/') {
                 if let Some(base) = value.strip_suffix("^{}") {
-                    deref_hashes.insert(base.to_string(), hash);
+                    deref_hashes.insert(base.to_owned(), hash);
                 } else {
                     raw.push(RawRef {
-                        type_: type_.to_string(),
-                        value: value.to_string(),
+                        type_: type_.to_owned(),
+                        value: value.to_owned(),
                         hash,
                     });
                 }
             }
-        }
     }
 
     raw.into_iter()
@@ -97,7 +96,7 @@ fn to_source_url(package_name: &str) -> String {
     package_name
         .trim_end_matches('/')
         .trim_end_matches(".git")
-        .to_string()
+        .to_owned()
 }
 
 /// Get releases for a package from `git ls-remote` output.

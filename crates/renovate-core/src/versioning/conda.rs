@@ -12,11 +12,10 @@ enum CondaPart {
 }
 
 fn extract_epoch(s: &str) -> (u64, &str) {
-    if let Some(pos) = s.find('!') {
-        if let Ok(e) = s[..pos].parse::<u64>() {
+    if let Some(pos) = s.find('!')
+        && let Ok(e) = s[..pos].parse::<u64>() {
             return (e, &s[pos + 1..]);
         }
-    }
     (0, s)
 }
 
@@ -202,8 +201,7 @@ fn matches_spec(version: &str, spec: &str) -> bool {
         return is_valid_version(version) && version_has_prefix(version, prefix);
     }
     if let Some((op, ver_str)) = parse_spec_op(spec) {
-        if ver_str.ends_with(".*") {
-            let prefix = &ver_str[..ver_str.len() - 2];
+        if let Some(prefix) = ver_str.strip_suffix(".*") {
             return op == "==" && is_valid_version(version) && version_has_prefix(version, prefix);
         }
         match op {
@@ -366,7 +364,7 @@ pub fn get_new_value(
         match range_strategy {
             "widen" => {
                 if matches_spec(new_version, current_value) {
-                    return Some(current_value.to_string());
+                    return Some(current_value.to_owned());
                 }
                 update_glob_for_new_version(current_value, new_version)
             }

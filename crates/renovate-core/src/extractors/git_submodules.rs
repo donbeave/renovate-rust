@@ -217,7 +217,6 @@ pub fn update_artifacts(dep_names: &[&str]) -> Vec<SubmoduleArtifact> {
         .collect()
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;

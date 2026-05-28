@@ -166,7 +166,7 @@ pub async fn fetch_releases(
     let mut tags = None;
     if let Some(ref v) = latest_version {
         let mut map = std::collections::HashMap::new();
-        map.insert("latest".to_string(), v.clone());
+        map.insert("latest".to_owned(), v.clone());
         tags = Some(map);
     }
 

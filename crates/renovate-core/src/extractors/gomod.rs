@@ -1659,12 +1659,10 @@ require (
             },
         ];
         let table = extra_deps_table(&deps);
-        let expected = vec![
-            "| **Package**          | **Change**           |",
+        let expected = ["| **Package**          | **Change**           |",
             "| :------------------- | :------------------- |",
             "| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |",
-            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
-        ]
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |"]
         .join("\n");
         assert_eq!(table, expected);
     }
@@ -1689,8 +1687,7 @@ require (
     fn get_extra_deps_notice_single_dep() {
         let exclude = ["go", "github.com/foo/foo"];
         let res = get_extra_deps_notice(Some(GO_MOD_BEFORE), Some(GO_MOD_AFTER), &exclude).unwrap();
-        let expected = vec![
-            "In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):",
+        let expected = ["In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):",
             "",
             "",
             "- 1 additional dependency was updated",
@@ -1701,8 +1698,7 @@ require (
             "",
             "| **Package**          | **Change**           |",
             "| :------------------- | :------------------- |",
-            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
-        ].join("\n");
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |"].join("\n");
         assert_eq!(res, expected);
     }
 

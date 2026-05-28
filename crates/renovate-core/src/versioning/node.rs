@@ -76,7 +76,7 @@ fn find_by_codename(name: &str) -> Option<&'static NodeSchedule> {
     let upper = name.to_uppercase();
     SCHEDULE
         .iter()
-        .find(|s| s.codename.map_or(false, |c| c.to_uppercase() == upper))
+        .find(|s| s.codename.is_some_and(|c| c.to_uppercase() == upper))
 }
 
 fn find_by_major(major: u64) -> Option<&'static NodeSchedule> {
@@ -93,7 +93,7 @@ fn normalize_value(value: &str) -> String {
     if let Some(sched) = find_by_codename(value) {
         return format!("^{}", sched.major);
     }
-    value.to_string()
+    value.to_owned()
 }
 
 fn npm_is_stable(version: &str) -> bool {
@@ -109,7 +109,7 @@ fn npm_get_new_value(
     let new_stripped = new_version.trim_start_matches('v');
     // Exact version pin → return new version (node-semver behavior)
     if Version::parse(current_value).is_ok() {
-        return Some(new_version.to_string());
+        return Some(new_version.to_owned());
     }
     // Tilde range with replace → ~{major}.{minor}.0
     if current_value.starts_with('~')
@@ -208,7 +208,7 @@ pub fn get_new_value(
     let res = npm_get_new_value(&normalized, range_strategy, current_version, new_version)?;
     // Strip 'v' prefix if result is a plain version
     if Version::parse(res.trim_start_matches('v')).is_ok() {
-        Some(res.trim_start_matches('v').to_string())
+        Some(res.trim_start_matches('v').to_owned())
     } else {
         Some(res)
     }

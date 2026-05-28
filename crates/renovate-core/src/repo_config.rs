@@ -1186,7 +1186,7 @@ impl CustomManager {
                     .name("registryUrl")
                     .map(|m| m.as_str().to_owned())
                     .or_else(|| self.registry_url_template.clone())
-                    .and_then(|url| validate_registry_url(url));
+                    .and_then(validate_registry_url);
                 let extract_version = caps
                     .name("extractVersion")
                     .map(|m| m.as_str().to_owned())
@@ -1274,7 +1274,7 @@ impl CustomManager {
         let registry_url = merged
             .remove("registryUrl")
             .or_else(|| self.registry_url_template.clone())
-            .and_then(|url| validate_registry_url(url));
+            .and_then(validate_registry_url);
         let extract_version = merged
             .remove("extractVersion")
             .or_else(|| self.extract_version_template.clone());

@@ -99,7 +99,7 @@ pub async fn fetch_releases(
         .collect();
 
     let mut tags = std::collections::HashMap::new();
-    tags.insert("latest".to_string(), versions.latest_version.clone());
+    tags.insert("latest".to_owned(), versions.latest_version.clone());
 
     let manifest_url = format!(
         "{}/{}/{}/package.yaml",

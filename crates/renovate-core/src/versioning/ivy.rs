@@ -61,8 +61,7 @@ pub fn parse_dynamic_revision(s: &str) -> Option<Revision> {
     }
 
     // Subrevision: ends with ".+"
-    if s.ends_with(".+") {
-        let prefix = &s[..s.len() - 2];
+    if let Some(prefix) = s.strip_suffix(".+") {
         if maven::is_version(prefix) {
             return Some(Revision {
                 rev_type: RevType::Subrevision,
@@ -116,11 +115,7 @@ pub fn matches_range(version: &str, range: &str) -> bool {
     if version.is_empty() || range.is_empty() {
         return false;
     }
-    let dynamic = match parse_dynamic_revision(range) {
-        Some(d) => d,
-        // Fallback to plain version equality
-        None => return maven::compare(version, range) == Ordering::Equal,
-    };
+    let Some(dynamic) = parse_dynamic_revision(range) else { return maven::compare(version, range) == Ordering::Equal };
 
     match dynamic.rev_type {
         RevType::Latest => {
@@ -145,7 +140,7 @@ pub fn matches_range(version: &str, range: &str) -> bool {
 
 // ── getSatisfyingVersion ──────────────────────────────────────────────────────
 
-pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<String> {
+pub fn get_satisfying_version(versions: &[&str], range: &str) -> Option<String> {
     versions.iter().fold(None, |best: Option<String>, &v| {
         if matches_range(v, range) {
             match best {
@@ -213,7 +208,10 @@ mod tests {
         ];
         for (input, expected_type, expected_value) in &cases {
             let result = parse_dynamic_revision(input);
-            assert!(result.is_some(), "parseDynamicRevision({input:?}) should be Some");
+            assert!(
+                result.is_some(),
+                "parseDynamicRevision({input:?}) should be Some"
+            );
             let rev = result.unwrap();
             assert_eq!(rev.rev_type, *expected_type, "type mismatch for {input:?}");
             assert_eq!(rev.value, *expected_value, "value mismatch for {input:?}");
@@ -248,15 +246,7 @@ mod tests {
             "]0,1[",
             "[0,1]",
         ];
-        let false_cases = [
-            "",
-            ".1",
-            "1.",
-            "-1",
-            "1-",
-            "1.0+",
-            "[0,1),(1,2]",
-        ];
+        let false_cases = ["", ".1", "1.", "-1", "1-", "1.0+", "[0,1),(1,2]"];
         for s in &true_cases {
             assert!(is_valid(s), "isValid({s:?}) should be true");
         }

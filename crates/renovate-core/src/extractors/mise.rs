@@ -1435,8 +1435,8 @@ pub fn extract_package_file(
 ) -> MiseExtractResult {
     let mut deps = extract(content);
 
-    if let Some(lock_content) = lock_file_content {
-        if let Some(lock_file) = parse_mise_lock_file(lock_content) {
+    if let Some(lock_content) = lock_file_content
+        && let Some(lock_file) = parse_mise_lock_file(lock_content) {
             let lock_file_name = get_lock_file_name(config_path);
             for dep in &mut deps {
                 let tool_key = dep.dep_name.split('/').next().unwrap_or(&dep.dep_name);
@@ -1452,7 +1452,6 @@ pub fn extract_package_file(
                 lock_files: Some(vec![lock_file_name]),
             };
         }
-    }
 
     MiseExtractResult {
         deps,

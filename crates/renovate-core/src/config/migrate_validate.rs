@@ -265,7 +265,7 @@ fn migrate_config(input: &Value) -> Value {
                     Value::Bool(b) => *b,
                     Value::String(s) => !s.is_empty(),
                     Value::Null => false,
-                    Value::Number(n) => n.as_f64().map_or(false, |f| f != 0.0),
+                    Value::Number(n) => n.as_f64().is_some_and(|f| f != 0.0),
                     _ => true,
                 };
                 let block = map.entry(block_key.to_owned()).or_insert_with(|| json!({}));
@@ -838,8 +838,8 @@ fn migrate_config(input: &Value) -> Value {
             set_safely(map, "rangeStrategy", Value::String("widen".to_owned()));
         }
         // Migrate gradle-lite → gradle (mirrors the TypeScript gradle-lite migration).
-        if let Some(gradle_lite_val) = map.remove("gradle-lite") {
-            if let Value::Object(gradle_lite_obj) = gradle_lite_val {
+        if let Some(gradle_lite_val) = map.remove("gradle-lite")
+            && let Value::Object(gradle_lite_obj) = gradle_lite_val {
                 let gradle_entry = map
                     .entry("gradle".to_owned())
                     .or_insert_with(|| Value::Object(serde_json::Map::new()));
@@ -849,12 +849,11 @@ fn migrate_config(input: &Value) -> Value {
                     }
                 }
             }
-        }
         // Replace 'gradle-lite' with 'gradle' in matchManagers inside package rules.
         if let Some(Value::Array(rules)) = map.get_mut("packageRules") {
             for rule in rules.iter_mut() {
-                if let Value::Object(rule_obj) = rule {
-                    if let Some(Value::Array(match_managers)) = rule_obj.get_mut("matchManagers") {
+                if let Value::Object(rule_obj) = rule
+                    && let Some(Value::Array(match_managers)) = rule_obj.get_mut("matchManagers") {
                         let has_gradle_lite = match_managers
                             .iter()
                             .any(|m| m.as_str() == Some("gradle-lite"));
@@ -867,7 +866,6 @@ fn migrate_config(input: &Value) -> Value {
                             match_managers.retain(|m| m.as_str() != Some("gradle-lite"));
                         }
                     }
-                }
             }
         }
         if matches!(map.get("platformCommit"), Some(Value::Bool(true))) {
@@ -892,8 +890,8 @@ fn migrate_config(input: &Value) -> Value {
             let mut flattened: Vec<Value> = Vec::new();
             let mut had_nested = false;
             for rule in rules {
-                if let Value::Object(ref obj) = rule {
-                    if let Some(Value::Array(subrules)) = obj.get("packageRules") {
+                if let Value::Object(ref obj) = rule
+                    && let Some(Value::Array(subrules)) = obj.get("packageRules") {
                         if subrules.is_empty() {
                             // Empty nested packageRules — keep rule but drop the empty array.
                             let mut parent = obj.clone();
@@ -916,7 +914,6 @@ fn migrate_config(input: &Value) -> Value {
                         }
                         continue;
                     }
-                }
                 flattened.push(rule);
             }
             if had_nested {

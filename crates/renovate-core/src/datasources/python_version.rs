@@ -133,10 +133,7 @@ pub async fn fetch_releases(
     let eol_map = build_eol_map(eol_result);
 
     // Use a non-retrying request so we can detect 429 immediately.
-    let resp = match http.get(registry_url).send().await {
-        Ok(r) => r,
-        Err(_) => return Ok(None),
-    };
+    let Ok(resp) = http.get(registry_url).send().await else { return Ok(None) };
 
     let status = resp.status();
 
@@ -166,10 +163,7 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let body = match resp.text().await {
-        Ok(b) => b,
-        Err(_) => return Ok(None),
-    };
+    let Ok(body) = resp.text().await else { return Ok(None) };
 
     let raw_releases: Vec<RawPythonRelease> =
         serde_json::from_str(&body).map_err(PythonVersionError::Json)?;

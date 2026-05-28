@@ -475,7 +475,7 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/api/v4/projects/some%2Fdep2/repository/commits"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&serde_json::json!([])))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
             .mount(&server)
             .await;
 

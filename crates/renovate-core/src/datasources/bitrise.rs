@@ -82,20 +82,20 @@ fn parse_steplib_url(registry_url: &str) -> Option<(String, String, String)> {
         return None;
     }
 
-    let full_name = path.to_string();
+    let full_name = path.to_owned();
 
     // github.com uses the central API; everything else uses /api/v3 (GHE or test servers)
     if host == "github.com" {
         let registry_url = format!("https://github.com/{full_name}.git");
         return Some((
-            "https://api.github.com".to_string(),
+            "https://api.github.com".to_owned(),
             full_name,
             registry_url,
         ));
     }
 
     let api_base = format!("{scheme}://{host}/api/v3");
-    Some((api_base, full_name, url.to_string()))
+    Some((api_base, full_name, url.to_owned()))
 }
 
 /// Returns true if `name` looks like a semver version (major.minor.patch pattern).
@@ -110,14 +110,8 @@ fn is_semver_version(name: &str) -> bool {
 /// Decode base64-encoded YAML content and extract `published_at` + `source_code_url`.
 fn parse_step_yaml(content_b64: &str) -> (Option<String>, Option<String>) {
     let raw = content_b64.replace('\n', "").replace(' ', "");
-    let bytes = match base64::engine::general_purpose::STANDARD.decode(&raw) {
-        Ok(b) => b,
-        Err(_) => return (None, None),
-    };
-    let yaml = match std::str::from_utf8(&bytes) {
-        Ok(s) => s,
-        Err(_) => return (None, None),
-    };
+    let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(&raw) else { return (None, None) };
+    let Ok(yaml) = std::str::from_utf8(&bytes) else { return (None, None) };
 
     let mut published_at: Option<String> = None;
     let mut source_code_url: Option<String> = None;
@@ -127,7 +121,7 @@ fn parse_step_yaml(content_b64: &str) -> (Option<String>, Option<String>) {
         if let Some(val) = line.strip_prefix("published_at:") {
             published_at = Some(normalize_timestamp(val.trim().trim_matches('"')));
         } else if let Some(val) = line.strip_prefix("source_code_url:") {
-            source_code_url = Some(val.trim().to_string());
+            source_code_url = Some(val.trim().to_owned());
         }
     }
 
@@ -145,7 +139,7 @@ fn normalize_timestamp(ts: &str) -> String {
         let utc: DateTime<Utc> = dt.into();
         return utc.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
     }
-    ts.to_string()
+    ts.to_owned()
 }
 
 /// Fetch all releases for `package_name` from the Bitrise steplib at `registry_url`.
@@ -216,7 +210,7 @@ pub async fn fetch_releases(
 
         let (ts, src) = parse_step_yaml(content_b64.unwrap());
         releases.push(BitriseRelease {
-            version: name.to_string(),
+            version: name.to_owned(),
             release_timestamp: ts,
             source_url: src,
         });
@@ -241,7 +235,7 @@ pub async fn fetch_latest(
     registry_url: &str,
 ) -> Result<BitriseUpdateSummary, BitriseError> {
     let result = fetch_releases(step_name, registry_url, http).await?;
-    let latest = result.and_then(|r| r.releases.into_iter().map(|rel| rel.version).last());
+    let latest = result.and_then(|r| r.releases.into_iter().map(|rel| rel.version).next_back());
     let update_available = latest.as_deref() != Some(current_value);
     Ok(BitriseUpdateSummary {
         latest,

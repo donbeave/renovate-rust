@@ -1107,7 +1107,13 @@ pub fn read_bazelrc_from_files<'a>(
         format!("{workspace_dir}/.bazelrc")
     };
     let mut read_files: Vec<String> = Vec::new();
-    read_bazelrc_file_inner(&bazelrc_path, workspace_dir, files, valid_paths, &mut read_files)
+    read_bazelrc_file_inner(
+        &bazelrc_path,
+        workspace_dir,
+        files,
+        valid_paths,
+        &mut read_files,
+    )
 }
 
 fn normalize_import_path(path: &str) -> String {
@@ -1138,12 +1144,14 @@ fn read_bazelrc_file_inner(
 
     for entry in entries {
         match entry {
-            BazelrcEntry::Command { command, options, config } => {
-                let sanitized = sanitize_bazelrc_options(
-                    &options,
-                    workspace_dir,
-                    |path| valid_paths.iter().any(|p| *p == path),
-                );
+            BazelrcEntry::Command {
+                command,
+                options,
+                config,
+            } => {
+                let sanitized = sanitize_bazelrc_options(&options, workspace_dir, |path| {
+                    valid_paths.iter().any(|p| *p == path)
+                });
                 results.push(BazelrcEntry::Command {
                     command,
                     options: sanitized,
@@ -1734,7 +1742,8 @@ mod tests {
     // Ported: "when .bazelrc has invalid lines" — bazel-module/bazelrc.spec.ts line 110
     #[test]
     fn bazelrc_read_invalid_lines_ignored() {
-        let content = "// This is not a valid comment\nbuild --show_timestamps --keep_going --jobs 600";
+        let content =
+            "// This is not a valid comment\nbuild --show_timestamps --keep_going --jobs 600";
         let files = &[(".bazelrc", Some(content))];
         let valid = &[".bazelrc"];
         let result = read_bazelrc_from_files(".", files, valid).unwrap();
@@ -1848,16 +1857,17 @@ mod tests {
         let result = read_bazelrc_from_files(".", files, valid);
         assert_eq!(
             result,
-            Err(
-                "Attempted to read a bazelrc multiple times. file: shared.bazelrc".to_owned()
-            )
+            Err("Attempted to read a bazelrc multiple times. file: shared.bazelrc".to_owned())
         );
     }
 
     // Ported: "when .bazelrc refers to a non-local file" — bazel-module/bazelrc.spec.ts line 239
     #[test]
     fn bazelrc_read_non_local_import_skipped() {
-        let files = &[(".bazelrc", Some("import /non-local.bazelrc\nbuild --jobs 600"))];
+        let files = &[(
+            ".bazelrc",
+            Some("import /non-local.bazelrc\nbuild --jobs 600"),
+        )];
         let valid = &[".bazelrc"];
         let result = read_bazelrc_from_files(".", files, valid).unwrap();
         assert_eq!(result, vec![cmd("build", &[("jobs", Some("600"))])]);
@@ -1869,14 +1879,14 @@ mod tests {
         let workspace_dir = "/tmp/workspace";
         let content = "build --output_base=%workspace%/bazel-out";
         let files = &[("/tmp/workspace/.bazelrc", Some(content))];
-        let valid = &[
-            "/tmp/workspace/.bazelrc",
-            "/tmp/workspace/bazel-out",
-        ];
+        let valid = &["/tmp/workspace/.bazelrc", "/tmp/workspace/bazel-out"];
         let result = read_bazelrc_from_files(workspace_dir, files, valid).unwrap();
         assert_eq!(
             result,
-            vec![cmd("build", &[("output_base", Some("/tmp/workspace/bazel-out"))])]
+            vec![cmd(
+                "build",
+                &[("output_base", Some("/tmp/workspace/bazel-out"))]
+            )]
         );
     }
 
@@ -1891,7 +1901,9 @@ mod tests {
             ),
             (
                 "/tmp/workspace/shared.bazelrc",
-                Some("build --output_base=%workspace%/bazel-out\nbuild --test_output=%workspace%/test-results"),
+                Some(
+                    "build --output_base=%workspace%/bazel-out\nbuild --test_output=%workspace%/test-results",
+                ),
             ),
         ];
         let valid = &[

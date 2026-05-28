@@ -57,7 +57,7 @@ fn char_count(s: &str) -> usize {
 /// Mirrors `smartTruncate` from `lib/modules/platform/utils/pr-body.ts`.
 pub fn smart_truncate(input: &str, len: usize) -> String {
     if char_count(input) < len {
-        return input.to_string();
+        return input.to_owned();
     }
 
     let truncated_input = format!("{}{}", NOTE, input);
@@ -103,17 +103,14 @@ pub fn smart_truncate(input: &str, len: usize) -> String {
 
 // ── PR body struct (lib/modules/platform/pr-body.ts) ─────────────────────────
 
-static PR_DEBUG_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\n?<!--renovate-debug:(?P<payload>.*?)-->\n?").unwrap()
-});
+static PR_DEBUG_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\n?<!--renovate-debug:(?P<payload>.*?)-->\n?").unwrap());
 
-static RENOVATE_CONFIG_HASH_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\n?<!--renovate-config-hash:(?P<payload>.*?)-->\n?").unwrap()
-});
+static RENOVATE_CONFIG_HASH_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\n?<!--renovate-config-hash:(?P<payload>.*?)-->\n?").unwrap());
 
-static PR_CHECKBOX_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"- (?P<checkbox>\[[\sx]]) <!-- rebase-check -->").unwrap()
-});
+static PR_CHECKBOX_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"- (?P<checkbox>\[[\sx]]) <!-- rebase-check -->").unwrap());
 
 static REVIEWABLE_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\s*<!-- Reviewable:start -->").unwrap());
@@ -121,10 +118,7 @@ static REVIEWABLE_RE: LazyLock<Regex> =
 fn to_sha256(input: &str) -> String {
     let mut h = Sha256::new();
     h.update(input.as_bytes());
-    h.finalize()
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect()
+    h.finalize().iter().map(|b| format!("{b:02x}")).collect()
 }
 
 fn strip_emojis_simple(s: &str) -> String {
@@ -138,8 +132,7 @@ fn strip_emojis_simple(s: &str) -> String {
 }
 
 fn no_whitespace_or_headings(s: &str) -> String {
-    static WS_HASH_RE: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r"[\r\n\s#]").unwrap());
+    static WS_HASH_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[\r\n\s#]").unwrap());
     WS_HASH_RE.replace_all(s, "").into_owned()
 }
 
@@ -175,9 +168,9 @@ pub fn get_pr_body_struct(input: Option<&str>) -> PrBodyStruct {
     let body = input.unwrap_or("");
     let hash = hash_body(input);
 
-    let rebase_requested = PR_CHECKBOX_RE.captures(body).and_then(|caps| {
-        caps.name("checkbox").map(|m| m.as_str() == "[x]")
-    });
+    let rebase_requested = PR_CHECKBOX_RE
+        .captures(body)
+        .and_then(|caps| caps.name("checkbox").map(|m| m.as_str() == "[x]"));
 
     let raw_config_hash = RENOVATE_CONFIG_HASH_RE
         .captures(body)
@@ -317,8 +310,7 @@ mod tests {
         assert_eq!(smart_truncate(PR_BODY, 60000), PR_BODY);
     }
 
-    const EMPTY_SHA256: &str =
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+    const EMPTY_SHA256: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
     // Ported: "returns hash for empty inputs" — modules/platform/pr-body.spec.ts line 6
     #[test]

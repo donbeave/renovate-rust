@@ -238,7 +238,7 @@ pub fn is_single_version(version: &str) -> bool {
     if version.is_empty() {
         return false;
     }
-    if version.starts_with(|c| matches!(c, '>' | '<' | '~')) {
+    if version.starts_with(['>', '<', '~']) {
         return false;
     }
     is_valid(version)

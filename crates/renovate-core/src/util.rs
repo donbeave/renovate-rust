@@ -119,28 +119,24 @@ pub fn take_personal_access_token_if_possible<'a>(
     git_tags_token: Option<&'a str>,
 ) -> Option<&'a str> {
     // If git_tags_token is a PAT, prefer it
-    if let Some(t) = git_tags_token {
-        if is_github_personal_access_token(t) {
+    if let Some(t) = git_tags_token
+        && is_github_personal_access_token(t) {
             return Some(t);
         }
-    }
     // If github_token is a PAT, prefer it
-    if let Some(t) = github_token {
-        if is_github_personal_access_token(t) {
+    if let Some(t) = github_token
+        && is_github_personal_access_token(t) {
             return Some(t);
         }
-    }
     // Fine-grained PAT
-    if let Some(t) = git_tags_token {
-        if is_github_fine_grained_personal_access_token(t) {
+    if let Some(t) = git_tags_token
+        && is_github_fine_grained_personal_access_token(t) {
             return Some(t);
         }
-    }
-    if let Some(t) = github_token {
-        if is_github_fine_grained_personal_access_token(t) {
+    if let Some(t) = github_token
+        && is_github_fine_grained_personal_access_token(t) {
             return Some(t);
         }
-    }
     // Fallback: prefer git_tags_token
     git_tags_token.or(github_token)
 }
@@ -158,8 +154,8 @@ pub fn take_personal_access_token_if_possible<'a>(
 pub fn get_http_url(url: &str, token: Option<&str>) -> String {
     let url = url.trim();
     // git@host:path SCP-like format
-    if !url.contains("://") {
-        if let Some(rest) = url.strip_prefix("git@") {
+    if !url.contains("://")
+        && let Some(rest) = url.strip_prefix("git@") {
             let (host, path) = if let Some(colon) = rest.find(':') {
                 (&rest[..colon], rest[colon + 1..].trim_end_matches(".git"))
             } else {
@@ -173,7 +169,6 @@ pub fn get_http_url(url: &str, token: Option<&str>) -> String {
                 format!("https://{creds}@{host}/{path}")
             };
         }
-    }
     // Detect scheme
     let (scheme, rest) = if let Some(r) = url.strip_prefix("https://") {
         ("https", r)
@@ -492,8 +487,8 @@ pub fn apply_git_source(
 ) -> GitSourceResult {
     if let Some(tag) = tag {
         let platform = detect_platform(git);
-        if platform == Some("github") || platform == Some("gitlab") {
-            if let Some((host, full_name)) = parse_git_url_host_and_name(git) {
+        if ((platform == Some("github") || platform == Some("gitlab")))
+            && let Some((host, full_name)) = parse_git_url_host_and_name(git) {
                 let datasource = if platform == Some("github") { "github-tags" } else { "gitlab-tags" };
                 return GitSourceResult {
                     datasource,
@@ -503,7 +498,6 @@ pub fn apply_git_source(
                     ..Default::default()
                 };
             }
-        }
         return GitSourceResult {
             datasource: "git-tags",
             package_name: git.to_owned(),
@@ -543,7 +537,7 @@ pub fn slugify_url(url: &str) -> String {
     for c in url.chars() {
         let mapped = transliterate_for_slug(c);
         match mapped {
-            Some(ch) if ch == '-' => {
+            Some('-') => {
                 if !prev_dash && !result.is_empty() {
                     result.push('-');
                     prev_dash = true;
@@ -1987,7 +1981,7 @@ pub fn mask_token(s: Option<&str>) -> String {
     let chars: Vec<char> = s.chars().collect();
     let n = chars.len();
     // TypeScript: new Array(n - 3).join('*') gives n - 4 stars for n > 4
-    let stars = if n > 4 { n - 4 } else { 0 };
+    let stars = n.saturating_sub(4);
     let prefix: String = chars[..2.min(n)].iter().collect();
     let suffix: String = chars[n.saturating_sub(2)..].iter().collect();
     format!("{}{}{}", prefix, "*".repeat(stars), suffix)
@@ -4089,7 +4083,7 @@ dep1 = "^1.0.0"
         m.insert("a".to_owned(), json!("bar"));
         m.insert("c".to_owned(), json!("baz"));
         let obj = Value::Object(m);
-        let cloned = obj.clone();
+        let cloned = obj;
         let keys: Vec<&str> = cloned.as_object().unwrap().keys().map(|k| k.as_str()).collect();
         assert_eq!(keys, vec!["b", "a", "c"]);
     }

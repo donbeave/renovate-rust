@@ -107,7 +107,7 @@ pub async fn fetch_releases(
 
     let base = registry_url.trim_end_matches('/');
     Ok(Some(GiteaReleasesResult {
-        registry_url: base.to_string(),
+        registry_url: base.to_owned(),
         source_url: format!("{}/{}", base, package_name),
         releases,
     }))

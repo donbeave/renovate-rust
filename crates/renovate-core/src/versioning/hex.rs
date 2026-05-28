@@ -28,8 +28,7 @@ static TWO_PART_CARET: LazyLock<Regex> =
 static TILDE_THREE_BARE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"~\s*(\d+\.\d+\.\d)").unwrap());
 // Match ~> X.Y$ in currentValue
-static CV_TWO_PART: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"~>\s*\d+\.\d+$").unwrap());
+static CV_TWO_PART: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"~>\s*\d+\.\d+$").unwrap());
 // Match ~> X.Y.Z$ in currentValue
 static CV_THREE_PART: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"~>\s*\d+\.\d+\.\d+$").unwrap());
@@ -59,17 +58,13 @@ fn hex2npm(input: &str) -> String {
 }
 
 fn find_first_eq_or_and(s: &str) -> Option<usize> {
-    static EQAND: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r"==|and").unwrap());
+    static EQAND: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"==|and").unwrap());
     EQAND.find(s).map(|m| m.start())
 }
 
 fn npm2hex(input: &str) -> String {
     const OPERATORS: &[&str] = &["^", "=", ">", "<", "<=", ">=", "~>"];
-    let tokens: Vec<&str> = input
-        .split_whitespace()
-        .filter(|s| !s.is_empty())
-        .collect();
+    let tokens: Vec<&str> = input.split_whitespace().filter(|s| !s.is_empty()).collect();
     let mut output = String::new();
     let mut i = 0;
     while i < tokens.len() {
@@ -96,10 +91,7 @@ fn npm2hex(input: &str) -> String {
 // ── Semver matching helpers ───────────────────────────────────────────────────
 
 fn semver_satisfies_range(version: &str, range: &str) -> bool {
-    let v = match Version::parse(version) {
-        Ok(v) => v,
-        Err(_) => return false,
-    };
+    let Ok(v) = Version::parse(version) else { return false };
     semver_matches_v(&v, range)
 }
 
@@ -145,7 +137,11 @@ fn normalize_hex_range(range: &str) -> String {
 /// e.g. ">= 1.0.0 < 2.0.0" → ">= 1.0.0, < 2.0.0"
 fn normalize_and_part(part: &str) -> String {
     // Already comma-separated (from `and` replacement) — normalize whitespace
-    let comma_tokens: Vec<&str> = part.split(',').map(str::trim).filter(|s| !s.is_empty()).collect();
+    let comma_tokens: Vec<&str> = part
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .collect();
     if comma_tokens.len() > 1 {
         return comma_tokens.join(", ");
     }
@@ -155,7 +151,8 @@ fn normalize_and_part(part: &str) -> String {
     let mut constraints: Vec<String> = Vec::new();
     let mut current: Option<String> = None;
     for word in &words {
-        let is_op_start = word.starts_with(|c: char| matches!(c, '>' | '<' | '=' | '!' | '^' | '~'));
+        let is_op_start =
+            word.starts_with(['>', '<', '=', '!', '^', '~']);
         if is_op_start {
             if let Some(c) = current.take() {
                 constraints.push(c);
@@ -338,8 +335,7 @@ fn npm_get_new_value(
             if semver_satisfies_range(new_version, current_value) {
                 return Some(current_value.to_owned());
             }
-            let replace_val =
-                npm_get_new_value(last, "replace", current_version, new_version)?;
+            let replace_val = npm_get_new_value(last, "replace", current_version, new_version)?;
             let last_op = constraint_operator(last);
             if last_op.starts_with('<') {
                 // Replace everything from the last operator occurrence onwards
@@ -435,8 +431,7 @@ pub fn is_valid(input: &str) -> bool {
             return false;
         }
         // Bare version (after == removal) is valid
-        Version::parse(alt.trim_start_matches('=')).is_ok()
-            || VersionReq::parse(alt).is_ok()
+        Version::parse(alt.trim_start_matches('=')).is_ok() || VersionReq::parse(alt).is_ok()
     })
 }
 
@@ -456,19 +451,13 @@ pub fn get_pinned_value(version: &str) -> String {
 }
 
 pub fn matches_range(version: &str, range: &str) -> bool {
-    let v = match Version::parse(&hex2npm(version)) {
-        Ok(v) => v,
-        Err(_) => return false,
-    };
+    let Ok(v) = Version::parse(&hex2npm(version)) else { return false };
     semver_matches_v(&v, &hex2npm(range))
 }
 
 pub fn is_less_than_range(version: &str, range: &str) -> bool {
     let npm_range = hex2npm(range);
-    let v = match Version::parse(version) {
-        Ok(v) => v,
-        Err(_) => return false,
-    };
+    let Ok(v) = Version::parse(version) else { return false };
     if semver_matches_v(&v, &npm_range) {
         return false;
     }
@@ -482,14 +471,8 @@ pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
     let npm_range = hex2npm(range);
     versions
         .iter()
-        .filter(|&&v| {
-            Version::parse(v).is_ok_and(|pv| semver_matches_v(&pv, &npm_range))
-        })
-        .max_by(|&&a, &&b| {
-            Version::parse(a)
-                .unwrap()
-                .cmp(&Version::parse(b).unwrap())
-        })
+        .filter(|&&v| Version::parse(v).is_ok_and(|pv| semver_matches_v(&pv, &npm_range)))
+        .max_by(|&&a, &&b| Version::parse(a).unwrap().cmp(&Version::parse(b).unwrap()))
         .copied()
 }
 
@@ -497,14 +480,8 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
     let npm_range = hex2npm(range);
     versions
         .iter()
-        .filter(|&&v| {
-            Version::parse(v).is_ok_and(|pv| semver_matches_v(&pv, &npm_range))
-        })
-        .min_by(|&&a, &&b| {
-            Version::parse(a)
-                .unwrap()
-                .cmp(&Version::parse(b).unwrap())
-        })
+        .filter(|&&v| Version::parse(v).is_ok_and(|pv| semver_matches_v(&pv, &npm_range)))
+        .min_by(|&&a, &&b| Version::parse(a).unwrap().cmp(&Version::parse(b).unwrap()))
         .copied()
 }
 
@@ -515,8 +492,7 @@ pub fn get_new_value(
     new_version: &str,
 ) -> Option<String> {
     let npm_current = hex2npm(current_value);
-    let new_semver =
-        npm_get_new_value(&npm_current, range_strategy, current_version, new_version)?;
+    let new_semver = npm_get_new_value(&npm_current, range_strategy, current_version, new_version)?;
     let mut result = npm2hex(&new_semver);
 
     // Apply ~> patterns based on original currentValue
@@ -526,14 +502,10 @@ pub fn get_new_value(
             .into_owned();
     } else if CV_TWO_PART.is_match(current_value) {
         result = TWO_PART_CARET
-            .replace_all(&result, |caps: &regex::Captures| {
-                format!("~> {}", &caps[1])
-            })
+            .replace_all(&result, |caps: &regex::Captures| format!("~> {}", &caps[1]))
             .into_owned();
     } else {
-        result = TILDE_THREE_BARE
-            .replace_all(&result, "~> $1")
-            .into_owned();
+        result = TILDE_THREE_BARE.replace_all(&result, "~> $1").into_owned();
     }
 
     if Version::parse(&result).is_ok() {
@@ -738,4 +710,3 @@ mod tests {
         }
     }
 }
-

@@ -38,7 +38,7 @@ pub fn construct_component_urls(registry_url: &str) -> Result<Vec<String>, Strin
         .ok_or_else(|| "Missing required query parameter: suite or release".to_owned())?;
 
     // Build base URL without the specific query params
-    let mut base = parsed.clone();
+    let mut base = parsed;
     base.set_query(None);
     let base_str = base.as_str().trim_end_matches('/');
 

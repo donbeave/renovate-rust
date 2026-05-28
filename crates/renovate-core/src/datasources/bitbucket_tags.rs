@@ -120,7 +120,7 @@ pub async fn fetch_releases(
 
     let registry_base = DEFAULT_REGISTRY_URL.trim_end_matches('/');
     Ok(Some(BitbucketTagsResult {
-        registry_url: registry_base.to_string(),
+        registry_url: registry_base.to_owned(),
         source_url: format!("{}/{}", registry_base, package_name),
         releases,
     }))

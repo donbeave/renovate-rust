@@ -32,15 +32,15 @@ fn massage_name_brackets(input: &str) -> String {
 
 fn try_name_email(s: &str) -> Option<(String, String)> {
     if let Some(caps) = RE_QUOTED_EMAIL.captures(s) {
-        let name = caps[1].trim().to_string();
-        let addr = caps[2].trim().to_string();
+        let name = caps[1].trim().to_owned();
+        let addr = caps[2].trim().to_owned();
         if addr.contains('@') {
             return Some((name, addr));
         }
     }
     if let Some(caps) = RE_UNQUOTED_EMAIL.captures(s) {
-        let name = caps[1].trim().to_string();
-        let addr = caps[2].trim().to_string();
+        let name = caps[1].trim().to_owned();
+        let addr = caps[2].trim().to_owned();
         if addr.contains('@') {
             return Some((name, addr));
         }
@@ -90,18 +90,18 @@ pub fn parse_git_author(input: &str) -> Option<GitAuthor> {
         let check = if has_bot_at {
             trimmed.replace("[bot]@", "@")
         } else {
-            trimmed.to_string()
+            trimmed.to_owned()
         };
 
         if RE_BARE_EMAIL.is_match(&check) {
             let name = if has_bot_at {
-                trimmed.split('@').next().unwrap_or("").to_string()
+                trimmed.split('@').next().unwrap_or("").to_owned()
             } else {
                 String::new()
             };
             return Some(GitAuthor {
                 name,
-                address: trimmed.to_string(),
+                address: trimmed.to_owned(),
             });
         }
     }
@@ -138,8 +138,8 @@ mod tests {
         assert_eq!(
             parse_git_author("renovate[bot]@users.noreply.github.com"),
             Some(GitAuthor {
-                name: "renovate[bot]".to_string(),
-                address: "renovate[bot]@users.noreply.github.com".to_string(),
+                name: "renovate[bot]".to_owned(),
+                address: "renovate[bot]@users.noreply.github.com".to_owned(),
             })
         );
     }
@@ -150,8 +150,8 @@ mod tests {
         assert_eq!(
             parse_git_author("renovate[bot] <renovate[bot]@users.noreply.github.com>"),
             Some(GitAuthor {
-                name: "renovate[bot]".to_string(),
-                address: "renovate[bot]@users.noreply.github.com".to_string(),
+                name: "renovate[bot]".to_owned(),
+                address: "renovate[bot]@users.noreply.github.com".to_owned(),
             })
         );
     }

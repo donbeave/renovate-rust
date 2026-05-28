@@ -66,7 +66,7 @@ impl<T: ApiPageItem> ApiCache<T> {
             Some(current) => timestamp > current.as_str(),
         };
         if should_update {
-            self.cache.last_modified = Some(timestamp.to_string());
+            self.cache.last_modified = Some(timestamp.to_owned());
         }
     }
 
@@ -87,7 +87,7 @@ impl<T: ApiPageItem> ApiCache<T> {
             let old_item = self.cache.items.get(&number);
 
             let item_new_time = new_item.updated_at();
-            let item_old_time = old_item.map(|i| i.updated_at().to_string());
+            let item_old_time = old_item.map(|i| i.updated_at().to_owned());
 
             if old_item != Some(new_item) {
                 self.cache.items.insert(number, new_item.clone());
@@ -99,8 +99,8 @@ impl<T: ApiPageItem> ApiCache<T> {
             };
 
             let cache_old_time = last_modified.as_deref();
-            if cache_old_time.map_or(true, |t| item_new_time > t) {
-                last_modified = Some(item_new_time.to_string());
+            if cache_old_time.is_none_or(|t| item_new_time > t) {
+                last_modified = Some(item_new_time.to_owned());
             }
         }
 
@@ -143,7 +143,7 @@ mod tests {
         }
         ApiPageCache {
             items: map,
-            last_modified: last_modified.map(|s| s.to_string()),
+            last_modified: last_modified.map(|s| s.to_owned()),
         }
     }
 
@@ -187,7 +187,7 @@ mod tests {
         let item1 = item(1, 2001);
         let item1_updated = TestItem {
             number: 1,
-            updated_at: "2003-01-01T00:00:00.000Z".to_string(),
+            updated_at: "2003-01-01T00:00:00.000Z".to_owned(),
         };
         let mut api_cache = ApiCache::new(cache_from(vec![item1], None));
         api_cache.update_item(item1_updated.clone());
@@ -202,10 +202,10 @@ mod tests {
         let item1 = item(1, 2001);
         let item1_updated = TestItem {
             number: 1,
-            updated_at: "2003-01-01T00:00:00.000Z".to_string(),
+            updated_at: "2003-01-01T00:00:00.000Z".to_owned(),
         };
         let mut api_cache = ApiCache::new(cache_from(vec![item1], None));
-        api_cache.reconcile(&[item1_updated.clone()]);
+        api_cache.reconcile(std::slice::from_ref(&item1_updated));
         assert_eq!(api_cache.get_item(1), Some(&item1_updated));
     }
 
@@ -286,7 +286,7 @@ mod tests {
             vec![item1.clone()],
             Some("2001-01-01T00:00:00.000Z"),
         ));
-        let result = api_cache.reconcile(&[item2.clone()]);
+        let result = api_cache.reconcile(std::slice::from_ref(&item2));
         assert!(result); // item2 is newer than lastModified
         assert_eq!(api_cache.get_item(1), Some(&item1));
         assert_eq!(api_cache.get_item(2), Some(&item2));
@@ -298,11 +298,11 @@ mod tests {
         let item1 = item(1, 2001);
         let item1_updated = TestItem {
             number: 1,
-            updated_at: "2003-01-01T00:00:00.000Z".to_string(),
+            updated_at: "2003-01-01T00:00:00.000Z".to_owned(),
         };
         let mut api_cache =
             ApiCache::new(cache_from(vec![item1], Some("2001-01-01T00:00:00.000Z")));
-        api_cache.reconcile(&[item1_updated.clone()]);
+        api_cache.reconcile(std::slice::from_ref(&item1_updated));
         assert_eq!(api_cache.get_item(1), Some(&item1_updated));
         assert_eq!(
             api_cache.get_last_modified(),
@@ -339,7 +339,7 @@ mod tests {
             Some("2002-01-01T00:00:00.000Z"),
         ));
         // Page contains item2 then item1 (desc order by updated_at), both already known
-        let result = api_cache.reconcile(&[item2.clone(), item1.clone()]);
+        let result = api_cache.reconcile(&[item2, item1]);
         assert!(!result);
     }
 }

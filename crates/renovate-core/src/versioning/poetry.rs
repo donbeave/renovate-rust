@@ -106,7 +106,11 @@ fn parse_letter_tag(letter: Option<&str>, number: Option<&str>) -> Option<Letter
 fn strip_leading_zeros(s: &str) -> String {
     // Trim leading zeros but keep at least one digit: "01" → "1", "0" → "0"
     let trimmed = s.trim_start_matches('0');
-    if trimmed.is_empty() { "0".to_owned() } else { trimmed.to_owned() }
+    if trimmed.is_empty() {
+        "0".to_owned()
+    } else {
+        trimmed.to_owned()
+    }
 }
 
 /// Convert a poetry/pep440 version string to its semver representation.
@@ -184,7 +188,8 @@ pub fn semver2poetry(version: &str) -> Option<String> {
     let v = Version::parse(version.trim()).ok()?;
 
     // Normalize prerelease spellings back to poetry/pep440
-    let spellings: &[(&str, &str)] = &[("a", "alpha"), ("b", "beta"), ("c", "rc"), ("dev", "alpha")];
+    let spellings: &[(&str, &str)] =
+        &[("a", "alpha"), ("b", "beta"), ("c", "rc"), ("dev", "alpha")];
 
     let pre = if v.pre.is_empty() {
         String::new()
@@ -388,10 +393,7 @@ pub fn npm2poetry(range: &str) -> String {
     }
 
     // Split by whitespace, rejoin with commas, handle || separators
-    let res: Vec<String> = transformed
-        .split_whitespace()
-        .map(str::to_owned)
-        .collect();
+    let res: Vec<String> = transformed.split_whitespace().map(str::to_owned).collect();
 
     let operators = ["^", "~", "=", ">", "<", "<=", ">="];
     let mut merged: Vec<String> = Vec::new();
@@ -432,17 +434,15 @@ pub fn is_valid(input: &str) -> bool {
     if let Some(rest) = input.strip_prefix("~=").or_else(|| {
         // handle with spaces: "~= 1.9"
         input.strip_prefix("~=")
-    }) {
-        if is_version(rest.trim()) || Version::parse(rest.trim()).is_ok() {
+    })
+        && ((is_version(rest.trim()) || Version::parse(rest.trim()).is_ok())) {
             return true;
         }
-    }
     // `===X.Y.Z` is a PEP 440 arbitrary equality operator
-    if let Some(rest) = input.strip_prefix("===") {
-        if is_version(rest.trim()) {
+    if let Some(rest) = input.strip_prefix("===")
+        && is_version(rest.trim()) {
             return true;
         }
-    }
     // `==X.Y.*` or `==X.Y.Z` is a PEP 440 matching operator
     if let Some(rest) = input.strip_prefix("==") {
         let r = rest.trim();
@@ -473,8 +473,7 @@ pub fn is_valid(input: &str) -> bool {
                 });
             }
             // Valid npm range
-            semver::VersionReq::parse(&npm).is_ok()
-                || Version::parse(npm.trim()).is_ok()
+            semver::VersionReq::parse(&npm).is_ok() || Version::parse(npm.trim()).is_ok()
         }
         None => false,
     }
@@ -518,7 +517,7 @@ pub fn is_greater_than(a: &str, b: &str) -> bool {
 pub fn is_stable(v: &str) -> bool {
     poetry2semver(v, true)
         .as_deref()
-        .map_or(false, super::npm::is_stable)
+        .is_some_and(super::npm::is_stable)
 }
 
 /// Whether `version` satisfies `range`.
@@ -548,7 +547,9 @@ pub fn matches(version: &str, range: &str) -> bool {
             let prefix = spec.trim_end_matches(".*");
             let parts: Vec<&str> = prefix.split('.').collect();
             if let Some(sv) = poetry2semver(version, false) {
-                let Ok(v) = Version::parse(&sv) else { return false };
+                let Ok(v) = Version::parse(&sv) else {
+                    return false;
+                };
                 match parts.as_slice() {
                     [major] => {
                         return v.major == major.parse::<u64>().unwrap_or(u64::MAX);
@@ -564,14 +565,15 @@ pub fn matches(version: &str, range: &str) -> bool {
         }
         // `==X.Y` means version is in X.Y.* (same as X.Y.*) in PEP 440
         // But in poetry, it means the version starts with X.Y
-        if let (Some(sv), Some(se)) = (
-            poetry2semver(version, false),
-            poetry2semver(spec, false),
-        ) {
+        if let (Some(sv), Some(se)) = (poetry2semver(version, false), poetry2semver(spec, false)) {
             // Check if major.minor match (wildcard on patch)
             let spec_dots = spec.split('.').count();
-            let Ok(vv) = Version::parse(&sv) else { return false };
-            let Ok(sv_spec) = Version::parse(&se) else { return false };
+            let Ok(vv) = Version::parse(&sv) else {
+                return false;
+            };
+            let Ok(sv_spec) = Version::parse(&se) else {
+                return false;
+            };
             return match spec_dots {
                 1 => vv.major == sv_spec.major,
                 2 => vv.major == sv_spec.major && vv.minor == sv_spec.minor,
@@ -679,9 +681,9 @@ pub fn range_subset(a: &str, b: &str) -> bool {
     if a.contains("||") || b.contains("||") {
         let a_alts: Vec<&str> = a.split("||").map(str::trim).collect();
         let b_alts: Vec<&str> = b.split("||").map(str::trim).collect();
-        return a_alts.iter().all(|aa| {
-            b_alts.iter().any(|bb| single_range_subset(aa, bb))
-        });
+        return a_alts
+            .iter()
+            .all(|aa| b_alts.iter().any(|bb| single_range_subset(aa, bb)));
     }
     single_range_subset(a, b)
 }
@@ -696,8 +698,7 @@ fn single_range_subset(a: &str, b: &str) -> bool {
     // If a is exact (=X.Y.Z): just check if b matches it
     let a_ver_str = a.strip_prefix('=').map(str::trim).unwrap_or(a);
     if let Ok(v) = Version::parse(a_ver_str.trim()) {
-        return semver::VersionReq::parse(b)
-            .map_or(false, |req| req.matches(&v));
+        return semver::VersionReq::parse(b).is_ok_and(|req| req.matches(&v));
     }
     // Compare bounds of a vs. b
     let (a_lo, a_hi) = range_effective_bounds(a);
@@ -730,48 +731,42 @@ fn single_range_subset(a: &str, b: &str) -> bool {
 fn range_effective_bounds(range: &str) -> (Option<String>, Option<String>) {
     let range = range.trim();
     // Caret: ^X.Y.Z → [X.Y.Z, (X+1).0.0)
-    if let Some(rest) = range.strip_prefix('^') {
-        if let Ok(v) = Version::parse(rest.trim()) {
+    if let Some(rest) = range.strip_prefix('^')
+        && let Ok(v) = Version::parse(rest.trim()) {
             let hi = Version::new(v.major + 1, 0, 0);
             return (Some(format!("{v}")), Some(format!("{hi}")));
         }
-    }
     // Tilde: ~X.Y.Z → [X.Y.Z, X.(Y+1).0)
-    if let Some(rest) = range.strip_prefix('~') {
-        if let Ok(v) = Version::parse(rest.trim()) {
+    if let Some(rest) = range.strip_prefix('~')
+        && let Ok(v) = Version::parse(rest.trim()) {
             let hi = Version::new(v.major, v.minor + 1, 0);
             return (Some(format!("{v}")), Some(format!("{hi}")));
         }
-    }
     // >= X.Y.Z → [X.Y.Z, ∞)
-    if let Some(rest) = range.strip_prefix(">=") {
-        if let Ok(v) = Version::parse(rest.trim()) {
+    if let Some(rest) = range.strip_prefix(">=")
+        && let Ok(v) = Version::parse(rest.trim()) {
             return (Some(format!("{v}")), None);
         }
-    }
     // > X.Y.Z → (X.Y.Z, ∞) — treat lower as exclusive but represent as ~next
-    if let Some(rest) = range.strip_prefix('>') {
-        if let Ok(v) = Version::parse(rest.trim()) {
+    if let Some(rest) = range.strip_prefix('>')
+        && let Ok(v) = Version::parse(rest.trim()) {
             let next = Version::new(v.major, v.minor, v.patch + 1);
             return (Some(format!("{next}")), None);
         }
-    }
     // <= X.Y.Z → (-∞, X.Y.Z]
-    if let Some(rest) = range.strip_prefix("<=") {
-        if let Ok(v) = Version::parse(rest.trim()) {
+    if let Some(rest) = range.strip_prefix("<=")
+        && let Ok(v) = Version::parse(rest.trim()) {
             return (None, Some(format!("{v}")));
         }
-    }
     // < X.Y.Z → (-∞, X.Y.Z)
-    if let Some(rest) = range.strip_prefix('<') {
-        if let Ok(v) = Version::parse(rest.trim()) {
+    if let Some(rest) = range.strip_prefix('<')
+        && let Ok(v) = Version::parse(rest.trim()) {
             // Strip pre-release for bound comparison purposes: <8.0.0-DEV and <8.0.0
             // should both contribute an upper bound of ~8.0.0. Represent as X.Y.Z
             // without pre-release so caret comparisons work correctly.
             let bound = format!("{}.{}.{}", v.major, v.minor, v.patch);
             return (None, Some(bound));
         }
-    }
     (None, None)
 }
 
@@ -787,41 +782,33 @@ pub fn get_new_value(
     // replace strategy: if new version already satisfies current, keep current
     if range_strategy == "replace" {
         let npm_current_value = poetry2npm(current_value)?;
-        if let Some(massaged_new) = poetry2semver(new_version, false) {
-            if Version::parse(&massaged_new).is_ok()
+        if let Some(massaged_new) = poetry2semver(new_version, false)
+            && Version::parse(&massaged_new).is_ok()
                 && is_version(&massaged_new)
                 && super::npm::matches_range(&massaged_new, &npm_current_value)
             {
                 return Some(current_value.to_owned());
             }
-        }
         // Check for single-comparator caret/tilde
         let parsed_range = parse_range_elements(&npm_current_value);
-        if let Some(element) = parsed_range.last() {
-            if parsed_range.len() == 1 {
-                if element.starts_with('^') {
-                    if let Some(v) = handle_short("^", &npm_current_value, new_version) {
+        if let Some(element) = parsed_range.last()
+            && parsed_range.len() == 1 {
+                if element.starts_with('^')
+                    && let Some(v) = handle_short("^", &npm_current_value, new_version) {
                         return Some(npm2poetry(&v));
                     }
-                }
-                if element.starts_with('~') {
-                    if let Some(v) = handle_short("~", &npm_current_value, new_version) {
+                if element.starts_with('~')
+                    && let Some(v) = handle_short("~", &npm_current_value, new_version) {
                         return Some(npm2poetry(&v));
                     }
-                }
             }
-        }
     }
 
     // Must have a 3-component release
     let release_parts = version_pattern()
         .captures(new_version.trim())
         .and_then(|c| c.name("release").map(|m| m.as_str().to_owned()));
-    if release_parts
-        .as_deref()
-        .map(|r| r.split('.').count())
-        != Some(3)
-    {
+    if release_parts.as_deref().map(|r| r.split('.').count()) != Some(3) {
         return Some(current_value.to_owned());
     }
 
@@ -837,7 +824,7 @@ pub fn get_new_value(
     if let Some(rest) = trimmed.strip_prefix('=') {
         let rest = rest.trim();
         // `= X.Y.Z` or `=X.Y.Z`
-        if is_version(rest) || rest.strip_prefix(' ').is_some_and(|s| is_version(s)) {
+        if is_version(rest) || rest.strip_prefix(' ').is_some_and(is_version) {
             return Some(format!("={new_poetry}"));
         }
     }
@@ -856,10 +843,7 @@ pub fn get_new_value(
 
 /// Parse a semver range string into its comparator elements.
 fn parse_range_elements(range: &str) -> Vec<String> {
-    range
-        .split_whitespace()
-        .map(str::to_owned)
-        .collect()
+    range.split_whitespace().map(str::to_owned).collect()
 }
 
 /// Handle short-form `^X` / `~X` / `^X.Y` / `~X.Y` ranges for replace strategy.
@@ -902,10 +886,7 @@ mod tests {
     #[test]
     fn poetry2semver_pre_release() {
         // Always pads to 3 components (matching node-semver normalization)
-        assert_eq!(
-            poetry2semver("1.9b0", false).as_deref(),
-            Some("1.9.0-b.0")
-        );
+        assert_eq!(poetry2semver("1.9b0", false).as_deref(), Some("1.9.0-b.0"));
         assert_eq!(
             poetry2semver("1.9.4b0", false).as_deref(),
             Some("1.9.4-b.0")
@@ -1104,12 +1085,24 @@ mod tests {
     #[test]
     fn min_satisfying_version_cases() {
         let v1 = &["0.4.0", "0.5.0", "4.2.0", "4.3.0", "5.0.0"];
-        assert_eq!(min_satisfying_version(v1, "4.*, > 4.2").as_deref(), Some("4.3.0"));
+        assert_eq!(
+            min_satisfying_version(v1, "4.*, > 4.2").as_deref(),
+            Some("4.3.0")
+        );
 
         let v2 = &["0.4.0", "0.5.0", "4.2.0", "5.0.0"];
-        assert_eq!(min_satisfying_version(v2, "^4.0.0").as_deref(), Some("4.2.0"));
-        assert_eq!(min_satisfying_version(v2, "^4.0.0, = 0.5.0").as_deref(), None);
-        assert_eq!(min_satisfying_version(v2, "^4.0.0, > 4.1.0, <= 4.3.5").as_deref(), Some("4.2.0"));
+        assert_eq!(
+            min_satisfying_version(v2, "^4.0.0").as_deref(),
+            Some("4.2.0")
+        );
+        assert_eq!(
+            min_satisfying_version(v2, "^4.0.0, = 0.5.0").as_deref(),
+            None
+        );
+        assert_eq!(
+            min_satisfying_version(v2, "^4.0.0, > 4.1.0, <= 4.3.5").as_deref(),
+            Some("4.2.0")
+        );
         assert_eq!(min_satisfying_version(v2, "^6.2.0, 3.*").as_deref(), None);
 
         let v3 = &["0.8.0a2", "0.8.0a7"];
@@ -1187,7 +1180,12 @@ mod tests {
             ("1.*", "replace", "1.0.0", "2.1.0", "2.*"),
         ];
         for (current_value, range_strategy, current_version, new_version, expected) in cases {
-            let result = get_new_value(current_value, range_strategy, Some(current_version), new_version);
+            let result = get_new_value(
+                current_value,
+                range_strategy,
+                Some(current_version),
+                new_version,
+            );
             assert_eq!(
                 result.as_deref(),
                 Some(*expected),

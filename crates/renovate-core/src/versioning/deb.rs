@@ -24,9 +24,8 @@ static DATED_CODENAME_RE: LazyLock<Regex> = LazyLock::new(|| {
 /// Known Debian release codenames (series), sourced from
 /// `data/debian-distro-info.json`.
 const DEBIAN_CODENAMES: &[&str] = &[
-    "buzz", "rex", "bo", "hamm", "slink", "potato", "woody", "sarge", "etch", "lenny",
-    "squeeze", "wheezy", "jessie", "stretch", "buster", "bullseye", "bookworm", "trixie",
-    "forky", "duke",
+    "buzz", "rex", "bo", "hamm", "slink", "potato", "woody", "sarge", "etch", "lenny", "squeeze",
+    "wheezy", "jessie", "stretch", "buster", "bullseye", "bookworm", "trixie", "forky", "duke",
 ];
 
 /// Return `true` when `input` is a dated container image tag whose codename
@@ -84,10 +83,7 @@ fn char_priority(c: char, is_empty_or_digit: bool) -> i32 {
         // digits and empty string are treated like space (position 1)
         1
     } else {
-        CHARACTER_ORDER
-            .find(c)
-            .map(|i| i as i32)
-            .unwrap_or(-1) // unknown chars sort before ~ (shouldn't happen for valid versions)
+        CHARACTER_ORDER.find(c).map(|i| i as i32).unwrap_or(-1) // unknown chars sort before ~ (shouldn't happen for valid versions)
     }
 }
 
@@ -118,8 +114,16 @@ fn compare_string(a: &str, b: &str) -> i32 {
             while b_chars.get(b_end).is_some_and(|c| c.is_ascii_digit()) {
                 b_end += 1;
             }
-            let a_num: u64 = a_chars[pos..a_end].iter().collect::<String>().parse().unwrap_or(0);
-            let b_num: u64 = b_chars[pos..b_end].iter().collect::<String>().parse().unwrap_or(0);
+            let a_num: u64 = a_chars[pos..a_end]
+                .iter()
+                .collect::<String>()
+                .parse()
+                .unwrap_or(0);
+            let b_num: u64 = b_chars[pos..b_end]
+                .iter()
+                .collect::<String>()
+                .parse()
+                .unwrap_or(0);
             if a_num != b_num {
                 return if a_num < b_num { -1 } else { 1 };
             }
@@ -140,7 +144,7 @@ fn compare_string(a: &str, b: &str) -> i32 {
                 b_char_or_empty.unwrap_or(' '),
                 b_char_or_empty.is_none() || b_is_digit,
             );
-            return (a_prio - b_prio).signum() as i32;
+            return (a_prio - b_prio).signum();
         }
         pos += 1;
     }
@@ -289,12 +293,20 @@ pub fn get_major(version: &str) -> Option<i64> {
 
 pub fn get_minor(version: &str) -> Option<i64> {
     let v = parse(version)?;
-    if v.release.len() >= 2 { Some(v.release[1]) } else { None }
+    if v.release.len() >= 2 {
+        Some(v.release[1])
+    } else {
+        None
+    }
 }
 
 pub fn get_patch(version: &str) -> Option<i64> {
     let v = parse(version)?;
-    if v.release.len() >= 3 { Some(v.release[2]) } else { None }
+    if v.release.len() >= 3 {
+        Some(v.release[2])
+    } else {
+        None
+    }
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -383,13 +395,13 @@ mod tests {
             ("9.5.0-1ubuntu1~22.04", "9.5.0-1ubuntu1~22.04", true),
             ("2.31-13+deb11u5", "2.31-13+deb11u5", true),
             ("2.31-13+deb11u5", "2.31-13+deb11u4", false),
-            ("1.4-", "1.4", false),       // invalid → 1 != 0
-            ("v1.4", "1.4", false),       // different upstream versions
-            ("0:1.4", "1.4", true),       // epoch 0 == default epoch 0
-            ("1:1.4", "1.4", false),      // epoch 1 != 0
+            ("1.4-", "1.4", false),  // invalid → 1 != 0
+            ("v1.4", "1.4", false),  // different upstream versions
+            ("0:1.4", "1.4", true),  // epoch 0 == default epoch 0
+            ("1:1.4", "1.4", false), // epoch 1 != 0
             ("1.4-1", "1.4-2", false),
-            ("0:1.4", "a:1.4", false),    // a:1.4 invalid
-            ("a:1.4", "0:1.4", false),    // a:1.4 invalid
+            ("0:1.4", "a:1.4", false), // a:1.4 invalid
+            ("a:1.4", "0:1.4", false), // a:1.4 invalid
         ];
         for (a, b, expected) in cases {
             assert_eq!(equals(a, b), *expected, "equals({a:?}, {b:?})");
@@ -415,7 +427,7 @@ mod tests {
             ("2.31-13+deb11u5", "2.31-9", true),
             ("2.31-13+deb11u5", "2.31-13+deb10u5", true),
             ("2.31-13+deb11u5", "2.31-13+deb11u4", true),
-            ("1.9", "1:1.7", false),     // epoch 0 < epoch 1
+            ("1.9", "1:1.7", false), // epoch 0 < epoch 1
             ("1.9", "1.12", false),
             ("1.12", "1.9", true),
             ("1:1.9", "1:1.7", true),
@@ -423,21 +435,21 @@ mod tests {
             ("1:1.0", "1:1.0~", true),
             ("1:1.0Z0-0", "1:1.0", true),
             ("1:1.0Z0-0", "1:1.0A0-0", true),
-            ("1:1.0a0-0", "1:1.0Z0-0", true),  // a > Z
+            ("1:1.0a0-0", "1:1.0Z0-0", true), // a > Z
             ("1:1.0z0-0", "1:1.0a0-0", true),
-            ("1:1.0+0-0", "1:1.0z0-0", true),  // + > z
-            ("1:1.0-0-0", "1:1.0+0-0", true),  // - > +
-            ("1:1.0.0-0", "1:1.0-0-0", true),  // . > -
-            ("1:1.0:0-0", "1:1.0.0-0", true),  // : > .
-            ("a:1.4", "0:1.4", true),    // a:1.4 invalid → 1
-            ("0:1.4", "a:1.4", true),    // a:1.4 invalid → 1
-            ("a:1.4", "a:1.4", true),    // both invalid → 1
-            ("a1", "a~", true),          // 1/digit (pos 1) > ~ (pos 0)
+            ("1:1.0+0-0", "1:1.0z0-0", true), // + > z
+            ("1:1.0-0-0", "1:1.0+0-0", true), // - > +
+            ("1:1.0.0-0", "1:1.0-0-0", true), // . > -
+            ("1:1.0:0-0", "1:1.0.0-0", true), // : > .
+            ("a:1.4", "0:1.4", true),         // a:1.4 invalid → 1
+            ("0:1.4", "a:1.4", true),         // a:1.4 invalid → 1
+            ("a:1.4", "a:1.4", true),         // both invalid → 1
+            ("a1", "a~", true),               // 1/digit (pos 1) > ~ (pos 0)
             ("a0", "a~", true),
-            ("aa", "a1", true),          // a (pos 28) > digit-treated-as-space (pos 1)
+            ("aa", "a1", true), // a (pos 28) > digit-treated-as-space (pos 1)
             ("ab", "a0", true),
-            ("10", "1.", true),          // digit block: 10 vs 1 then '.'. Actually...
-            ("10", "1a", true),          // 10 > 1 in numeric; then '' vs 'a'
+            ("10", "1.", true), // digit block: 10 vs 1 then '.'. Actually...
+            ("10", "1a", true), // 10 > 1 in numeric; then '' vs 'a'
         ];
         for (a, b, expected) in cases {
             assert_eq!(
@@ -508,14 +520,32 @@ mod tests {
     // Ported: 'getDatedContainerImageCodename("$input") === $expected' — versioning/debian/common.spec.ts line 48
     #[test]
     fn debian_get_dated_container_image_codename() {
-        assert_eq!(get_dated_container_image_codename("buster-20220101"), Some("buster"));
-        assert_eq!(get_dated_container_image_codename("bullseye-20220101"), Some("bullseye"));
-        assert_eq!(get_dated_container_image_codename("bookworm-20230816"), Some("bookworm"));
-        assert_eq!(get_dated_container_image_codename("bookworm-20230816.1"), Some("bookworm"));
+        assert_eq!(
+            get_dated_container_image_codename("buster-20220101"),
+            Some("buster")
+        );
+        assert_eq!(
+            get_dated_container_image_codename("bullseye-20220101"),
+            Some("bullseye")
+        );
+        assert_eq!(
+            get_dated_container_image_codename("bookworm-20230816"),
+            Some("bookworm")
+        );
+        assert_eq!(
+            get_dated_container_image_codename("bookworm-20230816.1"),
+            Some("bookworm")
+        );
         assert_eq!(get_dated_container_image_codename("buster"), None);
-        assert_eq!(get_dated_container_image_codename("invalid-20220101"), Some("invalid"));
+        assert_eq!(
+            get_dated_container_image_codename("invalid-20220101"),
+            Some("invalid")
+        );
         assert_eq!(get_dated_container_image_codename("buster-2022010"), None);
-        assert_eq!(get_dated_container_image_codename("buster-20220101.123"), None);
+        assert_eq!(
+            get_dated_container_image_codename("buster-20220101.123"),
+            None
+        );
         assert_eq!(get_dated_container_image_codename("buster-20220101a"), None);
         assert_eq!(get_dated_container_image_codename("buster-20220101-"), None);
     }
@@ -523,12 +553,27 @@ mod tests {
     // Ported: 'getDatedContainerImageVersion("$input") === $expected' — versioning/debian/common.spec.ts line 69
     #[test]
     fn debian_get_dated_container_image_version() {
-        assert_eq!(get_dated_container_image_version("buster-20220101"), Some(20220101));
-        assert_eq!(get_dated_container_image_version("bullseye-20220101"), Some(20220101));
-        assert_eq!(get_dated_container_image_version("bookworm-20230816"), Some(20230816));
-        assert_eq!(get_dated_container_image_version("bookworm-20230816.1"), Some(20230816));
+        assert_eq!(
+            get_dated_container_image_version("buster-20220101"),
+            Some(20220101)
+        );
+        assert_eq!(
+            get_dated_container_image_version("bullseye-20220101"),
+            Some(20220101)
+        );
+        assert_eq!(
+            get_dated_container_image_version("bookworm-20230816"),
+            Some(20230816)
+        );
+        assert_eq!(
+            get_dated_container_image_version("bookworm-20230816.1"),
+            Some(20230816)
+        );
         assert_eq!(get_dated_container_image_version("buster"), None);
-        assert_eq!(get_dated_container_image_version("invalid-20220101"), Some(20220101));
+        assert_eq!(
+            get_dated_container_image_version("invalid-20220101"),
+            Some(20220101)
+        );
         assert_eq!(get_dated_container_image_version("buster-2022010"), None);
     }
 
@@ -538,8 +583,14 @@ mod tests {
         assert_eq!(get_dated_container_image_suffix("buster-20220101"), None);
         assert_eq!(get_dated_container_image_suffix("bullseye-20220101"), None);
         assert_eq!(get_dated_container_image_suffix("bookworm-20230816"), None);
-        assert_eq!(get_dated_container_image_suffix("bookworm-20230816.1"), Some(".1"));
-        assert_eq!(get_dated_container_image_suffix("buster-20220101.2"), Some(".2"));
+        assert_eq!(
+            get_dated_container_image_suffix("bookworm-20230816.1"),
+            Some(".1")
+        );
+        assert_eq!(
+            get_dated_container_image_suffix("buster-20220101.2"),
+            Some(".2")
+        );
         assert_eq!(get_dated_container_image_suffix("buster"), None);
         assert_eq!(get_dated_container_image_suffix("invalid-20220101"), None);
         assert_eq!(get_dated_container_image_suffix("buster-2022010"), None);

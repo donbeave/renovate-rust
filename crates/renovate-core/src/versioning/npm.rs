@@ -245,8 +245,8 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
             .min_by(|(_, a), (_, b)| a.cmp(b))
             .map(|(v, _)| v);
     }
-    if has_range_operator(range) || range.contains(',') {
-        if let Ok(req) = VersionReq::parse(range) {
+    if ((has_range_operator(range) || range.contains(',')))
+        && let Ok(req) = VersionReq::parse(range) {
             return versions
                 .iter()
                 .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
@@ -254,7 +254,6 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
                 .min_by(|(_, a), (_, b)| a.cmp(b))
                 .map(|(v, _)| v);
         }
-    }
     versions
         .iter()
         .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
@@ -275,14 +274,13 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
     if matches!(range, "*" | "x" | "X") {
         return false;
     }
-    if let Ok(req) = VersionReq::parse(range) {
-        if req.matches(&v) {
+    if let Ok(req) = VersionReq::parse(range)
+        && req.matches(&v) {
             return false;
         }
-    }
     // Tokenize the range (handles both `>=1.0.0` and `>= 1.0.0` and trailing commas)
     let tokens: Vec<&str> = range
-        .split(|c: char| c == ',' || c == ' ')
+        .split([',', ' '])
         .map(str::trim)
         .filter(|s| !s.is_empty())
         .collect();
@@ -302,14 +300,13 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
         } else {
             (None, 1)
         };
-        if let Some(v_str) = version_str_opt {
-            if let Ok(bound) = Version::parse(v_str.trim()) {
-                let replace = min_bound.as_ref().map_or(true, |mb: &Version| bound < *mb);
+        if let Some(v_str) = version_str_opt
+            && let Ok(bound) = Version::parse(v_str.trim()) {
+                let replace = min_bound.as_ref().is_none_or(|mb: &Version| bound < *mb);
                 if replace {
                     min_bound = Some(bound);
                 }
             }
-        }
         i += advance;
     }
     if let Some(bound) = min_bound {
@@ -363,8 +360,8 @@ pub fn get_satisfying_version<'a>(versions: &'a [&'a str], range: &str) -> Optio
     // Use VersionReq::parse only for ranges with operators or compound conditions.
     // For plain wildcard patterns (digits, dots, *, x, X only), wildcard_req_matches
     // gives the correct "2.3 means 2.3.x" behaviour.
-    if has_range_operator(range) || range.contains(',') {
-        if let Ok(req) = VersionReq::parse(range) {
+    if ((has_range_operator(range) || range.contains(',')))
+        && let Ok(req) = VersionReq::parse(range) {
             return versions
                 .iter()
                 .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
@@ -372,7 +369,6 @@ pub fn get_satisfying_version<'a>(versions: &'a [&'a str], range: &str) -> Optio
                 .max_by(|(_, a), (_, b)| a.cmp(b))
                 .map(|(v, _)| v);
         }
-    }
     versions
         .iter()
         .filter_map(|version| {
@@ -411,7 +407,9 @@ pub fn intersects(a: &str, b: &str) -> bool {
     if a.contains("||") || b.contains("||") {
         let a_alts: Vec<&str> = a.split("||").map(str::trim).collect();
         let b_alts: Vec<&str> = b.split("||").map(str::trim).collect();
-        return a_alts.iter().any(|aa| b_alts.iter().any(|bb| intersects_single(aa, bb)));
+        return a_alts
+            .iter()
+            .any(|aa| b_alts.iter().any(|bb| intersects_single(aa, bb)));
     }
     intersects_single(a, b)
 }
@@ -423,26 +421,27 @@ fn intersects_single(a: &str, b: &str) -> bool {
     let req_a = VersionReq::parse(a);
     let req_b = VersionReq::parse(b);
     // If either fails to parse as VersionReq, check exact version match
-    let (req_a, req_b) = match (req_a, req_b) {
-        (Ok(ra), Ok(rb)) => (ra, rb),
-        _ => return false,
-    };
+    let (Ok(req_a), Ok(req_b)) = (req_a, req_b) else { return false };
     // Check if the lower bound of a satisfies b, or vice versa
     // Extract candidate versions from each range's min bound
-    for candidate_str in extract_range_bounds(a).iter().chain(extract_range_bounds(b).iter()) {
-        if let Ok(v) = Version::parse(candidate_str) {
-            if req_a.matches(&v) && req_b.matches(&v) {
+    for candidate_str in extract_range_bounds(a)
+        .iter()
+        .chain(extract_range_bounds(b).iter())
+    {
+        if let Ok(v) = Version::parse(candidate_str)
+            && req_a.matches(&v) && req_b.matches(&v) {
                 return true;
             }
-        }
     }
     // Also try exact version if either is a plain version
-    if let Ok(v) = Version::parse(a.strip_prefix('=').unwrap_or(a).trim()) {
-        if req_b.matches(&v) { return true; }
-    }
-    if let Ok(v) = Version::parse(b.strip_prefix('=').unwrap_or(b).trim()) {
-        if req_a.matches(&v) { return true; }
-    }
+    if let Ok(v) = Version::parse(a.strip_prefix('=').unwrap_or(a).trim())
+        && req_b.matches(&v) {
+            return true;
+        }
+    if let Ok(v) = Version::parse(b.strip_prefix('=').unwrap_or(b).trim())
+        && req_a.matches(&v) {
+            return true;
+        }
     false
 }
 
@@ -532,11 +531,10 @@ pub fn get_new_value(
         let new = Version::parse(new_version.trim_start_matches('v')).ok()?;
         let dots = rest.matches('.').count();
         // For replace: if new version satisfies the current range, keep it
-        if range_strategy == "replace" {
-            if matches_range(new_version.trim_start_matches('v'), current_value) {
+        if range_strategy == "replace"
+            && matches_range(new_version.trim_start_matches('v'), current_value) {
                 return Some(current_value.to_owned());
             }
-        }
         let result = if range_strategy == "bump" {
             // Bump: express the full new version (including any prerelease)
             format!("^{}", new_version.trim_start_matches('v'))

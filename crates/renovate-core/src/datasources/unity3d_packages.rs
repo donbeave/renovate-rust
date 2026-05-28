@@ -125,7 +125,7 @@ pub async fn fetch_releases(
             .time
             .get(&pkg_ver.version)
             .and_then(|v| v.as_str())
-            .map(|s| s.to_string());
+            .map(|s| s.to_owned());
 
         let changelog_content = pkg_ver
             .upm
@@ -144,7 +144,7 @@ pub async fn fetch_releases(
 
         releases.push(Unity3dPackageRelease {
             is_stable: is_stable_version(&pkg_ver.version),
-            registry_url: registry_url.trim_end_matches('/').to_string(),
+            registry_url: registry_url.trim_end_matches('/').to_owned(),
             release_timestamp,
             changelog_content,
             changelog_url,
@@ -153,7 +153,7 @@ pub async fn fetch_releases(
     }
 
     Ok(Unity3dPackagesResult {
-        registry_url: registry_url.trim_end_matches('/').to_string(),
+        registry_url: registry_url.trim_end_matches('/').to_owned(),
         homepage,
         source_url,
         releases,
@@ -364,11 +364,11 @@ mod tests {
         // changelogUrl derivation (unit test for the function)
         assert_eq!(
             changelog_url_from_docs("https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/manual/index.html"),
-            Some("https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/changelog/CHANGELOG.html".to_string())
+            Some("https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/changelog/CHANGELOG.html".to_owned())
         );
         assert_eq!(
             changelog_url_from_docs("https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.12/manual/index.html"),
-            Some("https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.12/changelog/CHANGELOG.html".to_string())
+            Some("https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.12/changelog/CHANGELOG.html".to_owned())
         );
 
         // homepage = first version's documentationUrl

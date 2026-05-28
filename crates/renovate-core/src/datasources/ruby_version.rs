@@ -65,10 +65,7 @@ fn version_re() -> &'static Regex {
 /// valid rows. Never returns Err — HTTP errors are handled by `fetch_releases`.
 pub fn parse_releases(html: &str) -> Vec<RubyRelease> {
     // Find the release-list table.
-    let start = match html.find("release-list") {
-        Some(pos) => pos,
-        None => return Vec::new(),
-    };
+    let Some(start) = html.find("release-list") else { return Vec::new() };
 
     let table_start = match html[start..].find("<table") {
         Some(p) => start + p,
@@ -95,7 +92,7 @@ pub fn parse_releases(html: &str) -> Vec<RubyRelease> {
 
         // First td: "Ruby X.Y.Z" — strip prefix.
         let raw_version = tds[0].trim().replace("Ruby ", "");
-        let version = raw_version.trim().to_string();
+        let version = raw_version.trim().to_owned();
 
         // Only accept X.Y.Z stable versions (no rc/preview/beta suffixes).
         if !version_re().is_match(&version) {
@@ -223,7 +220,7 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_releases(&server.uri(), &http).await.unwrap();
-        assert_eq!(result.is_none(), true);
+        assert!(result.is_none());
     }
 
     // Ported: "throws for 404" — ruby-version/index.spec.ts line 34

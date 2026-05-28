@@ -151,7 +151,7 @@ pub async fn fetch_releases_full(
     Ok(Some(GithubReleasesFullResult {
         releases,
         source_url: format!("https://github.com/{owner_repo}"),
-        registry_url: "https://github.com".to_string(),
+        registry_url: "https://github.com".to_owned(),
     }))
 }
 

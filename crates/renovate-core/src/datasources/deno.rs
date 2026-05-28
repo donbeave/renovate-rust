@@ -79,7 +79,7 @@ fn extract_module_name(package_name: &str) -> Option<String> {
     if name.is_empty() {
         return None;
     }
-    Some(name.to_string())
+    Some(name.to_owned())
 }
 
 fn github_source_url(repository: &str) -> String {
@@ -95,10 +95,7 @@ pub async fn fetch_releases(
     package_name: &str,
     http: &HttpClient,
 ) -> Result<Option<DenoResult>, DenoError> {
-    let module_name = match extract_module_name(package_name) {
-        Some(n) => n,
-        None => return Ok(None),
-    };
+    let Some(module_name) = extract_module_name(package_name) else { return Ok(None) };
 
     let base = registry_url.trim_end_matches('/');
     let module_url = format!("{}/v2/modules/{}", base, module_name);

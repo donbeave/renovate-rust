@@ -445,8 +445,8 @@ foo = { version = ">= 1.0.0 and < 2.0.0" }
     #[test]
     fn gleam_lock_returns_map_of_package_versions() {
         let result = extract_gleam_lock_file_versions(LOCK_FILE).unwrap();
-        assert_eq!(result.get("foo"), Some(&vec!["1.0.4".to_string()]));
-        assert_eq!(result.get("bar"), Some(&vec!["2.1.0".to_string()]));
+        assert_eq!(result.get("foo"), Some(&vec!["1.0.4".to_owned()]));
+        assert_eq!(result.get("bar"), Some(&vec!["2.1.0".to_owned()]));
     }
 
     // Ported: "parses lockfile string into an object" — modules/manager/gleam/locked-version.spec.ts line 47

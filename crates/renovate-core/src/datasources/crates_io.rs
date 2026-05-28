@@ -459,7 +459,7 @@ async fn fetch_crate_metadata(
         Err(_) => return (None, None),
     };
     let api_base = match config.api {
-        Some(ref a) => a.trim_end_matches('/').to_string(),
+        Some(ref a) => a.trim_end_matches('/').to_owned(),
         None => return (None, None),
     };
 
@@ -488,18 +488,12 @@ pub async fn get_releases(
     registry_url: &str,
     http: &HttpClient,
 ) -> Result<Option<CrateReleasesResult>, CratesIoError> {
-    let raw_url = match parse_registry_url(registry_url) {
-        Some(u) => u,
-        None => return Ok(None),
-    };
+    let Some(raw_url) = parse_registry_url(registry_url) else { return Ok(None) };
 
     let path = index_path(package_name);
     let url = format!("{}/{}", raw_url.trim_end_matches('/'), path);
 
-    let resp = match http.get_retrying(&url).await {
-        Ok(r) => r,
-        Err(_) => return Ok(None),
-    };
+    let Ok(resp) = http.get_retrying(&url).await else { return Ok(None) };
     let status = resp.status();
 
     if status.as_u16() == 404 {
@@ -1127,7 +1121,7 @@ mod tests {
         // The caller is responsible for checking existing timestamp before
         // invoking postprocess_release_timestamp.  This test verifies that
         // a pre-existing timestamp value is preserved by the caller pattern.
-        let existing_ts = Some("2024-09-04T19:16:41.355Z".to_string());
+        let existing_ts = Some("2024-09-04T19:16:41.355Z".to_owned());
         // Simulate the caller guard: if timestamp already set, skip the call.
         assert!(existing_ts.is_some());
     }

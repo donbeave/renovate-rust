@@ -3177,8 +3177,8 @@ jobs:
     #[test]
     fn use_enterprise_registry_when_endpoint_is_enterprise() {
         let ctx = GithubActionsContext {
-            platform: Some("github".to_string()),
-            endpoint: Some("https://github.enterprise.com".to_string()),
+            platform: Some("github".to_owned()),
+            endpoint: Some("https://github.enterprise.com".to_owned()),
         };
         let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
         assert!(!deps.is_empty());
@@ -3192,8 +3192,8 @@ jobs:
     #[test]
     fn use_enterprise_registry_when_endpoint_has_api_v3_path() {
         let ctx = GithubActionsContext {
-            platform: Some("github".to_string()),
-            endpoint: Some("https://github.enterprise.com/api/v3".to_string()),
+            platform: Some("github".to_owned()),
+            endpoint: Some("https://github.enterprise.com/api/v3".to_owned()),
         };
         let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
         assert!(!deps.is_empty());
@@ -3207,8 +3207,8 @@ jobs:
     #[test]
     fn use_no_custom_registry_when_platform_is_not_github() {
         let ctx = GithubActionsContext {
-            platform: Some("bitbucket".to_string()),
-            endpoint: Some("https://bitbucket.enterprise.com".to_string()),
+            platform: Some("bitbucket".to_owned()),
+            endpoint: Some("https://bitbucket.enterprise.com".to_owned()),
         };
         let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
         assert!(!deps.is_empty());
@@ -3219,8 +3219,8 @@ jobs:
     #[test]
     fn use_no_custom_registry_when_endpoint_is_github_com() {
         let ctx = GithubActionsContext {
-            platform: Some("github".to_string()),
-            endpoint: Some("https://github.com".to_string()),
+            platform: Some("github".to_owned()),
+            endpoint: Some("https://github.com".to_owned()),
         };
         let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
         assert!(!deps.is_empty());
@@ -3231,8 +3231,8 @@ jobs:
     #[test]
     fn use_no_custom_registry_when_endpoint_is_api_github_com() {
         let ctx = GithubActionsContext {
-            platform: Some("github".to_string()),
-            endpoint: Some("https://api.github.com".to_string()),
+            platform: Some("github".to_owned()),
+            endpoint: Some("https://api.github.com".to_owned()),
         };
         let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
         assert!(!deps.is_empty());
@@ -3243,8 +3243,8 @@ jobs:
     #[test]
     fn returns_no_registry_urls_when_endpoint_is_invalid() {
         let ctx = GithubActionsContext {
-            platform: Some("github".to_string()),
-            endpoint: Some("not-a-valid-url".to_string()),
+            platform: Some("github".to_owned()),
+            endpoint: Some("not-a-valid-url".to_owned()),
         };
         let deps = extract_with_context(WORKFLOW_2_FIRST_ACTION, &ctx);
         assert!(!deps.is_empty());

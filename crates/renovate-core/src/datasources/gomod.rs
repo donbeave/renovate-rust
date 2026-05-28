@@ -342,23 +342,23 @@ mod tests {
     fn get_source_url_maps_datasource_to_url() {
         assert_eq!(
             get_source_url("bitbucket-tags", "foo/bar", None),
-            Some("https://bitbucket.org/foo/bar".to_string())
+            Some("https://bitbucket.org/foo/bar".to_owned())
         );
         assert_eq!(
             get_source_url("forgejo-tags", "go-chi/cache", None),
-            Some("https://code.forgejo.org/go-chi/cache".to_string())
+            Some("https://code.forgejo.org/go-chi/cache".to_owned())
         );
         assert_eq!(
             get_source_url("gitea-tags", "go-chi/cache", None),
-            Some("https://gitea.com/go-chi/cache".to_string())
+            Some("https://gitea.com/go-chi/cache".to_owned())
         );
         assert_eq!(
             get_source_url("github-tags", "go-foo/foo", None),
-            Some("https://github.com/go-foo/foo".to_string())
+            Some("https://github.com/go-foo/foo".to_owned())
         );
         assert_eq!(
             get_source_url("gitlab-tags", "foo/bar", None),
-            Some("https://gitlab.com/foo/bar".to_string())
+            Some("https://gitlab.com/foo/bar".to_owned())
         );
         // git-tags is not handled → None
         assert_eq!(

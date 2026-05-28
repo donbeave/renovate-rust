@@ -39,7 +39,7 @@ pub fn is_maven_central(url: &str) -> bool {
         host_of(MAVEN_CENTRAL_BASE).unwrap_or(""),
         host_of(MAVEN_CENTRAL_MIRROR).unwrap_or(""),
     ];
-    host_of(url).map_or(false, |h| central_hosts.contains(&h))
+    host_of(url).is_some_and(|h| central_hosts.contains(&h))
 }
 
 const MAVEN_CENTRAL: &str = MAVEN_CENTRAL_BASE;
@@ -341,10 +341,10 @@ pub fn parse_all_versions(xml: &str) -> Option<MetadataResult> {
 
     let mut tags = HashMap::new();
     if let Some(l) = latest {
-        tags.insert("latest".to_string(), l);
+        tags.insert("latest".to_owned(), l);
     }
     if let Some(r) = release {
-        tags.insert("release".to_string(), r);
+        tags.insert("release".to_owned(), r);
     }
     Some(MetadataResult { versions, tags })
 }
@@ -386,11 +386,10 @@ pub fn parse_pom_info(xml: &str) -> PomInfo {
                     if !text.is_empty() && tag == "url" {
                         if in_scm && result.source_url.is_none() {
                             result.source_url = process_scm_url(&text);
-                        } else if !in_scm && result.homepage.is_none() {
-                            if !text.contains("${") {
+                        } else if !in_scm && result.homepage.is_none()
+                            && !text.contains("${") {
                                 result.homepage = Some(text);
                             }
-                        }
                     }
                 }
             }
@@ -418,8 +417,8 @@ fn process_scm_url(raw: &str) -> Option<String> {
     let s = re.replace(raw, "").into_owned();
 
     // Sequential prefix stripping matching TypeScript replace chains
-    let s = s.strip_prefix("scm:").unwrap_or(&s).to_string();
-    let s = s.strip_prefix("git:").unwrap_or(&s).to_string();
+    let s = s.strip_prefix("scm:").unwrap_or(&s).to_owned();
+    let s = s.strip_prefix("git:").unwrap_or(&s).to_owned();
 
     // git@github.com:path  →  https://github.com/path
     let s = if s.starts_with("git@github.com:") {
@@ -529,7 +528,7 @@ pub async fn fetch_releases_from_registry(
         PomInfo::default()
     };
 
-    let registry_url = base.to_string();
+    let registry_url = base.to_owned();
     let is_private = !default_registries
         .iter()
         .any(|r| r.trim_end_matches('/') == registry_url);

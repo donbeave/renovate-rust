@@ -67,7 +67,7 @@ fn parse_channel(version: &str) -> Option<ParsedVersion> {
 
     Some(ParsedVersion {
         release,
-        prerelease: caps.name("prerelease").map(|m| m.as_str().to_string()),
+        prerelease: caps.name("prerelease").map(|m| m.as_str().to_owned()),
     })
 }
 
@@ -90,15 +90,14 @@ fn parse_version(version: &str) -> Option<ParsedVersion> {
         .unwrap_or(0);
 
     let mut release = vec![major, minor, patch, supplement];
-    if let Some(m) = caps.name("build") {
-        if let Ok(b) = m.as_str().parse::<u64>() {
+    if let Some(m) = caps.name("build")
+        && let Ok(b) = m.as_str().parse::<u64>() {
             release.push(b);
         }
-    }
 
     Some(ParsedVersion {
         release,
-        prerelease: caps.name("prerelease").map(|m| m.as_str().to_string()),
+        prerelease: caps.name("prerelease").map(|m| m.as_str().to_owned()),
     })
 }
 

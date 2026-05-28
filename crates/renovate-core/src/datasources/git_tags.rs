@@ -20,7 +20,7 @@ pub fn get_releases(package_name: &str, ls_remote: Option<&str>) -> Option<GitRe
     let source_url = package_name
         .trim_end_matches('/')
         .trim_end_matches(".git")
-        .to_string();
+        .to_owned();
 
     let releases: Vec<GitRelease> = raw_refs
         .into_iter()

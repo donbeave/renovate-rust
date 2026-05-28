@@ -40,7 +40,7 @@ pub fn version_to_release(
 ) -> HackageRelease {
     let base = registry_url.trim_end_matches('/');
     HackageRelease {
-        version: version.to_string(),
+        version: version.to_owned(),
         changelog_url: format!("{}/package/{}-{}/changelog", base, package_name, version),
         is_deprecated: deprecated,
     }
@@ -57,10 +57,7 @@ pub async fn fetch_releases(
     let base = registry_url.trim_end_matches('/');
     let url = format!("{}/package/{}.json", base, urlencoding(package_name));
 
-    let resp = match http.get_retrying(&url).await {
-        Ok(r) => r,
-        Err(_) => return Ok(None),
-    };
+    let Ok(resp) = http.get_retrying(&url).await else { return Ok(None) };
 
     let status = resp.status();
     if status.is_client_error() {

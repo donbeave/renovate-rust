@@ -25,14 +25,13 @@ pub fn to_semver_range(range: &str) -> Option<String> {
 
     // from: "X.Y.Z"
     if let Some(rest) = t.strip_prefix("from").map(|r| r.trim()) {
-        if let Some(rest) = rest.strip_prefix(':').map(|r| r.trim()) {
-            if rest.starts_with('"') && rest.ends_with('"') {
+        if let Some(rest) = rest.strip_prefix(':').map(|r| r.trim())
+            && rest.starts_with('"') && rest.ends_with('"') {
                 let ver_str = &rest[1..rest.len() - 1];
                 let v = Version::parse(ver_str).ok()?;
                 let next_major = v.major + 1;
                 return Some(format!(">={ver_str}, <{next_major}.0.0"));
             }
-        }
         return None;
     }
 
@@ -74,21 +73,19 @@ pub fn to_semver_range(range: &str) -> Option<String> {
     }
 
     // ..."X.Y.Z" or ..<"X.Y.Z"
-    if let Some(rest) = t.strip_prefix("...").map(|r| r.trim()) {
-        if rest.starts_with('"') && rest.ends_with('"') {
+    if let Some(rest) = t.strip_prefix("...").map(|r| r.trim())
+        && rest.starts_with('"') && rest.ends_with('"') {
             let ver_str = &rest[1..rest.len() - 1];
             Version::parse(ver_str).ok()?;
             return Some(format!("<={ver_str}"));
         }
-    }
 
-    if let Some(rest) = t.strip_prefix("..<").map(|r| r.trim()) {
-        if rest.starts_with('"') && rest.ends_with('"') {
+    if let Some(rest) = t.strip_prefix("..<").map(|r| r.trim())
+        && rest.starts_with('"') && rest.ends_with('"') {
             let ver_str = &rest[1..rest.len() - 1];
             Version::parse(ver_str).ok()?;
             return Some(format!("<{ver_str}"));
         }
-    }
 
     None
 }
@@ -97,8 +94,7 @@ pub fn to_semver_range(range: &str) -> Option<String> {
 
 /// Returns `true` when `input` is a valid semver version or a valid Swift range.
 pub fn is_valid(input: &str) -> bool {
-    Version::parse(strip_v(input.trim())).is_ok()
-        || to_semver_range(input).is_some()
+    Version::parse(strip_v(input.trim())).is_ok() || to_semver_range(input).is_some()
 }
 
 /// Returns `true` only for plain semver versions (not ranges).
@@ -107,47 +103,43 @@ pub fn is_version(input: &str) -> bool {
 }
 
 pub fn is_stable(version: &str) -> bool {
-    Version::parse(strip_v(version.trim()))
-        .is_ok_and(|v| v.pre.is_empty())
+    Version::parse(strip_v(version.trim())).is_ok_and(|v| v.pre.is_empty())
 }
 
 pub fn get_major(version: &str) -> Option<i64> {
-    Version::parse(strip_v(version)).ok().map(|v| v.major as i64)
+    Version::parse(strip_v(version))
+        .ok()
+        .map(|v| v.major as i64)
 }
 
 pub fn get_minor(version: &str) -> Option<i64> {
-    Version::parse(strip_v(version)).ok().map(|v| v.minor as i64)
+    Version::parse(strip_v(version))
+        .ok()
+        .map(|v| v.minor as i64)
 }
 
 pub fn get_patch(version: &str) -> Option<i64> {
-    Version::parse(strip_v(version)).ok().map(|v| v.patch as i64)
+    Version::parse(strip_v(version))
+        .ok()
+        .map(|v| v.patch as i64)
 }
 
 pub fn equals(a: &str, b: &str) -> bool {
-    match (
-        Version::parse(strip_v(a)),
-        Version::parse(strip_v(b)),
-    ) {
+    match (Version::parse(strip_v(a)), Version::parse(strip_v(b))) {
         (Ok(va), Ok(vb)) => va == vb,
         _ => false,
     }
 }
 
 pub fn is_greater_than(a: &str, b: &str) -> bool {
-    match (
-        Version::parse(strip_v(a)),
-        Version::parse(strip_v(b)),
-    ) {
+    match (Version::parse(strip_v(a)), Version::parse(strip_v(b))) {
         (Ok(va), Ok(vb)) => va > vb,
         _ => false,
     }
 }
 
 pub fn sort_versions(a: &str, b: &str) -> i32 {
-    match (
-        Version::parse(strip_v(a)),
-        Version::parse(strip_v(b)),
-    ) {
+    match (Version::parse(strip_v(a)), Version::parse(strip_v(b))) {
         (Ok(va), Ok(vb)) => va.cmp(&vb) as i32,
         _ => 0,
     }
@@ -162,46 +154,24 @@ pub fn matches_range(version: &str, range: &str) -> bool {
     if is_version(range) {
         return equals(clean_v, strip_v(range.trim()));
     }
-    let semver_range = match to_semver_range(range) {
-        Some(r) => r,
-        None => return false,
-    };
-    let v = match Version::parse(clean_v) {
-        Ok(v) => v,
-        Err(_) => return false,
-    };
-    let req = match VersionReq::parse(&semver_range) {
-        Ok(r) => r,
-        Err(_) => return false,
-    };
+    let Some(semver_range) = to_semver_range(range) else { return false };
+    let Ok(v) = Version::parse(clean_v) else { return false };
+    let Ok(req) = VersionReq::parse(&semver_range) else { return false };
     req.matches(&v)
 }
 
 pub fn is_less_than_range(version: &str, range: &str) -> bool {
-    let semver_range = match to_semver_range(range) {
-        Some(r) => r,
-        None => return false,
-    };
+    let Some(semver_range) = to_semver_range(range) else { return false };
     let clean_v = strip_v(version.trim());
-    let v = match Version::parse(clean_v) {
-        Ok(v) => v,
-        Err(_) => return false,
-    };
-    let req = match VersionReq::parse(&semver_range) {
-        Ok(r) => r,
-        Err(_) => return false,
-    };
+    let Ok(v) = Version::parse(clean_v) else { return false };
+    let Ok(req) = VersionReq::parse(&semver_range) else { return false };
     if req.matches(&v) {
         return false;
     }
     // Version doesn't satisfy. Check if any lower bound (>= or >) in the range > v.
     for comp in &req.comparators {
         if matches!(comp.op, Op::GreaterEq | Op::Greater) {
-            let lower = Version::new(
-                comp.major,
-                comp.minor.unwrap_or(0),
-                comp.patch.unwrap_or(0),
-            );
+            let lower = Version::new(comp.major, comp.minor.unwrap_or(0), comp.patch.unwrap_or(0));
             if v < lower {
                 return true;
             }
@@ -267,7 +237,9 @@ pub fn get_new_value(current_value: &str, new_version: &str) -> String {
         if current_value.starts_with('"') {
             let left_ver = &current_value[1..left_end];
             let rest = &current_value[left_end + 1..];
-            if rest.trim().is_empty() || rest.trim().starts_with("...") && !rest.trim().contains('"') {
+            if rest.trim().is_empty()
+                || rest.trim().starts_with("...") && !rest.trim().contains('"')
+            {
                 // "X.Y.Z"...  — replace left ver
                 let new_cv = current_value.replacen(left_ver, clean_new, 1);
                 return new_cv;
@@ -426,10 +398,22 @@ mod tests {
     fn swift_get_new_value() {
         assert_eq!(get_new_value("1.2.3", "1.2.4"), "1.2.4");
         assert_eq!(get_new_value("1.2.3", "v1.2.4"), "1.2.4");
-        assert_eq!(get_new_value(r#"from: "1.2.3""#, "1.2.4"), r#"from: "1.2.4""#);
-        assert_eq!(get_new_value(r#"from: "1.2.3""#, "v1.2.4"), r#"from: "1.2.4""#);
-        assert_eq!(get_new_value(r#"from: "1.2.2""#, "1.2.4"), r#"from: "1.2.4""#);
-        assert_eq!(get_new_value(r#"from: "1.2.2""#, "v1.2.4"), r#"from: "1.2.4""#);
+        assert_eq!(
+            get_new_value(r#"from: "1.2.3""#, "1.2.4"),
+            r#"from: "1.2.4""#
+        );
+        assert_eq!(
+            get_new_value(r#"from: "1.2.3""#, "v1.2.4"),
+            r#"from: "1.2.4""#
+        );
+        assert_eq!(
+            get_new_value(r#"from: "1.2.2""#, "1.2.4"),
+            r#"from: "1.2.4""#
+        );
+        assert_eq!(
+            get_new_value(r#"from: "1.2.2""#, "v1.2.4"),
+            r#"from: "1.2.4""#
+        );
         assert_eq!(get_new_value(r#""1.2.3"..."#, "1.2.4"), r#""1.2.4"..."#);
         assert_eq!(get_new_value(r#""1.2.3"..."#, "v1.2.4"), r#""1.2.4"..."#);
         assert_eq!(
@@ -448,21 +432,9 @@ mod tests {
             get_new_value(r#""1.2.3"..<"1.2.4""#, "v1.2.5"),
             r#""1.2.3"..<"1.2.5""#
         );
-        assert_eq!(
-            get_new_value(r#"..."1.2.4""#, "1.2.5"),
-            r#"..."1.2.5""#
-        );
-        assert_eq!(
-            get_new_value(r#"..."1.2.4""#, "v1.2.5"),
-            r#"..."1.2.5""#
-        );
-        assert_eq!(
-            get_new_value(r#"..<"1.2.4""#, "1.2.5"),
-            r#"..<"1.2.5""#
-        );
-        assert_eq!(
-            get_new_value(r#"..<"1.2.4""#, "v1.2.5"),
-            r#"..<"1.2.5""#
-        );
+        assert_eq!(get_new_value(r#"..."1.2.4""#, "1.2.5"), r#"..."1.2.5""#);
+        assert_eq!(get_new_value(r#"..."1.2.4""#, "v1.2.5"), r#"..."1.2.5""#);
+        assert_eq!(get_new_value(r#"..<"1.2.4""#, "1.2.5"), r#"..<"1.2.5""#);
+        assert_eq!(get_new_value(r#"..<"1.2.4""#, "v1.2.5"), r#"..<"1.2.5""#);
     }
 }

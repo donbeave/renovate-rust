@@ -121,8 +121,8 @@ pub fn construct_base_url(registry_url: &str, package_name: &str) -> Option<Stri
     let repository = repo_re
         .captures(registry_url)
         .and_then(|c| c.get(1))
-        .map(|m| m.as_str().to_string())
-        .unwrap_or_else(|| "published".to_string());
+        .map(|m| m.as_str().to_owned())
+        .unwrap_or_else(|| "published".to_owned());
 
     let base = registry_url.trim_end_matches('/');
     Some(format!(
@@ -153,10 +153,7 @@ pub async fn fetch_releases(
     package_name: &str,
     http: &HttpClient,
 ) -> Result<Option<GalaxyCollectionResult>, GalaxyCollectionError> {
-    let base_url = match construct_base_url(registry_url, package_name) {
-        Some(u) => u,
-        None => return Ok(None),
-    };
+    let Some(base_url) = construct_base_url(registry_url, package_name) else { return Ok(None) };
 
     // Fetch base project info
     let base: BaseResponse = match http.get_json::<serde_json::Value>(&base_url).await {
@@ -321,7 +318,7 @@ mod tests {
                 "{}/community/kubernetes/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&base_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(base_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -349,7 +346,7 @@ mod tests {
                 "{}/community/kubernetes/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&base_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(base_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -376,7 +373,7 @@ mod tests {
                 "{}/community/kubernetes/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&base_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(base_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -384,7 +381,7 @@ mod tests {
                 "{}/community/kubernetes/versions/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&versions_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(versions_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -392,7 +389,7 @@ mod tests {
                 "{}/community/kubernetes/versions/1.2.0/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&details_120_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(details_120_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -400,7 +397,7 @@ mod tests {
                 "{}/community/kubernetes/versions/0.11.1/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&details_0111_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(details_0111_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -460,7 +457,7 @@ mod tests {
                 "{}/community/kubernetes/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&base_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(base_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -468,7 +465,7 @@ mod tests {
                 "{}/community/kubernetes/versions/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&versions_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(versions_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -476,7 +473,7 @@ mod tests {
                 "{}/community/kubernetes/versions/1.2.1/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&details_121_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(details_121_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -484,7 +481,7 @@ mod tests {
                 "{}/community/kubernetes/versions/1.2.0/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&details_120_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(details_120_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -492,7 +489,7 @@ mod tests {
                 "{}/community/kubernetes/versions/0.11.1/",
                 COLLECTION_API_PATH
             )))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&details_0111_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(details_0111_fixture()))
             .mount(&server)
             .await;
 
@@ -588,27 +585,27 @@ mod tests {
         let hub_base = "/api/galaxy/content/published/v3/plugin/ansible/content/published/collections/index/community/kubernetes";
         Mock::given(method("GET"))
             .and(path(format!("{}/", hub_base)))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&base_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(base_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path(format!("{}/versions/", hub_base)))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&versions_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(versions_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path(format!("{}/versions/1.2.1/", hub_base)))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&details_121_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(details_121_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path(format!("{}/versions/1.2.0/", hub_base)))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&details_120_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(details_120_fixture()))
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path(format!("{}/versions/0.11.1/", hub_base)))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&details_0111_fixture()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(details_0111_fixture()))
             .mount(&server)
             .await;
 

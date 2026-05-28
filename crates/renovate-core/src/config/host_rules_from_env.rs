@@ -189,8 +189,8 @@ pub fn host_rules_from_env(env: &HashMap<String, String>) -> Vec<Value> {
 
         let host_type = parts.remove(0);
 
-        let has_enough_parts = is_datasource(&host_type)
-            || (is_platform(&host_type) && parts.len() > 1);
+        let has_enough_parts =
+            is_datasource(&host_type) || (is_platform(&host_type) && parts.len() > 1);
 
         if !has_enough_parts {
             continue;
@@ -222,8 +222,7 @@ pub fn host_rules_from_env(env: &HashMap<String, String>) -> Vec<Value> {
         // Find or create the rule for (hostType, matchHost).
         let existing = rules.iter_mut().find(|r| {
             r.get("hostType").and_then(|v| v.as_str()) == Some(&host_type)
-                && r.get("matchHost").and_then(|v| v.as_str())
-                    == match_host.as_deref()
+                && r.get("matchHost").and_then(|v| v.as_str()) == match_host.as_deref()
         });
 
         if let Some(rule) = existing {
@@ -262,7 +261,10 @@ mod tests {
     // Ported: "supports docker username/password" — workers/global/config/parse/host-rules-from-env.spec.ts line 5
     #[test]
     fn host_rules_docker_user_pass() {
-        let e = env(&[("DOCKER_USERNAME", "some-username"), ("DOCKER_PASSWORD", "some-password")]);
+        let e = env(&[
+            ("DOCKER_USERNAME", "some-username"),
+            ("DOCKER_PASSWORD", "some-password"),
+        ]);
         let r = rules(&e);
         assert_eq!(r.len(), 1);
         assert_eq!(r[0]["hostType"], "docker");
@@ -303,7 +305,10 @@ mod tests {
     fn host_rules_regression_10937() {
         let e = env(&[
             ("GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_USERNAME", "some-user"),
-            ("GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_PASSWORD", "some-password"),
+            (
+                "GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_PASSWORD",
+                "some-password",
+            ),
         ]);
         let r = rules(&e);
         assert_eq!(r.len(), 1);
@@ -328,7 +333,10 @@ mod tests {
     fn host_rules_renovate_in_var() {
         let e = env(&[
             ("PYPI_MY_RENOVATE_HOST_PASSWORD", "some-password"),
-            ("RENOVATE_DOCKER_MY_RENOVATE_HOST_PASSWORD", "docker-password"),
+            (
+                "RENOVATE_DOCKER_MY_RENOVATE_HOST_PASSWORD",
+                "docker-password",
+            ),
         ]);
         let r = rules(&e);
         let pypi_rule = r.iter().find(|v| v["hostType"] == "pypi").unwrap();
@@ -343,9 +351,18 @@ mod tests {
     #[test]
     fn host_rules_https_auth() {
         let e = env(&[
-            ("GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY", "private-key"),
-            ("GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE", "certificate"),
-            ("GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY", "certificate-authority"),
+            (
+                "GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY",
+                "private-key",
+            ),
+            (
+                "GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE",
+                "certificate",
+            ),
+            (
+                "GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY",
+                "certificate-authority",
+            ),
         ]);
         let r = rules(&e);
         assert_eq!(r.len(), 1);
@@ -399,7 +416,10 @@ mod tests {
     // Ported: "rejects npm env" — workers/global/config/parse/host-rules-from-env.spec.ts line 137
     #[test]
     fn host_rules_npm_env_skipped() {
-        let e = env(&[("npm_package_devDependencies__types_registry_auth_token", "4.2.0")]);
+        let e = env(&[(
+            "npm_package_devDependencies__types_registry_auth_token",
+            "4.2.0",
+        )]);
         let r = rules(&e);
         assert_eq!(r.len(), 0);
     }

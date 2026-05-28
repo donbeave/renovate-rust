@@ -232,10 +232,7 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
         return Some(new_version.clone());
     }
 
-    let clauses = match parse_current_range(current_value) {
-        Ok(c) => c,
-        Err(_) => return None,
-    };
+    let Ok(clauses) = parse_current_range(current_value) else { return None };
 
     if clauses.is_empty() {
         return Some(current_value.clone());
@@ -281,8 +278,8 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
 
     let result = check_range_and_remove_unnecessary_range_limit(&result, new_version);
 
-    if let Ok(specs) = VersionSpecifiers::from_str(&result) {
-        if !specs.contains(&new_ver) {
+    if let Ok(specs) = VersionSpecifiers::from_str(&result)
+        && !specs.contains(&new_ver) {
             tracing::warn!(
                 result,
                 new_version,
@@ -291,7 +288,6 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
             );
             return None;
         }
-    }
 
     Some(result)
 }
@@ -308,16 +304,13 @@ pub fn check_range_and_remove_unnecessary_range_limit(range: &str, new_version: 
         && parts[0].contains(".*")
         && parts[0].contains("==")
         && parts[1].contains(">=")
-    {
-        if let (Ok(specs), Ok(ver)) = (
+        && let (Ok(specs), Ok(ver)) = (
             VersionSpecifiers::from_str(parts[0]),
             Version::from_str(new_version),
-        ) {
-            if specs.contains(&ver) {
+        )
+            && specs.contains(&ver) {
                 return parts[0].to_owned();
             }
-        }
-    }
     range.to_owned()
 }
 
@@ -545,7 +538,7 @@ fn update_range_value(
     // < upper bound
     if matches!(op, Operator::LessThan) {
         if new_ver >= &clause.version {
-            let precision = get_range_precision(&[clause.clone()]);
+            let precision = get_range_precision(std::slice::from_ref(clause));
             let future =
                 get_future_version(precision, new_ver.release(), Some(clause.version.release()));
             return Some(format!("<{}", fmt_parts(&future)));

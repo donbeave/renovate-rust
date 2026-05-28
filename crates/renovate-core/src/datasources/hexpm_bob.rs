@@ -40,8 +40,8 @@ fn get_package_type(package_name: &str) -> Option<PackageType> {
 
 fn clean_version(version: &str, pkg_type: &PackageType) -> String {
     match pkg_type {
-        PackageType::Elixir => version.trim_start_matches('v').to_string(),
-        PackageType::Erlang => version.trim_start_matches("OTP-").to_string(),
+        PackageType::Elixir => version.trim_start_matches('v').to_owned(),
+        PackageType::Erlang => version.trim_start_matches("OTP-").to_owned(),
     }
 }
 
@@ -122,10 +122,7 @@ pub async fn fetch_releases(
     package_name: &str,
     http: &HttpClient,
 ) -> Result<Option<HexpmBobResult>, HexpmBobError> {
-    let pkg_type = match get_package_type(package_name) {
-        Some(t) => t,
-        None => return Ok(None),
-    };
+    let Some(pkg_type) = get_package_type(package_name) else { return Ok(None) };
 
     let url = format!(
         "{}/builds/{}/builds.txt",
@@ -151,7 +148,7 @@ pub async fn fetch_releases(
                 return None;
             }
             let raw_version = parts[0];
-            let git_ref = parts[1].to_string();
+            let git_ref = parts[1].to_owned();
             let build_date = parts[2];
             Some(HexpmBobRelease {
                 version: clean_version(raw_version, &pkg_type),
@@ -168,7 +165,7 @@ pub async fn fetch_releases(
 
     let details = get_package_details(&pkg_type);
     Ok(Some(HexpmBobResult {
-        registry_url: registry_url.trim_end_matches('/').to_string(),
+        registry_url: registry_url.trim_end_matches('/').to_owned(),
         homepage: details.homepage,
         source_url: details.source_url,
         releases,

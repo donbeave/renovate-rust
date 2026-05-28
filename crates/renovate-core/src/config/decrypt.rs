@@ -34,7 +34,7 @@ pub fn validate_decrypted_value(decrypted_obj_str: &str, repository: &str) -> Op
     let repo = obj.r.unwrap_or_default();
 
     let repo_upper = repository.to_uppercase();
-    let repositories = vec![repo_upper.clone()];
+    let repositories = vec![repo_upper];
 
     let org_prefixes: Vec<String> = org
         .split(',')

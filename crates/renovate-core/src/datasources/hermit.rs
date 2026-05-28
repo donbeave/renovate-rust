@@ -83,7 +83,7 @@ fn parse_github_repo(url: &str) -> Option<(String, String)> {
     if rest.contains('/') || rest.is_empty() {
         return None;
     }
-    Some((owner.to_string(), rest.to_string()))
+    Some((owner.to_owned(), rest.to_owned()))
 }
 
 /// Fetch all releases for `package_name` from the Hermit index at `registry_url`.

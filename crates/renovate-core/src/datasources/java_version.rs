@@ -68,9 +68,9 @@ pub fn parse_package(package_name: &str) -> JavaPackageConfig {
         .unwrap_or((package_name, None));
 
     let image_type = if path == "java-jre" {
-        "jre".to_string()
+        "jre".to_owned()
     } else {
-        "jdk".to_string()
+        "jdk".to_owned()
     };
 
     let mut architecture: Option<String> = None;
@@ -81,8 +81,8 @@ pub fn parse_package(package_name: &str) -> JavaPackageConfig {
         for pair in q.split('&') {
             if let Some((key, val)) = pair.split_once('=') {
                 match key {
-                    "architecture" => architecture = Some(val.to_string()),
-                    "os" => os = Some(val.to_string()),
+                    "architecture" => architecture = Some(val.to_owned()),
+                    "os" => os = Some(val.to_owned()),
                     "system" => use_system = val == "true",
                     _ => {}
                 }
@@ -104,22 +104,22 @@ pub fn parse_package(package_name: &str) -> JavaPackageConfig {
 
 fn system_architecture() -> Option<String> {
     match std::env::consts::ARCH {
-        "x86" => Some("x86".to_string()),
-        "x86_64" => Some("x64".to_string()),
-        "arm" => Some("arm".to_string()),
-        "aarch64" => Some("aarch64".to_string()),
-        "riscv64" => Some("riscv64".to_string()),
-        "s390x" => Some("s390x".to_string()),
+        "x86" => Some("x86".to_owned()),
+        "x86_64" => Some("x64".to_owned()),
+        "arm" => Some("arm".to_owned()),
+        "aarch64" => Some("aarch64".to_owned()),
+        "riscv64" => Some("riscv64".to_owned()),
+        "s390x" => Some("s390x".to_owned()),
         _ => None,
     }
 }
 
 fn system_os() -> Option<String> {
     match std::env::consts::OS {
-        "macos" => Some("mac".to_string()),
-        "windows" => Some("windows".to_string()),
-        "linux" => Some("linux".to_string()),
-        "aix" => Some("aix".to_string()),
+        "macos" => Some("mac".to_owned()),
+        "windows" => Some("windows".to_owned()),
+        "linux" => Some("linux".to_owned()),
+        "aix" => Some("aix".to_owned()),
         _ => None,
     }
 }
@@ -232,7 +232,7 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_releases(&server.uri(), "java", &http).await.unwrap();
-        assert_eq!(result.is_none(), true);
+        assert!(result.is_none());
     }
 
     // Ported: "returns null for empty result" — java-version/index.spec.ts line 39
@@ -246,7 +246,7 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_releases(&server.uri(), "java", &http).await.unwrap();
-        assert_eq!(result.is_none(), true);
+        assert!(result.is_none());
     }
 
     // Ported: "returns null for empty 200 OK" — java-version/index.spec.ts line 49
@@ -262,7 +262,7 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_releases(&server.uri(), "java", &http).await.unwrap();
-        assert_eq!(result.is_none(), true);
+        assert!(result.is_none());
     }
 
     // Ported: "throws for 5xx" — java-version/index.spec.ts line 62

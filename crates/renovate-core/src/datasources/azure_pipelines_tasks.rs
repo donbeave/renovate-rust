@@ -61,6 +61,7 @@ struct OrgTask {
     #[serde(rename = "releaseNotes")]
     release_notes: Option<String>,
     #[serde(rename = "serverOwned")]
+    #[expect(dead_code, reason = "Deserialized for API parity; not currently read")]
     server_owned: Option<bool>,
     version: Option<OrgTaskVersion>,
     #[serde(rename = "contributionIdentifier")]
@@ -188,7 +189,7 @@ pub async fn fetch_releases_org(
             Some(AzureTaskRelease {
                 version: format!("{}.{}.{}", ver.major, ver.minor, ver.patch),
                 is_deprecated: task.deprecated,
-                changelog_url: Some(CHANGELOG_URL.to_string()),
+                changelog_url: Some(CHANGELOG_URL.to_owned()),
                 changelog_content: task.release_notes.clone(),
             })
         })

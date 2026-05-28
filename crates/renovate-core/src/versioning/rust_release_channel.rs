@@ -86,13 +86,11 @@ pub fn parse(input: &str) -> Option<Toolchain> {
             let minor: u32 = caps.name("minor")?.as_str().parse().ok()?;
             let patch = caps
                 .name("patch")
-                .map(|m| m.as_str().parse::<u32>().ok())
-                .flatten();
+                .and_then(|m| m.as_str().parse::<u32>().ok());
             let prerelease = if caps.name("beta").is_some() {
                 let number = caps
                     .name("betaNumber")
-                    .map(|m| m.as_str().parse::<u32>().ok())
-                    .flatten();
+                    .and_then(|m| m.as_str().parse::<u32>().ok());
                 Some(Prerelease {
                     name: "beta",
                     number,
@@ -253,7 +251,7 @@ pub fn get_major(version: &str) -> Option<i64> {
         Channel::Nightly => {
             if let Some(date) = &parsed.date {
                 let rust1 = RUST1_DATE;
-                let after = (date.year, date.month, date.day) >= (rust1.0 as i32, rust1.1, rust1.2);
+                let after = (date.year, date.month, date.day) >= ({ rust1.0 }, rust1.1, rust1.2);
                 Some(if after { 1 } else { 0 })
             } else {
                 None
@@ -419,15 +417,15 @@ pub fn get_new_value(
     // Channel names without dates stay as channel names
     match current_channel {
         Channel::Stable | Channel::Beta | Channel::Nightly => {
-            return Some(current_value.to_owned());
+            Some(current_value.to_owned())
         }
         Channel::Version(cv) => {
             if let Channel::Version(nv) = new_channel {
                 if cv.patch.is_none() {
                     return Some(format!("{}.{}", nv.major, nv.minor));
                 }
-                if let Some(cp) = &cv.prerelease {
-                    if cp.number.is_none() {
+                if let Some(cp) = &cv.prerelease
+                    && cp.number.is_none() {
                         return Some(format!(
                             "{}.{}.{}-beta",
                             nv.major,
@@ -435,7 +433,6 @@ pub fn get_new_value(
                             nv.patch.unwrap_or(0)
                         ));
                     }
-                }
             }
             Some(new_version.to_owned())
         }

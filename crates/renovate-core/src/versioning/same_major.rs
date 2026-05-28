@@ -28,11 +28,11 @@ pub fn matches(version: &str, range: &str) -> bool {
     semver_coerced::matches(version, &massage_version(range))
 }
 
-pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<String> {
+pub fn get_satisfying_version(versions: &[&str], range: &str) -> Option<String> {
     semver_coerced::get_satisfying_version(versions, &massage_version(range))
 }
 
-pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<String> {
+pub fn min_satisfying_version(versions: &[&str], range: &str) -> Option<String> {
     semver_coerced::min_satisfying_version(versions, &massage_version(range))
 }
 

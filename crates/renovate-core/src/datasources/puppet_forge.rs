@@ -71,10 +71,7 @@ pub async fn fetch_releases(
     let slug = package_name.replace('/', "-");
     let url = format!("{base}/v3/modules/{slug}?exclude_fields=current_release");
 
-    let text = match http.get_raw_with_accept(&url, "application/json").await {
-        Ok(v) => v,
-        Err(_) => return Ok(None),
-    };
+    let Ok(text) = http.get_raw_with_accept(&url, "application/json").await else { return Ok(None) };
 
     let module: ForgeModule = match serde_json::from_str(&text) {
         Ok(v) => v,
@@ -92,7 +89,7 @@ pub async fn fetch_releases(
             version: r.version,
             download_url: r.file_uri,
             release_timestamp: r.created_at.as_deref().and_then(parse_puppet_timestamp),
-            registry_url: Some(registry_url.trim_end_matches('/').to_string()),
+            registry_url: Some(registry_url.trim_end_matches('/').to_owned()),
         })
         .collect();
 

@@ -84,13 +84,12 @@ fn parse_string(s: &str) -> Option<String> {
     // Try space-padded single digit day: "Jan  1, 2021" → %b %_d, %Y
     // Use a normalized form
     let normalized = normalize_month_day(s);
-    if let Some(ref n) = normalized {
-        if let Ok(nd) = NaiveDate::parse_from_str(n, "%b %d, %Y") {
+    if let Some(ref n) = normalized
+        && let Ok(nd) = NaiveDate::parse_from_str(n, "%b %d, %Y") {
             let ndt = nd.and_hms_opt(0, 0, 0)?;
             let dt = Utc.from_utc_datetime(&ndt);
             return ms_to_iso(dt.timestamp_millis());
         }
-    }
 
     None
 }
@@ -149,19 +148,28 @@ mod tests {
     // Ported: "$input -> $expected" — util/timestamp.spec.ts line 5
     #[test]
     fn timestamp_valid_iso() {
-        assert_eq!(ts(json!("2021-01-01T00:00:00.000Z")), Some("2021-01-01T00:00:00.000Z".to_owned()));
+        assert_eq!(
+            ts(json!("2021-01-01T00:00:00.000Z")),
+            Some("2021-01-01T00:00:00.000Z".to_owned())
+        );
     }
 
     #[test]
     fn timestamp_number_millis() {
         // 1609459200000 ms = 2021-01-01T00:00:00.000Z
-        assert_eq!(ts(json!(1609459200000i64)), Some("2021-01-01T00:00:00.000Z".to_owned()));
+        assert_eq!(
+            ts(json!(1609459200000i64)),
+            Some("2021-01-01T00:00:00.000Z".to_owned())
+        );
     }
 
     #[test]
     fn timestamp_number_seconds() {
         // 1609459200 s = 2021-01-01T00:00:00.000Z
-        assert_eq!(ts(json!(1609459200i64)), Some("2021-01-01T00:00:00.000Z".to_owned()));
+        assert_eq!(
+            ts(json!(1609459200i64)),
+            Some("2021-01-01T00:00:00.000Z".to_owned())
+        );
     }
 
     #[test]
@@ -200,19 +208,34 @@ mod tests {
 
     #[test]
     fn timestamp_date_only() {
-        assert_eq!(ts(json!("2021-01-01")), Some("2021-01-01T00:00:00.000Z".to_owned()));
+        assert_eq!(
+            ts(json!("2021-01-01")),
+            Some("2021-01-01T00:00:00.000Z".to_owned())
+        );
     }
 
     #[test]
     fn timestamp_compact_format() {
-        assert_eq!(ts(json!("20210101000000")), Some("2021-01-01T00:00:00.000Z".to_owned()));
-        assert_eq!(ts(json!("20211231235959")), Some("2021-12-31T23:59:59.000Z".to_owned()));
+        assert_eq!(
+            ts(json!("20210101000000")),
+            Some("2021-01-01T00:00:00.000Z".to_owned())
+        );
+        assert_eq!(
+            ts(json!("20211231235959")),
+            Some("2021-12-31T23:59:59.000Z".to_owned())
+        );
     }
 
     #[test]
     fn timestamp_compact_with_tz() {
-        assert_eq!(ts(json!("20210101000000+0000")), Some("2021-01-01T00:00:00.000Z".to_owned()));
-        assert_eq!(ts(json!("20211231235959+0000")), Some("2021-12-31T23:59:59.000Z".to_owned()));
+        assert_eq!(
+            ts(json!("20210101000000+0000")),
+            Some("2021-01-01T00:00:00.000Z".to_owned())
+        );
+        assert_eq!(
+            ts(json!("20211231235959+0000")),
+            Some("2021-12-31T23:59:59.000Z".to_owned())
+        );
     }
 
     #[test]
@@ -233,11 +256,17 @@ mod tests {
 
     #[test]
     fn timestamp_slash_date() {
-        assert_eq!(ts(json!("2021/01/01")), Some("2021-01-01T00:00:00.000Z".to_owned()));
+        assert_eq!(
+            ts(json!("2021/01/01")),
+            Some("2021-01-01T00:00:00.000Z".to_owned())
+        );
     }
 
     #[test]
     fn timestamp_month_name() {
-        assert_eq!(ts(json!("Jan 1, 2021")), Some("2021-01-01T00:00:00.000Z".to_owned()));
+        assert_eq!(
+            ts(json!("Jan 1, 2021")),
+            Some("2021-01-01T00:00:00.000Z".to_owned())
+        );
     }
 }
