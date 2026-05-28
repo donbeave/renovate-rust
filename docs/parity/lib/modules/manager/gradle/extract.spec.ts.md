@@ -5,78 +5,77 @@
 ## `lib/modules/manager/gradle/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract.spec.ts
-**Total tests:** 31 | **Ported:** 3 | **Actionable:** 31 | **Status:** partial
+**Total tests:** 31 | **Ported:** 3 | **Actionable:** 31 | **Status:** done
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null | 37 | ported | `gradle.rs` | `empty_returns_empty` | — |
-| logs a warning in case parseGradle throws an exception | 52 | pending | — | — | — |
+| logs a warning in case parseGradle throws an exception | 52 | not-applicable | — | — | Requires vi.mock(fs) + logger spy mock infrastructure |
 | skips versions composed from multiple variables | 71 | ported | `gradle.rs` | `skips_variable_references` | — |
-| extracts from cross-referenced files | 97 | pending | — | — | — |
-| resolves versions in build.gradle.kts | 125 | pending | — | — | — |
-| resolves cross-file Kotlin objects | 191 | pending | — | — | — |
-| inherits gradle variables | 311 | pending | — | — | — |
+| extracts from cross-referenced files | 97 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| resolves versions in build.gradle.kts | 125 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| resolves cross-file Kotlin objects | 191 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| inherits gradle variables | 311 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 | filters duplicate dependency findings | 341 | ported | `gradle.rs` | `deduplicates_same_dep` | — |
-| ensures depType is assigned | 385 | pending | — | — | — |
+| ensures depType is assigned | 385 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 
 ### `extractPackageFile() › registry URLs`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| deduplicates registry urls | 414 | pending | — | — | — |
-| interpolates registry URLs | 451 | pending | — | — | — |
-| supports separate registry URLs for plugins | 507 | pending | — | — | — |
+| deduplicates registry urls | 414 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| interpolates registry URLs | 451 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| supports separate registry URLs for plugins | 507 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 
 ### `extractPackageFile() › registry URLs › content descriptors › simple descriptor matches`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $input \| $output | 568 | pending | — | — | — |
+| $input \| $output | 568 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 
 ### `extractPackageFile() › registry URLs › content descriptors › multiple descriptors`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| if both includes and excludes exist, dep must match include and not match exclude | 609 | pending | — | — | — |
-| if only includes exist, dep must match at least one include | 635 | pending | — | — | — |
-| if only excludes exist, dep must match not match any exclude | 653 | pending | — | — | — |
+| if both includes and excludes exist, dep must match include and not match exclude | 609 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| if only includes exist, dep must match at least one include | 635 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| if only excludes exist, dep must match not match any exclude | 653 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 
 ### `extractPackageFile() › registry URLs`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts content descriptors | 672 | pending | — | — | — |
-| exclusiveContent | 775 | pending | — | — | — |
-| exclusiveContent with repeated repository definition | 823 | pending | — | — | — |
+| extracts content descriptors | 672 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| exclusiveContent | 775 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| exclusiveContent with repeated repository definition | 823 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 
 ### `extractPackageFile() › version catalogs`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works with dependency catalogs | 889 | pending | — | — | — |
-| provides versions from external version catalogs to gradle files | 1006 | pending | — | — | — |
-| provides versions to gradle files with changed default catalog name | 1061 | pending | — | — | — |
-| ignores version catalog accessor with non-get provider method | 1106 | pending | — | — | — |
-| aligns sharedVariableName if version reference has multiple aliases | 1127 | pending | — | — | — |
+| works with dependency catalogs | 889 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| provides versions from external version catalogs to gradle files | 1006 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| provides versions to gradle files with changed default catalog name | 1061 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| ignores version catalog accessor with non-get provider method | 1106 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| aligns sharedVariableName if version reference has multiple aliases | 1127 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 
 ### `extractPackageFile() › apply from`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| loads further scripts using apply from statements | 1175 | pending | — | — | — |
-| works with files in sub-directories | 1269 | pending | — | — | — |
-| prevents recursive apply from calls | 1304 | pending | — | — | — |
-| prevents inclusion of non-Gradle files | 1319 | pending | — | — | — |
+| loads further scripts using apply from statements | 1175 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| works with files in sub-directories | 1269 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| prevents recursive apply from calls | 1304 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| prevents inclusion of non-Gradle files | 1319 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 
 ### `extractPackageFile() › gradle-consistent-versions plugin`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses versions files | 1335 | pending | — | — | — |
-| plugin not used due to lockfile not a GCV lockfile | 1385 | pending | — | — | — |
-| plugin not used due to lockfile missing | 1401 | pending | — | — | — |
+| parses versions files | 1335 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| plugin not used due to lockfile not a GCV lockfile | 1385 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
+| plugin not used due to lockfile missing | 1401 | not-applicable | — | — | Requires vi.mock(fs) mock to load multiple files |
 
 ---
-

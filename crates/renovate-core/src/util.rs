@@ -942,6 +942,104 @@ pub fn calculate_most_recent_timestamp<'a>(
 }
 
 // ---------------------------------------------------------------------------
+// PR configuration description — lib/workers/repository/update/pr/body/config-description.ts
+// ---------------------------------------------------------------------------
+
+/// Convert a few specific emoji shortcodes to Unicode.
+fn emojify_simple(text: &str) -> String {
+    text.replace(":date:", "\u{1f4c5}")
+        .replace(":vertical_traffic_light:", "\u{1f6a6}")
+        .replace(":recycle:", "\u{267b}\u{fe0f}")
+        .replace(":ghost:", "\u{1f47b}")
+        .replace(":no_bell:", "\u{1f515}")
+}
+
+/// Regex matching a basic 5-part cron pattern.
+static CRON_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+    regex::Regex::new(r"^[\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+$").unwrap()
+});
+
+fn schedule_to_string(schedule: Option<&[String]>, _timezone: Option<&str>) -> String {
+    let lines: Vec<String> = match schedule {
+        None => vec!["At any time (no schedule defined)".to_string()],
+        Some(s) if s.is_empty() || s.first().map(|v| v == "at any time").unwrap_or(false) => {
+            vec!["At any time (no schedule defined)".to_string()]
+        }
+        Some(s) => {
+            let all_cron = s.iter().all(|p| CRON_RE.is_match(p));
+            if all_cron {
+                s.iter().map(|p| format!("`{}`", p)).collect()
+            } else {
+                let joined = s.join(",");
+                vec![format!("\"{}\"", joined)]
+            }
+        }
+    };
+    format!("  - {}", lines.join("\n  - "))
+}
+
+/// Generate the "Configuration" section of a PR body.
+///
+/// Mirrors `getPrConfigDescription()` from
+/// `lib/workers/repository/update/pr/body/config-description.ts`.
+pub fn get_pr_config_description(
+    schedule: Option<&[String]>,
+    automerge_schedule: Option<&[String]>,
+    timezone: Option<&str>,
+    automerge: bool,
+    automerged_previously: bool,
+    rebase_when: Option<&str>,
+    stop_updating: bool,
+    recreate_closed: bool,
+    upgrades_count: usize,
+    product_links_help: Option<&str>,
+) -> String {
+    let mut body = "\n\n---\n\n### Configuration\n\n".to_string();
+    body.push_str(&emojify_simple(":date: **Schedule**: "));
+    if let Some(tz) = timezone {
+        body.push_str(&format!("(in timezone {})", tz));
+    } else {
+        body.push_str("(UTC)");
+    }
+    body.push_str("\n\n");
+    body.push_str(&format!("- Branch creation\n{}\n", schedule_to_string(schedule, timezone)));
+    body.push_str(&format!("- Automerge\n{}\n", schedule_to_string(automerge_schedule, timezone)));
+    body.push_str("\n\n");
+    body.push_str(&emojify_simple(":vertical_traffic_light: **Automerge**: "));
+    if automerge {
+        body.push_str("Enabled.");
+    } else if automerged_previously {
+        body.push_str("Disabled because a matching PR was automerged previously.");
+    } else {
+        body.push_str("Disabled by config. Please merge this manually once you are satisfied.");
+    }
+    body.push_str("\n\n");
+    body.push_str(&emojify_simple(":recycle: **Rebasing**: "));
+    if rebase_when == Some("behind-base-branch") {
+        body.push_str("Whenever PR is behind base branch");
+    } else if rebase_when == Some("never") || stop_updating {
+        body.push_str("Never");
+    } else {
+        body.push_str("Whenever PR becomes conflicted");
+    }
+    body.push_str(", or you tick the rebase/retry checkbox.\n\n");
+    if recreate_closed {
+        let help = product_links_help.unwrap_or("#");
+        body.push_str(&emojify_simple(&format!(
+            ":ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help]({}) if that's undesired.\n\n",
+            help
+        )));
+    } else {
+        let upd = if upgrades_count == 1 { "this update" } else { "these updates" };
+        body.push_str(&emojify_simple(&format!(
+            ":no_bell: **Ignore**: Close this PR and you won't be reminded about {} again.\n\n",
+            upd
+        )));
+    }
+    body
+}
+
+// ---------------------------------------------------------------------------
 // Error/warning PR text — lib/workers/repository/errors-warnings.ts
 // ---------------------------------------------------------------------------
 
@@ -5616,6 +5714,95 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── get_pr_config_description ────────────────────────────────────────────
+
+    // Ported: "renders stopUpdating=true" — workers/repository/update/pr/body/config-description.spec.ts line 14
+    #[test]
+    fn test_config_desc_stop_updating() {
+        let res = get_pr_config_description(None, None, None, false, false, None, true, false, 0, None);
+        assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
+    }
+
+    // Ported: "renders rebaseWhen=\"never\"" — config-description.spec.ts line 24
+    #[test]
+    fn test_config_desc_rebase_when_never() {
+        let res = get_pr_config_description(None, None, None, false, false, Some("never"), false, false, 0, None);
+        assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
+    }
+
+    // Ported: "renders rebaseWhen=\"behind-base-branch\"" — config-description.spec.ts line 34
+    #[test]
+    fn test_config_desc_rebase_when_behind() {
+        let res = get_pr_config_description(None, None, None, false, false, Some("behind-base-branch"), false, false, 0, None);
+        assert!(res.contains("Whenever PR is behind base branch"));
+    }
+
+    // Ported: "renders timezone" — config-description.spec.ts line 43
+    #[test]
+    fn test_config_desc_timezone() {
+        let schedule = vec!["* 1 * * * *".to_string()];
+        let res = get_pr_config_description(Some(&schedule), None, Some("Europe/Istanbul"), false, false, None, false, false, 0, None);
+        assert!(res.contains("(in timezone Europe/Istanbul)"));
+    }
+
+    // Ported: "displays later schedules" — config-description.spec.ts line 67
+    #[test]
+    fn test_config_desc_later_schedules() {
+        let schedule = vec!["before 6am on Monday".to_string(), "after 3pm on Tuesday".to_string()];
+        let res = get_pr_config_description(Some(&schedule), None, None, false, false, None, false, false, 0, None);
+        assert!(res.contains("\"before 6am on Monday,after 3pm on Tuesday\""));
+    }
+
+    // Ported: "renders undefined schedule" — config-description.spec.ts line 76
+    #[test]
+    fn test_config_desc_undefined_schedule() {
+        let res = get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
+        assert!(res.contains("At any time (no schedule defined)"));
+    }
+
+    // Ported: "renders recreateClosed=true" — config-description.spec.ts line 100
+    #[test]
+    fn test_config_desc_recreate_closed_true() {
+        let res = get_pr_config_description(None, None, None, false, false, None, false, true, 0, Some("https://help.example.com"));
+        assert!(res.contains("**Immortal**"));
+    }
+
+    // Ported: "does not render recreateClosed=false" — config-description.spec.ts line 109
+    #[test]
+    fn test_config_desc_recreate_closed_false() {
+        let res = get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
+        assert!(!res.contains("**Immortal**"));
+    }
+
+    // Ported: "does not render recreateClosed=undefined" — config-description.spec.ts line 118
+    #[test]
+    fn test_config_desc_recreate_closed_undefined() {
+        let res = get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
+        assert!(!res.contains("**Immortal**"));
+    }
+
+    // Ported: "renders singular" — config-description.spec.ts line 125
+    #[test]
+    fn test_config_desc_singular_upgrade() {
+        let res = get_pr_config_description(None, None, None, false, false, None, false, false, 1, None);
+        assert!(res.contains("this update"));
+        assert!(!res.contains("these updates"));
+    }
+
+    // Ported: "renders automerge" — config-description.spec.ts line 133
+    #[test]
+    fn test_config_desc_automerge_enabled() {
+        let res = get_pr_config_description(None, None, None, true, false, None, false, false, 0, None);
+        assert!(res.contains("**Automerge**: Enabled."));
+    }
+
+    // Ported: "renders blocked automerge" — config-description.spec.ts line 140
+    #[test]
+    fn test_config_desc_automerge_blocked() {
+        let res = get_pr_config_description(None, None, None, false, true, None, false, false, 0, None);
+        assert!(res.contains("**Automerge**: Disabled because a matching PR was automerged previously."));
     }
 
     // ── get_warnings / get_errors / get_dep_warnings_* ───────────────────────
