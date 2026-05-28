@@ -12,6 +12,51 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// YAML utilities — lib/util/yaml.ts
+// ---------------------------------------------------------------------------
+
+/// Parse a YAML string containing one or more documents.
+///
+/// Returns a `Vec<serde_json::Value>` (one entry per `---`-separated document).
+/// Returns an empty vec for empty/blank input.
+/// Strips Handlebars/Nunjucks templates before parsing when `remove_templates`
+/// is true.
+pub fn parse_yaml(content: &str, remove_templates: bool) -> Result<Vec<serde_json::Value>, String> {
+    let text = if remove_templates { strip_templates(content) } else { content.to_owned() };
+    if text.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+    let mut docs = Vec::new();
+    // Split on YAML document separators.  Each `---` line may appear at start
+    // or after a newline.
+    let raw_docs: Vec<&str> = text.split("\n---").collect();
+    for doc in raw_docs {
+        let doc = doc.trim_start_matches('-').trim();
+        if doc.is_empty() {
+            continue;
+        }
+        let value: serde_json::Value = serde_yaml::from_str(doc).map_err(|e| e.to_string())?;
+        if !value.is_null() {
+            docs.push(value);
+        }
+    }
+    Ok(docs)
+}
+
+/// Parse a single YAML document.  Returns `Ok(None)` for empty input.
+pub fn parse_single_yaml(
+    content: &str,
+    remove_templates: bool,
+) -> Result<Option<serde_json::Value>, String> {
+    let text = if remove_templates { strip_templates(content) } else { content.to_owned() };
+    if text.trim().is_empty() {
+        return Ok(None);
+    }
+    let value: serde_json::Value = serde_yaml::from_str(&text).map_err(|e| e.to_string())?;
+    Ok(if value.is_null() { None } else { Some(value) })
+}
+
+// ---------------------------------------------------------------------------
 // Common utilities — lib/util/common.ts
 // ---------------------------------------------------------------------------
 
@@ -1752,6 +1797,72 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // YAML utilities
+    // -----------------------------------------------------------------------
+
+    // Ported: "should return empty array for empty string" — util/yaml.spec.ts line 7
+    #[test]
+    fn test_parse_yaml_empty() {
+        assert_eq!(parse_yaml("", false).unwrap(), Vec::<serde_json::Value>::new());
+    }
+
+    // Ported: "should parse content with single document" — util/yaml.spec.ts line 11
+    #[test]
+    fn test_parse_yaml_single() {
+        use serde_json::json;
+        let input = "myObject:\n  aString: value";
+        let result = parse_yaml(input, false).unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0], json!({ "myObject": { "aString": "value" } }));
+    }
+
+    // Ported: "should parse content with multiple documents" — util/yaml.spec.ts line 50
+    #[test]
+    fn test_parse_yaml_multiple() {
+        use serde_json::json;
+        let input = "myObject:\n  aString: value\n---\nfoo: bar";
+        let result = parse_yaml(input, false).unwrap();
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0], json!({ "myObject": { "aString": "value" } }));
+        assert_eq!(result[1], json!({ "foo": "bar" }));
+    }
+
+    // Ported: "should parse content with templates" — util/yaml.spec.ts line 170
+    #[test]
+    fn test_parse_yaml_templates() {
+        use serde_json::json;
+        let input = "myObject:\n  aString: {{ value }}\n---\nfoo: {{ foo.bar }}";
+        let result = parse_yaml(input, true).unwrap();
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0], json!({ "myObject": { "aString": null } }));
+        assert_eq!(result[1], json!({ "foo": null }));
+    }
+
+    // Ported: "should return undefined" — util/yaml.spec.ts line 222
+    #[test]
+    fn test_parse_single_yaml_empty() {
+        assert_eq!(parse_single_yaml("", false).unwrap(), None);
+    }
+
+    // Ported: "should parse content with single document" (load) — util/yaml.spec.ts line 226
+    #[test]
+    fn test_parse_single_yaml_single() {
+        use serde_json::json;
+        let input = "myObject:\n  aString: value";
+        let result = parse_single_yaml(input, false).unwrap();
+        assert_eq!(result, Some(json!({ "myObject": { "aString": "value" } })));
+    }
+
+    // Ported: "should parse content with template" (load) — util/yaml.spec.ts line 303
+    #[test]
+    fn test_parse_single_yaml_template() {
+        use serde_json::json;
+        let input = "myObject:\n  aString: {{ value }}";
+        let result = parse_single_yaml(input, true).unwrap();
+        assert_eq!(result, Some(json!({ "myObject": { "aString": null } })));
     }
 
     // -----------------------------------------------------------------------
