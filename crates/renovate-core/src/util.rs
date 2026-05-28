@@ -12,6 +12,54 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Timing stats — lib/util/stats.ts
+// ---------------------------------------------------------------------------
+
+/// Compute timing statistics from a slice of millisecond durations.
+///
+/// Mirrors `makeTimingReport` from `lib/util/stats.ts`.
+pub struct TimingReport {
+    pub count: usize,
+    pub avg_ms: i64,
+    pub median_ms: i64,
+    pub max_ms: i64,
+    pub total_ms: i64,
+}
+
+impl std::fmt::Debug for TimingReport {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TimingReport")
+            .field("count", &self.count)
+            .field("avg_ms", &self.avg_ms)
+            .field("median_ms", &self.median_ms)
+            .field("max_ms", &self.max_ms)
+            .field("total_ms", &self.total_ms)
+            .finish()
+    }
+}
+
+impl PartialEq for TimingReport {
+    fn eq(&self, other: &Self) -> bool {
+        self.count == other.count
+            && self.avg_ms == other.avg_ms
+            && self.median_ms == other.median_ms
+            && self.max_ms == other.max_ms
+            && self.total_ms == other.total_ms
+    }
+}
+
+pub fn make_timing_report(data: &[i64]) -> TimingReport {
+    let count = data.len();
+    let total_ms: i64 = data.iter().sum();
+    let avg_ms = if count > 0 { (total_ms as f64 / count as f64).round() as i64 } else { 0 };
+    let max_ms = data.iter().copied().max().unwrap_or(0);
+    let mut sorted = data.to_vec();
+    sorted.sort_unstable();
+    let median_ms = if count > 0 { sorted[count / 2] } else { 0 };
+    TimingReport { count, avg_ms, median_ms, max_ms, total_ms }
+}
+
+// ---------------------------------------------------------------------------
 // GitHub token utilities — lib/util/check-token.ts
 // ---------------------------------------------------------------------------
 
@@ -2208,6 +2256,35 @@ mod tests {
                 "sanitize_urls({input:?})"
             );
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // make_timing_report
+    // -----------------------------------------------------------------------
+
+    // Ported: "supports empty data" — util/stats.spec.ts line 21
+    #[test]
+    fn test_make_timing_report_empty() {
+        let r = make_timing_report(&[]);
+        assert_eq!(r, TimingReport { count: 0, avg_ms: 0, median_ms: 0, max_ms: 0, total_ms: 0 });
+    }
+
+    // Ported: "supports single data point" — util/stats.spec.ts line 32
+    #[test]
+    fn test_make_timing_report_single() {
+        let r = make_timing_report(&[100]);
+        assert_eq!(r, TimingReport { count: 1, avg_ms: 100, median_ms: 100, max_ms: 100, total_ms: 100 });
+    }
+
+    // Ported: "supports multiple data points" — util/stats.spec.ts line 42
+    #[test]
+    fn test_make_timing_report_multiple() {
+        let r = make_timing_report(&[100, 200, 400]);
+        assert_eq!(r.count, 3);
+        assert_eq!(r.max_ms, 400);
+        assert_eq!(r.total_ms, 700);
+        assert_eq!(r.avg_ms, 233);
+        assert_eq!(r.median_ms, 200);
     }
 
     // -----------------------------------------------------------------------

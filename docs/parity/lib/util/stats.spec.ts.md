@@ -5,15 +5,15 @@
 ## `lib/util/stats.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/stats.spec.ts
-**Total tests:** 33 | **Ported:** 0 | **Actionable:** 33 | **Status:** pending
+**Total tests:** 33 | **Ported:** 3 | **Actionable:** 33 | **Status:** partial
 
 ### `util/stats › makeTimingReport`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| supports empty data | 21 | pending | — | — | — |
-| supports single data point | 32 | pending | — | — | — |
-| supports multiple data points | 43 | pending | — | — | — |
+| supports empty data | 21 | ported | `util.rs` | `test_make_timing_report_empty` | — |
+| supports single data point | 32 | ported | `util.rs` | `test_make_timing_report_single` | — |
+| supports multiple data points | 43 | ported | `util.rs` | `test_make_timing_report_multiple` | — |
 
 ### `util/stats › LookupStats`
 
