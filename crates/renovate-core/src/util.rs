@@ -3,6 +3,14 @@
 //! This module contains small, pure utility functions used throughout the
 //! Renovate Rust implementation.
 
+use std::cell::RefCell;
+use std::collections::HashSet;
+
+thread_local! {
+    static GLOBAL_SECRETS: RefCell<HashSet<String>> = RefCell::new(HashSet::new());
+    static REPO_SECRETS: RefCell<HashSet<String>> = RefCell::new(HashSet::new());
+}
+
 // ---------------------------------------------------------------------------
 // String utilities — lib/util/string.ts
 // ---------------------------------------------------------------------------
@@ -262,6 +270,75 @@ pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
     }
     result.truncate(sample_n);
     result
+}
+
+// ---------------------------------------------------------------------------
+// Sanitize — lib/util/sanitize.ts
+// ---------------------------------------------------------------------------
+
+const GITHUB_APP_TOKEN_PREFIX: &str = "x-access-token:";
+
+fn base64_encode(s: &str) -> String {
+    use base64::{Engine, engine::general_purpose::STANDARD};
+    STANDARD.encode(s.as_bytes())
+}
+
+fn add_to_set(set: &RefCell<HashSet<String>>, secret: &str) {
+    let mut s = set.borrow_mut();
+    s.insert(secret.to_owned());
+    s.insert(base64_encode(secret));
+    if let Some(trimmed) = secret.strip_prefix(GITHUB_APP_TOKEN_PREFIX) {
+        s.insert(trimmed.to_owned());
+        s.insert(base64_encode(trimmed));
+    }
+}
+
+/// Add a secret that `sanitize` should replace with `**redacted**`.
+///
+/// `scope = "global"` adds to the global secrets list; otherwise (default) to
+/// repo-scoped secrets.  Both the raw secret and its base64 encoding are added.
+/// GitHub App tokens (`x-access-token:…`) also add the trimmed suffix.
+pub fn add_secret_for_sanitizing(secret: &str, scope: &str) {
+    if secret.is_empty() {
+        return;
+    }
+    if scope == "global" {
+        GLOBAL_SECRETS.with(|s| add_to_set(s, secret));
+    } else {
+        REPO_SECRETS.with(|s| add_to_set(s, secret));
+    }
+}
+
+/// Clear the repo-scoped secrets list.
+pub fn clear_repo_secrets() {
+    REPO_SECRETS.with(|s| s.borrow_mut().clear());
+}
+
+/// Clear the global secrets list.
+pub fn clear_global_secrets() {
+    GLOBAL_SECRETS.with(|s| s.borrow_mut().clear());
+}
+
+/// Replace all registered secrets in `input` with `**redacted**`.
+/// Returns `None` for `None` input; returns empty string unchanged.
+pub fn sanitize_str(input: Option<&str>) -> Option<String> {
+    let s = input?;
+    if s.is_empty() {
+        return Some(String::new());
+    }
+    let mut output = s.to_owned();
+    let replace = |output: &mut String, secrets: &RefCell<HashSet<String>>| {
+        for secret in secrets.borrow().iter() {
+            if !secret.is_empty() {
+                while output.contains(secret.as_str()) {
+                    *output = output.replace(secret.as_str(), "**redacted**");
+                }
+            }
+        }
+    };
+    GLOBAL_SECRETS.with(|s| replace(&mut output, s));
+    REPO_SECRETS.with(|s| replace(&mut output, s));
+    Some(output)
 }
 
 // ---------------------------------------------------------------------------
@@ -1171,6 +1248,64 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // sanitize
+    // -----------------------------------------------------------------------
+
+    fn setup_sanitize() {
+        clear_repo_secrets();
+        clear_global_secrets();
+    }
+
+    // Ported: "sanitizes empty string" — util/sanitize.spec.ts line 15
+    #[test]
+    fn test_sanitize_empty() {
+        setup_sanitize();
+        add_secret_for_sanitizing("", "repo"); // should be a no-op
+        assert_eq!(sanitize_str(None), None);
+        assert_eq!(sanitize_str(Some("")), Some(String::new()));
+        setup_sanitize();
+    }
+
+    // Ported: "sanitizes secrets from strings" — util/sanitize.spec.ts line 21
+    #[test]
+    fn test_sanitize_secrets() {
+        setup_sanitize();
+        let token = "123testtoken";
+        let username = "userabc";
+        let password = "password123";
+        add_secret_for_sanitizing(token, "global");
+        let hashed = base64_encode(&format!("{username}:{password}"));
+        add_secret_for_sanitizing(&hashed, "repo");
+        add_secret_for_sanitizing(password, "repo");
+
+        let input = format!(
+            r#"My token is {token}, username is "{username}" and password is "{password}" (hashed: {hashed})"#
+        );
+        let expected = format!(
+            r#"My token is **redacted**, username is "{username}" and password is "**redacted**" (hashed: **redacted**)"#
+        );
+        assert_eq!(sanitize_str(Some(&input)), Some(expected.clone()));
+        let input_x2 = format!("{input}\n{input}");
+        let output_x2 = format!("{expected}\n{expected}");
+        assert_eq!(sanitize_str(Some(&input_x2)), Some(output_x2));
+        setup_sanitize();
+    }
+
+    // Ported: "sanitizes github app tokens" — util/sanitize.spec.ts line 40
+    #[test]
+    fn test_sanitize_github_app_token() {
+        setup_sanitize();
+        add_secret_for_sanitizing("x-access-token:abc123", "repo");
+        let b64_trimmed = base64_encode("abc123");
+        let input = format!("hello {b64_trimmed} world");
+        assert_eq!(
+            sanitize_str(Some(&input)),
+            Some("hello **redacted** world".to_owned())
+        );
+        setup_sanitize();
     }
 
     // -----------------------------------------------------------------------
