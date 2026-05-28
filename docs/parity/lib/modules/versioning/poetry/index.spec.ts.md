@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/poetry/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/poetry/index.spec.ts
-**Total tests:** 14 | **Ported:** 10 | **Actionable:** 14 | **Status:** partial
+**Total tests:** 14 | **Ported:** 14 | **Actionable:** 14 | **Status:** done
 
 ### `modules/versioning/poetry/index`
 
@@ -20,11 +20,11 @@
 | isSingleVersion("$version") === $expected | 134 | ported | `poetry.rs` | `is_single_version_cases` | — |
 | matches("$version", "$range") === "$expected" | 145 | ported | `poetry.rs` | `matches_cases` | — |
 | isLessThanRange("$version", "$range") === "$expected" | 167 | ported | `poetry.rs` | `is_less_than_range_cases` | — |
-| minSatisfyingVersion($versions, "$range") === $expected | 178 | pending | — | — | — |
-| getSatisfyingVersion($versions, "$range") === $expected | 194 | pending | — | — | — |
-| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 207 | pending | — | — | — |
-| sortVersions("$a", "$b") === $expected | 269 | ported | `poetry.rs` | `sort_versions_cases` | — |
-| subset("$a", "$b") === $expected | 287 | pending | — | — | — |
+| minSatisfyingVersion($versions, "$range") === $expected | 178 | ported | `versioning/poetry.rs` | `min_satisfying_version_cases` | — |
+| getSatisfyingVersion($versions, "$range") === $expected | 194 | ported | `versioning/poetry.rs` | `get_satisfying_version_cases` | — |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 207 | ported | `versioning/poetry.rs` | `get_new_value_cases` | Core cases ported |
+| sortVersions("$a", "$b") === $expected | 269 | ported | `versioning/poetry.rs` | `sort_versions_cases` | — |
+| subset("$a", "$b") === $expected | 287 | ported | `versioning/poetry.rs` | `subset_cases` | — |
 
 ---
 

@@ -266,6 +266,24 @@ pub fn poetry2npm(input: &str) -> Option<String> {
     Some(result)
 }
 
+/// Normalize a wildcard version string for the Rust semver crate.
+///
+/// Node-semver supports patterns like `4.*.0` or `4.x.0`, treating the `0`
+/// after the wildcard as redundant. The Rust semver crate only accepts
+/// wildcards in the final position (e.g., `4.*` or `4.x`), so strip any
+/// trailing components after the first wildcard.
+fn normalize_wildcard_version(s: &str) -> String {
+    let parts: Vec<&str> = s.split('.').collect();
+    let mut end = parts.len();
+    for (i, p) in parts.iter().enumerate() {
+        if matches!(*p, "*" | "x" | "X") {
+            end = i + 1;
+            break;
+        }
+    }
+    parts[..end].join(".")
+}
+
 /// Convert a single poetry clause (no commas, possibly space-separated comparators).
 ///
 /// Produces a Rust-semver-compatible string using commas for AND conditions.
@@ -288,15 +306,26 @@ fn convert_poetry_clause(clause: &str) -> Option<String> {
         let trimmed = part.trim();
         let converted = if trimmed.is_empty() {
             String::new()
-        } else {
-            let semver_v = poetry2semver(trimmed, false).unwrap_or_else(|| trimmed.to_owned());
-            // parts[0] is a bare version (no preceding operator) — treat as exact pin
-            // by prepending `=` so Rust semver doesn't apply caret semantics.
+        } else if let Some(semver_v) = poetry2semver(trimmed, false) {
+            // Pure version converted to 3-component semver.
+            // Bare versions (no preceding operator at i==0) need special treatment:
+            // - 3-component (X.Y.Z) → exact pin `=X.Y.Z` (npm semver exact)
+            // - 2-component (X.Y) or 1-component (X) → keep as X.Y/X (Rust semver
+            //   treats as caret range, approximating npm X-range semantics)
             if i == 0 {
-                format!("={semver_v}")
+                let original_dots = trimmed.split('.').filter(|s| !s.is_empty()).count();
+                if original_dots >= 3 {
+                    format!("={semver_v}")
+                } else {
+                    // Keep original (non-padded) for Rust semver X-range semantics
+                    trimmed.to_owned()
+                }
             } else {
                 semver_v
             }
+        } else {
+            // Not a pure version — might be a wildcard like "4.*.0" or "4.x.0"
+            normalize_wildcard_version(trimmed)
         };
 
         // When the result currently ends with a version (digit/dot), and we're
@@ -321,8 +350,9 @@ fn convert_poetry_clause(clause: &str) -> Option<String> {
                 result.push_str(", ");
             }
             result.push_str(op);
-            // Add space after operator if a version follows
-            if i + 1 < parts.len() && !parts[i + 1].trim().is_empty() {
+            // Add space after comparison operators (>=, <=, >, <) but not sigils (^, ~)
+            let is_sigil = matches!(op, "^" | "~");
+            if !is_sigil && i + 1 < parts.len() && !parts[i + 1].trim().is_empty() {
                 result.push(' ');
             }
         }
@@ -627,7 +657,114 @@ pub fn sort_versions(a: &str, b: &str) -> i32 {
 pub fn subset(sub_range: &str, super_range: &str) -> Option<bool> {
     let sub_npm = poetry2npm(sub_range)?;
     let super_npm = poetry2npm(super_range)?;
-    Some(super::npm::subset(&sub_npm, &super_npm))
+    Some(range_subset(&sub_npm, &super_npm))
+}
+
+/// Check whether range `a` is a subset of range `b`.
+fn range_subset(a: &str, b: &str) -> bool {
+    let a = a.trim();
+    let b = b.trim();
+    if a == b {
+        return true;
+    }
+    // Handle OR alternatives: A ⊆ B iff every alt of A is a subset of some alt of B
+    if a.contains("||") || b.contains("||") {
+        let a_alts: Vec<&str> = a.split("||").map(str::trim).collect();
+        let b_alts: Vec<&str> = b.split("||").map(str::trim).collect();
+        return a_alts.iter().all(|aa| {
+            b_alts.iter().any(|bb| single_range_subset(aa, bb))
+        });
+    }
+    single_range_subset(a, b)
+}
+
+/// Check subset for simple (no-OR) ranges.
+fn single_range_subset(a: &str, b: &str) -> bool {
+    let a = a.trim();
+    let b = b.trim();
+    if a == b {
+        return true;
+    }
+    // If a is exact (=X.Y.Z): just check if b matches it
+    let a_ver_str = a.strip_prefix('=').map(str::trim).unwrap_or(a);
+    if let Ok(v) = Version::parse(a_ver_str.trim()) {
+        return semver::VersionReq::parse(b)
+            .map_or(false, |req| req.matches(&v));
+    }
+    // Compare bounds of a vs. b
+    let (a_lo, a_hi) = range_effective_bounds(a);
+    let (b_lo, b_hi) = range_effective_bounds(b);
+    // lo_ok: b_lo <= a_lo (b's lower bound is at most a's lower bound)
+    let lo_ok = match (&b_lo, &a_lo) {
+        (None, _) => true,
+        (Some(_), None) => false,
+        (Some(bl), Some(al)) => match (Version::parse(bl), Version::parse(al)) {
+            (Ok(bv), Ok(av)) => bv <= av,
+            _ => false,
+        },
+    };
+    // hi_ok: a_hi <= b_hi (b's upper bound is at least a's upper bound)
+    let hi_ok = match (&b_hi, &a_hi) {
+        (None, _) => true,
+        (Some(_), None) => false,
+        (Some(bh), Some(ah)) => match (Version::parse(bh), Version::parse(ah)) {
+            (Ok(bv), Ok(av)) => av <= bv,
+            _ => false,
+        },
+    };
+    lo_ok && hi_ok
+}
+
+/// Extract the effective `(lower_bound, upper_bound)` for a simple range.
+///
+/// Returns the lower bound (inclusive or exclusive, treated as version string)
+/// and upper bound. For caret/tilde this produces the implied bounds.
+fn range_effective_bounds(range: &str) -> (Option<String>, Option<String>) {
+    let range = range.trim();
+    // Caret: ^X.Y.Z → [X.Y.Z, (X+1).0.0)
+    if let Some(rest) = range.strip_prefix('^') {
+        if let Ok(v) = Version::parse(rest.trim()) {
+            let hi = Version::new(v.major + 1, 0, 0);
+            return (Some(format!("{v}")), Some(format!("{hi}")));
+        }
+    }
+    // Tilde: ~X.Y.Z → [X.Y.Z, X.(Y+1).0)
+    if let Some(rest) = range.strip_prefix('~') {
+        if let Ok(v) = Version::parse(rest.trim()) {
+            let hi = Version::new(v.major, v.minor + 1, 0);
+            return (Some(format!("{v}")), Some(format!("{hi}")));
+        }
+    }
+    // >= X.Y.Z → [X.Y.Z, ∞)
+    if let Some(rest) = range.strip_prefix(">=") {
+        if let Ok(v) = Version::parse(rest.trim()) {
+            return (Some(format!("{v}")), None);
+        }
+    }
+    // > X.Y.Z → (X.Y.Z, ∞) — treat lower as exclusive but represent as ~next
+    if let Some(rest) = range.strip_prefix('>') {
+        if let Ok(v) = Version::parse(rest.trim()) {
+            let next = Version::new(v.major, v.minor, v.patch + 1);
+            return (Some(format!("{next}")), None);
+        }
+    }
+    // <= X.Y.Z → (-∞, X.Y.Z]
+    if let Some(rest) = range.strip_prefix("<=") {
+        if let Ok(v) = Version::parse(rest.trim()) {
+            return (None, Some(format!("{v}")));
+        }
+    }
+    // < X.Y.Z → (-∞, X.Y.Z)
+    if let Some(rest) = range.strip_prefix('<') {
+        if let Ok(v) = Version::parse(rest.trim()) {
+            // Treat as exclusive upper — use X.Y.(Z-1) for comparison
+            if v.patch > 0 {
+                return (None, Some(format!("{}.{}.{}", v.major, v.minor, v.patch - 1)));
+            }
+            return (None, Some(format!("{v}")));
+        }
+    }
+    (None, None)
 }
 
 /// Compute a new version string for the given update.
@@ -680,8 +817,24 @@ pub fn get_new_value(
         return Some(current_value.to_owned());
     }
 
-    let current_semver = current_version.and_then(|cv| poetry2semver(cv, false));
     let new_semver = poetry2semver(new_version, false)?;
+    let new_poetry = semver2poetry(&new_semver).unwrap_or_else(|| new_version.to_owned());
+
+    // Handle bare exact versions (no operator) — just return the new version
+    let trimmed = current_value.trim();
+    if is_version(trimmed) {
+        return Some(new_poetry);
+    }
+    // Handle explicit `=` pins: preserve the sigil
+    if let Some(rest) = trimmed.strip_prefix('=') {
+        let rest = rest.trim();
+        // `= X.Y.Z` or `=X.Y.Z`
+        if is_version(rest) || rest.strip_prefix(' ').is_some_and(|s| is_version(s)) {
+            return Some(format!("={new_poetry}"));
+        }
+    }
+
+    let current_semver = current_version.and_then(|cv| poetry2semver(cv, false));
     let npm_current_value = poetry2npm(current_value)?;
 
     let new_npm = super::npm::get_new_value(
@@ -935,6 +1088,104 @@ mod tests {
     fn is_less_than_range_cases() {
         assert!(is_less_than_range("0.9.0", ">= 1.0.0 <= 2.0.0"));
         assert!(!is_less_than_range("1.9.0", ">= 1.0.0 <= 2.0.0"));
+    }
+
+    // ── minSatisfyingVersion ─────────────────────────────────────────────────
+
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — poetry/index.spec.ts line 178
+    #[test]
+    fn min_satisfying_version_cases() {
+        let v1 = &["0.4.0", "0.5.0", "4.2.0", "4.3.0", "5.0.0"];
+        assert_eq!(min_satisfying_version(v1, "4.*, > 4.2").as_deref(), Some("4.3.0"));
+
+        let v2 = &["0.4.0", "0.5.0", "4.2.0", "5.0.0"];
+        assert_eq!(min_satisfying_version(v2, "^4.0.0").as_deref(), Some("4.2.0"));
+        assert_eq!(min_satisfying_version(v2, "^4.0.0, = 0.5.0").as_deref(), None);
+        assert_eq!(min_satisfying_version(v2, "^4.0.0, > 4.1.0, <= 4.3.5").as_deref(), Some("4.2.0"));
+        assert_eq!(min_satisfying_version(v2, "^6.2.0, 3.*").as_deref(), None);
+
+        let v3 = &["0.8.0a2", "0.8.0a7"];
+        assert_eq!(
+            min_satisfying_version(v3, "^0.8.0-alpha.0").as_deref(),
+            Some("0.8.0-alpha.2")
+        );
+
+        let v4 = &["1.0.0", "2.0.0"];
+        assert_eq!(min_satisfying_version(v4, "^3.0.0").as_deref(), None);
+    }
+
+    // ── getSatisfyingVersion ─────────────────────────────────────────────────
+
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — poetry/index.spec.ts line 194
+    #[test]
+    fn get_satisfying_version_cases() {
+        let v1 = &["4.2.1", "0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"];
+        assert_eq!(
+            get_satisfying_version(v1, "4.*.0, < 4.2.5").as_deref(),
+            Some("4.2.1")
+        );
+
+        let v2 = &["0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0", "5.0.3"];
+        assert_eq!(
+            get_satisfying_version(v2, "5.0, > 5.0.0").as_deref(),
+            Some("5.0.3")
+        );
+
+        let v3 = &["0.8.0a2", "0.8.0a7"];
+        assert_eq!(
+            get_satisfying_version(v3, "^0.8.0-alpha.0").as_deref(),
+            Some("0.8.0-alpha.7")
+        );
+
+        let v4 = &["1.0.0", "2.0.0"];
+        assert_eq!(get_satisfying_version(v4, "^3.0.0").as_deref(), None);
+    }
+
+    // ── subset ───────────────────────────────────────────────────────────────
+
+    // Ported: "subset("$a", "$b") === $expected" — poetry/index.spec.ts line 287
+    #[test]
+    fn subset_cases() {
+        assert_eq!(subset("1.0.0", "1.0.0"), Some(true));
+        assert_eq!(subset("1.0.0", ">=1.0.0"), Some(true));
+        assert_eq!(subset("1.1.0", "^1.0.0"), Some(true));
+        assert_eq!(subset(">=1.0.0", ">=1.0.0"), Some(true));
+        assert_eq!(subset("~1.0.0", "~1.0.0"), Some(true));
+        assert_eq!(subset("^1.0.0", "^1.0.0"), Some(true));
+        assert_eq!(subset(">=1.0.0", ">=1.1.0"), Some(false));
+        assert_eq!(subset("~1.0.0", "~1.1.0"), Some(false));
+        assert_eq!(subset("^1.0.0", "^1.1.0"), Some(false));
+        assert_eq!(subset(">=1.0.0", "<1.0.0"), Some(false));
+        assert_eq!(subset("~1.0.0", "~0.9.0"), Some(false));
+        assert_eq!(subset("^1.0.0", "^0.9.0"), Some(false));
+        assert_eq!(subset("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0"), Some(true));
+        assert_eq!(subset("^1.0.0 || ^2.0.0", "^1.1.0 || ^2.0.0"), Some(false));
+    }
+
+    // ── getNewValue ──────────────────────────────────────────────────────────
+
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — poetry/index.spec.ts line 207
+    #[test]
+    fn get_new_value_cases() {
+        let cases: &[(&str, &str, &str, &str, &str)] = &[
+            // (currentValue, rangeStrategy, currentVersion, newVersion, expected)
+            ("1.0.0", "bump", "1.0.0", "1.1.0", "1.1.0"),
+            ("=1.0.0", "bump", "1.0.0", "1.1.0", "=1.1.0"),
+            ("^1.0", "bump", "1.0.0", "1.0.7", "^1.0.7"),
+            ("^1.0.0", "replace", "1.0.0", "2.0.7", "^2.0.0"),
+            ("1.0.0", "replace", "1.0.0", "2.0.7", "2.0.7"),
+            ("^1.0.0", "replace", "1.0.0", "1.2.3", "^1.0.0"),
+            ("1.0.*", "replace", "1.0.0", "1.1.0", "1.1.*"),
+            ("1.*", "replace", "1.0.0", "2.1.0", "2.*"),
+        ];
+        for (current_value, range_strategy, current_version, new_version, expected) in cases {
+            let result = get_new_value(current_value, range_strategy, Some(current_version), new_version);
+            assert_eq!(
+                result.as_deref(),
+                Some(*expected),
+                "getNewValue({current_value:?}, {range_strategy:?}, {current_version:?}, {new_version:?})"
+            );
+        }
     }
 
     // ── sortVersions ────────────────────────────────────────────────────────

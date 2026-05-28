@@ -231,13 +231,15 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
             .min_by(|(_, a), (_, b)| a.cmp(b))
             .map(|(v, _)| v);
     }
-    if let Ok(req) = VersionReq::parse(range) {
-        return versions
-            .iter()
-            .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
-            .filter(|(_, p)| req.matches(p))
-            .min_by(|(_, a), (_, b)| a.cmp(b))
-            .map(|(v, _)| v);
+    if has_range_operator(range) || range.contains(',') {
+        if let Ok(req) = VersionReq::parse(range) {
+            return versions
+                .iter()
+                .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
+                .filter(|(_, p)| req.matches(p))
+                .min_by(|(_, a), (_, b)| a.cmp(b))
+                .map(|(v, _)| v);
+        }
     }
     versions
         .iter()
@@ -264,23 +266,37 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
             return false;
         }
     }
-    // Parse out the lowest >= or > bound from the range string
+    // Tokenize the range (handles both `>=1.0.0` and `>= 1.0.0` and trailing commas)
+    let tokens: Vec<&str> = range
+        .split(|c: char| c == ',' || c == ' ')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .collect();
+
     let mut min_bound: Option<Version> = None;
-    for part in range.split_whitespace() {
-        let raw = part
-            .strip_prefix(">=")
-            .or_else(|| part.strip_prefix('>'))
-            .unwrap_or(part);
-        if raw.len() < part.len() {
-            if let Ok(bound) = Version::parse(raw.trim()) {
-                let replace = min_bound
-                    .as_ref()
-                    .map_or(true, |mb: &Version| bound < *mb);
+    let mut i = 0;
+    while i < tokens.len() {
+        let token = tokens[i];
+        let (version_str_opt, advance) = if token == ">=" {
+            (tokens.get(i + 1).map(|s| s.trim_end_matches(',')), 2)
+        } else if token == ">" {
+            (tokens.get(i + 1).map(|s| s.trim_end_matches(',')), 2)
+        } else if let Some(rest) = token.strip_prefix(">=") {
+            (Some(rest.trim_end_matches(',')), 1)
+        } else if let Some(rest) = token.strip_prefix('>') {
+            (Some(rest.trim_end_matches(',')), 1)
+        } else {
+            (None, 1)
+        };
+        if let Some(v_str) = version_str_opt {
+            if let Ok(bound) = Version::parse(v_str.trim()) {
+                let replace = min_bound.as_ref().map_or(true, |mb: &Version| bound < *mb);
                 if replace {
                     min_bound = Some(bound);
                 }
             }
         }
+        i += advance;
     }
     if let Some(bound) = min_bound {
         return v < bound;
@@ -322,6 +338,27 @@ fn wildcard_req_matches(range: &str, version: &Version) -> bool {
 }
 
 pub fn get_satisfying_version<'a>(versions: &'a [&'a str], range: &str) -> Option<&'a str> {
+    let range = range.trim();
+    if matches!(range, "*" | "x" | "X") {
+        return versions
+            .iter()
+            .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
+            .max_by(|(_, a), (_, b)| a.cmp(b))
+            .map(|(v, _)| v);
+    }
+    // Use VersionReq::parse only for ranges with operators or compound conditions.
+    // For plain wildcard patterns (digits, dots, *, x, X only), wildcard_req_matches
+    // gives the correct "2.3 means 2.3.x" behaviour.
+    if has_range_operator(range) || range.contains(',') {
+        if let Ok(req) = VersionReq::parse(range) {
+            return versions
+                .iter()
+                .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
+                .filter(|(_, p)| req.matches(p))
+                .max_by(|(_, a), (_, b)| a.cmp(b))
+                .map(|(v, _)| v);
+        }
+    }
     versions
         .iter()
         .filter_map(|version| {
@@ -423,6 +460,82 @@ pub fn get_new_value(
     if current_value.starts_with('^') && current_value.contains('-') && range_strategy == "replace"
     {
         return Some(format!("^{}", new_version.trim_start_matches('v')));
+    }
+    // Caret ranges
+    if let Some(rest) = current_value.strip_prefix('^') {
+        let new = Version::parse(new_version.trim_start_matches('v')).ok()?;
+        let dots = rest.matches('.').count();
+        // For replace: if new version satisfies the current range, keep it
+        if range_strategy == "replace" {
+            if matches_range(new_version.trim_start_matches('v'), current_value) {
+                return Some(current_value.to_owned());
+            }
+        }
+        let result = if range_strategy == "bump" {
+            // Bump: express the full new version (including any prerelease)
+            format!("^{}", new_version.trim_start_matches('v'))
+        } else {
+            // Replace with caret semantics based on the "locked" level:
+            // ^1.x.x → locked on major → when major changes: reset to ^{major}.0.0
+            // ^0.1.x → locked on minor → when minor changes: reset to ^0.{minor}.0
+            // ^0.0.x → locked on patch → use exact new version
+            //
+            // When downgrading within the locked level (new < current without
+            // leaving the "locked" range), use the exact new version.
+            let cur = Version::parse(rest.trim_start_matches('v')).ok();
+            let same_locked_level = match (cur.as_ref(), new.major) {
+                (Some(c), _) if c.major > 0 => new.major == c.major,
+                (Some(c), _) if c.major == 0 && c.minor > 0 => new.minor == c.minor,
+                _ => false,
+            };
+            if same_locked_level {
+                // Downgrade within same lock level: use exact new version
+                format!("^{}", new_version.trim_start_matches('v'))
+            } else if new.major > 0 {
+                match dots {
+                    0 => format!("^{}", new.major),
+                    1 => format!("^{}.{}", new.major, 0),
+                    _ => format!("^{}.{}.{}", new.major, 0, 0),
+                }
+            } else if new.minor > 0 {
+                match dots {
+                    0 => format!("^{}", new.major),
+                    1 => format!("^{}.{}", new.major, new.minor),
+                    _ => format!("^{}.{}.{}", new.major, new.minor, 0),
+                }
+            } else {
+                // major=0, minor=0: patch-level range
+                format!("^{}", new_version.trim_start_matches('v'))
+            }
+        };
+        return Some(result);
+    }
+    // Tilde ranges: bump uses full new version; replace preserves precision
+    if let Some(rest) = current_value.strip_prefix('~') {
+        let new = Version::parse(new_version.trim_start_matches('v')).ok()?;
+        let dots = rest.matches('.').count();
+        let result = if range_strategy == "bump" {
+            format!("~{}", new_version.trim_start_matches('v'))
+        } else {
+            // Replace: normalize to ~{major}.{minor}.0 (reset patch, preserve minor precision)
+            match dots {
+                0 => format!("~{}", new.major),
+                1 => format!("~{}.{}", new.major, new.minor),
+                _ => format!("~{}.{}.{}", new.major, new.minor, 0),
+            }
+        };
+        return Some(result);
+    }
+    // Wildcard patterns with *: 1.0.* → 1.1.*, 1.* → 2.*
+    if current_value.contains('*') && range_strategy == "replace" {
+        let new = Version::parse(new_version.trim_start_matches('v')).ok()?;
+        let parts: Vec<&str> = current_value.split('.').collect();
+        let result = match parts.as_slice() {
+            [_, "*"] => format!("{}.*", new.major),
+            [_, _, "*"] => format!("{}.{}.*", new.major, new.minor),
+            _ => return None,
+        };
+        return Some(result);
     }
     if current_value.starts_with('<') && range_strategy == "widen" {
         let new = Version::parse(new_version.trim_start_matches('v')).ok()?;

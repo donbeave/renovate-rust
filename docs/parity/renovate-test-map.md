@@ -486,7 +486,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/gradle/index.spec.ts` | Done | [details](lib/modules/versioning/gradle/index.spec.ts.md) |
 | `lib/modules/versioning/devbox/index.spec.ts` | Done | [details](lib/modules/versioning/devbox/index.spec.ts.md) |
 | `lib/modules/versioning/nixpkgs/index.spec.ts` | Done | [details](lib/modules/versioning/nixpkgs/index.spec.ts.md) |
-| `lib/modules/versioning/poetry/index.spec.ts` | Not done | [details](lib/modules/versioning/poetry/index.spec.ts.md) |
+| `lib/modules/versioning/poetry/index.spec.ts` | Done | [details](lib/modules/versioning/poetry/index.spec.ts.md) |
 | `lib/modules/versioning/semver/index.spec.ts` | Done | [details](lib/modules/versioning/semver/index.spec.ts.md) |
 | `lib/modules/versioning/semver/common.spec.ts` | Done | [details](lib/modules/versioning/semver/common.spec.ts.md) |
 | `lib/modules/versioning/swift/index.spec.ts` | Done | [details](lib/modules/versioning/swift/index.spec.ts.md) |

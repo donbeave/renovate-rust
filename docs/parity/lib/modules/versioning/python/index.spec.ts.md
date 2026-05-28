@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/python/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/python/index.spec.ts
-**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 7 | **Actionable:** 8 | **Status:** partial
 
 ### `modules/versioning/python/index`
 
