@@ -20,6 +20,7 @@ pub mod conda;
 pub mod cpan;
 pub mod crates_io;
 pub mod dart_version;
+pub mod deb;
 pub mod deno;
 pub mod devbox;
 pub mod docker_hub;
