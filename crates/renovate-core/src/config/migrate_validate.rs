@@ -837,6 +837,40 @@ fn migrate_config(input: &Value) -> Value {
         {
             set_safely(map, "rangeStrategy", Value::String("widen".to_owned()));
         }
+        // Migrate gradle-lite → gradle (mirrors the TypeScript gradle-lite migration).
+        if let Some(gradle_lite_val) = map.remove("gradle-lite") {
+            if let Value::Object(gradle_lite_obj) = gradle_lite_val {
+                let gradle_entry = map
+                    .entry("gradle".to_owned())
+                    .or_insert_with(|| Value::Object(serde_json::Map::new()));
+                if let Value::Object(gradle_obj) = gradle_entry {
+                    for (k, v) in gradle_lite_obj {
+                        gradle_obj.entry(k).or_insert(v);
+                    }
+                }
+            }
+        }
+        // Replace 'gradle-lite' with 'gradle' in matchManagers inside package rules.
+        if let Some(Value::Array(rules)) = map.get_mut("packageRules") {
+            for rule in rules.iter_mut() {
+                if let Value::Object(rule_obj) = rule {
+                    if let Some(Value::Array(match_managers)) = rule_obj.get_mut("matchManagers") {
+                        let has_gradle_lite = match_managers
+                            .iter()
+                            .any(|m| m.as_str() == Some("gradle-lite"));
+                        if has_gradle_lite {
+                            let has_gradle = match_managers
+                                .iter()
+                                .any(|m| m.as_str() == Some("gradle"));
+                            if !has_gradle {
+                                match_managers.push(Value::String("gradle".to_owned()));
+                            }
+                            match_managers.retain(|m| m.as_str() != Some("gradle-lite"));
+                        }
+                    }
+                }
+            }
+        }
         if matches!(map.get("platformCommit"), Some(Value::Bool(true))) {
             map.insert(
                 "platformCommit".to_owned(),
@@ -6559,6 +6593,24 @@ mod tests {
             .iter()
             .map(|warning| warning["message"].as_str().unwrap())
             .collect()
+    }
+
+    // Ported: "migrates gradle-lite" — config/migration.spec.ts line 731
+    #[test]
+    fn migrates_gradle_lite() {
+        let result = migrate_config(&json!({
+            "gradle-lite": {"enabled": true, "fileMatch": ["foo"]},
+            "packageRules": [{"matchManagers": ["gradle-lite"], "separateMinorPatch": true}]
+        }));
+        // gradle-lite merged into gradle
+        assert_eq!(result["gradle"]["enabled"], json!(true));
+        assert!(result.get("gradle-lite").is_none());
+        // matchManagers: gradle-lite → gradle
+        let rules = result["packageRules"].as_array().unwrap();
+        assert!(rules[0]["matchManagers"].as_array().unwrap().iter()
+            .any(|m| m.as_str() == Some("gradle")));
+        assert!(!rules[0]["matchManagers"].as_array().unwrap().iter()
+            .any(|m| m.as_str() == Some("gradle-lite")));
     }
 
     // Ported: "overrides existing automerge setting" — config/migration.spec.ts line 279

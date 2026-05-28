@@ -5,7 +5,7 @@
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 25 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 26 | **Actionable:** 30 | **Status:** partial
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 
@@ -39,7 +39,7 @@
 | migrates presets | 655 | ported | `repo_config.rs` | `migrate_presets_rewrites_extends_and_drops_empty_replacements` | — |
 | migrates customManagers | 671 | ported | `repo_config.rs` | `custom_manager_deprecated_lookup_name_fields_migrate` | — |
 | migrates pip-compile | 696 | pending | — | — | — |
-| migrates gradle-lite | 731 | pending | — | — | — |
+| migrates gradle-lite | 731 | ported | — | — | — |
 | migrates empty requiredStatusChecks | 751 | ported | `repo_config.rs` | `empty_required_status_checks_is_removed` | — |
 | migrates azureAutoComplete | 762 | ported | `repo_config.rs` | `azure_auto_complete_migrated_to_platform_automerge` | — |
 | migrates gitLabAutomerge | 791 | ported | `repo_config.rs` | `git_lab_automerge_migrated_to_platform_automerge` | — |
