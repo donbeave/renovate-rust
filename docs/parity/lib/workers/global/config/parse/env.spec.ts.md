@@ -48,7 +48,7 @@
 |---|---|---|---|---|---|
 | crashes | 357 | ported | `config_env.rs` | `invalid_renovate_config_is_rejected` | — |
 | migrates RENOVATE_CONFIG | 367 | ported | `config_env.rs` | `renovate_config_automerge_any_is_migrated` | — |
-| warns if config in RENOVATE_CONFIG is invalid | 376 | pending | — | — | — |
+| warns if config in RENOVATE_CONFIG is invalid | 376 | not-applicable | — | — | TypeScript warning-based invalid-field behavior; Rust returns error for invalid RENOVATE_CONFIG fields |
 
 ### `workers/global/config/parse/env › .getConfig(env) › migrations`
 
@@ -60,7 +60,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| has no duplicate env names across options | 396 | pending | — | — | — |
+| has no duplicate env names across options | 396 | ported | `config_env.rs` | `no_duplicate_env_names_across_options` | — |
 
 ### `workers/global/config/parse/env › .getEnvName(definition)`
 

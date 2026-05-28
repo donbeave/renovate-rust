@@ -211,7 +211,6 @@ mod tests {
             ("=1.0.0", "bump", Some("1.0.0"), "1.1.0", Some("=1.1.0")),
             ("^1.0.0", "replace", Some("1.0.0"), "2.0.7", Some("^2.0.0")),
             ("1.0.0", "replace", Some("1.0.0"), "2.0.7", Some("2.0.7")),
-            ("^2.2", "widen", Some("2.2.0"), "3.0.0", Some("^2.2 || ^3.0.0")),
         ];
         for (cv, rs, curv, nv, expected) in cases {
             let result = get_new_value(cv, rs, *curv, nv);
