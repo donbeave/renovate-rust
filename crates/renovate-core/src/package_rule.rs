@@ -509,9 +509,13 @@ impl PackageRule {
             };
             sv
         };
-        semver::VersionReq::parse(mcv)
-            .map(|req| req.matches(&compare_sv))
-            .unwrap_or(false)
+        // Try semver range matching first
+        if let Ok(req) = semver::VersionReq::parse(mcv) {
+            return req.matches(&compare_sv);
+        }
+        // Fallback: try PEP 440 range matching for ranges that semver cannot parse
+        // (e.g. `<1.2.3.5` which has 4 components and is rejected by semver).
+        crate::versioning::pep440::matches_range(current_value, mcv)
     }
 
     /// Return `true` when this rule's `matchRegistryUrls` condition matches.
@@ -1674,6 +1678,14 @@ mod tests {
     fn current_version_matcher_returns_true_for_null_versioning_equivalent() {
         let rule = rule_with_current_version("1.2.3");
 
+        assert!(rule.current_version_matches("1.2.3", None, None));
+    }
+
+    // Ported: "return true for a valid match" — util/package-rules/current-version.spec.ts line 39
+    #[test]
+    fn current_version_matcher_pep440_four_component_range() {
+        // pep440: 1.2.3 < 1.2.3.5 (4-component version, semver rejects but pep440 handles)
+        let rule = rule_with_current_version("<1.2.3.5");
         assert!(rule.current_version_matches("1.2.3", None, None));
     }
 

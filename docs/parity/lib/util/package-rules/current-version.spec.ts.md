@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | returns true for null versioning | 8 | ported | `package_rule.rs` | `current_version_matcher_returns_true_for_null_versioning_equivalent` | — |
 | return false on version exception | 22 | not-applicable | — | — | mocking framework internals; tests vi.spyOn/mockImplementationOnce |
-| return true for a valid match | 39 | pending | — | — | — |
+| return true for a valid match | 39 | ported | `package_rule.rs` | `current_version_matcher_pep440_four_component_range` | — |
 | return false if no version could be found | 52 | ported | `package_rule.rs` | `current_version_matcher_returns_false_if_no_version_found` | — |
 | case insensitive match | 66 | ported | `package_rule.rs` | `current_version_matcher_regex_is_case_insensitive` | — |
 | return false for regex version non match | 79 | ported | `package_rule.rs` | `current_version_matcher_returns_false_for_regex_version_non_match` | — |

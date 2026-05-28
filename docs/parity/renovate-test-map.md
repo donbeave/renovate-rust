@@ -378,7 +378,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/package-rules/files.spec.ts` | Done | [details](lib/util/package-rules/files.spec.ts.md) |
 | `lib/util/package-rules/current-age.spec.ts` | Done | [details](lib/util/package-rules/current-age.spec.ts.md) |
 | `lib/util/package-rules/repositories.spec.ts` | Done | [details](lib/util/package-rules/repositories.spec.ts.md) |
-| `lib/util/package-rules/current-version.spec.ts` | Not done | [details](lib/util/package-rules/current-version.spec.ts.md) |
+| `lib/util/package-rules/current-version.spec.ts` | Done | [details](lib/util/package-rules/current-version.spec.ts.md) |
 | `lib/util/package-rules/jsonata.spec.ts` | Not done | [details](lib/util/package-rules/jsonata.spec.ts.md) |
 | `lib/workers/global/config/parse/cli.spec.ts` | Done | [details](lib/workers/global/config/parse/cli.spec.ts.md) |
 | `lib/workers/repository/init/apis.spec.ts` | Not done | [details](lib/workers/repository/init/apis.spec.ts.md) |
