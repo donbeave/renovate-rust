@@ -12,6 +12,247 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// URL utilities — lib/util/url.ts
+// ---------------------------------------------------------------------------
+
+/// Remove one or more trailing slashes from a URL/path.
+pub fn trim_trailing_slash(url: &str) -> String {
+    url.trim_end_matches('/').to_owned()
+}
+
+/// Remove one or more leading slashes from a path.
+pub fn trim_leading_slash(path: &str) -> String {
+    path.trim_start_matches('/').to_owned()
+}
+
+/// Remove both leading and trailing slashes from a path.
+pub fn trim_slashes(path: &str) -> String {
+    path.trim_matches('/').to_owned()
+}
+
+/// Ensure a URL ends with exactly one trailing slash.
+pub fn ensure_trailing_slash(url: &str) -> String {
+    format!("{}/", url.trim_end_matches('/'))
+}
+
+/// Return true when `url` starts with `http://` or `https://`.
+pub fn is_http_url(url: &str) -> bool {
+    url.starts_with("http://") || url.starts_with("https://")
+}
+
+/// Ensure that `url`'s path starts with `prefix`.
+pub fn ensure_path_prefix(url: &str, prefix: &str) -> String {
+    // Parse scheme + host, then handle path
+    if let Some(after_scheme) = url.strip_prefix("https://").or_else(|| url.strip_prefix("http://")) {
+        let scheme = if url.starts_with("https://") { "https://" } else { "http://" };
+        let (host_part, path_part) = after_scheme.split_once('/').unwrap_or((after_scheme, ""));
+        let full_path = if path_part.is_empty() { "/".to_owned() } else { format!("/{path_part}") };
+        if full_path.starts_with(prefix) {
+            return url.to_owned();
+        }
+        // Extract query string from path
+        let (path_only, query) = full_path.split_once('?').unwrap_or((&full_path, ""));
+        let new_path = format!("{prefix}{path_only}");
+        let result = format!("{scheme}{host_part}{new_path}");
+        if query.is_empty() { result } else { format!("{result}?{query}") }
+    } else {
+        url.to_owned()
+    }
+}
+
+/// Resolve `input` against `base_url`, following `url-join` semantics.
+///
+/// If `input` is a full URL (contains `://`), it is returned unchanged.
+/// Otherwise, `input` is appended to `base_url` with a single `/` separator.
+pub fn resolve_base_url(base_url: &str, input: &str) -> String {
+    if input.is_empty() {
+        return trim_trailing_slash(base_url);
+    }
+    // Full URL passthrough
+    if input.contains("://") {
+        return input.to_owned();
+    }
+    let base = base_url.trim_end_matches('/');
+    let stripped = input.trim_start_matches('/');
+    if stripped.is_empty() {
+        // Input was "/" or all slashes → base + trailing slash
+        return format!("{base}/");
+    }
+    // Query string starting directly with ? → append without separator
+    if stripped.starts_with('?') {
+        return format!("{base}{stripped}");
+    }
+    // Clean trailing slash before query string
+    let cleaned = stripped.replace("/?", "?");
+    format!("{base}/{cleaned}")
+}
+
+/// Replace the path of `base_url` with `path`, using the origin (scheme+host)
+/// only (not the base path).
+pub fn replace_url_path(base_url: &str, path: &str) -> String {
+    if path.contains("://") {
+        return path.to_owned();
+    }
+    let origin = extract_origin(base_url);
+    resolve_base_url(&origin, path)
+}
+
+fn extract_origin(url: &str) -> String {
+    let (scheme, rest) = if let Some(r) = url.strip_prefix("https://") {
+        ("https", r)
+    } else if let Some(r) = url.strip_prefix("http://") {
+        ("http", r)
+    } else {
+        return url.trim_end_matches('/').to_owned();
+    };
+    let host_end = rest.find(['/', '?', '#']).unwrap_or(rest.len());
+    format!("{scheme}://{}", &rest[..host_end])
+}
+
+/// Join URL path parts with exactly one `/` between each.
+pub fn join_url_parts(parts: &[&str]) -> String {
+    if parts.is_empty() {
+        return String::new();
+    }
+    // Single arg: normalize trailing slashes
+    if parts.len() == 1 {
+        let s = parts[0];
+        let trimmed = s.trim_end_matches('/');
+        return if s.len() > trimmed.len() {
+            format!("{trimmed}/")
+        } else {
+            trimmed.to_owned()
+        };
+    }
+    let mut result = parts[0].to_owned();
+    for part in &parts[1..] {
+        result = resolve_base_url(&result, part);
+    }
+    result
+}
+
+/// Build a URL from a host name or full URL string.
+///
+/// If `host_or_url` already contains `://`, it is returned as-is.
+/// Otherwise, `https://` is prepended.
+pub fn create_url_from_host_or_url(host_or_url: &str) -> String {
+    if host_or_url.contains("://") {
+        host_or_url.to_owned()
+    } else {
+        format!("https://{host_or_url}")
+    }
+}
+
+/// Parse an HTTP `Link` header into a map from `rel` value to link attributes.
+///
+/// Returns `None` for empty/absent headers or headers longer than 2000 chars.
+/// Each link is returned as a `HashMap<String, String>` with `url`, `rel`, and
+/// any other parameters plus the URL's query parameters flattened in.
+///
+/// Mirrors `parseLinkHeader` from `lib/util/url.ts`.
+pub fn parse_link_header(
+    header: Option<&str>,
+) -> Option<std::collections::HashMap<String, std::collections::HashMap<String, String>>> {
+    let header = header?;
+    if header.is_empty() || header.len() > 2000 {
+        return None;
+    }
+    let mut result = std::collections::HashMap::new();
+    // Split on commas that are NOT inside angle brackets
+    for segment in split_link_header(header) {
+        let segment = segment.trim();
+        if segment.is_empty() {
+            continue;
+        }
+        // Extract URL from <...>
+        let url_start = segment.find('<')? + 1;
+        let url_end = segment.find('>')?;
+        let url = &segment[url_start..url_end];
+        let rest = &segment[url_end + 1..]; // ; param=val; ...
+
+        let mut link: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+        link.insert("url".to_owned(), url.to_owned());
+
+        // Extract query params from URL
+        if let Some(query_start) = url.find('?') {
+            for kv in url[query_start + 1..].split('&') {
+                if let Some((k, v)) = kv.split_once('=') {
+                    link.insert(k.to_owned(), v.to_owned());
+                }
+            }
+        }
+
+        // Extract ; key="value" params
+        for param in rest.split(';') {
+            let param = param.trim();
+            if param.is_empty() { continue; }
+            if let Some((k, v)) = param.split_once('=') {
+                let k = k.trim().to_owned();
+                let v = v.trim().trim_matches('"').to_owned();
+                link.insert(k, v);
+            }
+        }
+
+        // Index by rel
+        if let Some(rel) = link.get("rel").cloned() {
+            result.insert(rel, link);
+        }
+    }
+    if result.is_empty() { None } else { Some(result) }
+}
+
+fn split_link_header(header: &str) -> Vec<&str> {
+    let mut parts = Vec::new();
+    let mut depth = 0i32;
+    let mut start = 0;
+    for (i, ch) in header.char_indices() {
+        match ch {
+            '<' => depth += 1,
+            '>' => depth -= 1,
+            ',' if depth == 0 => {
+                parts.push(&header[start..i]);
+                start = i + 1;
+            }
+            _ => {}
+        }
+    }
+    parts.push(&header[start..]);
+    parts
+}
+
+/// Prefix `https://` to host strings that include a port or path.
+///
+/// Mirrors `massageHostUrl` from `lib/util/url.ts`.
+pub fn massage_host_url(url: &str) -> String {
+    if !url.contains("://") && (url.contains('/') || url.contains(':')) {
+        format!("https://{url}")
+    } else {
+        url.to_owned()
+    }
+}
+
+/// Build a query string from key-value pairs.
+///
+/// Returns an empty string for empty input.
+pub fn get_query_string(params: &[(&str, &str)]) -> String {
+    if params.is_empty() {
+        return String::new();
+    }
+    params
+        .iter()
+        .map(|(k, v)| format!("{k}={v}"))
+        .collect::<Vec<_>>()
+        .join("&")
+}
+
+/// Parse a URL string, returning `Some(normalized_url)` for valid HTTP(S) URLs or `None`.
+///
+/// Mirrors the TypeScript `parseUrl` from `lib/util/url.ts`.
+pub fn parse_url(url: &str) -> Option<reqwest::Url> {
+    reqwest::Url::parse(url).ok()
+}
+
+// ---------------------------------------------------------------------------
 // String utilities — lib/util/string.ts
 // ---------------------------------------------------------------------------
 
@@ -1460,6 +1701,194 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // URL utilities
+    // -----------------------------------------------------------------------
+
+    // Ported: "$baseUrl + $x => $result" — util/url.spec.ts line 18
+    #[test]
+    fn test_resolve_base_url() {
+        let cases: &[(&str, &str, &str)] = &[
+            ("http://foo.io", "", "http://foo.io"),
+            ("http://foo.io/", "", "http://foo.io"),
+            ("http://foo.io", "/", "http://foo.io/"),
+            ("http://foo.io/", "/", "http://foo.io/"),
+            ("http://foo.io", "/aaa", "http://foo.io/aaa"),
+            ("http://foo.io", "aaa", "http://foo.io/aaa"),
+            ("http://foo.io/", "/aaa", "http://foo.io/aaa"),
+            ("http://foo.io/", "aaa", "http://foo.io/aaa"),
+            ("http://foo.io", "/aaa/", "http://foo.io/aaa/"),
+            ("http://foo.io", "aaa/", "http://foo.io/aaa/"),
+            ("http://foo.io/aaa", "/bbb", "http://foo.io/aaa/bbb"),
+            ("http://foo.io/aaa", "bbb", "http://foo.io/aaa/bbb"),
+            ("http://foo.io/aaa/", "/bbb", "http://foo.io/aaa/bbb"),
+            ("http://foo.io/aaa/", "bbb", "http://foo.io/aaa/bbb"),
+            ("http://foo.io", "http://bar.io/bbb", "http://bar.io/bbb"),
+            ("http://foo.io/aaa", "http://bar.io/bbb/", "http://bar.io/bbb/"),
+            ("http://foo.io", "aaa?bbb=z", "http://foo.io/aaa?bbb=z"),
+            ("http://foo.io", "/aaa?bbb=z", "http://foo.io/aaa?bbb=z"),
+            ("http://foo.io", "aaa/?bbb=z", "http://foo.io/aaa?bbb=z"),
+        ];
+        for (base, x, expected) in cases {
+            let got = resolve_base_url(base, x);
+            assert_eq!(got, *expected, "resolve_base_url({base:?}, {x:?})");
+        }
+    }
+
+    // Ported: "replaceUrlPath(\"$baseUrl\", \"$x\") => $result" — util/url.spec.ts line 57
+    #[test]
+    fn test_replace_url_path() {
+        let cases: &[(&str, &str, &str)] = &[
+            ("http://foo.io", "", "http://foo.io"),
+            ("http://foo.io/", "/", "http://foo.io/"),
+            ("http://foo.io", "/aaa", "http://foo.io/aaa"),
+            ("http://foo.io", "aaa", "http://foo.io/aaa"),
+            ("http://foo.io/aaa", "/bbb", "http://foo.io/bbb"),
+            ("http://foo.io/aaa", "bbb", "http://foo.io/bbb"),
+            ("http://foo.io/aaa/", "/bbb", "http://foo.io/bbb"),
+            ("http://foo.io", "http://bar.io/bbb", "http://bar.io/bbb"),
+        ];
+        for (base, x, expected) in cases {
+            let got = replace_url_path(base, x);
+            assert_eq!(got, *expected, "replace_url_path({base:?}, {x:?})");
+        }
+    }
+
+    // Ported: "getQueryString" — util/url.spec.ts line 97
+    #[test]
+    fn test_get_query_string() {
+        assert_eq!(get_query_string(&[("a", "1")]), "a=1");
+        assert_eq!(get_query_string(&[]), "");
+    }
+
+    // Ported: "validates http-based URLs" — util/url.spec.ts line 101
+    #[test]
+    fn test_is_http_url() {
+        assert!(!is_http_url(""));
+        assert!(!is_http_url("foo"));
+        assert!(!is_http_url("ssh://github.com"));
+        assert!(is_http_url("http://github.com"));
+        assert!(is_http_url("https://github.com"));
+    }
+
+    // Ported: "parses URL" — util/url.spec.ts line 112
+    #[test]
+    fn test_parse_url() {
+        assert!(parse_url("bad url").is_none());
+        let u = parse_url("https://github.com/renovatebot/renovate").unwrap();
+        assert_eq!(u.scheme(), "https");
+        assert_eq!(u.host_str(), Some("github.com"));
+        assert_eq!(u.path(), "/renovatebot/renovate");
+    }
+
+    // Ported: "trimTrailingSlash" — util/url.spec.ts line 123
+    #[test]
+    fn test_trim_trailing_slash() {
+        assert_eq!(trim_trailing_slash("foo"), "foo");
+        assert_eq!(trim_trailing_slash("/foo/bar"), "/foo/bar");
+        assert_eq!(trim_trailing_slash("foo/"), "foo");
+        assert_eq!(trim_trailing_slash("foo//////"), "foo");
+    }
+
+    // Ported: "trimSlashes" — util/url.spec.ts line 130
+    #[test]
+    fn test_trim_slashes() {
+        assert_eq!(trim_slashes("foo"), "foo");
+        assert_eq!(trim_slashes("/foo"), "foo");
+        assert_eq!(trim_slashes("foo/"), "foo");
+        assert_eq!(trim_slashes("//////foo//////"), "foo");
+        assert_eq!(trim_slashes("foo/bar"), "foo/bar");
+        assert_eq!(trim_slashes("/foo/bar"), "foo/bar");
+        assert_eq!(trim_slashes("foo/bar/"), "foo/bar");
+        assert_eq!(trim_slashes("/foo/bar/"), "foo/bar");
+    }
+
+    // Ported: "ensureTrailingSlash" — util/url.spec.ts line 141
+    #[test]
+    fn test_ensure_trailing_slash() {
+        assert_eq!(ensure_trailing_slash(""), "/");
+        assert_eq!(ensure_trailing_slash("/"), "/");
+        assert_eq!(ensure_trailing_slash("https://example.com"), "https://example.com/");
+    }
+
+    // Ported: "ensures path prefix" — util/url.spec.ts line 146
+    #[test]
+    fn test_ensure_path_prefix() {
+        assert_eq!(
+            ensure_path_prefix("https://index.docker.io", "/v2"),
+            "https://index.docker.io/v2/"
+        );
+        assert_eq!(
+            ensure_path_prefix("https://index.docker.io/v2", "/v2"),
+            "https://index.docker.io/v2"
+        );
+        assert_eq!(
+            ensure_path_prefix("https://index.docker.io/v2/something", "/v2"),
+            "https://index.docker.io/v2/something"
+        );
+    }
+
+    // Ported: "joinUrlParts" — util/url.spec.ts line 164
+    #[test]
+    fn test_join_url_parts() {
+        let base = "https://some.test";
+        assert_eq!(join_url_parts(&[base, "foo"]), format!("{base}/foo"));
+        assert_eq!(join_url_parts(&[base, "/?foo"]), format!("{base}?foo"));
+        assert_eq!(join_url_parts(&[base, "/foo/bar/"]), format!("{base}/foo/bar/"));
+        assert_eq!(
+            join_url_parts(&[&format!("{base}/foo/"), "/foo/bar"]),
+            format!("{base}/foo/foo/bar")
+        );
+        assert_eq!(
+            join_url_parts(&[&format!("{base}/api/"), "/foo/bar"]),
+            format!("{base}/api/foo/bar")
+        );
+        assert_eq!(join_url_parts(&["foo//////"]), "foo/");
+    }
+
+    // Ported: "createURLFromHostOrURL" — util/url.spec.ts line 180
+    #[test]
+    fn test_create_url_from_host_or_url() {
+        assert_eq!(
+            create_url_from_host_or_url("https://some.test"),
+            "https://some.test"
+        );
+        assert_eq!(
+            create_url_from_host_or_url("some.test"),
+            "https://some.test"
+        );
+    }
+
+    // Ported: "parseLinkHeader" — util/url.spec.ts line 189
+    #[test]
+    fn test_parse_link_header() {
+        assert_eq!(parse_link_header(None), None);
+        assert_eq!(parse_link_header(Some(&" ".repeat(2001))), None);
+        let header = concat!(
+            r#"<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next","#,
+            r#"<https://api.github.com/user/9287/repos?page=1&per_page=100>; rel="prev"; pet="cat", "#,
+            r#"<https://api.github.com/user/9287/repos?page=5&per_page=100>; rel="last""#,
+        );
+        let result = parse_link_header(Some(header)).unwrap();
+        let next = result.get("next").unwrap();
+        assert_eq!(next.get("url").unwrap(), "https://api.github.com/user/9287/repos?page=3&per_page=100");
+        assert_eq!(next.get("rel").unwrap(), "next");
+        assert_eq!(next.get("page").unwrap(), "3");
+        assert_eq!(next.get("per_page").unwrap(), "100");
+        let prev = result.get("prev").unwrap();
+        assert_eq!(prev.get("pet").unwrap(), "cat");
+        assert!(result.contains_key("last"));
+    }
+
+    // Ported: "massageHostUrl" — util/url.spec.ts line 221
+    #[test]
+    fn test_massage_host_url() {
+        assert_eq!(massage_host_url("domain.com"), "domain.com");
+        assert_eq!(massage_host_url("domain.com:8080"), "https://domain.com:8080");
+        assert_eq!(massage_host_url("domain.com/some/path"), "https://domain.com/some/path");
+        assert_eq!(massage_host_url("https://domain.com"), "https://domain.com");
     }
 
     // -----------------------------------------------------------------------
