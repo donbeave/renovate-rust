@@ -5,13 +5,13 @@
 ## `lib/workers/repository/result.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/result.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** done
 
 ### `workers/repository/result › processResult()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| runs | 16 | pending | — | — | — |
+| runs | 16 | ported | `util.rs` | `test_process_result_runs` | — |
 
 ---
 

@@ -12,6 +12,27 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Environment utilities — lib/util/env.ts
+// ---------------------------------------------------------------------------
+
+/// Combine environment maps with precedence: `user_env > custom_env > process_env`.
+///
+/// Mirrors `getEnv()` from `lib/util/env.ts`.
+pub fn get_combined_env<S: std::hash::BuildHasher>(
+    process_env: &std::collections::HashMap<String, String, S>,
+    custom_env: &std::collections::HashMap<String, String>,
+    user_env: &std::collections::HashMap<String, String>,
+) -> std::collections::HashMap<String, String> {
+    let mut combined: std::collections::HashMap<String, String> = process_env
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
+    combined.extend(custom_env.iter().map(|(k, v)| (k.clone(), v.clone())));
+    combined.extend(user_env.iter().map(|(k, v)| (k.clone(), v.clone())));
+    combined
+}
+
+// ---------------------------------------------------------------------------
 // Timing stats — lib/util/stats.ts
 // ---------------------------------------------------------------------------
 
@@ -1687,6 +1708,99 @@ pub fn massage_throwable<T: std::fmt::Display>(e: Option<T>) -> Option<String> {
 // ---------------------------------------------------------------------------
 // cmdSerializer — lib/logger/cmd-serializer.ts
 // ---------------------------------------------------------------------------
+// Repository result — lib/workers/repository/result.ts
+// ---------------------------------------------------------------------------
+
+/// Status of a repository run.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ProcessStatus {
+    Disabled,
+    Activated,
+    Onboarded,
+    Onboarding,
+    Unknown,
+}
+
+/// Result of `process_result`.
+#[derive(Debug, Clone)]
+pub struct ProcessResult {
+    pub res: String,
+    pub status: ProcessStatus,
+    pub enabled: Option<bool>,
+    pub onboarded: Option<bool>,
+}
+
+const REPOSITORY_ERRORS: &[&str] = &[
+    "REPOSITORY_ACCESS_FORBIDDEN",
+    "REPOSITORY_ARCHIVED",
+    "REPOSITORY_BLOCKED",
+    "REPOSITORY_CANNOT_FORK",
+    "REPOSITORY_DISABLED_BY_CONFIG",
+    "REPOSITORY_EMPTY",
+    "REPOSITORY_FORKED",
+    "REPOSITORY_MIRROR",
+    "REPOSITORY_NOT_FOUND",
+    "REPOSITORY_NO_PACKAGE_FILES",
+    "REPOSITORY_RENAMED",
+    "REPOSITORY_UNINITIATED",
+    "REPOSITORY_NOT_ONBOARDED",
+];
+
+const ENABLED_STATUSES: &[&str] = &[
+    "CONFIG_SECRETS_EXPOSED",
+    "CONFIG_VALIDATION",
+    "MISSING_API_CREDENTIALS",
+];
+
+/// Process the result of a repository run and return structured status.
+///
+/// Ports `processResult` from `lib/workers/repository/result.ts`.
+pub fn process_result(
+    repo_is_activated: bool,
+    repo_is_onboarded: Option<bool>,
+    res: &str,
+) -> ProcessResult {
+    if REPOSITORY_ERRORS.contains(&res) {
+        return ProcessResult {
+            res: res.to_owned(),
+            status: ProcessStatus::Disabled,
+            enabled: Some(false),
+            onboarded: None,
+        };
+    }
+    if repo_is_activated {
+        return ProcessResult {
+            res: res.to_owned(),
+            status: ProcessStatus::Activated,
+            enabled: Some(true),
+            onboarded: Some(true),
+        };
+    }
+    if ENABLED_STATUSES.contains(&res) || repo_is_onboarded == Some(true) {
+        return ProcessResult {
+            res: res.to_owned(),
+            status: ProcessStatus::Onboarded,
+            enabled: Some(true),
+            onboarded: Some(true),
+        };
+    }
+    if repo_is_onboarded == Some(false) {
+        return ProcessResult {
+            res: res.to_owned(),
+            status: ProcessStatus::Onboarding,
+            enabled: Some(true),
+            onboarded: Some(false),
+        };
+    }
+    ProcessResult {
+        res: res.to_owned(),
+        status: ProcessStatus::Unknown,
+        enabled: None,
+        onboarded: None,
+    }
+}
+
+// ---------------------------------------------------------------------------
 
 /// Redact HTTPS credentials in a command string.
 ///
@@ -2208,6 +2322,17 @@ mod tests {
             redact_cmd_credentials(" https://token@domain.com"),
             " https://**redacted**@domain.com"
         );
+    }
+
+    // Ported: "runs" — workers/repository/result.spec.ts line 16
+    #[test]
+    fn test_process_result_runs() {
+        // config: {repoIsActivated: true, repoIsOnboarded: true}, res: 'done'
+        let result = process_result(true, Some(true), "done");
+        assert_eq!(result.res, "done");
+        assert_eq!(result.status, ProcessStatus::Activated);
+        assert_eq!(result.enabled, Some(true));
+        assert_eq!(result.onboarded, Some(true));
     }
 
     // Ported: 'sanitizeValue("$input") == "$output"' — logger/utils.spec.ts line 11
