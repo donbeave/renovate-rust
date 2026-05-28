@@ -5,7 +5,7 @@
 ## `lib/config/decrypt.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/decrypt.spec.ts
-**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+**Total tests:** 15 | **Ported:** 1 | **Actionable:** 15 | **Status:** partial
 
 ### `config/decrypt › decryptConfig()`
 
@@ -20,7 +20,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| equals("$str", "$repo") === $expected | 68 | pending | — | — | — |
+| equals("$str", "$repo") === $expected | 68 | ported | `config/decrypt.rs` | `validate_decrypted_value_platforms_non_azure` | — |
 
 ### `config/decrypt › validateDecryptedValue() › azure only platform › general tests`
 

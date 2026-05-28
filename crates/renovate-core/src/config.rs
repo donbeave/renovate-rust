@@ -10,6 +10,7 @@
 mod platform;
 mod run;
 
+pub mod decrypt;
 pub mod file;
 pub mod host_rules_from_env;
 pub mod massage;
