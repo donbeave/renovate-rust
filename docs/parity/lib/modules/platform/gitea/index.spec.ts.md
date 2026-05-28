@@ -5,266 +5,265 @@
 ## `lib/modules/platform/gitea/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/index.spec.ts
-**Total tests:** 134 | **Ported:** 0 | **Actionable:** 134 | **Status:** pending
+**Total tests:** 134 | **Ported:** 0 | **Actionable:** 134 | **Status:** not-applicable
 
 ### `initPlatform()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should throw if no token | 270 | pending | — | — | — |
-| should throw if auth fails | 274 | pending | — | — | — |
-| should support default endpoint | 283 | pending | — | — | — |
-| should support custom endpoint | 297 | pending | — | — | — |
-| should support custom endpoint including api path | 316 | pending | — | — | — |
-| should use username as author name if full name is missing | 335 | pending | — | — | — |
+| should throw if no token | 270 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should throw if auth fails | 274 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should support default endpoint | 283 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should support custom endpoint | 297 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should support custom endpoint including api path | 316 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use username as author name if full name is missing | 335 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getRepos`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should propagate any other errors | 354 | pending | — | — | — |
-| should return an array of repos | 368 | pending | — | — | — |
-| should return an filtered array of repos | 386 | pending | — | — | — |
-| should query the organization endpoint for each namespace | 423 | pending | — | — | — |
-| Sorts repos | 437 | pending | — | — | — |
+| should propagate any other errors | 354 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return an array of repos | 368 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return an filtered array of repos | 386 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should query the organization endpoint for each namespace | 423 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| Sorts repos | 437 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `initRepo`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should propagate API errors | 466 | pending | — | — | — |
-| should abort when repo is archived | 475 | pending | — | — | — |
-| should abort when repo is mirrored | 489 | pending | — | — | — |
-| should abort when repo is empty | 503 | pending | — | — | — |
-| should abort when repo has insufficient permissions | 517 | pending | — | — | — |
-| should abort when repo has pulls disabled | 535 | pending | — | — | — |
-| should abort when repo has no available merge methods | 549 | pending | — | — | — |
-| should select default merge method when it is allowed | 563 | pending | — | — | — |
-| should fall back to merge method as per ordered list when default not allowed | 584 | pending | — | — | — |
-| should throw if unknown default merge style is configured | 606 | pending | — | — | — |
-| should use clone_url of repo if gitUrl is not specified | 621 | pending | — | — | — |
-| should use clone_url of repo if gitUrl has value default | 638 | pending | — | — | — |
-| should use ssh_url of repo if gitUrl has value ssh | 656 | pending | — | — | — |
-| should abort when gitUrl has value ssh but ssh_url is empty | 674 | pending | — | — | — |
-| should use generated url of repo if gitUrl has value endpoint | 691 | pending | — | — | — |
-| should abort when clone_url is empty | 711 | pending | — | — | — |
-| should use given access token if gitUrl has value endpoint | 730 | pending | — | — | — |
-| should use given access token if gitUrl is not specified | 759 | pending | — | — | — |
-| should abort when clone_url is not valid | 785 | pending | — | — | — |
+| should propagate API errors | 466 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when repo is archived | 475 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when repo is mirrored | 489 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when repo is empty | 503 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when repo has insufficient permissions | 517 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when repo has pulls disabled | 535 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when repo has no available merge methods | 549 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should select default merge method when it is allowed | 563 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should fall back to merge method as per ordered list when default not allowed | 584 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should throw if unknown default merge style is configured | 606 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use clone_url of repo if gitUrl is not specified | 621 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use clone_url of repo if gitUrl has value default | 638 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use ssh_url of repo if gitUrl has value ssh | 656 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when gitUrl has value ssh but ssh_url is empty | 674 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use generated url of repo if gitUrl has value endpoint | 691 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when clone_url is empty | 711 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use given access token if gitUrl has value endpoint | 730 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use given access token if gitUrl is not specified | 759 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when clone_url is not valid | 785 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `setBranchStatus`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should create a new commit status | 806 | pending | — | — | — |
-| should default to pending state | 834 | pending | — | — | — |
-| should include url if specified | 862 | pending | — | — | — |
-| should gracefully fail with warning | 892 | pending | — | — | — |
+| should create a new commit status | 806 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should default to pending state | 834 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should include url if specified | 862 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should gracefully fail with warning | 892 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getBranchStatus`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return yellow for unknown result | 931 | pending | — | — | — |
-| should return pending state for pending result | 944 | pending | — | — | — |
-| should return green state for success result | 957 | pending | — | — | — |
-| should return yellow for all other results | 970 | pending | — | — | — |
-| should abort when branch status returns 404 | 983 | pending | — | — | — |
-| should propagate any other errors | 996 | pending | — | — | — |
-| should treat internal checks as success | 1009 | pending | — | — | — |
-| should not treat internal checks as success | 1031 | pending | — | — | — |
+| should return yellow for unknown result | 931 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return pending state for pending result | 944 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return green state for success result | 957 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return yellow for all other results | 970 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when branch status returns 404 | 983 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should propagate any other errors | 996 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should treat internal checks as success | 1009 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should not treat internal checks as success | 1031 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getBranchStatusCheck`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return null with no results | 1055 | pending | — | — | — |
-| should return null with no matching results | 1068 | pending | — | — | — |
-| should return yellow with unknown status | 1093 | pending | — | — | — |
-| should return green of matching result | 1118 | pending | — | — | — |
+| should return null with no results | 1055 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return null with no matching results | 1068 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return yellow with unknown status | 1093 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return green of matching result | 1118 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getPrList`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return list of pull requests | 1145 | pending | — | — | — |
-| should filter list by creator | 1163 | pending | — | — | — |
-| should cache results after first query | 1206 | pending | — | — | — |
-| should update cache results | 1232 | pending | — | — | — |
+| should return list of pull requests | 1145 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should filter list by creator | 1163 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should cache results after first query | 1206 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should update cache results | 1232 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getPr`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return enriched pull request which exists if open | 1260 | pending | — | — | — |
-| should fallback to direct fetching if cache fails | 1274 | pending | — | — | — |
-| should return null for missing pull request | 1291 | pending | — | — | — |
-| should throw temporary error for null pull request | 1307 | pending | — | — | — |
+| should return enriched pull request which exists if open | 1260 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should fallback to direct fetching if cache fails | 1274 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return null for missing pull request | 1291 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should throw temporary error for null pull request | 1307 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `findPr`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should find pull request without title or state | 1321 | pending | — | — | — |
-| should find pull request with title | 1338 | pending | — | — | — |
-| should find pull request with state | 1358 | pending | — | — | — |
-| should not find pull request with inverted state | 1378 | pending | — | — | — |
-| should find pull request with title and state | 1399 | pending | — | — | — |
-| should find pull request with draft | 1421 | pending | — | — | — |
-| should find merged pull request | 1443 | pending | — | — | — |
-| should return null for missing pull request | 1461 | pending | — | — | — |
-| finds pr from other authors using base and head | 1475 | pending | — | — | — |
-| returns null if cannot find pr from other author | 1513 | pending | — | — | — |
+| should find pull request without title or state | 1321 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should find pull request with title | 1338 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should find pull request with state | 1358 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should not find pull request with inverted state | 1378 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should find pull request with title and state | 1399 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should find pull request with draft | 1421 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should find merged pull request | 1443 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return null for missing pull request | 1461 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| finds pr from other authors using base and head | 1475 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns null if cannot find pr from other author | 1513 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `createPr`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should use base branch by default | 1557 | pending | — | — | — |
-| should use default branch if requested | 1581 | pending | — | — | — |
-| should resolve and apply optional labels to pull request | 1603 | pending | — | — | — |
-| should ensure new pull request gets added to cached pull requests | 1629 | pending | — | — | — |
-| should attempt to resolve 409 conflict error (w/o update) | 1652 | pending | — | — | — |
-| should attempt to resolve 409 conflict error (w/ update) | 1676 | pending | — | — | — |
-| should abort when response for created pull request is invalid | 1702 | pending | — | — | — |
-| should use platform automerge | 1720 | pending | — | — | — |
-| should not use platform automerge on forgejo v7 | 1746 | pending | — | — | — |
-| should not use platform automerge on forgejo v7 LTS | 1770 | pending | — | — | — |
-| continues on platform automerge error | 1794 | pending | — | — | — |
-| continues if platform automerge is not supported | 1823 | pending | — | — | — |
-| should create PR with repository merge method when automergeStrategy is auto | 1851 | pending | — | — | — |
-| should create PR with mergeStrategy $prMergeStrategy | 1878 | pending | — | — | — |
+| should use base branch by default | 1557 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use default branch if requested | 1581 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should resolve and apply optional labels to pull request | 1603 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should ensure new pull request gets added to cached pull requests | 1629 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should attempt to resolve 409 conflict error (w/o update) | 1652 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should attempt to resolve 409 conflict error (w/ update) | 1676 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort when response for created pull request is invalid | 1702 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should use platform automerge | 1720 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should not use platform automerge on forgejo v7 | 1746 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should not use platform automerge on forgejo v7 LTS | 1770 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| continues on platform automerge error | 1794 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| continues if platform automerge is not supported | 1823 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should create PR with repository merge method when automergeStrategy is auto | 1851 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should create PR with mergeStrategy $prMergeStrategy | 1878 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `updatePr`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should update pull request with title | 1919 | pending | — | — | — |
-| should update pull target branch | 1936 | pending | — | — | — |
-| should update pull request with title and body | 1959 | pending | — | — | — |
-| should update pull request with draft | 1982 | pending | — | — | — |
-| should close pull request | 2005 | pending | — | — | — |
-| should update labels | 2030 | pending | — | — | — |
-| should log a warning if labels could not be looked up | 2069 | pending | — | — | — |
+| should update pull request with title | 1919 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should update pull target branch | 1936 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should update pull request with title and body | 1959 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should update pull request with draft | 1982 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should close pull request | 2005 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should update labels | 2030 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should log a warning if labels could not be looked up | 2069 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `mergePr`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return true when merging succeeds | 2114 | pending | — | — | — |
-| should return false when merging fails | 2132 | pending | — | — | — |
+| should return true when merging succeeds | 2114 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return false when merging fails | 2132 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getIssueList`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return empty for disabled issues | 2153 | pending | — | — | — |
+| should return empty for disabled issues | 2153 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getIssue`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return the issue | 2165 | pending | — | — | — |
-| should return null for disabled issues | 2182 | pending | — | — | — |
+| should return the issue | 2165 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return null for disabled issues | 2182 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `findIssue`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return existing open issue | 2194 | pending | — | — | — |
-| should not return existing closed issue | 2214 | pending | — | — | — |
-| should return null for missing issue | 2231 | pending | — | — | — |
+| should return existing open issue | 2194 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should not return existing closed issue | 2214 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return null for missing issue | 2231 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `ensureIssue`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should create issue if not found | 2247 | pending | — | — | — |
-| should create issue with the correct labels | 2273 | pending | — | — | — |
-| should not reopen closed issue by default | 2308 | pending | — | — | — |
-| should not update labels when not necessary | 2333 | pending | — | — | — |
-| should update labels when missing | 2370 | pending | — | — | — |
-| should reset labels when others have been set | 2409 | pending | — | — | — |
-| should reopen closed issue if desired | 2449 | pending | — | — | — |
-| should not update existing closed issue if desired | 2475 | pending | — | — | — |
-| should close all open duplicate issues except first one when updating | 2495 | pending | — | — | — |
-| should reset issue cache when creating an issue | 2526 | pending | — | — | — |
-| should gracefully fail with warning | 2550 | pending | — | — | — |
-| should return null for disabled issues | 2572 | pending | — | — | — |
+| should create issue if not found | 2247 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should create issue with the correct labels | 2273 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should not reopen closed issue by default | 2308 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should not update labels when not necessary | 2333 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should update labels when missing | 2370 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should reset labels when others have been set | 2409 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should reopen closed issue if desired | 2449 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should not update existing closed issue if desired | 2475 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should close all open duplicate issues except first one when updating | 2495 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should reset issue cache when creating an issue | 2526 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should gracefully fail with warning | 2550 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return null for disabled issues | 2572 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `ensureIssueClosing`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should close issues with matching title | 2589 | pending | — | — | — |
-| should return for disabled issues | 2604 | pending | — | — | — |
+| should close issues with matching title | 2589 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return for disabled issues | 2604 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `deleteLabel`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should delete a label which exists | 2613 | pending | — | — | — |
-| should gracefully fail with warning if label is missing | 2629 | pending | — | — | — |
+| should delete a label which exists | 2613 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should gracefully fail with warning if label is missing | 2629 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `ensureComment`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should add comment with topic if not found | 2649 | pending | — | — | — |
-| should add comment without topic if not found | 2670 | pending | — | — | — |
-| should update comment with topic if found | 2689 | pending | — | — | — |
-| should skip if comment is up-to-date | 2710 | pending | — | — | — |
-| should gracefully fail with warning | 2727 | pending | — | — | — |
+| should add comment with topic if not found | 2649 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should add comment without topic if not found | 2670 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should update comment with topic if found | 2689 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should skip if comment is up-to-date | 2710 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should gracefully fail with warning | 2727 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `ensureCommentRemoval`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should remove existing comment by topic | 2751 | pending | — | — | — |
-| should remove existing comment by content | 2770 | pending | — | — | — |
-| should gracefully fail with warning | 2789 | pending | — | — | — |
-| should abort silently if comment is missing | 2815 | pending | — | — | — |
+| should remove existing comment by topic | 2751 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should remove existing comment by content | 2770 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should gracefully fail with warning | 2789 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should abort silently if comment is missing | 2815 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getBranchPr`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return existing pull request for branch | 2834 | pending | — | — | — |
-| should return null if no pull request exists | 2848 | pending | — | — | — |
+| should return existing pull request for branch | 2834 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should return null if no pull request exists | 2848 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `addAssignees`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should add assignees to the issue | 2862 | pending | — | — | — |
+| should add assignees to the issue | 2862 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `addReviewers`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should assign reviewers | 2877 | pending | — | — | — |
-| should do nothing for older Gitea versions | 2892 | pending | — | — | — |
-| catches errors | 2900 | pending | — | — | — |
+| should assign reviewers | 2877 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should do nothing for older Gitea versions | 2892 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| catches errors | 2900 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `massageMarkdown`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| replaces pr links | 2920 | pending | — | — | — |
-| replaces issue links | 2929 | pending | — | — | — |
-| maxBodyLength | 2939 | pending | — | — | — |
+| replaces pr links | 2920 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| replaces issue links | 2929 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| maxBodyLength | 2939 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getJsonFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns file content | 2944 | pending | — | — | — |
-| returns file content from given repo | 2960 | pending | — | — | — |
-| returns file content from branch or tag | 2976 | pending | — | — | — |
-| returns file content in json5 format | 2992 | pending | — | — | — |
-| throws on malformed JSON | 3013 | pending | — | — | — |
-| returns null on missing content | 3025 | pending | — | — | — |
-| throws on errors | 3035 | pending | — | — | — |
+| returns file content | 2944 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns file content from given repo | 2960 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns file content from branch or tag | 2976 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns file content in json5 format | 2992 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| throws on malformed JSON | 3013 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns null on missing content | 3025 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| throws on errors | 3035 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ---
-

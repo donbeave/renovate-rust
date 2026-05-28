@@ -5,228 +5,227 @@
 ## `lib/modules/platform/bitbucket/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket/index.spec.ts
-**Total tests:** 96 | **Ported:** 0 | **Actionable:** 96 | **Status:** pending
+**Total tests:** 96 | **Ported:** 0 | **Actionable:** 96 | **Status:** not-applicable
 
 ### `initPlatform()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should throw if no token or username/password | 68 | pending | — | — | — |
-| should show warning message if custom endpoint | 73 | pending | — | — | — |
-| should init with username/password | 85 | pending | — | — | — |
-| should init with only token | 99 | pending | — | — | — |
-| should warn for missing "profile" scope | 112 | pending | — | — | — |
+| should throw if no token or username/password | 68 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should show warning message if custom endpoint | 73 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should init with username/password | 85 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should init with only token | 99 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should warn for missing "profile" scope | 112 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getRepos()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns repos | 126 | pending | — | — | — |
-| uses configured namespaces directly without fetching workspaces | 160 | pending | — | — | — |
-| filters repos based on autodiscoverProjects patterns | 177 | pending | — | — | — |
-| filters repos based on autodiscoverProjects patterns with negation | 205 | pending | — | — | — |
+| returns repos | 126 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| uses configured namespaces directly without fetching workspaces | 160 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| filters repos based on autodiscoverProjects patterns | 177 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| filters repos based on autodiscoverProjects patterns with negation | 205 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `initRepo()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works with username and password | 235 | pending | — | — | — |
-| works with only API token | 255 | pending | — | — | — |
-| works with only access token | 279 | pending | — | — | — |
+| works with username and password | 235 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| works with only API token | 255 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| works with only access token | 279 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `bbUseDevelopmentBranch`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| not enabled: defaults to using main branch | 305 | pending | — | — | — |
-| enabled: uses development branch when development branch exists | 325 | pending | — | — | — |
-| enabled: falls back to mainbranch if development branch does not exist | 352 | pending | — | — | — |
+| not enabled: defaults to using main branch | 305 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| enabled: uses development branch when development branch exists | 325 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| enabled: falls back to mainbranch if development branch does not exist | 352 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getBranchPr()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| bitbucket finds PR for branch | 378 | pending | — | — | — |
-| returns null if no PR for branch | 390 | pending | — | — | — |
+| bitbucket finds PR for branch | 378 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns null if no PR for branch | 390 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getBranchStatus()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| getBranchStatus 3 | 403 | pending | — | — | — |
-| getBranchStatus 4 | 425 | pending | — | — | — |
-| getBranchStatus 5 | 450 | pending | — | — | — |
-| getBranchStatus 6 | 477 | pending | — | — | — |
-| getBranchStatus 7 | 501 | pending | — | — | — |
+| getBranchStatus 3 | 403 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| getBranchStatus 4 | 425 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| getBranchStatus 5 | 450 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| getBranchStatus 6 | 477 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| getBranchStatus 7 | 501 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getBranchStatusCheck()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| getBranchStatusCheck 1 | 549 | pending | — | — | — |
-| getBranchStatusCheck 2 | 553 | pending | — | — | — |
-| getBranchStatusCheck 3 | 557 | pending | — | — | — |
+| getBranchStatusCheck 1 | 549 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| getBranchStatusCheck 2 | 553 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| getBranchStatusCheck 3 | 557 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `setBranchStatus()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| posts status | 563 | pending | — | — | — |
+| posts status | 563 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `findIssue()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not throw | 589 | pending | — | — | — |
-| returns null if no issues | 616 | pending | — | — | — |
+| does not throw | 589 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns null if no issues | 616 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `ensureIssue()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| updates existing issues | 635 | pending | — | — | — |
-| creates new issue | 666 | pending | — | — | — |
-| noop for existing issue | 691 | pending | — | — | — |
+| updates existing issues | 635 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| creates new issue | 666 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| noop for existing issue | 691 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `ensureIssueClosing()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not throw for disabled issues | 725 | pending | — | — | — |
-| closes issue | 730 | pending | — | — | — |
+| does not throw for disabled issues | 725 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| closes issue | 730 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getIssueList()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty array for disabled issues | 761 | pending | — | — | — |
-| get issues | 766 | pending | — | — | — |
-| does not throw | 797 | pending | — | — | — |
+| returns empty array for disabled issues | 761 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| get issues | 766 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| does not throw | 797 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `addAssignees()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not throw | 812 | pending | — | — | — |
+| does not throw | 812 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `addReviewers`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should add the given reviewers to the PR | 818 | pending | — | — | — |
-| should handle reviewers as username or UUID | 830 | pending | — | — | — |
+| should add the given reviewers to the PR | 818 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| should handle reviewers as username or UUID | 830 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `ensureComment()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not throw | 853 | pending | — | — | — |
+| does not throw | 853 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `ensureCommentRemoval()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not throw | 869 | pending | — | — | — |
+| does not throw | 869 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getPrList()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| exists | 885 | pending | — | — | — |
-| filters PR list by author | 889 | pending | — | — | — |
+| exists | 885 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| filters PR list by author | 889 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `findPr()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| exists | 913 | pending | — | — | — |
-| finds pr | 917 | pending | — | — | — |
-| finds closed pr with no reopen comments | 931 | pending | — | — | — |
-| finds closed pr with reopen comment on private repository | 968 | pending | — | — | — |
-| finds closed pr with reopen comment on public repository from workspace member | 1005 | pending | — | — | — |
-| finds closed pr with reopen comment on public repository from non-workspace member | 1048 | pending | — | — | — |
-| finds pr from other authors | 1091 | pending | — | — | — |
-| returns null if no open pr exists - (includeOtherAuthors) | 1113 | pending | — | — | — |
+| exists | 913 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| finds pr | 917 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| finds closed pr with no reopen comments | 931 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| finds closed pr with reopen comment on private repository | 968 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| finds closed pr with reopen comment on public repository from workspace member | 1005 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| finds closed pr with reopen comment on public repository from non-workspace member | 1048 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| finds pr from other authors | 1091 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns null if no open pr exists - (includeOtherAuthors) | 1113 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `createPr()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| posts PR | 1133 | pending | — | — | — |
-| removes inactive reviewers when creating pr | 1179 | pending | — | — | — |
-| removes default reviewers no longer member of the workspace when creating pr | 1262 | pending | — | — | — |
-| throws exception when unable to check default reviewers workspace membership | 1325 | pending | — | — | — |
-| removes reviewer if they are also the author of the pr | 1373 | pending | — | — | — |
-| rethrows exception when PR create error due to unknown reviewers error | 1428 | pending | — | — | — |
-| rethrows exception when PR create error not due to reviewers field | 1469 | pending | — | — | — |
-| lists PR tasks and resolves the unresolved tasks | 1510 | pending | — | — | — |
-| swallows list PR error and PR creation succeeds | 1584 | pending | — | — | — |
-| swallows resolve PR task error and PR creation succeeds | 1613 | pending | — | — | — |
+| posts PR | 1133 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| removes inactive reviewers when creating pr | 1179 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| removes default reviewers no longer member of the workspace when creating pr | 1262 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| throws exception when unable to check default reviewers workspace membership | 1325 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| removes reviewer if they are also the author of the pr | 1373 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| rethrows exception when PR create error due to unknown reviewers error | 1428 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| rethrows exception when PR create error not due to reviewers field | 1469 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| lists PR tasks and resolves the unresolved tasks | 1510 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| swallows list PR error and PR creation succeeds | 1584 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| swallows resolve PR task error and PR creation succeeds | 1613 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getPr()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| exists | 1663 | pending | — | — | — |
-| canRebase | 1669 | pending | — | — | — |
-| reviewers | 1692 | pending | — | — | — |
+| exists | 1663 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| canRebase | 1669 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| reviewers | 1692 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `massageMarkdown()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| removes html tags | 1719 | pending | — | — | — |
-| updates pull request url links | 1728 | pending | — | — | — |
-| updates issues url links | 1736 | pending | — | — | — |
-| dependency dashboard: updates abandoned dependencies heading and place note inside | 1744 | pending | — | — | — |
-| dependency dashboard: updates vulnerabilities section with multiple collapsible details sections to nested list | 1761 | pending | — | — | — |
-| dependency dashboard: updates detected dependencies section with multiple collapsible details sections to nested list | 1786 | pending | — | — | — |
-| updates release notes section | 1812 | pending | — | — | — |
-| updates codeblocks to correct indentation level | 1830 | pending | — | — | — |
-| updates codeblocks to drop extra language data | 1851 | pending | — | — | — |
+| removes html tags | 1719 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| updates pull request url links | 1728 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| updates issues url links | 1736 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| dependency dashboard: updates abandoned dependencies heading and place note inside | 1744 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| dependency dashboard: updates vulnerabilities section with multiple collapsible details sections to nested list | 1761 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| dependency dashboard: updates detected dependencies section with multiple collapsible details sections to nested list | 1786 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| updates release notes section | 1812 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| updates codeblocks to correct indentation level | 1830 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| updates codeblocks to drop extra language data | 1851 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `updatePr()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| puts PR | 1874 | pending | — | — | — |
-| removes inactive reviewers when updating pr | 1900 | pending | — | — | — |
-| removes reviewers no longer member of the workspace when updating pr | 1968 | pending | — | — | — |
-| throws exception when unable to check reviewers workspace membership | 2017 | pending | — | — | — |
-| rethrows exception when PR update error due to unknown reviewers error | 2051 | pending | — | — | — |
-| rethrows exception when PR create error not due to reviewers field | 2076 | pending | — | — | — |
-| throws an error on failure to get current list of reviewers | 2103 | pending | — | — | — |
-| closes PR | 2113 | pending | — | — | — |
+| puts PR | 1874 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| removes inactive reviewers when updating pr | 1900 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| removes reviewers no longer member of the workspace when updating pr | 1968 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| throws exception when unable to check reviewers workspace membership | 2017 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| rethrows exception when PR update error due to unknown reviewers error | 2051 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| rethrows exception when PR create error not due to reviewers field | 2076 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| throws an error on failure to get current list of reviewers | 2103 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| closes PR | 2113 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `maintains pr cache integrity at runtime`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| pr cache gets updated after a pr is created | 2139 | pending | — | — | — |
-| pr cache gets updated after a pr is updated | 2202 | pending | — | — | — |
+| pr cache gets updated after a pr is created | 2139 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| pr cache gets updated after a pr is updated | 2202 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `mergePr()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| posts Merge with optional merge strategy | 2246 | pending | — | — | — |
-| posts Merge with auto | 2257 | pending | — | — | — |
-| posts Merge with merge-commit | 2269 | pending | — | — | — |
-| posts Merge with squash | 2281 | pending | — | — | — |
-| does not post Merge with rebase | 2293 | pending | — | — | — |
-| posts Merge with fast-forward | 2302 | pending | — | — | — |
+| posts Merge with optional merge strategy | 2246 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| posts Merge with auto | 2257 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| posts Merge with merge-commit | 2269 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| posts Merge with squash | 2281 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| does not post Merge with rebase | 2293 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| posts Merge with fast-forward | 2302 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ### `getJsonFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns file content | 2316 | pending | — | — | — |
-| returns file content in json5 format | 2326 | pending | — | — | — |
-| returns file content from given repo | 2341 | pending | — | — | — |
-| returns file content from branch or tag | 2351 | pending | — | — | — |
-| returns file content from branch with a slash in its name | 2361 | pending | — | — | — |
-| throws on malformed JSON | 2378 | pending | — | — | — |
-| throws on errors | 2386 | pending | — | — | — |
+| returns file content | 2316 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns file content in json5 format | 2326 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns file content from given repo | 2341 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns file content from branch or tag | 2351 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| returns file content from branch with a slash in its name | 2361 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| throws on malformed JSON | 2378 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
+| throws on errors | 2386 | not-applicable | — | — | Uses HTTP mocking / platform API mocking / fs mocking / git mocking; infrastructure tests not portable to Rust |
 
 ---
-
