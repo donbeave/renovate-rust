@@ -287,7 +287,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/defaults.spec.ts` | Done | [details](lib/config/defaults.spec.ts.md) |
 | `lib/config/global.spec.ts` | Done | [details](lib/config/global.spec.ts.md) |
 | `lib/config/index.spec.ts` | Done | [details](lib/config/index.spec.ts.md) |
-| `lib/config/migration.spec.ts` | Not done | [details](lib/config/migration.spec.ts.md) |
+| `lib/config/migration.spec.ts` | Done | [details](lib/config/migration.spec.ts.md) |
 | `lib/config/options/index.spec.ts` | Not done | [details](lib/config/options/index.spec.ts.md) |
 | `lib/config/options/env-options.spec.ts` | Not done | [details](lib/config/options/env-options.spec.ts.md) |
 | `lib/config/migrations/migrations-service.spec.ts` | Not done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
