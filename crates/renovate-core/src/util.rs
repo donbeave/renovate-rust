@@ -237,6 +237,48 @@ pub fn get_cli_name(name: &str, cli_enabled: bool) -> String {
 }
 
 // ---------------------------------------------------------------------------
+// configSerializer — lib/logger/config-serializer.ts
+// ---------------------------------------------------------------------------
+
+const TEMPLATE_FIELDS: &[&str] = &["prBody"];
+const CONTENT_FIELDS: &[&str] = &[
+    "content",
+    "contents",
+    "packageLockParsed",
+    "yarnLockParsed",
+];
+const ARRAY_FIELDS: &[&str] = &["packageFiles", "upgrades"];
+
+/// Scrub sensitive or large fields from a log config value.
+///
+/// Replaces template fields with `"[Template]"`, content fields with
+/// `"[content]"`, and array fields with `"[Array]"`.  Mirrors the TypeScript
+/// `configSerializer` function.
+pub fn config_serialize(config: &serde_json::Value) -> serde_json::Value {
+    match config {
+        serde_json::Value::Object(map) => {
+            let new_map: serde_json::Map<String, serde_json::Value> = map
+                .iter()
+                .map(|(k, v)| {
+                    let new_v = if TEMPLATE_FIELDS.contains(&k.as_str()) && !v.is_null() {
+                        serde_json::Value::String("[Template]".into())
+                    } else if CONTENT_FIELDS.contains(&k.as_str()) && !v.is_null() {
+                        serde_json::Value::String("[content]".into())
+                    } else if ARRAY_FIELDS.contains(&k.as_str()) && !v.is_null() {
+                        serde_json::Value::String("[Array]".into())
+                    } else {
+                        config_serialize(v)
+                    };
+                    (k.clone(), new_v)
+                })
+                .collect();
+            serde_json::Value::Object(new_map)
+        }
+        other => other.clone(),
+    }
+}
+
+// ---------------------------------------------------------------------------
 // massageThrowable — lib/instrumentation/utils.ts
 // ---------------------------------------------------------------------------
 
@@ -625,6 +667,38 @@ mod tests {
         assert_eq!(left["foo"], 1);
         assert_eq!(left["bar"], 2);
         assert_eq!(left["baz"], 42); // not in keys list, unchanged
+    }
+
+    // -----------------------------------------------------------------------
+    // config_serialize
+    // -----------------------------------------------------------------------
+
+    // Ported: "squashes templates" — logger/config-serializer.spec.ts line 4
+    #[test]
+    fn test_config_serialize_templates() {
+        use serde_json::json;
+        let input = json!({ "nottoken": "b", "prBody": "foo" });
+        let output = config_serialize(&input);
+        assert_eq!(output["nottoken"], "b");
+        assert_eq!(output["prBody"], "[Template]");
+    }
+
+    // Ported: "suppresses content" — logger/config-serializer.spec.ts line 15
+    #[test]
+    fn test_config_serialize_content() {
+        use serde_json::json;
+        let input = json!({ "content": {} });
+        let output = config_serialize(&input);
+        assert_eq!(output["content"], "[content]");
+    }
+
+    // Ported: "suppresses packageFiles" — logger/config-serializer.spec.ts line 24
+    #[test]
+    fn test_config_serialize_package_files() {
+        use serde_json::json;
+        let input = json!({ "packageFiles": [] });
+        let output = config_serialize(&input);
+        assert_eq!(output["packageFiles"], "[Array]");
     }
 
     // -----------------------------------------------------------------------
