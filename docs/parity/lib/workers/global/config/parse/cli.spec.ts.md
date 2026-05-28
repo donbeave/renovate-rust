@@ -5,14 +5,14 @@
 ## `lib/workers/global/config/parse/cli.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/cli.spec.ts
-**Total tests:** 30 | **Ported:** 28 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 30 | **Actionable:** 30 | **Status:** ported
 
 ### `workers/global/config/parse/cli › .getCliName(definition)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| generates CLI value | 15 | pending | — | — | — |
-| generates returns empty if CLI false | 22 | pending | — | — | — |
+| generates CLI value | 15 | ported | `util.rs` | `test_get_cli_name_generates` | — |
+| generates returns empty if CLI false | 22 | ported | `util.rs` | `test_get_cli_name_empty_when_disabled` | — |
 
 ### `workers/global/config/parse/cli › .getConfig(argv)`
 

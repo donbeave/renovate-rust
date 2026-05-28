@@ -211,6 +211,32 @@ pub fn assign_keys<K, V>(
 }
 
 // ---------------------------------------------------------------------------
+// getCliName — lib/workers/global/config/parse/cli.ts
+// ---------------------------------------------------------------------------
+
+/// Convert a camelCase option name to a `--kebab-case` CLI flag.
+///
+/// Returns an empty string when `cli_enabled` is false.
+/// Mirrors the TypeScript `getCliName` which prepends `--` and converts
+/// camelCase to kebab-case.
+pub fn get_cli_name(name: &str, cli_enabled: bool) -> String {
+    if !cli_enabled {
+        return String::new();
+    }
+    let kebab: String = name
+        .chars()
+        .flat_map(|c| {
+            if c.is_uppercase() {
+                vec!['-', c.to_lowercase().next().unwrap_or(c)]
+            } else {
+                vec![c]
+            }
+        })
+        .collect();
+    format!("--{kebab}")
+}
+
+// ---------------------------------------------------------------------------
 // massageThrowable — lib/instrumentation/utils.ts
 // ---------------------------------------------------------------------------
 
@@ -599,6 +625,22 @@ mod tests {
         assert_eq!(left["foo"], 1);
         assert_eq!(left["bar"], 2);
         assert_eq!(left["baz"], 42); // not in keys list, unchanged
+    }
+
+    // -----------------------------------------------------------------------
+    // get_cli_name
+    // -----------------------------------------------------------------------
+
+    // Ported: "generates CLI value" — workers/global/config/parse/cli.spec.ts line 15
+    #[test]
+    fn test_get_cli_name_generates() {
+        assert_eq!(get_cli_name("oneTwoThree", true), "--one-two-three");
+    }
+
+    // Ported: "generates returns empty if CLI false" — workers/global/config/parse/cli.spec.ts line 22
+    #[test]
+    fn test_get_cli_name_empty_when_disabled() {
+        assert_eq!(get_cli_name("oneTwoThree", false), "");
     }
 
     // -----------------------------------------------------------------------
