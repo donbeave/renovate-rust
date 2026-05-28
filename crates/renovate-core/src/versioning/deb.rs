@@ -1,12 +1,77 @@
 //! Debian package versioning.
 //!
-//! Ports `lib/modules/versioning/deb/index.ts`.
+//! Ports `lib/modules/versioning/deb/index.ts` and
+//! `lib/modules/versioning/debian/common.ts`.
 //!
 //! Format: `[epoch:]upstream-version[-debian-revision]`
 //!
 //! Comparison uses the dpkg algorithm:
 //! alternating non-digit/digit blocks with a custom character order for
 //! non-digit characters.
+
+use std::sync::LazyLock;
+
+use regex::Regex;
+
+// ── Debian container image helpers (lib/modules/versioning/debian/common.ts) ──
+
+/// Regex for dated Debian container image tags like `buster-20220101` or
+/// `bookworm-20230816.1`.
+static DATED_CODENAME_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?P<codename>\w+)-(?P<date>\d{8})(?P<suffix>\.\d{1,2})?$").unwrap()
+});
+
+/// Known Debian release codenames (series), sourced from
+/// `data/debian-distro-info.json`.
+const DEBIAN_CODENAMES: &[&str] = &[
+    "buzz", "rex", "bo", "hamm", "slink", "potato", "woody", "sarge", "etch", "lenny",
+    "squeeze", "wheezy", "jessie", "stretch", "buster", "bullseye", "bookworm", "trixie",
+    "forky", "duke",
+];
+
+/// Return `true` when `input` is a dated container image tag whose codename
+/// component is a recognised Debian release series.
+///
+/// Mirrors `isDatedCodeName` from `lib/modules/versioning/debian/common.ts`.
+pub fn is_dated_codename(input: &str) -> bool {
+    let Some(caps) = DATED_CODENAME_RE.captures(input) else {
+        return false;
+    };
+    let codename = caps.name("codename").expect("named group").as_str();
+    DEBIAN_CODENAMES.contains(&codename)
+}
+
+/// Extract the codename component from a dated container image tag such as
+/// `buster-20220101`.  Returns `None` when the input does not match the
+/// expected pattern.
+///
+/// Mirrors `getDatedContainerImageCodename` from
+/// `lib/modules/versioning/debian/common.ts`.
+pub fn get_dated_container_image_codename(version: &str) -> Option<&str> {
+    let caps = DATED_CODENAME_RE.captures(version)?;
+    Some(caps.name("codename")?.as_str())
+}
+
+/// Extract the date component from a dated container image tag such as
+/// `buster-20220101`, returning it as a `u32` (e.g. `20220101`).  Returns
+/// `None` when the input does not match.
+///
+/// Mirrors `getDatedContainerImageVersion` from
+/// `lib/modules/versioning/debian/common.ts`.
+pub fn get_dated_container_image_version(version: &str) -> Option<u32> {
+    let caps = DATED_CODENAME_RE.captures(version)?;
+    caps.name("date")?.as_str().parse().ok()
+}
+
+/// Extract the optional suffix component (e.g. `.1`) from a dated container
+/// image tag such as `bookworm-20230816.1`.  Returns `None` when absent.
+///
+/// Mirrors `getDatedContainerImageSuffix` from
+/// `lib/modules/versioning/debian/common.ts`.
+pub fn get_dated_container_image_suffix(version: &str) -> Option<&str> {
+    let caps = DATED_CODENAME_RE.captures(version)?;
+    Some(caps.name("suffix")?.as_str())
+}
 
 // ── Character ordering ────────────────────────────────────────────────────────
 
@@ -424,5 +489,59 @@ mod tests {
         assert_eq!(get_patch("foo"), None);
         assert_eq!(get_patch("8"), None);
         assert_eq!(get_patch("1.0"), None);
+    }
+
+    // Ported: 'isDatedCodeName("$input") === $expected' — versioning/debian/common.spec.ts line 31
+    #[test]
+    fn debian_is_dated_codename() {
+        assert!(!is_dated_codename("buster"));
+        assert!(is_dated_codename("buster-20220101"));
+        assert!(is_dated_codename("bullseye-20220101"));
+        assert!(is_dated_codename("bookworm-20230816"));
+        assert!(is_dated_codename("bookworm-20230816.1"));
+        assert!(!is_dated_codename("invalid-20220101"));
+        assert!(!is_dated_codename("buster-2022010"));
+        assert!(!is_dated_codename("buster-202201011"));
+        assert!(!is_dated_codename("buster-20220101.123"));
+    }
+
+    // Ported: 'getDatedContainerImageCodename("$input") === $expected' — versioning/debian/common.spec.ts line 48
+    #[test]
+    fn debian_get_dated_container_image_codename() {
+        assert_eq!(get_dated_container_image_codename("buster-20220101"), Some("buster"));
+        assert_eq!(get_dated_container_image_codename("bullseye-20220101"), Some("bullseye"));
+        assert_eq!(get_dated_container_image_codename("bookworm-20230816"), Some("bookworm"));
+        assert_eq!(get_dated_container_image_codename("bookworm-20230816.1"), Some("bookworm"));
+        assert_eq!(get_dated_container_image_codename("buster"), None);
+        assert_eq!(get_dated_container_image_codename("invalid-20220101"), Some("invalid"));
+        assert_eq!(get_dated_container_image_codename("buster-2022010"), None);
+        assert_eq!(get_dated_container_image_codename("buster-20220101.123"), None);
+        assert_eq!(get_dated_container_image_codename("buster-20220101a"), None);
+        assert_eq!(get_dated_container_image_codename("buster-20220101-"), None);
+    }
+
+    // Ported: 'getDatedContainerImageVersion("$input") === $expected' — versioning/debian/common.spec.ts line 69
+    #[test]
+    fn debian_get_dated_container_image_version() {
+        assert_eq!(get_dated_container_image_version("buster-20220101"), Some(20220101));
+        assert_eq!(get_dated_container_image_version("bullseye-20220101"), Some(20220101));
+        assert_eq!(get_dated_container_image_version("bookworm-20230816"), Some(20230816));
+        assert_eq!(get_dated_container_image_version("bookworm-20230816.1"), Some(20230816));
+        assert_eq!(get_dated_container_image_version("buster"), None);
+        assert_eq!(get_dated_container_image_version("invalid-20220101"), Some(20220101));
+        assert_eq!(get_dated_container_image_version("buster-2022010"), None);
+    }
+
+    // Ported: 'getDatedContainerImageSuffix("$input") === $expected' — versioning/debian/common.spec.ts line 87
+    #[test]
+    fn debian_get_dated_container_image_suffix() {
+        assert_eq!(get_dated_container_image_suffix("buster-20220101"), None);
+        assert_eq!(get_dated_container_image_suffix("bullseye-20220101"), None);
+        assert_eq!(get_dated_container_image_suffix("bookworm-20230816"), None);
+        assert_eq!(get_dated_container_image_suffix("bookworm-20230816.1"), Some(".1"));
+        assert_eq!(get_dated_container_image_suffix("buster-20220101.2"), Some(".2"));
+        assert_eq!(get_dated_container_image_suffix("buster"), None);
+        assert_eq!(get_dated_container_image_suffix("invalid-20220101"), None);
+        assert_eq!(get_dated_container_image_suffix("buster-2022010"), None);
     }
 }

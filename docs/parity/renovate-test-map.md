@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4357 / 11677 total tests ported (37%) · pending 7123 · not-applicable 197 (2% of total) — updated 2026-05-28
+**Progress:** 4361 / 11677 total tests ported (37%) · pending 7109 · not-applicable 207 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -402,7 +402,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/coerce.spec.ts` | Done | [details](lib/util/coerce.spec.ts.md) |
 | `lib/util/sample.spec.ts` | Done | [details](lib/util/sample.spec.ts.md) |
 | `lib/util/promises.spec.ts` | Done | [details](lib/util/promises.spec.ts.md) |
-| `lib/util/markdown.spec.ts` | Not done | [details](lib/util/markdown.spec.ts.md) |
+| `lib/util/markdown.spec.ts` | Done | [details](lib/util/markdown.spec.ts.md) |
 | `lib/util/html.spec.ts` | Not done | [details](lib/util/html.spec.ts.md) |
 | `lib/util/lazy.spec.ts` | Done | [details](lib/util/lazy.spec.ts.md) |
 | `lib/util/mutex.spec.ts` | Done | [details](lib/util/mutex.spec.ts.md) |
@@ -787,7 +787,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts.md) |
-| `lib/util/github/graphql/util.spec.ts` | Not done | [details](lib/util/github/graphql/util.spec.ts.md) |
+| `lib/util/github/graphql/util.spec.ts` | Done | [details](lib/util/github/graphql/util.spec.ts.md) |
 | `lib/util/github/tags.spec.ts` | Not done | [details](lib/util/github/tags.spec.ts.md) |
 | `lib/util/github/url.spec.ts` | Done | [details](lib/util/github/url.spec.ts.md) |
 | `lib/util/http/auth.spec.ts` | Done | [details](lib/util/http/auth.spec.ts.md) |
@@ -805,12 +805,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/hooks.spec.ts` | Done | [details](lib/util/http/hooks.spec.ts.md) |
 | `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
 | `lib/util/http/index.spec.ts` | Not done | [details](lib/util/http/index.spec.ts.md) |
-| `lib/util/http/jira.spec.ts` | Not done | [details](lib/util/http/jira.spec.ts.md) |
-| `lib/util/http/queue.spec.ts` | Not done | [details](lib/util/http/queue.spec.ts.md) |
+| `lib/util/http/jira.spec.ts` | Done | [details](lib/util/http/jira.spec.ts.md) |
+| `lib/util/http/queue.spec.ts` | Done | [details](lib/util/http/queue.spec.ts.md) |
 | `lib/util/http/rate-limit.spec.ts` | Not done | [details](lib/util/http/rate-limit.spec.ts.md) |
 | `lib/util/http/retry-after.spec.ts` | Not done | [details](lib/util/http/retry-after.spec.ts.md) |
 | `lib/util/http/scm-manager.spec.ts` | Not done | [details](lib/util/http/scm-manager.spec.ts.md) |
-| `lib/util/http/throttle.spec.ts` | Not done | [details](lib/util/http/throttle.spec.ts.md) |
+| `lib/util/http/throttle.spec.ts` | Done | [details](lib/util/http/throttle.spec.ts.md) |
 | `lib/util/http/www-authenticate.spec.ts` | Done | [details](lib/util/http/www-authenticate.spec.ts.md) |
 | `lib/util/json-writer/editor-config.spec.ts` | Not done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
 | `lib/util/json-writer/json-writer.spec.ts` | Done | [details](lib/util/json-writer/json-writer.spec.ts.md) |
