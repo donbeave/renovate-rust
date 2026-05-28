@@ -11,10 +11,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty with no privateKey | 23 | pending | — | — | — |
-| warns if no privateKey found | 29 | pending | — | — | — |
-| throws exception if encrypted found but no privateKey | 41 | pending | — | — | — |
-| throws exception if encrypted found but no privateKey- Mend Hosted | 51 | pending | — | — | — |
+| returns empty with no privateKey | 23 | not-applicable | — | — | Requires logger spy (logger.logger.once.warn) |
+| warns if no privateKey found | 29 | not-applicable | — | — | Requires logger spy (logger.logger.once.warn) |
+| throws exception if encrypted found but no privateKey | 41 | not-applicable | — | — | Requires logger spy + process.env mutation |
+| throws exception if encrypted found but no privateKey- Mend Hosted | 51 | not-applicable | — | — | Requires logger spy + process.env mutation |
 
 ### `config/decrypt › validateDecryptedValue() › platforms non azure`
 

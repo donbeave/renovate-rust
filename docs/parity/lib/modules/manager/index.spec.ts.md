@@ -5,19 +5,19 @@
 ## `lib/modules/manager/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/index.spec.ts
-**Total tests:** 22 | **Ported:** 0 | **Actionable:** 22 | **Status:** pending
+**Total tests:** 22 | **Ported:** 0 | **Actionable:** 22 | **Status:** partial
 
 ### `modules/manager/index › supportedDatasources`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| has valid supportedDatasources for ${m} | 18 | pending | — | — | — |
+| has valid supportedDatasources for ${m} | 18 | not-applicable | — | — | Requires vi.mock(fs) + iterates full manager registry; TypeScript registry metadata test |
 
 ### `modules/manager/index › lockFileNames`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| has lockFileNames for ${name} | 31 | pending | — | — | — |
+| has lockFileNames for ${name} | 31 | not-applicable | — | — | Requires vi.mock(fs) + iterates full manager registry; TypeScript registry metadata test |
 
 ### `modules/manager/index › get()`
 
@@ -41,13 +41,13 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| validates | 60 | pending | — | — | — |
+| validates | 60 | not-applicable | — | — | Requires vi.mock(fs) + loadModules dynamic module loading; TypeScript-specific module validation |
 
 ### `modules/manager/index › detectGlobalConfig()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| iterates through managers | 108 | pending | — | — | — |
+| iterates through managers | 108 | not-applicable | — | — | Requires vi.mock(fs); iterates all managers dynamically |
 
 ### `modules/manager/index › extractAllPackageFiles()`
 

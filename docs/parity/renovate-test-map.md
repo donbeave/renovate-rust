@@ -210,7 +210,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/orb/index.spec.ts` | Done | [details](lib/modules/datasource/orb/index.spec.ts.md) |
 | `lib/modules/datasource/gitea-tags/index.spec.ts` | Done | [details](lib/modules/datasource/gitea-tags/index.spec.ts.md) |
 | `lib/modules/datasource/forgejo-tags/index.spec.ts` | Done | [details](lib/modules/datasource/forgejo-tags/index.spec.ts.md) |
-| `lib/modules/datasource/hex/v2/index.spec.ts` | Not done | [details](lib/modules/datasource/hex/v2/index.spec.ts.md) |
+| `lib/modules/datasource/hex/v2/index.spec.ts` | Done | [details](lib/modules/datasource/hex/v2/index.spec.ts.md) |
 | `lib/modules/datasource/hex/index.spec.ts` | Done | [details](lib/modules/datasource/hex/index.spec.ts.md) |
 | `lib/modules/datasource/puppet-forge/index.spec.ts` | Done | [details](lib/modules/datasource/puppet-forge/index.spec.ts.md) |
 | `lib/modules/datasource/helm/index.spec.ts` | Done | [details](lib/modules/datasource/helm/index.spec.ts.md) |
@@ -266,14 +266,14 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/secrets.spec.ts` | Done | [details](lib/config/secrets.spec.ts.md) |
 | `lib/config/inherit.spec.ts` | Done | [details](lib/config/inherit.spec.ts.md) |
 | `lib/config/decrypt.spec.ts` | Not done | [details](lib/config/decrypt.spec.ts.md) |
-| `lib/config/decrypt/bcpgp.spec.ts` | Not done | [details](lib/config/decrypt/bcpgp.spec.ts.md) |
-| `lib/config/decrypt/openpgp.spec.ts` | Not done | [details](lib/config/decrypt/openpgp.spec.ts.md) |
+| `lib/config/decrypt/bcpgp.spec.ts` | Done | [details](lib/config/decrypt/bcpgp.spec.ts.md) |
+| `lib/config/decrypt/openpgp.spec.ts` | Done | [details](lib/config/decrypt/openpgp.spec.ts.md) |
 | `lib/config/presets/forgejo/index.spec.ts` | Done | [details](lib/config/presets/forgejo/index.spec.ts.md) |
 | `lib/config/presets/gitea/index.spec.ts` | Done | [details](lib/config/presets/gitea/index.spec.ts.md) |
 | `lib/config/presets/github/index.spec.ts` | Done | [details](lib/config/presets/github/index.spec.ts.md) |
 | `lib/config/presets/gitlab/index.spec.ts` | Done | [details](lib/config/presets/gitlab/index.spec.ts.md) |
 | `lib/config/presets/http/index.spec.ts` | Done | [details](lib/config/presets/http/index.spec.ts.md) |
-| `lib/config/presets/internal/group.spec.ts` | Not done | [details](lib/config/presets/internal/group.spec.ts.md) |
+| `lib/config/presets/internal/group.spec.ts` | Done | [details](lib/config/presets/internal/group.spec.ts.md) |
 | `lib/config/presets/internal/index.spec.ts` | Not done | [details](lib/config/presets/internal/index.spec.ts.md) |
 | `lib/config/presets/internal/monorepos.spec.ts` | Done | [details](lib/config/presets/internal/monorepos.spec.ts.md) |
 | `lib/config/presets/internal/schedule.spec.ts` | Done | [details](lib/config/presets/internal/schedule.spec.ts.md) |
@@ -288,7 +288,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/global.spec.ts` | Done | [details](lib/config/global.spec.ts.md) |
 | `lib/config/index.spec.ts` | Done | [details](lib/config/index.spec.ts.md) |
 | `lib/config/migration.spec.ts` | Done | [details](lib/config/migration.spec.ts.md) |
-| `lib/config/options/index.spec.ts` | Not done | [details](lib/config/options/index.spec.ts.md) |
+| `lib/config/options/index.spec.ts` | Done | [details](lib/config/options/index.spec.ts.md) |
 | `lib/config/options/env-options.spec.ts` | Not done | [details](lib/config/options/env-options.spec.ts.md) |
 | `lib/config/migrations/migrations-service.spec.ts` | Done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
 | `lib/config/migrations/base/abstract-migration.spec.ts` | Done | [details](lib/config/migrations/base/abstract-migration.spec.ts.md) |
@@ -366,7 +366,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/renovate-logger.spec.ts` | Done | [details](lib/logger/renovate-logger.spec.ts.md) |
 | `lib/logger/pretty-stdout.spec.ts` | Not done | [details](lib/logger/pretty-stdout.spec.ts.md) |
 | `lib/logger/err-serializer.spec.ts` | Done | [details](lib/logger/err-serializer.spec.ts.md) |
-| `lib/logger/once.spec.ts` | Not done | [details](lib/logger/once.spec.ts.md) |
+| `lib/logger/once.spec.ts` | Done | [details](lib/logger/once.spec.ts.md) |
 | `lib/logger/utils.spec.ts` | Not done | [details](lib/logger/utils.spec.ts.md) |
 | `lib/logger/index.spec.ts` | Done | [details](lib/logger/index.spec.ts.md) |
 | `lib/util/string-match.spec.ts` | Done | [details](lib/util/string-match.spec.ts.md) |
@@ -429,7 +429,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/mask.spec.ts` | Done | [details](lib/util/mask.spec.ts.md) |
 | `lib/util/host-rules.spec.ts` | Done | [details](lib/util/host-rules.spec.ts.md) |
 | `lib/util/stats.spec.ts` | Not done | [details](lib/util/stats.spec.ts.md) |
-| `lib/util/s3.spec.ts` | Not done | [details](lib/util/s3.spec.ts.md) |
+| `lib/util/s3.spec.ts` | Done | [details](lib/util/s3.spec.ts.md) |
 | `lib/util/jsonata.spec.ts` | Done | [details](lib/util/jsonata.spec.ts.md) |
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
@@ -560,7 +560,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/copier/artifacts.spec.ts` | Done | [details](lib/modules/manager/copier/artifacts.spec.ts.md) |
 | `lib/modules/manager/copier/update.spec.ts` | Done | [details](lib/modules/manager/copier/update.spec.ts.md) |
 | `lib/modules/manager/custom/index.spec.ts` | Done | [details](lib/modules/manager/custom/index.spec.ts.md) |
-| `lib/modules/manager/custom/jsonata/index.spec.ts` | Not done | [details](lib/modules/manager/custom/jsonata/index.spec.ts.md) |
+| `lib/modules/manager/custom/jsonata/index.spec.ts` | Done | [details](lib/modules/manager/custom/jsonata/index.spec.ts.md) |
 | `lib/modules/manager/custom/regex/index.spec.ts` | Not done | [details](lib/modules/manager/custom/regex/index.spec.ts.md) |
 | `lib/modules/manager/custom/regex/utils.spec.ts` | Done | [details](lib/modules/manager/custom/regex/utils.spec.ts.md) |
 | `lib/modules/manager/deno/artifacts.spec.ts` | Done | [details](lib/modules/manager/deno/artifacts.spec.ts.md) |

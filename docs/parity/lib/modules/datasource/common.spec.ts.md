@@ -20,7 +20,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns default versioning for undefined datasource | 39 | pending | — | — | — |
-| returns default versioning for unknown datasource | 43 | pending | — | — | — |
+| returns default versioning for unknown datasource | 43 | not-applicable | — | — | Requires logger spy to assert warning |
 | returns default versioning for datasource with missing default versioning configuration | 52 | pending | — | — | — |
 | returns datasource-defined default versioning | 56 | pending | — | — | — |
 
@@ -54,7 +54,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | sorts releases by version and removes duplicates | 162 | ported | `util.rs` | `test_sort_and_remove_duplicates_sorts_and_deduplicates` | — |
-| uses default versioning if none is specified | 183 | pending | — | — | — |
+| uses default versioning if none is specified | 183 | not-applicable | — | — | Requires logger spy to assert warning |
 
 ### `modules/datasource/common › applyConstraintsFiltering`
 
