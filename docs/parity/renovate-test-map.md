@@ -379,7 +379,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/package-rules/current-age.spec.ts` | Done | [details](lib/util/package-rules/current-age.spec.ts.md) |
 | `lib/util/package-rules/repositories.spec.ts` | Done | [details](lib/util/package-rules/repositories.spec.ts.md) |
 | `lib/util/package-rules/current-version.spec.ts` | Done | [details](lib/util/package-rules/current-version.spec.ts.md) |
-| `lib/util/package-rules/jsonata.spec.ts` | Not done | [details](lib/util/package-rules/jsonata.spec.ts.md) |
+| `lib/util/package-rules/jsonata.spec.ts` | Done | [details](lib/util/package-rules/jsonata.spec.ts.md) |
 | `lib/workers/global/config/parse/cli.spec.ts` | Done | [details](lib/workers/global/config/parse/cli.spec.ts.md) |
 | `lib/workers/repository/init/apis.spec.ts` | Not done | [details](lib/workers/repository/init/apis.spec.ts.md) |
 | `lib/workers/repository/init/cache.spec.ts` | Done | [details](lib/workers/repository/init/cache.spec.ts.md) |
@@ -403,7 +403,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/sample.spec.ts` | Done | [details](lib/util/sample.spec.ts.md) |
 | `lib/util/promises.spec.ts` | Done | [details](lib/util/promises.spec.ts.md) |
 | `lib/util/markdown.spec.ts` | Done | [details](lib/util/markdown.spec.ts.md) |
-| `lib/util/html.spec.ts` | Not done | [details](lib/util/html.spec.ts.md) |
+| `lib/util/html.spec.ts` | Done | [details](lib/util/html.spec.ts.md) |
 | `lib/util/lazy.spec.ts` | Done | [details](lib/util/lazy.spec.ts.md) |
 | `lib/util/mutex.spec.ts` | Done | [details](lib/util/mutex.spec.ts.md) |
 | `lib/util/yaml.spec.ts` | Not done | [details](lib/util/yaml.spec.ts.md) |
@@ -420,7 +420,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/check-token.spec.ts` | Done | [details](lib/util/check-token.spec.ts.md) |
 | `lib/util/minimatch.spec.ts` | Done | [details](lib/util/minimatch.spec.ts.md) |
 | `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
-| `lib/util/unicode.spec.ts` | Not done | [details](lib/util/unicode.spec.ts.md) |
+| `lib/util/unicode.spec.ts` | Done | [details](lib/util/unicode.spec.ts.md) |
 | `lib/util/pretty-time.spec.ts` | Done | [details](lib/util/pretty-time.spec.ts.md) |
 | `lib/util/array.spec.ts` | Done | [details](lib/util/array.spec.ts.md) |
 | `lib/util/uniq.spec.ts` | Done | [details](lib/util/uniq.spec.ts.md) |
@@ -430,7 +430,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/host-rules.spec.ts` | Done | [details](lib/util/host-rules.spec.ts.md) |
 | `lib/util/stats.spec.ts` | Not done | [details](lib/util/stats.spec.ts.md) |
 | `lib/util/s3.spec.ts` | Not done | [details](lib/util/s3.spec.ts.md) |
-| `lib/util/jsonata.spec.ts` | Not done | [details](lib/util/jsonata.spec.ts.md) |
+| `lib/util/jsonata.spec.ts` | Done | [details](lib/util/jsonata.spec.ts.md) |
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
 | `lib/modules/platform/comment.spec.ts` | Not done | [details](lib/modules/platform/comment.spec.ts.md) |
@@ -754,7 +754,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/package/with-cache.spec.ts` | Not done | [details](lib/util/cache/package/with-cache.spec.ts.md) |
 | `lib/util/cache/repository/http-cache.spec.ts` | Done | [details](lib/util/cache/repository/http-cache.spec.ts.md) |
 | `lib/util/cache/repository/impl/local.spec.ts` | Not done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
-| `lib/util/cache/repository/impl/s3.spec.ts` | Not done | [details](lib/util/cache/repository/impl/s3.spec.ts.md) |
+| `lib/util/cache/repository/impl/s3.spec.ts` | Done | [details](lib/util/cache/repository/impl/s3.spec.ts.md) |
 | `lib/util/cache/repository/index.spec.ts` | Not done | [details](lib/util/cache/repository/index.spec.ts.md) |
 | `lib/util/exec/common.spec.ts` | Not done | [details](lib/util/exec/common.spec.ts.md) |
 | `lib/util/exec/containerbase.spec.ts` | Not done | [details](lib/util/exec/containerbase.spec.ts.md) |

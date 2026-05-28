@@ -456,6 +456,27 @@ pub fn format_create_label_commands(repo: &str, labels: &[GithubLabel]) -> Strin
         .join("\n")
 }
 
+// ---------------------------------------------------------------------------
+// PR label utilities — lib/workers/repository/update/pr/labels.ts
+// ---------------------------------------------------------------------------
+
+/// Merge, deduplicate, and sort label arrays.
+///
+/// Mirrors the core logic of `prepareLabels` from
+/// `lib/workers/repository/update/pr/labels.ts` (without template compilation
+/// or platform char-limit trimming).
+pub fn prepare_labels(labels: &[&str], add_labels: &[&str]) -> Vec<String> {
+    let mut combined: Vec<String> = labels
+        .iter()
+        .chain(add_labels.iter())
+        .map(|s| s.to_string())
+        .filter(|s| !s.trim().is_empty())
+        .collect();
+    combined.sort();
+    combined.dedup();
+    combined
+}
+
 /// Return the label description for a module kind and id.
 ///
 /// Mirrors `getLabelDescription` from `tools/utils/sync-module-labels.ts`.
@@ -3216,6 +3237,43 @@ mod tests {
     // -----------------------------------------------------------------------
 
     // ── module label utilities ────────────────────────────────────────────────
+
+    // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
+    // ── prepare_labels ────────────────────────────────────────────────────────
+
+    // Ported: "returns empty array if no labels are configured" — pr/labels.spec.ts line 11
+    #[test]
+    fn test_prepare_labels_empty() {
+        assert!(prepare_labels(&[], &[]).is_empty());
+    }
+
+    // Ported: "only labels" — pr/labels.spec.ts line 16
+    #[test]
+    fn test_prepare_labels_only_labels() {
+        let result = prepare_labels(&["labelA", "labelB"], &[]);
+        assert_eq!(result, vec!["labelA", "labelB"]);
+    }
+
+    // Ported: "only addLabels" — pr/labels.spec.ts line 22
+    #[test]
+    fn test_prepare_labels_only_add_labels() {
+        let result = prepare_labels(&[], &["labelA", "labelB"]);
+        assert_eq!(result, vec!["labelA", "labelB"]);
+    }
+
+    // Ported: "merge labels and addLabels" — pr/labels.spec.ts line 30
+    #[test]
+    fn test_prepare_labels_merge() {
+        let result = prepare_labels(&["labelA", "labelB"], &["labelC"]);
+        assert_eq!(result, vec!["labelA", "labelB", "labelC"]);
+    }
+
+    // Ported: "deduplicate merged labels and addLabels" — pr/labels.spec.ts line 39
+    #[test]
+    fn test_prepare_labels_deduplicate() {
+        let result = prepare_labels(&["labelA", "labelB"], &["labelB", "labelC"]);
+        assert_eq!(result, vec!["labelA", "labelB", "labelC"]);
+    }
 
     // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
     #[test]
