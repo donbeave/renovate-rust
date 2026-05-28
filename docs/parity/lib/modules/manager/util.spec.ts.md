@@ -5,7 +5,7 @@
 ## `lib/modules/manager/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/util.spec.ts
-**Total tests:** 10 | **Ported:** 9 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `modules/manager/util`
 
@@ -14,7 +14,7 @@
 | applies GitHub source for tag | 14 | ported | `util.rs` | `test_apply_git_source_github_https` | — |
 | applies GitLab source for tag | 30 | ported | `util.rs` | `test_apply_git_source_gitlab` | — |
 | applies other git source for tag | 46 | ported | `util.rs` | `test_apply_git_source_generic` | — |
-| applies git source with subdomain | 61 | pending | — | — | — |
+| applies git source with subdomain | 61 | ported | `util.rs` | `test_apply_git_source_subdomain` | — |
 | applies GitHub source for tag with SSH URL | 81 | ported | `util.rs` | `test_apply_git_source_github_ssh` | — |
 | applies GitLab source for tag with SSH URL | 97 | ported | `util.rs` | `test_apply_git_source_gitlab_ssh` | — |
 | applies GitHub source for tag with HTTPS URL | 113 | ported | `util.rs` | `test_apply_git_source_github_https_explicit` | — |

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4421 / 11677 total tests ported (38%) · pending 7047 · not-applicable 209 (2% of total) — updated 2026-05-28
+**Progress:** 4422 / 11677 total tests ported (38%) · pending 7046 · not-applicable 209 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -442,7 +442,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/default-scm.spec.ts` | Not done | [details](lib/modules/platform/default-scm.spec.ts.md) |
 | `lib/modules/manager/range.spec.ts` | Done | [details](lib/modules/manager/range.spec.ts.md) |
 | `lib/modules/manager/index.spec.ts` | Not done | [details](lib/modules/manager/index.spec.ts.md) |
-| `lib/modules/manager/util.spec.ts` | Not done | [details](lib/modules/manager/util.spec.ts.md) |
+| `lib/modules/manager/util.spec.ts` | Done | [details](lib/modules/manager/util.spec.ts.md) |
 | `lib/modules/manager/fingerprint.spec.ts` | Done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
 | `lib/modules/manager/metadata.spec.ts` | Done | [details](lib/modules/manager/metadata.spec.ts.md) |
 | `lib/modules/versioning/schema.spec.ts` | Done | [details](lib/modules/versioning/schema.spec.ts.md) |

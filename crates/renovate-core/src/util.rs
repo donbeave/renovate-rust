@@ -3060,6 +3060,25 @@ mod tests {
     // apply_git_source
     // -----------------------------------------------------------------------
 
+    // Ported: "applies git source with subdomain" — modules/manager/util.spec.ts line 61
+    #[test]
+    fn test_apply_git_source_subdomain() {
+        // Register git.example.com as a github host via host rules
+        host_rules::clear();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("github".to_owned()),
+            match_host: Some("git.example.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        let r = apply_git_source("https://git.example.com/foo/bar", None, Some("v1.2.3"), None);
+        assert_eq!(r.datasource, "github-tags");
+        assert_eq!(r.package_name, "foo/bar");
+        assert_eq!(r.current_value, Some("v1.2.3".to_owned()));
+        assert_eq!(r.registry_urls, Some(vec!["https://git.example.com".to_owned()]));
+        host_rules::clear();
+    }
+
     // Ported: "applies GitHub source for tag" — modules/manager/util.spec.ts line 14
     #[test]
     fn test_apply_git_source_github_https() {
