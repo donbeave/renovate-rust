@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/ttl.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/ttl.spec.ts
-**Total tests:** 31 | **Ported:** 21 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 31 | **Ported:** 25 | **Actionable:** 29 | **Status:** partial
 
 ### `util/cache/package/ttl › getTtlOverride › No configuration`
 
@@ -71,21 +71,21 @@
 |---|---|---|---|---|---|
 | uses override for softTtlMinutes when available | 363 | ported | cache/package.rs | `resolve_ttl_values_applies_override_and_hard_min` | — |
 | applies custom cacheHardTtlMinutes from config | 378 | ported | cache/package.rs | `resolve_ttl_values_applies_override_and_hard_min` | — |
-| resolves TTL with glob pattern overrides | 391 | pending | — | — | Glob-override in resolveTtlValues path |
-| resolves TTL correctly with multiple overlapping overrides | 407 | pending | — | — | Multi-overlap TTL test |
+| resolves TTL with glob pattern overrides | 391 | ported | `cache/package.rs` | `resolve_ttl_values_with_glob_override` | — |
+| resolves TTL correctly with multiple overlapping overrides | 407 | ported | `cache/package.rs` | `resolve_ttl_values_multi_overlap` | — |
 
 ### `util/cache/package/ttl › resolveTtlValues › Hard TTL calculation`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | uses maximum of softTtlMinutes and cacheHardTtlMinutes for hardTtlMinutes | 427 | ported | cache/package.rs | `resolve_ttl_values_applies_override_and_hard_min` | max behavior covered |
-| handles negative cacheHardTtlMinutes config | 443 | pending | — | — | Negative hard TTL edge case |
+| handles negative cacheHardTtlMinutes config | 443 | ported | `cache/package.rs` | `resolve_ttl_values_negative_hard_ttl` | — |
 
 ### `util/cache/package/ttl › resolveTtlValues › Edge cases and special scenarios`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles zero as valid override value | 461 | pending | — | — | Zero TTL case |
+| handles zero as valid override value | 461 | ported | `cache/package.rs` | `resolve_ttl_values_zero_override` | — |
 | uses fallback when override is not a number | 477 | not-applicable | — | — | Rust HashMap<String,i64> prevents non-numeric |
 
 ---

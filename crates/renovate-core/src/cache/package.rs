@@ -979,6 +979,64 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(-1));
     }
 
+    // Ported: "resolves TTL with glob pattern overrides" — util/cache/package/ttl.spec.ts line 391
+    #[test]
+    fn resolve_ttl_values_with_glob_override() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-*".to_owned(), 180i64)].into(),
+            hard_ttl_minutes: 2880,
+            ..Default::default()
+        };
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 180);
+        assert_eq!(hard, 2880);
+    }
+
+    // Ported: "resolves TTL correctly with multiple overlapping overrides" — util/cache/package/ttl.spec.ts line 407
+    #[test]
+    fn resolve_ttl_values_multi_overlap() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [
+                ("datasource-*".to_owned(), 100i64),
+                ("datasource-npm".to_owned(), 200i64),
+                ("*".to_owned(), 50i64),
+            ]
+            .into(),
+            hard_ttl_minutes: 5760,
+            ..Default::default()
+        };
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 200); // exact match wins
+        assert_eq!(hard, 5760);
+    }
+
+    // Ported: "handles negative cacheHardTtlMinutes config" — util/cache/package/ttl.spec.ts line 443
+    #[test]
+    fn resolve_ttl_values_negative_hard_ttl() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-npm".to_owned(), 120i64)].into(),
+            hard_ttl_minutes: -1,
+            ..Default::default()
+        };
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 120);
+        // hard = max(soft, hard_ttl) = max(120, -1) = 120
+        assert_eq!(hard, 120);
+    }
+
+    // Ported: "handles zero as valid override value" — util/cache/package/ttl.spec.ts line 461
+    #[test]
+    fn resolve_ttl_values_zero_override() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-npm".to_owned(), 0i64)].into(),
+            hard_ttl_minutes: 1440,
+            ..Default::default()
+        };
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 0);
+        assert_eq!(hard, 1440);
+    }
+
     // ── glob_match ────────────────────────────────────────────────────────
 
     #[test]
