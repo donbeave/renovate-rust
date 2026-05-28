@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4298 / 11677 total tests ported (37%) · pending 7285 · not-applicable 94 (1% of total) — updated 2026-05-28
+**Progress:** 4304 / 11677 total tests ported (37%) · pending 7279 · not-applicable 94 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -440,7 +440,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/types.spec.ts` | Done | [details](lib/modules/platform/types.spec.ts.md) |
 | `lib/modules/platform/util.spec.ts` | Done | [details](lib/modules/platform/util.spec.ts.md) |
 | `lib/modules/platform/default-scm.spec.ts` | Not done | [details](lib/modules/platform/default-scm.spec.ts.md) |
-| `lib/modules/manager/range.spec.ts` | Not done | [details](lib/modules/manager/range.spec.ts.md) |
+| `lib/modules/manager/range.spec.ts` | Done | [details](lib/modules/manager/range.spec.ts.md) |
 | `lib/modules/manager/index.spec.ts` | Not done | [details](lib/modules/manager/index.spec.ts.md) |
 | `lib/modules/manager/util.spec.ts` | Not done | [details](lib/modules/manager/util.spec.ts.md) |
 | `lib/modules/manager/fingerprint.spec.ts` | Done | [details](lib/modules/manager/fingerprint.spec.ts.md) |

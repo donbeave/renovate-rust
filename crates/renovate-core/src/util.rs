@@ -12,6 +12,64 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Manager range strategy — lib/modules/manager/index.ts (getRangeStrategy)
+// ---------------------------------------------------------------------------
+
+/// Managers that support `updateLockedDependency` (return `update-lockfile` for `auto`).
+const MANAGERS_WITH_UPDATE_LOCKED: &[&str] = &[
+    "bundler",
+    "cargo",
+    "composer",
+    "gomod",
+    "gradle-wrapper",
+    "npm",
+    "pnpm",
+    "poetry",
+    "pip_requirements",
+    "pip-compile",
+];
+
+/// Determine the effective range strategy for a manager.
+///
+/// - Non-`auto` strategies pass through unchanged.
+/// - `in-range-only` → `update-lockfile`.
+/// - `auto` → `update-lockfile` if the manager supports locked updates,
+///   otherwise `replace`.
+/// - For `npm` with `auto` and `depType = "dependencies"`, returns
+///   `update-lockfile` (npm-specific heuristic).
+///
+/// Mirrors `getRangeStrategy` from `lib/modules/manager/index.ts`.
+pub fn get_range_strategy(manager: &str, range_strategy: &str, dep_type: Option<&str>) -> &'static str {
+    match range_strategy {
+        "in-range-only" => "update-lockfile",
+        "auto" => {
+            // npm-specific: if depType is "dependencies", use update-lockfile
+            if manager == "npm" && dep_type == Some("dependencies") {
+                return "update-lockfile";
+            }
+            if MANAGERS_WITH_UPDATE_LOCKED.contains(&manager) {
+                "update-lockfile"
+            } else {
+                "replace"
+            }
+        }
+        other => {
+            // Safe: caller is responsible for passing valid strategy strings.
+            // Return the strategy as a static string if it matches a known one.
+            match other {
+                "widen" => "widen",
+                "replace" => "replace",
+                "pin" => "pin",
+                "bump" => "bump",
+                "update-lockfile" => "update-lockfile",
+                "future" => "future",
+                _ => "replace",
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Reconfigure branch cache — lib/workers/repository/reconfigure/reconfigure-cache.ts
 // ---------------------------------------------------------------------------
 
@@ -2019,6 +2077,40 @@ mod tests {
     #[test]
     fn test_sample_size_empty_arr() {
         assert_eq!(sample_size(&[], Some(1)), Vec::<String>::new());
+    }
+
+    // -----------------------------------------------------------------------
+    // get_range_strategy
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns same if not auto" — modules/manager/range.spec.ts line 5
+    #[test]
+    fn test_get_range_strategy_not_auto() {
+        assert_eq!(get_range_strategy("npm", "widen", None), "widen");
+    }
+
+    // Ported: "returns manager strategy" — modules/manager/range.spec.ts line 13
+    #[test]
+    fn test_get_range_strategy_npm_auto_dependencies() {
+        assert_eq!(get_range_strategy("npm", "auto", Some("dependencies")), "update-lockfile");
+    }
+
+    // Ported: "defaults to update-lockfile if updateLockedDependency() is supported" — modules/manager/range.spec.ts line 22
+    #[test]
+    fn test_get_range_strategy_bundler_auto() {
+        assert_eq!(get_range_strategy("bundler", "auto", None), "update-lockfile");
+    }
+
+    // Ported: "defaults to replace" — modules/manager/range.spec.ts line 30
+    #[test]
+    fn test_get_range_strategy_sbt_auto() {
+        assert_eq!(get_range_strategy("sbt", "auto", None), "replace");
+    }
+
+    // Ported: "returns rangeStrategy if not auto" — modules/manager/range.spec.ts line 38
+    #[test]
+    fn test_get_range_strategy_future() {
+        assert_eq!(get_range_strategy("circleci", "future", None), "future");
     }
 
     // -----------------------------------------------------------------------
