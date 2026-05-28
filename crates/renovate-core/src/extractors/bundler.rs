@@ -543,7 +543,24 @@ pub fn update_locked_bundler_dependency(
     }
 }
 
-// ── Auth helpers (unchanged) ─────────────────────────────────────────────────
+// ── Auth helpers ─────────────────────────────────────────────────────────────
+
+/// Return all host rules for `host_type` that have a `resolved_host` and
+/// complete credentials (username+password or token).
+///
+/// Mirrors `findAllAuthenticatable` from
+/// `lib/modules/manager/bundler/host-rules.ts`.
+pub fn find_all_authenticatable(host_type: &str) -> Vec<crate::util::host_rules::HostRule> {
+    crate::util::host_rules::find_all(host_type)
+        .into_iter()
+        .filter(|r| {
+            r.resolved_host.as_deref().is_some_and(|h| !h.is_empty())
+                && ((r.username.as_deref().is_some_and(|u| !u.is_empty())
+                    && r.password.as_deref().is_some_and(|p| !p.is_empty()))
+                    || r.token.as_deref().is_some_and(|t| !t.is_empty()))
+        })
+        .collect()
+}
 
 pub fn get_authentication_header_value(
     username: Option<&str>,
@@ -1215,6 +1232,100 @@ end
             find("gem_with_multiple_values").current_value,
             r#"">= 3.0.5", "< 3.2""#
         );
+    }
+
+    // ── findAllAuthenticatable ───────────────────────────────────────────────
+
+    fn make_rule(
+        host_type: &str,
+        match_host: Option<&str>,
+        username: Option<&str>,
+        password: Option<&str>,
+        token: Option<&str>,
+    ) -> crate::util::host_rules::HostRule {
+        crate::util::host_rules::HostRule {
+            host_type: Some(host_type.to_owned()),
+            match_host: match_host.map(str::to_owned),
+            resolved_host: match_host.map(str::to_owned),
+            username: username.map(str::to_owned),
+            password: password.map(str::to_owned),
+            token: token.map(str::to_owned),
+            ..Default::default()
+        }
+    }
+
+    // Ported: "returns an empty array if matchHost is missing" — bundler/host-rules.spec.ts line 55
+    #[test]
+    fn find_all_authenticatable_empty_if_no_match_host() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            host_type: Some("bundler".to_owned()),
+            resolved_host: None,
+            username: Some("user".to_owned()),
+            password: Some("pass".to_owned()),
+            ..Default::default()
+        }).unwrap();
+        assert!(find_all_authenticatable("bundler").is_empty());
+        crate::util::host_rules::clear();
+    }
+
+    // Ported: "returns an empty array if username is missing and password is present" — bundler/host-rules.spec.ts line 63
+    #[test]
+    fn find_all_authenticatable_empty_if_no_username() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(make_rule("bundler", Some("example.com"), None, Some("pass"), None)).unwrap();
+        assert!(find_all_authenticatable("bundler").is_empty());
+        crate::util::host_rules::clear();
+    }
+
+    // Ported: "returns an empty array if password and token are missing" — bundler/host-rules.spec.ts line 73
+    #[test]
+    fn find_all_authenticatable_empty_if_no_credentials() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(make_rule("bundler", Some("example.com"), Some("user"), None, None)).unwrap();
+        assert!(find_all_authenticatable("bundler").is_empty());
+        crate::util::host_rules::clear();
+    }
+
+    // Ported: "returns the hostRule if using matchHost and password" — bundler/host-rules.spec.ts line 83
+    #[test]
+    fn find_all_authenticatable_returns_rule_with_match_host_and_password() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(make_rule("bundler", Some("example.com"), Some("user"), Some("pass"), None)).unwrap();
+        let result = find_all_authenticatable("bundler");
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].resolved_host.as_deref(), Some("example.com"));
+        crate::util::host_rules::clear();
+    }
+
+    // Ported: "returns the hostRule if using matchHost and token" — bundler/host-rules.spec.ts line 92
+    #[test]
+    fn find_all_authenticatable_returns_rule_with_match_host_and_token() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(make_rule("bundler", Some("example.com"), None, None, Some("token123"))).unwrap();
+        let result = find_all_authenticatable("bundler");
+        assert_eq!(result.len(), 1);
+        crate::util::host_rules::clear();
+    }
+
+    // Ported: "returns the hostRule if using baseUrl and password" — bundler/host-rules.spec.ts line 101
+    #[test]
+    fn find_all_authenticatable_returns_rule_with_base_url_and_password() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(make_rule("bundler", Some("https://example.com"), Some("user"), Some("pass"), None)).unwrap();
+        let result = find_all_authenticatable("bundler");
+        assert_eq!(result.len(), 1);
+        crate::util::host_rules::clear();
+    }
+
+    // Ported: "returns the hostRule if using baseUrl and token" — bundler/host-rules.spec.ts line 110
+    #[test]
+    fn find_all_authenticatable_returns_rule_with_base_url_and_token() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(make_rule("bundler", Some("https://example.com"), None, None, Some("token"))).unwrap();
+        let result = find_all_authenticatable("bundler");
+        assert_eq!(result.len(), 1);
+        crate::util::host_rules::clear();
     }
 
     // Ported: "skips local gems in Gemfile" — bundler/extract.spec.ts line 284
