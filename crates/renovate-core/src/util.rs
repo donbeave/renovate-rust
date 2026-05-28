@@ -12,6 +12,38 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Interpolator — lib/util/interpolator.ts
+// ---------------------------------------------------------------------------
+
+/// Validate a secrets/variables map for correct key format and value types.
+///
+/// `None` input → no-op.  Non-object → `Err(CONFIG_SECRETS_INVALID)`.
+/// Object with keys not matching `name_pattern` or non-string values → `Err`.
+pub fn validate_interpolated_values(
+    input: Option<&serde_json::Value>,
+    name_pattern: &str,
+) -> Result<(), String> {
+    use regex::Regex;
+    let Some(input) = input else { return Ok(()); };
+    let re = Regex::new(name_pattern).map_err(|e| e.to_string())?;
+    match input {
+        serde_json::Value::Object(map) => {
+            for (k, v) in map {
+                if !re.is_match(k) {
+                    return Err(format!("CONFIG_SECRETS_INVALID: invalid key {k:?}"));
+                }
+                if !v.is_string() {
+                    return Err(format!("CONFIG_SECRETS_INVALID: value for {k:?} must be string"));
+                }
+            }
+            Ok(())
+        }
+        serde_json::Value::Null => Ok(()),
+        _ => Err("CONFIG_SECRETS_INVALID: input must be an object".to_owned()),
+    }
+}
+
+// ---------------------------------------------------------------------------
 // YAML utilities — lib/util/yaml.ts
 // ---------------------------------------------------------------------------
 
@@ -1931,6 +1963,50 @@ mod tests {
     fn test_parse_json_invalid() {
         let input = r#"{"name": "Alice", "hobbies": ["Reading"]  "isStudent": true}"#;
         assert!(parse_json(input).is_err());
+    }
+
+    // -----------------------------------------------------------------------
+    // interpolator (validateInterpolatedValues)
+    // -----------------------------------------------------------------------
+
+    const NAME_PATTERN: &str = "^[A-Za-z][A-Za-z0-9_]*$";
+
+    // Ported: "does nothing if not input" — util/interpolator.spec.ts line 13
+    #[test]
+    fn test_validate_interpolated_none() {
+        assert!(validate_interpolated_values(None, NAME_PATTERN).is_ok());
+    }
+
+    // Ported: "does not throw error when keys and values are valid" — util/interpolator.spec.ts line 19
+    #[test]
+    fn test_validate_interpolated_valid() {
+        use serde_json::json;
+        let input = json!({ "SOME_SECRET": "secret" });
+        assert!(validate_interpolated_values(Some(&input), NAME_PATTERN).is_ok());
+    }
+
+    // Ported: "throws when input is not a valid object" — util/interpolator.spec.ts line 25
+    #[test]
+    fn test_validate_interpolated_not_object() {
+        use serde_json::json;
+        let input = json!("not_an_object");
+        assert!(validate_interpolated_values(Some(&input), NAME_PATTERN).is_err());
+    }
+
+    // Ported: "throws when keys do not follow specified regex patterns" — util/interpolator.spec.ts line 31
+    #[test]
+    fn test_validate_interpolated_bad_key() {
+        use serde_json::json;
+        let input = json!({ "SOME-SECRET": "secret" }); // hyphen is not allowed
+        assert!(validate_interpolated_values(Some(&input), NAME_PATTERN).is_err());
+    }
+
+    // Ported: "throws when values are not of type string" — util/interpolator.spec.ts line 40
+    #[test]
+    fn test_validate_interpolated_non_string_value() {
+        use serde_json::json;
+        let input = json!({ "SOME_SECRET": 1 }); // number not allowed
+        assert!(validate_interpolated_values(Some(&input), NAME_PATTERN).is_err());
     }
 
     // -----------------------------------------------------------------------

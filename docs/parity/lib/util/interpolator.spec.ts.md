@@ -5,17 +5,17 @@
 ## `lib/util/interpolator.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/interpolator.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+**Total tests:** 10 | **Ported:** 5 | **Actionable:** 10 | **Status:** partial
 
 ### `util/interpolator › validateInterpolatedValues`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does nothing if not input | 13 | pending | — | — | — |
-| does not throw error when keys and values are valid | 19 | pending | — | — | — |
-| throws when input is not a valid object | 25 | pending | — | — | — |
-| throws when keys do not follow specified regex patterns | 31 | pending | — | — | — |
-| throws when values are not of type string | 40 | pending | — | — | — |
+| does nothing if not input | 13 | ported | `util.rs` | `test_validate_interpolated_none` | — |
+| does not throw error when keys and values are valid | 19 | ported | `util.rs` | `test_validate_interpolated_valid` | — |
+| throws when input is not a valid object | 25 | ported | `util.rs` | `test_validate_interpolated_not_object` | — |
+| throws when keys do not follow specified regex patterns | 31 | ported | `util.rs` | `test_validate_interpolated_bad_key` | — |
+| throws when values are not of type string | 40 | ported | `util.rs` | `test_validate_interpolated_non_string_value` | — |
 
 ### `util/interpolator › replaceInterpolatedValuesInObject`
 
