@@ -98,23 +98,56 @@ fn collect_named_values(
         .collect())
 }
 
+/// Prefixes that are NOT allowed to use secret substitution.
+///
+/// Mirrors the `disallowedPrefixes` in `lib/util/interpolator.ts`.
+const DISALLOWED_PREFIXES: &[&str] = &["branch", "commit", "group", "pr", "semantic"];
+
+/// Check if a key is in the disallowed list for secret substitution.
+fn is_disallowed_key(key: &str) -> bool {
+    DISALLOWED_PREFIXES.iter().any(|prefix| key.starts_with(prefix))
+}
+
 fn replace_values(
     value: &mut Value,
     namespace: &'static str,
     replacements: &BTreeMap<String, String>,
 ) -> Result<(), SecretsError> {
+    replace_values_with_key(value, namespace, replacements, None)
+}
+
+fn replace_values_with_key(
+    value: &mut Value,
+    namespace: &'static str,
+    replacements: &BTreeMap<String, String>,
+    current_key: Option<&str>,
+) -> Result<(), SecretsError> {
     match value {
         Value::String(s) => {
+            // Check disallowed keys BEFORE replacing
+            if let Some(key) = current_key {
+                if is_disallowed_key(key) {
+                    // Check if the string contains a template pattern
+                    let pattern = format!(r"\{{\{{ *{}\..*?\}}\}}", namespace);
+                    if regex::Regex::new(&pattern).is_ok_and(|re| re.is_match(s)) {
+                        return Err(SecretsError::ConfigValidation);
+                    }
+                }
+            }
             *s = replace_string(s, namespace, replacements)?;
         }
         Value::Array(values) => {
             for value in values {
-                replace_values(value, namespace, replacements)?;
+                replace_values_with_key(value, namespace, replacements, current_key)?;
             }
         }
         Value::Object(values) => {
-            for value in values.values_mut() {
-                replace_values(value, namespace, replacements)?;
+            for (key, value) in values.iter_mut() {
+                // Skip onboardingConfig — it should not have secrets resolved
+                if key == "onboardingConfig" {
+                    continue;
+                }
+                replace_values_with_key(value, namespace, replacements, Some(key))?;
             }
         }
         Value::Null | Value::Bool(_) | Value::Number(_) => {}
@@ -381,6 +414,41 @@ mod tests {
         let result = apply_secrets_and_variables_to_config(&config, false, false).unwrap();
         assert_eq!(result["mode"], json!("silent"));
         assert!(result.get("secrets").is_some(), "secrets should be kept");
+    }
+
+    // Ported: "does not resolve secrets in onboaringConfig" — util/interpolator.spec.ts line 115
+    #[test]
+    fn does_not_resolve_secrets_in_onboarding_config() {
+        let config = json!({
+            "mode": "{{ secrets.SECRET_MODE }}",
+            "secrets": {"SECRET_MODE": "silent", "ARTIFACTORY_API_TOKEN": "token"},
+            "onboardingConfig": {
+                "hostRules": [{
+                    "hostType": "maven",
+                    "password": "{{ secrets.ARTIFACTORY_API_TOKEN }}"
+                }]
+            }
+        });
+        let result = apply_secrets_and_variables_to_config(&config, false, false).unwrap();
+        // mode should be replaced
+        assert_eq!(result["mode"], json!("silent"));
+        // onboardingConfig should NOT be modified
+        assert_eq!(
+            result["onboardingConfig"]["hostRules"][0]["password"],
+            json!("{{ secrets.ARTIFACTORY_API_TOKEN }}")
+        );
+    }
+
+    // Ported: "throws error if secrets are used in disallowed options" — util/interpolator.spec.ts line 155
+    #[test]
+    fn errors_if_secrets_in_disallowed_options() {
+        // 'prHeader' starts with 'pr' which is a disallowed prefix
+        let config = json!({
+            "prHeader": "{{ secrets.SECRET_HEADER }}",
+            "secrets": {"SECRET_HEADER": "header"}
+        });
+        let result = apply_secrets_and_variables_to_config(&config, false, false);
+        assert_eq!(result, Err(SecretsError::ConfigValidation));
     }
 
     // Ported: "throws error if secret key is not present in config" — util/interpolator.spec.ts line 175

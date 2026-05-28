@@ -247,7 +247,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) |
 | `lib/modules/datasource/bitrise/index.spec.ts` | Done | [details](lib/modules/datasource/bitrise/index.spec.ts.md) |
-| `lib/modules/datasource/terraform-module/base.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
+| `lib/modules/datasource/terraform-module/base.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/index.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/utils.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/utils.spec.ts.md) |
 | `lib/modules/datasource/terraform-provider/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-provider/index.spec.ts.md) |
@@ -382,7 +382,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/package-rules/jsonata.spec.ts` | Not done | [details](lib/util/package-rules/jsonata.spec.ts.md) |
 | `lib/workers/global/config/parse/cli.spec.ts` | Done | [details](lib/workers/global/config/parse/cli.spec.ts.md) |
 | `lib/workers/repository/init/apis.spec.ts` | Not done | [details](lib/workers/repository/init/apis.spec.ts.md) |
-| `lib/workers/repository/init/cache.spec.ts` | Not done | [details](lib/workers/repository/init/cache.spec.ts.md) |
+| `lib/workers/repository/init/cache.spec.ts` | Done | [details](lib/workers/repository/init/cache.spec.ts.md) |
 | `lib/workers/global/config/parse/file.spec.ts` | Not done | [details](lib/workers/global/config/parse/file.spec.ts.md) |
 | `lib/workers/global/config/parse/env.spec.ts` | Done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
 | `lib/workers/repository/init/merge.spec.ts` | Not done | [details](lib/workers/repository/init/merge.spec.ts.md) |
@@ -809,7 +809,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/queue.spec.ts` | Done | [details](lib/util/http/queue.spec.ts.md) |
 | `lib/util/http/rate-limit.spec.ts` | Not done | [details](lib/util/http/rate-limit.spec.ts.md) |
 | `lib/util/http/retry-after.spec.ts` | Not done | [details](lib/util/http/retry-after.spec.ts.md) |
-| `lib/util/http/scm-manager.spec.ts` | Not done | [details](lib/util/http/scm-manager.spec.ts.md) |
+| `lib/util/http/scm-manager.spec.ts` | Done | [details](lib/util/http/scm-manager.spec.ts.md) |
 | `lib/util/http/throttle.spec.ts` | Done | [details](lib/util/http/throttle.spec.ts.md) |
 | `lib/util/http/www-authenticate.spec.ts` | Done | [details](lib/util/http/www-authenticate.spec.ts.md) |
 | `lib/util/json-writer/editor-config.spec.ts` | Not done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
@@ -849,7 +849,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/extract/supersedes.spec.ts` | Done | [details](lib/workers/repository/extract/supersedes.spec.ts.md) |
 | `lib/workers/repository/finalize/prune.spec.ts` | Not done | [details](lib/workers/repository/finalize/prune.spec.ts.md) |
 | `lib/workers/repository/finalize/repository-statistics.spec.ts` | Not done | [details](lib/workers/repository/finalize/repository-statistics.spec.ts.md) |
-| `lib/workers/repository/index.spec.ts` | Not done | [details](lib/workers/repository/index.spec.ts.md) |
+| `lib/workers/repository/index.spec.ts` | Done | [details](lib/workers/repository/index.spec.ts.md) |
 | `lib/workers/repository/init/index.spec.ts` | Not done | [details](lib/workers/repository/init/index.spec.ts.md) |
 | `lib/workers/repository/init/inherited.spec.ts` | Not done | [details](lib/workers/repository/init/inherited.spec.ts.md) |
 | `lib/workers/repository/init/vulnerability.spec.ts` | Not done | [details](lib/workers/repository/init/vulnerability.spec.ts.md) |
