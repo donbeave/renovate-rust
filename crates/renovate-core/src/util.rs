@@ -1263,6 +1263,38 @@ impl<T: Clone, E: Clone> Lazy<T, E> {
 }
 
 // ---------------------------------------------------------------------------
+// getEnvName — lib/config/options/env.ts
+// ---------------------------------------------------------------------------
+
+/// Get the environment variable name for a configuration option.
+///
+/// - `env_enabled = false` → empty string.
+/// - `env = Some("FOO")` → `"FOO"` (explicit override).
+/// - Otherwise → `"RENOVATE_ONE_TWO_THREE"` for camelCase `"oneTwoThree"`.
+///
+/// Mirrors `getEnvName` from `lib/config/options/env.ts`.
+pub fn get_env_name(name: &str, env: Option<&str>, env_enabled: bool) -> String {
+    if !env_enabled {
+        return String::new();
+    }
+    if let Some(e) = env {
+        return e.to_owned();
+    }
+    let screaming: String = name
+        .chars()
+        .flat_map(|c| {
+            if c.is_uppercase() {
+                vec!['_', c]
+            } else {
+                vec![c]
+            }
+        })
+        .collect::<String>()
+        .to_uppercase();
+    format!("RENOVATE_{screaming}")
+}
+
+// ---------------------------------------------------------------------------
 // getCliName — lib/workers/global/config/parse/cli.ts
 // ---------------------------------------------------------------------------
 
@@ -1751,6 +1783,28 @@ mod tests {
         let input = json!({ "packageFiles": [] });
         let output = config_serialize(&input);
         assert_eq!(output["packageFiles"], "[Array]");
+    }
+
+    // -----------------------------------------------------------------------
+    // get_env_name
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns empty" — workers/global/config/parse/env.spec.ts line 418
+    #[test]
+    fn test_get_env_name_empty() {
+        assert_eq!(get_env_name("foo", None, false), "");
+    }
+
+    // Ported: "returns existing env" — workers/global/config/parse/env.spec.ts line 426
+    #[test]
+    fn test_get_env_name_existing() {
+        assert_eq!(get_env_name("foo", Some("FOO"), true), "FOO");
+    }
+
+    // Ported: "generates RENOVATE_ env" — workers/global/config/parse/env.spec.ts line 434
+    #[test]
+    fn test_get_env_name_generated() {
+        assert_eq!(get_env_name("oneTwoThree", None, true), "RENOVATE_ONE_TWO_THREE");
     }
 
     // -----------------------------------------------------------------------

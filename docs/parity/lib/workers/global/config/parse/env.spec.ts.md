@@ -5,7 +5,7 @@
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 40 | **Actionable:** 45 | **Status:** partial
+**Total tests:** 45 | **Ported:** 43 | **Actionable:** 45 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -66,9 +66,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty | 418 | pending | — | — | — |
-| returns existing env | 426 | pending | — | — | — |
-| generates RENOVATE_ env | 434 | pending | — | — | — |
+| returns empty | 418 | ported | `util.rs` | `test_get_env_name_empty` | — |
+| returns existing env | 426 | ported | `util.rs` | `test_get_env_name_existing` | — |
+| generates RENOVATE_ env | 434 | ported | `util.rs` | `test_get_env_name_generated` | — |
 | dryRun boolean true | 441 | ported | `config_env.rs` | `dry_run_true_maps_to_full` | — |
 | dryRun boolean false | 449 | ported | `config_env.rs` | `dry_run_false_disables_dry_run` | — |
 | dryRun null | 457 | ported | `config_env.rs` | `dry_run_null_disables_dry_run` | — |
