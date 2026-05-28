@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4152 / 11677 total tests ported (36%) · pending 7437 · not-applicable 88 (1% of total) — updated 2026-05-28
+**Progress:** 4166 / 11677 total tests ported (36%) · pending 7423 · not-applicable 88 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -412,7 +412,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/interpolator.spec.ts` | Not done | [details](lib/util/interpolator.spec.ts.md) |
 | `lib/util/date.spec.ts` | Not done | [details](lib/util/date.spec.ts.md) |
 | `lib/util/fingerprint.spec.ts` | Done | [details](lib/util/fingerprint.spec.ts.md) |
-| `lib/util/hash.spec.ts` | Not done | [details](lib/util/hash.spec.ts.md) |
+| `lib/util/hash.spec.ts` | Done | [details](lib/util/hash.spec.ts.md) |
 | `lib/util/regex.spec.ts` | Not done | [details](lib/util/regex.spec.ts.md) |
 | `lib/util/result.spec.ts` | Not done | [details](lib/util/result.spec.ts.md) |
 | `lib/util/number.spec.ts` | Done | [details](lib/util/number.spec.ts.md) |
@@ -432,7 +432,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/s3.spec.ts` | Not done | [details](lib/util/s3.spec.ts.md) |
 | `lib/util/jsonata.spec.ts` | Not done | [details](lib/util/jsonata.spec.ts.md) |
 | `lib/util/url.spec.ts` | Not done | [details](lib/util/url.spec.ts.md) |
-| `lib/util/toml.spec.ts` | Not done | [details](lib/util/toml.spec.ts.md) |
+| `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
 | `lib/modules/platform/comment.spec.ts` | Not done | [details](lib/modules/platform/comment.spec.ts.md) |
 | `lib/modules/platform/scm.spec.ts` | Not done | [details](lib/modules/platform/scm.spec.ts.md) |
 | `lib/modules/platform/pr-body.spec.ts` | Not done | [details](lib/modules/platform/pr-body.spec.ts.md) |

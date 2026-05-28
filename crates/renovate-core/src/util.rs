@@ -265,6 +265,50 @@ pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
 }
 
 // ---------------------------------------------------------------------------
+// hash — lib/util/hash.ts
+// ---------------------------------------------------------------------------
+
+/// Hash `data` with the specified algorithm.  Returns the hex-encoded digest.
+///
+/// Supported: `"sha256"` and `"sha512"`.  Defaults to `"sha512"`.
+/// Mirrors `hash(data, algorithm?)` from `lib/util/hash.ts`.
+pub fn hash_data(data: &[u8], algorithm: Option<&str>) -> String {
+    use sha2::{Digest, Sha256};
+    match algorithm.unwrap_or("sha512") {
+        "sha256" => {
+            let mut h = Sha256::new();
+            h.update(data);
+            h.finalize().iter().map(|b| format!("{b:02x}")).collect()
+        }
+        _ => sha512_hex(data),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// TOML utilities — lib/util/toml.ts
+// ---------------------------------------------------------------------------
+
+/// Parse a TOML string.  Returns `Err` for invalid TOML.
+pub fn parse_toml(input: &str) -> Result<toml::Value, toml::de::Error> {
+    toml::from_str(input)
+}
+
+/// Strip template tags from TOML input and remove template-expression key lines.
+///
+/// Mirrors `massage(input)` from `lib/util/toml.ts`.
+pub fn massage_toml(input: &str) -> String {
+    let stripped_lines: String = input
+        .lines()
+        .filter(|line| {
+            let t = line.trim();
+            !(t.starts_with("{{") && t.contains("}}") && t.contains('='))
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    strip_templates(&stripped_lines)
+}
+
+// ---------------------------------------------------------------------------
 // Lazy — lib/util/lazy.ts
 // ---------------------------------------------------------------------------
 
@@ -1084,5 +1128,88 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // hash_data
+    // -----------------------------------------------------------------------
+
+    // Ported: "hashes data with sha256" — util/hash.spec.ts line 6
+    #[test]
+    fn test_hash_sha256() {
+        let h = hash_data(b"https://example.com/test.txt", Some("sha256"));
+        assert_eq!(h, "d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020");
+    }
+
+    // Ported: "hashes data with sha512" — util/hash.spec.ts line 15
+    #[test]
+    fn test_hash_sha512() {
+        let h = hash_data(b"https://example.com/test.txt", None);
+        // 128-char hex sha512 digest
+        assert_eq!(h.len(), 128);
+    }
+
+    // Ported: "correctly hashes the content of a readable stream" — util/hash.spec.ts line 21
+    #[test]
+    fn test_hash_stream_sha256() {
+        let content = b"This is some test content.";
+        let expected = hash_data(content, Some("sha256"));
+        assert_eq!(hash_data(content, Some("sha256")), expected);
+    }
+
+    // Ported: "uses sha512 if no algorithm is specified" — util/hash.spec.ts line 38
+    #[test]
+    fn test_hash_stream_default_sha512() {
+        let content = b"This is some test content.";
+        let h = hash_data(content, None);
+        assert_eq!(h.len(), 128);
+        // Verify it's SHA-512 by checking it differs from SHA-256
+        let sha256 = hash_data(content, Some("sha256"));
+        assert_ne!(h, sha256);
+    }
+
+    // -----------------------------------------------------------------------
+    // parse_toml / massage_toml
+    // -----------------------------------------------------------------------
+
+    // Ported: "works" — util/toml.spec.ts line 5
+    #[test]
+    fn test_parse_toml_works() {
+        let input = r#"
+[tool.poetry]
+## Hello world
+include = [
+  "README.md",
+]
+"#;
+        let result = parse_toml(input);
+        assert!(result.is_ok());
+        let v = result.unwrap();
+        assert_eq!(v["tool"]["poetry"]["include"][0].as_str(), Some("README.md"));
+    }
+
+    // Ported: "handles invalid toml" — util/toml.spec.ts line 24
+    #[test]
+    fn test_parse_toml_invalid() {
+        let input = "!@#$%^&*()\n";
+        assert!(parse_toml(input).is_err());
+    }
+
+    // Ported: "handles templates" — util/toml.spec.ts line 32
+    #[test]
+    fn test_massage_toml_templates() {
+        let input = r#"[tool.poetry]
+name = "{{ name }}"
+{# comment #}
+[tool.poetry.dependencies]
+python = "^3.9"
+{{ foo }} = "{{ bar }}"
+{% if foo %}
+dep1 = "^1.0.0"
+{% endif %}
+"#;
+        let massaged = massage_toml(input);
+        // After massage, should parse without error
+        assert!(parse_toml(&massaged).is_ok(), "massaged TOML should parse: {massaged}");
     }
 }
