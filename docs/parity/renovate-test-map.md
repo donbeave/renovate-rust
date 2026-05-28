@@ -468,7 +468,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/hashicorp/index.spec.ts` | Done | [details](lib/modules/versioning/hashicorp/index.spec.ts.md) |
 | `lib/modules/versioning/hashicorp/convertor.spec.ts` | Done | [details](lib/modules/versioning/hashicorp/convertor.spec.ts.md) |
 | `lib/modules/versioning/glasskube/index.spec.ts` | Done | [details](lib/modules/versioning/glasskube/index.spec.ts.md) |
-| `lib/modules/versioning/bazel-module/index.spec.ts` | Not done | [details](lib/modules/versioning/bazel-module/index.spec.ts.md) |
+| `lib/modules/versioning/bazel-module/index.spec.ts` | Done | [details](lib/modules/versioning/bazel-module/index.spec.ts.md) |
 | `lib/modules/versioning/bazel-module/bzlmod-version.spec.ts` | Done | [details](lib/modules/versioning/bazel-module/bzlmod-version.spec.ts.md) |
 | `lib/modules/versioning/cargo/index.spec.ts` | Done | [details](lib/modules/versioning/cargo/index.spec.ts.md) |
 | `lib/modules/versioning/maven/compare.spec.ts` | Done | [details](lib/modules/versioning/maven/compare.spec.ts.md) |
