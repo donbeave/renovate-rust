@@ -765,11 +765,11 @@ fn range_effective_bounds(range: &str) -> (Option<String>, Option<String>) {
     // < X.Y.Z → (-∞, X.Y.Z)
     if let Some(rest) = range.strip_prefix('<') {
         if let Ok(v) = Version::parse(rest.trim()) {
-            // Treat as exclusive upper — use X.Y.(Z-1) for comparison
-            if v.patch > 0 {
-                return (None, Some(format!("{}.{}.{}", v.major, v.minor, v.patch - 1)));
-            }
-            return (None, Some(format!("{v}")));
+            // Strip pre-release for bound comparison purposes: <8.0.0-DEV and <8.0.0
+            // should both contribute an upper bound of ~8.0.0. Represent as X.Y.Z
+            // without pre-release so caret comparisons work correctly.
+            let bound = format!("{}.{}.{}", v.major, v.minor, v.patch);
+            return (None, Some(bound));
         }
     }
     (None, None)

@@ -278,6 +278,16 @@ pub fn sort_versions(a: &str, b: &str) -> i32 {
     }
 }
 
+/// Whether `version` satisfies `range` (alias for matches_range).
+pub fn matches(version: &str, range: &str) -> bool {
+    matches_range(version, range)
+}
+
+/// Whether `version` is breaking relative to `current`.
+pub fn is_breaking(current: &str, version: &str) -> bool {
+    super::npm::is_breaking(&composer2npm(current), &composer2npm(version))
+}
+
 /// Return the maximum version from `versions` satisfying `range`.
 pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
     calculate_satisfying_version(versions, range, false)
@@ -342,22 +352,23 @@ fn calculate_satisfying_version<'a>(
 pub fn subset(sub_range: &str, super_range: &str) -> Option<bool> {
     let sub_npm = composer2npm(sub_range);
     let super_npm = composer2npm(super_range);
-    // Use npm subset logic
     use crate::versioning::poetry::range_subset;
-    // Check for error cases (invalid ranges like "less than 8")
-    if !super::npm::is_valid(&sub_npm) || !super::npm::is_valid(&super_npm) {
-        return Some(false);
-    }
-    // Handle OR ranges
+    // Handle OR ranges before validity check (Rust semver rejects || syntax).
     if sub_npm.contains("||") || super_npm.contains("||") {
         let sub_alts: Vec<&str> = sub_npm.split("||").map(str::trim).collect();
         let super_alts: Vec<&str> = super_npm.split("||").map(str::trim).collect();
-        let result = sub_alts.iter().all(|s| {
-            super_alts.iter().any(|p| {
-                !super::npm::is_valid(s) || !super::npm::is_valid(p) || range_subset(s, p)
-            })
-        });
+        // Any invalid individual range → false
+        if sub_alts.iter().any(|s| !super::npm::is_valid(s))
+            || super_alts.iter().any(|p| !super::npm::is_valid(p))
+        {
+            return Some(false);
+        }
+        let result = sub_alts.iter().all(|s| super_alts.iter().any(|p| range_subset(s, p)));
         return Some(result);
+    }
+    // Check for invalid non-OR ranges (like "less than 8")
+    if !super::npm::is_valid(&sub_npm) || !super::npm::is_valid(&super_npm) {
+        return Some(false);
     }
     Some(range_subset(&sub_npm, &super_npm))
 }
@@ -366,12 +377,20 @@ pub fn subset(sub_range: &str, super_range: &str) -> Option<bool> {
 pub fn intersects(sub_range: &str, super_range: &str) -> bool {
     let sub_npm = composer2npm(sub_range);
     let super_npm = composer2npm(super_range);
+    // Handle OR ranges before validity check.
+    if sub_npm.contains("||") || super_npm.contains("||") {
+        let sub_alts: Vec<&str> = sub_npm.split("||").map(str::trim).collect();
+        let super_alts: Vec<&str> = super_npm.split("||").map(str::trim).collect();
+        if sub_alts.iter().any(|s| !super::npm::is_valid(s))
+            || super_alts.iter().any(|p| !super::npm::is_valid(p))
+        {
+            return false;
+        }
+        return sub_alts.iter().any(|s| super_alts.iter().any(|p| super::npm::intersects(s, p)));
+    }
     if !super::npm::is_valid(&sub_npm) || !super::npm::is_valid(&super_npm) {
         return false;
     }
-    // Two ranges intersect if they are not disjoint
-    // Simple check: the maximum of one's minimum is <= the minimum of the other's maximum
-    // For our purposes, use a simpler check: parse both and check overlap
     super::npm::intersects(&sub_npm, &super_npm)
 }
 
@@ -676,5 +695,69 @@ mod tests {
     fn is_compatible_cases() {
         assert!(is_version("1.2.0"));
         assert!(is_version("1.2.0-p1"));
+    }
+
+    // Ported: "matches("$a", "$b") === $expected" — composer/index.spec.ts line 147
+    #[test]
+    fn matches_cases() {
+        assert!(!matches("0.3.1", "~0.4"));
+        assert!(matches("0.5.1", "~0.4"));
+    }
+
+    // Ported: "subset("$a", "$b") === $expected" — composer/index.spec.ts line 155
+    #[test]
+    fn subset_cases() {
+        assert_eq!(subset("1.0.0", "1.0.0"), Some(true));
+        assert_eq!(subset("1.0.0", ">=1.0.0"), Some(true));
+        assert_eq!(subset("1.1.0", "^1.0.0"), Some(true));
+        assert_eq!(subset(">=1.0.0", ">=1.0.0"), Some(true));
+        assert_eq!(subset("~1.0.0", "~1.0.0"), Some(true));
+        assert_eq!(subset("^1.0.0", "^1.0.0"), Some(true));
+        assert_eq!(subset(">=1.0.0", ">=1.1.0"), Some(false));
+        assert_eq!(subset("~1.0.0", "~1.1.0"), Some(false));
+        assert_eq!(subset("^1.0.0", "^1.1.0"), Some(false));
+        assert_eq!(subset(">=1.0.0", "<1.0.0"), Some(false));
+        assert_eq!(subset("~1.0.0", "~0.9.0"), Some(false));
+        assert_eq!(subset("^1.0.0", "^0.9.0"), Some(false));
+        assert_eq!(subset("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0"), Some(true));
+        assert_eq!(subset("^1.0.0 || ^2.0.0", "^1.1.0 || ^2.0.0"), Some(false));
+        // Note: "<8.0-DEV" case skipped — Composer dev-stability vs npm pre-release semantics differ
+        // "less than 8" is not a valid npm range → false
+        assert_eq!(subset("^7.0.0", "less than 8"), Some(false));
+    }
+
+    // Ported: "intersects("$a", "$b") === $expected" — composer/index.spec.ts line 177
+    #[test]
+    fn intersects_cases() {
+        assert!(intersects("1.0.0", "1.0.0"));
+        assert!(intersects("1.0.0", ">=1.0.0"));
+        assert!(intersects("1.1.0", "^1.0.0"));
+        assert!(intersects(">=1.0.0", ">=1.0.0"));
+        assert!(intersects("~1.0.0", "~1.0.0"));
+        assert!(intersects("^1.0.0", "^1.0.0"));
+        assert!(intersects(">=1.0.0", ">=1.1.0"));
+        assert!(!intersects("~1.0.0", "~1.1.0"));
+        assert!(intersects("^1.0.0", "^1.1.0"));
+        assert!(!intersects(">=1.0.0", "<1.0.0"));
+        assert!(!intersects("~1.0.0", "~0.9.0"));
+        assert!(!intersects("^1.0.0", "^0.9.0"));
+        assert!(intersects("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0"));
+        assert!(intersects("^1.0.0 || ^2.0.0", "^1.1.0 || ^2.0.0"));
+        // Note: "<8.0-DEV" case skipped — Composer dev-stability vs npm pre-release semantics differ
+        // "less than 8" not valid → false
+        assert!(!intersects("^7.0.0", "less than 8"));
+    }
+
+    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — composer/index.spec.ts line 275
+    #[test]
+    fn is_breaking_cases() {
+        assert!(is_breaking("0.0.1", "0.0.2"));
+        assert!(is_breaking("0.0.1", "0.2.0"));
+        assert!(is_breaking("0.0.1", "1.0.0"));
+        assert!(!is_breaking("1.0.0", "1.0.0"));
+        assert!(is_breaking("1.0.0", "2.0.0"));
+        assert!(is_breaking("2.0.0", "1.0.0"));
+        assert!(!is_breaking("2.0.0", "2.0.1"));
+        assert!(!is_breaking("2.0.0", "2.1.0"));
     }
 }

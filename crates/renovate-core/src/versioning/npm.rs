@@ -385,26 +385,71 @@ pub fn subset(a: &str, b: &str) -> bool {
     )
 }
 
+/// Return `true` when ranges `a` and `b` have at least one version in common.
+///
+/// For OR-compound ranges (containing `||`), the caller should split and check
+/// individual alternatives. This function handles single, non-OR ranges.
+///
+/// Implementation: two ranges intersect if either's lower bound satisfies the
+/// other, or their effective bound intervals overlap.
 pub fn intersects(a: &str, b: &str) -> bool {
-    match (a, b) {
-        (">=1.0.0", "<1.0.0")
-        | ("~1.0.0", "~0.9.0")
-        | ("^1.0.0", "^0.9.0")
-        | ("~1.0.0", "~1.1.0") => false,
-        _ => matches!(
-            (a, b),
-            ("1.0.0", "1.0.0")
-                | ("1.0.0", ">=1.0.0")
-                | ("1.1.0", "^1.0.0")
-                | (">=1.0.0", ">=1.0.0")
-                | ("~1.0.0", "~1.0.0")
-                | ("^1.0.0", "^1.0.0")
-                | (">=1.0.0", ">=1.1.0")
-                | ("^1.0.0", "^1.1.0")
-                | ("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0")
-                | ("^1.0.0 || ^2.0.0", "^1.1.0 || ^2.0.0")
-        ),
+    // Handle OR ranges by splitting into alternatives
+    if a.contains("||") || b.contains("||") {
+        let a_alts: Vec<&str> = a.split("||").map(str::trim).collect();
+        let b_alts: Vec<&str> = b.split("||").map(str::trim).collect();
+        return a_alts.iter().any(|aa| b_alts.iter().any(|bb| intersects_single(aa, bb)));
     }
+    intersects_single(a, b)
+}
+
+fn intersects_single(a: &str, b: &str) -> bool {
+    if !is_valid(a) || !is_valid(b) {
+        return false;
+    }
+    let req_a = VersionReq::parse(a);
+    let req_b = VersionReq::parse(b);
+    // If either fails to parse as VersionReq, check exact version match
+    let (req_a, req_b) = match (req_a, req_b) {
+        (Ok(ra), Ok(rb)) => (ra, rb),
+        _ => return false,
+    };
+    // Check if the lower bound of a satisfies b, or vice versa
+    // Extract candidate versions from each range's min bound
+    for candidate_str in extract_range_bounds(a).iter().chain(extract_range_bounds(b).iter()) {
+        if let Ok(v) = Version::parse(candidate_str) {
+            if req_a.matches(&v) && req_b.matches(&v) {
+                return true;
+            }
+        }
+    }
+    // Also try exact version if either is a plain version
+    if let Ok(v) = Version::parse(a.strip_prefix('=').unwrap_or(a).trim()) {
+        if req_b.matches(&v) { return true; }
+    }
+    if let Ok(v) = Version::parse(b.strip_prefix('=').unwrap_or(b).trim()) {
+        if req_a.matches(&v) { return true; }
+    }
+    false
+}
+
+/// Extract candidate version strings from a range string for intersection testing.
+fn extract_range_bounds(range: &str) -> Vec<String> {
+    let mut result = Vec::new();
+    for part in range.split_whitespace() {
+        let ver_str = part
+            .strip_prefix(">=")
+            .or_else(|| part.strip_prefix("<="))
+            .or_else(|| part.strip_prefix('^'))
+            .or_else(|| part.strip_prefix('~'))
+            .or_else(|| part.strip_prefix('>'))
+            .or_else(|| part.strip_prefix('<'))
+            .or_else(|| part.strip_prefix('='))
+            .unwrap_or(part);
+        if Version::parse(ver_str).is_ok() {
+            result.push(ver_str.to_owned());
+        }
+    }
+    result
 }
 
 pub fn is_breaking(current_version: &str, new_version: &str) -> bool {
