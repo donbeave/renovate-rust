@@ -1463,6 +1463,20 @@ mod tests {
     }
 
     // -----------------------------------------------------------------------
+    // regex
+    // -----------------------------------------------------------------------
+
+    // Ported: "throws unsafe 2" — util/regex.spec.ts line 10
+    #[test]
+    fn test_regex_unsafe_pattern_rejected() {
+        // Rust regex crate rejects unsupported features (lookahead/backrefs)
+        // that could cause catastrophic backtracking or are not RE2-compatible.
+        // This mirrors the TypeScript `regEx` which uses RE2 and rejects `x++`.
+        assert!(regex::Regex::new(r"(?=foo)").is_err(), "lookahead should be rejected");
+        assert!(regex::Regex::new(r"\1").is_err(), "backreference should be rejected");
+    }
+
+    // -----------------------------------------------------------------------
     // sanitize_markdown
     // -----------------------------------------------------------------------
 
