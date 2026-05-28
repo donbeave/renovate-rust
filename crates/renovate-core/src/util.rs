@@ -211,6 +211,47 @@ pub fn assign_keys<K, V>(
 }
 
 // ---------------------------------------------------------------------------
+// massageThrowable — lib/instrumentation/utils.ts
+// ---------------------------------------------------------------------------
+
+/// Convert an error/throwable value to an optional string message.
+///
+/// - `None` input → `None`
+/// - `Display` input → `Some(value.to_string())`
+///
+/// Mirrors the TypeScript `massageThrowable` which returns `undefined` for
+/// null/undefined and the string representation otherwise.
+pub fn massage_throwable<T: std::fmt::Display>(e: Option<T>) -> Option<String> {
+    e.map(|v| v.to_string())
+}
+
+// ---------------------------------------------------------------------------
+// cmdSerializer — lib/logger/cmd-serializer.ts
+// ---------------------------------------------------------------------------
+
+/// Redact HTTPS credentials in a command string.
+///
+/// Replaces `https://<anything>@` with `https://**redacted**@`, matching
+/// the TypeScript `cmdSerializer` behaviour.
+pub fn redact_cmd_credentials(cmd: &str) -> String {
+    // Replace https://…@  with  https://**redacted**@
+    let mut result = String::new();
+    let mut remaining = cmd;
+    while let Some(pos) = remaining.find("https://") {
+        result.push_str(&remaining[..pos]);
+        remaining = &remaining[pos + "https://".len()..];
+        if let Some(at_pos) = remaining.find('@') {
+            result.push_str("https://**redacted**@");
+            remaining = &remaining[at_pos + 1..];
+        } else {
+            result.push_str("https://");
+        }
+    }
+    result.push_str(remaining);
+    result
+}
+
+// ---------------------------------------------------------------------------
 // Filter-map — lib/util/filter-map.ts
 // ---------------------------------------------------------------------------
 
@@ -558,6 +599,49 @@ mod tests {
         assert_eq!(left["foo"], 1);
         assert_eq!(left["bar"], 2);
         assert_eq!(left["baz"], 42); // not in keys list, unchanged
+    }
+
+    // -----------------------------------------------------------------------
+    // massage_throwable
+    // -----------------------------------------------------------------------
+
+    // Ported: "should return $expected for $input" — instrumentation/utils.spec.ts line 5
+    #[test]
+    fn test_massage_throwable() {
+        // null/undefined → None
+        assert_eq!(massage_throwable::<String>(None), None);
+        // Error message → Some(message)
+        assert_eq!(
+            massage_throwable(Some("test")),
+            Some("test".to_string())
+        );
+        // Number → Some(string)
+        assert_eq!(
+            massage_throwable(Some(123i64)),
+            Some("123".to_string())
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // redact_cmd_credentials
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns array" — logger/cmd-serializer.spec.ts line 4
+    #[test]
+    fn test_redact_cmd_credentials_no_credentials() {
+        // For an array with no credentials, returns as-is
+        // In Rust: string with no https://…@ pattern returns unchanged
+        assert_eq!(redact_cmd_credentials(""), "");
+        assert_eq!(redact_cmd_credentials(" "), " ");
+    }
+
+    // Ported: "redacts" — logger/cmd-serializer.spec.ts line 8
+    #[test]
+    fn test_redact_cmd_credentials_redacts() {
+        assert_eq!(
+            redact_cmd_credentials(" https://token@domain.com"),
+            " https://**redacted**@domain.com"
+        );
     }
 
     // -----------------------------------------------------------------------

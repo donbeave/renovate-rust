@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4100 / 11677 total tests ported (35%) · pending 7494 · not-applicable 83 (1% of total) — updated 2026-05-28
+**Progress:** 4103 / 11677 total tests ported (35%) · pending 7490 · not-applicable 84 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -357,10 +357,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/instrumentation/index.spec.ts` | Not done | [details](lib/instrumentation/index.spec.ts.md) |
 | `lib/instrumentation/reporting.spec.ts` | Not done | [details](lib/instrumentation/reporting.spec.ts.md) |
 | `lib/instrumentation/with-instrumenting.spec.ts` | Not done | [details](lib/instrumentation/with-instrumenting.spec.ts.md) |
-| `lib/instrumentation/utils.spec.ts` | Not done | [details](lib/instrumentation/utils.spec.ts.md) |
+| `lib/instrumentation/utils.spec.ts` | Done | [details](lib/instrumentation/utils.spec.ts.md) |
 | `lib/data/index.spec.ts` | Done | [details](lib/data/index.spec.ts.md) |
 | `lib/logger/bunyan.spec.ts` | Done | [details](lib/logger/bunyan.spec.ts.md) |
-| `lib/logger/cmd-serializer.spec.ts` | Not done | [details](lib/logger/cmd-serializer.spec.ts.md) |
+| `lib/logger/cmd-serializer.spec.ts` | Done | [details](lib/logger/cmd-serializer.spec.ts.md) |
 | `lib/logger/config-serializer.spec.ts` | Not done | [details](lib/logger/config-serializer.spec.ts.md) |
 | `lib/logger/remap.spec.ts` | Not done | [details](lib/logger/remap.spec.ts.md) |
 | `lib/logger/renovate-logger.spec.ts` | Not done | [details](lib/logger/renovate-logger.spec.ts.md) |
