@@ -12,6 +12,69 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// GitHub token utilities — lib/util/check-token.ts
+// ---------------------------------------------------------------------------
+
+/// Return `true` when `token` is a GitHub Classic Personal Access Token (`ghp_`).
+pub fn is_github_personal_access_token(token: &str) -> bool {
+    token.starts_with("ghp_")
+}
+
+/// Return `true` when `token` is a GitHub App / Server-to-Server token (`ghs_`).
+pub fn is_github_server_to_server_token(token: &str) -> bool {
+    token.starts_with("ghs_")
+}
+
+/// Return `true` when `token` is a GitHub Fine-Grained PAT (`github_pat_`).
+pub fn is_github_fine_grained_personal_access_token(token: &str) -> bool {
+    token.starts_with("github_pat_")
+}
+
+/// Extract the raw token from a host-rule token value, stripping `x-access-token:` prefix.
+pub fn find_github_token(token: Option<&str>) -> Option<&str> {
+    let t = token?;
+    if t.is_empty() {
+        return None;
+    }
+    Some(t.strip_prefix("x-access-token:").unwrap_or(t))
+}
+
+/// Choose the preferred GitHub token from two candidates.
+///
+/// Prefers PAT > fine-grained PAT > other. When both candidates have the
+/// same class, prefers `git_tags_token`.
+pub fn take_personal_access_token_if_possible<'a>(
+    github_token: Option<&'a str>,
+    git_tags_token: Option<&'a str>,
+) -> Option<&'a str> {
+    // If git_tags_token is a PAT, prefer it
+    if let Some(t) = git_tags_token {
+        if is_github_personal_access_token(t) {
+            return Some(t);
+        }
+    }
+    // If github_token is a PAT, prefer it
+    if let Some(t) = github_token {
+        if is_github_personal_access_token(t) {
+            return Some(t);
+        }
+    }
+    // Fine-grained PAT
+    if let Some(t) = git_tags_token {
+        if is_github_fine_grained_personal_access_token(t) {
+            return Some(t);
+        }
+    }
+    if let Some(t) = github_token {
+        if is_github_fine_grained_personal_access_token(t) {
+            return Some(t);
+        }
+    }
+    // Fallback: prefer git_tags_token
+    git_tags_token.or(github_token)
+}
+
+// ---------------------------------------------------------------------------
 // Git URL conversion — lib/util/git/url.ts
 // ---------------------------------------------------------------------------
 
@@ -2240,6 +2303,126 @@ mod tests {
         // Single value wrapped
         let single_wrapped: Vec<i32> = vec![42];
         assert_eq!(single_wrapped, vec![42]);
+    }
+
+    // -----------------------------------------------------------------------
+    // GitHub token utilities
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns true when string is a github personnal access token" — util/check-token.spec.ts line 132
+    // Ported: "returns false when string is a github application token" — util/check-token.spec.ts line 136
+    // Ported: "returns false when string is a github fine grained personal access token" — util/check-token.spec.ts line 140
+    // Ported: "returns false when string is not a token at all" — util/check-token.spec.ts line 144
+    #[test]
+    fn test_is_github_personal_access_token() {
+        assert!(is_github_personal_access_token("ghp_XXXXXX"));
+        assert!(!is_github_personal_access_token("ghs_XXXXXX"));
+        assert!(!is_github_personal_access_token("github_pat_XXXXXX"));
+        assert!(!is_github_personal_access_token("XXXXXX"));
+    }
+
+    // Ported: "returns true when string is a github server to server token" — util/check-token.spec.ts line 150
+    // Ported: "returns true when string is a 2026-style GitHub Installation Access Token" — util/check-token.spec.ts line 155
+    // Ported: "returns false when string is a github personal access token token" — util/check-token.spec.ts line 161
+    // Ported: "returns false when string is not a token at all" — util/check-token.spec.ts line 169
+    #[test]
+    fn test_is_github_server_to_server_token() {
+        assert!(is_github_server_to_server_token("ghs_XXXXXX"));
+        assert!(is_github_server_to_server_token("ghs_0123456_eyJhbGciOiJSUzI1NiJ9"));
+        assert!(!is_github_server_to_server_token("ghp_XXXXXX"));
+        assert!(!is_github_server_to_server_token("XXXXXX"));
+    }
+
+    // Ported: "returns true when string is a github fine grained personal access token" — util/check-token.spec.ts line 175
+    // Ported: "returns false when string is a github personnal access token" — util/check-token.spec.ts line 181
+    // Ported: "returns false when string is a github application token" — util/check-token.spec.ts line 185
+    // Ported: "returns false when string is not a token at all" — util/check-token.spec.ts line 189
+    #[test]
+    fn test_is_github_fine_grained_pat() {
+        assert!(is_github_fine_grained_personal_access_token("github_pat_XXXXXX"));
+        assert!(!is_github_fine_grained_personal_access_token("ghp_XXXXXX"));
+        assert!(!is_github_fine_grained_personal_access_token("ghs_XXXXXX"));
+        assert!(!is_github_fine_grained_personal_access_token("XXXXXX"));
+    }
+
+    // Ported: "returns the token string when hostRule match search with a valid personal access token" — util/check-token.spec.ts line 195
+    // Ported: "returns undefined when no token is defined" — util/check-token.spec.ts line 201
+    // Ported: "remove x-access-token token prefix" — util/check-token.spec.ts line 205
+    #[test]
+    fn test_find_github_token() {
+        assert_eq!(find_github_token(Some("ghp_TOKEN")), Some("ghp_TOKEN"));
+        assert_eq!(find_github_token(None), None);
+        assert_eq!(find_github_token(Some("")), None);
+        assert_eq!(find_github_token(Some("x-access-token:ghp_TOKEN")), Some("ghp_TOKEN"));
+    }
+
+    // Ported: "returns undefined when both token are undefined" — util/check-token.spec.ts line 216
+    // Ported: "returns gitTagsToken when both token are PAT" — util/check-token.spec.ts line 224
+    // Ported: "returns githubToken is PAT and gitTagsGithubToken is not a PAT" — util/check-token.spec.ts line 232
+    // Ported: "returns gitTagsToken when both token are set but not PAT" — util/check-token.spec.ts line 240
+    // Ported: "returns gitTagsToken when gitTagsToken not PAT and gitTagsGithubToken is not set" — util/check-token.spec.ts line 248
+    // Ported: "returns githubToken when githubToken not PAT and gitTagsGithubToken is not set" — util/check-token.spec.ts line 256
+    // Ported: "take personal access token over fine grained token" — util/check-token.spec.ts line 264
+    // Ported: "take fine grained token over server to server token" — util/check-token.spec.ts line 272
+    #[test]
+    fn test_take_personal_access_token() {
+        // both undefined → None
+        assert_eq!(take_personal_access_token_if_possible(None, None), None);
+        // both PAT → prefer gitTags
+        assert_eq!(
+            take_personal_access_token_if_possible(Some("ghp_github"), Some("ghp_gitTags")),
+            Some("ghp_gitTags")
+        );
+        // github is PAT, gitTags is not → github wins
+        assert_eq!(
+            take_personal_access_token_if_possible(Some("ghp_github"), Some("ghs_gitTags")),
+            Some("ghp_github")
+        );
+        // both not PAT → prefer gitTags
+        assert_eq!(
+            take_personal_access_token_if_possible(Some("ghs_github"), Some("ghs_gitTags")),
+            Some("ghs_gitTags")
+        );
+        // only gitTags set → gitTags
+        assert_eq!(
+            take_personal_access_token_if_possible(None, Some("ghs_gitTags")),
+            Some("ghs_gitTags")
+        );
+        // only github set → github
+        assert_eq!(
+            take_personal_access_token_if_possible(Some("ghs_gitTags"), None),
+            Some("ghs_gitTags")
+        );
+        // PAT over fine-grained → PAT
+        assert_eq!(
+            take_personal_access_token_if_possible(Some("ghp_github"), Some("github_pat_gitTags")),
+            Some("ghp_github")
+        );
+        // fine-grained over server-to-server → fine-grained
+        assert_eq!(
+            take_personal_access_token_if_possible(Some("ghs_github"), Some("github_pat_gitTags")),
+            Some("github_pat_gitTags")
+        );
+        // Ported: "take fine grained token over server to server token" — line 272
+        assert_eq!(
+            take_personal_access_token_if_possible(Some("github_pat_github"), Some("ghs_gitTags")),
+            Some("github_pat_github")
+        );
+        // Ported: "take git-tags fine grained token" — line 280
+        assert_eq!(
+            take_personal_access_token_if_possible(None, Some("github_pat_gitTags")),
+            Some("github_pat_gitTags")
+        );
+        // Ported: "take git-tags unknown token type when no other token is set" — line 288
+        assert_eq!(
+            take_personal_access_token_if_possible(None, Some("unknownTokenType_gitTags")),
+            Some("unknownTokenType_gitTags")
+        );
+        // Ported: "take github unknown token type when no other token is set" — line 296
+        assert_eq!(
+            take_personal_access_token_if_possible(Some("unknownTokenType"), None),
+            Some("unknownTokenType")
+        );
     }
 
     // -----------------------------------------------------------------------
