@@ -12,6 +12,52 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Helm environment variables — lib/modules/manager/kustomize/common.ts
+// ---------------------------------------------------------------------------
+
+/// Generate helm environment variable mappings.
+///
+/// `cache_dir` is the private cache directory.
+/// `needs_experimental_oci` is `true` when helm < 3.8.0.
+pub fn generate_helm_envs(
+    cache_dir: &str,
+    needs_experimental_oci: bool,
+) -> std::collections::HashMap<&'static str, String> {
+    let mut envs = std::collections::HashMap::new();
+    envs.insert("HELM_REGISTRY_CONFIG", format!("{cache_dir}/registry.json"));
+    envs.insert("HELM_REPOSITORY_CONFIG", format!("{cache_dir}/repositories.yaml"));
+    envs.insert("HELM_REPOSITORY_CACHE", format!("{cache_dir}/repositories"));
+    if needs_experimental_oci {
+        envs.insert("HELM_EXPERIMENTAL_OCI", "1".to_owned());
+    }
+    envs
+}
+
+/// Return whether a helm version constraint requires `HELM_EXPERIMENTAL_OCI=1`.
+/// Returns `true` when the constraint does not intersect `>=3.8.0`.
+pub fn helm_needs_experimental_oci(helm_constraint: &str) -> bool {
+    use semver::{Version, VersionReq};
+    let v380 = Version::new(3, 8, 0);
+    let v400 = Version::new(4, 0, 0);
+    let constraint = helm_constraint.trim();
+    // Try as a bare version first
+    if let Ok(v) = Version::parse(constraint) {
+        return v < v380;
+    }
+    // Normalize space-separated constraints to comma-separated for semver crate
+    let candidates: [String; 2] = [
+        constraint.to_owned(),
+        constraint.replace(" <", ", <").replace(" >=", ", >=").replace(" >", ", >"),
+    ];
+    for c in &candidates {
+        if let Ok(req) = VersionReq::parse(c) {
+            return !req.matches(&v380) && !req.matches(&v400);
+        }
+    }
+    false
+}
+
+// ---------------------------------------------------------------------------
 // Manager range strategy — lib/modules/manager/index.ts (getRangeStrategy)
 // ---------------------------------------------------------------------------
 
@@ -2080,6 +2126,42 @@ mod tests {
     }
 
     // -----------------------------------------------------------------------
+    // helm environment variables
+    // -----------------------------------------------------------------------
+
+    const PRIVATE_CACHE: &str = "/tmp/cache/__renovate-private-cache";
+
+    // Ported: "generates envs for specific helm version not requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 19
+    #[test]
+    fn test_helm_envs_no_experimental_oci_specific_version() {
+        let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci("3.8.0"));
+        assert!(!envs.contains_key("HELM_EXPERIMENTAL_OCI"), "3.8.0 should not need OCI flag");
+        assert_eq!(envs["HELM_REGISTRY_CONFIG"], format!("{PRIVATE_CACHE}/registry.json"));
+    }
+
+    // Ported: "generates envs for helm version range not requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 34
+    #[test]
+    fn test_helm_envs_no_experimental_oci_range() {
+        let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci(">=3.7.0"));
+        assert!(!envs.contains_key("HELM_EXPERIMENTAL_OCI"), ">=3.7.0 should not need OCI (intersects >=3.8.0)");
+    }
+
+    // Ported: "generates envs for specific helm version requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 49
+    #[test]
+    fn test_helm_envs_with_experimental_oci_specific() {
+        let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci("3.7.0"));
+        assert_eq!(envs.get("HELM_EXPERIMENTAL_OCI"), Some(&"1".to_owned()));
+    }
+
+    // Ported: "generates envs for helm range version requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 66
+    #[test]
+    fn test_helm_envs_with_experimental_oci_range() {
+        // The TypeScript test uses constraints: { helm: '<3.8.0' }
+        let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci("<3.8.0"));
+        assert_eq!(envs.get("HELM_EXPERIMENTAL_OCI"), Some(&"1".to_owned()));
+    }
+
+    // -----------------------------------------------------------------------
     // get_range_strategy
     // -----------------------------------------------------------------------
 
@@ -2413,6 +2495,30 @@ mod tests {
         assert_eq!(result.len(), 2);
         assert_eq!(result[0], json!({ "myObject": { "aString": null } }));
         assert_eq!(result[1], json!({ "foo": null }));
+    }
+
+    // Ported: "should parse invalid content using strict=false" — util/yaml.spec.ts line 239
+    // serde_yaml handles inline comments after quoted strings natively.
+    #[test]
+    fn test_parse_single_yaml_strict_false() {
+        let content = "version: '2.1'\n\nservices:\n  rtl_433:\n    image: ubuntu:oracular-20240918\n    command: \"echo some text\"# a comment";
+        let result = parse_single_yaml(content, false);
+        assert!(result.is_ok());
+        assert!(result.unwrap().is_some());
+    }
+
+    // Ported: "should parse content with templates without quotes" — util/yaml.spec.ts line 193
+    #[test]
+    fn test_parse_yaml_templates_without_quotes() {
+        use serde_json::json;
+        let input = "myObject:\n  aString: {{ value }}\n  {{ prefixKey }}anotherString: value\n---\nfoo: {{ foo.bar }}\nbar: value{{ value }}:v2";
+        let result = parse_yaml(input, true).unwrap();
+        assert_eq!(result.len(), 2);
+        assert_eq!(
+            result[0],
+            json!({ "myObject": { "aString": null, "anotherString": "value" } })
+        );
+        assert_eq!(result[1], json!({ "foo": null, "bar": "value:v2" }));
     }
 
     // Ported: "should return undefined" — util/yaml.spec.ts line 222
@@ -3104,3 +3210,4 @@ dep1 = "^1.0.0"
         }
     }
 }
+
