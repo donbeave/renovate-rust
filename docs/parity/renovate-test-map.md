@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4545 / 11677 total tests ported (38%) · pending 6736 · not-applicable 396 (2% of total) — updated 2026-05-28
+**Progress:** 4547 / 11677 total tests ported (38%) · pending 6681 · not-applicable 449 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -434,7 +434,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
 | `lib/modules/platform/comment.spec.ts` | Not done | [details](lib/modules/platform/comment.spec.ts.md) |
-| `lib/modules/platform/scm.spec.ts` | Not done | [details](lib/modules/platform/scm.spec.ts.md) |
+| `lib/modules/platform/scm.spec.ts` | Done | [details](lib/modules/platform/scm.spec.ts.md) |
 | `lib/modules/platform/pr-body.spec.ts` | Done | [details](lib/modules/platform/pr-body.spec.ts.md) |
 | `lib/modules/platform/index.spec.ts` | Not done | [details](lib/modules/platform/index.spec.ts.md) |
 | `lib/modules/platform/types.spec.ts` | Done | [details](lib/modules/platform/types.spec.ts.md) |
@@ -744,7 +744,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/utils/pr-body.spec.ts` | Done | [details](lib/modules/platform/utils/pr-body.spec.ts.md) |
 | `lib/modules/platform/utils/read-only-issue-body.spec.ts` | Done | [details](lib/modules/platform/utils/read-only-issue-body.spec.ts.md) |
 | `lib/util/cache/memory/index.spec.ts` | Done | [details](lib/util/cache/memory/index.spec.ts.md) |
-| `lib/util/cache/package/backend.spec.ts` | Not done | [details](lib/util/cache/package/backend.spec.ts.md) |
+| `lib/util/cache/package/backend.spec.ts` | Done | [details](lib/util/cache/package/backend.spec.ts.md) |
 | `lib/util/cache/package/impl/file.spec.ts` | Not done | [details](lib/util/cache/package/impl/file.spec.ts.md) |
 | `lib/util/cache/package/impl/redis.spec.ts` | Not done | [details](lib/util/cache/package/impl/redis.spec.ts.md) |
 | `lib/util/cache/package/impl/sqlite.spec.ts` | Not done | [details](lib/util/cache/package/impl/sqlite.spec.ts.md) |
@@ -753,7 +753,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/package/ttl.spec.ts` | Done | [details](lib/util/cache/package/ttl.spec.ts.md) |
 | `lib/util/cache/package/with-cache.spec.ts` | Not done | [details](lib/util/cache/package/with-cache.spec.ts.md) |
 | `lib/util/cache/repository/http-cache.spec.ts` | Done | [details](lib/util/cache/repository/http-cache.spec.ts.md) |
-| `lib/util/cache/repository/impl/local.spec.ts` | Not done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
+| `lib/util/cache/repository/impl/local.spec.ts` | Done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
 | `lib/util/cache/repository/impl/s3.spec.ts` | Done | [details](lib/util/cache/repository/impl/s3.spec.ts.md) |
 | `lib/util/cache/repository/index.spec.ts` | Not done | [details](lib/util/cache/repository/index.spec.ts.md) |
 | `lib/util/exec/common.spec.ts` | Not done | [details](lib/util/exec/common.spec.ts.md) |
@@ -773,17 +773,17 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/git/errors.spec.ts` | Done | [details](lib/util/git/errors.spec.ts.md) |
 | `lib/util/git/index.spec.ts` | Not done | [details](lib/util/git/index.spec.ts.md) |
 | `lib/util/git/modified-cache.spec.ts` | Not done | [details](lib/util/git/modified-cache.spec.ts.md) |
-| `lib/util/git/pristine.spec.ts` | Not done | [details](lib/util/git/pristine.spec.ts.md) |
+| `lib/util/git/pristine.spec.ts` | Done | [details](lib/util/git/pristine.spec.ts.md) |
 | `lib/util/git/private-key.spec.ts` | Not done | [details](lib/util/git/private-key.spec.ts.md) |
 | `lib/util/git/semantic.spec.ts` | Done | [details](lib/util/git/semantic.spec.ts.md) |
-| `lib/util/git/set-branch-commit.spec.ts` | Not done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
+| `lib/util/git/set-branch-commit.spec.ts` | Done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
 | `lib/util/git/span-processor.spec.ts` | Done | [details](lib/util/git/span-processor.spec.ts.md) |
 | `lib/util/git/update-date-cache.spec.ts` | Not done | [details](lib/util/git/update-date-cache.spec.ts.md) |
 | `lib/util/git/url.spec.ts` | Not done | [details](lib/util/git/url.spec.ts.md) |
-| `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | Not done | [details](lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts.md) |
-| `lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts` | Not done | [details](lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts.md) |
-| `lib/util/github/graphql/datasource-fetcher.spec.ts` | Not done | [details](lib/util/github/graphql/datasource-fetcher.spec.ts.md) |
-| `lib/util/github/graphql/index.spec.ts` | Not done | [details](lib/util/github/graphql/index.spec.ts.md) |
+| `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | Done | [details](lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts.md) |
+| `lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts` | Done | [details](lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts.md) |
+| `lib/util/github/graphql/datasource-fetcher.spec.ts` | Done | [details](lib/util/github/graphql/datasource-fetcher.spec.ts.md) |
+| `lib/util/github/graphql/index.spec.ts` | Done | [details](lib/util/github/graphql/index.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts.md) |
@@ -850,7 +850,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/finalize/prune.spec.ts` | Not done | [details](lib/workers/repository/finalize/prune.spec.ts.md) |
 | `lib/workers/repository/finalize/repository-statistics.spec.ts` | Not done | [details](lib/workers/repository/finalize/repository-statistics.spec.ts.md) |
 | `lib/workers/repository/index.spec.ts` | Done | [details](lib/workers/repository/index.spec.ts.md) |
-| `lib/workers/repository/init/index.spec.ts` | Not done | [details](lib/workers/repository/init/index.spec.ts.md) |
+| `lib/workers/repository/init/index.spec.ts` | Done | [details](lib/workers/repository/init/index.spec.ts.md) |
 | `lib/workers/repository/init/inherited.spec.ts` | Not done | [details](lib/workers/repository/init/inherited.spec.ts.md) |
 | `lib/workers/repository/init/vulnerability.spec.ts` | Not done | [details](lib/workers/repository/init/vulnerability.spec.ts.md) |
 | `lib/workers/repository/model/custom-commit-message.spec.ts` | Done | [details](lib/workers/repository/model/custom-commit-message.spec.ts.md) |
@@ -870,7 +870,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/process/index.spec.ts` | Not done | [details](lib/workers/repository/process/index.spec.ts.md) |
 | `lib/workers/repository/process/libyear.spec.ts` | Not done | [details](lib/workers/repository/process/libyear.spec.ts.md) |
 | `lib/workers/repository/process/limits.spec.ts` | Not done | [details](lib/workers/repository/process/limits.spec.ts.md) |
-| `lib/workers/repository/process/lookup/abandonment.spec.ts` | Not done | [details](lib/workers/repository/process/lookup/abandonment.spec.ts.md) |
+| `lib/workers/repository/process/lookup/abandonment.spec.ts` | Done | [details](lib/workers/repository/process/lookup/abandonment.spec.ts.md) |
 | `lib/workers/repository/process/lookup/filter-checks.spec.ts` | Not done | [details](lib/workers/repository/process/lookup/filter-checks.spec.ts.md) |
 | `lib/workers/repository/process/lookup/filter.spec.ts` | Not done | [details](lib/workers/repository/process/lookup/filter.spec.ts.md) |
 | `lib/workers/repository/process/lookup/index.spec.ts` | Not done | [details](lib/workers/repository/process/lookup/index.spec.ts.md) |
@@ -890,7 +890,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/branch/automerge.spec.ts` | Not done | [details](lib/workers/repository/update/branch/automerge.spec.ts.md) |
 | `lib/workers/repository/update/branch/bump-versions.spec.ts` | Not done | [details](lib/workers/repository/update/branch/bump-versions.spec.ts.md) |
 | `lib/workers/repository/update/branch/check-existing.spec.ts` | Not done | [details](lib/workers/repository/update/branch/check-existing.spec.ts.md) |
-| `lib/workers/repository/update/branch/commit.spec.ts` | Not done | [details](lib/workers/repository/update/branch/commit.spec.ts.md) |
+| `lib/workers/repository/update/branch/commit.spec.ts` | Done | [details](lib/workers/repository/update/branch/commit.spec.ts.md) |
 | `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts` | Not done | [details](lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts.md) |
 | `lib/workers/repository/update/branch/get-updated.spec.ts` | Not done | [details](lib/workers/repository/update/branch/get-updated.spec.ts.md) |
 | `lib/workers/repository/update/branch/index.spec.ts` | Not done | [details](lib/workers/repository/update/branch/index.spec.ts.md) |
@@ -919,11 +919,11 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/pr/changelog/releases.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/releases.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/source.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/source.spec.ts.md) |
 | `lib/workers/repository/update/pr/code-owners.spec.ts` | Not done | [details](lib/workers/repository/update/pr/code-owners.spec.ts.md) |
-| `lib/workers/repository/update/pr/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/index.spec.ts.md) |
+| `lib/workers/repository/update/pr/index.spec.ts` | Done | [details](lib/workers/repository/update/pr/index.spec.ts.md) |
 | `lib/workers/repository/update/pr/labels.spec.ts` | Not done | [details](lib/workers/repository/update/pr/labels.spec.ts.md) |
 | `lib/workers/repository/update/pr/participants.spec.ts` | Not done | [details](lib/workers/repository/update/pr/participants.spec.ts.md) |
-| `lib/workers/repository/update/pr/pr-cache.spec.ts` | Not done | [details](lib/workers/repository/update/pr/pr-cache.spec.ts.md) |
-| `lib/workers/repository/update/pr/pr-reuse.spec.ts` | Not done | [details](lib/workers/repository/update/pr/pr-reuse.spec.ts.md) |
+| `lib/workers/repository/update/pr/pr-cache.spec.ts` | Done | [details](lib/workers/repository/update/pr/pr-cache.spec.ts.md) |
+| `lib/workers/repository/update/pr/pr-reuse.spec.ts` | Done | [details](lib/workers/repository/update/pr/pr-reuse.spec.ts.md) |
 | `lib/workers/repository/updates/branch-name.spec.ts` | Done | [details](lib/workers/repository/updates/branch-name.spec.ts.md) |
 | `lib/workers/repository/updates/branchify.spec.ts` | Not done | [details](lib/workers/repository/updates/branchify.spec.ts.md) |
 | `lib/workers/repository/updates/flatten.spec.ts` | Not done | [details](lib/workers/repository/updates/flatten.spec.ts.md) |

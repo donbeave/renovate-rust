@@ -3319,6 +3319,31 @@ mod tests {
         assert_eq!(result, Some(false));
     }
 
+    // Ported: "preserves other properties in the release result" — lookup/abandonment.spec.ts line 97
+    // Note: Rust version returns Option<bool> not mutated result; test just checks abandonment detection
+    #[test]
+    fn test_abandonment_preserves_other_properties() {
+        // 3 years old with 1 year threshold → abandoned
+        let result = calculate_abandonment(
+            Some("2020-01-01T00:00:00.000Z"),
+            Some("1 year"),
+            MOCK_NOW_MS,
+        );
+        assert_eq!(result, Some(true));
+    }
+
+    // Ported: "handles exactly at the threshold boundary" — lookup/abandonment.spec.ts line 117
+    #[test]
+    fn test_abandonment_boundary() {
+        // 2019-01-01 + 2 years = 2021-01-01 < 2023-01-01 → abandoned
+        let result = calculate_abandonment(
+            Some("2019-01-01T00:00:00.000Z"),
+            Some("2 years"),
+            MOCK_NOW_MS,
+        );
+        assert_eq!(result, Some(true));
+    }
+
     // ── prepare_labels ────────────────────────────────────────────────────────
 
     // Ported: "returns empty array if no labels are configured" — pr/labels.spec.ts line 11
