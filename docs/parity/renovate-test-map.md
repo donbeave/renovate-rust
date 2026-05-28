@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4512 / 11677 total tests ported (38%) · pending 6947 · not-applicable 218 (2% of total) — updated 2026-05-28
+**Progress:** 4522 / 11677 total tests ported (38%) · pending 6936 · not-applicable 219 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -740,7 +740,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/scm-manager/index.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/index.spec.ts.md) |
 | `lib/modules/platform/scm-manager/mapper.spec.ts` | Done | [details](lib/modules/platform/scm-manager/mapper.spec.ts.md) |
 | `lib/modules/platform/scm-manager/scm-manager-helper.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/scm-manager-helper.spec.ts.md) |
-| `lib/modules/platform/scm-manager/utils.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/utils.spec.ts.md) |
+| `lib/modules/platform/scm-manager/utils.spec.ts` | Done | [details](lib/modules/platform/scm-manager/utils.spec.ts.md) |
 | `lib/modules/platform/utils/pr-body.spec.ts` | Done | [details](lib/modules/platform/utils/pr-body.spec.ts.md) |
 | `lib/modules/platform/utils/read-only-issue-body.spec.ts` | Done | [details](lib/modules/platform/utils/read-only-issue-body.spec.ts.md) |
 | `lib/util/cache/memory/index.spec.ts` | Done | [details](lib/util/cache/memory/index.spec.ts.md) |
