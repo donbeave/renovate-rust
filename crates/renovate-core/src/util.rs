@@ -487,8 +487,9 @@ pub fn apply_git_source(
 ) -> GitSourceResult {
     if let Some(tag) = tag {
         let platform = detect_platform(git);
-        if ((platform == Some("github") || platform == Some("gitlab")))
-            && let Some((host, full_name)) = parse_git_url_host_and_name(git) {
+        if (platform == Some("github") || platform == Some("gitlab"))
+            && let Some((host, full_name)) = parse_git_url_host_and_name(git)
+        {
                 let datasource = if platform == Some("github") { "github-tags" } else { "gitlab-tags" };
                 return GitSourceResult {
                     datasource,
@@ -1645,9 +1646,11 @@ pub fn massage_toml(input: &str) -> String {
 ///   calls return the cached outcome without re-invoking the executor.
 /// - `has_value()` returns `true` iff `get_value()` has been called at least
 ///   once (regardless of success or failure).
+type LazyExecutor<T, E> = Box<dyn FnOnce() -> Result<T, E>>;
+
 pub struct Lazy<T, E> {
     result: std::cell::RefCell<Option<Result<T, E>>>,
-    executor: std::cell::RefCell<Option<Box<dyn FnOnce() -> Result<T, E>>>>,
+    executor: std::cell::RefCell<Option<LazyExecutor<T, E>>>,
 }
 
 impl<T: std::fmt::Debug + Clone, E: std::fmt::Debug + Clone> std::fmt::Debug for Lazy<T, E> {
@@ -2258,6 +2261,7 @@ mod tests {
     // Ported: "should return empty object" — util/object.spec.ts line 17
     // Ported: "should return input object" — util/object.spec.ts line 22
     #[test]
+    #[allow(clippy::unnecessary_literal_unwrap)]
     fn test_coerce_object() {
         use std::collections::HashMap;
         // coerceObject(undefined) / coerceObject(null) → {} (empty map)
@@ -2384,12 +2388,12 @@ mod tests {
         // Error message → Some(message)
         assert_eq!(
             massage_throwable(Some("test")),
-            Some("test".to_string())
+            Some("test".to_owned())
         );
         // Number → Some(string)
         assert_eq!(
             massage_throwable(Some(123i64)),
-            Some("123".to_string())
+            Some("123".to_owned())
         );
     }
 
@@ -2581,7 +2585,7 @@ mod tests {
     fn test_is_not_null_or_undefined() {
         // In Rust: Option::is_some() is the equivalent
         let none_val: Option<std::collections::HashMap<&str, &str>> = None;
-        assert!(!none_val.is_some()); // null/undefined → false
+        assert!(none_val.is_none()); // null/undefined → false
         let some_val = Some(std::collections::HashMap::<&str, &str>::new());
         assert!(some_val.is_some()); // actual value → true
     }
@@ -3748,6 +3752,7 @@ mod tests {
 
     // Ported: "throws unsafe 2" — util/regex.spec.ts line 10
     #[test]
+    #[allow(clippy::invalid_regex)]
     fn test_regex_unsafe_pattern_rejected() {
         // Rust regex crate rejects unsupported features (lookahead/backrefs)
         // that could cause catastrophic backtracking or are not RE2-compatible.

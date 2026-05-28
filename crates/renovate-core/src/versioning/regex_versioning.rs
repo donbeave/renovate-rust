@@ -22,6 +22,7 @@ struct ParsedVersion {
 
 // ── Versioner ─────────────────────────────────────────────────────────────────
 
+#[derive(Debug)]
 pub struct RegexVersioning {
     re: Regex,
 }

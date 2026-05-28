@@ -194,6 +194,7 @@ pub fn add(rule: HostRule) -> Result<(), String> {
 }
 
 /// Add a host rule with optional legacy field migration.
+#[allow(clippy::needless_pass_by_value)]
 pub fn add_with_legacy(rule: HostRule, legacy: LegacyHostRule) -> Result<(), String> {
     let mut rule = migrate_rule(rule, &legacy)?;
 

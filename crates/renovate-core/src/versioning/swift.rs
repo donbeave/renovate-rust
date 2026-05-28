@@ -36,10 +36,10 @@ pub fn to_semver_range(range: &str) -> Option<String> {
     }
 
     // "X.Y.Z"... or "X.Y.Z"..<"A.B.C" or "X.Y.Z"..."A.B.C"
-    if t.starts_with('"') {
+    if let Some(after_quote) = t.strip_prefix('"') {
         // binary range: "X"..op"Y" or "X"...
         // find end of first quoted version
-        let end = t[1..].find('"')? + 1;
+        let end = after_quote.find('"')? + 1;
         let left_ver = &t[1..end];
         let rest = t[end + 1..].trim();
 

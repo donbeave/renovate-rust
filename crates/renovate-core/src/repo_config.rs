@@ -1305,13 +1305,9 @@ impl CustomManager {
 /// Returns `Some(url)` if valid (has scheme + non-empty host), `None` if invalid.
 /// Mirrors TypeScript's `createDependency` which calls `parseUrl()` and skips invalid URLs.
 fn validate_registry_url(url: String) -> Option<String> {
-    let rest = if let Some(r) = url.strip_prefix("https://") {
-        r
-    } else if let Some(r) = url.strip_prefix("http://") {
-        r
-    } else {
-        return None;
-    };
+    let rest = url
+        .strip_prefix("https://")
+        .or_else(|| url.strip_prefix("http://"))?;
     let host = rest.split('/').next().unwrap_or("");
     if host.is_empty() {
         return None;

@@ -299,6 +299,7 @@ mod tests {
 
     // Ported: "getMajor, getMinor, getPatch for "$version"" — versioning/hermit/index.spec.ts line 57
     #[test]
+    #[allow(clippy::type_complexity)]
     fn get_major_minor_patch_matches_renovate_hermit_index_spec() {
         let cases: &[(&str, Option<u64>, Option<u64>, Option<u64>)] = &[
             ("17", Some(17), Some(0), Some(0)),

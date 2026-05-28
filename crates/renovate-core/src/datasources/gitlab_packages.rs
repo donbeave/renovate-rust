@@ -195,11 +195,9 @@ mod tests {
     fn empty_releases_yields_none() {
         let pkgs: Vec<ApiPackage> = vec![];
         
-        assert!(pkgs
-            .iter()
-            .filter(|p| {
-                let effective = p.conan_package_name.as_deref().unwrap_or(&p.name);
-                effective == "mypkg"
-            }).next().is_none());
+        assert!(!pkgs.iter().any(|p| {
+            let effective = p.conan_package_name.as_deref().unwrap_or(&p.name);
+            effective == "mypkg"
+        }));
     }
 }

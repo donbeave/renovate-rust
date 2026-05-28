@@ -1418,6 +1418,7 @@ pub fn update_locked_dependency(
 // ── mise extractPackageFile (with lock file support) ─────────────────────────
 
 /// Result of extracting a mise.toml file, including optional lock file information.
+#[derive(Debug)]
 pub struct MiseExtractResult {
     pub deps: Vec<AsdfDep>,
     /// Lock file paths when a lock file was found and parsed.

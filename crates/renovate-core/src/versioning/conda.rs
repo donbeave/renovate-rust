@@ -299,13 +299,11 @@ pub fn get_patch(s: &str) -> Option<u64> {
 }
 
 pub fn is_single_version(s: &str) -> bool {
-    if !s.starts_with('=') {
+    let Some(stripped) = s
+        .strip_prefix("==")
+        .or_else(|| s.strip_prefix('='))
+    else {
         return false;
-    }
-    let stripped = if s.starts_with("==") {
-        &s[2..]
-    } else {
-        &s[1..]
     };
     let rest = stripped.trim_start();
     is_valid_version(rest)

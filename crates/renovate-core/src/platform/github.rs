@@ -96,7 +96,7 @@ pub fn massage_markdown_links(content: &str) -> String {
     }
 
     // Deduplicate and sort by start (desc) then apply in reverse order.
-    replacements.sort_by(|a, b| b.0.cmp(&a.0));
+    replacements.sort_by_key(|r| std::cmp::Reverse(r.0));
     replacements.dedup_by(|a, b| a.0 == b.0 && a.1 == b.1);
 
     let mut result = content.to_owned();

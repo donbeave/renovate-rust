@@ -1150,7 +1150,7 @@ fn read_bazelrc_file_inner(
                 config,
             } => {
                 let sanitized = sanitize_bazelrc_options(&options, workspace_dir, |path| {
-                    valid_paths.iter().any(|p| *p == path)
+                    valid_paths.contains(&path)
                 });
                 results.push(BazelrcEntry::Command {
                     command,

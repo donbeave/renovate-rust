@@ -169,7 +169,7 @@ pub async fn fetch_latest_lts(
     Ok(Unity3dUpdateSummary {
         latest: latest.clone(),
         latest_with_revision: if with_revision { latest } else { latest_plain },
-        update_available: result.releases.first().is_some(),
+        update_available: !result.releases.is_empty(),
     })
 }
 

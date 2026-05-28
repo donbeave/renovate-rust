@@ -1229,7 +1229,7 @@ let package = Package(
         assert!(extract_package_file(&format!("{base}from:]")).is_some());
         assert!(extract_package_file(&format!("{base}from:.package(")).is_some());
         assert!(
-            extract_package_file(&r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]"#.to_string())
+            extract_package_file(r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]"#)
             .is_some()
         );
     }
@@ -1239,7 +1239,7 @@ let package = Package(
     fn index_parses_package_descriptions() {
         let base = r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","#;
         assert_eq!(
-            extract_package_file(&r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]"#.to_string())
+            extract_package_file(r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]"#)
             .unwrap()[0]
                 .current_value,
             r#"from:"1.2.3""#

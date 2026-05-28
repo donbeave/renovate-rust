@@ -340,16 +340,7 @@ fn replace_caret_value(old_ver: &str, new_ver: &str) -> String {
     for i in 0..3 {
         let ov = old_t[i];
         let nv = new_t[i];
-        let leading_digit = if ov != 0 || nv != 0 {
-            if leading_zero {
-                leading_zero = false;
-                true
-            } else {
-                false
-            }
-        } else {
-            false
-        };
+        let leading_digit = (ov != 0 || nv != 0) && std::mem::take(&mut leading_zero);
         if leading_digit && nv > ov {
             need_replace = true;
         }
@@ -560,7 +551,7 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
         let mut bound = None;
         for e in &elems {
             let (op, ver) = npm_split_op_ver(e);
-            if op == ">=" || op == ">" || op == "" {
+            if op == ">=" || op == ">" || op.is_empty() {
                 bound = Version::parse(&pad_to_semver(ver)).ok();
                 break;
             }

@@ -140,7 +140,7 @@ fn map_http_err(e: crate::http::HttpError) -> Result<Option<()>, GalaxyCollectio
     match e {
         crate::http::HttpError::Status { status, .. } if status.is_client_error() => Ok(None),
         crate::http::HttpError::Request(_) => Ok(None),
-        other => Err(GalaxyCollectionError::Http(other)),
+        other @ crate::http::HttpError::Status { .. } => Err(GalaxyCollectionError::Http(other)),
     }
 }
 

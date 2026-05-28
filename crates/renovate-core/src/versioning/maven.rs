@@ -436,9 +436,9 @@ pub fn parse_range(range_str: &str) -> Option<Vec<RangeInterval>> {
                     right_value: ver.to_owned(),
                     right_bracket: "]".to_owned(),
                 });
-            } else if sub_str.starts_with('[') {
+            } else if let Some(rest) = sub_str.strip_prefix('[') {
                 interval.left_type = Some(RangePointType::Including);
-                interval.left_value = sub_str[1..].to_owned();
+                interval.left_value = rest.to_owned();
                 interval.left_bracket = "[".to_owned();
             } else if sub_str.starts_with('(') || sub_str.starts_with(']') {
                 interval.left_type = Some(RangePointType::Excluding);
@@ -447,9 +447,9 @@ pub fn parse_range(range_str: &str) -> Option<Vec<RangeInterval>> {
             } else {
                 failed = true;
             }
-        } else if sub_str.ends_with(']') {
+        } else if let Some(prefix) = sub_str.strip_suffix(']') {
             interval.right_type = Some(RangePointType::Including);
-            interval.right_value = sub_str[..sub_str.len() - 1].to_owned();
+            interval.right_value = prefix.to_owned();
             interval.right_bracket = "]".to_owned();
             raw_ranges.push(std::mem::replace(&mut interval, IntervalBuilder::empty()));
         } else if sub_str.ends_with(')') || sub_str.ends_with('[') {
@@ -1180,6 +1180,7 @@ mod tests {
 
     // Ported: "parseRange("$input")" — maven/compare.spec.ts line 521
     #[test]
+    #[allow(clippy::type_complexity)]
     fn parse_range_valid_matches_renovate_maven_compare_spec() {
         use RangePointType::{Excluding, Including};
         let cases: &[(
@@ -1329,6 +1330,7 @@ mod tests {
 
     // Ported: '"$input" is represented as [$major, $minor, $patch]' — maven/index.spec.ts line 89
     #[test]
+    #[allow(clippy::type_complexity)]
     fn get_major_minor_patch_matches_renovate_maven_index_spec() {
         let cases: &[(&str, Option<i64>, Option<i64>, Option<i64>)] = &[
             ("", None, None, None),

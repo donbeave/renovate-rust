@@ -1880,6 +1880,7 @@ mod tests {
 
     // Ported: "$input -> [$major, $minor, $patch]" — versioning/nuget/index.spec.ts line 218
     #[test]
+    #[allow(clippy::type_complexity)]
     fn nuget_get_major_minor_patch_parametrized() {
         let cases: &[(&str, Option<u64>, Option<u64>, Option<u64>)] = &[
             ("", None, None, None),

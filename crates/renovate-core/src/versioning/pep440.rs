@@ -449,7 +449,7 @@ fn get_future_version(
         .collect()
 }
 
-fn trim_trailing_zeros(v: Vec<u64>) -> Vec<u64> {
+fn trim_trailing_zeros(v: &[u64]) -> Vec<u64> {
     let mut end = v.len();
     while end > 0 && v[end - 1] == 0 {
         end -= 1;
@@ -595,7 +595,7 @@ fn handle_replace_strategy(
                 let mut future =
                     get_future_version(precision, new_ver.release(), Some(c.version.release()));
                 if trim_zeros {
-                    future = trim_trailing_zeros(future);
+                    future = trim_trailing_zeros(&future);
                 }
                 return Some(format!("<{}", fmt_parts(&future)));
             }
@@ -609,7 +609,7 @@ fn handle_replace_strategy(
                 let lp = lower_len.saturating_sub(1);
                 let mut new_base = get_future_version(lp, new_ver.release(), None);
                 if trim_zeros {
-                    new_base = trim_trailing_zeros(new_base);
+                    new_base = trim_trailing_zeros(&new_base);
                 }
                 if matches!(c.op, Operator::GreaterThan)
                     && new_version == fmt_parts(&new_base)
@@ -667,7 +667,7 @@ fn handle_widen_strategy(
                 let mut future =
                     get_future_version(range_precision, new_ver.release(), Some(upper));
                 if trim_zeros {
-                    future = trim_trailing_zeros(future);
+                    future = trim_trailing_zeros(&future);
                 }
                 return Some(format!("<{}", fmt_parts(&future)));
             }

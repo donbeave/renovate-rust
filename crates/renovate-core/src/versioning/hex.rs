@@ -262,16 +262,7 @@ fn replace_caret_value(old: &Version, new: &Version) -> String {
         let old_v = old_t[idx];
         let new_v = new_t[idx];
 
-        let leading_digit = if old_v != 0 || new_v != 0 {
-            if leading_zero {
-                leading_zero = false;
-                true
-            } else {
-                false
-            }
-        } else {
-            false
-        };
+        let leading_digit = (old_v != 0 || new_v != 0) && std::mem::take(&mut leading_zero);
 
         if leading_digit && new_v > old_v {
             need_replace = true;

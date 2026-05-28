@@ -141,6 +141,7 @@ mod tests {
     use super::*;
     use serde_json::json;
 
+    #[allow(clippy::needless_pass_by_value)]
     fn ts(v: Value) -> Option<String> {
         as_timestamp(&v)
     }

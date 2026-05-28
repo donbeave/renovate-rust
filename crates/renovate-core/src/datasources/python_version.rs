@@ -102,7 +102,7 @@ fn annotate_with_eol(releases: &mut [PythonRelease], eol_map: &HashMap<String, b
     }
 }
 
-fn sort_releases(releases: &mut Vec<PythonRelease>) {
+fn sort_releases(releases: &mut [PythonRelease]) {
     releases.sort_by(|a, b| {
         let parse = |v: &str| -> Vec<u32> { v.split('.').filter_map(|p| p.parse().ok()).collect() };
         parse(&a.version).cmp(&parse(&b.version))

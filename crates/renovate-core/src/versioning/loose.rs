@@ -22,7 +22,7 @@ struct LooseVersion {
 fn parse(v: &str) -> Option<LooseVersion> {
     let len = v.len();
     let is_commit_hash =
-        len >= 7 && len <= 40 && v.chars().all(|c| matches!(c, '0'..='9' | 'a'..='f'));
+        (7..=40).contains(&len) && v.chars().all(|c| matches!(c, '0'..='9' | 'a'..='f'));
     let is_pure_numeric = v.chars().all(|c| c.is_ascii_digit());
     if is_commit_hash && !is_pure_numeric {
         return None;

@@ -171,6 +171,7 @@ mod tests {
 
     use super::*;
 
+    #[allow(clippy::needless_pass_by_value)]
     fn make_tags_response(values: serde_json::Value) -> String {
         serde_json::json!({"size": 3, "limit": 100, "isLastPage": true, "start": 0, "values": values})
             .to_string()

@@ -111,7 +111,7 @@ fn has_inline_prerelease(s: &str) -> bool {
 // Rust's regex crate has no lookahead, so we tokenize manually: if a token is a
 // pure operator character sequence (e.g. ">=" or "<"), merge it with the next token.
 fn split_and_parts(range: &str) -> Vec<String> {
-    let tokens: Vec<&str> = range.trim().split_whitespace().collect();
+    let tokens: Vec<&str> = range.split_whitespace().collect();
     let mut parts = Vec::new();
     let mut i = 0;
     while i < tokens.len() {
@@ -153,7 +153,7 @@ fn preprocess_single_range(s: &str) -> String {
     let s = s.replace("~=", "~");
     // Plain dotted version (no operator, no wildcard, no spaces, e.g. "3.17.2") → exact match.
     // Rust semver treats bare versions as caret ranges; npm/conan treats them as exact.
-    let s = if s
+    if s
         .chars()
         .next()
         .map(|c| c.is_ascii_digit())
@@ -168,8 +168,7 @@ fn preprocess_single_range(s: &str) -> String {
         format!("={s}")
     } else {
         s
-    };
-    s
+    }
 }
 
 #[expect(dead_code, reason = "Reserved for future range validation use")]
@@ -772,8 +771,8 @@ fn replace_range(clean_range: &str, new_version: &str) -> Option<String> {
         return Some(format!("~> {new_major}.{new_minor}.0"));
     }
     // ~= operator
-    if cv.starts_with("~=") {
-        let after = cv[2..].trim();
+    if let Some(after) = cv.strip_prefix("~=") {
+        let after = after.trim();
         let dots = after.matches('.').count();
         return Some(if dots == 0 {
             format!("~={new_major}")
@@ -784,12 +783,12 @@ fn replace_range(clean_range: &str, new_version: &str) -> Option<String> {
         });
     }
     // ~ operator (not ~> or ~=) — TypeScript always returns 3-component when no suffix.
-    if cv.starts_with('~') {
+    if let Some(after_tilde) = cv.strip_prefix('~') {
         let op = if cv.starts_with("~ ") { "~ " } else { "~" };
         if !suffix.is_empty() {
             return Some(format!("{op}{new_major}.{new_minor}.{new_patch}{suffix}"));
         }
-        let after = &cv[1..].trim_start_matches(' ');
+        let after = after_tilde.trim_start_matches(' ');
         let dots = after.matches('.').count();
         return Some(if dots == 0 {
             format!("{op}{new_major}")
@@ -898,8 +897,8 @@ fn bump_range_single(clean_range: &str, new_version: &str, _opts: &ConanOptions)
     }
 
     // ~= operator
-    if cv.starts_with("~=") {
-        let after = cv[2..].trim();
+    if let Some(after) = cv.strip_prefix("~=") {
+        let after = after.trim();
         let dots = after.matches('.').count();
         return Some(if dots == 0 {
             format!("~={new_major}")
@@ -1859,6 +1858,7 @@ mod tests {
     // Ported: "getMajor("$version") === $major getMinor("$version") === $minor getPatch("$version") === $patch"
     //         — lib/modules/versioning/conan/index.spec.ts line 720
     #[test]
+    #[allow(clippy::type_complexity)]
     fn get_major_minor_patch_matches_renovate_conan_index_spec() {
         let cases: Vec<(&str, Option<u64>, Option<u64>, Option<u64>)> = vec![
             ("4.1.3", Some(4), Some(1), Some(3)),

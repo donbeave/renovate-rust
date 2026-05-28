@@ -183,6 +183,7 @@ mod tests {
 
     // Ported: "getMajor, getMinor, getPatch for "$version"" — versioning/docker/index.spec.ts line 27
     #[test]
+    #[allow(clippy::type_complexity)]
     fn get_major_minor_patch_matches_renovate_docker_index_spec() {
         let cases: &[(&str, Option<u64>, Option<u64>, Option<u64>)] = &[
             ("1.2.3", Some(1), Some(2), Some(3)),

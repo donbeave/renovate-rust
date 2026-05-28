@@ -421,10 +421,10 @@ fn process_scm_url(raw: &str) -> Option<String> {
     let s = s.strip_prefix("git:").unwrap_or(&s).to_owned();
 
     // git@github.com:path  →  https://github.com/path
-    let s = if s.starts_with("git@github.com:") {
-        format!("https://github.com/{}", &s["git@github.com:".len()..])
-    } else if s.starts_with("git@github.com/") {
-        format!("https://github.com/{}", &s["git@github.com/".len()..])
+    let s = if let Some(rest) = s.strip_prefix("git@github.com:") {
+        format!("https://github.com/{rest}")
+    } else if let Some(rest) = s.strip_prefix("git@github.com/") {
+        format!("https://github.com/{rest}")
     } else {
         s
     };

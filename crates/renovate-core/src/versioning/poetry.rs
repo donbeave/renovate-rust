@@ -434,15 +434,16 @@ pub fn is_valid(input: &str) -> bool {
     if let Some(rest) = input.strip_prefix("~=").or_else(|| {
         // handle with spaces: "~= 1.9"
         input.strip_prefix("~=")
-    })
-        && ((is_version(rest.trim()) || Version::parse(rest.trim()).is_ok())) {
-            return true;
-        }
+    }) && (is_version(rest.trim()) || Version::parse(rest.trim()).is_ok())
+    {
+        return true;
+    }
     // `===X.Y.Z` is a PEP 440 arbitrary equality operator
     if let Some(rest) = input.strip_prefix("===")
-        && is_version(rest.trim()) {
-            return true;
-        }
+        && is_version(rest.trim())
+    {
+        return true;
+    }
     // `==X.Y.*` or `==X.Y.Z` is a PEP 440 matching operator
     if let Some(rest) = input.strip_prefix("==") {
         let r = rest.trim();

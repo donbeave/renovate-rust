@@ -117,15 +117,15 @@ pub fn extract_file(content: &str, package_file: &str) -> Option<BatectFileExtra
             }
 
             // Indented fields inside a block include item.
-            if indent >= 4 {
-                if let Some((key, val)) = parse_kv(trimmed) {
-                    match key {
-                        "type" => cur_type = Some(val),
-                        "repo" => cur_repo = Some(val),
-                        "ref" => cur_ref = Some(val),
-                        "path" => cur_path = Some(val),
-                        _ => {}
-                    }
+            if indent >= 4
+                && let Some((key, val)) = parse_kv(trimmed)
+            {
+                match key {
+                    "type" => cur_type = Some(val),
+                    "repo" => cur_repo = Some(val),
+                    "ref" => cur_ref = Some(val),
+                    "path" => cur_path = Some(val),
+                    _ => {}
                 }
             }
         }
@@ -168,16 +168,11 @@ fn flush_include_item(
                 result.deps.push(BatectDep::GitBundle { repo, ref_value });
             }
         }
-        Some("file") => {
-            // `type: file, path: …` — only follow if no `repo:` field
-            // (invalid if both type:file and repo: are set).
-            if repo.is_none() {
-                if let Some(p) = path {
-                    result.referenced_files.push(resolve_path(dir, &p));
-                }
-            }
+        // `type: file, path: …` — only follow if no `repo:` field
+        // (invalid if both type:file and repo: are set).
+        Some("file") if repo.is_none() && let Some(p) = path => {
+            result.referenced_files.push(resolve_path(dir, &p));
         }
-        None => {}
         _ => {}
     }
 }
@@ -345,7 +340,7 @@ include:
             .iter()
             .filter_map(|d| match d {
                 BatectDep::Image(img) => Some(img),
-                _ => None,
+                BatectDep::GitBundle { .. } => None,
             })
             .collect();
         assert_eq!(images.len(), 4); // container-4 has build_directory, not image
@@ -368,7 +363,7 @@ include:
                 BatectDep::GitBundle { repo, ref_value } => {
                     Some((repo.as_str(), ref_value.as_str()))
                 }
-                _ => None,
+                BatectDep::Image(_) => None,
             })
             .collect();
         assert_eq!(git_bundles.len(), 2);

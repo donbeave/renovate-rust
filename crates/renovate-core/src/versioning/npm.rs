@@ -245,15 +245,16 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
             .min_by(|(_, a), (_, b)| a.cmp(b))
             .map(|(v, _)| v);
     }
-    if ((has_range_operator(range) || range.contains(',')))
-        && let Ok(req) = VersionReq::parse(range) {
-            return versions
-                .iter()
-                .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
-                .filter(|(_, p)| req.matches(p))
-                .min_by(|(_, a), (_, b)| a.cmp(b))
-                .map(|(v, _)| v);
-        }
+    if (has_range_operator(range) || range.contains(','))
+        && let Ok(req) = VersionReq::parse(range)
+    {
+        return versions
+            .iter()
+            .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
+            .filter(|(_, p)| req.matches(p))
+            .min_by(|(_, a), (_, b)| a.cmp(b))
+            .map(|(v, _)| v);
+    }
     versions
         .iter()
         .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
@@ -360,15 +361,16 @@ pub fn get_satisfying_version<'a>(versions: &'a [&'a str], range: &str) -> Optio
     // Use VersionReq::parse only for ranges with operators or compound conditions.
     // For plain wildcard patterns (digits, dots, *, x, X only), wildcard_req_matches
     // gives the correct "2.3 means 2.3.x" behaviour.
-    if ((has_range_operator(range) || range.contains(',')))
-        && let Ok(req) = VersionReq::parse(range) {
-            return versions
-                .iter()
-                .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
-                .filter(|(_, p)| req.matches(p))
-                .max_by(|(_, a), (_, b)| a.cmp(b))
-                .map(|(v, _)| v);
-        }
+    if (has_range_operator(range) || range.contains(','))
+        && let Ok(req) = VersionReq::parse(range)
+    {
+        return versions
+            .iter()
+            .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
+            .filter(|(_, p)| req.matches(p))
+            .max_by(|(_, a), (_, b)| a.cmp(b))
+            .map(|(v, _)| v);
+    }
     versions
         .iter()
         .filter_map(|version| {

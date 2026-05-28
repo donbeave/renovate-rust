@@ -134,6 +134,7 @@ fn next_major(version: &str) -> String {
     format!("{}.0.0", v.major + 1)
 }
 
+#[derive(Debug)]
 pub struct NewValueParams {
     pub current_value: String,
     pub range_strategy: String,

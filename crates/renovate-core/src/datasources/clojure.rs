@@ -64,17 +64,16 @@ pub async fn fetch_releases_merged(
             }
         }
 
-        if first_result.is_none() {
-            first_result = Some(res);
-        } else {
+        if let Some(fr) = first_result.as_mut() {
             // Patch in sourceUrl / homepage from later registries if missing
-            let fr = first_result.as_mut().unwrap();
             if fr.source_url.is_none() && res.source_url.is_some() {
                 fr.source_url = res.source_url;
             }
             if fr.homepage.is_none() && res.homepage.is_some() {
                 fr.homepage = res.homepage;
             }
+        } else {
+            first_result = Some(res);
         }
     }
 

@@ -111,9 +111,8 @@ pub fn is_greater_than(x: &str, y: &str) -> bool {
 }
 
 pub fn matches(version: &str, range: &str) -> bool {
-    let v = match parse_version(version) {
-        Some(v) => v,
-        None => return false,
+    let Some(v) = parse_version(version) else {
+        return false;
     };
     if is_latest(range) {
         return true;
@@ -121,9 +120,8 @@ pub fn matches(version: &str, range: &str) -> bool {
     if let Some(rv) = parse_version(range) {
         return v == rv;
     }
-    let r = match parse_range(range) {
-        Some(r) => r,
-        None => return false,
+    let Some(r) = parse_range(range) else {
+        return false;
     };
     // prerelease versions don't match partial ranges
     if !v.pre.is_empty() {
@@ -159,26 +157,18 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
 }
 
 pub fn is_less_than_range(version: &str, range: &str) -> bool {
-    let v = match parse_version(version) {
-        Some(v) => v,
-        None => return false,
+    let Some(v) = parse_version(version) else {
+        return false;
     };
-    let r = match parse_range(range) {
-        Some(r) => r,
-        None => return false,
+    let Some(r) = parse_range(range) else {
+        return false;
     };
     if v.major != r.major {
         return v.major < r.major;
     }
     match r.minor {
         None => false,
-        Some(m) => {
-            if v.minor != m {
-                v.minor < m
-            } else {
-                false
-            }
-        }
+        Some(m) => v.minor < m,
     }
 }
 
@@ -187,13 +177,11 @@ pub fn is_compatible(version: &str) -> bool {
 }
 
 pub fn is_breaking(version: &str, current: &str) -> bool {
-    let v = match parse_version(version) {
-        Some(v) => v,
-        None => return false,
+    let Some(v) = parse_version(version) else {
+        return false;
     };
-    let c = match parse_version(current) {
-        Some(c) => c,
-        None => return false,
+    let Some(c) = parse_version(current) else {
+        return false;
     };
     if c.major == 0 {
         return v.major > 0 || v.minor > c.minor;
@@ -201,6 +189,7 @@ pub fn is_breaking(version: &str, current: &str) -> bool {
     v.major > c.major
 }
 
+#[derive(Debug)]
 pub struct NewValueParams {
     pub current_value: String,
     pub range_strategy: String,
@@ -217,13 +206,11 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
     if is_latest(current_value) {
         return Some(current_value.clone());
     }
-    let range = match parse_range(current_value) {
-        None => return Some(new_version.clone()),
-        Some(r) => r,
+    let Some(range) = parse_range(current_value) else {
+        return Some(new_version.clone());
     };
-    let new_parsed = match parse_version(new_version) {
-        None => return Some(new_version.clone()),
-        Some(v) => v,
+    let Some(new_parsed) = parse_version(new_version) else {
+        return Some(new_version.clone());
     };
     // if currentValue is a full version, return newVersion directly
     if parse_version(current_value).is_some() {
@@ -717,13 +704,13 @@ mod tests {
         ];
         for (current_value, range_strategy, _current_version, new_version, expected) in cases {
             let result = get_new_value(&NewValueParams {
-                current_value: current_value.to_string(),
-                range_strategy: range_strategy.to_string(),
-                new_version: new_version.to_string(),
+                current_value: current_value.to_owned(),
+                range_strategy: range_strategy.to_owned(),
+                new_version: new_version.to_owned(),
             });
             assert_eq!(
                 result,
-                Some(expected.to_string()),
+                Some(expected.to_owned()),
                 "get_new_value({current_value:?}, {range_strategy:?}, {new_version:?})"
             );
         }

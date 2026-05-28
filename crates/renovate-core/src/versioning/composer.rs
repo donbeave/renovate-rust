@@ -567,9 +567,9 @@ fn widen_compound_range(current_value: &str, new_version: &str) -> Option<String
     }
 
     let upper_op = upper_op?;
-    let upper = if upper_op.starts_with("<=") {
+    let upper = if let Some(rest) = upper_op.strip_prefix("<=") {
         // `<=Y` → extend to `<= new_version` (preserve exact patch)
-        let cur_upper = Version::parse(&pad_zeroes(&normalize_version(&upper_op[2..]))).ok()?;
+        let cur_upper = Version::parse(&pad_zeroes(&normalize_version(rest))).ok()?;
         if new > cur_upper {
             format!("<={new_version}")
         } else {

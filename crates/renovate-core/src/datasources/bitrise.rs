@@ -109,7 +109,7 @@ fn is_semver_version(name: &str) -> bool {
 
 /// Decode base64-encoded YAML content and extract `published_at` + `source_code_url`.
 fn parse_step_yaml(content_b64: &str) -> (Option<String>, Option<String>) {
-    let raw = content_b64.replace('\n', "").replace(' ', "");
+    let raw = content_b64.replace(['\n', ' '], "");
     let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(&raw) else { return (None, None) };
     let Ok(yaml) = std::str::from_utf8(&bytes) else { return (None, None) };
 

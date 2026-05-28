@@ -80,7 +80,7 @@ pub enum DebCompression {
 }
 
 impl DebCompression {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse(s: &str) -> Option<Self> {
         match s {
             "gz" => Some(Self::Gz),
             _ => None,
@@ -94,7 +94,7 @@ impl DebCompression {
 /// Mirrors the compression check in `extract()` from
 /// `lib/modules/datasource/deb/utils.ts`.
 pub fn check_compression_supported(compression: &str) -> Result<DebCompression, String> {
-    DebCompression::from_str(compression)
+    DebCompression::parse(compression)
         .ok_or_else(|| format!("Unsupported compression standard '{compression}'"))
 }
 

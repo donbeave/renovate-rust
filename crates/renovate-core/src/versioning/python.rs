@@ -208,6 +208,7 @@ mod tests {
     // Ported: "getNewValue(...) === "$expected"" — versioning/python/index.spec.ts line 97
     // Delegates entirely to poetry::get_new_value; same cases as poetry spec.
     #[test]
+    #[allow(clippy::type_complexity)]
     fn get_new_value_cases() {
         let cases: &[(&str, &str, Option<&str>, &str, Option<&str>)] = &[
             ("1.0.0", "bump", Some("1.0.0"), "1.1.0", Some("1.1.0")),

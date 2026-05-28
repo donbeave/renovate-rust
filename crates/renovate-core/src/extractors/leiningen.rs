@@ -89,9 +89,7 @@ pub fn trim_at_key<'a>(s: &'a str, kw_name: &str) -> Option<&'a str> {
     let keyword = format!(":{kw_name}");
     let mut search_from = 0;
     while search_from < s.len() {
-        let Some(rel) = s[search_from..].find(&keyword) else {
-            return None;
-        };
+        let rel = s[search_from..].find(&keyword)?;
         let abs = search_from + rel;
         let after = abs + keyword.len();
         if s[after..].starts_with(|c: char| c.is_ascii_whitespace()) {
