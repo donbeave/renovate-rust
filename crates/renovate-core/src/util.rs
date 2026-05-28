@@ -273,6 +273,84 @@ pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
 }
 
 // ---------------------------------------------------------------------------
+// Markdown utilities — lib/util/markdown.ts
+// ---------------------------------------------------------------------------
+
+/// Apply generic sanitization to Markdown content for safe display.
+///
+/// Inserts zero-width spaces after `@` mentions and `#`+digit patterns to
+/// prevent unintended GitHub auto-linking.  Mirrors `sanitizeMarkdown` from
+/// `lib/util/markdown.ts`.
+pub fn sanitize_markdown(markdown: &str) -> String {
+    use regex::Regex;
+    static AT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static HASH_NONWORD: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static UNDO_BACKTICK_AT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static UNDO_LETTER_AT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static UNDO_COMPARE_AT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static UNDO_URL_ELLIPSIS: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static HASH_NUM: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static HTML_BACKTICK: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static CODE_HASH: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static HEADING_NEWLINE: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+
+    let mut res = markdown.to_owned();
+    // 1: #digit after non-word
+    {
+        let re = HASH_NONWORD.get_or_init(|| Regex::new(r"(\W)#(\d)").unwrap());
+        res = re.replace_all(&res, "${1}#&#8203;${2}").to_string();
+    }
+    // 2: @ → @&#8203;
+    {
+        let re = AT.get_or_init(|| Regex::new(r"@").unwrap());
+        res = re.replace_all(&res, "@&#8203;").to_string();
+    }
+    // 3: undo &#8203; inside backtick @
+    {
+        let re = UNDO_BACKTICK_AT.get_or_init(|| Regex::new(r"(`\[?@)&#8203;").unwrap());
+        res = re.replace_all(&res, "$1").to_string();
+    }
+    // 4: undo &#8203; after [a-z]@
+    {
+        let re = UNDO_LETTER_AT.get_or_init(|| Regex::new(r"(?i)([a-z]@)&#8203;").unwrap());
+        res = re.replace_all(&res, "$1").to_string();
+    }
+    // 5: undo in /compare/@
+    {
+        let re = UNDO_COMPARE_AT.get_or_init(|| Regex::new(r"/compare/@&#8203;").unwrap());
+        res = re.replace_all(&res, "/compare/@").to_string();
+    }
+    // 6: undo in URL ellipsis
+    {
+        let re = UNDO_URL_ELLIPSIS.get_or_init(|| {
+            Regex::new(r"(\(https://[^)]*?)\.\.\.@&#8203;").unwrap()
+        });
+        res = re.replace_all(&res, "$1...@").to_string();
+    }
+    // 7: standalone #N
+    {
+        let re = HASH_NUM.get_or_init(|| Regex::new(r"([\s(])#(\d+)([)\s]?)").unwrap());
+        res = re.replace_all(&res, "${1}#&#8203;${2}${3}").to_string();
+    }
+    // 8: HTML backtick entities
+    {
+        let re = HTML_BACKTICK.get_or_init(|| Regex::new(r"&#x60;([^/]*?)&#x60;").unwrap());
+        res = re.replace_all(&res, "`$1`").to_string();
+    }
+    // 9: undo &#8203; in inline code #N
+    {
+        let re = CODE_HASH.get_or_init(|| Regex::new(r"`#&#8203;(\d+)`").unwrap());
+        res = re.replace_all(&res, "`#$1`").to_string();
+    }
+    // 10: add blank line before headings
+    {
+        let re = HEADING_NEWLINE.get_or_init(|| Regex::new(r"([^\n]\n)(#.*)").unwrap());
+        res = re.replace_all(&res, "$1\n$2").to_string();
+    }
+    res
+}
+
+// ---------------------------------------------------------------------------
 // Sanitize — lib/util/sanitize.ts
 // ---------------------------------------------------------------------------
 
@@ -1382,6 +1460,24 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // sanitize_markdown
+    // -----------------------------------------------------------------------
+
+    // Ported: "sanitizeMarkdown check massaged release notes" — util/markdown.spec.ts line 48
+    #[test]
+    fn test_sanitize_markdown() {
+        // Key behaviors: @ → @&#8203;, [#N] → [#&#8203;N]
+        let input = "#### What's Changed\n* fix by @user in https://github.com/foo/foo/pull/1\n\n#### New Contributors\n* @user made their first in https://github.com/foo/foo/pull/2\n\n#### [Heading](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023)\n* link [#1234](https://github.com/some/repo/issues/1234)";
+        let output = sanitize_markdown(input);
+        // @ should be ZWS'd
+        assert!(output.contains("@&#8203;user"), "expected @&#8203;user in: {output}");
+        // #1234 in link text should be ZWS'd
+        assert!(output.contains("#&#8203;1234"), "expected #&#8203;1234 in: {output}");
+        // The heading URL anchor (#1234-2023) should not be broken
+        assert!(output.contains("CHANGELOG.md#1234-2023"), "heading anchor should be intact");
     }
 
     // -----------------------------------------------------------------------

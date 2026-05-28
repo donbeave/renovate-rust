@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4213 / 11677 total tests ported (36%) · pending 7375 · not-applicable 89 (1% of total) — updated 2026-05-28
+**Progress:** 4214 / 11677 total tests ported (36%) · pending 7374 · not-applicable 89 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
