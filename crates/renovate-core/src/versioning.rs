@@ -36,6 +36,7 @@ pub mod maven;
 pub mod nixpkgs;
 pub mod node;
 pub mod npm;
+pub mod composer;
 pub mod poetry;
 pub mod python;
 pub mod nuget;

@@ -669,7 +669,7 @@ pub fn subset(sub_range: &str, super_range: &str) -> Option<bool> {
 }
 
 /// Check whether range `a` is a subset of range `b`.
-fn range_subset(a: &str, b: &str) -> bool {
+pub fn range_subset(a: &str, b: &str) -> bool {
     let a = a.trim();
     let b = b.trim();
     if a == b {
