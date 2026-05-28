@@ -5,19 +5,18 @@
 ## `lib/modules/versioning/deb/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/deb/index.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** done
 
 ### `modules/versioning/deb/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| isValid("$version") === $expected | 4 | pending | — | — | — |
-| equals("$a", "$b") === $expected | 60 | pending | — | — | — |
-| isGreaterThan("$a", "$b") === $expected | 84 | pending | — | — | — |
-| isSingleVersion("$version") === $expected | 128 | pending | — | — | — |
-| getMajor("$version") === $expected | 136 | pending | — | — | — |
-| getMinor("$version") === $expected | 149 | pending | — | — | — |
-| getPatch("$version") === $expected | 162 | pending | — | — | — |
+| isValid("$version") === $expected | 4 | ported | `versioning/deb.rs` | `deb_is_valid` | — |
+| equals("$a", "$b") === $expected | 60 | ported | `versioning/deb.rs` | `deb_equals` | — |
+| isGreaterThan("$a", "$b") === $expected | 84 | ported | `versioning/deb.rs` | `deb_is_greater_than` | — |
+| isSingleVersion("$version") === $expected | 128 | ported | `versioning/deb.rs` | `deb_is_single_version` | — |
+| getMajor("$version") === $expected | 136 | ported | `versioning/deb.rs` | `deb_get_major` | — |
+| getMinor("$version") === $expected | 149 | ported | `versioning/deb.rs` | `deb_get_minor` | — |
+| getPatch("$version") === $expected | 162 | ported | `versioning/deb.rs` | `deb_get_patch` | — |
 
 ---
-

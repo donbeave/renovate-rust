@@ -21,6 +21,7 @@ pub mod github_actions;
 pub mod hex;
 pub mod glasskube;
 pub mod go_mod_directive;
+pub mod deb;
 pub mod gradle;
 pub mod ivy;
 pub mod hashicorp;

@@ -491,7 +491,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/semver/common.spec.ts` | Done | [details](lib/modules/versioning/semver/common.spec.ts.md) |
 | `lib/modules/versioning/swift/index.spec.ts` | Not done | [details](lib/modules/versioning/swift/index.spec.ts.md) |
 | `lib/modules/versioning/go-mod-directive/index.spec.ts` | Done | [details](lib/modules/versioning/go-mod-directive/index.spec.ts.md) |
-| `lib/modules/versioning/deb/index.spec.ts` | Not done | [details](lib/modules/versioning/deb/index.spec.ts.md) |
+| `lib/modules/versioning/deb/index.spec.ts` | Done | [details](lib/modules/versioning/deb/index.spec.ts.md) |
 | `lib/modules/versioning/nuget/version.spec.ts` | Done | [details](lib/modules/versioning/nuget/version.spec.ts.md) |
 | `lib/modules/versioning/nuget/parser.spec.ts` | Done | [details](lib/modules/versioning/nuget/parser.spec.ts.md) |
 | `lib/modules/versioning/nuget/index.spec.ts` | Done | [details](lib/modules/versioning/nuget/index.spec.ts.md) |
