@@ -1016,6 +1016,46 @@ pub fn massage_url(url: &str) -> String {
     massage_github_url(url)
 }
 
+/// Determine if the `homepage` field should be deleted because it equals `source_url`.
+///
+/// Mirrors `shouldDeleteHomepage()` from `lib/modules/datasource/metadata.ts`.
+pub fn should_delete_homepage(source_url: Option<&str>, homepage: Option<&str>) -> bool {
+    let source_url = match source_url {
+        None | Some("") => return false,
+        Some(s) => s,
+    };
+    let homepage = match homepage {
+        None | Some("") => return false,
+        Some(h) => h,
+    };
+    let massaged_source = massage_url(source_url);
+    // Detect platform for homepage
+    let platform = detect_platform(homepage);
+    if matches!(platform, Some("github") | Some("gitlab")) {
+        let source_path = extract_url_path(&massaged_source);
+        let homepage_path = extract_url_path(homepage);
+        if source_path.is_empty() || homepage_path.is_empty() {
+            return false;
+        }
+        let source_trimmed = source_path.trim_end_matches('/');
+        let homepage_trimmed = homepage_path.trim_end_matches('/');
+        return source_trimmed == homepage_trimmed;
+    }
+    massaged_source == homepage
+}
+
+fn extract_url_path(url: &str) -> &str {
+    // Find the path component (after host)
+    if let Some(pos) = url.find("://") {
+        let after_scheme = &url[pos + 3..];
+        if let Some(slash) = after_scheme.find('/') {
+            return &after_scheme[slash..];
+        }
+        return "";
+    }
+    ""
+}
+
 // ---------------------------------------------------------------------------
 // Datasource common utilities — lib/modules/datasource/common.ts
 // ---------------------------------------------------------------------------
@@ -5847,6 +5887,33 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── shouldDeleteHomepage ─────────────────────────────────────────────────
+
+    // Ported: "shouldDeleteHomepage($sourceUrl, $homepage) -> $expected" — metadata.spec.ts line 618
+    #[test]
+    fn test_should_delete_homepage() {
+        let cases: &[(&str, &str, bool)] = &[
+            ("not a url", "https://gitlab.com/org/repo", false),
+            ("https://gitlab.com/org/repo", "not a url", false),
+            ("https://gitlab.com/org", "https://gitlab.com/org/", true),
+            ("https://gitlab.com/org/repo/", "https://gitlab.com/org/repo", true),
+            ("https://github.com/org/repo/path/", "https://github.com/org/repo/path/", false),
+            ("https://gitlab.com/org/repo/", "https://gitlab.com/org/repo/path/to/something/", false),
+        ];
+        for (source_url, homepage, expected) in cases {
+            assert_eq!(
+                should_delete_homepage(Some(source_url), Some(homepage)),
+                *expected,
+                "shouldDeleteHomepage({:?}, {:?})",
+                source_url,
+                homepage
+            );
+        }
+        // null/undefined cases
+        assert!(!should_delete_homepage(None, Some("https://gitlab.com/org/repo")));
+        assert!(!should_delete_homepage(Some("https://gitlab.com/org/repo"), None));
     }
 
     // ── massageUrl / massageGithubUrl / massageGitlabUrl ─────────────────────

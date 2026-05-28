@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/metadata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata.spec.ts
-**Total tests:** 32 | **Ported:** 10 | **Actionable:** 32 | **Status:** partial
+**Total tests:** 32 | **Ported:** 11 | **Actionable:** 32 | **Status:** partial
 
 ### `modules/datasource/metadata`
 
@@ -41,7 +41,7 @@
 | Should delete gitlab homepage if its same as sourceUrl | 503 | pending | — | — | — |
 | does not set homepage to sourceURl when undefined | 542 | pending | — | — | — |
 | does not set homepage to sourceURl when not github or gitlab | 580 | pending | — | — | — |
-| shouldDeleteHomepage($homepage, $sourceUrl) === $expected | 618 | pending | — | — | — |
+| shouldDeleteHomepage($homepage, $sourceUrl) === $expected | 618 | ported | `util.rs` | `test_should_delete_homepage` | — |
 | should handle dep with no releases | 638 | pending | — | — | — |
 
 ---

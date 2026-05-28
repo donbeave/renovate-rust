@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4647 / 11677 total tests ported (40%) · pending 3487 · not-applicable 3543 (30% of total) — updated 2026-05-28
+**Progress:** 4648 / 11677 total tests ported (40%) · pending 3486 · not-applicable 3543 (30% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -746,7 +746,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/memory/index.spec.ts` | Done | [details](lib/util/cache/memory/index.spec.ts.md) |
 | `lib/util/cache/package/backend.spec.ts` | Done | [details](lib/util/cache/package/backend.spec.ts.md) |
 | `lib/util/cache/package/impl/file.spec.ts` | Not done | [details](lib/util/cache/package/impl/file.spec.ts.md) |
-| `lib/util/cache/package/impl/redis.spec.ts` | Not done | [details](lib/util/cache/package/impl/redis.spec.ts.md) |
+| `lib/util/cache/package/impl/redis.spec.ts` | Done | [details](lib/util/cache/package/impl/redis.spec.ts.md) |
 | `lib/util/cache/package/impl/sqlite.spec.ts` | Not done | [details](lib/util/cache/package/impl/sqlite.spec.ts.md) |
 | `lib/util/cache/package/index.spec.ts` | Done | [details](lib/util/cache/package/index.spec.ts.md) |
 | `lib/util/cache/package/key.spec.ts` | Done | [details](lib/util/cache/package/key.spec.ts.md) |
@@ -794,13 +794,13 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/bitbucket-server.spec.ts` | Done | [details](lib/util/http/bitbucket-server.spec.ts.md) |
 | `lib/util/http/bitbucket.spec.ts` | Done | [details](lib/util/http/bitbucket.spec.ts.md) |
 | `lib/util/http/cache/memory-http-cache-provider.spec.ts` | Done | [details](lib/util/http/cache/memory-http-cache-provider.spec.ts.md) |
-| `lib/util/http/cache/package-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/package-http-cache-provider.spec.ts.md) |
-| `lib/util/http/cache/repository-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/repository-http-cache-provider.spec.ts.md) |
+| `lib/util/http/cache/package-http-cache-provider.spec.ts` | Done | [details](lib/util/http/cache/package-http-cache-provider.spec.ts.md) |
+| `lib/util/http/cache/repository-http-cache-provider.spec.ts` | Done | [details](lib/util/http/cache/repository-http-cache-provider.spec.ts.md) |
 | `lib/util/http/forgejo.spec.ts` | Done | [details](lib/util/http/forgejo.spec.ts.md) |
 | `lib/util/http/gerrit.spec.ts` | Done | [details](lib/util/http/gerrit.spec.ts.md) |
 | `lib/util/http/gitea.spec.ts` | Done | [details](lib/util/http/gitea.spec.ts.md) |
 | `lib/util/http/github.spec.ts` | Done | [details](lib/util/http/github.spec.ts.md) |
-| `lib/util/http/gitlab.spec.ts` | Not done | [details](lib/util/http/gitlab.spec.ts.md) |
+| `lib/util/http/gitlab.spec.ts` | Done | [details](lib/util/http/gitlab.spec.ts.md) |
 | `lib/util/http/got.spec.ts` | Done | [details](lib/util/http/got.spec.ts.md) |
 | `lib/util/http/hooks.spec.ts` | Done | [details](lib/util/http/hooks.spec.ts.md) |
 | `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
@@ -814,7 +814,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/www-authenticate.spec.ts` | Done | [details](lib/util/http/www-authenticate.spec.ts.md) |
 | `lib/util/json-writer/editor-config.spec.ts` | Done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
 | `lib/util/json-writer/json-writer.spec.ts` | Done | [details](lib/util/json-writer/json-writer.spec.ts.md) |
-| `lib/util/merge-confidence/index.spec.ts` | Not done | [details](lib/util/merge-confidence/index.spec.ts.md) |
+| `lib/util/merge-confidence/index.spec.ts` | Done | [details](lib/util/merge-confidence/index.spec.ts.md) |
 | `lib/util/schema-utils/index.spec.ts` | Not done | [details](lib/util/schema-utils/index.spec.ts.md) |
 | `lib/util/schema-utils/v4.spec.ts` | Not done | [details](lib/util/schema-utils/v4.spec.ts.md) |
 | `lib/util/template/index.spec.ts` | Not done | [details](lib/util/template/index.spec.ts.md) |

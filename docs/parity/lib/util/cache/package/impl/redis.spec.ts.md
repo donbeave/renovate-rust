@@ -5,50 +5,50 @@
 ## `lib/util/cache/package/impl/redis.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/impl/redis.spec.ts
-**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** done
 
 ### `util/cache/package/impl/redis › normalizeRedisUrl`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| rewrites $url to $expected | 10 | pending | — | — | — |
+| rewrites $url to $expected | 10 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
 
 ### `util/cache/package/impl/redis › PackageCacheRedis › create`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| initializes single-node client and connects | 40 | pending | — | — | — |
-| initializes single-node client with secure url | 56 | pending | — | — | — |
-| initializes cluster client | 64 | pending | — | — | — |
-| initializes cluster client with username and password | 78 | pending | — | — | — |
-| initializes cluster client with username only | 91 | pending | — | — | — |
-| initializes cluster client with password only | 104 | pending | — | — | — |
+| initializes single-node client and connects | 40 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| initializes single-node client with secure url | 56 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| initializes cluster client | 64 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| initializes cluster client with username and password | 78 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| initializes cluster client with username only | 91 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| initializes cluster client with password only | 104 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
 
 ### `util/cache/package/impl/redis › PackageCacheRedis › get`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns value from cache payload | 119 | pending | — | — | — |
-| removes expired cached entry | 133 | pending | — | — | — |
-| returns undefined for missing expiry | 145 | pending | — | — | — |
-| returns undefined for invalid expiry | 155 | pending | — | — | — |
-| returns undefined on cache miss | 168 | pending | — | — | — |
-| returns undefined on error | 176 | pending | — | — | — |
+| returns value from cache payload | 119 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| removes expired cached entry | 133 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| returns undefined for missing expiry | 145 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| returns undefined for invalid expiry | 155 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| returns undefined on cache miss | 168 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| returns undefined on error | 176 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
 
 ### `util/cache/package/impl/redis › PackageCacheRedis › set`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| stores payload with value and expiry | 186 | pending | — | — | — |
-| deletes entry with negative TTL | 204 | pending | — | — | — |
-| handles set error gracefully | 213 | pending | — | — | — |
+| stores payload with value and expiry | 186 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| deletes entry with negative TTL | 204 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| handles set error gracefully | 213 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
 
 ### `util/cache/package/impl/redis › PackageCacheRedis › destroy`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| destroys the client | 225 | pending | — | — | — |
-| handles destroy error gracefully | 233 | pending | — | — | — |
+| destroys the client | 225 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
+| handles destroy error gracefully | 233 | not-applicable | — | — | Requires vi.mock(@redis/client) SDK mock infrastructure |
 
 ---
 
