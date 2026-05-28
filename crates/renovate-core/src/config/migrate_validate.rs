@@ -859,9 +859,8 @@ fn migrate_config(input: &Value) -> Value {
                             .iter()
                             .any(|m| m.as_str() == Some("gradle-lite"));
                         if has_gradle_lite {
-                            let has_gradle = match_managers
-                                .iter()
-                                .any(|m| m.as_str() == Some("gradle"));
+                            let has_gradle =
+                                match_managers.iter().any(|m| m.as_str() == Some("gradle"));
                             if !has_gradle {
                                 match_managers.push(Value::String("gradle".to_owned()));
                             }
@@ -945,7 +944,11 @@ fn migrate_config(input: &Value) -> Value {
                         .entry("managerFilePatterns".to_owned())
                         .or_insert_with(|| Value::Array(Vec::new()));
                     if let Value::Array(arr) = mfp {
-                        arr.extend(patterns.into_iter().map(|p| Value::String(format!("/{p}/"))));
+                        arr.extend(
+                            patterns
+                                .into_iter()
+                                .map(|p| Value::String(format!("/{p}/"))),
+                        );
                     }
                 }
             }
@@ -966,9 +969,7 @@ fn migrate_config(input: &Value) -> Value {
         // Recurse into nested object-valued config fields — mirrors TypeScript
         // `migrateConfig`'s recursive call for sub-configs (lockFileMaintenance,
         // manager overrides, etc.).  Skip special non-config fields.
-        const SKIP_RECURSE: &[&str] = &[
-            "errors", "warnings", "migratedConfig", "onboardingConfig",
-        ];
+        const SKIP_RECURSE: &[&str] = &["errors", "warnings", "migratedConfig", "onboardingConfig"];
         let keys_to_recurse: Vec<String> = map
             .iter()
             .filter(|(k, v)| v.is_object() && !SKIP_RECURSE.contains(&k.as_str()))
@@ -1084,9 +1085,10 @@ fn migrate_package_rule(rule: &mut Map<String, Value>) {
     if let Some(pin_versions) = rule.remove("pinVersions")
         && let Some(value) = pin_versions.as_bool()
     {
-        rule.entry("rangeStrategy".to_owned()).or_insert(Value::String(
-            if value { "pin" } else { "replace" }.to_owned(),
-        ));
+        rule.entry("rangeStrategy".to_owned())
+            .or_insert(Value::String(
+                if value { "pin" } else { "replace" }.to_owned(),
+            ));
     }
 
     // Migrate automerge string values inside package rules (like 'patch', 'minor', etc.).
@@ -5939,7 +5941,7 @@ mod tests {
     #[test]
     fn package_files_object_migrates_to_include_paths_and_package_rules() {
         let result = migrate_config(
-            &json!({"packageFiles": [{"packageFile": "package.json", "packageRules": []}]})
+            &json!({"packageFiles": [{"packageFile": "package.json", "packageRules": []}]}),
         );
         assert_eq!(result["includePaths"], json!(["package.json"]));
         let rules = result["packageRules"].as_array().unwrap();
@@ -6704,10 +6706,20 @@ mod tests {
         assert!(result.get("gradle-lite").is_none());
         // matchManagers: gradle-lite → gradle
         let rules = result["packageRules"].as_array().unwrap();
-        assert!(rules[0]["matchManagers"].as_array().unwrap().iter()
-            .any(|m| m.as_str() == Some("gradle")));
-        assert!(!rules[0]["matchManagers"].as_array().unwrap().iter()
-            .any(|m| m.as_str() == Some("gradle-lite")));
+        assert!(
+            rules[0]["matchManagers"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|m| m.as_str() == Some("gradle"))
+        );
+        assert!(
+            !rules[0]["matchManagers"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|m| m.as_str() == Some("gradle-lite"))
+        );
     }
 
     // Ported: "migrates subconfig" — config/migration.spec.ts line 308
@@ -6766,13 +6778,18 @@ mod tests {
         }));
         assert_eq!(result["pip-compile"]["enabled"], json!(true));
         assert!(result["pip-compile"].get("fileMatch").is_none());
-        let patterns = result["pip-compile"]["managerFilePatterns"].as_array().unwrap();
+        let patterns = result["pip-compile"]["managerFilePatterns"]
+            .as_array()
+            .unwrap();
         assert_eq!(patterns[0], json!("requirements.txt"));
         assert_eq!(patterns[1], json!("/(^|/)requirements\\.txt$/"));
         assert_eq!(patterns[2], json!("/(^|/)requirements-fmt\\.txt$/"));
         assert_eq!(patterns[3], json!("/(^|/)requirements-lint\\.txt$/"));
         assert_eq!(patterns[4], json!("/.github/workflows/requirements.txt/"));
-        assert_eq!(patterns[5], json!("/(^|/)debian_packages/private/third_party/requirements\\.txt$/"));
+        assert_eq!(
+            patterns[5],
+            json!("/(^|/)debian_packages/private/third_party/requirements\\.txt$/")
+        );
         assert_eq!(patterns[6], json!("/(^|/).*?requirements.*?\\.txt$/"));
         assert_eq!(patterns.len(), 7);
     }
@@ -6844,12 +6861,45 @@ mod tests {
             "commitMessage": "test",
             "raiseDeprecationWarnings": null
         }));
-        assert_eq!(result, json!({
-            "baseBranchPatterns": [],
-            "commitMessage": "test",
-            "ignorePaths": [],
-            "includePaths": ["test"],
-            "rebaseWhen": "auto"
-        }));
+        assert_eq!(
+            result,
+            json!({
+                "baseBranchPatterns": [],
+                "commitMessage": "test",
+                "ignorePaths": [],
+                "includePaths": ["test"],
+                "rebaseWhen": "auto"
+            })
+        );
+    }
+
+    // Ported: "should remove deprecated properties" — config/migrations/migrations-service.spec.ts line 9
+    #[test]
+    fn migrations_service_removes_deprecated_properties() {
+        let removed = [
+            "allowCommandTemplating",
+            "allowPostUpgradeCommandTemplating",
+            "deepExtract",
+            "gitFs",
+            "groupBranchName",
+            "groupCommitMessage",
+            "groupPrBody",
+            "groupPrTitle",
+            "lazyGrouping",
+            "maintainYarnLock",
+            "raiseDeprecationWarnings",
+            "statusCheckVerify",
+            "supportPolicy",
+            "transitiveRemediation",
+            "yarnCacheFolder",
+            "yarnMaintenanceBranchName",
+            "yarnMaintenanceCommitMessage",
+            "yarnMaintenancePrBody",
+            "yarnMaintenancePrTitle",
+        ];
+        for &prop in &removed {
+            let result = migrate_config(&json!({prop: "test"}));
+            assert!(result.get(prop).is_none(), "should remove {}", prop);
+        }
     }
 }
