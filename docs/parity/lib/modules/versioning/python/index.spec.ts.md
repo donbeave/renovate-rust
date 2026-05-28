@@ -5,20 +5,20 @@
 ## `lib/modules/versioning/python/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/python/index.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** partial
 
 ### `modules/versioning/python/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| isValid("$version") === $expected | 4 | pending | — | — | — |
-| matches("$version", "$range") === "$expected" | 28 | pending | — | — | — |
-| isLessThanRange("$version", "$range") === "$expected" | 54 | pending | — | — | — |
-| minSatisfyingVersion($versions, "$range") === $expected | 66 | pending | — | — | — |
-| getSatisfyingVersion($versions, "$range") === $expected | 83 | pending | — | — | — |
+| isValid("$version") === $expected | 4 | ported | `python.rs` | `is_valid_cases` | — |
+| matches("$version", "$range") === "$expected" | 28 | ported | `python.rs` | `matches_cases` | — |
+| isLessThanRange("$version", "$range") === "$expected" | 54 | ported | `python.rs` | `is_less_than_range_cases` | — |
+| minSatisfyingVersion($versions, "$range") === $expected | 66 | ported | `python.rs` | `min_satisfying_version_cases` | — |
+| getSatisfyingVersion($versions, "$range") === $expected | 83 | ported | `python.rs` | `get_satisfying_version_cases` | — |
 | getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 97 | pending | — | — | — |
 | subset("$a", "$b") === $expected | 160 | pending | — | — | — |
-| isBreaking("$currentVersion", "$newVersion") === $expected | 182 | pending | — | — | — |
+| isBreaking("$currentVersion", "$newVersion") === $expected | 182 | ported | `python.rs` | `is_breaking_cases` | — |
 
 ---
 
