@@ -5,17 +5,17 @@
 ## `lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** not-applicable
 
 ### `getLockedDependencies()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| finds indirect dependency | 10 | pending | — | — | — |
-| finds removed dependencies | 35 | pending | — | — | — |
-| finds when a greater version is needed | 58 | pending | — | — | — |
-| finds when a range matches greater versions | 78 | pending | — | — | — |
-| returns null if no matching | 97 | pending | — | — | — |
+| finds indirect dependency | 10 | not-applicable | — | — | Uses httpMock (nock); HTTP mock infrastructure not portable |
+| finds removed dependencies | 35 | not-applicable | — | — | Uses httpMock (nock); HTTP mock infrastructure not portable |
+| finds when a greater version is needed | 58 | not-applicable | — | — | Uses httpMock (nock); HTTP mock infrastructure not portable |
+| finds when a range matches greater versions | 78 | not-applicable | — | — | Uses httpMock (nock); HTTP mock infrastructure not portable |
+| returns null if no matching | 97 | not-applicable | — | — | Uses httpMock (nock); HTTP mock infrastructure not portable |
 
 ---
 

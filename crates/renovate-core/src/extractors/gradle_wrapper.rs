@@ -134,6 +134,18 @@ pub fn parse_java_language_version(content: &str) -> Option<String> {
         .map(|m| m.as_str().to_owned())
 }
 
+/// Return the Gradle wrapper script filename for the current OS.
+///
+/// Mirrors `gradleWrapperFileName()` from
+/// `lib/modules/manager/gradle-wrapper/utils.ts`.
+pub fn gradle_wrapper_filename() -> &'static str {
+    if cfg!(target_os = "windows") {
+        "gradlew.bat"
+    } else {
+        "./gradlew"
+    }
+}
+
 /// Parse `gradle-wrapper.properties` and extract the Gradle version.
 ///
 /// Returns `None` if no `distributionUrl` with a recognizable version is found.
@@ -342,5 +354,19 @@ zipStorePath=wrapper/dists
     fn parse_java_language_version_extracts_value() {
         let content = "java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }";
         assert_eq!(parse_java_language_version(content), Some("21".to_owned()));
+    }
+
+    // Ported: "works on windows" — gradle-wrapper/util.spec.ts line 135
+    #[test]
+    #[cfg(target_os = "windows")]
+    fn gradle_wrapper_filename_windows() {
+        assert_eq!(gradle_wrapper_filename(), "gradlew.bat");
+    }
+
+    // Ported: "works on linux" — gradle-wrapper/util.spec.ts line 140
+    #[test]
+    #[cfg(not(target_os = "windows"))]
+    fn gradle_wrapper_filename_linux() {
+        assert_eq!(gradle_wrapper_filename(), "./gradlew");
     }
 }
