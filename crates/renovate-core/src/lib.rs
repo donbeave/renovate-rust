@@ -21,6 +21,7 @@ pub mod replacements;
 pub mod repo_config;
 pub mod schedule;
 pub mod string_match;
+pub mod timestamp;
 pub mod util;
 pub mod versioning;
 pub mod vulnerability;

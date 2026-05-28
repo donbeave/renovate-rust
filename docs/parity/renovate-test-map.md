@@ -393,7 +393,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/compress.spec.ts` | Not done | [details](lib/util/compress.spec.ts.md) |
 | `lib/util/split.spec.ts` | Not done | [details](lib/util/split.spec.ts.md) |
 | `lib/util/streams.spec.ts` | Not done | [details](lib/util/streams.spec.ts.md) |
-| `lib/util/timestamp.spec.ts` | Not done | [details](lib/util/timestamp.spec.ts.md) |
+| `lib/util/timestamp.spec.ts` | Done | [details](lib/util/timestamp.spec.ts.md) |
 | `lib/util/sanitize.spec.ts` | Done | [details](lib/util/sanitize.spec.ts.md) |
 | `lib/util/clone.spec.ts` | Done | [details](lib/util/clone.spec.ts.md) |
 | `lib/util/filter-map.spec.ts` | Done | [details](lib/util/filter-map.spec.ts.md) |
