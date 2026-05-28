@@ -1128,6 +1128,41 @@ fn extract_url_path(url: &str) -> &str {
 }
 
 // ---------------------------------------------------------------------------
+// S3 URL parsing — lib/util/s3.ts
+// ---------------------------------------------------------------------------
+
+/// Parsed S3 URL components.
+#[derive(Debug, Clone, PartialEq)]
+pub struct S3UrlParts {
+    pub bucket: String,
+    pub key: String,
+}
+
+/// Parse an S3 URL string into bucket and key.
+///
+/// Mirrors `parseS3Url()` from `lib/util/s3.ts`.
+pub fn parse_s3_url(raw_url: &str) -> Option<S3UrlParts> {
+    if !raw_url.starts_with("s3://") {
+        return None;
+    }
+    // s3://bucket/key/path
+    let after_scheme = &raw_url[5..]; // strip "s3://"
+    let slash_pos = after_scheme.find('/');
+    let bucket = match slash_pos {
+        None => after_scheme,
+        Some(i) => &after_scheme[..i],
+    };
+    if bucket.is_empty() {
+        return None;
+    }
+    let key = match slash_pos {
+        None => "",
+        Some(i) => &after_scheme[i + 1..],
+    };
+    Some(S3UrlParts { bucket: bucket.to_string(), key: key.to_string() })
+}
+
+// ---------------------------------------------------------------------------
 // Local platform stub — lib/modules/platform/local/index.ts
 // ---------------------------------------------------------------------------
 
@@ -6197,6 +6232,28 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── parse_s3_url ─────────────────────────────────────────────────────────
+
+    // Ported: "parses S3 URLs" — util/s3.spec.ts line 8
+    #[test]
+    fn test_parse_s3_url_valid() {
+        let r = parse_s3_url("s3://bucket/key/path").unwrap();
+        assert_eq!(r.bucket, "bucket");
+        assert_eq!(r.key, "key/path");
+    }
+
+    // Ported: "returns null for non-S3 URLs" — util/s3.spec.ts line 15
+    #[test]
+    fn test_parse_s3_url_non_s3() {
+        assert!(parse_s3_url("http://example.com/key/path").is_none());
+    }
+
+    // Ported: "returns null for invalid URLs" — util/s3.spec.ts line 19
+    #[test]
+    fn test_parse_s3_url_invalid() {
+        assert!(parse_s3_url("thisisnotaurl").is_none());
     }
 
     // ── local platform stub ───────────────────────────────────────────────────
