@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4079 / 11677 total tests ported (35%) · pending 7515 · not-applicable 83 (1% of total) — updated 2026-05-28
+**Progress:** 4100 / 11677 total tests ported (35%) · pending 7494 · not-applicable 83 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -396,7 +396,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/timestamp.spec.ts` | Not done | [details](lib/util/timestamp.spec.ts.md) |
 | `lib/util/sanitize.spec.ts` | Not done | [details](lib/util/sanitize.spec.ts.md) |
 | `lib/util/clone.spec.ts` | Not done | [details](lib/util/clone.spec.ts.md) |
-| `lib/util/filter-map.spec.ts` | Not done | [details](lib/util/filter-map.spec.ts.md) |
+| `lib/util/filter-map.spec.ts` | Done | [details](lib/util/filter-map.spec.ts.md) |
 | `lib/util/env.spec.ts` | Not done | [details](lib/util/env.spec.ts.md) |
 | `lib/util/ignore.spec.ts` | Not done | [details](lib/util/ignore.spec.ts.md) |
 | `lib/util/coerce.spec.ts` | Not done | [details](lib/util/coerce.spec.ts.md) |
@@ -411,7 +411,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
 | `lib/util/interpolator.spec.ts` | Not done | [details](lib/util/interpolator.spec.ts.md) |
 | `lib/util/date.spec.ts` | Not done | [details](lib/util/date.spec.ts.md) |
-| `lib/util/fingerprint.spec.ts` | Not done | [details](lib/util/fingerprint.spec.ts.md) |
+| `lib/util/fingerprint.spec.ts` | Done | [details](lib/util/fingerprint.spec.ts.md) |
 | `lib/util/hash.spec.ts` | Not done | [details](lib/util/hash.spec.ts.md) |
 | `lib/util/regex.spec.ts` | Not done | [details](lib/util/regex.spec.ts.md) |
 | `lib/util/result.spec.ts` | Not done | [details](lib/util/result.spec.ts.md) |
@@ -422,11 +422,11 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
 | `lib/util/unicode.spec.ts` | Not done | [details](lib/util/unicode.spec.ts.md) |
 | `lib/util/pretty-time.spec.ts` | Not done | [details](lib/util/pretty-time.spec.ts.md) |
-| `lib/util/array.spec.ts` | Not done | [details](lib/util/array.spec.ts.md) |
+| `lib/util/array.spec.ts` | Done | [details](lib/util/array.spec.ts.md) |
 | `lib/util/uniq.spec.ts` | Done | [details](lib/util/uniq.spec.ts.md) |
 | `lib/util/object.spec.ts` | Done | [details](lib/util/object.spec.ts.md) |
 | `lib/util/memoize.spec.ts` | Done | [details](lib/util/memoize.spec.ts.md) |
-| `lib/util/mask.spec.ts` | Not done | [details](lib/util/mask.spec.ts.md) |
+| `lib/util/mask.spec.ts` | Done | [details](lib/util/mask.spec.ts.md) |
 | `lib/util/host-rules.spec.ts` | Not done | [details](lib/util/host-rules.spec.ts.md) |
 | `lib/util/stats.spec.ts` | Not done | [details](lib/util/stats.spec.ts.md) |
 | `lib/util/s3.spec.ts` | Not done | [details](lib/util/s3.spec.ts.md) |
@@ -483,7 +483,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/pep440/index.spec.ts` | Done | [details](lib/modules/versioning/pep440/index.spec.ts.md) |
 | `lib/modules/versioning/regex/index.spec.ts` | Not done | [details](lib/modules/versioning/regex/index.spec.ts.md) |
 | `lib/modules/versioning/lambda-node/index.spec.ts` | Done | [details](lib/modules/versioning/lambda-node/index.spec.ts.md) |
-| `lib/modules/versioning/gradle/index.spec.ts` | Not done | [details](lib/modules/versioning/gradle/index.spec.ts.md) |
+| `lib/modules/versioning/gradle/index.spec.ts` | Done | [details](lib/modules/versioning/gradle/index.spec.ts.md) |
 | `lib/modules/versioning/devbox/index.spec.ts` | Done | [details](lib/modules/versioning/devbox/index.spec.ts.md) |
 | `lib/modules/versioning/nixpkgs/index.spec.ts` | Done | [details](lib/modules/versioning/nixpkgs/index.spec.ts.md) |
 | `lib/modules/versioning/poetry/index.spec.ts` | Not done | [details](lib/modules/versioning/poetry/index.spec.ts.md) |

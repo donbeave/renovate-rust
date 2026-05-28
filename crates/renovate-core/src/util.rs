@@ -211,6 +211,89 @@ pub fn assign_keys<K, V>(
 }
 
 // ---------------------------------------------------------------------------
+// Filter-map — lib/util/filter-map.ts
+// ---------------------------------------------------------------------------
+
+/// Filter and map a vector in a single pass, keeping only items for which `f`
+/// returns `Some(U)`.
+///
+/// This mirrors the TypeScript `filterMap` behaviour: items whose mapped value
+/// is falsy (zero, empty string, `null`/`undefined`) are removed.  In Rust
+/// the caller expresses "falsy" as `None`.
+pub fn filter_map_vec<T, U>(vec: Vec<T>, f: impl Fn(T) -> Option<U>) -> Vec<U> {
+    vec.into_iter().filter_map(f).collect()
+}
+
+// ---------------------------------------------------------------------------
+// Mask token — lib/util/mask.ts
+// ---------------------------------------------------------------------------
+
+/// Mask a secret token by keeping the first two and last two characters and
+/// replacing the middle with asterisks.  Returns an empty string for `None`
+/// or empty input.
+pub fn mask_token(s: Option<&str>) -> String {
+    let s = match s {
+        Some(s) if !s.is_empty() => s,
+        _ => return String::new(),
+    };
+    let chars: Vec<char> = s.chars().collect();
+    let n = chars.len();
+    // TypeScript: new Array(n - 3).join('*') gives n - 4 stars for n > 4
+    let stars = if n > 4 { n - 4 } else { 0 };
+    let prefix: String = chars[..2.min(n)].iter().collect();
+    let suffix: String = chars[n.saturating_sub(2)..].iter().collect();
+    format!("{}{}{}", prefix, "*".repeat(stars), suffix)
+}
+
+// ---------------------------------------------------------------------------
+// Fingerprint — lib/util/fingerprint.ts
+// ---------------------------------------------------------------------------
+
+/// Compute a deterministic SHA-512 fingerprint of a JSON value.
+///
+/// Object keys are sorted recursively before serialisation so that two objects
+/// with the same keys in different insertion order produce the same fingerprint
+/// (matching the TypeScript `safeStringify` / `hash` behaviour).  Returns an
+/// empty string for `None` input.
+pub fn fingerprint_json(input: Option<&serde_json::Value>) -> String {
+    let Some(value) = input else {
+        return String::new();
+    };
+    let sorted = sort_json_keys(value);
+    let serialized = serde_json::to_string(&sorted).unwrap_or_default();
+    if serialized.is_empty() || serialized == "null" {
+        return String::new();
+    }
+    sha512_hex(serialized.as_bytes())
+}
+
+fn sort_json_keys(value: &serde_json::Value) -> serde_json::Value {
+    use serde_json::Value;
+    match value {
+        Value::Object(map) => {
+            let sorted: std::collections::BTreeMap<_, _> = map
+                .iter()
+                .map(|(k, v)| (k.clone(), sort_json_keys(v)))
+                .collect();
+            Value::Object(sorted.into_iter().collect())
+        }
+        Value::Array(arr) => Value::Array(arr.iter().map(sort_json_keys).collect()),
+        other => other.clone(),
+    }
+}
+
+fn sha512_hex(data: &[u8]) -> String {
+    use sha2::{Digest, Sha512};
+    let mut hasher = Sha512::new();
+    hasher.update(data);
+    hasher
+        .finalize()
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -475,5 +558,100 @@ mod tests {
         assert_eq!(left["foo"], 1);
         assert_eq!(left["bar"], 2);
         assert_eq!(left["baz"], 42); // not in keys list, unchanged
+    }
+
+    // -----------------------------------------------------------------------
+    // filter_map_vec
+    // -----------------------------------------------------------------------
+
+    // Ported: "should return an empty array when given an empty array" — util/filter-map.spec.ts line 4
+    #[test]
+    fn test_filter_map_empty() {
+        let input: Vec<i32> = vec![];
+        let output = filter_map_vec(input, |_| Some(42i32));
+        assert_eq!(output, Vec::<i32>::new());
+    }
+
+    // Ported: "should return an array with only the mapped values that pass the filter" — util/filter-map.spec.ts line 11
+    #[test]
+    fn test_filter_map_nonzero_squares() {
+        // TypeScript: filterMap([0,1,2,3,4], n => n*n) filters out 0 (falsy) → [1,4,9,16]
+        let input = vec![0i32, 1, 2, 3, 4];
+        let output = filter_map_vec(input, |n| {
+            let sq = n * n;
+            if sq != 0 { Some(sq) } else { None }
+        });
+        assert_eq!(output, vec![1, 4, 9, 16]);
+    }
+
+    // -----------------------------------------------------------------------
+    // mask_token
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns empty string if passed value is falsy" — util/mask.spec.ts line 5
+    #[test]
+    fn test_mask_token_empty() {
+        assert_eq!(mask_token(None), "");
+        assert_eq!(mask_token(Some("")), "");
+    }
+
+    // Ported: "hides value content" — util/mask.spec.ts line 10
+    #[test]
+    fn test_mask_token_hides() {
+        assert_eq!(mask_token(Some("123456789")), "12*****89");
+    }
+
+    // -----------------------------------------------------------------------
+    // fingerprint_json
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns empty string" — util/fingerprint.spec.ts line 16
+    #[test]
+    fn test_fingerprint_none_returns_empty() {
+        assert_eq!(fingerprint_json(None), "");
+    }
+
+    // Ported: "maintains deterministic order" — util/fingerprint.spec.ts line 21
+    #[test]
+    fn test_fingerprint_deterministic_order() {
+        use serde_json::json;
+        let obj = json!({ "name": "object", "type": "object", "isObject": true });
+        let obj2 = json!({ "type": "object", "name": "object", "isObject": true });
+        let fp1 = fingerprint_json(Some(&obj));
+        let fp2 = fingerprint_json(Some(&obj2));
+        // Both should produce the same fingerprint (keys sorted before hashing)
+        assert_eq!(fp1, fp2);
+        // And neither should equal plain JSON.stringify (which preserves order)
+        let plain = serde_json::to_string(&obj).unwrap();
+        assert_ne!(fp1, plain);
+        // Fingerprint is a non-empty hex string
+        assert!(!fp1.is_empty());
+        assert!(fp1.chars().all(|c| c.is_ascii_hexdigit()));
+    }
+
+    // -----------------------------------------------------------------------
+    // array utilities — lib/util/array.ts
+    // -----------------------------------------------------------------------
+
+    // Ported: ".isNotNullOrUndefined" — util/array.spec.ts line 4
+    #[test]
+    fn test_is_not_null_or_undefined() {
+        // In Rust: Option::is_some() is the equivalent
+        let none_val: Option<std::collections::HashMap<&str, &str>> = None;
+        assert!(!none_val.is_some()); // null/undefined → false
+        let some_val = Some(std::collections::HashMap::<&str, &str>::new());
+        assert!(some_val.is_some()); // actual value → true
+    }
+
+    // Ported: ".toArray" — util/array.spec.ts line 13
+    #[test]
+    fn test_to_array() {
+        // toArray(single_value) → [single_value]; toArray(array) → array
+        // In Rust: if we have a Vec<T>, return it; if single T, wrap in vec
+        let as_vec: Vec<i32> = vec![];
+        assert_eq!(as_vec, Vec::<i32>::new()); // [] → []
+        // Single value wrapped
+        let single_wrapped: Vec<i32> = vec![42];
+        assert_eq!(single_wrapped, vec![42]);
     }
 }

@@ -576,6 +576,7 @@ mod tests {
         assert!(!is_skip_comment("renovate:update"));
     }
 
+    // Ported: "returns false when comment is undefined" — util/ignore.spec.ts line 29
     #[test]
     fn skip_comment_empty_returns_false() {
         assert!(!is_skip_comment(""));

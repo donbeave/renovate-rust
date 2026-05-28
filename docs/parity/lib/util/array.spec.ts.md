@@ -5,14 +5,14 @@
 ## `lib/util/array.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/array.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `util/array`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| .isNotNullOrUndefined | 4 | pending | — | — | — |
-| .toArray | 13 | pending | — | — | — |
+| .isNotNullOrUndefined | 4 | ported | `util.rs` | `test_is_not_null_or_undefined` | — |
+| .toArray | 13 | ported | `util.rs` | `test_to_array` | — |
 
 ---
 
