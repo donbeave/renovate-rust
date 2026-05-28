@@ -1,6 +1,7 @@
 //! Debian package (deb) datasource utilities.
 //!
-//! Mirrors `lib/modules/datasource/deb/url.ts`.
+//! Mirrors `lib/modules/datasource/deb/url.ts` and
+//! `lib/modules/datasource/deb/utils.ts`.
 
 /// Construct binary component URLs from a Debian registry URL.
 ///
@@ -54,6 +55,31 @@ pub fn construct_component_urls(registry_url: &str) -> Result<Vec<String>, Strin
     Ok(urls)
 }
 
+/// Supported compression types for Debian package archive extraction.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DebCompression {
+    Gz,
+}
+
+impl DebCompression {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "gz" => Some(Self::Gz),
+            _ => None,
+        }
+    }
+}
+
+/// Validate that the compression type is supported, returning an error for
+/// unsupported types.
+///
+/// Mirrors the compression check in `extract()` from
+/// `lib/modules/datasource/deb/utils.ts`.
+pub fn check_compression_supported(compression: &str) -> Result<DebCompression, String> {
+    DebCompression::from_str(compression)
+        .ok_or_else(|| format!("Unsupported compression standard '{compression}'"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -80,6 +106,14 @@ mod tests {
             "https://deb.debian.org/debian/dists/bullseye/main/binary-amd64",
             "https://deb.debian.org/debian/dists/bullseye/contrib/binary-amd64",
         ]);
+    }
+
+    // Ported: "should throw error for unsupported compression" — datasource/deb/utils.spec.ts line 29
+    #[test]
+    fn extract_rejects_unsupported_compression() {
+        let result = check_compression_supported("xz");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unsupported compression standard"));
     }
 
     // Ported: "throws an error if required parameters are missing" — datasource/deb/url.spec.ts line 33

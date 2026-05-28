@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4495 / 11677 total tests ported (38%) · pending 6967 · not-applicable 215 (2% of total) — updated 2026-05-28
+**Progress:** 4496 / 11677 total tests ported (38%) · pending 6966 · not-applicable 215 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -168,7 +168,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/galaxy/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy/index.spec.ts.md) |
 | `lib/modules/datasource/repology/index.spec.ts` | Done | [details](lib/modules/datasource/repology/index.spec.ts.md) |
 | `lib/modules/datasource/deb/checksum.spec.ts` | Not done | [details](lib/modules/datasource/deb/checksum.spec.ts.md) |
-| `lib/modules/datasource/deb/utils.spec.ts` | Not done | [details](lib/modules/datasource/deb/utils.spec.ts.md) |
+| `lib/modules/datasource/deb/utils.spec.ts` | Done | [details](lib/modules/datasource/deb/utils.spec.ts.md) |
 | `lib/modules/datasource/deb/index.spec.ts` | Not done | [details](lib/modules/datasource/deb/index.spec.ts.md) |
 | `lib/modules/datasource/deb/packages.spec.ts` | Not done | [details](lib/modules/datasource/deb/packages.spec.ts.md) |
 | `lib/modules/datasource/deb/url.spec.ts` | Not done | [details](lib/modules/datasource/deb/url.spec.ts.md) |
