@@ -77,14 +77,19 @@ pub const FILE_ACCESS_VIOLATION_ERROR: &str = "FILE_ACCESS_VIOLATION_ERROR";
 /// `lib/util/fs/util.ts`.
 pub fn ensure_base_path(path: &str, base_dir: &str) -> Result<String, &'static str> {
     let normalized = path.replace('\\', "/");
+    let base = normalize_path(base_dir);
     let resolved = if normalized.is_empty() {
-        normalize_path(base_dir)
+        base.clone()
     } else if normalized.starts_with('/') {
         normalize_path(&normalized)
     } else {
-        normalize_path(&format!("{}/{}", base_dir, normalized))
+        normalize_path(&format!("{}/{}", base, normalized))
     };
-    if !resolved.starts_with(base_dir) {
+    // Require resolved == base OR resolved starts with base + '/' to prevent
+    // prefix confusion ("/foo" matching "/foobar").
+    let within = resolved == base
+        || resolved.starts_with(&format!("{}/", base));
+    if !within {
         return Err(FILE_ACCESS_VIOLATION_ERROR);
     }
     Ok(resolved)
@@ -122,6 +127,9 @@ mod tests {
             assert_eq!(ensure_base_path(path, cache_dir), Err(FILE_ACCESS_VIOLATION_ERROR),
                 "ensure_base_path({path:?}, {cache_dir:?}) should be Err");
         }
+        // Prefix confusion guard: /foobar must not match when base is /foo
+        assert_eq!(ensure_base_path("/foobar", "/foo"), Err(FILE_ACCESS_VIOLATION_ERROR));
+        assert_eq!(ensure_base_path("../foobar/x", "/foo"), Err(FILE_ACCESS_VIOLATION_ERROR));
     }
 
     // Ported: "isValidPath($value) == $expected" — util/fs/util.spec.ts line 53
