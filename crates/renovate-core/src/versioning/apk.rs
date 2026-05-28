@@ -355,14 +355,14 @@ pub fn get_satisfying_version(versions: &[&str], range: &str) -> Option<String> 
             }
         });
 
-        return satisfying.first().map(|s| s.to_string());
+        return satisfying.first().map(|s| (*s).to_owned());
     }
 
     // Exact match fallback
     versions
         .iter()
         .find(|&&v| equals(v, range))
-        .map(|s| s.to_string())
+        .map(|s| (*s).to_owned())
 }
 
 pub fn get_new_value(current_value: &str, new_version: &str) -> String {

@@ -17,8 +17,11 @@ pub fn get_storage_extra_clone_opts(
         && username.is_some_and(|u| !u.is_empty())
         && password.is_some_and(|p| !p.is_empty())
     {
-        let encoded = general_purpose::STANDARD
-            .encode(format!("{}:{}", username.unwrap_or(""), password.unwrap_or("")));
+        let encoded = general_purpose::STANDARD.encode(format!(
+            "{}:{}",
+            username.unwrap_or(""),
+            password.unwrap_or("")
+        ));
         ("basic".to_owned(), encoded)
     } else if token.is_some_and(|t| t.len() == 52) {
         let encoded = general_purpose::STANDARD.encode(format!(":{}", token.unwrap_or("")));
@@ -39,9 +42,9 @@ pub fn get_storage_extra_clone_opts(
 /// Mirrors the `stateMap` in `lib/modules/platform/azure/util.ts`.
 pub fn get_azure_pr_state(status: u32) -> &'static str {
     match status {
-        2 => "closed",  // Abandoned
-        3 => "merged",  // Completed
-        _ => "open",    // Active (1) and anything else
+        2 => "closed", // Abandoned
+        3 => "merged", // Completed
+        _ => "open",   // Active (1) and anything else
     }
 }
 

@@ -991,7 +991,7 @@ fn bump_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opti
                 let has_op = part.starts_with(|c: char| "<>=~^".contains(c));
                 if !has_op {
                     // Pinned version: preserve
-                    return part.to_string();
+                    return (*part).to_owned();
                 }
                 // Handle multi-part AND within this OR part
                 let and_sub = split_and_parts(part);
@@ -1002,7 +1002,7 @@ fn bump_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opti
                     {
                         return b.clone();
                     }
-                    replace_range(part, new_version).unwrap_or_else(|| part.to_string())
+                    replace_range(part, new_version).unwrap_or_else(|| (*part).to_owned())
                 } else {
                     // AND sub-range
                     bump_and_range(&and_sub, new_version, opts)
@@ -1048,7 +1048,7 @@ fn bump_and_range(and_parts: &[String], new_version: &str, opts: &ConanOptions) 
                     return b;
                 }
             }
-            replace_range(part, new_version).unwrap_or_else(|| part.to_owned())
+            replace_range(part, new_version).unwrap_or_else(|| (*part).to_owned())
         })
         .collect();
     result.join(" ")

@@ -1440,7 +1440,7 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                     "workarounds:libericaJdkDockerVersioning",
                     "workarounds:ubuntuDockerVersioning",
                 ] {
-                    result.push(wa.to_string());
+                    result.push((*wa).to_owned());
                 }
             }
             other => {
@@ -1496,14 +1496,22 @@ fn resolve_extends_ignore_paths(extends: &[String]) -> Vec<String> {
             ":ignoreModulesAndTests" | "default:ignoreModulesAndTests" => {
                 if !seen_ignore_modules {
                     seen_ignore_modules = true;
-                    result.extend(IGNORE_MODULES_AND_TESTS_PATHS.iter().map(|s| s.to_string()));
+                    result.extend(
+                        IGNORE_MODULES_AND_TESTS_PATHS
+                            .iter()
+                            .map(|s| (*s).to_owned()),
+                    );
                 }
             }
             // config:recommended → includes :ignoreModulesAndTests (among others).
             "config:recommended" | "config:base" | "config:best-practices" => {
                 if !seen_ignore_modules {
                     seen_ignore_modules = true;
-                    result.extend(IGNORE_MODULES_AND_TESTS_PATHS.iter().map(|s| s.to_string()));
+                    result.extend(
+                        IGNORE_MODULES_AND_TESTS_PATHS
+                            .iter()
+                            .map(|s| (*s).to_owned()),
+                    );
                 }
             }
             _ => {
@@ -2885,7 +2893,7 @@ fn resolve_extends_parameterized_rules(extends: &[String]) -> Vec<PackageRule> {
             ":doNotPinPackage" | "doNotPinPackage" => {
                 if let Some(pkg) = args.first().filter(|s| !s.is_empty()) {
                     rules.push(PackageRule {
-                        match_package_names: vec![pkg.to_string()],
+                        match_package_names: vec![(*pkg).to_owned()],
                         has_name_constraint: true,
                         range_strategy: Some("replace".to_owned()),
                         ..Default::default()
@@ -2896,7 +2904,7 @@ fn resolve_extends_parameterized_rules(extends: &[String]) -> Vec<PackageRule> {
                 if let Some(commit_type) = args.first().filter(|s| !s.is_empty()) {
                     rules.push(PackageRule {
                         match_file_names: vec!["**/*".to_owned()],
-                        semantic_commit_type: Some(commit_type.to_string()),
+                        semantic_commit_type: Some((*commit_type).to_owned()),
                         ..Default::default()
                     });
                 }
@@ -3699,7 +3707,7 @@ fn resolve_extends_group_presets(
                     "group:symfony",
                 ];
                 for sub_preset in recommended_presets {
-                    let sub_extends = vec![sub_preset.to_string()];
+                    let sub_extends = vec![(*sub_preset).to_owned()];
                     let (sub_rules, _) = resolve_extends_group_presets(&sub_extends);
                     rules.extend(sub_rules);
                 }
@@ -4248,39 +4256,39 @@ fn resolve_extends_parameterized(extends: &[String]) -> ParamOverrides {
             // :label(foo) sets labels: ["foo"]; :labels(a, b) sets labels: ["a", "b"].
             ":label" | "label" | ":labels" | "labels" => {
                 for arg in &args {
-                    if !arg.is_empty() && !labels.contains(&arg.to_string()) {
-                        labels.push(arg.to_string());
+                    if !arg.is_empty() && !labels.contains(&(*arg).to_owned()) {
+                        labels.push((*arg).to_owned());
                     }
                 }
             }
             ":assignee" | "assignee" => {
                 for arg in &args {
-                    if !arg.is_empty() && !assignees.contains(&arg.to_string()) {
-                        assignees.push(arg.to_string());
+                    if !arg.is_empty() && !assignees.contains(&(*arg).to_owned()) {
+                        assignees.push((*arg).to_owned());
                     }
                 }
             }
             ":reviewer" | "reviewer" => {
                 for arg in &args {
-                    if !arg.is_empty() && !reviewers.contains(&arg.to_string()) {
-                        reviewers.push(arg.to_string());
+                    if !arg.is_empty() && !reviewers.contains(&(*arg).to_owned()) {
+                        reviewers.push((*arg).to_owned());
                     }
                 }
             }
             ":automergeType" => {
                 if let Some(ty) = args.first().filter(|s| !s.is_empty()) {
-                    automerge_type = Some(ty.to_string());
+                    automerge_type = Some((*ty).to_owned());
                 }
             }
             ":semanticCommitType" | "semanticCommitType" => {
                 if let Some(t) = args.first().filter(|s| !s.is_empty()) {
-                    semantic_commit_type = Some(t.to_string());
+                    semantic_commit_type = Some((*t).to_owned());
                 }
             }
             ":semanticCommitScope" | "semanticCommitScope" => {
                 if let Some(s) = args.first() {
                     // Empty arg → no scope (disable parentheses).
-                    semantic_commit_scope = Some(s.to_string());
+                    semantic_commit_scope = Some((*s).to_owned());
                 }
             }
             ":semanticCommitScopeDisabled" | "semanticCommitScopeDisabled" => {

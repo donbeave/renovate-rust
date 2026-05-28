@@ -202,7 +202,10 @@ mod get_repo_url_tests {
     use super::*;
 
     fn link(name: &str, href: &str) -> ProtocolLink {
-        ProtocolLink { name: name.to_owned(), href: href.to_owned() }
+        ProtocolLink {
+            name: name.to_owned(),
+            href: href.to_owned(),
+        }
     }
 
     const GIT_HTTP: &str = "http://localhost:8081/scm/repo/default/repo";
@@ -211,10 +214,7 @@ mod get_repo_url_tests {
     // Ported: "should use the provided ssh link" — scm-manager/utils.spec.ts line 158
     #[test]
     fn get_repo_url_uses_ssh_link() {
-        let links = vec![
-            link("http", GIT_HTTP),
-            link("ssh", GIT_SSH),
-        ];
+        let links = vec![link("http", GIT_HTTP), link("ssh", GIT_SSH)];
         let result = get_repo_url(&links, Some("ssh"), None, None).unwrap();
         assert_eq!(result, GIT_SSH);
     }

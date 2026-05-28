@@ -13,7 +13,7 @@ pub fn get_parent_dir(file_name: &str) -> String {
     match trimmed.rfind('/') {
         None => String::new(),
         Some(0) => String::from("/"),
-        Some(pos) => trimmed[..pos].to_string(),
+        Some(pos) => trimmed[..pos].to_owned(),
     }
 }
 

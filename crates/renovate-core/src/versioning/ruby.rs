@@ -4,13 +4,12 @@
 //! Supports `~>` pessimistic version constraint, dot-separated prereleases,
 //! and partial versions (`1`, `1.2`).
 
+use regex::Regex;
 use std::cmp::Ordering;
 use std::sync::LazyLock;
-use regex::Regex;
 
-static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:[.-](.+))?$").unwrap()
-});
+static VERSION_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:[.-](.+))?$").unwrap());
 
 /// A parsed Ruby gem version.
 #[derive(Debug, Clone)]
@@ -22,7 +21,9 @@ struct RubyVersion {
 impl RubyVersion {
     fn parse(input: &str) -> Option<Self> {
         let s = input.trim().trim_start_matches('v');
-        if s.is_empty() { return None; }
+        if s.is_empty() {
+            return None;
+        }
 
         let caps = VERSION_RE.captures(s)?;
         let seg1: u64 = caps.get(1)?.as_str().parse().ok()?;
@@ -47,7 +48,9 @@ impl RubyVersion {
 }
 
 impl PartialEq for RubyVersion {
-    fn eq(&self, other: &Self) -> bool { self.cmp(other) == Ordering::Equal }
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
 }
 impl Eq for RubyVersion {}
 
@@ -64,21 +67,27 @@ fn cmp_prerelease_tokens(a: &str, b: &str) -> Ordering {
 }
 
 fn cmp_prerelease_str(a: &str, b: &str) -> Ordering {
-    let a_toks: Vec<&str> = a.split(|c| c == '.' || c == '-').collect();
-    let b_toks: Vec<&str> = b.split(|c| c == '.' || c == '-').collect();
+    let a_toks: Vec<&str> = a.split(['.', '-']).collect();
+    let b_toks: Vec<&str> = b.split(['.', '-']).collect();
     let len = a_toks.len().max(b_toks.len());
     for i in 0..len {
         let at = a_toks.get(i).copied().unwrap_or("");
         let bt = b_toks.get(i).copied().unwrap_or("");
-        if at == bt { continue; }
+        if at == bt {
+            continue;
+        }
         let ord = cmp_prerelease_tokens(at, bt);
-        if ord != Ordering::Equal { return ord; }
+        if ord != Ordering::Equal {
+            return ord;
+        }
     }
     Ordering::Equal
 }
 
 impl PartialOrd for RubyVersion {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl Ord for RubyVersion {
@@ -87,7 +96,9 @@ impl Ord for RubyVersion {
         let n = self.max_segs(other);
         for i in 0..n {
             let ord = self.seg(i).cmp(&other.seg(i));
-            if ord != Ordering::Equal { return ord; }
+            if ord != Ordering::Equal {
+                return ord;
+            }
         }
         // Prerelease: pre < stable
         match (&self.pre, &other.pre) {
@@ -100,7 +111,9 @@ impl Ord for RubyVersion {
 }
 
 pub fn is_version(input: &str) -> bool {
-    if input.is_empty() { return false; }
+    if input.is_empty() {
+        return false;
+    }
     RubyVersion::parse(input).is_some()
 }
 
@@ -109,11 +122,19 @@ pub fn get_major(input: &str) -> Option<i32> {
 }
 
 pub fn get_minor(input: &str) -> Option<i32> {
-    RubyVersion::parse(input)?.segs.get(1).copied().map(|v| v as i32)
+    RubyVersion::parse(input)?
+        .segs
+        .get(1)
+        .copied()
+        .map(|v| v as i32)
 }
 
 pub fn get_patch(input: &str) -> Option<i32> {
-    RubyVersion::parse(input)?.segs.get(2).copied().map(|v| v as i32)
+    RubyVersion::parse(input)?
+        .segs
+        .get(2)
+        .copied()
+        .map(|v| v as i32)
 }
 
 pub fn equals(a: &str, b: &str) -> bool {
@@ -158,9 +179,15 @@ fn parse_constraint(s: &str) -> Option<Constraint> {
         Regex::new(r"^(?<op>~>|[!<>]=?|=)?\s*(?<ver>v?[\d][0-9a-zA-Z._-]*)$").unwrap()
     });
     let s = s.trim();
-    if s.is_empty() { return None; }
+    if s.is_empty() {
+        return None;
+    }
     let caps = RE.captures(s)?;
-    let op = caps.name("op").map(|m| m.as_str()).unwrap_or("=").to_owned();
+    let op = caps
+        .name("op")
+        .map(|m| m.as_str())
+        .unwrap_or("=")
+        .to_owned();
     let ver_str = caps.name("ver")?.as_str();
     let ver = RubyVersion::parse(ver_str)?;
     let ver_segs = ver.segs.len();
@@ -168,7 +195,10 @@ fn parse_constraint(s: &str) -> Option<Constraint> {
 }
 
 fn parse_constraints(range: &str) -> Vec<Constraint> {
-    range.split(',').filter_map(|s| parse_constraint(s.trim())).collect()
+    range
+        .split(',')
+        .filter_map(|s| parse_constraint(s.trim()))
+        .collect()
 }
 
 fn satisfies_constraint(v: &RubyVersion, c: &Constraint) -> bool {
@@ -184,7 +214,9 @@ fn satisfies_constraint(v: &RubyVersion, c: &Constraint) -> bool {
             // ~> X → >= X, < X+1
             // ~> X.Y → >= X.Y, < X+1
             // ~> X.Y.Z → >= X.Y.Z, < X.Y+1
-            if *v < c.ver { return false; }
+            if *v < c.ver {
+                return false;
+            }
             if c.ver_segs == 1 {
                 v.seg(0) < c.ver.seg(0) + 1
             } else if c.ver_segs == 2 {
@@ -200,16 +232,22 @@ fn satisfies_constraint(v: &RubyVersion, c: &Constraint) -> bool {
 }
 
 pub fn matches(version: &str, range: &str) -> bool {
-    let Some(v) = RubyVersion::parse(version) else { return false; };
+    let Some(v) = RubyVersion::parse(version) else {
+        return false;
+    };
     let cs = parse_constraints(range);
-    if cs.is_empty() { return false; }
+    if cs.is_empty() {
+        return false;
+    }
     cs.iter().all(|c| satisfies_constraint(&v, c))
 }
 
 pub fn is_less_than_range(version: &str, range: &str) -> Option<bool> {
     let v = RubyVersion::parse(version)?;
     let cs = parse_constraints(range);
-    if cs.is_empty() { return Some(false); }
+    if cs.is_empty() {
+        return Some(false);
+    }
     // Mirror ltr() from range.ts:
     // For each constraint, check if version is "less than or at" the constraint's version.
     // GT/LT: version <= constraint_version (compare <= 0)
@@ -221,10 +259,15 @@ pub fn is_less_than_range(version: &str, range: &str) -> Option<bool> {
             ">=" | "<=" | "=" | "" | "!=" => v < c.ver,
             "~>" => {
                 // version < constraint AND version < bump of constraint
-                if v >= c.ver { return false; }
+                if v >= c.ver {
+                    return false;
+                }
                 // Also check that version <= bump (upper bound)
                 let bump = if c.ver_segs <= 1 {
-                    RubyVersion { segs: vec![c.ver.seg(0) + 1], pre: None }
+                    RubyVersion {
+                        segs: vec![c.ver.seg(0) + 1],
+                        pre: None,
+                    }
                 } else {
                     // bump penultimate segment
                     let mut segs = c.ver.segs[..c.ver_segs - 1].to_vec();
@@ -241,10 +284,15 @@ pub fn is_less_than_range(version: &str, range: &str) -> Option<bool> {
 
 pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
     let cs = parse_constraints(range);
-    let mut matches: Vec<(&'a str, RubyVersion)> = versions.iter()
+    let mut matches: Vec<(&'a str, RubyVersion)> = versions
+        .iter()
         .filter_map(|&v| {
             let rv = RubyVersion::parse(v)?;
-            if cs.iter().all(|c| satisfies_constraint(&rv, c)) { Some((v, rv)) } else { None }
+            if cs.iter().all(|c| satisfies_constraint(&rv, c)) {
+                Some((v, rv))
+            } else {
+                None
+            }
         })
         .collect();
     matches.sort_by(|a, b| a.1.cmp(&b.1));
@@ -253,10 +301,15 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
 
 pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
     let cs = parse_constraints(range);
-    let mut ms: Vec<(&'a str, RubyVersion)> = versions.iter()
+    let mut ms: Vec<(&'a str, RubyVersion)> = versions
+        .iter()
         .filter_map(|&v| {
             let rv = RubyVersion::parse(v)?;
-            if cs.iter().all(|c| satisfies_constraint(&rv, c)) { Some((v, rv)) } else { None }
+            if cs.iter().all(|c| satisfies_constraint(&rv, c)) {
+                Some((v, rv))
+            } else {
+                None
+            }
         })
         .collect();
     ms.sort_by(|a, b| a.1.cmp(&b.1));
@@ -265,7 +318,9 @@ pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
 
 pub fn is_valid(input: &str) -> bool {
     let s = input.trim();
-    if s.is_empty() { return false; }
+    if s.is_empty() {
+        return false;
+    }
     // All comma-separated parts must parse successfully
     let parts: Vec<&str> = s.split(',').map(|p| p.trim()).collect();
     let valid_ops = ["=", "!=", ">", ">=", "<", "<=", "~>", ""];
@@ -283,7 +338,9 @@ pub fn is_single_version(input: &str) -> bool {
         Regex::new(r"^(?:=\s*)?v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:[.-](.+))?$").unwrap()
     });
     let s = input.trim();
-    if s.is_empty() { return false; }
+    if s.is_empty() {
+        return false;
+    }
     RE.is_match(s)
 }
 
@@ -298,10 +355,24 @@ mod tests {
     // Ported: "equals(\"$a\", \"$b\") === $expected" — modules/versioning/ruby/index.spec.ts line 4
     #[test]
     fn ruby_equals_cases() {
-        let trues = [("1.0.0", "1"), ("1.2.0", "1.2"), ("1.2.0", "1.2.0"), ("1.0.0.rc1", "1.0.0.rc1")];
-        for (a, b) in trues { assert!(equals(a, b), "equals({a:?}, {b:?})"); }
-        let falses = [("1.2.0", "2"), ("1.2.0", "1.1"), ("1.2.0", "1.2.1"), ("1.0.0.rc1", "1.0.0.rc2")];
-        for (a, b) in falses { assert!(!equals(a, b), "!equals({a:?}, {b:?})"); }
+        let trues = [
+            ("1.0.0", "1"),
+            ("1.2.0", "1.2"),
+            ("1.2.0", "1.2.0"),
+            ("1.0.0.rc1", "1.0.0.rc1"),
+        ];
+        for (a, b) in trues {
+            assert!(equals(a, b), "equals({a:?}, {b:?})");
+        }
+        let falses = [
+            ("1.2.0", "2"),
+            ("1.2.0", "1.1"),
+            ("1.2.0", "1.2.1"),
+            ("1.0.0.rc1", "1.0.0.rc2"),
+        ];
+        for (a, b) in falses {
+            assert!(!equals(a, b), "!equals({a:?}, {b:?})");
+        }
     }
 
     // Ported: "getMajor, getMinor, getPatch for \"$version\"" — ruby/index.spec.ts line 21
@@ -324,10 +395,23 @@ mod tests {
     // Ported: "isVersion(\"$version\") === $expected" — ruby/index.spec.ts line 38
     #[test]
     fn ruby_is_version_cases() {
-        for v in ["0","v0","v1","v1.2","v1.2.3","1","1.1","1.1.2","1.1.2.3","1.1.2-4","1.1.2.pre.4","v1.1.2.pre.4"] {
+        for v in [
+            "0",
+            "v0",
+            "v1",
+            "v1.2",
+            "v1.2.3",
+            "1",
+            "1.1",
+            "1.1.2",
+            "1.1.2.3",
+            "1.1.2-4",
+            "1.1.2.pre.4",
+            "v1.1.2.pre.4",
+        ] {
             assert!(is_version(v), "is_version({v:?})");
         }
-        for v in ["","v","tottally-not-a-version"] {
+        for v in ["", "v", "tottally-not-a-version"] {
             assert!(!is_version(v), "!is_version({v:?})");
         }
     }
@@ -335,19 +419,37 @@ mod tests {
     // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — ruby/index.spec.ts line 62
     #[test]
     fn ruby_is_greater_than_cases() {
-        for (a,b) in [("2","1"),("2.2","2.1"),("2.2.1","2.2.0"),
-                      ("3.0.0.rc2","3.0.0.rc1"),("3.0.0-rc.2","3.0.0-rc.1"),
-                      ("3.0.0.rc1","3.0.0.beta"),("3.0.0-rc.1","3.0.0-beta"),
-                      ("3.0.0.beta","3.0.0.alpha"),("3.0.0-beta","3.0.0-alpha"),
-                      ("5.0.1.rc1","5.0.1.beta1"),("5.0.1-rc.1","5.0.1-beta.1")] {
+        for (a, b) in [
+            ("2", "1"),
+            ("2.2", "2.1"),
+            ("2.2.1", "2.2.0"),
+            ("3.0.0.rc2", "3.0.0.rc1"),
+            ("3.0.0-rc.2", "3.0.0-rc.1"),
+            ("3.0.0.rc1", "3.0.0.beta"),
+            ("3.0.0-rc.1", "3.0.0-beta"),
+            ("3.0.0.beta", "3.0.0.alpha"),
+            ("3.0.0-beta", "3.0.0-alpha"),
+            ("5.0.1.rc1", "5.0.1.beta1"),
+            ("5.0.1-rc.1", "5.0.1-beta.1"),
+        ] {
             assert!(is_greater_than(a, b), "{a:?} > {b:?}");
         }
-        for (a,b) in [("1","2"),("2.1","2.2"),("2.2.0","2.2.1"),
-                      ("3.0.0.rc1","3.0.0.rc2"),("3.0.0-rc.1","3.0.0-rc.2"),
-                      ("3.0.0.beta","3.0.0.rc1"),("3.0.0-beta","3.0.0-rc.1"),
-                      ("3.0.0.alpha","3.0.0.beta"),("3.0.0-alpha","3.0.0-beta"),
-                      ("5.0.1.beta1","5.0.1.rc1"),("5.0.1-beta.1","5.0.1-rc.1"),
-                      ("1","1"),("2.1","2.1"),("2.2.0","2.2.0")] {
+        for (a, b) in [
+            ("1", "2"),
+            ("2.1", "2.2"),
+            ("2.2.0", "2.2.1"),
+            ("3.0.0.rc1", "3.0.0.rc2"),
+            ("3.0.0-rc.1", "3.0.0-rc.2"),
+            ("3.0.0.beta", "3.0.0.rc1"),
+            ("3.0.0-beta", "3.0.0-rc.1"),
+            ("3.0.0.alpha", "3.0.0.beta"),
+            ("3.0.0-alpha", "3.0.0-beta"),
+            ("5.0.1.beta1", "5.0.1.rc1"),
+            ("5.0.1-beta.1", "5.0.1-rc.1"),
+            ("1", "1"),
+            ("2.1", "2.1"),
+            ("2.2.0", "2.2.0"),
+        ] {
             assert!(!is_greater_than(a, b), "!({a:?} > {b:?})");
         }
     }
@@ -355,28 +457,44 @@ mod tests {
     // Ported: "isStable(\"$version\") === $expected" — ruby/index.spec.ts line 106
     #[test]
     fn ruby_is_stable() {
-        for v in ["1","1.2","1.2.3"] { assert!(is_stable(v), "is_stable({v:?})"); }
-        for v in ["1.2.0.alpha","1.2.0.alpha1","1.2.0-alpha.1"] { assert!(!is_stable(v), "!is_stable({v:?})"); }
+        for v in ["1", "1.2", "1.2.3"] {
+            assert!(is_stable(v), "is_stable({v:?})");
+        }
+        for v in ["1.2.0.alpha", "1.2.0.alpha1", "1.2.0-alpha.1"] {
+            assert!(!is_stable(v), "!is_stable({v:?})");
+        }
     }
 
     // Ported: "$versions -> sortVersions -> $expected" — ruby/index.spec.ts line 122
     #[test]
     fn ruby_sort_versions() {
-        let mut v = vec!["1.2.3-beta","2.0.1","1.3.4","1.2.3"];
-        v.sort_by(|a,b| sort_versions(a,b));
-        assert_eq!(v, vec!["1.2.3-beta","1.2.3","1.3.4","2.0.1"]);
+        let mut v = vec!["1.2.3-beta", "2.0.1", "1.3.4", "1.2.3"];
+        v.sort_by(|a, b| sort_versions(a, b));
+        assert_eq!(v, vec!["1.2.3-beta", "1.2.3", "1.3.4", "2.0.1"]);
     }
 
     // Ported: "minSatisfyingVersion($versions, \"$range\") === \"$expected\"" — ruby/index.spec.ts line 129
     #[test]
     fn ruby_min_satisfying_version() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
-            (&["2.1.5","2.1.6"], "~> 2.1", Some("2.1.5")),
-            (&["2.1.6","2.1.5"], "~> 2.1.6", Some("2.1.6")),
-            (&["4.7.3","4.7.4","4.7.5","4.7.9"], "~> 4.7, >= 4.7.4", Some("4.7.4")),
-            (&["2.5.3","2.5.4","2.5.5","2.5.6"], "~>2.5.3", Some("2.5.3")),
-            (&["2.1.0","3.0.0.beta","2.3","3.0.0-rc.1","3.0.0","3.1.1"], "~> 3.0", Some("3.0.0")),
-            (&["1.2.3","1.2.4"], ">= 3.5.0", None),
+            (&["2.1.5", "2.1.6"], "~> 2.1", Some("2.1.5")),
+            (&["2.1.6", "2.1.5"], "~> 2.1.6", Some("2.1.6")),
+            (
+                &["4.7.3", "4.7.4", "4.7.5", "4.7.9"],
+                "~> 4.7, >= 4.7.4",
+                Some("4.7.4"),
+            ),
+            (
+                &["2.5.3", "2.5.4", "2.5.5", "2.5.6"],
+                "~>2.5.3",
+                Some("2.5.3"),
+            ),
+            (
+                &["2.1.0", "3.0.0.beta", "2.3", "3.0.0-rc.1", "3.0.0", "3.1.1"],
+                "~> 3.0",
+                Some("3.0.0"),
+            ),
+            (&["1.2.3", "1.2.4"], ">= 3.5.0", None),
         ];
         for (vs, r, exp) in cases {
             assert_eq!(min_satisfying_version(vs, r), *exp, "min({vs:?}, {r:?})");
@@ -387,12 +505,24 @@ mod tests {
     #[test]
     fn ruby_get_satisfying_version() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
-            (&["2.1.5","2.1.6"], "~> 2.1", Some("2.1.6")),
-            (&["2.1.6","2.1.5"], "~> 2.1.6", Some("2.1.6")),
-            (&["4.7.3","4.7.4","4.7.5","4.7.9"], "~> 4.7, >= 4.7.4", Some("4.7.9")),
-            (&["2.5.3","2.5.4","2.5.5","2.5.6"], "~>2.5.3", Some("2.5.6")),
-            (&["2.1.0","3.0.0.beta","2.3","3.0.0-rc.1","3.0.0","3.1.1"], "~> 3.0", Some("3.1.1")),
-            (&["1.2.3","1.2.4"], ">= 3.5.0", None),
+            (&["2.1.5", "2.1.6"], "~> 2.1", Some("2.1.6")),
+            (&["2.1.6", "2.1.5"], "~> 2.1.6", Some("2.1.6")),
+            (
+                &["4.7.3", "4.7.4", "4.7.5", "4.7.9"],
+                "~> 4.7, >= 4.7.4",
+                Some("4.7.9"),
+            ),
+            (
+                &["2.5.3", "2.5.4", "2.5.5", "2.5.6"],
+                "~>2.5.3",
+                Some("2.5.6"),
+            ),
+            (
+                &["2.1.0", "3.0.0.beta", "2.3", "3.0.0-rc.1", "3.0.0", "3.1.1"],
+                "~> 3.0",
+                Some("3.1.1"),
+            ),
+            (&["1.2.3", "1.2.4"], ">= 3.5.0", None),
         ];
         for (vs, r, exp) in cases {
             assert_eq!(get_satisfying_version(vs, r), *exp, "max({vs:?}, {r:?})");
@@ -402,10 +532,20 @@ mod tests {
     // Ported: "matches(\"$version\", \"$range\") === \"$expected\"" — ruby/index.spec.ts line 165
     #[test]
     fn ruby_matches() {
-        for (v,r) in [("1.2",">= 1.2"),("1.2.3","~> 1.2.1"),("1.2.7","1.2.7"),("1.1.6",">= 1.1.5, < 2.0")] {
+        for (v, r) in [
+            ("1.2", ">= 1.2"),
+            ("1.2.3", "~> 1.2.1"),
+            ("1.2.7", "1.2.7"),
+            ("1.1.6", ">= 1.1.5, < 2.0"),
+        ] {
             assert!(matches(v, r), "matches({v:?}, {r:?})");
         }
-        for (v,r) in [("1.2",">= 1.3"),("1.3.8","~> 1.2.1"),("1.3.9","1.3.8"),("2.0.0",">= 1.1.5, < 2.0")] {
+        for (v, r) in [
+            ("1.2", ">= 1.3"),
+            ("1.3.8", "~> 1.2.1"),
+            ("1.3.9", "1.3.8"),
+            ("2.0.0", ">= 1.1.5, < 2.0"),
+        ] {
             assert!(!matches(v, r), "!matches({v:?}, {r:?})");
         }
     }
@@ -432,17 +572,30 @@ mod tests {
     // Ported: "isValid(\"$version\") === $expected" (version form) — ruby/index.spec.ts line 209
     #[test]
     fn ruby_is_valid_version_form() {
-        for v in ["1","1.2","1.2.3"] { assert!(is_valid(v), "is_valid({v:?})"); }
-        for v in ["^1.2.3","~1.2.3","1.2.*","< 3.0, >= 1.0.0 <= 2.0.0"] { assert!(!is_valid(v), "!is_valid({v:?})"); }
+        for v in ["1", "1.2", "1.2.3"] {
+            assert!(is_valid(v), "is_valid({v:?})");
+        }
+        for v in ["^1.2.3", "~1.2.3", "1.2.*", "< 3.0, >= 1.0.0 <= 2.0.0"] {
+            assert!(!is_valid(v), "!is_valid({v:?})");
+        }
     }
 
     // Ported: "isValid(\"$version\") === $expected" (range form) — ruby/index.spec.ts line 224
     #[test]
     fn ruby_is_valid_range_form() {
-        for v in ["= 1","!= 1.1","> 1.1.2","< 1.0.0-beta",">= 1.0.0.beta","<= 1.2.0.alpha1","~> 1.2.0-alpha.1",">= 3.0.5, < 3.2"] {
+        for v in [
+            "= 1",
+            "!= 1.1",
+            "> 1.1.2",
+            "< 1.0.0-beta",
+            ">= 1.0.0.beta",
+            "<= 1.2.0.alpha1",
+            "~> 1.2.0-alpha.1",
+            ">= 3.0.5, < 3.2",
+        ] {
             assert!(is_valid(v), "is_valid({v:?})");
         }
-        for v in ["+ 1","- 1.1","=== 1.1.2","! 1.0.0-beta","& 1.0.0.beta"] {
+        for v in ["+ 1", "- 1.1", "=== 1.1.2", "! 1.0.0-beta", "& 1.0.0.beta"] {
             assert!(!is_valid(v), "!is_valid({v:?})");
         }
     }
@@ -450,10 +603,33 @@ mod tests {
     // Ported: "isSingleVersion(\"$version\") === $expected" — ruby/index.spec.ts line 247
     #[test]
     fn ruby_is_single_version() {
-        for v in ["1","1.2","1.2.1","=1","=1.2","=1.2.1","= 1","= 1.2","= 1.2.1","1.2.1.rc1","1.2.1-rc.1","= 1.2.0.alpha","= 1.2.0-alpha"] {
+        for v in [
+            "1",
+            "1.2",
+            "1.2.1",
+            "=1",
+            "=1.2",
+            "=1.2.1",
+            "= 1",
+            "= 1.2",
+            "= 1.2.1",
+            "1.2.1.rc1",
+            "1.2.1-rc.1",
+            "= 1.2.0.alpha",
+            "= 1.2.0-alpha",
+        ] {
             assert!(is_single_version(v), "is_single({v:?})");
         }
-        for v in ["!= 1","> 1.2","< 1.2.1",">= 1","<= 1.2","~> 1.2.1","","tottally-not-a-version"] {
+        for v in [
+            "!= 1",
+            "> 1.2",
+            "< 1.2.1",
+            ">= 1",
+            "<= 1.2",
+            "~> 1.2.1",
+            "",
+            "tottally-not-a-version",
+        ] {
             assert!(!is_single_version(v), "!is_single({v:?})");
         }
     }

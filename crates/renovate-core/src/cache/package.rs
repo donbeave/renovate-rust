@@ -1079,7 +1079,10 @@ mod tests {
         // The first-encountered pattern (determined by iteration) should win.
         // We verify the result is one of the two valid values.
         let res = get_ttl_override(&cfg, "datasource-docker");
-        assert!(res == Some(120) || res == Some(90), "expected 120 or 90, got {res:?}");
+        assert!(
+            res == Some(120) || res == Some(90),
+            "expected 120 or 90, got {res:?}"
+        );
     }
 
     // Ported: "handles empty string pattern" — util/cache/package/ttl.spec.ts line 271

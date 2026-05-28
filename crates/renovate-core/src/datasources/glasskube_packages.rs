@@ -87,7 +87,7 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let Some(versions): Option<VersionsYaml> = parse_yaml(&versions_text) else {
+    let Some(versions) = parse_yaml::<VersionsYaml>(&versions_text) else {
         return Ok(None);
     };
 
@@ -121,7 +121,7 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let Some(manifest): Option<PackageManifest> = parse_yaml(&manifest_text) else {
+    let Some(manifest) = parse_yaml::<PackageManifest>(&manifest_text) else {
         return Ok(None);
     };
 

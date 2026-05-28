@@ -45,9 +45,8 @@ static DIRECTIVE_LINE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Matches an `InstallTool(...)` or `InstallTools(...)` block (potentially multiline).
-static INSTALL_TOOLS_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?s)InstallTools?\s*\([^)]+\)\s*;").unwrap()
-});
+static INSTALL_TOOLS_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)InstallTools?\s*\([^)]+\)\s*;").unwrap());
 
 /// Matches a `"dotnet:..."` string inside an InstallTools block.
 static DOTNET_REF_RE: LazyLock<Regex> =
@@ -97,7 +96,11 @@ fn parse_dep_url(url_str: &str) -> Option<CakeDep> {
         .captures(url_str)
         .map(|c| c[1].trim_end_matches('/').to_owned())
         .unwrap_or_default();
-    Some(CakeDep { package_name, current_value, registry_url })
+    Some(CakeDep {
+        package_name,
+        current_value,
+        registry_url,
+    })
 }
 
 /// Extract Cake NuGet deps from a `.cake` or `.csx` file.
@@ -313,9 +316,13 @@ bar
 
         let multi_first = find("MultipleTools.Install.First").expect("MultipleTools.Install.First");
         assert_eq!(multi_first.current_value, "2.0.0");
-        assert_eq!(multi_first.registry_url, "https://api.nuget.org/v3/index.json");
+        assert_eq!(
+            multi_first.registry_url,
+            "https://api.nuget.org/v3/index.json"
+        );
 
-        let multi_second = find("MultipleTools.Install.Second").expect("MultipleTools.Install.Second");
+        let multi_second =
+            find("MultipleTools.Install.Second").expect("MultipleTools.Install.Second");
         assert_eq!(multi_second.current_value, "2.1.1");
 
         // Variable assignment outside InstallTool() should not be extracted

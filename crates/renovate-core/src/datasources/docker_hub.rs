@@ -438,7 +438,10 @@ mod tests {
     #[test]
     fn single_component_update_stays_single_component() {
         // "18" (1-component) should update to "20" (1-component), not "20.1" (2-component).
-        let tags: Vec<String> = ["18", "20", "20.1"].iter().map(|s| s.to_string()).collect();
+        let tags: Vec<String> = ["18", "20", "20.1"]
+            .iter()
+            .map(|s| (*s).to_owned())
+            .collect();
         let s = docker_update_summary("18", &tags);
         assert_eq!(s.latest.as_deref(), Some("20"));
         assert!(s.update_available);
@@ -469,7 +472,7 @@ mod tests {
             "21-alpine",
         ]
         .iter()
-        .map(|s| s.to_string())
+        .map(|s| (*s).to_owned())
         .collect();
         let s = docker_update_summary("18-alpine", &tags);
         // Only 1-component -alpine tags are compatible: 18, 20, 21 → latest is 21.
@@ -493,7 +496,10 @@ mod tests {
 
     #[test]
     fn latest_tag_produces_no_update() {
-        let tags: Vec<String> = ["latest", "22.04"].iter().map(|s| s.to_string()).collect();
+        let tags: Vec<String> = ["latest", "22.04"]
+            .iter()
+            .map(|s| (*s).to_owned())
+            .collect();
         let s = docker_update_summary("latest", &tags);
         assert!(s.latest.is_none());
         assert!(!s.update_available);
@@ -501,7 +507,10 @@ mod tests {
 
     #[test]
     fn already_latest_produces_no_update() {
-        let tags: Vec<String> = ["22.04", "22.04.1"].iter().map(|s| s.to_string()).collect();
+        let tags: Vec<String> = ["22.04", "22.04.1"]
+            .iter()
+            .map(|s| (*s).to_owned())
+            .collect();
         let s = docker_update_summary("22.04.1", &tags);
         assert!(!s.update_available);
     }

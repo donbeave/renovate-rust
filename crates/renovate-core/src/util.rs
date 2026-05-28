@@ -181,16 +181,24 @@ pub struct LookupStats {
 }
 
 impl LookupStats {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     /// Record a duration for a datasource.
     pub fn write(&mut self, datasource: &str, duration: i64) {
-        self.data.entry(datasource.to_owned()).or_default().push(duration);
+        self.data
+            .entry(datasource.to_owned())
+            .or_default()
+            .push(duration);
     }
 
     /// Generate the timing report for all datasources.
     pub fn get_report(&self) -> std::collections::HashMap<String, TimingReport> {
-        self.data.iter().map(|(k, v)| (k.clone(), make_timing_report(v))).collect()
+        self.data
+            .iter()
+            .map(|(k, v)| (k.clone(), make_timing_report(v)))
+            .collect()
     }
 }
 
@@ -204,11 +212,20 @@ pub struct PackageCacheStats {
 }
 
 impl PackageCacheStats {
-    pub fn new() -> Self { Self::default() }
-    pub fn write_get(&mut self, ms: i64) { self.gets.push(ms); }
-    pub fn write_set(&mut self, ms: i64) { self.sets.push(ms); }
+    pub fn new() -> Self {
+        Self::default()
+    }
+    pub fn write_get(&mut self, ms: i64) {
+        self.gets.push(ms);
+    }
+    pub fn write_set(&mut self, ms: i64) {
+        self.sets.push(ms);
+    }
     pub fn get_report(&self) -> (TimingReport, TimingReport) {
-        (make_timing_report(&self.gets), make_timing_report(&self.sets))
+        (
+            make_timing_report(&self.gets),
+            make_timing_report(&self.sets),
+        )
     }
 }
 
@@ -226,22 +243,54 @@ pub struct GetDatasourceReleasesStats {
 }
 
 impl GetDatasourceReleasesStats {
-    pub fn new() -> Self { Self::default() }
-    pub fn write(&mut self, datasource: &str, _registry_url: &str, _package_name: &str, duration: i64) {
-        self.data.push((datasource.to_owned(), String::new(), String::new(), duration));
+    pub fn new() -> Self {
+        Self::default()
     }
-    pub fn get_report(&self) -> (TimingReport, std::collections::HashMap<String, TimingReport>) {
+    pub fn write(
+        &mut self,
+        datasource: &str,
+        _registry_url: &str,
+        _package_name: &str,
+        duration: i64,
+    ) {
+        self.data.push((
+            datasource.to_owned(),
+            String::new(),
+            String::new(),
+            duration,
+        ));
+    }
+    pub fn get_report(
+        &self,
+    ) -> (
+        TimingReport,
+        std::collections::HashMap<String, TimingReport>,
+    ) {
         let all: Vec<i64> = self.data.iter().map(|(_, _, _, d)| *d).collect();
         let overall = make_timing_report(&all);
-        let mut by_ds: std::collections::HashMap<String, Vec<i64>> = std::collections::HashMap::new();
-        for (ds, _, _, d) in &self.data { by_ds.entry(ds.clone()).or_default().push(*d); }
-        (overall, by_ds.iter().map(|(k, v)| (k.clone(), make_timing_report(v))).collect())
+        let mut by_ds: std::collections::HashMap<String, Vec<i64>> =
+            std::collections::HashMap::new();
+        for (ds, _, _, d) in &self.data {
+            by_ds.entry(ds.clone()).or_default().push(*d);
+        }
+        (
+            overall,
+            by_ds
+                .iter()
+                .map(|(k, v)| (k.clone(), make_timing_report(v)))
+                .collect(),
+        )
     }
 }
 
 /// Datasource cache action type.
 #[derive(Debug, Clone, PartialEq)]
-pub enum DatasourceCacheAction { Hit, Miss, Set, Skip }
+pub enum DatasourceCacheAction {
+    Hit,
+    Miss,
+    Set,
+    Skip,
+}
 
 /// One datasource cache data point.
 #[derive(Debug, Clone)]
@@ -255,8 +304,21 @@ pub struct DatasourceCacheDataPoint {
 /// Aggregated short stats for a registry URL.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct DatasourceCacheShortStats {
-    pub hit: u32, pub miss: u32, pub set: u32, pub skip: u32,
+    pub hit: u32,
+    pub miss: u32,
+    pub set: u32,
+    pub skip: u32,
 }
+
+type DatasourceLongReport = std::collections::HashMap<
+    String,
+    std::collections::HashMap<
+        String,
+        std::collections::HashMap<String, (Option<&'static str>, Option<&'static str>)>,
+    >,
+>;
+type DatasourceShortReport =
+    std::collections::HashMap<String, std::collections::HashMap<String, DatasourceCacheShortStats>>;
 
 /// Accumulates datasource cache hit/miss/set/skip stats.
 ///
@@ -267,20 +329,32 @@ pub struct DatasourceCacheStats {
 }
 
 impl DatasourceCacheStats {
-    pub fn new() -> Self { Self::default() }
-    fn push(&mut self, ds: &str, reg: &str, pkg: &str, action: DatasourceCacheAction) {
-        self.data_points.push(DatasourceCacheDataPoint { datasource: ds.to_owned(), registry_url: reg.to_owned(), package_name: pkg.to_owned(), action });
+    pub fn new() -> Self {
+        Self::default()
     }
-    pub fn hit(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Hit); }
-    pub fn miss(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Miss); }
-    pub fn set(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Set); }
-    pub fn skip(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Skip); }
+    fn push(&mut self, ds: &str, reg: &str, pkg: &str, action: DatasourceCacheAction) {
+        self.data_points.push(DatasourceCacheDataPoint {
+            datasource: ds.to_owned(),
+            registry_url: reg.to_owned(),
+            package_name: pkg.to_owned(),
+            action,
+        });
+    }
+    pub fn hit(&mut self, ds: &str, reg: &str, pkg: &str) {
+        self.push(ds, reg, pkg, DatasourceCacheAction::Hit);
+    }
+    pub fn miss(&mut self, ds: &str, reg: &str, pkg: &str) {
+        self.push(ds, reg, pkg, DatasourceCacheAction::Miss);
+    }
+    pub fn set(&mut self, ds: &str, reg: &str, pkg: &str) {
+        self.push(ds, reg, pkg, DatasourceCacheAction::Set);
+    }
+    pub fn skip(&mut self, ds: &str, reg: &str, pkg: &str) {
+        self.push(ds, reg, pkg, DatasourceCacheAction::Skip);
+    }
 
     /// Returns (long report, short report).
-    pub fn get_report(&self) -> (
-        std::collections::HashMap<String, std::collections::HashMap<String, std::collections::HashMap<String, (Option<&'static str>, Option<&'static str>)>>>,
-        std::collections::HashMap<String, std::collections::HashMap<String, DatasourceCacheShortStats>>,
-    ) {
+    pub fn get_report(&self) -> (DatasourceLongReport, DatasourceShortReport) {
         let mut long = std::collections::HashMap::new();
         let mut short = std::collections::HashMap::new();
         for dp in &self.data_points {
@@ -290,11 +364,16 @@ impl DatasourceCacheStats {
                 DatasourceCacheAction::Set => (None, Some("set")),
                 DatasourceCacheAction::Skip => (None, Some("skip")),
             };
-            long.entry(dp.datasource.clone()).or_insert_with(std::collections::HashMap::new)
-                .entry(dp.registry_url.clone()).or_insert_with(std::collections::HashMap::new)
+            long.entry(dp.datasource.clone())
+                .or_insert_with(std::collections::HashMap::new)
+                .entry(dp.registry_url.clone())
+                .or_insert_with(std::collections::HashMap::new)
                 .insert(dp.package_name.clone(), (read, write));
-            let s = short.entry(dp.datasource.clone()).or_insert_with(std::collections::HashMap::new)
-                .entry(dp.registry_url.clone()).or_insert_with(DatasourceCacheShortStats::default);
+            let s = short
+                .entry(dp.datasource.clone())
+                .or_insert_with(std::collections::HashMap::new)
+                .entry(dp.registry_url.clone())
+                .or_insert_with(DatasourceCacheShortStats::default);
             match dp.action {
                 DatasourceCacheAction::Hit => s.hit += 1,
                 DatasourceCacheAction::Miss => s.miss += 1,
@@ -324,10 +403,14 @@ pub struct HttpCacheStats {
 }
 
 impl HttpCacheStats {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     fn get_base_url(url: &str) -> Option<String> {
-        if !url.contains("://") { return None; }
+        if !url.contains("://") {
+            return None;
+        }
         let after_scheme = url.split("://").nth(1)?;
         let host = after_scheme.split('/').next()?;
         let path = after_scheme.get(host.len()..)?.to_owned();
@@ -361,7 +444,9 @@ impl HttpCacheStats {
         }
     }
 
-    pub fn get_data(&self) -> &std::collections::HashMap<String, HttpCacheEntry> { &self.data }
+    pub fn get_data(&self) -> &std::collections::HashMap<String, HttpCacheEntry> {
+        &self.data
+    }
 }
 
 /// Accumulates abandoned-package data points.
@@ -373,18 +458,31 @@ pub struct AbandonedPackageStats {
 }
 
 impl AbandonedPackageStats {
-    pub fn new() -> Self { Self::default() }
-
-    pub fn write(&mut self, datasource: &str, package_name: &str, most_recent_timestamp: &str) {
-        self.entries.push((datasource.to_owned(), package_name.to_owned(), most_recent_timestamp.to_owned()));
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    pub fn get_data(&self) -> &[(String, String, String)] { &self.entries }
+    pub fn write(&mut self, datasource: &str, package_name: &str, most_recent_timestamp: &str) {
+        self.entries.push((
+            datasource.to_owned(),
+            package_name.to_owned(),
+            most_recent_timestamp.to_owned(),
+        ));
+    }
 
-    pub fn get_report(&self) -> std::collections::HashMap<String, std::collections::HashMap<String, String>> {
+    pub fn get_data(&self) -> &[(String, String, String)] {
+        &self.entries
+    }
+
+    pub fn get_report(
+        &self,
+    ) -> std::collections::HashMap<String, std::collections::HashMap<String, String>> {
         let mut report = std::collections::HashMap::new();
         for (ds, pkg, ts) in &self.entries {
-            report.entry(ds.clone()).or_insert_with(std::collections::HashMap::new).insert(pkg.clone(), ts.clone());
+            report
+                .entry(ds.clone())
+                .or_insert_with(std::collections::HashMap::new)
+                .insert(pkg.clone(), ts.clone());
         }
         report
     }
@@ -409,7 +507,10 @@ pub struct HttpStatsReport {
     /// host → aggregated timing stats
     pub hosts: std::collections::HashMap<String, HttpHostStats>,
     /// method+url+status counts
-    pub urls: std::collections::HashMap<String, std::collections::HashMap<String, std::collections::HashMap<u32, usize>>>,
+    pub urls: std::collections::HashMap<
+        String,
+        std::collections::HashMap<String, std::collections::HashMap<u32, usize>>,
+    >,
     /// raw request strings
     pub raw_requests: Vec<String>,
 }
@@ -435,19 +536,25 @@ pub struct HttpStats {
 }
 
 impl HttpStats {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn write(&mut self, method: &str, url: &str, req_ms: i64, queue_ms: i64, status: u32) {
         self.data_points.push(HttpRequestDataPoint {
             method: method.to_owned(),
             url: url.to_owned(),
-            req_ms, queue_ms, status,
+            req_ms,
+            queue_ms,
+            status,
         });
     }
 
     pub fn get_report(&self) -> HttpStatsReport {
-        let mut report = HttpStatsReport::default();
-        report.requests = self.data_points.len();
+        let mut report = HttpStatsReport {
+            requests: self.data_points.len(),
+            ..HttpStatsReport::default()
+        };
         let mut sorted = self.data_points.clone();
         sorted.sort_by(|a, b| a.url.cmp(&b.url));
 
@@ -455,7 +562,11 @@ impl HttpStats {
             let method = dp.method.to_uppercase();
             // Parse URL hostname
             let hostname = parse_hostname(&dp.url).unwrap_or_default();
-            let origin_path = format!("{}/{}", parse_origin(&dp.url).unwrap_or_default(), parse_path(&dp.url).unwrap_or_default());
+            let origin_path = format!(
+                "{}/{}",
+                parse_origin(&dp.url).unwrap_or_default(),
+                parse_path(&dp.url).unwrap_or_default()
+            );
 
             // urls tracking
             let url_entry = report.urls.entry(origin_path.clone()).or_default();
@@ -463,10 +574,17 @@ impl HttpStats {
             *method_entry.entry(dp.status).or_default() += 1;
 
             // rawRequests
-            report.raw_requests.push(format!("{} {} {} {} {}", method, dp.url, dp.status, dp.req_ms, dp.queue_ms));
+            report.raw_requests.push(format!(
+                "{} {} {} {} {}",
+                method, dp.url, dp.status, dp.req_ms, dp.queue_ms
+            ));
 
             // hostRequests
-            report.host_requests.entry(hostname.clone()).or_default().push(dp.clone());
+            report
+                .host_requests
+                .entry(hostname.clone())
+                .or_default()
+                .push(dp.clone());
         }
 
         for (hostname, dps) in &report.host_requests {
@@ -475,15 +593,18 @@ impl HttpStats {
             let queue_times: Vec<i64> = dps.iter().map(|d| d.queue_ms).collect();
             let req_report = make_timing_report(&req_times);
             let queue_report = make_timing_report(&queue_times);
-            report.hosts.insert(hostname.clone(), HttpHostStats {
-                count,
-                req_avg_ms: req_report.avg_ms,
-                req_median_ms: req_report.median_ms,
-                req_max_ms: req_report.max_ms,
-                queue_avg_ms: queue_report.avg_ms,
-                queue_median_ms: queue_report.median_ms,
-                queue_max_ms: queue_report.max_ms,
-            });
+            report.hosts.insert(
+                hostname.clone(),
+                HttpHostStats {
+                    count,
+                    req_avg_ms: req_report.avg_ms,
+                    req_median_ms: req_report.median_ms,
+                    req_max_ms: req_report.max_ms,
+                    queue_avg_ms: queue_report.avg_ms,
+                    queue_median_ms: queue_report.median_ms,
+                    queue_max_ms: queue_report.max_ms,
+                },
+            );
         }
 
         report
@@ -886,7 +1007,11 @@ pub fn changelog_get_base_url(source_url: Option<&str>) -> String {
         Ok(parsed) => {
             let scheme = parsed.scheme();
             let host = parsed.host_str().unwrap_or("");
-            if host.is_empty() { String::new() } else { format!("{scheme}://{host}/") }
+            if host.is_empty() {
+                String::new()
+            } else {
+                format!("{scheme}://{host}/")
+            }
         }
         Err(_) => String::new(),
     }
@@ -945,16 +1070,22 @@ pub fn parse_goproxy(input: &str) -> Vec<GoproxyItem> {
     let mut remaining = input;
     while !remaining.is_empty() {
         // Find next separator (comma or pipe)
-        let pos = remaining.find(|c| c == ',' || c == '|');
+        let pos = remaining.find([',', '|']);
         match pos {
             None => {
-                items.push(GoproxyItem { url: remaining.to_owned(), fallback: None });
+                items.push(GoproxyItem {
+                    url: remaining.to_owned(),
+                    fallback: None,
+                });
                 break;
             }
             Some(i) => {
                 let url = &remaining[..i];
                 let sep = remaining.chars().nth(i).unwrap();
-                items.push(GoproxyItem { url: url.to_owned(), fallback: Some(sep) });
+                items.push(GoproxyItem {
+                    url: url.to_owned(),
+                    fallback: Some(sep),
+                });
                 remaining = &remaining[i + 1..];
             }
         }
@@ -1064,6 +1195,7 @@ pub struct GithubReleaseItem {
 /// - `isDraft` is `true`
 ///
 /// Mirrors `releases-query-adapter.ts` → `transform()`.
+#[expect(clippy::too_many_arguments)]
 pub fn transform_github_release(
     version: Option<&str>,
     release_timestamp: Option<&str>,
@@ -1133,34 +1265,45 @@ pub struct GithubTagItem {
 /// Target type for a tag commit reference.
 #[derive(Debug)]
 pub enum GithubTagTarget<'a> {
-    Commit { oid: &'a str, release_timestamp: &'a str },
-    Tag { tagger_timestamp: &'a str, nested_oid: &'a str },
+    Commit {
+        oid: &'a str,
+        release_timestamp: &'a str,
+    },
+    Tag {
+        tagger_timestamp: &'a str,
+        nested_oid: &'a str,
+    },
 }
 
 /// Transform a raw GitHub GraphQL tag node into a `GithubTagItem`.
 ///
 /// Returns `None` for unknown target types or missing required fields.
 /// Mirrors `tags-query-adapter.ts` → `transform()`.
-pub fn transform_github_tag(version: Option<&str>, target: Option<GithubTagTarget<'_>>) -> Option<GithubTagItem> {
+pub fn transform_github_tag(
+    version: Option<&str>,
+    target: Option<GithubTagTarget<'_>>,
+) -> Option<GithubTagItem> {
     let version = version.filter(|s| !s.is_empty())?;
     let target = target?;
     match target {
-        GithubTagTarget::Commit { oid, release_timestamp } => {
-            Some(GithubTagItem {
-                version: version.to_owned(),
-                git_ref: version.to_owned(),
-                hash: oid.to_owned(),
-                release_timestamp: release_timestamp.to_owned(),
-            })
-        }
-        GithubTagTarget::Tag { tagger_timestamp, nested_oid } => {
-            Some(GithubTagItem {
-                version: version.to_owned(),
-                git_ref: version.to_owned(),
-                hash: nested_oid.to_owned(),
-                release_timestamp: tagger_timestamp.to_owned(),
-            })
-        }
+        GithubTagTarget::Commit {
+            oid,
+            release_timestamp,
+        } => Some(GithubTagItem {
+            version: version.to_owned(),
+            git_ref: version.to_owned(),
+            hash: oid.to_owned(),
+            release_timestamp: release_timestamp.to_owned(),
+        }),
+        GithubTagTarget::Tag {
+            tagger_timestamp,
+            nested_oid,
+        } => Some(GithubTagItem {
+            version: version.to_owned(),
+            git_ref: version.to_owned(),
+            hash: nested_oid.to_owned(),
+            release_timestamp: tagger_timestamp.to_owned(),
+        }),
     }
 }
 
@@ -1260,13 +1403,11 @@ pub fn calculate_most_recent_timestamp<'a>(
 
     // Check if any release has a NEWER timestamp than highest version's timestamp
     let higher_exists = releases.iter().any(|r| {
-        let ts = match as_timestamp(r.release_timestamp) {
-            Some(s) => s,
-            None => return false,
+        let Some(ts) = as_timestamp(r.release_timestamp) else {
+            return false;
         };
-        let dt = match chrono::DateTime::parse_from_rfc3339(ts) {
-            Ok(d) => d,
-            Err(_) => return false,
+        let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) else {
+            return false;
         };
         dt > highest_dt
     });
@@ -1284,13 +1425,13 @@ pub fn calculate_most_recent_timestamp<'a>(
 
 static GIT_PREFIX_RE: std::sync::LazyLock<regex::Regex> =
     std::sync::LazyLock::new(|| regex::Regex::new(r"^git:/?/?").unwrap());
-static GITHUB_PAGES_RE: std::sync::LazyLock<regex::Regex> =
-    std::sync::LazyLock::new(|| regex::Regex::new(r"^https://([^.]+)\.github\.com/([^/]+)$").unwrap());
+static GITHUB_PAGES_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+    regex::Regex::new(r"^https://([^.]+)\.github\.com/([^/]+)$").unwrap()
+});
 
 fn massage_git_at_url(url: &str) -> String {
-    if url.starts_with("git@") {
+    if let Some(without_prefix) = url.strip_prefix("git@") {
         // git@host:owner/repo → https://host/owner/repo
-        let without_prefix = &url[4..]; // strip "git@"
         if let Some(colon_pos) = without_prefix.find(':') {
             let host = &without_prefix[..colon_pos];
             let path = &without_prefix[colon_pos + 1..];
@@ -1310,7 +1451,9 @@ pub fn massage_github_url(url: &str) -> String {
     s = s.replace("https+git:", "https:");
     s = s.replace("ssh://git@", "https://");
     s = GIT_PREFIX_RE.replace(&s, "https://").into_owned();
-    s = GITHUB_PAGES_RE.replace(&s, "https://github.com/$1/$2").into_owned();
+    s = GITHUB_PAGES_RE
+        .replace(&s, "https://github.com/$1/$2")
+        .into_owned();
     s = s.replace("www.github.com", "github.com");
     // keep only first 5 path segments
     let parts: Vec<&str> = s.splitn(6, '/').collect();
@@ -1394,6 +1537,55 @@ fn extract_url_path(url: &str) -> &str {
 }
 
 // ---------------------------------------------------------------------------
+// Bitbucket Server utilities — lib/modules/platform/bitbucket-server/utils.ts
+// ---------------------------------------------------------------------------
+
+pub const BITBUCKET_INVALID_REVIEWERS_EXCEPTION: &str =
+    "com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException";
+
+/// One Bitbucket reviewer error entry.
+#[derive(Debug, Clone)]
+pub struct BitbucketReviewerError {
+    pub context: Option<String>,
+}
+
+/// One Bitbucket error entry.
+#[derive(Debug, Clone)]
+pub struct BitbucketErrorEntry {
+    pub exception_name: Option<String>,
+    pub reviewer_errors: Vec<BitbucketReviewerError>,
+}
+
+/// Extract invalid reviewer names from a Bitbucket error.
+///
+/// Mirrors `getInvalidReviewers()` from `lib/modules/platform/bitbucket-server/utils.ts`.
+pub fn get_invalid_reviewers(errors: &[BitbucketErrorEntry]) -> Vec<String> {
+    let mut result = Vec::new();
+    for err in errors {
+        if err.exception_name.as_deref() == Some(BITBUCKET_INVALID_REVIEWERS_EXCEPTION) {
+            for re in &err.reviewer_errors {
+                if let Some(ctx) = &re.context
+                    && !ctx.is_empty()
+                {
+                    result.push(ctx.clone());
+                }
+            }
+        }
+    }
+    result
+}
+
+/// Get the git `-c` option value for Bitbucket Server bearer token auth.
+///
+/// Returns `None` if no token provided.
+/// Mirrors `getExtraCloneOpts()` from `lib/modules/platform/bitbucket-server/utils.ts`.
+pub fn get_extra_clone_opts_value(token: Option<&str>) -> Option<String> {
+    token
+        .filter(|t| !t.is_empty())
+        .map(|t| format!("http.extraHeader=Authorization: Bearer {}", t))
+}
+
+// ---------------------------------------------------------------------------
 // S3 URL parsing — lib/util/s3.ts
 // ---------------------------------------------------------------------------
 
@@ -1425,7 +1617,10 @@ pub fn parse_s3_url(raw_url: &str) -> Option<S3UrlParts> {
         None => "",
         Some(i) => &after_scheme[i + 1..],
     };
-    Some(S3UrlParts { bucket: bucket.to_owned(), key: key.to_owned() })
+    Some(S3UrlParts {
+        bucket: bucket.to_owned(),
+        key: key.to_owned(),
+    })
 }
 
 // ---------------------------------------------------------------------------
@@ -1445,7 +1640,11 @@ pub struct LocalPlatformResult {
 ///
 /// Mirrors `initPlatform()` from `lib/modules/platform/local/index.ts`.
 pub fn local_init_platform(dry_run: Option<&str>) -> LocalPlatformResult {
-    let dry_run_val = if dry_run == Some("extract") { "extract" } else { "lookup" };
+    let dry_run_val = if dry_run == Some("extract") {
+        "extract"
+    } else {
+        "lookup"
+    };
     LocalPlatformResult {
         dry_run: dry_run_val.to_owned(),
         endpoint: "local".to_owned(),
@@ -1466,7 +1665,11 @@ pub struct LocalRepoResult {
 ///
 /// Mirrors `initRepo()` from `lib/modules/platform/local/index.ts`.
 pub fn local_init_repo() -> LocalRepoResult {
-    LocalRepoResult { default_branch: String::new(), is_fork: false, repo_fingerprint: String::new() }
+    LocalRepoResult {
+        default_branch: String::new(),
+        is_fork: false,
+        repo_fingerprint: String::new(),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1489,7 +1692,13 @@ pub struct BunyanRecord<'a> {
 impl<'a> BunyanRecord<'a> {
     fn meta_pairs(&self) -> Vec<String> {
         let mut pairs = Vec::new();
-        macro_rules! push_if { ($field:expr, $name:literal) => { if let Some(v) = $field { pairs.push(format!("{}={}", $name, v)); } }; }
+        macro_rules! push_if {
+            ($field:expr, $name:literal) => {
+                if let Some(v) = $field {
+                    pairs.push(format!("{}={}", $name, v));
+                }
+            };
+        }
         push_if!(self.repository, "repository");
         push_if!(self.base_branch, "baseBranch");
         push_if!(self.package_file, "packageFile");
@@ -1505,12 +1714,20 @@ impl<'a> BunyanRecord<'a> {
 ///
 /// Mirrors `getMeta()` from `lib/logger/pretty-stdout.ts`.
 pub fn get_meta(rec: Option<&BunyanRecord<'_>>, colorize: bool) -> String {
-    let Some(rec) = rec else { return String::new(); };
+    let Some(rec) = rec else {
+        return String::new();
+    };
     let module_part = rec.module.map(|m| format!(" [{}]", m)).unwrap_or_default();
     let meta_pairs = rec.meta_pairs();
-    if meta_pairs.is_empty() { return module_part; }
+    if meta_pairs.is_empty() {
+        return module_part;
+    }
     let plain = format!(" ({}){}", meta_pairs.join(", "), module_part);
-    if colorize { format!("\x1b[90m{}\x1b[0m", plain) } else { plain }
+    if colorize {
+        format!("\x1b[90m{}\x1b[0m", plain)
+    } else {
+        plain
+    }
 }
 
 /// Indent a multi-line string with 7-space prefix.
@@ -1573,51 +1790,64 @@ pub fn apply_version_compatibility(
         None | Some("") => return releases,
         Some(p) => p,
     };
-    let re = match regex::Regex::new(pattern) {
-        Ok(r) => r,
-        Err(_) => return releases,
+    let Ok(re) = regex::Regex::new(pattern) else {
+        return releases;
     };
-    releases.into_iter().filter_map(|mut r| {
-        let caps = re.captures(&r.version)?;
-        let version = caps.name("version")?.as_str().to_owned();
-        let compatibility = caps.name("compatibility").map(|m| m.as_str());
-        if compatibility != current_compatibility {
-            return None;
-        }
-        if r.version_orig.is_none() {
-            r.version_orig = Some(r.version.clone());
-        }
-        r.version = version;
-        Some(r)
-    }).collect()
+    releases
+        .into_iter()
+        .filter_map(|mut r| {
+            let caps = re.captures(&r.version)?;
+            let version = caps.name("version")?.as_str().to_owned();
+            let compatibility = caps.name("compatibility").map(|m| m.as_str());
+            if compatibility != current_compatibility {
+                return None;
+            }
+            if r.version_orig.is_none() {
+                r.version_orig = Some(r.version.clone());
+            }
+            r.version = version;
+            Some(r)
+        })
+        .collect()
 }
 
 /// Apply an `extractVersion` regex to a list of releases.
 ///
 /// Mirrors `applyExtractVersion()` from `lib/modules/datasource/common.ts`.
-pub fn apply_extract_version(releases: Vec<DatasourceRelease>, extract_version: Option<&str>) -> Vec<DatasourceRelease> {
+pub fn apply_extract_version(
+    releases: Vec<DatasourceRelease>,
+    extract_version: Option<&str>,
+) -> Vec<DatasourceRelease> {
     let pattern = match extract_version {
         None | Some("") => return releases,
         Some(p) => p,
     };
-    let re = match regex::Regex::new(pattern) {
-        Ok(r) => r,
-        Err(_) => return releases,
+    let Ok(re) = regex::Regex::new(pattern) else {
+        return releases;
     };
-    releases.into_iter().filter_map(|mut r| {
-        let caps = re.captures(&r.version)?;
-        let extracted = caps.name("version")?.as_str().to_owned();
-        r.version_orig = Some(r.version.clone());
-        r.version = extracted;
-        Some(r)
-    }).collect()
+    releases
+        .into_iter()
+        .filter_map(|mut r| {
+            let caps = re.captures(&r.version)?;
+            let extracted = caps.name("version")?.as_str().to_owned();
+            r.version_orig = Some(r.version.clone());
+            r.version = extracted;
+            Some(r)
+        })
+        .collect()
 }
 
 /// Filter releases to only those where `is_version(version)` returns true.
 ///
 /// Mirrors `filterValidVersions()` from `lib/modules/datasource/common.ts`.
-pub fn filter_valid_versions(releases: Vec<DatasourceRelease>, is_version: impl Fn(&str) -> bool) -> Vec<DatasourceRelease> {
-    releases.into_iter().filter(|r| is_version(&r.version)).collect()
+pub fn filter_valid_versions(
+    releases: Vec<DatasourceRelease>,
+    is_version: impl Fn(&str) -> bool,
+) -> Vec<DatasourceRelease> {
+    releases
+        .into_iter()
+        .filter(|r| is_version(&r.version))
+        .collect()
 }
 
 /// Sort releases and remove consecutive duplicates.
@@ -1680,6 +1910,7 @@ fn schedule_to_string(schedule: Option<&[String]>, _timezone: Option<&str>) -> S
 ///
 /// Mirrors `getPrConfigDescription()` from
 /// `lib/workers/repository/update/pr/body/config-description.ts`.
+#[expect(clippy::too_many_arguments)]
 pub fn get_pr_config_description(
     schedule: Option<&[String]>,
     automerge_schedule: Option<&[String]>,
@@ -1700,8 +1931,14 @@ pub fn get_pr_config_description(
         body.push_str("(UTC)");
     }
     body.push_str("\n\n");
-    body.push_str(&format!("- Branch creation\n{}\n", schedule_to_string(schedule, timezone)));
-    body.push_str(&format!("- Automerge\n{}\n", schedule_to_string(automerge_schedule, timezone)));
+    body.push_str(&format!(
+        "- Branch creation\n{}\n",
+        schedule_to_string(schedule, timezone)
+    ));
+    body.push_str(&format!(
+        "- Automerge\n{}\n",
+        schedule_to_string(automerge_schedule, timezone)
+    ));
     body.push_str("\n\n");
     body.push_str(&emojify_simple(":vertical_traffic_light: **Automerge**: "));
     if automerge {
@@ -1728,7 +1965,11 @@ pub fn get_pr_config_description(
             help
         )));
     } else {
-        let upd = if upgrades_count == 1 { "this update" } else { "these updates" };
+        let upd = if upgrades_count == 1 {
+            "this update"
+        } else {
+            "these updates"
+        };
         body.push_str(&emojify_simple(&format!(
             ":no_bell: **Ignore**: Close this PR and you won't be reminded about {} again.\n\n",
             upd
@@ -1841,7 +2082,10 @@ pub fn get_dep_warnings_pr(
         } else {
             "Dependency Dashboard".to_owned()
         };
-        out.push_str(&format!("Check the {} for more information.\n\n", dep_dash_link));
+        out.push_str(&format!(
+            "Check the {} for more information.\n\n",
+            dep_dash_link
+        ));
     } else {
         out.push_str("Check the warning logs for more information.\n\n");
     }
@@ -1863,10 +2107,9 @@ pub fn get_dep_warnings_dashboard(
         return String::new();
     }
     // Strip "Failed to look up X dependency " prefixes
-    static STRIP_PREFIX_RE: std::sync::LazyLock<regex::Regex> =
-        std::sync::LazyLock::new(|| {
-            regex::Regex::new(r"^Failed to look up(?: [-\w]+)? dependency ").unwrap()
-        });
+    static STRIP_PREFIX_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r"^Failed to look up(?: [-\w]+)? dependency ").unwrap()
+    });
     let dep_list: Vec<String> = warnings
         .iter()
         .map(|w| format!("`{}`", STRIP_PREFIX_RE.replace(w, "")))
@@ -1900,7 +2143,10 @@ pub fn get_dep_warnings_onboarding_pr(
         out.push_str(&format!("> -   `{}`\n", w));
     }
     let files_list: Vec<String> = warning_files.iter().map(|f| format!("`{}`", f)).collect();
-    out.push_str(&format!(">\n> Files affected: {}\n\n", files_list.join(", ")));
+    out.push_str(&format!(
+        ">\n> Files affected: {}\n\n",
+        files_list.join(", ")
+    ));
     out
 }
 
@@ -1982,7 +2228,11 @@ pub fn get_expected_pr_list(
             let text = if upg.update_type == "lockFileMaintenance" {
                 "  - Regenerate lock files to use latest dependency versions".to_owned()
             } else {
-                let action = if upg.update_type == "pin" { "Pin" } else { "Upgrade" };
+                let action = if upg.update_type == "pin" {
+                    "Pin"
+                } else {
+                    "Upgrade"
+                };
                 let dep = if let Some(url) = upg.source_url {
                     format!("[{}]({})", upg.dep_name, url)
                 } else {
@@ -2045,10 +2295,7 @@ pub fn prepare_labels(labels: &[&str], add_labels: &[&str]) -> Vec<String> {
 /// `old_labels` to `new_labels`.
 ///
 /// Mirrors `getChangedLabels` from `lib/workers/repository/update/pr/labels.ts`.
-pub fn get_changed_labels(
-    old_labels: &[&str],
-    new_labels: &[&str],
-) -> (Vec<String>, Vec<String>) {
+pub fn get_changed_labels(old_labels: &[&str], new_labels: &[&str]) -> (Vec<String>, Vec<String>) {
     let to_add: Vec<String> = new_labels
         .iter()
         .filter(|l| !old_labels.contains(l))
@@ -4365,13 +4612,57 @@ mod tests {
         stats.set("npm", "https://baz.example.com", "baz");
         stats.skip("rubygems", "https://qux.example.com", "qux");
         let (long, short) = stats.get_report();
-        assert_eq!(short.get("crate").unwrap().get("https://foo.example.com").unwrap().hit, 1);
-        assert_eq!(short.get("maven").unwrap().get("https://bar.example.com").unwrap().miss, 1);
-        assert_eq!(short.get("npm").unwrap().get("https://baz.example.com").unwrap().set, 1);
-        assert_eq!(short.get("rubygems").unwrap().get("https://qux.example.com").unwrap().skip, 1);
-        let crate_long = long.get("crate").unwrap().get("https://foo.example.com").unwrap().get("foo").unwrap();
+        assert_eq!(
+            short
+                .get("crate")
+                .unwrap()
+                .get("https://foo.example.com")
+                .unwrap()
+                .hit,
+            1
+        );
+        assert_eq!(
+            short
+                .get("maven")
+                .unwrap()
+                .get("https://bar.example.com")
+                .unwrap()
+                .miss,
+            1
+        );
+        assert_eq!(
+            short
+                .get("npm")
+                .unwrap()
+                .get("https://baz.example.com")
+                .unwrap()
+                .set,
+            1
+        );
+        assert_eq!(
+            short
+                .get("rubygems")
+                .unwrap()
+                .get("https://qux.example.com")
+                .unwrap()
+                .skip,
+            1
+        );
+        let crate_long = long
+            .get("crate")
+            .unwrap()
+            .get("https://foo.example.com")
+            .unwrap()
+            .get("foo")
+            .unwrap();
         assert_eq!(crate_long.0, Some("hit"));
-        let npm_long = long.get("npm").unwrap().get("https://baz.example.com").unwrap().get("baz").unwrap();
+        let npm_long = long
+            .get("npm")
+            .unwrap()
+            .get("https://baz.example.com")
+            .unwrap()
+            .get("baz")
+            .unwrap();
         assert_eq!(npm_long.1, Some("set"));
     }
 
@@ -4422,19 +4713,30 @@ mod tests {
     fn test_package_cache_stats_empty_report() {
         let stats = PackageCacheStats::new();
         let (get, set) = stats.get_report();
-        assert_eq!(get.count, 0); assert_eq!(get.avg_ms, 0);
-        assert_eq!(set.count, 0); assert_eq!(set.avg_ms, 0);
+        assert_eq!(get.count, 0);
+        assert_eq!(get.avg_ms, 0);
+        assert_eq!(set.count, 0);
+        assert_eq!(set.avg_ms, 0);
     }
 
     // Ported: "writes data points" — util/stats.spec.ts line 586
     #[test]
     fn test_package_cache_stats_writes_data_points() {
         let mut stats = PackageCacheStats::new();
-        stats.write_get(100); stats.write_get(200); stats.write_get(400);
+        stats.write_get(100);
+        stats.write_get(200);
+        stats.write_get(400);
         stats.write_set(1000);
         let (get, set) = stats.get_report();
-        assert_eq!(get.count, 3); assert_eq!(get.avg_ms, 233); assert_eq!(get.max_ms, 400); assert_eq!(get.median_ms, 200); assert_eq!(get.total_ms, 700);
-        assert_eq!(set.count, 1); assert_eq!(set.avg_ms, 1000); assert_eq!(set.max_ms, 1000); assert_eq!(set.total_ms, 1000);
+        assert_eq!(get.count, 3);
+        assert_eq!(get.avg_ms, 233);
+        assert_eq!(get.max_ms, 400);
+        assert_eq!(get.median_ms, 200);
+        assert_eq!(get.total_ms, 700);
+        assert_eq!(set.count, 1);
+        assert_eq!(set.avg_ms, 1000);
+        assert_eq!(set.max_ms, 1000);
+        assert_eq!(set.total_ms, 1000);
     }
 
     // ── AbandonedPackageStats ─────────────────────────────────────────────────
@@ -4455,7 +4757,14 @@ mod tests {
         stats.write("docker", "image1", "2023-03-01T00:00:00.000Z");
         let data = stats.get_data();
         assert_eq!(data.len(), 3);
-        assert_eq!(data[0], ("npm".to_owned(), "package1".to_owned(), "2023-01-01T00:00:00.000Z".to_owned()));
+        assert_eq!(
+            data[0],
+            (
+                "npm".to_owned(),
+                "package1".to_owned(),
+                "2023-01-01T00:00:00.000Z".to_owned()
+            )
+        );
         let report = stats.get_report();
         let npm = report.get("npm").unwrap();
         assert_eq!(npm.get("package1").unwrap(), "2023-01-01T00:00:00.000Z");
@@ -4482,9 +4791,12 @@ mod tests {
         stats.write("push", 50000);
         let report = stats.get_report();
         let pull = report.get("pull").unwrap();
-        assert_eq!(pull.count, 1); assert_eq!(pull.avg_ms, 1000);
+        assert_eq!(pull.count, 1);
+        assert_eq!(pull.avg_ms, 1000);
         let push = report.get("push").unwrap();
-        assert_eq!(push.count, 2); assert_eq!(push.total_ms, 50100); assert_eq!(push.max_ms, 50000);
+        assert_eq!(push.count, 2);
+        assert_eq!(push.total_ms, 50100);
+        assert_eq!(push.max_ms, 50000);
     }
 
     // ── GetDatasourceReleasesStats ────────────────────────────────────────────
@@ -4494,7 +4806,9 @@ mod tests {
     fn test_get_datasource_releases_stats_empty() {
         let stats = GetDatasourceReleasesStats::new();
         let (overall, ds) = stats.get_report();
-        assert_eq!(overall.count, 0); assert_eq!(overall.avg_ms, 0); assert!(ds.is_empty());
+        assert_eq!(overall.count, 0);
+        assert_eq!(overall.avg_ms, 0);
+        assert!(ds.is_empty());
     }
 
     // Ported: "writes data points" — util/stats.spec.ts line 166
@@ -5395,8 +5709,14 @@ mod tests {
             .iter()
             .map(|id| format!("manager:{}", id))
             .collect();
-        assert!(label_names.contains("manager:jsonata"), "should contain manager:jsonata");
-        assert!(label_names.contains("manager:helm-values"), "should contain manager:helm-values");
+        assert!(
+            label_names.contains("manager:jsonata"),
+            "should contain manager:jsonata"
+        );
+        assert!(
+            label_names.contains("manager:helm-values"),
+            "should contain manager:helm-values"
+        );
     }
 
     // Ported: "returns reconfigure branch name" — workers/repository/reconfigure/utils.spec.ts line 64
@@ -5786,8 +6106,11 @@ mod tests {
             // (value after tag coercion depends on serde_yaml version)
             let tag_val = &v["myObject"]["aStringWithTag"];
             // Accept either null JSON (serde_yaml v0.8) or string "null" (v0.9+)
-            assert!(tag_val == &json!(null) || tag_val == &json!("null"),
-                "Unexpected value for tagged null: {}", tag_val);
+            assert!(
+                tag_val == &json!(null) || tag_val == &json!("null"),
+                "Unexpected value for tagged null: {}",
+                tag_val
+            );
         }
     }
 
@@ -6653,6 +6976,55 @@ dep1 = "^1.0.0"
         }
     }
 
+    // ── Bitbucket Server utilities ────────────────────────────────────────────
+
+    fn bbs_error(
+        exception: Option<&str>,
+        reviewer_contexts: &[Option<&str>],
+    ) -> BitbucketErrorEntry {
+        BitbucketErrorEntry {
+            exception_name: exception.map(String::from),
+            reviewer_errors: reviewer_contexts
+                .iter()
+                .map(|c| BitbucketReviewerError {
+                    context: c.map(String::from),
+                })
+                .collect(),
+        }
+    }
+
+    // Ported: "getInvalidReviewers" — modules/platform/bitbucket-server/utils.spec.ts line 94
+    #[test]
+    fn test_get_invalid_reviewers() {
+        // With valid reviewerErrors
+        let errors = [bbs_error(
+            Some(BITBUCKET_INVALID_REVIEWERS_EXCEPTION),
+            &[Some("dummy"), None],
+        )];
+        assert_eq!(get_invalid_reviewers(&errors), vec!["dummy"]);
+        // Empty errors
+        assert_eq!(get_invalid_reviewers(&[]), Vec::<String>::new());
+        // With wrong exception name - no reviewer errors
+        let errors2 = [bbs_error(Some(BITBUCKET_INVALID_REVIEWERS_EXCEPTION), &[])];
+        assert_eq!(get_invalid_reviewers(&errors2), Vec::<String>::new());
+    }
+
+    // Ported: "should not configure bearer token" — modules/platform/bitbucket-server/utils.spec.ts line 347
+    #[test]
+    fn test_get_extra_clone_opts_no_token() {
+        assert_eq!(get_extra_clone_opts_value(None), None);
+        assert_eq!(get_extra_clone_opts_value(Some("")), None);
+    }
+
+    // Ported: "should configure bearer token" — modules/platform/bitbucket-server/utils.spec.ts line 352
+    #[test]
+    fn test_get_extra_clone_opts_with_token() {
+        assert_eq!(
+            get_extra_clone_opts_value(Some("abc")),
+            Some("http.extraHeader=Authorization: Bearer abc".to_owned())
+        );
+    }
+
     // ── parse_s3_url ─────────────────────────────────────────────────────────
 
     // Ported: "parses S3 URLs" — util/s3.spec.ts line 8
@@ -6758,41 +7130,99 @@ dep1 = "^1.0.0"
     }
 
     // Ported: "findIssue" — modules/platform/local/index.spec.ts line 62
-    #[test] fn test_local_find_issue_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_find_issue_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
     // Ported: "getIssueList" — modules/platform/local/index.spec.ts line 66
-    #[test] fn test_local_get_issue_list_returns_empty() { let r: Vec<()> = vec![]; assert!(r.is_empty()); }
+    #[test]
+    fn test_local_get_issue_list_returns_empty() {
+        let r: Vec<()> = vec![];
+        assert!(r.is_empty());
+    }
     // Ported: "getRawFile" — modules/platform/local/index.spec.ts line 70
-    #[test] fn test_local_get_raw_file_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_get_raw_file_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
     // Ported: "getJsonFile" — modules/platform/local/index.spec.ts line 74
-    #[test] fn test_local_get_json_file_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_get_json_file_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
     // Ported: "getPrList" — modules/platform/local/index.spec.ts line 78
-    #[test] fn test_local_get_pr_list_returns_empty() { let r: Vec<()> = vec![]; assert!(r.is_empty()); }
+    #[test]
+    fn test_local_get_pr_list_returns_empty() {
+        let r: Vec<()> = vec![];
+        assert!(r.is_empty());
+    }
     // Ported: "ensureIssueClosing" — modules/platform/local/index.spec.ts line 82
-    #[test] fn test_local_ensure_issue_closing_returns_void() { /* void - no assertion needed */ }
+    #[test]
+    fn test_local_ensure_issue_closing_returns_void() { /* void - no assertion needed */
+    }
     // Ported: "ensureIssue" — modules/platform/local/index.spec.ts line 86
-    #[test] fn test_local_ensure_issue_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_ensure_issue_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
     // Ported: "updatePr" — modules/platform/local/index.spec.ts line 98
-    #[test] fn test_local_update_pr_returns_void() { /* void */ }
+    #[test]
+    fn test_local_update_pr_returns_void() { /* void */
+    }
     // Ported: "addReviewers" — modules/platform/local/index.spec.ts line 106
-    #[test] fn test_local_add_reviewers_returns_void() { /* void */ }
+    #[test]
+    fn test_local_add_reviewers_returns_void() { /* void */
+    }
     // Ported: "addAssignees" — modules/platform/local/index.spec.ts line 110
-    #[test] fn test_local_add_assignees_returns_void() { /* void */ }
+    #[test]
+    fn test_local_add_assignees_returns_void() { /* void */
+    }
     // Ported: "createPr" — modules/platform/local/index.spec.ts line 114
-    #[test] fn test_local_create_pr_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_create_pr_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
     // Ported: "deleteLabel" — modules/platform/local/index.spec.ts line 118
-    #[test] fn test_local_delete_label_returns_void() { /* void */ }
+    #[test]
+    fn test_local_delete_label_returns_void() { /* void */
+    }
     // Ported: "setBranchStatus" — modules/platform/local/index.spec.ts line 122
-    #[test] fn test_local_set_branch_status_returns_void() { /* void */ }
+    #[test]
+    fn test_local_set_branch_status_returns_void() { /* void */
+    }
     // Ported: "getBranchStatusCheck" — modules/platform/local/index.spec.ts line 130
-    #[test] fn test_local_get_branch_status_check_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_get_branch_status_check_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
     // Ported: "ensureCommentRemoval" — modules/platform/local/index.spec.ts line 134
-    #[test] fn test_local_ensure_comment_removal_returns_void() { /* void */ }
+    #[test]
+    fn test_local_ensure_comment_removal_returns_void() { /* void */
+    }
     // Ported: "getPr" — modules/platform/local/index.spec.ts line 142
-    #[test] fn test_local_get_pr_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_get_pr_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
     // Ported: "findPr" — modules/platform/local/index.spec.ts line 146
-    #[test] fn test_local_find_pr_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_find_pr_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
     // Ported: "getBranchPr" — modules/platform/local/index.spec.ts line 150
-    #[test] fn test_local_get_branch_pr_returns_null() { let r: Option<()> = None; assert!(r.is_none()); }
+    #[test]
+    fn test_local_get_branch_pr_returns_null() {
+        let r: Option<()> = None;
+        assert!(r.is_none());
+    }
 
     // ── getMeta / getDetails ─────────────────────────────────────────────────
 
@@ -6819,7 +7249,11 @@ dep1 = "^1.0.0"
     // Ported: "returns plain text when colorize is false" — logger/pretty-stdout.spec.ts line 46
     #[test]
     fn test_get_meta_plain_text() {
-        let rec = BunyanRecord { repository: Some("a/b"), module: Some("test"), ..Default::default() };
+        let rec = BunyanRecord {
+            repository: Some("a/b"),
+            module: Some("test"),
+            ..Default::default()
+        };
         assert_eq!(get_meta(Some(&rec), false), " (repository=a/b) [test]");
     }
 
@@ -6861,8 +7295,12 @@ dep1 = "^1.0.0"
     #[test]
     fn test_as_raw_commands_with_opts() {
         let cmds = [
-            ExecCommand::WithOpts { command: vec!["ls".to_string()] },
-            ExecCommand::WithOpts { command: vec!["go".to_string(), "mod".to_string(), "tidy".to_string()] },
+            ExecCommand::WithOpts {
+                command: vec!["ls".to_owned()],
+            },
+            ExecCommand::WithOpts {
+                command: vec!["go".to_owned(), "mod".to_owned(), "tidy".to_owned()],
+            },
         ];
         let result = as_raw_commands(&cmds);
         assert_eq!(result.len(), 2);
@@ -6879,9 +7317,21 @@ dep1 = "^1.0.0"
             ("not a url", "https://gitlab.com/org/repo", false),
             ("https://gitlab.com/org/repo", "not a url", false),
             ("https://gitlab.com/org", "https://gitlab.com/org/", true),
-            ("https://gitlab.com/org/repo/", "https://gitlab.com/org/repo", true),
-            ("https://github.com/org/repo/path/", "https://github.com/org/repo/path/", false),
-            ("https://gitlab.com/org/repo/", "https://gitlab.com/org/repo/path/to/something/", false),
+            (
+                "https://gitlab.com/org/repo/",
+                "https://gitlab.com/org/repo",
+                true,
+            ),
+            (
+                "https://github.com/org/repo/path/",
+                "https://github.com/org/repo/path/",
+                false,
+            ),
+            (
+                "https://gitlab.com/org/repo/",
+                "https://gitlab.com/org/repo/path/to/something/",
+                false,
+            ),
         ];
         for (source_url, homepage, expected) in cases {
             assert_eq!(
@@ -6893,8 +7343,14 @@ dep1 = "^1.0.0"
             );
         }
         // null/undefined cases
-        assert!(!should_delete_homepage(None, Some("https://gitlab.com/org/repo")));
-        assert!(!should_delete_homepage(Some("https://gitlab.com/org/repo"), None));
+        assert!(!should_delete_homepage(
+            None,
+            Some("https://gitlab.com/org/repo")
+        ));
+        assert!(!should_delete_homepage(
+            Some("https://gitlab.com/org/repo"),
+            None
+        ));
     }
 
     // ── massageUrl / massageGithubUrl / massageGitlabUrl ─────────────────────
@@ -6910,13 +7366,31 @@ dep1 = "^1.0.0"
     fn test_massage_url_github() {
         let cases = [
             ("git@github.com:user/repo", "https://github.com/user/repo"),
-            ("http://github.com/user/repo", "https://github.com/user/repo"),
-            ("http+git://github.com/user/repo", "https://github.com/user/repo"),
-            ("https+git://github.com/user/repo", "https://github.com/user/repo"),
-            ("ssh://git@github.com/user/repo", "https://github.com/user/repo"),
+            (
+                "http://github.com/user/repo",
+                "https://github.com/user/repo",
+            ),
+            (
+                "http+git://github.com/user/repo",
+                "https://github.com/user/repo",
+            ),
+            (
+                "https+git://github.com/user/repo",
+                "https://github.com/user/repo",
+            ),
+            (
+                "ssh://git@github.com/user/repo",
+                "https://github.com/user/repo",
+            ),
             ("git://github.com/user/repo", "https://github.com/user/repo"),
-            ("https://www.github.com/user/repo", "https://github.com/user/repo"),
-            ("https://user.github.com/repo", "https://github.com/user/repo"),
+            (
+                "https://www.github.com/user/repo",
+                "https://github.com/user/repo",
+            ),
+            (
+                "https://user.github.com/repo",
+                "https://github.com/user/repo",
+            ),
         ];
         for (input, expected) in cases {
             assert_eq!(massage_url(input), expected, "massageUrl({:?})", input);
@@ -6927,12 +7401,27 @@ dep1 = "^1.0.0"
     #[test]
     fn test_massage_url_gitlab() {
         let cases = [
-            ("http://gitlab.com/user/repo", "https://gitlab.com/user/repo"),
+            (
+                "http://gitlab.com/user/repo",
+                "https://gitlab.com/user/repo",
+            ),
             ("git://gitlab.com/user/repo", "https://gitlab.com/user/repo"),
-            ("https://gitlab.com/user/repo/tree/master", "https://gitlab.com/user/repo"),
-            ("http://gitlab.com/user/repo/", "https://gitlab.com/user/repo"),
-            ("http://gitlab.com/user/repo.git", "https://gitlab.com/user/repo"),
-            ("git@gitlab.com:user/repo.git", "https://gitlab.com/user/repo"),
+            (
+                "https://gitlab.com/user/repo/tree/master",
+                "https://gitlab.com/user/repo",
+            ),
+            (
+                "http://gitlab.com/user/repo/",
+                "https://gitlab.com/user/repo",
+            ),
+            (
+                "http://gitlab.com/user/repo.git",
+                "https://gitlab.com/user/repo",
+            ),
+            (
+                "git@gitlab.com:user/repo.git",
+                "https://gitlab.com/user/repo",
+            ),
         ];
         for (input, expected) in cases {
             assert_eq!(massage_url(input), expected, "massageUrl({:?})", input);
@@ -6944,11 +7433,26 @@ dep1 = "^1.0.0"
     fn test_massage_url_other_host() {
         let cases = [
             ("git@example.com:user/repo", "https://example.com/user/repo"),
-            ("http://example.com/user/repo", "https://example.com/user/repo"),
-            ("http+git://example.com/user/repo", "https://example.com/user/repo"),
-            ("https+git://example.com/user/repo", "https://example.com/user/repo"),
-            ("ssh://git@example.com/user/repo", "https://example.com/user/repo"),
-            ("git://example.com/user/repo", "https://example.com/user/repo"),
+            (
+                "http://example.com/user/repo",
+                "https://example.com/user/repo",
+            ),
+            (
+                "http+git://example.com/user/repo",
+                "https://example.com/user/repo",
+            ),
+            (
+                "https+git://example.com/user/repo",
+                "https://example.com/user/repo",
+            ),
+            (
+                "ssh://git@example.com/user/repo",
+                "https://example.com/user/repo",
+            ),
+            (
+                "git://example.com/user/repo",
+                "https://example.com/user/repo",
+            ),
         ];
         for (input, expected) in cases {
             assert_eq!(massage_url(input), expected, "massageUrl({:?})", input);
@@ -6958,43 +7462,62 @@ dep1 = "^1.0.0"
     // Ported: "Should massage github git@ url to valid https url" — metadata.spec.ts line 429
     #[test]
     fn test_massage_github_url_git_at() {
-        assert!(massage_github_url("git@example.com:foo/bar").contains("https://example.com/foo/bar"));
+        assert!(
+            massage_github_url("git@example.com:foo/bar").contains("https://example.com/foo/bar")
+        );
     }
 
     // Ported: "Should massage github http url to valid https url" — metadata.spec.ts line 435
     #[test]
     fn test_massage_github_url_http() {
-        assert!(massage_github_url("http://example.com/foo/bar").contains("https://example.com/foo/bar"));
+        assert!(
+            massage_github_url("http://example.com/foo/bar")
+                .contains("https://example.com/foo/bar")
+        );
     }
 
     // Ported: "Should massage github http and git url to valid https url" — metadata.spec.ts line 441
     #[test]
     fn test_massage_github_url_http_git() {
-        assert!(massage_github_url("http+git://example.com/foo/bar").contains("https://example.com/foo/bar"));
+        assert!(
+            massage_github_url("http+git://example.com/foo/bar")
+                .contains("https://example.com/foo/bar")
+        );
     }
 
     // Ported: "Should massage github ssh git@ url to valid https url" — metadata.spec.ts line 447
     #[test]
     fn test_massage_github_url_ssh() {
-        assert!(massage_github_url("ssh://git@example.com/foo/bar").contains("https://example.com/foo/bar"));
+        assert!(
+            massage_github_url("ssh://git@example.com/foo/bar")
+                .contains("https://example.com/foo/bar")
+        );
     }
 
     // Ported: "Should massage github git url to valid https url" — metadata.spec.ts line 453
     #[test]
     fn test_massage_github_url_git() {
-        assert!(massage_github_url("git://example.com/foo/bar").contains("https://example.com/foo/bar"));
+        assert!(
+            massage_github_url("git://example.com/foo/bar").contains("https://example.com/foo/bar")
+        );
     }
 
     // Ported: "Should massage gitlab git url to valid https url" — metadata.spec.ts line 460
     #[test]
     fn test_massage_gitlab_url_git() {
-        assert!(massage_gitlab_url("git://example.gitlab-dedicated.com/foo/bar").contains("https://example.gitlab-dedicated.com/foo/bar"));
+        assert!(
+            massage_gitlab_url("git://example.gitlab-dedicated.com/foo/bar")
+                .contains("https://example.gitlab-dedicated.com/foo/bar")
+        );
     }
 
     // ── datasource common functions ──────────────────────────────────────────
 
     fn mk_release(version: &str) -> DatasourceRelease {
-        DatasourceRelease { version: version.to_string(), version_orig: None }
+        DatasourceRelease {
+            version: version.to_owned(),
+            version_orig: None,
+        }
     }
 
     // Ported: "should return the same release result if extractVersion is not defined" — modules/datasource/common.spec.ts line 95
@@ -7012,7 +7535,7 @@ dep1 = "^1.0.0"
         let result = apply_extract_version(releases, Some("^v(?<version>.+)$"));
         assert_eq!(result.len(), 2);
         assert_eq!(result[0].version, "1.0.0");
-        assert_eq!(result[0].version_orig, Some("v1.0.0".to_string()));
+        assert_eq!(result[0].version_orig, Some("v1.0.0".to_owned()));
         assert_eq!(result[1].version, "2.0.0");
     }
 
@@ -7028,7 +7551,11 @@ dep1 = "^1.0.0"
     // Ported: "should filter out invalid versions" — modules/datasource/common.spec.ts line 136
     #[test]
     fn test_filter_valid_versions_removes_invalid() {
-        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("invalid")];
+        let releases = vec![
+            mk_release("1.0.0"),
+            mk_release("2.0.0"),
+            mk_release("invalid"),
+        ];
         let result = filter_valid_versions(releases, crate::versioning::npm::is_version);
         assert_eq!(result.len(), 2);
         assert_eq!(result[0].version, "1.0.0");
@@ -7038,7 +7565,11 @@ dep1 = "^1.0.0"
     // Ported: "should use specified versioning if provided" — modules/datasource/common.spec.ts line 152
     #[test]
     fn test_filter_valid_versions_semver() {
-        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("invalid")];
+        let releases = vec![
+            mk_release("1.0.0"),
+            mk_release("2.0.0"),
+            mk_release("invalid"),
+        ];
         let result = filter_valid_versions(releases, crate::versioning::npm::is_version);
         assert_eq!(result.len(), 2);
     }
@@ -7056,36 +7587,59 @@ dep1 = "^1.0.0"
     // Ported: "filters out non-matching" — modules/datasource/common.spec.ts line 383
     #[test]
     fn test_apply_version_compatibility_filters_non_matching() {
-        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("2.0.0-alpine"), mk_release("v3.0.0-alpine")];
+        let releases = vec![
+            mk_release("1.0.0"),
+            mk_release("2.0.0"),
+            mk_release("2.0.0-alpine"),
+            mk_release("v3.0.0-alpine"),
+        ];
         let result = apply_version_compatibility(releases, Some("^(?<version>[^-]+)$"), None);
         assert_eq!(result.len(), 2);
         assert_eq!(result[0].version, "1.0.0");
-        assert_eq!(result[0].version_orig, Some("1.0.0".to_string()));
+        assert_eq!(result[0].version_orig, Some("1.0.0".to_owned()));
         assert_eq!(result[1].version, "2.0.0");
     }
 
     // Ported: "filters out incompatible" — modules/datasource/common.spec.ts line 395
     #[test]
     fn test_apply_version_compatibility_filters_incompatible() {
-        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("2.0.0-alpine"), mk_release("v3.0.0-alpine")];
-        let result = apply_version_compatibility(releases, Some("^(?<version>[^-]+)(?<compatibility>.*)$"), Some("-alpine"));
+        let releases = vec![
+            mk_release("1.0.0"),
+            mk_release("2.0.0"),
+            mk_release("2.0.0-alpine"),
+            mk_release("v3.0.0-alpine"),
+        ];
+        let result = apply_version_compatibility(
+            releases,
+            Some("^(?<version>[^-]+)(?<compatibility>.*)$"),
+            Some("-alpine"),
+        );
         assert_eq!(result.len(), 2, "result: {:?}", result);
         assert_eq!(result[0].version, "2.0.0");
-        assert_eq!(result[0].version_orig, Some("2.0.0-alpine".to_string()));
+        assert_eq!(result[0].version_orig, Some("2.0.0-alpine".to_owned()));
         assert_eq!(result[1].version, "v3.0.0");
-        assert_eq!(result[1].version_orig, Some("v3.0.0-alpine".to_string()));
+        assert_eq!(result[1].version_orig, Some("v3.0.0-alpine".to_owned()));
     }
 
     // Ported: "does not override versionOrig from extractVersion" — modules/datasource/common.spec.ts line 407
     #[test]
     fn test_apply_version_compatibility_preserves_version_orig() {
-        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("2.0.0-alpine"), mk_release("v3.0.0-alpine")];
+        let releases = vec![
+            mk_release("1.0.0"),
+            mk_release("2.0.0"),
+            mk_release("2.0.0-alpine"),
+            mk_release("v3.0.0-alpine"),
+        ];
         let after_extract = apply_extract_version(releases, Some("^v(?<version>.+)$"));
         assert_eq!(after_extract.len(), 1);
-        let result = apply_version_compatibility(after_extract, Some("^(?<version>[^-]+)(?<compatibility>.*)$"), Some("-alpine"));
+        let result = apply_version_compatibility(
+            after_extract,
+            Some("^(?<version>[^-]+)(?<compatibility>.*)$"),
+            Some("-alpine"),
+        );
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].version, "3.0.0");
-        assert_eq!(result[0].version_orig, Some("v3.0.0-alpine".to_string()));
+        assert_eq!(result[0].version_orig, Some("v3.0.0-alpine".to_owned()));
     }
 
     // ── apply_extract_version / filter_valid_versions / sort_and_remove_duplicates ──
@@ -7093,7 +7647,12 @@ dep1 = "^1.0.0"
     // Ported: "sorts releases by version and removes duplicates" — modules/datasource/common.spec.ts line 162
     #[test]
     fn test_sort_and_remove_duplicates_sorts_and_deduplicates() {
-        let releases = vec![mk_release("2.0.0"), mk_release("1.0.0"), mk_release("1.0.0"), mk_release("3.0.0")];
+        let releases = vec![
+            mk_release("2.0.0"),
+            mk_release("1.0.0"),
+            mk_release("1.0.0"),
+            mk_release("3.0.0"),
+        ];
         let result = sort_and_remove_duplicates(releases, crate::versioning::npm::sort_versions);
         assert_eq!(result.len(), 3);
         assert_eq!(result[0].version, "1.0.0");
@@ -7106,72 +7665,135 @@ dep1 = "^1.0.0"
     // Ported: "renders stopUpdating=true" — workers/repository/update/pr/body/config-description.spec.ts line 14
     #[test]
     fn test_config_desc_stop_updating() {
-        let res = get_pr_config_description(None, None, None, false, false, None, true, false, 0, None);
+        let res =
+            get_pr_config_description(None, None, None, false, false, None, true, false, 0, None);
         assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
     }
 
     // Ported: "renders rebaseWhen=\"never\"" — config-description.spec.ts line 24
     #[test]
     fn test_config_desc_rebase_when_never() {
-        let res = get_pr_config_description(None, None, None, false, false, Some("never"), false, false, 0, None);
+        let res = get_pr_config_description(
+            None,
+            None,
+            None,
+            false,
+            false,
+            Some("never"),
+            false,
+            false,
+            0,
+            None,
+        );
         assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
     }
 
     // Ported: "renders rebaseWhen=\"behind-base-branch\"" — config-description.spec.ts line 34
     #[test]
     fn test_config_desc_rebase_when_behind() {
-        let res = get_pr_config_description(None, None, None, false, false, Some("behind-base-branch"), false, false, 0, None);
+        let res = get_pr_config_description(
+            None,
+            None,
+            None,
+            false,
+            false,
+            Some("behind-base-branch"),
+            false,
+            false,
+            0,
+            None,
+        );
         assert!(res.contains("Whenever PR is behind base branch"));
     }
 
     // Ported: "renders timezone" — config-description.spec.ts line 43
     #[test]
     fn test_config_desc_timezone() {
-        let schedule = vec!["* 1 * * * *".to_string()];
-        let res = get_pr_config_description(Some(&schedule), None, Some("Europe/Istanbul"), false, false, None, false, false, 0, None);
+        let schedule = vec!["* 1 * * * *".to_owned()];
+        let res = get_pr_config_description(
+            Some(&schedule),
+            None,
+            Some("Europe/Istanbul"),
+            false,
+            false,
+            None,
+            false,
+            false,
+            0,
+            None,
+        );
         assert!(res.contains("(in timezone Europe/Istanbul)"));
     }
 
     // Ported: "displays later schedules" — config-description.spec.ts line 67
     #[test]
     fn test_config_desc_later_schedules() {
-        let schedule = vec!["before 6am on Monday".to_string(), "after 3pm on Tuesday".to_string()];
-        let res = get_pr_config_description(Some(&schedule), None, None, false, false, None, false, false, 0, None);
+        let schedule = vec![
+            "before 6am on Monday".to_owned(),
+            "after 3pm on Tuesday".to_owned(),
+        ];
+        let res = get_pr_config_description(
+            Some(&schedule),
+            None,
+            None,
+            false,
+            false,
+            None,
+            false,
+            false,
+            0,
+            None,
+        );
         assert!(res.contains("\"before 6am on Monday,after 3pm on Tuesday\""));
     }
 
     // Ported: "renders undefined schedule" — config-description.spec.ts line 76
     #[test]
     fn test_config_desc_undefined_schedule() {
-        let res = get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
+        let res =
+            get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
         assert!(res.contains("At any time (no schedule defined)"));
     }
 
     // Ported: "renders recreateClosed=true" — config-description.spec.ts line 100
     #[test]
     fn test_config_desc_recreate_closed_true() {
-        let res = get_pr_config_description(None, None, None, false, false, None, false, true, 0, Some("https://help.example.com"));
+        let res = get_pr_config_description(
+            None,
+            None,
+            None,
+            false,
+            false,
+            None,
+            false,
+            true,
+            0,
+            Some("https://help.example.com"),
+        );
         assert!(res.contains("**Immortal**"));
     }
 
     // Ported: "does not render recreateClosed=false" — config-description.spec.ts line 109
     #[test]
     fn test_config_desc_recreate_closed_false() {
-        let res = get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
+        let res =
+            get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
         assert!(!res.contains("**Immortal**"));
     }
 
     // Ported: "does not render recreateClosed=undefined" — config-description.spec.ts line 118
     #[test]
     fn test_config_desc_recreate_closed_undefined() {
-        let res = get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
+        let res =
+            get_pr_config_description(None, None, None, false, false, None, false, false, 0, None);
         assert!(!res.contains("**Immortal**"));
     }
 
     // Ported: "renders singular" — config-description.spec.ts line 125
     #[test]
     fn test_config_desc_singular_upgrade() {
-        let res = get_pr_config_description(None, None, None, false, false, None, false, false, 1, None);
+        let res =
+            get_pr_config_description(None, None, None, false, false, None, false, false, 1, None);
         assert!(res.contains("this update"));
         assert!(!res.contains("these updates"));
     }
@@ -7179,15 +7801,21 @@ dep1 = "^1.0.0"
     // Ported: "renders automerge" — config-description.spec.ts line 133
     #[test]
     fn test_config_desc_automerge_enabled() {
-        let res = get_pr_config_description(None, None, None, true, false, None, false, false, 0, None);
+        let res =
+            get_pr_config_description(None, None, None, true, false, None, false, false, 0, None);
         assert!(res.contains("**Automerge**: Enabled."));
     }
 
     // Ported: "renders blocked automerge" — config-description.spec.ts line 140
     #[test]
     fn test_config_desc_automerge_blocked() {
-        let res = get_pr_config_description(None, None, None, false, true, None, false, false, 0, None);
-        assert!(res.contains("**Automerge**: Disabled because a matching PR was automerged previously."));
+        let res =
+            get_pr_config_description(None, None, None, false, true, None, false, false, 0, None);
+        assert!(
+            res.contains(
+                "**Automerge**: Disabled because a matching PR was automerged previously."
+            )
+        );
     }
 
     // ── get_warnings / get_errors / get_dep_warnings_* ───────────────────────
@@ -7201,7 +7829,10 @@ dep1 = "^1.0.0"
     }
 
     fn mk_pkg<'a>(file: &'a str, deps: &'a [DepWithWarnings<'a>]) -> PackageFileWarnings<'a> {
-        PackageFileWarnings { package_file: file, deps }
+        PackageFileWarnings {
+            package_file: file,
+            deps,
+        }
     }
 
     // Ported: "returns warning text" — workers/repository/errors-warnings.spec.ts line 22
@@ -7241,8 +7872,13 @@ dep1 = "^1.0.0"
         let w1 = ["Warning 1"];
         let w2 = ["Warning 2"];
         let empty: [&str; 0] = [];
-        let dep1a = mk_dep(&w1); let dep1b = mk_dep(&empty); let dep1c = mk_dep(&w1); let dep2 = mk_dep(&w2);
-        let pkg1_deps = [dep1a, dep1b]; let pkg2_deps = [dep1c]; let pkg3_deps = [dep2];
+        let dep1a = mk_dep(&w1);
+        let dep1b = mk_dep(&empty);
+        let dep1c = mk_dep(&w1);
+        let dep2 = mk_dep(&w2);
+        let pkg1_deps = [dep1a, dep1b];
+        let pkg2_deps = [dep1c];
+        let pkg3_deps = [dep2];
         let files = [
             mk_pkg("package.json", &pkg1_deps),
             mk_pkg("backend/package.json", &pkg2_deps),
@@ -7258,7 +7894,8 @@ dep1 = "^1.0.0"
     #[test]
     fn test_get_dep_warnings_pr_with_issue_link() {
         let w1 = ["Warning 1"];
-        let dep = mk_dep(&w1); let dep_arr = [dep];
+        let dep = mk_dep(&w1);
+        let dep_arr = [dep];
         let files = [mk_pkg("package.json", &dep_arr)];
         let result = get_dep_warnings_pr(&files, false, true, Some(123));
         assert!(result.contains("[Dependency Dashboard](../issues/123)"));
@@ -7268,7 +7905,8 @@ dep1 = "^1.0.0"
     #[test]
     fn test_get_dep_warnings_pr_dashboard_false() {
         let w1 = ["Warning 1"];
-        let dep = mk_dep(&w1); let dep_arr = [dep];
+        let dep = mk_dep(&w1);
+        let dep_arr = [dep];
         let files = [mk_pkg("package.json", &dep_arr)];
         let result = get_dep_warnings_pr(&files, false, false, None);
         assert!(result.contains("Check the warning logs for more information."));
@@ -7292,8 +7930,13 @@ dep1 = "^1.0.0"
         let d1 = ["dependency-1"];
         let d2 = ["dependency-2"];
         let empty: [&str; 0] = [];
-        let dep1a = mk_dep(&d1); let dep1b = mk_dep(&empty); let dep1c = mk_dep(&d1); let dep2 = mk_dep(&d2);
-        let pkg1_deps = [dep1a, dep1b]; let pkg2_deps = [dep1c]; let pkg3_deps = [dep2];
+        let dep1a = mk_dep(&d1);
+        let dep1b = mk_dep(&empty);
+        let dep1c = mk_dep(&d1);
+        let dep2 = mk_dep(&d2);
+        let pkg1_deps = [dep1a, dep1b];
+        let pkg2_deps = [dep1c];
+        let pkg3_deps = [dep2];
         let files = [
             mk_pkg("package.json", &pkg1_deps),
             mk_pkg("backend/package.json", &pkg2_deps),
@@ -7323,8 +7966,13 @@ dep1 = "^1.0.0"
         let w1 = ["Warning 1"];
         let w2 = ["Warning 2"];
         let empty: [&str; 0] = [];
-        let dep1a = mk_dep(&w1); let dep1b = mk_dep(&empty); let dep1c = mk_dep(&w1); let dep2 = mk_dep(&w2);
-        let pkg1_deps = [dep1a, dep1b]; let pkg2_deps = [dep1c]; let pkg3_deps = [dep2];
+        let dep1a = mk_dep(&w1);
+        let dep1b = mk_dep(&empty);
+        let dep1c = mk_dep(&w1);
+        let dep2 = mk_dep(&w2);
+        let pkg1_deps = [dep1a, dep1b];
+        let pkg2_deps = [dep1c];
+        let pkg3_deps = [dep2];
         let files = [
             mk_pkg("package.json", &pkg1_deps),
             mk_pkg("backend/package.json", &pkg2_deps),
@@ -7371,10 +8019,34 @@ dep1 = "^1.0.0"
     fn test_parse_goproxy_multiple() {
         let r = parse_goproxy("foo,bar|baz,qux");
         assert_eq!(r.len(), 4);
-        assert_eq!(r[0], GoproxyItem { url: "foo".into(), fallback: Some(',') });
-        assert_eq!(r[1], GoproxyItem { url: "bar".into(), fallback: Some('|') });
-        assert_eq!(r[2], GoproxyItem { url: "baz".into(), fallback: Some(',') });
-        assert_eq!(r[3], GoproxyItem { url: "qux".into(), fallback: None });
+        assert_eq!(
+            r[0],
+            GoproxyItem {
+                url: "foo".into(),
+                fallback: Some(',')
+            }
+        );
+        assert_eq!(
+            r[1],
+            GoproxyItem {
+                url: "bar".into(),
+                fallback: Some('|')
+            }
+        );
+        assert_eq!(
+            r[2],
+            GoproxyItem {
+                url: "baz".into(),
+                fallback: Some(',')
+            }
+        );
+        assert_eq!(
+            r[3],
+            GoproxyItem {
+                url: "qux".into(),
+                fallback: None
+            }
+        );
     }
 
     // Ported: "ignores everything starting from "direct" and "off" keywords" — goproxy-parser.spec.ts line 25
@@ -7423,10 +8095,26 @@ dep1 = "^1.0.0"
     fn test_parse_noproxy_real_prefixes() {
         assert!(parse_noproxy("ex.co").unwrap().is_match("ex.co/foo"));
         assert!(parse_noproxy("ex.co/").unwrap().is_match("ex.co/foo"));
-        assert!(parse_noproxy("ex.co/foo/bar").unwrap().is_match("ex.co/foo/bar"));
-        assert!(parse_noproxy("*/foo/*").unwrap().is_match("example.com/foo/bar"));
-        assert!(parse_noproxy("ex.co/foo/*").unwrap().is_match("ex.co/foo/bar"));
-        assert!(parse_noproxy("ex.co/foo/*").unwrap().is_match("ex.co/foo/baz"));
+        assert!(
+            parse_noproxy("ex.co/foo/bar")
+                .unwrap()
+                .is_match("ex.co/foo/bar")
+        );
+        assert!(
+            parse_noproxy("*/foo/*")
+                .unwrap()
+                .is_match("example.com/foo/bar")
+        );
+        assert!(
+            parse_noproxy("ex.co/foo/*")
+                .unwrap()
+                .is_match("ex.co/foo/bar")
+        );
+        assert!(
+            parse_noproxy("ex.co/foo/*")
+                .unwrap()
+                .is_match("ex.co/foo/baz")
+        );
         assert!(parse_noproxy("ex.co").unwrap().is_match("ex.co/foo/v2"));
         let multi = parse_noproxy("ex.co/foo/bar,ex.co/foo/baz").unwrap();
         assert!(multi.is_match("ex.co/foo/bar"));
@@ -7502,15 +8190,49 @@ dep1 = "^1.0.0"
     #[test]
     fn test_pr_list_multiple_with_limit() {
         let upgrades1 = [
-            PrListUpgrade { dep_name: "a", source_url: Some("https://a"), update_type: "pin", new_value: Some("1.1.0"), new_version: None, new_digest: None, is_lockfile_update: false },
-            PrListUpgrade { dep_name: "b", source_url: None, update_type: "pin", new_value: Some("1.5.3"), new_version: None, new_digest: None, is_lockfile_update: false },
+            PrListUpgrade {
+                dep_name: "a",
+                source_url: Some("https://a"),
+                update_type: "pin",
+                new_value: Some("1.1.0"),
+                new_version: None,
+                new_digest: None,
+                is_lockfile_update: false,
+            },
+            PrListUpgrade {
+                dep_name: "b",
+                source_url: None,
+                update_type: "pin",
+                new_value: Some("1.5.3"),
+                new_version: None,
+                new_digest: None,
+                is_lockfile_update: false,
+            },
         ];
-        let upgrades2 = [
-            PrListUpgrade { dep_name: "a", source_url: Some("https://a"), update_type: "update", new_value: Some("2.0.1"), new_version: None, new_digest: None, is_lockfile_update: true },
-        ];
+        let upgrades2 = [PrListUpgrade {
+            dep_name: "a",
+            source_url: Some("https://a"),
+            update_type: "update",
+            new_value: Some("2.0.1"),
+            new_version: None,
+            new_digest: None,
+            is_lockfile_update: true,
+        }];
         let branches = [
-            PrListBranch { pr_title: "Pin dependencies", branch_name: "renovate/pin-dependencies", base_branch: Some("base"), schedule: &[], upgrades: &upgrades1 },
-            PrListBranch { pr_title: "Update a to v2", branch_name: "renovate/a-2.x", base_branch: Some(""), schedule: &[], upgrades: &upgrades2 },
+            PrListBranch {
+                pr_title: "Pin dependencies",
+                branch_name: "renovate/pin-dependencies",
+                base_branch: Some("base"),
+                schedule: &[],
+                upgrades: &upgrades1,
+            },
+            PrListBranch {
+                pr_title: "Update a to v2",
+                branch_name: "renovate/a-2.x",
+                base_branch: Some(""),
+                schedule: &[],
+                upgrades: &upgrades2,
+            },
         ];
         let result = get_expected_pr_list(1, 0, &branches);
         assert!(result.contains("Renovate will create 2 Pull Requests:"));
@@ -7521,10 +8243,30 @@ dep1 = "^1.0.0"
     // Ported: "shows commitHourlyLimit message when limit is low" — workers/repository/onboarding/pr/pr-list.spec.ts line 145
     #[test]
     fn test_pr_list_commit_hourly_limit_low() {
-        let upgrades = [PrListUpgrade { dep_name: "a", source_url: None, update_type: "update", new_value: Some("1.0.0"), new_version: None, new_digest: None, is_lockfile_update: false }];
+        let upgrades = [PrListUpgrade {
+            dep_name: "a",
+            source_url: None,
+            update_type: "update",
+            new_value: Some("1.0.0"),
+            new_version: None,
+            new_digest: None,
+            is_lockfile_update: false,
+        }];
         let branches = [
-            PrListBranch { pr_title: "Update a to v1", branch_name: "renovate/a-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
-            PrListBranch { pr_title: "Update b to v1", branch_name: "renovate/b-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
+            PrListBranch {
+                pr_title: "Update a to v1",
+                branch_name: "renovate/a-1.x",
+                base_branch: Some("base"),
+                schedule: &[],
+                upgrades: &upgrades,
+            },
+            PrListBranch {
+                pr_title: "Update b to v1",
+                branch_name: "renovate/b-1.x",
+                base_branch: Some("base"),
+                schedule: &[],
+                upgrades: &upgrades,
+            },
         ];
         let result = get_expected_pr_list(2, 1, &branches);
         assert!(result.contains("commitHourlyLimit"));
@@ -7534,10 +8276,22 @@ dep1 = "^1.0.0"
     // Ported: "does not show commitHourlyLimit message when limit is high" — workers/repository/onboarding/pr/pr-list.spec.ts line 184
     #[test]
     fn test_pr_list_commit_hourly_limit_high() {
-        let upgrades = [PrListUpgrade { dep_name: "a", source_url: None, update_type: "update", new_value: Some("1.0.0"), new_version: None, new_digest: None, is_lockfile_update: false }];
-        let branches = [
-            PrListBranch { pr_title: "Update a to v1", branch_name: "renovate/a-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
-        ];
+        let upgrades = [PrListUpgrade {
+            dep_name: "a",
+            source_url: None,
+            update_type: "update",
+            new_value: Some("1.0.0"),
+            new_version: None,
+            new_digest: None,
+            is_lockfile_update: false,
+        }];
+        let branches = [PrListBranch {
+            pr_title: "Update a to v1",
+            branch_name: "renovate/a-1.x",
+            base_branch: Some("base"),
+            schedule: &[],
+            upgrades: &upgrades,
+        }];
         let result = get_expected_pr_list(2, 10, &branches);
         assert!(!result.contains("commitHourlyLimit"));
     }
@@ -7545,10 +8299,30 @@ dep1 = "^1.0.0"
     // Ported: "shows only commitHourlyLimit message when both limits are set" — workers/repository/onboarding/pr/pr-list.spec.ts line 206
     #[test]
     fn test_pr_list_both_limits_commit_wins() {
-        let upgrades = [PrListUpgrade { dep_name: "a", source_url: None, update_type: "update", new_value: Some("1.0.0"), new_version: None, new_digest: None, is_lockfile_update: false }];
+        let upgrades = [PrListUpgrade {
+            dep_name: "a",
+            source_url: None,
+            update_type: "update",
+            new_value: Some("1.0.0"),
+            new_version: None,
+            new_digest: None,
+            is_lockfile_update: false,
+        }];
         let branches = [
-            PrListBranch { pr_title: "Update a to v1", branch_name: "renovate/a-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
-            PrListBranch { pr_title: "Update b to v1", branch_name: "renovate/b-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
+            PrListBranch {
+                pr_title: "Update a to v1",
+                branch_name: "renovate/a-1.x",
+                base_branch: Some("base"),
+                schedule: &[],
+                upgrades: &upgrades,
+            },
+            PrListBranch {
+                pr_title: "Update b to v1",
+                branch_name: "renovate/b-1.x",
+                base_branch: Some("base"),
+                schedule: &[],
+                upgrades: &upgrades,
+            },
         ];
         let result = get_expected_pr_list(1, 1, &branches);
         assert!(result.contains("commitHourlyLimit"));
@@ -7562,7 +8336,10 @@ dep1 = "^1.0.0"
     fn test_transform_github_tag_commit_type() {
         let r = transform_github_tag(
             Some("1.2.3"),
-            Some(GithubTagTarget::Commit { oid: "abc123", release_timestamp: "2022-09-24" }),
+            Some(GithubTagTarget::Commit {
+                oid: "abc123",
+                release_timestamp: "2022-09-24",
+            }),
         );
         assert!(r.is_some());
         let r = r.unwrap();
@@ -7577,7 +8354,10 @@ dep1 = "^1.0.0"
     fn test_transform_github_tag_tag_type() {
         let r = transform_github_tag(
             Some("1.2.3"),
-            Some(GithubTagTarget::Tag { tagger_timestamp: "2022-09-24", nested_oid: "abc123" }),
+            Some(GithubTagTarget::Tag {
+                tagger_timestamp: "2022-09-24",
+                nested_oid: "abc123",
+            }),
         );
         assert!(r.is_some());
         let r = r.unwrap();
@@ -7593,7 +8373,10 @@ dep1 = "^1.0.0"
         // Nested Tag: Tag → Tag → Commit; oid from innermost commit
         let r = transform_github_tag(
             Some("1.2.3"),
-            Some(GithubTagTarget::Tag { tagger_timestamp: "2022-09-24", nested_oid: "abc123" }),
+            Some(GithubTagTarget::Tag {
+                tagger_timestamp: "2022-09-24",
+                nested_oid: "abc123",
+            }),
         );
         assert!(r.is_some());
         let r = r.unwrap();
@@ -7629,8 +8412,8 @@ dep1 = "^1.0.0"
         assert_eq!(r.release_timestamp, "2024-09-24T00:00:00.000Z");
         assert_eq!(r.url, "https://example.com");
         assert_eq!(r.id, Some(123));
-        assert_eq!(r.name, Some("name".to_string()));
-        assert_eq!(r.description, Some("description".to_string()));
+        assert_eq!(r.name, Some("name".to_owned()));
+        assert_eq!(r.description, Some("description".to_owned()));
         assert_eq!(r.is_stable, None);
     }
 
@@ -7677,18 +8460,35 @@ dep1 = "^1.0.0"
 
     // ── calculate_most_recent_timestamp ──────────────────────────────────────
 
-    fn semver_is_version(v: &str) -> bool { crate::versioning::npm::is_version(v) }
-    fn semver_is_greater_than(a: &str, b: &str) -> bool { crate::versioning::npm::is_greater_than(a, b) }
+    fn semver_is_version(v: &str) -> bool {
+        crate::versioning::npm::is_version(v)
+    }
+    fn semver_is_greater_than(a: &str, b: &str) -> bool {
+        crate::versioning::npm::is_greater_than(a, b)
+    }
 
     // Ported: "returns the timestamp of the latest version" — workers/repository/process/lookup/timestamps.spec.ts line 10
     #[test]
     fn test_timestamps_returns_latest() {
         let releases = vec![
-            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "0.9.0", release_timestamp: Some("2020-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry {
+                version: "1.0.0",
+                release_timestamp: Some("2021-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "2.0.0",
+                release_timestamp: Some("2022-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "0.9.0",
+                release_timestamp: Some("2020-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
         ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert_eq!(ts.as_deref(), Some("2022-01-01T00:00:00.000Z"));
     }
 
@@ -7696,11 +8496,24 @@ dep1 = "^1.0.0"
     #[test]
     fn test_timestamps_missing_middle() {
         let releases = vec![
-            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "2.0.0", release_timestamp: None, is_deprecated: false },
-            ReleaseEntry { version: "3.0.0", release_timestamp: Some("2023-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry {
+                version: "1.0.0",
+                release_timestamp: Some("2021-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "2.0.0",
+                release_timestamp: None,
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "3.0.0",
+                release_timestamp: Some("2023-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
         ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert_eq!(ts.as_deref(), Some("2023-01-01T00:00:00.000Z"));
     }
 
@@ -7708,11 +8521,24 @@ dep1 = "^1.0.0"
     #[test]
     fn test_timestamps_latest_no_timestamp() {
         let releases = vec![
-            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "3.0.0", release_timestamp: None, is_deprecated: false },
+            ReleaseEntry {
+                version: "1.0.0",
+                release_timestamp: Some("2021-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "2.0.0",
+                release_timestamp: Some("2022-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "3.0.0",
+                release_timestamp: None,
+                is_deprecated: false,
+            },
         ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert!(ts.is_none());
     }
 
@@ -7720,11 +8546,24 @@ dep1 = "^1.0.0"
     #[test]
     fn test_timestamps_latest_deprecated() {
         let releases = vec![
-            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "3.0.0", release_timestamp: Some("2023-01-01T00:00:00.000Z"), is_deprecated: true },
+            ReleaseEntry {
+                version: "1.0.0",
+                release_timestamp: Some("2021-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "2.0.0",
+                release_timestamp: Some("2022-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "3.0.0",
+                release_timestamp: Some("2023-01-01T00:00:00.000Z"),
+                is_deprecated: true,
+            },
         ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert!(ts.is_none());
     }
 
@@ -7732,11 +8571,24 @@ dep1 = "^1.0.0"
     #[test]
     fn test_timestamps_invalid_timestamp_for_highest() {
         let releases = vec![
-            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "3.0.0", release_timestamp: Some("invalid"), is_deprecated: false },
+            ReleaseEntry {
+                version: "1.0.0",
+                release_timestamp: Some("2021-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "2.0.0",
+                release_timestamp: Some("2022-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "3.0.0",
+                release_timestamp: Some("invalid"),
+                is_deprecated: false,
+            },
         ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert!(ts.is_none());
     }
 
@@ -7744,10 +8596,19 @@ dep1 = "^1.0.0"
     #[test]
     fn test_timestamps_no_valid_timestamps() {
         let releases = vec![
-            ReleaseEntry { version: "1.0.0", release_timestamp: None, is_deprecated: false },
-            ReleaseEntry { version: "2.0.0", release_timestamp: None, is_deprecated: false },
+            ReleaseEntry {
+                version: "1.0.0",
+                release_timestamp: None,
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "2.0.0",
+                release_timestamp: None,
+                is_deprecated: false,
+            },
         ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert!(ts.is_none());
     }
 
@@ -7755,17 +8616,21 @@ dep1 = "^1.0.0"
     #[test]
     fn test_timestamps_empty_releases() {
         let releases: Vec<ReleaseEntry> = vec![];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert!(ts.is_none());
     }
 
     // Ported: "preserves other properties in the release result" — workers/repository/process/lookup/timestamps.spec.ts line 138
     #[test]
     fn test_timestamps_single_release() {
-        let releases = vec![
-            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
-        ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let releases = vec![ReleaseEntry {
+            version: "1.0.0",
+            release_timestamp: Some("2021-01-01T00:00:00.000Z"),
+            is_deprecated: false,
+        }];
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert_eq!(ts.as_deref(), Some("2021-01-01T00:00:00.000Z"));
     }
 
@@ -7775,10 +8640,19 @@ dep1 = "^1.0.0"
         // 99.99.99-alpha is the highest semver but has an OLD timestamp (2010).
         // 2.0.0 has a NEWER timestamp (2022). So higher timestamp exists for lower version → None.
         let releases = vec![
-            ReleaseEntry { version: "99.99.99-alpha", release_timestamp: Some("2010-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry {
+                version: "99.99.99-alpha",
+                release_timestamp: Some("2010-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "2.0.0",
+                release_timestamp: Some("2022-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
         ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert!(ts.is_none());
     }
 
@@ -7788,19 +8662,39 @@ dep1 = "^1.0.0"
         // 'foo' and 'bar' are invalid versions, should be skipped.
         // Highest valid is 2.0.0 with timestamp 2023.
         let releases = vec![
-            ReleaseEntry { version: "foo", release_timestamp: Some("2020-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "bar", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
-            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2023-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry {
+                version: "foo",
+                release_timestamp: Some("2020-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "1.0.0",
+                release_timestamp: Some("2021-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "bar",
+                release_timestamp: Some("2022-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
+            ReleaseEntry {
+                version: "2.0.0",
+                release_timestamp: Some("2023-01-01T00:00:00.000Z"),
+                is_deprecated: false,
+            },
         ];
-        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        let ts =
+            calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
         assert_eq!(ts.as_deref(), Some("2023-01-01T00:00:00.000Z"));
     }
 
     // ── get_child_process_env ─────────────────────────────────────────────────
 
     fn make_env(pairs: &[(&str, &str)]) -> std::collections::HashMap<String, String> {
-        pairs.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect()
+        pairs
+            .iter()
+            .map(|(k, v)| ((*k).to_owned(), (*v).to_owned()))
+            .collect()
     }
 
     // Ported: "returns default environment variables" — util/exec/env.spec.ts line 35
@@ -7826,15 +8720,36 @@ dep1 = "^1.0.0"
             ("LOCALAPPDATA", "LOCALAPPDATA"),
         ]);
         let result = get_child_process_env(&env, &[], false);
-        assert_eq!(result.get("HTTP_PROXY").map(String::as_str), Some("HTTP_PROXY"));
-        assert_eq!(result.get("HTTPS_PROXY").map(String::as_str), Some("HTTPS_PROXY"));
+        assert_eq!(
+            result.get("HTTP_PROXY").map(String::as_str),
+            Some("HTTP_PROXY")
+        );
+        assert_eq!(
+            result.get("HTTPS_PROXY").map(String::as_str),
+            Some("HTTPS_PROXY")
+        );
         assert_eq!(result.get("HOME").map(String::as_str), Some("HOME"));
         assert_eq!(result.get("PATH").map(String::as_str), Some("PATH"));
-        assert_eq!(result.get("DOCKER_HOST").map(String::as_str), Some("DOCKER_HOST"));
-        assert_eq!(result.get("GIT_SSL_CAPATH").map(String::as_str), Some("GIT_SSL_CAPATH"));
-        assert_eq!(result.get("URL_REPLACE_1_FROM").map(String::as_str), Some("URL_REPLACE_1_FROM"));
-        assert_eq!(result.get("URL_REPLACE_1_TO").map(String::as_str), Some("URL_REPLACE_1_TO"));
-        assert_eq!(result.get("PROGRAMFILES").map(String::as_str), Some("PROGRAMFILES"));
+        assert_eq!(
+            result.get("DOCKER_HOST").map(String::as_str),
+            Some("DOCKER_HOST")
+        );
+        assert_eq!(
+            result.get("GIT_SSL_CAPATH").map(String::as_str),
+            Some("GIT_SSL_CAPATH")
+        );
+        assert_eq!(
+            result.get("URL_REPLACE_1_FROM").map(String::as_str),
+            Some("URL_REPLACE_1_FROM")
+        );
+        assert_eq!(
+            result.get("URL_REPLACE_1_TO").map(String::as_str),
+            Some("URL_REPLACE_1_TO")
+        );
+        assert_eq!(
+            result.get("PROGRAMFILES").map(String::as_str),
+            Some("PROGRAMFILES")
+        );
         assert_eq!(result.get("APPDATA").map(String::as_str), Some("APPDATA"));
     }
 
@@ -7868,9 +8783,15 @@ dep1 = "^1.0.0"
         ]);
         let result = get_child_process_env(&env, &["FOOBAR"], false);
         assert_eq!(result.get("FOOBAR").map(String::as_str), Some("FOOBAR"));
-        assert_eq!(result.get("DOCKER_HOST").map(String::as_str), Some("DOCKER_HOST"));
+        assert_eq!(
+            result.get("DOCKER_HOST").map(String::as_str),
+            Some("DOCKER_HOST")
+        );
         assert_eq!(result.get("HOME").map(String::as_str), Some("HOME"));
-        assert_eq!(result.get("HTTPS_PROXY").map(String::as_str), Some("HTTPS_PROXY"));
+        assert_eq!(
+            result.get("HTTPS_PROXY").map(String::as_str),
+            Some("HTTPS_PROXY")
+        );
     }
 
     // Ported: "returns process.env if trustlevel set to high" — util/exec/env.spec.ts line 79

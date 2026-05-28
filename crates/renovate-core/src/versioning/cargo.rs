@@ -429,7 +429,8 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
 /// Equivalent to Renovate cargo `isSingleVersion`.
 pub fn is_single_version(constraint: &str) -> bool {
     let t = constraint.trim();
-    t.starts_with('=') && Version::parse(t[1..].trim()).is_ok()
+    t.strip_prefix('=')
+        .is_some_and(|rest| Version::parse(rest.trim()).is_ok())
 }
 
 /// Return the pinned form of `version` (`=version`).

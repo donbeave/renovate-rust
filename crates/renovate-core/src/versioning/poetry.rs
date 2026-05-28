@@ -385,7 +385,7 @@ pub fn npm2poetry(range: &str) -> String {
     let mut sep_iter = separators.iter();
 
     for part in &parts {
-        let converted = semver2poetry(part).unwrap_or_else(|| part.to_string());
+        let converted = semver2poetry(part).unwrap_or_else(|| (*part).to_owned());
         transformed.push_str(&converted);
         if let Some(sep) = sep_iter.next() {
             transformed.push_str(sep);

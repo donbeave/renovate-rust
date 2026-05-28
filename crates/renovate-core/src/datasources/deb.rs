@@ -154,7 +154,10 @@ mod tests {
         // SHA-256("bar") = fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9
         let hash = Sha256::digest(b"bar");
         let hex_str: String = hash.iter().map(|b| format!("{b:02x}")).collect();
-        assert_eq!(hex_str, "fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9");
+        assert_eq!(
+            hex_str,
+            "fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9"
+        );
     }
 
     // Ported: "should fail if there is an error in the stream" — datasource/deb/checksum.spec.ts line 56

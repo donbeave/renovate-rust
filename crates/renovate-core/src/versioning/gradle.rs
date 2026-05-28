@@ -690,10 +690,10 @@ pub fn get_new_value(
         let preferred = preferred.clone();
         // Strip `!!preferred` from the end to get the base range.
         let suffix = format!("!!{preferred}");
-        let base_range = match current_value.rfind(&suffix) {
-            Some(idx) => &current_value[..idx],
-            None => return Some(current_value.to_owned()),
+        let Some(idx) = current_value.rfind(&suffix) else {
+            return Some(current_value.to_owned());
         };
+        let base_range = &current_value[..idx];
         let new_base_range = maven::get_new_value(base_range, range_strategy, new_version);
 
         let preferred_is_boundary = mbr.left_val.as_deref() == Some(&preferred)

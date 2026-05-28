@@ -78,7 +78,7 @@ fn convert_stability_modifier(input: &str) -> String {
         .replace_all(parts[1], |caps: &regex::Captures| {
             format!("{}.{}", &caps[1], &caps[2])
         })
-        .to_string();
+        .into_owned();
     format!("{}-{}", pad_zeroes(parts[0]), stability)
 }
 
@@ -417,7 +417,7 @@ pub fn get_new_value(
         .is_some_and(|p| p.contains('v'))
     {
         let digit_regex = Regex::new(r"([0-9])").unwrap();
-        result = digit_regex.replace(&result, "v$1").to_string();
+        result = digit_regex.replace(&result, "v$1").into_owned();
     }
 
     // Preserve `@stability` modifier

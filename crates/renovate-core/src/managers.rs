@@ -1122,13 +1122,13 @@ mod tests {
             "requirements.dev.pip",
         ] {
             assert!(
-                pip.matched_files.contains(&name.to_string()),
+                pip.matched_files.contains(&(*name).to_owned()),
                 "{name} should match pip_requirements"
             );
         }
         for name in &["setup.py", "pyproject.toml"] {
             assert!(
-                !pip.matched_files.contains(&name.to_string()),
+                !pip.matched_files.contains(&(*name).to_owned()),
                 "{name} should NOT match pip_requirements"
             );
         }
@@ -1155,7 +1155,7 @@ mod tests {
         let all_files: Vec<String> = should_match
             .iter()
             .chain(should_not_match.iter())
-            .map(|s| s.to_string())
+            .map(|s| (*s).to_owned())
             .collect();
         let file_refs: Vec<&str> = all_files.iter().map(|s| s.as_str()).collect();
         let f = files(&file_refs);
@@ -1163,13 +1163,13 @@ mod tests {
         let mgr = result.iter().find(|m| m.name == "circleci").unwrap();
         for name in should_match {
             assert!(
-                mgr.matched_files.contains(&name.to_string()),
+                mgr.matched_files.contains(&(*name).to_owned()),
                 "{name} should match circleci"
             );
         }
         for name in should_not_match {
             assert!(
-                !mgr.matched_files.contains(&name.to_string()),
+                !mgr.matched_files.contains(&(*name).to_owned()),
                 "{name} should NOT match circleci"
             );
         }
@@ -1221,7 +1221,7 @@ mod tests {
         let all_files: Vec<String> = should_match
             .iter()
             .chain(should_not_match.iter())
-            .map(|s| s.to_string())
+            .map(|s| (*s).to_owned())
             .collect();
         let file_refs: Vec<&str> = all_files.iter().map(|s| s.as_str()).collect();
         let f = files(&file_refs);
@@ -1232,13 +1232,13 @@ mod tests {
             .expect("mise manager not detected");
         for name in should_match {
             assert!(
-                mise.matched_files.contains(&name.to_string()),
+                mise.matched_files.contains(&(*name).to_owned()),
                 "{name} should match mise"
             );
         }
         for name in should_not_match {
             assert!(
-                !mise.matched_files.contains(&name.to_string()),
+                !mise.matched_files.contains(&(*name).to_owned()),
                 "{name} should NOT match mise"
             );
         }
@@ -1275,7 +1275,7 @@ mod tests {
         let all_files: Vec<String> = should_match
             .iter()
             .chain(should_not_match.iter())
-            .map(|s| s.to_string())
+            .map(|s| (*s).to_owned())
             .collect();
         let file_refs: Vec<&str> = all_files.iter().map(|s| s.as_str()).collect();
         let f = files(&file_refs);
@@ -1286,13 +1286,13 @@ mod tests {
             .expect("proto manager not detected");
         for name in should_match {
             assert!(
-                proto.matched_files.contains(&name.to_string()),
+                proto.matched_files.contains(&(*name).to_owned()),
                 "{name} should match proto"
             );
         }
         for name in should_not_match {
             assert!(
-                !proto.matched_files.contains(&name.to_string()),
+                !proto.matched_files.contains(&(*name).to_owned()),
                 "{name} should NOT match proto"
             );
         }

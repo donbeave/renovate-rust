@@ -105,7 +105,9 @@ const DISALLOWED_PREFIXES: &[&str] = &["branch", "commit", "group", "pr", "seman
 
 /// Check if a key is in the disallowed list for secret substitution.
 fn is_disallowed_key(key: &str) -> bool {
-    DISALLOWED_PREFIXES.iter().any(|prefix| key.starts_with(prefix))
+    DISALLOWED_PREFIXES
+        .iter()
+        .any(|prefix| key.starts_with(prefix))
 }
 
 fn replace_values(
@@ -125,13 +127,13 @@ fn replace_values_with_key(
     match value {
         Value::String(s) => {
             // Check disallowed keys BEFORE replacing
-            if let Some(key) = current_key {
-                if is_disallowed_key(key) {
-                    // Check if the string contains a template pattern
-                    let pattern = format!(r"\{{\{{ *{}\..*?\}}\}}", namespace);
-                    if regex::Regex::new(&pattern).is_ok_and(|re| re.is_match(s)) {
-                        return Err(SecretsError::ConfigValidation);
-                    }
+            if let Some(key) = current_key
+                && is_disallowed_key(key)
+            {
+                // Check if the string contains a template pattern
+                let pattern = format!(r"\{{\{{ *{}\..*?\}}\}}", namespace);
+                if regex::Regex::new(&pattern).is_ok_and(|re| re.is_match(s)) {
+                    return Err(SecretsError::ConfigValidation);
                 }
             }
             *s = replace_string(s, namespace, replacements)?;

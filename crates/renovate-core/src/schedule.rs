@@ -1828,7 +1828,7 @@ mod tests {
     // ── is_valid_schedule (hasValidSchedule) ─────────────────────────────────
 
     fn sched(entries: &[&str]) -> Vec<String> {
-        entries.iter().map(|s| s.to_string()).collect()
+        entries.iter().map(|s| (*s).to_owned()).collect()
     }
 
     // Ported: "returns true for null" — workers/repository/update/branch/schedule.spec.ts line 17
