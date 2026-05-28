@@ -1716,4 +1716,22 @@ mod tests {
 
         assert!(!rule.current_version_matches("\"~> 0.1.0\"", None, None));
     }
+
+    // Ported: "return true for same-major verisioning if version lies in expected range" — util/package-rules/current-version.spec.ts line 120
+    #[test]
+    fn current_version_matcher_same_major_in_range() {
+        // matchCurrentVersion='6.0.400', currentValue='6.0.300'
+        // 6.0.400 satisfies ^6.0.300 (>=6.0.300 <7) → true
+        let rule = rule_with_current_version("6.0.400");
+        assert!(rule.current_version_matches("6.0.300", None, None));
+    }
+
+    // Ported: "return false for same-major verisioning if version lies outside of expected range" — util/package-rules/current-version.spec.ts line 133
+    #[test]
+    fn current_version_matcher_same_major_out_of_range() {
+        // matchCurrentVersion='6.0.100', currentValue='6.0.300'
+        // 6.0.100 does NOT satisfy ^6.0.300 (6.0.100 < 6.0.300) → false
+        let rule = rule_with_current_version("6.0.100");
+        assert!(!rule.current_version_matches("6.0.300", None, None));
+    }
 }
