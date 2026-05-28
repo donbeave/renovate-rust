@@ -586,6 +586,125 @@ pub fn changelog_has_valid_repository(repo: &str) -> bool {
 }
 
 // ---------------------------------------------------------------------------
+// Go proxy / noproxy parsing — lib/modules/datasource/go/goproxy-parser.ts
+// ---------------------------------------------------------------------------
+
+/// One entry in a parsed `GOPROXY` value.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GoproxyItem {
+    pub url: String,
+    /// Separator that follows this entry: `","` (try next), `"|"` (on error try next), or `None` (last entry).
+    pub fallback: Option<char>,
+}
+
+/// Parse the `GOPROXY` environment variable into a sequence of proxy entries.
+///
+/// Mirrors `parseGoproxy()` from `lib/modules/datasource/go/goproxy-parser.ts`.
+pub fn parse_goproxy(input: &str) -> Vec<GoproxyItem> {
+    if input.is_empty() {
+        return Vec::new();
+    }
+    let mut items = Vec::new();
+    let mut remaining = input;
+    while !remaining.is_empty() {
+        // Find next separator (comma or pipe)
+        let pos = remaining.find(|c| c == ',' || c == '|');
+        match pos {
+            None => {
+                items.push(GoproxyItem { url: remaining.to_string(), fallback: None });
+                break;
+            }
+            Some(i) => {
+                let url = &remaining[..i];
+                let sep = remaining.chars().nth(i).unwrap();
+                items.push(GoproxyItem { url: url.to_string(), fallback: Some(sep) });
+                remaining = &remaining[i + 1..];
+            }
+        }
+    }
+    items
+}
+
+/// Convert a `NOPROXY`/`GONOPROXY` glob pattern to a `Regex`, or `None` if the
+/// pattern is empty or produces an empty regex.
+///
+/// Supported syntax (Go path matching):
+/// - `*` → matches any non-`/` sequence
+/// - `?` → matches a single non-`/` character
+/// - `[abc]`, `[a-c]` → character ranges
+/// - `\x` → literal `x` (escape)
+/// - `.` → literal dot (escaped in regex)
+/// - Trailing `/` → ignored
+/// - `,` → alternation separator
+///
+/// Mirrors `parseNoproxy()` from `lib/modules/datasource/go/goproxy-parser.ts`.
+pub fn parse_noproxy(input: &str) -> Option<regex::Regex> {
+    if input.is_empty() {
+        return None;
+    }
+
+    // Build alternatives by splitting on comma (after stripping spaces)
+    let alts: Vec<String> = input
+        .split(',')
+        .filter(|s| !s.trim().is_empty())
+        .map(|pat| glob_to_regex_part(pat.trim()))
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    if alts.is_empty() {
+        return None;
+    }
+
+    let pattern = format!("^(?:{})(?:/.*)?$", alts.join("|"));
+    regex::Regex::new(&pattern).ok()
+}
+
+fn glob_to_regex_part(pattern: &str) -> String {
+    let mut result = String::new();
+    let mut chars = pattern.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '*' => result.push_str("[^/]*"),
+            '?' => result.push_str("[^/]"),
+            '[' => {
+                // Character range: read until ']'
+                result.push('[');
+                while let Some(inner) = chars.next() {
+                    if inner == '\\' {
+                        // escape: take next char literally
+                        if let Some(next) = chars.next() {
+                            result.push(next);
+                        }
+                    } else if inner == ']' {
+                        result.push(']');
+                        break;
+                    } else {
+                        result.push(inner);
+                    }
+                }
+            }
+            '\\' => {
+                // Escape: take next char literally
+                if let Some(next) = chars.next() {
+                    result.push(next);
+                }
+            }
+            '/' => {
+                // Strip trailing slash; for non-trailing, handle path separator
+                if chars.peek().is_none() {
+                    // trailing slash: skip
+                } else {
+                    result.push('/');
+                }
+            }
+            '.' => result.push_str("\\."),
+            c => result.push(c),
+        }
+    }
+    result
+}
+
+// ---------------------------------------------------------------------------
 // GitHub GraphQL releases adapter — lib/util/github/graphql/query-adapters/releases-query-adapter.ts
 // ---------------------------------------------------------------------------
 
@@ -5313,6 +5432,113 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── parse_goproxy / parse_noproxy ────────────────────────────────────────
+
+    // Ported: "parses single url" — modules/datasource/go/goproxy-parser.spec.ts line 10
+    #[test]
+    fn test_parse_goproxy_single() {
+        let r = parse_goproxy("foo");
+        assert_eq!(r.len(), 1);
+        assert_eq!(r[0].url, "foo");
+        assert_eq!(r[0].fallback, None);
+    }
+
+    // Ported: "parses multiple urls" — modules/datasource/go/goproxy-parser.spec.ts line 15
+    #[test]
+    fn test_parse_goproxy_multiple() {
+        let r = parse_goproxy("foo,bar|baz,qux");
+        assert_eq!(r.len(), 4);
+        assert_eq!(r[0], GoproxyItem { url: "foo".into(), fallback: Some(',') });
+        assert_eq!(r[1], GoproxyItem { url: "bar".into(), fallback: Some('|') });
+        assert_eq!(r[2], GoproxyItem { url: "baz".into(), fallback: Some(',') });
+        assert_eq!(r[3], GoproxyItem { url: "qux".into(), fallback: None });
+    }
+
+    // Ported: "ignores everything starting from "direct" and "off" keywords" — goproxy-parser.spec.ts line 25
+    #[test]
+    fn test_parse_goproxy_empty_and_keywords() {
+        assert!(parse_goproxy("").is_empty());
+        let off = parse_goproxy("off");
+        assert_eq!(off[0].url, "off");
+        let direct = parse_goproxy("direct");
+        assert_eq!(direct[0].url, "direct");
+        let mixed = parse_goproxy("foo,off|direct,qux");
+        assert_eq!(mixed.len(), 4);
+        assert_eq!(mixed[0].url, "foo");
+        assert_eq!(mixed[1].url, "off");
+        assert_eq!(mixed[2].url, "direct");
+        assert_eq!(mixed[3].url, "qux");
+    }
+
+    // Ported: "produces regex" — modules/datasource/go/goproxy-parser.spec.ts line 49
+    #[test]
+    fn test_parse_noproxy_produces_regex() {
+        assert!(parse_noproxy("").is_none());
+        assert!(parse_noproxy("/").is_none());
+        let star = parse_noproxy("*").unwrap();
+        assert_eq!(star.as_str(), "^(?:[^/]*)(?:/.*)?$");
+        let qmark = parse_noproxy("?").unwrap();
+        assert_eq!(qmark.as_str(), "^(?:[^/])(?:/.*)?$");
+        let foo = parse_noproxy("foo").unwrap();
+        assert_eq!(foo.as_str(), "^(?:foo)(?:/.*)?$");
+        let foo_bar = parse_noproxy("foo,bar").unwrap();
+        assert_eq!(foo_bar.as_str(), "^(?:foo|bar)(?:/.*)?$");
+        let dot = parse_noproxy("a.b.c").unwrap();
+        assert_eq!(dot.as_str(), r"^(?:a\.b\.c)(?:/.*)?$");
+        let trailing = parse_noproxy("trailing/").unwrap();
+        assert_eq!(trailing.as_str(), "^(?:trailing)(?:/.*)?$");
+        // escaped chars
+        let escaped_foo = parse_noproxy(r"\f\o\o").unwrap();
+        assert_eq!(escaped_foo.as_str(), "^(?:foo)(?:/.*)?$");
+        // character range with escaped chars
+        let escaped_range = parse_noproxy(r"[\a-\c]").unwrap();
+        assert_eq!(escaped_range.as_str(), "^(?:[a-c])(?:/.*)?$");
+    }
+
+    // Ported: "matches on real package prefixes" — modules/datasource/go/goproxy-parser.spec.ts line 68
+    #[test]
+    fn test_parse_noproxy_real_prefixes() {
+        assert!(parse_noproxy("ex.co").unwrap().is_match("ex.co/foo"));
+        assert!(parse_noproxy("ex.co/").unwrap().is_match("ex.co/foo"));
+        assert!(parse_noproxy("ex.co/foo/bar").unwrap().is_match("ex.co/foo/bar"));
+        assert!(parse_noproxy("*/foo/*").unwrap().is_match("example.com/foo/bar"));
+        assert!(parse_noproxy("ex.co/foo/*").unwrap().is_match("ex.co/foo/bar"));
+        assert!(parse_noproxy("ex.co/foo/*").unwrap().is_match("ex.co/foo/baz"));
+        assert!(parse_noproxy("ex.co").unwrap().is_match("ex.co/foo/v2"));
+        let multi = parse_noproxy("ex.co/foo/bar,ex.co/foo/baz").unwrap();
+        assert!(multi.is_match("ex.co/foo/bar"));
+        assert!(multi.is_match("ex.co/foo/baz"));
+        assert!(!multi.is_match("ex.co/foo/qux"));
+        assert!(!parse_noproxy("ex").unwrap().is_match("ex.co/foo"));
+        assert!(!parse_noproxy("aba").unwrap().is_match("x/aba"));
+        assert!(parse_noproxy("x/ab[a-b]").unwrap().is_match("x/aba"));
+    }
+
+    // Ported: "matches on wildcards" — modules/datasource/go/goproxy-parser.spec.ts line 100
+    #[test]
+    fn test_parse_noproxy_wildcards() {
+        assert!(!parse_noproxy("/*/").unwrap().is_match("ex.co/foo"));
+        assert!(parse_noproxy("*/foo").unwrap().is_match("ex.co/foo"));
+        assert!(!parse_noproxy("*/fo").unwrap().is_match("ex.co/foo"));
+        assert!(parse_noproxy("*/fo?").unwrap().is_match("ex.co/foo"));
+        assert!(parse_noproxy("*/fo*").unwrap().is_match("ex.co/foo"));
+        assert!(!parse_noproxy("*fo*").unwrap().is_match("ex.co/foo"));
+        assert!(parse_noproxy("*.co").unwrap().is_match("ex.co/foo"));
+        assert!(parse_noproxy("ex*").unwrap().is_match("ex.co/foo"));
+        assert!(parse_noproxy("*/foo").unwrap().is_match("ex.co/foo/v2"));
+        assert!(!parse_noproxy("*/v2").unwrap().is_match("ex.co/foo/v2"));
+        assert!(parse_noproxy("*/*/v2").unwrap().is_match("ex.co/foo/v2"));
+        assert!(parse_noproxy("*/*/*").unwrap().is_match("ex.co/foo/v2"));
+        assert!(!parse_noproxy("*/*/*").unwrap().is_match("ex.co/foo"));
+    }
+
+    // Ported: "matches on character ranges" — modules/datasource/go/goproxy-parser.spec.ts line 126
+    #[test]
+    fn test_parse_noproxy_char_ranges() {
+        assert!(parse_noproxy("x/ab[a-b]").unwrap().is_match("x/aba"));
+        assert!(!parse_noproxy("x/ab[a-b]").unwrap().is_match("x/abc"));
     }
 
     // ── get_expected_pr_list ─────────────────────────────────────────────────

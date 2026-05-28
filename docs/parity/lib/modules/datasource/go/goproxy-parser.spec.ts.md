@@ -5,26 +5,25 @@
 ## `lib/modules/datasource/go/goproxy-parser.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/go/goproxy-parser.spec.ts
-**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+**Total tests:** 9 | **Ported:** 7 | **Actionable:** 9 | **Status:** partial
 
 ### `modules/datasource/go/goproxy-parser › parseGoproxy`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses single url | 10 | pending | — | — | — |
-| parses multiple urls | 15 | pending | — | — | — |
-| ignores everything starting from "direct" and "off" keywords | 25 | pending | — | — | — |
-| caches results | 43 | pending | — | — | — |
+| parses single url | 10 | ported | `util.rs` | `test_parse_goproxy_single` | — |
+| parses multiple urls | 15 | ported | `util.rs` | `test_parse_goproxy_multiple` | — |
+| ignores everything starting from "direct" and "off" keywords | 25 | ported | `util.rs` | `test_parse_goproxy_empty_and_keywords` | — |
+| caches results | 43 | not-applicable | — | — | Tests referential identity of cached objects; Rust returns owned values, no ref-equality |
 
 ### `modules/datasource/go/goproxy-parser › parseNoproxy`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| produces regex | 49 | pending | — | — | — |
-| matches on real package prefixes | 68 | pending | — | — | — |
-| matches on wildcards | 100 | pending | — | — | — |
-| matches on character ranges | 126 | pending | — | — | — |
-| caches results | 131 | pending | — | — | — |
+| produces regex | 49 | ported | `util.rs` | `test_parse_noproxy_produces_regex` | — |
+| matches on real package prefixes | 68 | ported | `util.rs` | `test_parse_noproxy_real_prefixes` | — |
+| matches on wildcards | 100 | ported | `util.rs` | `test_parse_noproxy_wildcards` | — |
+| matches on character ranges | 126 | ported | `util.rs` | `test_parse_noproxy_char_ranges` | — |
+| caches results | 131 | not-applicable | — | — | Tests referential identity of cached objects; Rust returns owned values, no ref-equality |
 
 ---
-
