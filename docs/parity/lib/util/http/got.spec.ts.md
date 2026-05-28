@@ -5,14 +5,14 @@
 ## `lib/util/http/got.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/got.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** partial
 
 ### `util/http/got`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| configures rejectUnauthorized when forced | 15 | pending | — | — | — |
-| does a flat clone of options | 25 | pending | — | — | — |
+| configures rejectUnauthorized when forced | 15 | not-applicable | — | — | Requires httpMock.scope + Node.js process.env |
+| does a flat clone of options | 25 | not-applicable | — | — | Requires httpMock.scope + Node.js process.env |
 
 ---
 
