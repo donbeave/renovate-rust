@@ -1141,6 +1141,24 @@ mod www_auth_tests {
         assert!(parse_retry_after_value("invalid", now).is_none());
     }
 
+    // Ported: "returns null missing \"retry-after\" header" — util/http/retry-after.spec.ts line 103
+    #[tokio::test]
+    async fn retry_after_missing_header_returns_none() {
+        let server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("GET"))
+            .and(wiremock::matchers::path("/no-header"))
+            .respond_with(wiremock::ResponseTemplate::new(429))
+            .mount(&server)
+            .await;
+        let http = HttpClient::new().unwrap();
+        let resp = http
+            .get(&format!("{}/no-header", server.uri()))
+            .send()
+            .await
+            .unwrap();
+        assert!(parse_retry_after(&resp).is_none());
+    }
+
     // Ported: "returns $expected for status code $statusCode and followRedirect $followRedirect" — util/http/hooks.spec.ts line 5
     #[test]
     fn test_is_response_ok() {

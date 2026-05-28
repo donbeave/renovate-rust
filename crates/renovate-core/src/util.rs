@@ -14,6 +14,82 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Child-process environment — lib/util/exec/env.ts
+// ---------------------------------------------------------------------------
+
+const BASIC_ENV_VARS: &[&str] = &[
+    "CI",
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "NO_PROXY",
+    "http_proxy",
+    "https_proxy",
+    "no_proxy",
+    "HOME",
+    "PATH",
+    "LC_ALL",
+    "LANG",
+    "DOCKER_HOST",
+    "DOCKER_TLS_VERIFY",
+    "DOCKER_CERT_PATH",
+    "SSL_CERT_DIR",
+    "SSL_CERT_FILE",
+    "NODE_EXTRA_CA_CERTS",
+    "GIT_SSL_CAPATH",
+    "GIT_SSL_CAINFO",
+    "PROGRAMFILES",
+    "PROGRAMFILES(X86)",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "PROCESSOR_ARCHITECTURE",
+    "PATHEXT",
+    "COREPACK_DEFAULT_TO_LATEST",
+    "COREPACK_ENABLE_NETWORK",
+    "COREPACK_ENABLE_STRICT",
+    "COREPACK_ENABLE_PROJECT_SPEC",
+    "COREPACK_ENABLE_UNSAFE_CUSTOM_URLS",
+    "COREPACK_HOME",
+    "COREPACK_INTEGRITY_KEYS",
+    "COREPACK_NPM_REGISTRY",
+    "COREPACK_NPM_TOKEN",
+    "COREPACK_NPM_USERNAME",
+    "COREPACK_NPM_PASSWORD",
+    "COREPACK_ROOT",
+    "PNPM_WORKERS",
+    "PNPM_MAX_WORKERS",
+];
+
+static URL_REPLACE_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+    regex::Regex::new(r"^URL_REPLACE_\d+_(FROM|TO)$").expect("valid regex")
+});
+
+/// Build child-process environment from `env_source`.
+///
+/// When `expose_all` is true returns a clone of the entire source map. Otherwise
+/// returns only the allowed vars plus any `URL_REPLACE_N_{FROM,TO}` entries.
+pub fn get_child_process_env(
+    env_source: &std::collections::HashMap<String, String>,
+    custom_vars: &[&str],
+    expose_all: bool,
+) -> std::collections::HashMap<String, String> {
+    if expose_all {
+        return env_source.clone();
+    }
+    let mut out = std::collections::HashMap::new();
+    for key in BASIC_ENV_VARS.iter().chain(custom_vars.iter()) {
+        if let Some(val) = env_source.get(*key) {
+            out.insert((*key).to_string(), val.clone());
+        }
+    }
+    for (key, val) in env_source {
+        if URL_REPLACE_RE.is_match(key) {
+            out.insert(key.clone(), val.clone());
+        }
+    }
+    out
+}
+
+// ---------------------------------------------------------------------------
 // Environment utilities — lib/util/env.ts
 // ---------------------------------------------------------------------------
 
@@ -533,6 +609,94 @@ pub fn calculate_abandonment(
         .timestamp_millis();
     let abandonment_ms = most_recent_ms + threshold_ms;
     Some(abandonment_ms < now_ms)
+}
+
+// ---------------------------------------------------------------------------
+// Release timestamp utilities — lib/workers/repository/process/lookup/timestamps.ts
+// ---------------------------------------------------------------------------
+
+/// One release entry for timestamp calculation.
+#[derive(Debug)]
+pub struct ReleaseEntry<'a> {
+    pub version: &'a str,
+    pub release_timestamp: Option<&'a str>,
+    pub is_deprecated: bool,
+}
+
+/// Parse an ISO8601 timestamp string, returning None if invalid or out of range.
+///
+/// Mirrors `asTimestamp` from `lib/util/timestamp.ts`:
+/// must be after 2000-01-01 and not in the future.
+fn as_timestamp(input: Option<&str>) -> Option<&str> {
+    let s = input?;
+    // Must parse as RFC3339/ISO8601
+    let dt = chrono::DateTime::parse_from_rfc3339(s).ok()?;
+    let ts_ms = dt.timestamp_millis();
+    let millenium: i64 = 946_684_800_000; // 2000-01-01
+    if ts_ms <= millenium {
+        return None;
+    }
+    Some(s)
+}
+
+/// Compute `mostRecentTimestamp` for a package release list.
+///
+/// Returns the ISO timestamp of the highest-version release if and only if:
+/// - A highest valid version exists
+/// - It is not deprecated
+/// - Its timestamp is >= all other releases' timestamps
+///
+/// Mirrors `calculateMostRecentTimestamp` from
+/// `lib/workers/repository/process/lookup/timestamps.ts`.
+pub fn calculate_most_recent_timestamp<'a>(
+    releases: &[ReleaseEntry<'a>],
+    is_version: impl Fn(&str) -> bool,
+    is_greater_than: impl Fn(&str, &str) -> bool,
+) -> Option<String> {
+    // Find highest valid version
+    let mut highest: Option<&ReleaseEntry<'a>> = None;
+    for r in releases {
+        if !is_version(r.version) {
+            continue;
+        }
+        match highest {
+            None => highest = Some(r),
+            Some(h) => {
+                // try/catch equivalent: ignore comparison errors
+                if is_greater_than(r.version, h.version) {
+                    highest = Some(r);
+                }
+            }
+        }
+    }
+
+    let h = highest?;
+
+    if h.is_deprecated {
+        return None;
+    }
+
+    let highest_ts = as_timestamp(h.release_timestamp)?;
+    let highest_dt = chrono::DateTime::parse_from_rfc3339(highest_ts).ok()?;
+
+    // Check if any release has a NEWER timestamp than highest version's timestamp
+    let higher_exists = releases.iter().any(|r| {
+        let ts = match as_timestamp(r.release_timestamp) {
+            Some(s) => s,
+            None => return false,
+        };
+        let dt = match chrono::DateTime::parse_from_rfc3339(ts) {
+            Ok(d) => d,
+            Err(_) => return false,
+        };
+        dt > highest_dt
+    });
+
+    if higher_exists {
+        return None;
+    }
+
+    Some(highest_ts.to_string())
 }
 
 // ---------------------------------------------------------------------------
@@ -4910,5 +5074,218 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── calculate_most_recent_timestamp ──────────────────────────────────────
+
+    fn semver_is_version(v: &str) -> bool { crate::versioning::npm::is_version(v) }
+    fn semver_is_greater_than(a: &str, b: &str) -> bool { crate::versioning::npm::is_greater_than(a, b) }
+
+    // Ported: "returns the timestamp of the latest version" — workers/repository/process/lookup/timestamps.spec.ts line 10
+    #[test]
+    fn test_timestamps_returns_latest() {
+        let releases = vec![
+            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "0.9.0", release_timestamp: Some("2020-01-01T00:00:00.000Z"), is_deprecated: false },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert_eq!(ts.as_deref(), Some("2022-01-01T00:00:00.000Z"));
+    }
+
+    // Ported: "handles releases with missing timestamps" — workers/repository/process/lookup/timestamps.spec.ts line 33
+    #[test]
+    fn test_timestamps_missing_middle() {
+        let releases = vec![
+            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "2.0.0", release_timestamp: None, is_deprecated: false },
+            ReleaseEntry { version: "3.0.0", release_timestamp: Some("2023-01-01T00:00:00.000Z"), is_deprecated: false },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert_eq!(ts.as_deref(), Some("2023-01-01T00:00:00.000Z"));
+    }
+
+    // Ported: "handles latest release with missing timestamp" — workers/repository/process/lookup/timestamps.spec.ts line 53
+    #[test]
+    fn test_timestamps_latest_no_timestamp() {
+        let releases = vec![
+            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "3.0.0", release_timestamp: None, is_deprecated: false },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert!(ts.is_none());
+    }
+
+    // Ported: "handles latest release with deprecation flag" — workers/repository/process/lookup/timestamps.spec.ts line 75
+    #[test]
+    fn test_timestamps_latest_deprecated() {
+        let releases = vec![
+            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "3.0.0", release_timestamp: Some("2023-01-01T00:00:00.000Z"), is_deprecated: true },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert!(ts.is_none());
+    }
+
+    // Ported: "handles latest release with invalid version" — workers/repository/process/lookup/timestamps.spec.ts line 99
+    #[test]
+    fn test_timestamps_invalid_timestamp_for_highest() {
+        let releases = vec![
+            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "3.0.0", release_timestamp: Some("invalid"), is_deprecated: false },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert!(ts.is_none());
+    }
+
+    // Ported: "returns undefined mostRecentTimestamp when no valid timestamps exist" — workers/repository/process/lookup/timestamps.spec.ts line 122
+    #[test]
+    fn test_timestamps_no_valid_timestamps() {
+        let releases = vec![
+            ReleaseEntry { version: "1.0.0", release_timestamp: None, is_deprecated: false },
+            ReleaseEntry { version: "2.0.0", release_timestamp: None, is_deprecated: false },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert!(ts.is_none());
+    }
+
+    // Ported: "handles empty releases array" — workers/repository/process/lookup/timestamps.spec.ts line 132
+    #[test]
+    fn test_timestamps_empty_releases() {
+        let releases: Vec<ReleaseEntry> = vec![];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert!(ts.is_none());
+    }
+
+    // Ported: "preserves other properties in the release result" — workers/repository/process/lookup/timestamps.spec.ts line 138
+    #[test]
+    fn test_timestamps_single_release() {
+        let releases = vec![
+            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert_eq!(ts.as_deref(), Some("2021-01-01T00:00:00.000Z"));
+    }
+
+    // Ported: "handles ancient versions that are higher than the ones recently released" — workers/repository/process/lookup/timestamps.spec.ts line 160
+    #[test]
+    fn test_timestamps_ancient_high_version() {
+        // 99.99.99-alpha is the highest semver but has an OLD timestamp (2010).
+        // 2.0.0 has a NEWER timestamp (2022). So higher timestamp exists for lower version → None.
+        let releases = vec![
+            ReleaseEntry { version: "99.99.99-alpha", release_timestamp: Some("2010-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert!(ts.is_none());
+    }
+
+    // Ported: "handles errors thrown for invalid versions" — workers/repository/process/lookup/timestamps.spec.ts line 180
+    #[test]
+    fn test_timestamps_invalid_versions_ignored() {
+        // 'foo' and 'bar' are invalid versions, should be skipped.
+        // Highest valid is 2.0.0 with timestamp 2023.
+        let releases = vec![
+            ReleaseEntry { version: "foo", release_timestamp: Some("2020-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "1.0.0", release_timestamp: Some("2021-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "bar", release_timestamp: Some("2022-01-01T00:00:00.000Z"), is_deprecated: false },
+            ReleaseEntry { version: "2.0.0", release_timestamp: Some("2023-01-01T00:00:00.000Z"), is_deprecated: false },
+        ];
+        let ts = calculate_most_recent_timestamp(&releases, semver_is_version, semver_is_greater_than);
+        assert_eq!(ts.as_deref(), Some("2023-01-01T00:00:00.000Z"));
+    }
+
+    // ── get_child_process_env ─────────────────────────────────────────────────
+
+    fn make_env(pairs: &[(&str, &str)]) -> std::collections::HashMap<String, String> {
+        pairs.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect()
+    }
+
+    // Ported: "returns default environment variables" — util/exec/env.spec.ts line 35
+    #[test]
+    fn test_get_child_process_env_defaults() {
+        let env = make_env(&[
+            ("HTTP_PROXY", "HTTP_PROXY"),
+            ("HTTPS_PROXY", "HTTPS_PROXY"),
+            ("NO_PROXY", "NO_PROXY"),
+            ("HOME", "HOME"),
+            ("PATH", "PATH"),
+            ("LC_ALL", "LC_ALL"),
+            ("LANG", "LANG"),
+            ("DOCKER_HOST", "DOCKER_HOST"),
+            ("GIT_SSL_CAPATH", "GIT_SSL_CAPATH"),
+            ("GIT_SSL_CAINFO", "GIT_SSL_CAINFO"),
+            ("SSL_CERT_FILE", "SSL_CERT_FILE"),
+            ("URL_REPLACE_1_FROM", "URL_REPLACE_1_FROM"),
+            ("URL_REPLACE_1_TO", "URL_REPLACE_1_TO"),
+            ("PROGRAMFILES", "PROGRAMFILES"),
+            ("PROGRAMFILES(X86)", "PROGRAMFILES(X86)"),
+            ("APPDATA", "APPDATA"),
+            ("LOCALAPPDATA", "LOCALAPPDATA"),
+        ]);
+        let result = get_child_process_env(&env, &[], false);
+        assert_eq!(result.get("HTTP_PROXY").map(String::as_str), Some("HTTP_PROXY"));
+        assert_eq!(result.get("HTTPS_PROXY").map(String::as_str), Some("HTTPS_PROXY"));
+        assert_eq!(result.get("HOME").map(String::as_str), Some("HOME"));
+        assert_eq!(result.get("PATH").map(String::as_str), Some("PATH"));
+        assert_eq!(result.get("DOCKER_HOST").map(String::as_str), Some("DOCKER_HOST"));
+        assert_eq!(result.get("GIT_SSL_CAPATH").map(String::as_str), Some("GIT_SSL_CAPATH"));
+        assert_eq!(result.get("URL_REPLACE_1_FROM").map(String::as_str), Some("URL_REPLACE_1_FROM"));
+        assert_eq!(result.get("URL_REPLACE_1_TO").map(String::as_str), Some("URL_REPLACE_1_TO"));
+        assert_eq!(result.get("PROGRAMFILES").map(String::as_str), Some("PROGRAMFILES"));
+        assert_eq!(result.get("APPDATA").map(String::as_str), Some("APPDATA"));
+    }
+
+    // Ported: "returns environment variable only if defined" — util/exec/env.spec.ts line 57
+    #[test]
+    fn test_get_child_process_env_only_defined() {
+        let env = make_env(&[
+            ("HOME", "HOME"),
+            ("HTTPS_PROXY", "HTTPS_PROXY"),
+            // PATH intentionally absent
+        ]);
+        let result = get_child_process_env(&env, &[], false);
+        assert!(result.contains_key("HOME"));
+        assert!(result.contains_key("HTTPS_PROXY"));
+        assert!(!result.contains_key("PATH"));
+    }
+
+    // Ported: "returns custom environment variables if passed and defined" — util/exec/env.spec.ts line 62
+    #[test]
+    fn test_get_child_process_env_custom_vars() {
+        let env = make_env(&[
+            ("DOCKER_HOST", "DOCKER_HOST"),
+            ("FOOBAR", "FOOBAR"),
+            ("HOME", "HOME"),
+            ("HTTPS_PROXY", "HTTPS_PROXY"),
+            ("HTTP_PROXY", "HTTP_PROXY"),
+            ("LANG", "LANG"),
+            ("LC_ALL", "LC_ALL"),
+            ("NO_PROXY", "NO_PROXY"),
+            ("PATH", "PATH"),
+        ]);
+        let result = get_child_process_env(&env, &["FOOBAR"], false);
+        assert_eq!(result.get("FOOBAR").map(String::as_str), Some("FOOBAR"));
+        assert_eq!(result.get("DOCKER_HOST").map(String::as_str), Some("DOCKER_HOST"));
+        assert_eq!(result.get("HOME").map(String::as_str), Some("HOME"));
+        assert_eq!(result.get("HTTPS_PROXY").map(String::as_str), Some("HTTPS_PROXY"));
+    }
+
+    // Ported: "returns process.env if trustlevel set to high" — util/exec/env.spec.ts line 79
+    #[test]
+    fn test_get_child_process_env_expose_all() {
+        let env = make_env(&[
+            ("HOME", "home_val"),
+            ("SECRET_KEY", "secret"),
+            ("RANDOM_VAR", "random"),
+        ]);
+        let result = get_child_process_env(&env, &[], true);
+        // expose_all=true returns everything
+        assert_eq!(result.get("HOME").map(String::as_str), Some("home_val"));
+        assert_eq!(result.get("SECRET_KEY").map(String::as_str), Some("secret"));
+        assert_eq!(result.get("RANDOM_VAR").map(String::as_str), Some("random"));
     }
 }

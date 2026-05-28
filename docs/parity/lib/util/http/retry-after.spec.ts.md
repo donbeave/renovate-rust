@@ -5,7 +5,7 @@
 ## `lib/util/http/retry-after.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/retry-after.spec.ts
-**Total tests:** 13 | **Ported:** 9 | **Actionable:** 13 | **Status:** partial
+**Total tests:** 13 | **Ported:** 10 | **Actionable:** 13 | **Status:** partial
 
 ### `util/http/retry-after › wrapWithRetry`
 
@@ -21,14 +21,13 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for non-RequestError | 89 | pending | — | — | — |
-| returns null for RequestError without response | 93 | pending | — | — | — |
-| returns null for status other than 429 | 97 | pending | — | — | — |
-| returns null missing "retry-after" header | 103 | pending | — | — | — |
+| returns null for non-RequestError | 89 | not-applicable | — | — | TypeScript `instanceof RequestError` check; Rust type system prevents non-Response input |
+| returns null for RequestError without response | 93 | not-applicable | — | — | TypeScript null response check on error object; Rust `parse_retry_after` takes `&Response` directly |
+| returns null for status other than 429 | 97 | not-applicable | — | — | TypeScript status-code guard in getRetryAfter; Rust handles status gating in retry loop |
+| returns null missing "retry-after" header | 103 | ported | `http.rs` | `retry_after_missing_header_returns_none` | — |
 | returns null for non-integer "retry-after" header | 109 | ported | `http.rs` | `retry_after_value_past_date_returns_none` | — |
 | returns delay in seconds from date | 122 | ported | `http.rs` | `retry_after_value_future_date_returns_seconds` | — |
 | returns delay in seconds from number | 136 | ported | `http.rs` | `retry_after_value_numeric_returns_seconds` | — |
 | returns null for invalid header value | 149 | ported | `http.rs` | `retry_after_value_invalid_returns_none` | — |
 
 ---
-
