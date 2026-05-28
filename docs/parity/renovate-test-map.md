@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4577 / 11677 total tests ported (39%) · pending 6505 · not-applicable 595 (5% of total) — updated 2026-05-28
+**Progress:** 4585 / 11677 total tests ported (39%) · pending 6497 · not-applicable 595 (5% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -241,7 +241,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/helm/schema.spec.ts` | Done | [details](lib/modules/datasource/helm/schema.spec.ts.md) |
 | `lib/modules/datasource/npm/schema.spec.ts` | Done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
 | `lib/modules/datasource/nuget/common.spec.ts` | Done | [details](lib/modules/datasource/nuget/common.spec.ts.md) |
-| `lib/modules/datasource/maven/cache.spec.ts` | Not done | [details](lib/modules/datasource/maven/cache.spec.ts.md) |
+| `lib/modules/datasource/maven/cache.spec.ts` | Done | [details](lib/modules/datasource/maven/cache.spec.ts.md) |
 | `lib/modules/datasource/maven/common.spec.ts` | Done | [details](lib/modules/datasource/maven/common.spec.ts.md) |
 | `lib/modules/datasource/docker/dockerhub-cache.spec.ts` | Not done | [details](lib/modules/datasource/docker/dockerhub-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) |
@@ -281,7 +281,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/presets/local/common.spec.ts` | Not done | [details](lib/config/presets/local/common.spec.ts.md) |
 | `lib/config/presets/local/index.spec.ts` | Not done | [details](lib/config/presets/local/index.spec.ts.md) |
 | `lib/config/presets/npm/index.spec.ts` | Not done | [details](lib/config/presets/npm/index.spec.ts.md) |
-| `lib/config/presets/util.spec.ts` | Not done | [details](lib/config/presets/util.spec.ts.md) |
+| `lib/config/presets/util.spec.ts` | Done | [details](lib/config/presets/util.spec.ts.md) |
 | `lib/config/parse.spec.ts` | Done | [details](lib/config/parse.spec.ts.md) |
 | `lib/config/app-strings.spec.ts` | Done | [details](lib/config/app-strings.spec.ts.md) |
 | `lib/config/defaults.spec.ts` | Done | [details](lib/config/defaults.spec.ts.md) |
@@ -356,7 +356,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/instrumentation/detectors.spec.ts` | Not done | [details](lib/instrumentation/detectors.spec.ts.md) |
 | `lib/instrumentation/index.spec.ts` | Not done | [details](lib/instrumentation/index.spec.ts.md) |
 | `lib/instrumentation/reporting.spec.ts` | Not done | [details](lib/instrumentation/reporting.spec.ts.md) |
-| `lib/instrumentation/with-instrumenting.spec.ts` | Not done | [details](lib/instrumentation/with-instrumenting.spec.ts.md) |
+| `lib/instrumentation/with-instrumenting.spec.ts` | Done | [details](lib/instrumentation/with-instrumenting.spec.ts.md) |
 | `lib/instrumentation/utils.spec.ts` | Done | [details](lib/instrumentation/utils.spec.ts.md) |
 | `lib/data/index.spec.ts` | Done | [details](lib/data/index.spec.ts.md) |
 | `lib/logger/bunyan.spec.ts` | Done | [details](lib/logger/bunyan.spec.ts.md) |
@@ -521,7 +521,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bazel/common.spec.ts` | Not done | [details](lib/modules/manager/bazel/common.spec.ts.md) |
 | `lib/modules/manager/bazel/parser.spec.ts` | Not done | [details](lib/modules/manager/bazel/parser.spec.ts.md) |
 | `lib/modules/manager/bazel/rules/index.spec.ts` | Not done | [details](lib/modules/manager/bazel/rules/index.spec.ts.md) |
-| `lib/modules/manager/bazel-module/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/artifacts.spec.ts.md) |
+| `lib/modules/manager/bazel-module/artifacts.spec.ts` | Done | [details](lib/modules/manager/bazel-module/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazel-module/parser/index.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/parser/index.spec.ts.md) |
 | `lib/modules/manager/bazel-module/parser/starlark.spec.ts` | Done | [details](lib/modules/manager/bazel-module/parser/starlark.spec.ts.md) |
 | `lib/modules/manager/bazel-module/rules-img.spec.ts` | Done | [details](lib/modules/manager/bazel-module/rules-img.spec.ts.md) |
@@ -785,8 +785,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/github/graphql/datasource-fetcher.spec.ts` | Done | [details](lib/util/github/graphql/datasource-fetcher.spec.ts.md) |
 | `lib/util/github/graphql/index.spec.ts` | Done | [details](lib/util/github/graphql/index.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts.md) |
-| `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts.md) |
-| `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts.md) |
+| `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts.md) |
+| `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/util.spec.ts` | Done | [details](lib/util/github/graphql/util.spec.ts.md) |
 | `lib/util/github/tags.spec.ts` | Done | [details](lib/util/github/tags.spec.ts.md) |
 | `lib/util/github/url.spec.ts` | Done | [details](lib/util/github/url.spec.ts.md) |
@@ -812,7 +812,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/scm-manager.spec.ts` | Done | [details](lib/util/http/scm-manager.spec.ts.md) |
 | `lib/util/http/throttle.spec.ts` | Done | [details](lib/util/http/throttle.spec.ts.md) |
 | `lib/util/http/www-authenticate.spec.ts` | Done | [details](lib/util/http/www-authenticate.spec.ts.md) |
-| `lib/util/json-writer/editor-config.spec.ts` | Not done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
+| `lib/util/json-writer/editor-config.spec.ts` | Done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
 | `lib/util/json-writer/json-writer.spec.ts` | Done | [details](lib/util/json-writer/json-writer.spec.ts.md) |
 | `lib/util/merge-confidence/index.spec.ts` | Not done | [details](lib/util/merge-confidence/index.spec.ts.md) |
 | `lib/util/schema-utils/index.spec.ts` | Not done | [details](lib/util/schema-utils/index.spec.ts.md) |

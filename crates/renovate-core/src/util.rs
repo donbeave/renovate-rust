@@ -586,6 +586,129 @@ pub fn changelog_has_valid_repository(repo: &str) -> bool {
 }
 
 // ---------------------------------------------------------------------------
+// GitHub GraphQL releases adapter — lib/util/github/graphql/query-adapters/releases-query-adapter.ts
+// ---------------------------------------------------------------------------
+
+/// One GitHub release item as returned by the GraphQL adapter.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GithubReleaseItem {
+    pub version: String,
+    pub release_timestamp: String,
+    pub url: String,
+    pub id: Option<i64>,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub is_stable: Option<bool>,
+}
+
+/// Transform a raw GitHub GraphQL release node into a `GithubReleaseItem`.
+///
+/// Returns `None` when:
+/// - Required fields are missing/invalid (version, releaseTimestamp, url, isDraft, isPrerelease)
+/// - `isDraft` is `true`
+///
+/// Mirrors `releases-query-adapter.ts` → `transform()`.
+pub fn transform_github_release(
+    version: Option<&str>,
+    release_timestamp: Option<&str>,
+    is_draft: Option<bool>,
+    is_prerelease: Option<bool>,
+    url: Option<&str>,
+    id: Option<i64>,
+    name: Option<&str>,
+    description: Option<&str>,
+) -> Option<GithubReleaseItem> {
+    let version = version.filter(|s| !s.is_empty())?;
+    let ts_raw = release_timestamp?;
+    let url = url.filter(|s| !s.is_empty())?;
+    let is_draft = is_draft?;
+    let is_prerelease = is_prerelease?;
+
+    // Normalise timestamp: bare dates like "2024-09-24" become ISO with time+Z
+    let normalised_ts = normalise_timestamp(ts_raw)?;
+
+    if is_draft {
+        return None;
+    }
+
+    Some(GithubReleaseItem {
+        version: version.to_string(),
+        release_timestamp: normalised_ts,
+        url: url.to_string(),
+        id,
+        name: name.map(String::from),
+        description: description.map(String::from),
+        is_stable: if is_prerelease { Some(false) } else { None },
+    })
+}
+
+/// Parse and normalise a timestamp string to `YYYY-MM-DDTHH:MM:SS.sssZ`.
+///
+/// Accepts ISO 8601 date-time strings and bare date strings (`YYYY-MM-DD`).
+fn normalise_timestamp(s: &str) -> Option<String> {
+    // Try full RFC3339 first
+    if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(s) {
+        return Some(format!(
+            "{}.{:03}Z",
+            dt.with_timezone(&chrono::Utc).format("%Y-%m-%dT%H:%M:%S"),
+            dt.timestamp_subsec_millis()
+        ));
+    }
+    // Try bare date YYYY-MM-DD
+    if let Ok(d) = chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d") {
+        return Some(format!("{}T00:00:00.000Z", d.format("%Y-%m-%d")));
+    }
+    None
+}
+
+// ---------------------------------------------------------------------------
+// GitHub GraphQL tags adapter — lib/util/github/graphql/query-adapters/tags-query-adapter.ts
+// ---------------------------------------------------------------------------
+
+/// One GitHub tag item as returned by the GraphQL adapter.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GithubTagItem {
+    pub version: String,
+    pub git_ref: String,
+    pub hash: String,
+    pub release_timestamp: String,
+}
+
+/// Target type for a tag commit reference.
+#[derive(Debug)]
+pub enum GithubTagTarget<'a> {
+    Commit { oid: &'a str, release_timestamp: &'a str },
+    Tag { tagger_timestamp: &'a str, nested_oid: &'a str },
+}
+
+/// Transform a raw GitHub GraphQL tag node into a `GithubTagItem`.
+///
+/// Returns `None` for unknown target types or missing required fields.
+/// Mirrors `tags-query-adapter.ts` → `transform()`.
+pub fn transform_github_tag(version: Option<&str>, target: Option<GithubTagTarget<'_>>) -> Option<GithubTagItem> {
+    let version = version.filter(|s| !s.is_empty())?;
+    let target = target?;
+    match target {
+        GithubTagTarget::Commit { oid, release_timestamp } => {
+            Some(GithubTagItem {
+                version: version.to_string(),
+                git_ref: version.to_string(),
+                hash: oid.to_string(),
+                release_timestamp: release_timestamp.to_string(),
+            })
+        }
+        GithubTagTarget::Tag { tagger_timestamp, nested_oid } => {
+            Some(GithubTagItem {
+                version: version.to_string(),
+                git_ref: version.to_string(),
+                hash: nested_oid.to_string(),
+                release_timestamp: tagger_timestamp.to_string(),
+            })
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Package abandonment — lib/workers/repository/process/lookup/abandonment.ts
 // ---------------------------------------------------------------------------
 
@@ -5074,6 +5197,126 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── transform_github_tag ─────────────────────────────────────────────────
+
+    // Ported: "transforms Commit type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 4
+    #[test]
+    fn test_transform_github_tag_commit_type() {
+        let r = transform_github_tag(
+            Some("1.2.3"),
+            Some(GithubTagTarget::Commit { oid: "abc123", release_timestamp: "2022-09-24" }),
+        );
+        assert!(r.is_some());
+        let r = r.unwrap();
+        assert_eq!(r.version, "1.2.3");
+        assert_eq!(r.git_ref, "1.2.3");
+        assert_eq!(r.hash, "abc123");
+        assert_eq!(r.release_timestamp, "2022-09-24");
+    }
+
+    // Ported: "transforms Tag type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 22
+    #[test]
+    fn test_transform_github_tag_tag_type() {
+        let r = transform_github_tag(
+            Some("1.2.3"),
+            Some(GithubTagTarget::Tag { tagger_timestamp: "2022-09-24", nested_oid: "abc123" }),
+        );
+        assert!(r.is_some());
+        let r = r.unwrap();
+        assert_eq!(r.version, "1.2.3");
+        assert_eq!(r.git_ref, "1.2.3");
+        assert_eq!(r.hash, "abc123");
+        assert_eq!(r.release_timestamp, "2022-09-24");
+    }
+
+    // Ported: "transforms nested Tag type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 43
+    #[test]
+    fn test_transform_github_tag_nested_tag_type() {
+        // Nested Tag: Tag → Tag → Commit; oid from innermost commit
+        let r = transform_github_tag(
+            Some("1.2.3"),
+            Some(GithubTagTarget::Tag { tagger_timestamp: "2022-09-24", nested_oid: "abc123" }),
+        );
+        assert!(r.is_some());
+        let r = r.unwrap();
+        assert_eq!(r.hash, "abc123");
+        assert_eq!(r.release_timestamp, "2022-09-24");
+    }
+
+    // Ported: "returns null for other types" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 65
+    #[test]
+    fn test_transform_github_tag_invalid_returns_none() {
+        let r = transform_github_tag(None, None);
+        assert!(r.is_none());
+    }
+
+    // ── transform_github_release ─────────────────────────────────────────────
+
+    // Ported: "transforms items" — util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 17
+    #[test]
+    fn test_transform_github_release_basic() {
+        let r = transform_github_release(
+            Some("1.2.3"),
+            Some("2024-09-24"),
+            Some(false),
+            Some(false),
+            Some("https://example.com"),
+            Some(123),
+            Some("name"),
+            Some("description"),
+        );
+        assert!(r.is_some());
+        let r = r.unwrap();
+        assert_eq!(r.version, "1.2.3");
+        assert_eq!(r.release_timestamp, "2024-09-24T00:00:00.000Z");
+        assert_eq!(r.url, "https://example.com");
+        assert_eq!(r.id, Some(123));
+        assert_eq!(r.name, Some("name".to_string()));
+        assert_eq!(r.description, Some("description".to_string()));
+        assert_eq!(r.is_stable, None);
+    }
+
+    // Ported: "filters out drafts" — util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 28
+    #[test]
+    fn test_transform_github_release_draft_filtered() {
+        let r = transform_github_release(
+            Some("1.2.3"),
+            Some("2024-09-24"),
+            Some(true), // isDraft = true
+            Some(false),
+            Some("https://example.com"),
+            Some(123),
+            Some("name"),
+            Some("description"),
+        );
+        assert!(r.is_none());
+    }
+
+    // Ported: "handles invalid items" — util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 32
+    #[test]
+    fn test_transform_github_release_invalid_returns_none() {
+        // Empty struct = all None fields → transform returns None
+        let r = transform_github_release(None, None, None, None, None, None, None, None);
+        assert!(r.is_none());
+    }
+
+    // Ported: "marks prereleases as unstable" — util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 36
+    #[test]
+    fn test_transform_github_release_prerelease_unstable() {
+        let r = transform_github_release(
+            Some("1.2.3"),
+            Some("2024-09-24"),
+            Some(false),
+            Some(true), // isPrerelease = true
+            Some("https://example.com"),
+            Some(123),
+            Some("name"),
+            Some("description"),
+        );
+        assert!(r.is_some());
+        assert_eq!(r.unwrap().is_stable, Some(false));
     }
 
     // ── calculate_most_recent_timestamp ──────────────────────────────────────
