@@ -158,6 +158,136 @@ pub fn is_single_version(input: &str) -> bool {
     Version::parse(input).is_ok()
 }
 
+/// Return true when `a` and `b` represent the same semver version.
+pub fn equals(a: &str, b: &str) -> bool {
+    match (Version::parse(a.trim()), Version::parse(b.trim())) {
+        (Ok(va), Ok(vb)) => va == vb,
+        _ => false,
+    }
+}
+
+/// Return the major version number, or `None` for invalid input.
+pub fn get_major(v: &str) -> Option<u64> {
+    Version::parse(v.trim()).ok().map(|p| p.major)
+}
+
+/// Return the minor version number, or `None` for invalid input.
+pub fn get_minor(v: &str) -> Option<u64> {
+    Version::parse(v.trim()).ok().map(|p| p.minor)
+}
+
+/// Return the patch version number, or `None` for invalid input.
+pub fn get_patch(v: &str) -> Option<u64> {
+    Version::parse(v.trim()).ok().map(|p| p.patch)
+}
+
+/// Return true when the version has no pre-release component.
+pub fn is_stable(v: &str) -> bool {
+    Version::parse(v.trim())
+        .ok()
+        .is_some_and(|p| p.pre.is_empty())
+}
+
+/// Return true when `a` is strictly greater than `b`.
+pub fn is_greater_than(a: &str, b: &str) -> bool {
+    match (Version::parse(a.trim()), Version::parse(b.trim())) {
+        (Ok(va), Ok(vb)) => va > vb,
+        _ => false,
+    }
+}
+
+/// Return the ordering of `a` relative to `b` for sort purposes.
+pub fn sort_versions(a: &str, b: &str) -> std::cmp::Ordering {
+    match (Version::parse(a.trim()), Version::parse(b.trim())) {
+        (Ok(va), Ok(vb)) => va.cmp(&vb),
+        (Ok(_), Err(_)) => std::cmp::Ordering::Greater,
+        (Err(_), Ok(_)) => std::cmp::Ordering::Less,
+        _ => std::cmp::Ordering::Equal,
+    }
+}
+
+/// Return true when `version` satisfies `range`.
+pub fn matches_range(version: &str, range: &str) -> bool {
+    let range = range.trim();
+    if matches!(range, "*" | "x" | "X") {
+        return Version::parse(version.trim()).is_ok();
+    }
+    let Ok(v) = Version::parse(version.trim()) else {
+        return false;
+    };
+    if let Ok(req) = VersionReq::parse(range) {
+        return req.matches(&v);
+    }
+    wildcard_req_matches(range, &v)
+}
+
+/// Return the minimum version from `versions` that satisfies `range`.
+pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
+    let range = range.trim();
+    if matches!(range, "*" | "x" | "X") {
+        return versions
+            .iter()
+            .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
+            .min_by(|(_, a), (_, b)| a.cmp(b))
+            .map(|(v, _)| v);
+    }
+    if let Ok(req) = VersionReq::parse(range) {
+        return versions
+            .iter()
+            .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
+            .filter(|(_, p)| req.matches(p))
+            .min_by(|(_, a), (_, b)| a.cmp(b))
+            .map(|(v, _)| v);
+    }
+    versions
+        .iter()
+        .filter_map(|v| Version::parse(v.trim()).ok().map(|p| (*v, p)))
+        .filter(|(_, p)| wildcard_req_matches(range, p))
+        .min_by(|(_, a), (_, b)| a.cmp(b))
+        .map(|(v, _)| v)
+}
+
+/// Return true when `version` is below all bounds in `range`.
+///
+/// Mirrors node-semver `ltr` — a version is "less than range" when it does not
+/// satisfy the range and is strictly below the lowest version that could.
+pub fn is_less_than_range(version: &str, range: &str) -> bool {
+    let Ok(v) = Version::parse(version.trim()) else {
+        return false;
+    };
+    let range = range.trim();
+    if matches!(range, "*" | "x" | "X") {
+        return false;
+    }
+    if let Ok(req) = VersionReq::parse(range) {
+        if req.matches(&v) {
+            return false;
+        }
+    }
+    // Parse out the lowest >= or > bound from the range string
+    let mut min_bound: Option<Version> = None;
+    for part in range.split_whitespace() {
+        let raw = part
+            .strip_prefix(">=")
+            .or_else(|| part.strip_prefix('>'))
+            .unwrap_or(part);
+        if raw.len() < part.len() {
+            if let Ok(bound) = Version::parse(raw.trim()) {
+                let replace = min_bound
+                    .as_ref()
+                    .map_or(true, |mb: &Version| bound < *mb);
+                if replace {
+                    min_bound = Some(bound);
+                }
+            }
+        }
+    }
+    if let Some(bound) = min_bound {
+        return v < bound;
+    }
+    false
+}
+
 fn wildcard_req_matches(range: &str, version: &Version) -> bool {
     let range = range.trim();
     if matches!(range, "*" | "x" | "X") {

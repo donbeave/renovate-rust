@@ -65,6 +65,24 @@ pub fn is_stable(input: &str) -> bool {
         .unwrap_or(false)
 }
 
+/// Whether `a` is strictly greater than `b` (PEP 440 ordering).
+pub fn is_greater_than(a: &str, b: &str) -> bool {
+    match (Version::from_str(a), Version::from_str(b)) {
+        (Ok(va), Ok(vb)) => va > vb,
+        _ => false,
+    }
+}
+
+/// Return the ordering of `a` relative to `b` for sort purposes.
+pub fn sort_versions(a: &str, b: &str) -> std::cmp::Ordering {
+    match (Version::from_str(a), Version::from_str(b)) {
+        (Ok(va), Ok(vb)) => va.cmp(&vb),
+        (Ok(_), Err(_)) => std::cmp::Ordering::Greater,
+        (Err(_), Ok(_)) => std::cmp::Ordering::Less,
+        _ => std::cmp::Ordering::Equal,
+    }
+}
+
 /// Whether two version strings are semantically equal.
 pub fn equals(a: &str, b: &str) -> bool {
     match (Version::from_str(a), Version::from_str(b)) {

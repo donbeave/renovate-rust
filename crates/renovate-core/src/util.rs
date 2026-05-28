@@ -658,6 +658,63 @@ pub fn detect_platform(url: &str) -> Option<&'static str> {
     if hostname == "gitlab.com" || hostname.contains("gitlab") {
         return Some("gitlab");
     }
+
+    // Fall back to host rules — check the hostType registered for this URL
+    let host_type = host_rules::host_type_for_url(url)?;
+    platform_from_host_type(&host_type)
+}
+
+/// Derive a canonical platform name from a `hostType` string.
+///
+/// Used by `detect_platform` when falling back to host-rules lookup.
+/// Mirrors the `*_API_USING_HOST_TYPES` constants in `lib/constants/platforms.ts`.
+fn platform_from_host_type(host_type: &str) -> Option<&'static str> {
+    const AZURE: &[&str] = &["azure", "azure-tags"];
+    const BITBUCKET_SERVER: &[&str] =
+        &["bitbucket-server", "bitbucket-server-changelog", "bitbucket-server-tags"];
+    const BITBUCKET: &[&str] = &["bitbucket", "bitbucket-changelog", "bitbucket-tags"];
+    const FORGEJO: &[&str] = &["forgejo", "forgejo-changelog", "forgejo-releases", "forgejo-tags"];
+    const GITEA: &[&str] = &["gitea", "gitea-changelog", "gitea-releases", "gitea-tags"];
+    const GITHUB: &[&str] = &[
+        "github",
+        "github-releases",
+        "github-release-attachments",
+        "github-tags",
+        "pod",
+        "hermit",
+        "github-changelog",
+        "conan",
+    ];
+    const GITLAB: &[&str] = &[
+        "gitlab",
+        "gitlab-releases",
+        "gitlab-tags",
+        "gitlab-packages",
+        "gitlab-changelog",
+        "pypi",
+    ];
+
+    if AZURE.contains(&host_type) {
+        return Some("azure");
+    }
+    if BITBUCKET_SERVER.contains(&host_type) {
+        return Some("bitbucket-server");
+    }
+    if BITBUCKET.contains(&host_type) {
+        return Some("bitbucket");
+    }
+    if FORGEJO.contains(&host_type) {
+        return Some("forgejo");
+    }
+    if GITEA.contains(&host_type) {
+        return Some("gitea");
+    }
+    if GITHUB.contains(&host_type) {
+        return Some("github");
+    }
+    if GITLAB.contains(&host_type) {
+        return Some("gitlab");
+    }
     None
 }
 
@@ -3248,6 +3305,64 @@ mod tests {
             let got = detect_platform(url);
             assert_eq!(got, *expected, "detect_platform({url:?})");
         }
+    }
+
+    // Ported: "uses host rules" — util/common.spec.ts line 67
+    #[test]
+    fn test_detect_platform_uses_host_rules() {
+        host_rules::clear();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("azure".to_owned()),
+            match_host: Some("az.example.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("bitbucket".to_owned()),
+            match_host: Some("bb.example.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("gitea".to_owned()),
+            match_host: Some("gt.example.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("forgejo".to_owned()),
+            match_host: Some("fj.example.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("github-changelog".to_owned()),
+            match_host: Some("gh.example.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("gitlab-changelog".to_owned()),
+            match_host: Some("gl.example.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("unknown".to_owned()),
+            match_host: Some("f.example.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+
+        assert_eq!(detect_platform("https://az.example.com/chalk/chalk"), Some("azure"));
+        assert_eq!(detect_platform("https://bb.example.com/chalk/chalk"), Some("bitbucket"));
+        assert_eq!(detect_platform("https://gt.example.com/chalk/chalk"), Some("gitea"));
+        assert_eq!(detect_platform("https://fj.example.com/chalk/chalk"), Some("forgejo"));
+        assert_eq!(detect_platform("https://gh.example.com/chalk/chalk"), Some("github"));
+        assert_eq!(detect_platform("https://gl.example.com/chalk/chalk"), Some("gitlab"));
+        assert_eq!(detect_platform("https://f.example.com/chalk/chalk"), None);
+
+        host_rules::clear();
     }
 
     // -----------------------------------------------------------------------

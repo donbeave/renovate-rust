@@ -5,14 +5,14 @@
 ## `lib/util/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/common.spec.ts
-**Total tests:** 22 | **Ported:** 7 | **Actionable:** 22 | **Status:** partial
+**Total tests:** 22 | **Ported:** 8 | **Actionable:** 22 | **Status:** partial
 
 ### `util/common › detectPlatform`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | ("$url") === $hostType | 46 | ported | `util.rs` | `test_detect_platform` | — |
-| uses host rules | 67 | pending | — | — | — |
+| uses host rules | 67 | ported | `util.rs` | `test_detect_platform_uses_host_rules` | — |
 
 ### `util/common › parseJson`
 
@@ -55,4 +55,3 @@
 | returns global value when inherited value is not set | 289 | pending | — | — | — |
 
 ---
-

@@ -886,6 +886,41 @@ fn migrate_config(input: &Value) -> Value {
             map.remove("requiredStatusChecks");
             map.insert("ignoreTests".to_owned(), Value::Bool(true));
         }
+        // pip-compile: apply fileMatch migration and convert .in → .txt patterns.
+        // Mirrors the TypeScript logic in lib/config/migration.ts.
+        if let Some(Value::Object(pip)) = map.get_mut("pip-compile") {
+            if let Some(file_match) = pip.remove("fileMatch") {
+                let patterns: Vec<String> = match file_match {
+                    Value::String(s) => vec![s],
+                    Value::Array(arr) if arr.iter().all(|v| v.is_string()) => arr
+                        .into_iter()
+                        .filter_map(|v| v.as_str().map(ToOwned::to_owned))
+                        .collect(),
+                    _ => Vec::new(),
+                };
+                if !patterns.is_empty() {
+                    let mfp = pip
+                        .entry("managerFilePatterns".to_owned())
+                        .or_insert_with(|| Value::Array(Vec::new()));
+                    if let Value::Array(arr) = mfp {
+                        arr.extend(patterns.into_iter().map(|p| Value::String(format!("/{p}/"))));
+                    }
+                }
+            }
+            if let Some(Value::Array(patterns)) = pip.get_mut("managerFilePatterns") {
+                for pat in patterns.iter_mut() {
+                    if let Value::String(s) = pat {
+                        *s = if s.ends_with(".in") {
+                            format!("{}.txt", &s[..s.len() - 3])
+                        } else if s.ends_with(".in/") {
+                            format!("{}.txt/", &s[..s.len() - 4])
+                        } else {
+                            s.replace(".in$/", ".txt$/")
+                        };
+                    }
+                }
+            }
+        }
     }
     migrated
 }
@@ -6611,6 +6646,36 @@ mod tests {
             .any(|m| m.as_str() == Some("gradle")));
         assert!(!rules[0]["matchManagers"].as_array().unwrap().iter()
             .any(|m| m.as_str() == Some("gradle-lite")));
+    }
+
+    // Ported: "migrates pip-compile" — config/migration.spec.ts line 696
+    #[test]
+    fn migrates_pip_compile() {
+        let result = migrate_config(&json!({
+            "pip-compile": {
+                "enabled": true,
+                "fileMatch": [
+                    "(^|/)requirements\\.in$",
+                    "(^|/)requirements-fmt\\.in$",
+                    "(^|/)requirements-lint\\.in$",
+                    ".github/workflows/requirements.in",
+                    "(^|/)debian_packages/private/third_party/requirements\\.in$",
+                    "(^|/).*?requirements.*?\\.in$"
+                ],
+                "managerFilePatterns": ["requirements.in"]
+            }
+        }));
+        assert_eq!(result["pip-compile"]["enabled"], json!(true));
+        assert!(result["pip-compile"].get("fileMatch").is_none());
+        let patterns = result["pip-compile"]["managerFilePatterns"].as_array().unwrap();
+        assert_eq!(patterns[0], json!("requirements.txt"));
+        assert_eq!(patterns[1], json!("/(^|/)requirements\\.txt$/"));
+        assert_eq!(patterns[2], json!("/(^|/)requirements-fmt\\.txt$/"));
+        assert_eq!(patterns[3], json!("/(^|/)requirements-lint\\.txt$/"));
+        assert_eq!(patterns[4], json!("/.github/workflows/requirements.txt/"));
+        assert_eq!(patterns[5], json!("/(^|/)debian_packages/private/third_party/requirements\\.txt$/"));
+        assert_eq!(patterns[6], json!("/(^|/).*?requirements.*?\\.txt$/"));
+        assert_eq!(patterns.len(), 7);
     }
 
     // Ported: "overrides existing automerge setting" — config/migration.spec.ts line 279

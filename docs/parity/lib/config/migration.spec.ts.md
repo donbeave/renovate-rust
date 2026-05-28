@@ -5,7 +5,7 @@
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 26 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 27 | **Actionable:** 30 | **Status:** partial
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 
@@ -38,7 +38,7 @@
 | migrates nested packageRules | 624 | ported | `repo_config.rs` | `nested_package_rules_are_flattened_with_parent_fields` | — |
 | migrates presets | 655 | ported | `repo_config.rs` | `migrate_presets_rewrites_extends_and_drops_empty_replacements` | — |
 | migrates customManagers | 671 | ported | `repo_config.rs` | `custom_manager_deprecated_lookup_name_fields_migrate` | — |
-| migrates pip-compile | 696 | pending | — | — | — |
+| migrates pip-compile | 696 | ported | `migrate_validate.rs` | `migrates_pip_compile` | — |
 | migrates gradle-lite | 731 | ported | — | — | — |
 | migrates empty requiredStatusChecks | 751 | ported | `repo_config.rs` | `empty_required_status_checks_is_removed` | — |
 | migrates azureAutoComplete | 762 | ported | `repo_config.rs` | `azure_auto_complete_migrated_to_platform_automerge` | — |
