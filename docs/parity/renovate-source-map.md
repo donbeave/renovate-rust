@@ -1143,7 +1143,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/versioning/poetry/index.ts` | `crates/renovate-core/src/versioning/poetry.rs` | full | Full VersioningApi: poetry2semver/semver2poetry/poetry2npm/npm2poetry, all range matching, get/minSatisfying, getNewValue (bump/replace), subset |
 | `lib/modules/versioning/poetry/transform.ts` | `crates/renovate-core/src/versioning/poetry.rs` | full | poetry2semver, semver2poetry, poetry2npm, npm2poetry inlined |
 | `lib/modules/versioning/poetry/patterns.ts` | `crates/renovate-core/src/versioning/poetry.rs` | full | VERSION_PATTERN and RANGE_COMPARATOR_PATTERN inlined as regex functions |
-| `lib/modules/versioning/python/index.ts` | `crates/renovate-core/src/versioning/python.rs` | partial | isValid, matches, isLessThanRange, min/getSatisfyingVersion, isBreaking ported; Missing: getNewValue, subset |
+| `lib/modules/versioning/python/index.ts` | `crates/renovate-core/src/versioning/python.rs` | full | Full VersioningApi delegating to poetry + pep440: isValid, matches (PEP 440 ==X.Y.*), isLessThanRange, min/getSatisfyingVersion, getNewValue, subset, isBreaking |
 | `lib/modules/versioning/nuget/index.ts` | `crates/renovate-core/src/versioning/nuget.rs` | partial | NuGet versioning ported |
 | `lib/modules/versioning/pep440/index.ts` | `crates/renovate-core/src/versioning/pep440.rs` | partial | PEP 440 Python versioning ported |
 | `lib/modules/versioning/perl/index.ts` | `crates/renovate-core/src/versioning/perl.rs` | done | isValid, isVersion, getMajor, getNewValue for Perl versions |

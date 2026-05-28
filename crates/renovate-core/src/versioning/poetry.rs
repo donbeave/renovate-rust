@@ -464,6 +464,14 @@ pub fn is_valid(input: &str) -> bool {
             if matches!(npm.trim(), "*") {
                 return true;
             }
+            // OR-compound range: validate each alternative independently
+            if npm.contains("||") {
+                return npm.split("||").map(str::trim).all(|alt| {
+                    semver::VersionReq::parse(alt).is_ok()
+                        || Version::parse(alt.trim()).is_ok()
+                        || matches!(alt.trim(), "*")
+                });
+            }
             // Valid npm range
             semver::VersionReq::parse(&npm).is_ok()
                 || Version::parse(npm.trim()).is_ok()

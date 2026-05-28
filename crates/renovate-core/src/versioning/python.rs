@@ -49,6 +49,27 @@ pub fn get_satisfying_version(versions: &[&str], range: &str) -> Option<String> 
     }
 }
 
+/// Return a new constraint value for the given update strategy.
+/// Delegates entirely to poetry.
+pub fn get_new_value(
+    current_value: &str,
+    range_strategy: &str,
+    current_version: Option<&str>,
+    new_version: &str,
+) -> Option<String> {
+    poetry::get_new_value(current_value, range_strategy, current_version, new_version)
+}
+
+/// Whether `sub_range` is a subset of `super_range`.
+/// Returns `None` when either range is not valid poetry syntax.
+pub fn subset(sub_range: &str, super_range: &str) -> Option<bool> {
+    if poetry::is_valid(sub_range) && poetry::is_valid(super_range) {
+        poetry::subset(sub_range, super_range)
+    } else {
+        None
+    }
+}
+
 /// Whether going from `current_version` to `new_version` is a breaking change.
 pub fn is_breaking(current_version: &str, new_version: &str) -> bool {
     let current_major = poetry::get_major(current_version);
@@ -179,6 +200,45 @@ mod tests {
             get_satisfying_version(&["1.0.0", "2.0.0"], "== 3.7.*"),
             None
         );
+    }
+
+    // Ported: "getNewValue(...) === "$expected"" — versioning/python/index.spec.ts line 97
+    // Delegates entirely to poetry::get_new_value; same cases as poetry spec.
+    #[test]
+    fn get_new_value_cases() {
+        let cases: &[(&str, &str, Option<&str>, &str, Option<&str>)] = &[
+            ("1.0.0", "bump", Some("1.0.0"), "1.1.0", Some("1.1.0")),
+            ("=1.0.0", "bump", Some("1.0.0"), "1.1.0", Some("=1.1.0")),
+            ("^1.0.0", "replace", Some("1.0.0"), "2.0.7", Some("^2.0.0")),
+            ("1.0.0", "replace", Some("1.0.0"), "2.0.7", Some("2.0.7")),
+            ("^2.2", "widen", Some("2.2.0"), "3.0.0", Some("^2.2 || ^3.0.0")),
+        ];
+        for (cv, rs, curv, nv, expected) in cases {
+            let result = get_new_value(cv, rs, *curv, nv);
+            assert_eq!(result.as_deref(), *expected,
+                "get_new_value({cv:?}, {rs:?}, {curv:?}, {nv:?})");
+        }
+    }
+
+    // Ported: "subset("$a", "$b") === $expected" — versioning/python/index.spec.ts line 160
+    #[test]
+    fn subset_cases() {
+        assert_eq!(subset("1.0.0", "1.0.0"), Some(true));
+        assert_eq!(subset("1.0.0", ">=1.0.0"), Some(true));
+        assert_eq!(subset("1.1.0", "^1.0.0"), Some(true));
+        assert_eq!(subset(">=1.0.0", ">=1.0.0"), Some(true));
+        assert_eq!(subset("~1.0.0", "~1.0.0"), Some(true));
+        assert_eq!(subset("^1.0.0", "^1.0.0"), Some(true));
+        assert_eq!(subset(">=1.0.0", ">=1.1.0"), Some(false));
+        assert_eq!(subset("~1.0.0", "~1.1.0"), Some(false));
+        assert_eq!(subset("^1.0.0", "^1.1.0"), Some(false));
+        assert_eq!(subset(">=1.0.0", "<1.0.0"), Some(false));
+        assert_eq!(subset("~1.0.0", "~0.9.0"), Some(false));
+        assert_eq!(subset("^1.0.0", "^0.9.0"), Some(false));
+        assert_eq!(subset("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0"), Some(true));
+        assert_eq!(subset("^1.0.0 || ^2.0.0", "^1.1.0 || ^2.0.0"), Some(false));
+        // Invalid: "1.2.3foo" is not valid poetry → returns None
+        assert_eq!(subset("1.2.3foo", "~1.1.0"), None);
     }
 
     // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — versioning/python/index.spec.ts line 182
