@@ -217,6 +217,28 @@ impl PackageCacheStats {
 /// Mirrors `GitOperationStats` from `lib/util/stats.ts`.
 pub type GitOperationStats = LookupStats;
 
+/// Accumulates per-release-datasource timing stats.
+///
+/// Mirrors `GetDatasourceReleasesStats` from `lib/util/stats.ts`.
+#[derive(Debug, Default)]
+pub struct GetDatasourceReleasesStats {
+    data: Vec<(String, String, String, i64)>,
+}
+
+impl GetDatasourceReleasesStats {
+    pub fn new() -> Self { Self::default() }
+    pub fn write(&mut self, datasource: &str, _registry_url: &str, _package_name: &str, duration: i64) {
+        self.data.push((datasource.to_owned(), String::new(), String::new(), duration));
+    }
+    pub fn get_report(&self) -> (TimingReport, std::collections::HashMap<String, TimingReport>) {
+        let all: Vec<i64> = self.data.iter().map(|(_, _, _, d)| *d).collect();
+        let overall = make_timing_report(&all);
+        let mut by_ds: std::collections::HashMap<String, Vec<i64>> = std::collections::HashMap::new();
+        for (ds, _, _, d) in &self.data { by_ds.entry(ds.clone()).or_default().push(*d); }
+        (overall, by_ds.iter().map(|(k, v)| (k.clone(), make_timing_report(v))).collect())
+    }
+}
+
 /// Datasource cache action type.
 #[derive(Debug, Clone, PartialEq)]
 pub enum DatasourceCacheAction { Hit, Miss, Set, Skip }
@@ -247,7 +269,7 @@ pub struct DatasourceCacheStats {
 impl DatasourceCacheStats {
     pub fn new() -> Self { Self::default() }
     fn push(&mut self, ds: &str, reg: &str, pkg: &str, action: DatasourceCacheAction) {
-        self.data_points.push(DatasourceCacheDataPoint { datasource: ds.to_string(), registry_url: reg.to_string(), package_name: pkg.to_string(), action });
+        self.data_points.push(DatasourceCacheDataPoint { datasource: ds.to_owned(), registry_url: reg.to_owned(), package_name: pkg.to_owned(), action });
     }
     pub fn hit(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Hit); }
     pub fn miss(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Miss); }
@@ -308,7 +330,7 @@ impl HttpCacheStats {
         if !url.contains("://") { return None; }
         let after_scheme = url.split("://").nth(1)?;
         let host = after_scheme.split('/').next()?;
-        let path = after_scheme.get(host.len()..)?.to_string();
+        let path = after_scheme.get(host.len()..)?.to_owned();
         let scheme = url.split("://").next()?;
         Some(format!("{}://{}{}", scheme, host, path))
     }
@@ -1253,7 +1275,7 @@ pub fn calculate_most_recent_timestamp<'a>(
         return None;
     }
 
-    Some(highest_ts.to_string())
+    Some(highest_ts.to_owned())
 }
 
 // ---------------------------------------------------------------------------
@@ -1275,7 +1297,7 @@ fn massage_git_at_url(url: &str) -> String {
             return format!("https://{}/{}", host, path);
         }
     }
-    url.to_string()
+    url.to_owned()
 }
 
 /// Normalize a GitHub-hosted URL to `https://github.com/owner/repo` form.
@@ -1403,7 +1425,7 @@ pub fn parse_s3_url(raw_url: &str) -> Option<S3UrlParts> {
         None => "",
         Some(i) => &after_scheme[i + 1..],
     };
-    Some(S3UrlParts { bucket: bucket.to_string(), key: key.to_string() })
+    Some(S3UrlParts { bucket: bucket.to_owned(), key: key.to_owned() })
 }
 
 // ---------------------------------------------------------------------------
@@ -1425,10 +1447,10 @@ pub struct LocalPlatformResult {
 pub fn local_init_platform(dry_run: Option<&str>) -> LocalPlatformResult {
     let dry_run_val = if dry_run == Some("extract") { "extract" } else { "lookup" };
     LocalPlatformResult {
-        dry_run: dry_run_val.to_string(),
-        endpoint: "local".to_string(),
+        dry_run: dry_run_val.to_owned(),
+        endpoint: "local".to_owned(),
         persist_repo_data: true,
-        require_config: "optional".to_string(),
+        require_config: "optional".to_owned(),
     }
 }
 
@@ -1557,7 +1579,7 @@ pub fn apply_version_compatibility(
     };
     releases.into_iter().filter_map(|mut r| {
         let caps = re.captures(&r.version)?;
-        let version = caps.name("version")?.as_str().to_string();
+        let version = caps.name("version")?.as_str().to_owned();
         let compatibility = caps.name("compatibility").map(|m| m.as_str());
         if compatibility != current_compatibility {
             return None;
@@ -1584,7 +1606,7 @@ pub fn apply_extract_version(releases: Vec<DatasourceRelease>, extract_version: 
     };
     releases.into_iter().filter_map(|mut r| {
         let caps = re.captures(&r.version)?;
-        let extracted = caps.name("version")?.as_str().to_string();
+        let extracted = caps.name("version")?.as_str().to_owned();
         r.version_orig = Some(r.version.clone());
         r.version = extracted;
         Some(r)
@@ -1637,9 +1659,9 @@ static CRON_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| 
 
 fn schedule_to_string(schedule: Option<&[String]>, _timezone: Option<&str>) -> String {
     let lines: Vec<String> = match schedule {
-        None => vec!["At any time (no schedule defined)".to_string()],
+        None => vec!["At any time (no schedule defined)".to_owned()],
         Some(s) if s.is_empty() || s.first().map(|v| v == "at any time").unwrap_or(false) => {
-            vec!["At any time (no schedule defined)".to_string()]
+            vec!["At any time (no schedule defined)".to_owned()]
         }
         Some(s) => {
             let all_cron = s.iter().all(|p| CRON_RE.is_match(p));
@@ -1670,7 +1692,7 @@ pub fn get_pr_config_description(
     upgrades_count: usize,
     product_links_help: Option<&str>,
 ) -> String {
-    let mut body = "\n\n---\n\n### Configuration\n\n".to_string();
+    let mut body = "\n\n---\n\n### Configuration\n\n".to_owned();
     body.push_str(&emojify_simple(":date: **Schedule**: "));
     if let Some(tz) = timezone {
         body.push_str(&format!("(in timezone {})", tz));
@@ -1811,13 +1833,13 @@ pub fn get_dep_warnings_pr(
     if warnings.is_empty() {
         return String::new();
     }
-    let mut out = "\n---\n\n> \u{26a0}\u{fe0f} **Warning**\n> \n".to_string();
+    let mut out = "\n---\n\n> \u{26a0}\u{fe0f} **Warning**\n> \n".to_owned();
     out.push_str("> Some dependencies could not be looked up. ");
     if has_dependency_dashboard {
         let dep_dash_link = if let Some(issue) = dependency_dashboard_issue {
             format!("[Dependency Dashboard](../issues/{})", issue)
         } else {
-            "Dependency Dashboard".to_string()
+            "Dependency Dashboard".to_owned()
         };
         out.push_str(&format!("Check the {} for more information.\n\n", dep_dash_link));
     } else {
@@ -1850,7 +1872,7 @@ pub fn get_dep_warnings_dashboard(
         .map(|w| format!("`{}`", STRIP_PREFIX_RE.replace(w, "")))
         .collect();
     let files_list: Vec<String> = warning_files.iter().map(|f| format!("`{}`", f)).collect();
-    let mut out = "\n---\n\n> \u{26a0}\u{fe0f} **Warning**\n> \n> Renovate failed to look up the following dependencies: ".to_string();
+    let mut out = "\n---\n\n> \u{26a0}\u{fe0f} **Warning**\n> \n> Renovate failed to look up the following dependencies: ".to_owned();
     out.push_str(&dep_list.join(", "));
     out.push_str(".\n> \n> Files affected: ");
     out.push_str(&files_list.join(", "));
@@ -1872,7 +1894,7 @@ pub fn get_dep_warnings_onboarding_pr(
     if warnings.is_empty() {
         return String::new();
     }
-    let mut out = "\n---\n> \n> \u{26a0}\u{fe0f} **Warning**\n> \n".to_string();
+    let mut out = "\n---\n> \n> \u{26a0}\u{fe0f} **Warning**\n> \n".to_owned();
     out.push_str("> Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.\n> \n");
     for w in &warnings {
         out.push_str(&format!("> -   `{}`\n", w));
@@ -1924,7 +1946,7 @@ pub fn get_expected_pr_list(
     commit_hourly_limit: u32,
     branches: &[PrListBranch<'_>],
 ) -> String {
-    let mut out = "\n### What to Expect\n\n".to_string();
+    let mut out = "\n### What to Expect\n\n".to_owned();
     if branches.is_empty() {
         out.push_str("It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n");
         return out;
@@ -1958,7 +1980,7 @@ pub fn get_expected_pr_list(
         let mut seen: Vec<String> = Vec::new();
         for upg in branch.upgrades {
             let text = if upg.update_type == "lockFileMaintenance" {
-                "  - Regenerate lock files to use latest dependency versions".to_string()
+                "  - Regenerate lock files to use latest dependency versions".to_owned()
             } else {
                 let action = if upg.update_type == "pin" { "Pin" } else { "Upgrade" };
                 let dep = if let Some(url) = upg.source_url {
@@ -2011,7 +2033,7 @@ pub fn prepare_labels(labels: &[&str], add_labels: &[&str]) -> Vec<String> {
     let mut combined: Vec<String> = labels
         .iter()
         .chain(add_labels.iter())
-        .map(|s| s.to_string())
+        .map(|s| (*s).to_owned())
         .filter(|s| !s.trim().is_empty())
         .collect();
     combined.sort();
@@ -2030,12 +2052,12 @@ pub fn get_changed_labels(
     let to_add: Vec<String> = new_labels
         .iter()
         .filter(|l| !old_labels.contains(l))
-        .map(|l| l.to_string())
+        .map(|l| (*l).to_owned())
         .collect();
     let to_remove: Vec<String> = old_labels
         .iter()
         .filter(|l| !new_labels.contains(l))
-        .map(|l| l.to_string())
+        .map(|l| (*l).to_owned())
         .collect();
     (to_add, to_remove)
 }
@@ -3082,53 +3104,53 @@ pub fn sanitize_markdown(markdown: &str) -> String {
     // 1: #digit after non-word
     {
         let re = HASH_NONWORD.get_or_init(|| Regex::new(r"(\W)#(\d)").unwrap());
-        res = re.replace_all(&res, "${1}#&#8203;${2}").to_string();
+        res = re.replace_all(&res, "${1}#&#8203;${2}").into_owned();
     }
     // 2: @ → @&#8203;
     {
         let re = AT.get_or_init(|| Regex::new(r"@").unwrap());
-        res = re.replace_all(&res, "@&#8203;").to_string();
+        res = re.replace_all(&res, "@&#8203;").into_owned();
     }
     // 3: undo &#8203; inside backtick @
     {
         let re = UNDO_BACKTICK_AT.get_or_init(|| Regex::new(r"(`\[?@)&#8203;").unwrap());
-        res = re.replace_all(&res, "$1").to_string();
+        res = re.replace_all(&res, "$1").into_owned();
     }
     // 4: undo &#8203; after [a-z]@
     {
         let re = UNDO_LETTER_AT.get_or_init(|| Regex::new(r"(?i)([a-z]@)&#8203;").unwrap());
-        res = re.replace_all(&res, "$1").to_string();
+        res = re.replace_all(&res, "$1").into_owned();
     }
     // 5: undo in /compare/@
     {
         let re = UNDO_COMPARE_AT.get_or_init(|| Regex::new(r"/compare/@&#8203;").unwrap());
-        res = re.replace_all(&res, "/compare/@").to_string();
+        res = re.replace_all(&res, "/compare/@").into_owned();
     }
     // 6: undo in URL ellipsis
     {
         let re = UNDO_URL_ELLIPSIS
             .get_or_init(|| Regex::new(r"(\(https://[^)]*?)\.\.\.@&#8203;").unwrap());
-        res = re.replace_all(&res, "$1...@").to_string();
+        res = re.replace_all(&res, "$1...@").into_owned();
     }
     // 7: standalone #N
     {
         let re = HASH_NUM.get_or_init(|| Regex::new(r"([\s(])#(\d+)([)\s]?)").unwrap());
-        res = re.replace_all(&res, "${1}#&#8203;${2}${3}").to_string();
+        res = re.replace_all(&res, "${1}#&#8203;${2}${3}").into_owned();
     }
     // 8: HTML backtick entities
     {
         let re = HTML_BACKTICK.get_or_init(|| Regex::new(r"&#x60;([^/]*?)&#x60;").unwrap());
-        res = re.replace_all(&res, "`$1`").to_string();
+        res = re.replace_all(&res, "`$1`").into_owned();
     }
     // 9: undo &#8203; in inline code #N
     {
         let re = CODE_HASH.get_or_init(|| Regex::new(r"`#&#8203;(\d+)`").unwrap());
-        res = re.replace_all(&res, "`#$1`").to_string();
+        res = re.replace_all(&res, "`#$1`").into_owned();
     }
     // 10: add blank line before headings
     {
         let re = HEADING_NEWLINE.get_or_init(|| Regex::new(r"([^\n]\n)(#.*)").unwrap());
-        res = re.replace_all(&res, "$1\n$2").to_string();
+        res = re.replace_all(&res, "$1\n$2").into_owned();
     }
     res
 }
@@ -3297,7 +3319,7 @@ fn preprocess_time_spec(s: &str) -> String {
         let n: i64 = caps[1].parse().unwrap_or(0);
         format!("{}d", n * 30)
     })
-    .to_string()
+    .into_owned()
 }
 
 /// Check whether `date` satisfies a `range` expression like `"< 1 year"` or
@@ -4433,7 +4455,7 @@ mod tests {
         stats.write("docker", "image1", "2023-03-01T00:00:00.000Z");
         let data = stats.get_data();
         assert_eq!(data.len(), 3);
-        assert_eq!(data[0], ("npm".to_string(), "package1".to_string(), "2023-01-01T00:00:00.000Z".to_string()));
+        assert_eq!(data[0], ("npm".to_owned(), "package1".to_owned(), "2023-01-01T00:00:00.000Z".to_owned()));
         let report = stats.get_report();
         let npm = report.get("npm").unwrap();
         assert_eq!(npm.get("package1").unwrap(), "2023-01-01T00:00:00.000Z");
@@ -4463,6 +4485,29 @@ mod tests {
         assert_eq!(pull.count, 1); assert_eq!(pull.avg_ms, 1000);
         let push = report.get("push").unwrap();
         assert_eq!(push.count, 2); assert_eq!(push.total_ms, 50100); assert_eq!(push.max_ms, 50000);
+    }
+
+    // ── GetDatasourceReleasesStats ────────────────────────────────────────────
+
+    // Ported: "returns empty report" — util/stats.spec.ts line 152
+    #[test]
+    fn test_get_datasource_releases_stats_empty() {
+        let stats = GetDatasourceReleasesStats::new();
+        let (overall, ds) = stats.get_report();
+        assert_eq!(overall.count, 0); assert_eq!(overall.avg_ms, 0); assert!(ds.is_empty());
+    }
+
+    // Ported: "writes data points" — util/stats.spec.ts line 166
+    #[test]
+    fn test_get_datasource_releases_stats_writes() {
+        let mut stats = GetDatasourceReleasesStats::new();
+        stats.write("npm", "r1", "lodash", 100);
+        stats.write("npm", "r1", "lodash", 200);
+        stats.write("docker", "r2", "alpine", 1000);
+        let (overall, ds) = stats.get_report();
+        assert_eq!(overall.count, 3);
+        assert_eq!(ds.get("npm").unwrap().total_ms, 300);
+        assert_eq!(ds.get("docker").unwrap().total_ms, 1000);
     }
 
     // ── LookupStats ───────────────────────────────────────────────────────────
@@ -6783,7 +6828,7 @@ dep1 = "^1.0.0"
     // Ported: "returns array of strings" (string) — util/exec/utils.spec.ts line 189
     #[test]
     fn test_as_raw_commands_single_string() {
-        let cmds = [ExecCommand::Str("go mod tidy".to_string())];
+        let cmds = [ExecCommand::Str("go mod tidy".to_owned())];
         let result = as_raw_commands(&cmds);
         assert_eq!(result, vec!["go mod tidy"]);
     }
@@ -6792,8 +6837,8 @@ dep1 = "^1.0.0"
     #[test]
     fn test_as_raw_commands_array_of_strings() {
         let cmds = [
-            ExecCommand::Str("go mod tidy".to_string()),
-            ExecCommand::Str("make tidy".to_string()),
+            ExecCommand::Str("go mod tidy".to_owned()),
+            ExecCommand::Str("make tidy".to_owned()),
         ];
         let result = as_raw_commands(&cmds);
         assert_eq!(result, vec!["go mod tidy", "make tidy"]);
@@ -6803,9 +6848,9 @@ dep1 = "^1.0.0"
     #[test]
     fn test_as_raw_commands_many_strings() {
         let cmds = [
-            ExecCommand::Str("go mod tidy".to_string()),
-            ExecCommand::Str("make tidy".to_string()),
-            ExecCommand::Str("make generate".to_string()),
+            ExecCommand::Str("go mod tidy".to_owned()),
+            ExecCommand::Str("make tidy".to_owned()),
+            ExecCommand::Str("make generate".to_owned()),
         ];
         let result = as_raw_commands(&cmds);
         assert_eq!(result.len(), 3);

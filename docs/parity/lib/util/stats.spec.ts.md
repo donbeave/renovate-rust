@@ -5,7 +5,7 @@
 ## `lib/util/stats.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/stats.spec.ts
-**Total tests:** 33 | **Ported:** 17 | **Actionable:** 33 | **Status:** partial
+**Total tests:** 33 | **Ported:** 19 | **Actionable:** 33 | **Status:** partial
 
 ### `util/stats › makeTimingReport`
 
@@ -28,8 +28,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty report | 152 | pending | — | — | — |
-| writes data points | 166 | pending | — | — | — |
+| returns empty report | 152 | ported | `util.rs` | `test_get_datasource_releases_stats_empty` | — |
+| writes data points | 166 | ported | `util.rs` | `test_get_datasource_releases_stats_writes` | — |
 | wraps a function | 308 | not-applicable | — | — | Uses vi.useFakeTimers() to advance time; not portable without fake-timer test infrastructure |
 | logs report | 362 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
 
