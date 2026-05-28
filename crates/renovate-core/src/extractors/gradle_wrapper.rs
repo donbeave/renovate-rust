@@ -330,6 +330,13 @@ zipStorePath=wrapper/dists
         assert_eq!(parse_jvm_toolchain_version("# just a comment\n"), None);
     }
 
+    // Ported: "returns null if build.gradle does not include languageVersion" — gradle-wrapper/util.spec.ts line 102
+    #[test]
+    fn parse_java_language_version_returns_none_for_no_pattern() {
+        let content = r#"dependencies { implementation "com.google.protobuf:protobuf-java:2.17.0" }"#;
+        assert_eq!(parse_java_language_version(content), None);
+    }
+
     // Ported: "extract languageVersion value" — gradle-wrapper/util.spec.ts line 83
     #[test]
     fn parse_java_language_version_extracts_value() {

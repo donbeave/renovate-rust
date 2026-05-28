@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gradle-wrapper/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle-wrapper/util.spec.ts
-**Total tests:** 14 | **Ported:** 6 | **Actionable:** 14 | **Status:** partial
+**Total tests:** 14 | **Ported:** 7 | **Actionable:** 14 | **Status:** partial
 
 ### `getJavaConstraint() › returns Java constraint based on gradle support`
 
@@ -28,7 +28,7 @@
 |---|---|---|---|---|---|
 | extract languageVersion value | 83 | ported | `gradle_wrapper.rs` | `parse_java_language_version_extracts_value` | — |
 | returns null if build.gradle or build.gradle.kts file not found | 92 | pending | — | — | — |
-| returns null if build.gradle does not include languageVersion | 102 | pending | — | — | — |
+| returns null if build.gradle does not include languageVersion | 102 | ported | `gradle_wrapper.rs` | `parse_java_language_version_returns_none_for_no_pattern` | — |
 
 ### `extractGradleVersion()`
 
