@@ -55,6 +55,24 @@ pub fn construct_component_urls(registry_url: &str) -> Result<Vec<String>, Strin
     Ok(urls)
 }
 
+/// Parse SHA256 checksum for `package_path` from a Debian InRelease file.
+///
+/// Mirrors `parseChecksumsFromInRelease` from `lib/modules/datasource/deb/checksum.ts`.
+pub fn parse_checksums_from_in_release(
+    in_release_content: &str,
+    package_path: &str,
+) -> Option<String> {
+    use regex::Regex;
+    let pattern = format!(r"([a-f0-9]{{64}})\s+\d+\s+{}$", regex::escape(package_path));
+    let re = Regex::new(&pattern).ok()?;
+    for line in in_release_content.lines() {
+        if let Some(caps) = re.captures(line) {
+            return Some(caps[1].to_owned());
+        }
+    }
+    None
+}
+
 /// Supported compression types for Debian package archive extraction.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DebCompression {
@@ -106,6 +124,25 @@ mod tests {
             "https://deb.debian.org/debian/dists/bullseye/main/binary-amd64",
             "https://deb.debian.org/debian/dists/bullseye/contrib/binary-amd64",
         ]);
+    }
+
+    // Ported: "parses the checksum for the specified package" — datasource/deb/checksum.spec.ts line 27
+    #[test]
+    fn parse_checksums_finds_sha256() {
+        let in_release = concat!(
+            " 28dff8b86daf5731f94c272bca52d981    61020 contrib/binary-amd64/Packages.gz\n",
+            " bf77b15e68c5bfd7267c76a34172021de8f10f861f41ebda7b39d1390dd4bf9a    61020 contrib/binary-amd64/Packages.gz\n",
+        );
+        let expected = "bf77b15e68c5bfd7267c76a34172021de8f10f861f41ebda7b39d1390dd4bf9a";
+        assert_eq!(
+            parse_checksums_from_in_release(in_release, "contrib/binary-amd64/Packages.gz"),
+            Some(expected.to_owned())
+        );
+        // Non-existing path returns None
+        assert_eq!(
+            parse_checksums_from_in_release(in_release, "non-existing/binary-amd64/Packages.gz"),
+            None
+        );
     }
 
     // Ported: "should throw error for unsupported compression" — datasource/deb/utils.spec.ts line 29
