@@ -823,6 +823,122 @@ pub fn calculate_most_recent_timestamp<'a>(
 }
 
 // ---------------------------------------------------------------------------
+// Onboarding PR list — lib/workers/repository/onboarding/pr/pr-list.ts
+// ---------------------------------------------------------------------------
+
+/// One dependency upgrade inside a branch.
+#[derive(Debug)]
+pub struct PrListUpgrade<'a> {
+    pub dep_name: &'a str,
+    pub source_url: Option<&'a str>,
+    pub update_type: &'a str,
+    pub new_value: Option<&'a str>,
+    pub new_version: Option<&'a str>,
+    pub new_digest: Option<&'a str>,
+    pub is_lockfile_update: bool,
+}
+
+/// One branch in the expected PR list.
+#[derive(Debug)]
+pub struct PrListBranch<'a> {
+    pub pr_title: &'a str,
+    pub branch_name: &'a str,
+    pub base_branch: Option<&'a str>,
+    pub schedule: &'a [&'a str],
+    pub upgrades: &'a [PrListUpgrade<'a>],
+}
+
+/// Convert `@org/repo` patterns to `@&#8203;org/repo` (zero-width space after @).
+fn sanitize_pr_title(title: &str) -> String {
+    static RE: std::sync::LazyLock<regex::Regex> =
+        std::sync::LazyLock::new(|| regex::Regex::new(r"@([a-z]+/[a-z]+)").unwrap());
+    RE.replace_all(title, "@\u{200B}$1").into_owned()
+}
+
+/// Build the "What to Expect" section of the onboarding PR description.
+///
+/// Mirrors `getExpectedPrList` from
+/// `lib/workers/repository/onboarding/pr/pr-list.ts`.
+pub fn get_expected_pr_list(
+    pr_hourly_limit: u32,
+    commit_hourly_limit: u32,
+    branches: &[PrListBranch<'_>],
+) -> String {
+    let mut out = "\n### What to Expect\n\n".to_string();
+    if branches.is_empty() {
+        out.push_str("It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n");
+        return out;
+    }
+    let n = branches.len();
+    out.push_str(&format!(
+        "With your current configuration, Renovate will create {} Pull Request{}:\n\n",
+        n,
+        if n > 1 { "s" } else { "" }
+    ));
+
+    for branch in branches {
+        out.push_str(&format!(
+            "<details>\n<summary>{}</summary>\n\n",
+            sanitize_pr_title(branch.pr_title)
+        ));
+        if !branch.schedule.is_empty() {
+            let sched = branch
+                .schedule
+                .iter()
+                .map(|s| format!("\"{}\"", s))
+                .collect::<Vec<_>>()
+                .join(",");
+            out.push_str(&format!("  - Schedule: [{}]\n", sched));
+        }
+        out.push_str(&format!("  - Branch name: `{}`\n", branch.branch_name));
+        if let Some(base) = branch.base_branch.filter(|s| !s.is_empty()) {
+            out.push_str(&format!("  - Merge into: `{}`\n", base));
+        }
+
+        let mut seen: Vec<String> = Vec::new();
+        for upg in branch.upgrades {
+            let text = if upg.update_type == "lockFileMaintenance" {
+                "  - Regenerate lock files to use latest dependency versions".to_string()
+            } else {
+                let action = if upg.update_type == "pin" { "Pin" } else { "Upgrade" };
+                let dep = if let Some(url) = upg.source_url {
+                    format!("[{}]({})", upg.dep_name, url)
+                } else {
+                    sanitize_pr_title(upg.dep_name)
+                };
+                let version = if upg.is_lockfile_update {
+                    format!("`{}`", upg.new_version.unwrap_or("undefined"))
+                } else {
+                    let v = upg.new_digest.or(upg.new_value).unwrap_or("undefined");
+                    format!("`{}`", v)
+                };
+                format!("  - {} {} to {}\n", action, dep, version)
+            };
+            if !seen.contains(&text) {
+                out.push_str(&text);
+                seen.push(text);
+            }
+        }
+        out.push_str("\n\n");
+        out.push_str("</details>\n\n");
+    }
+
+    // Hourly limit messages
+    if commit_hourly_limit > 0 && commit_hourly_limit < 5 && (commit_hourly_limit as usize) < n {
+        out.push_str(&format!(
+            "\n\n🚸 Branch creation and rebasing will be limited to maximum {} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for `commitHourlyLimit` for details.\n\n",
+            commit_hourly_limit
+        ));
+    } else if pr_hourly_limit > 0 && pr_hourly_limit < 5 && (pr_hourly_limit as usize) < n {
+        out.push_str(&format!(
+            "\n\n🚸 PR creation will be limited to maximum {} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for `prHourlyLimit`](https://docs.renovatebot.com/configuration-options/#prhourlylimit) for details.\n\n",
+            pr_hourly_limit
+        ));
+    }
+
+    out
+}
+
 // PR label utilities — lib/workers/repository/update/pr/labels.ts
 // ---------------------------------------------------------------------------
 
@@ -5197,6 +5313,99 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── get_expected_pr_list ─────────────────────────────────────────────────
+
+    // Ported: "handles empty" — workers/repository/onboarding/pr/pr-list.spec.ts line 16
+    #[test]
+    fn test_pr_list_empty() {
+        let result = get_expected_pr_list(2, 0, &[]);
+        assert!(result.contains("already up-to-date"));
+        assert!(!result.contains("Renovate will create"));
+    }
+
+    // Ported: "has special lock file maintenance description" — workers/repository/onboarding/pr/pr-list.spec.ts line 28
+    #[test]
+    fn test_pr_list_lock_file_maintenance() {
+        let upgrades = [PrListUpgrade {
+            dep_name: "",
+            source_url: None,
+            update_type: "lockFileMaintenance",
+            new_value: None,
+            new_version: None,
+            new_digest: None,
+            is_lockfile_update: false,
+        }];
+        let branches = [PrListBranch {
+            pr_title: "Lock file maintenance",
+            branch_name: "renovate/lock-file-maintenance",
+            base_branch: Some("base"),
+            schedule: &["before 5am"],
+            upgrades: &upgrades,
+        }];
+        let result = get_expected_pr_list(2, 0, &branches);
+        assert!(result.contains("Renovate will create 1 Pull Request:"));
+        assert!(result.contains("Schedule: [\"before 5am\"]"));
+        assert!(result.contains("Regenerate lock files"));
+        assert!(result.contains("Merge into: `base`"));
+    }
+
+    // Ported: "handles multiple" — workers/repository/onboarding/pr/pr-list.spec.ts line 66
+    #[test]
+    fn test_pr_list_multiple_with_limit() {
+        let upgrades1 = [
+            PrListUpgrade { dep_name: "a", source_url: Some("https://a"), update_type: "pin", new_value: Some("1.1.0"), new_version: None, new_digest: None, is_lockfile_update: false },
+            PrListUpgrade { dep_name: "b", source_url: None, update_type: "pin", new_value: Some("1.5.3"), new_version: None, new_digest: None, is_lockfile_update: false },
+        ];
+        let upgrades2 = [
+            PrListUpgrade { dep_name: "a", source_url: Some("https://a"), update_type: "update", new_value: Some("2.0.1"), new_version: None, new_digest: None, is_lockfile_update: true },
+        ];
+        let branches = [
+            PrListBranch { pr_title: "Pin dependencies", branch_name: "renovate/pin-dependencies", base_branch: Some("base"), schedule: &[], upgrades: &upgrades1 },
+            PrListBranch { pr_title: "Update a to v2", branch_name: "renovate/a-2.x", base_branch: Some(""), schedule: &[], upgrades: &upgrades2 },
+        ];
+        let result = get_expected_pr_list(1, 0, &branches);
+        assert!(result.contains("Renovate will create 2 Pull Requests:"));
+        assert!(result.contains("prHourlyLimit"));
+        assert!(result.contains("limited to maximum 1 per hour"));
+    }
+
+    // Ported: "shows commitHourlyLimit message when limit is low" — workers/repository/onboarding/pr/pr-list.spec.ts line 145
+    #[test]
+    fn test_pr_list_commit_hourly_limit_low() {
+        let upgrades = [PrListUpgrade { dep_name: "a", source_url: None, update_type: "update", new_value: Some("1.0.0"), new_version: None, new_digest: None, is_lockfile_update: false }];
+        let branches = [
+            PrListBranch { pr_title: "Update a to v1", branch_name: "renovate/a-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
+            PrListBranch { pr_title: "Update b to v1", branch_name: "renovate/b-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
+        ];
+        let result = get_expected_pr_list(2, 1, &branches);
+        assert!(result.contains("commitHourlyLimit"));
+        assert!(result.contains("Branch creation and rebasing"));
+    }
+
+    // Ported: "does not show commitHourlyLimit message when limit is high" — workers/repository/onboarding/pr/pr-list.spec.ts line 184
+    #[test]
+    fn test_pr_list_commit_hourly_limit_high() {
+        let upgrades = [PrListUpgrade { dep_name: "a", source_url: None, update_type: "update", new_value: Some("1.0.0"), new_version: None, new_digest: None, is_lockfile_update: false }];
+        let branches = [
+            PrListBranch { pr_title: "Update a to v1", branch_name: "renovate/a-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
+        ];
+        let result = get_expected_pr_list(2, 10, &branches);
+        assert!(!result.contains("commitHourlyLimit"));
+    }
+
+    // Ported: "shows only commitHourlyLimit message when both limits are set" — workers/repository/onboarding/pr/pr-list.spec.ts line 206
+    #[test]
+    fn test_pr_list_both_limits_commit_wins() {
+        let upgrades = [PrListUpgrade { dep_name: "a", source_url: None, update_type: "update", new_value: Some("1.0.0"), new_version: None, new_digest: None, is_lockfile_update: false }];
+        let branches = [
+            PrListBranch { pr_title: "Update a to v1", branch_name: "renovate/a-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
+            PrListBranch { pr_title: "Update b to v1", branch_name: "renovate/b-1.x", base_branch: Some("base"), schedule: &[], upgrades: &upgrades },
+        ];
+        let result = get_expected_pr_list(1, 1, &branches);
+        assert!(result.contains("commitHourlyLimit"));
+        assert!(!result.contains("prHourlyLimit"));
     }
 
     // ── transform_github_tag ─────────────────────────────────────────────────
