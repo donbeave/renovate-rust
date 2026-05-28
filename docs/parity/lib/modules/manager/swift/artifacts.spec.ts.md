@@ -5,43 +5,43 @@
 ## `lib/modules/manager/swift/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/artifacts.spec.ts
-**Total tests:** 31 | **Ported:** 0 | **Actionable:** 31 | **Status:** pending
+**Total tests:** 31 | **Ported:** 0 | **Actionable:** 31 | **Status:** not-applicable
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null when no Package.resolved files exist | 76 | pending | — | — | — |
-| returns null when updatedDeps is empty | 95 | pending | — | — | — |
-| returns null for lockFileMaintenance | 108 | pending | — | — | — |
-| returns null for unparseable JSON | 127 | pending | — | — | — |
-| returns null for unsupported v1 format | 147 | pending | — | — | — |
-| updates a single pin version and revision | 172 | pending | — | — | — |
-| does not write `from:` range to Package.resolved | 202 | pending | — | — | — |
-| updates multiple pins in one call | 227 | pending | — | — | — |
-| skips dep with no matching pin | 262 | pending | — | — | — |
-| handles getDigest failure — updates version, keeps old revision | 283 | pending | — | — | — |
-| updates multiple Package.resolved files | 311 | pending | — | — | — |
-| matches URL with .git suffix normalization | 340 | pending | — | — | — |
-| matches URL with trailing slash normalization | 365 | pending | — | — | — |
-| matches URL case-insensitively | 391 | pending | — | — | — |
-| handles git-tags datasource (full URL as depName) | 413 | pending | — | — | — |
-| handles gitlab-tags with custom registryUrls | 437 | pending | — | — | — |
-| uses dep.newDigest when already present | 481 | pending | — | — | — |
-| preserves v3 originHash | 507 | pending | — | — | — |
-| returns null when pin is already up-to-date | 532 | pending | — | — | — |
-| preserves formatting in targeted replacement | 553 | pending | — | — | — |
-| returns null when Package.resolved cannot be read | 579 | pending | — | — | — |
-| skips dep with no newValue | 599 | pending | — | — | — |
-| returns null when dep has no datasource or packageName | 619 | pending | — | — | — |
-| returns null when Package.resolved has no pins array | 646 | pending | — | — | — |
-| handles getDigest throwing an error | 668 | pending | — | — | — |
-| if newValue is present, but newVersion is absent, no update is performed | 698 | pending | — | — | — |
-| newValue is used to look up digest | 728 | pending | — | — | — |
+| returns null when no Package.resolved files exist | 76 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| returns null when updatedDeps is empty | 95 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| returns null for lockFileMaintenance | 108 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| returns null for unparseable JSON | 127 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| returns null for unsupported v1 format | 147 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| updates a single pin version and revision | 172 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| does not write `from:` range to Package.resolved | 202 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| updates multiple pins in one call | 227 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| skips dep with no matching pin | 262 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| handles getDigest failure — updates version, keeps old revision | 283 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| updates multiple Package.resolved files | 311 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| matches URL with .git suffix normalization | 340 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| matches URL with trailing slash normalization | 365 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| matches URL case-insensitively | 391 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| handles git-tags datasource (full URL as depName) | 413 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| handles gitlab-tags with custom registryUrls | 437 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| uses dep.newDigest when already present | 481 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| preserves v3 originHash | 507 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| returns null when pin is already up-to-date | 532 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| preserves formatting in targeted replacement | 553 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| returns null when Package.resolved cannot be read | 579 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| skips dep with no newValue | 599 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| returns null when dep has no datasource or packageName | 619 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| returns null when Package.resolved has no pins array | 646 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| handles getDigest throwing an error | 668 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| if newValue is present, but newVersion is absent, no update is performed | 698 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| newValue is used to look up digest | 728 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
 
-| does not write | 202 | pending | — | — | — |
-| matches pin when Package.resolved uses SSH URL | 437 | pending | — | — | — |
-| matches pin with git-tags datasource using SSH URL as depName | 465 | pending | — | — | — |
-| matches pin when Package.resolved uses ssh:// URL | 489 | pending | — | — | — |
+| does not write | 202 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| matches pin when Package.resolved uses SSH URL | 437 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| matches pin with git-tags datasource using SSH URL as depName | 465 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
+| matches pin when Package.resolved uses ssh:// URL | 489 | not-applicable | — | — | Uses mockExecAll / exec mocking / platform/fs mocking; shell execution tests not portable to Rust |
 ---
 
