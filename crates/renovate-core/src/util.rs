@@ -12,6 +12,40 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Reconfigure branch cache — lib/workers/repository/reconfigure/reconfigure-cache.ts
+// ---------------------------------------------------------------------------
+
+/// Set or update the reconfigure branch cache entry.
+///
+/// Mirrors `setReconfigureBranchCache` from
+/// `lib/workers/repository/reconfigure/reconfigure-cache.ts`.
+pub fn set_reconfigure_branch_cache(
+    cache: &mut serde_json::Value,
+    sha: &str,
+    is_valid: bool,
+) {
+    if let serde_json::Value::Object(map) = cache {
+        map.insert(
+            "reconfigureBranchCache".to_owned(),
+            serde_json::json!({
+                "reconfigureBranchSha": sha,
+                "isConfigValid": is_valid,
+            }),
+        );
+    }
+}
+
+/// Delete the reconfigure branch cache entry.
+///
+/// Mirrors `deleteReconfigureBranchCache` from
+/// `lib/workers/repository/reconfigure/reconfigure-cache.ts`.
+pub fn delete_reconfigure_branch_cache(cache: &mut serde_json::Value) {
+    if let serde_json::Value::Object(map) = cache {
+        map.remove("reconfigureBranchCache");
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Repository configuration check — lib/workers/repository/configured.ts
 // ---------------------------------------------------------------------------
 
@@ -2000,6 +2034,70 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // reconfigure_branch_cache
+    // -----------------------------------------------------------------------
+
+    // Ported: "sets new cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 16
+    #[test]
+    fn test_set_reconfigure_branch_cache_new() {
+        use serde_json::json;
+        let mut cache = json!({});
+        set_reconfigure_branch_cache(&mut cache, "reconfigure-sha", false);
+        assert_eq!(
+            cache["reconfigureBranchCache"],
+            json!({ "reconfigureBranchSha": "reconfigure-sha", "isConfigValid": false })
+        );
+    }
+
+    // Ported: "updates old cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 28
+    #[test]
+    fn test_set_reconfigure_branch_cache_update() {
+        use serde_json::json;
+        let mut cache = json!({
+            "reconfigureBranchCache": {
+                "reconfigureBranchSha": "reconfigure-sha",
+                "isConfigValid": false,
+            }
+        });
+        set_reconfigure_branch_cache(&mut cache, "reconfigure-sha-1", false);
+        assert_eq!(
+            cache["reconfigureBranchCache"]["reconfigureBranchSha"],
+            "reconfigure-sha-1"
+        );
+    }
+
+    // Ported: "updates extractResult old cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 45
+    #[test]
+    fn test_set_reconfigure_branch_cache_clears_extract_result() {
+        use serde_json::json;
+        let mut cache = json!({
+            "reconfigureBranchCache": {
+                "reconfigureBranchSha": "reconfigure-sha",
+                "isConfigValid": false,
+                "extractResult": { "branches": [], "branchList": ["some-branch"], "packageFiles": {} }
+            }
+        });
+        set_reconfigure_branch_cache(&mut cache, "reconfigure-sha-1", false);
+        // extractResult should be gone (not in new cache entry)
+        assert!(cache["reconfigureBranchCache"]["extractResult"].is_null());
+        assert_eq!(
+            cache["reconfigureBranchCache"]["reconfigureBranchSha"],
+            "reconfigure-sha-1"
+        );
+    }
+
+    // Ported: "deletes cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 69
+    #[test]
+    fn test_delete_reconfigure_branch_cache() {
+        use serde_json::json;
+        let mut cache = json!({
+            "reconfigureBranchCache": { "reconfigureBranchSha": "sha", "isConfigValid": true }
+        });
+        delete_reconfigure_branch_cache(&mut cache);
+        assert!(cache["reconfigureBranchCache"].is_null());
     }
 
     // -----------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4288 / 11677 total tests ported (37%) · pending 7295 · not-applicable 94 (1% of total) — updated 2026-05-28
+**Progress:** 4292 / 11677 total tests ported (37%) · pending 7291 · not-applicable 94 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -881,7 +881,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/process/write.spec.ts` | Not done | [details](lib/workers/repository/process/write.spec.ts.md) |
 | `lib/workers/repository/reconfigure/comment.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/comment.spec.ts.md) |
 | `lib/workers/repository/reconfigure/index.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/index.spec.ts.md) |
-| `lib/workers/repository/reconfigure/reconfigure-cache.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/reconfigure-cache.spec.ts.md) |
+| `lib/workers/repository/reconfigure/reconfigure-cache.spec.ts` | Done | [details](lib/workers/repository/reconfigure/reconfigure-cache.spec.ts.md) |
 | `lib/workers/repository/reconfigure/utils.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/utils.spec.ts.md) |
 | `lib/workers/repository/reconfigure/validate.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/validate.spec.ts.md) |
 | `lib/workers/repository/result.spec.ts` | Not done | [details](lib/workers/repository/result.spec.ts.md) |
