@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4530 / 11677 total tests ported (38%) · pending 6921 · not-applicable 219 (2% of total) — updated 2026-05-28
+**Progress:** 4533 / 11677 total tests ported (38%) · pending 6910 · not-applicable 219 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -409,7 +409,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/yaml.spec.ts` | Not done | [details](lib/util/yaml.spec.ts.md) |
 | `lib/util/common.spec.ts` | Not done | [details](lib/util/common.spec.ts.md) |
 | `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
-| `lib/util/interpolator.spec.ts` | Not done | [details](lib/util/interpolator.spec.ts.md) |
+| `lib/util/interpolator.spec.ts` | Done | [details](lib/util/interpolator.spec.ts.md) |
 | `lib/util/date.spec.ts` | Done | [details](lib/util/date.spec.ts.md) |
 | `lib/util/fingerprint.spec.ts` | Done | [details](lib/util/fingerprint.spec.ts.md) |
 | `lib/util/hash.spec.ts` | Done | [details](lib/util/hash.spec.ts.md) |
@@ -899,7 +899,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/branch/schedule.spec.ts` | Done | [details](lib/workers/repository/update/branch/schedule.spec.ts.md) |
 | `lib/workers/repository/update/branch/status-checks.spec.ts` | Not done | [details](lib/workers/repository/update/branch/status-checks.spec.ts.md) |
 | `lib/workers/repository/update/pr/automerge.spec.ts` | Not done | [details](lib/workers/repository/update/pr/automerge.spec.ts.md) |
-| `lib/workers/repository/update/pr/body/changelogs.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/changelogs.spec.ts.md) |
+| `lib/workers/repository/update/pr/body/changelogs.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/changelogs.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/config-description.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/config-description.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/controls.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/controls.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/footer.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/footer.spec.ts.md) |
