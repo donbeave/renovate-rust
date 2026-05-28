@@ -1057,6 +1057,59 @@ fn extract_url_path(url: &str) -> &str {
 }
 
 // ---------------------------------------------------------------------------
+// Logger pretty-stdout — lib/logger/pretty-stdout.ts
+// ---------------------------------------------------------------------------
+
+/// A minimal Bunyan log record for metadata extraction.
+#[derive(Debug, Default, Clone)]
+pub struct BunyanRecord<'a> {
+    pub repository: Option<&'a str>,
+    pub base_branch: Option<&'a str>,
+    pub package_file: Option<&'a str>,
+    pub dep_type: Option<&'a str>,
+    pub dependency: Option<&'a str>,
+    pub dependencies: Option<&'a str>,
+    pub branch: Option<&'a str>,
+    pub module: Option<&'a str>,
+}
+
+impl<'a> BunyanRecord<'a> {
+    fn meta_pairs(&self) -> Vec<String> {
+        let mut pairs = Vec::new();
+        macro_rules! push_if { ($field:expr, $name:literal) => { if let Some(v) = $field { pairs.push(format!("{}={}", $name, v)); } }; }
+        push_if!(self.repository, "repository");
+        push_if!(self.base_branch, "baseBranch");
+        push_if!(self.package_file, "packageFile");
+        push_if!(self.dep_type, "depType");
+        push_if!(self.dependency, "dependency");
+        push_if!(self.dependencies, "dependencies");
+        push_if!(self.branch, "branch");
+        pairs
+    }
+}
+
+/// Generate the metadata string for a log record.
+///
+/// Mirrors `getMeta()` from `lib/logger/pretty-stdout.ts`.
+pub fn get_meta(rec: Option<&BunyanRecord<'_>>, colorize: bool) -> String {
+    let rec = match rec { None => return String::new(), Some(r) => r };
+    let module_part = rec.module.map(|m| format!(" [{}]", m)).unwrap_or_default();
+    let meta_pairs = rec.meta_pairs();
+    if meta_pairs.is_empty() { return module_part; }
+    let plain = format!(" ({}){}", meta_pairs.join(", "), module_part);
+    if colorize { format!("\x1b[90m{}\x1b[0m", plain) } else { plain }
+}
+
+/// Indent a multi-line string with 7-space prefix.
+///
+/// Mirrors `indent()` from `lib/logger/pretty-stdout.ts`.
+pub fn pretty_stdout_indent(s: &str, leading: bool) -> String {
+    let prefix = if leading { "       " } else { "" };
+    let indented = s.lines().collect::<Vec<_>>().join("\n       ");
+    format!("{}{}", prefix, indented)
+}
+
+// ---------------------------------------------------------------------------
 // Exec utilities — lib/util/exec/utils.ts
 // ---------------------------------------------------------------------------
 
@@ -5928,6 +5981,35 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── getMeta / getDetails ─────────────────────────────────────────────────
+
+    // Ported: "returns empty string if null rec" — logger/pretty-stdout.spec.ts line 9
+    #[test]
+    fn test_get_meta_null_rec() {
+        assert_eq!(get_meta(None, true), "");
+    }
+
+    // Ported: "returns empty string if empty rec" — logger/pretty-stdout.spec.ts line 13
+    #[test]
+    fn test_get_meta_empty_rec() {
+        let rec = BunyanRecord::default();
+        assert_eq!(get_meta(Some(&rec), true), "");
+    }
+
+    // Ported: "returns empty string if no meta fields" — logger/pretty-stdout.spec.ts line 17
+    #[test]
+    fn test_get_meta_no_meta_fields() {
+        let rec = BunyanRecord::default(); // foo: 'bar' is not a meta field
+        assert_eq!(get_meta(Some(&rec), true), "");
+    }
+
+    // Ported: "returns plain text when colorize is false" — logger/pretty-stdout.spec.ts line 46
+    #[test]
+    fn test_get_meta_plain_text() {
+        let rec = BunyanRecord { repository: Some("a/b"), module: Some("test"), ..Default::default() };
+        assert_eq!(get_meta(Some(&rec), false), " (repository=a/b) [test]");
     }
 
     // ── as_raw_commands ──────────────────────────────────────────────────────
