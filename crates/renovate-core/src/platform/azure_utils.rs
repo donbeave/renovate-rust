@@ -143,6 +143,27 @@ pub fn get_repo_by_name<'a>(name: &str, repos: &'a [AzureGitRepo]) -> Option<&'a
 mod tests {
     use super::*;
 
+    // ── get_azure_pr_state ───────────────────────────────────────────────────
+
+    // Ported: "should be formated (closed)" — modules/platform/azure/util.spec.ts line 91
+    #[test]
+    fn azure_pr_state_closed() {
+        assert_eq!(get_azure_pr_state(2), "closed");
+    }
+
+    // Ported: "should be formated (closed v2)" — modules/platform/azure/util.spec.ts line 96
+    #[test]
+    fn azure_pr_state_merged() {
+        assert_eq!(get_azure_pr_state(3), "merged");
+    }
+
+    // Ported: "should be formated (not closed)" — modules/platform/azure/util.spec.ts line 101
+    #[test]
+    fn azure_pr_state_open() {
+        assert_eq!(get_azure_pr_state(1), "open");
+        assert_eq!(get_azure_pr_state(0), "open"); // unknown → open
+    }
+
     // Ported: "should return undefined if null context passed" (getGitStatusContextCombinedName)
     //         — modules/platform/azure/util.spec.ts line 17
     #[test]

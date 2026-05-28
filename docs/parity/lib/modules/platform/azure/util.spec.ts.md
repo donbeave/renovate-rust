@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/util.spec.ts
-**Total tests:** 29 | **Ported:** 23 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 26 | **Actionable:** 29 | **Status:** partial
 
 ### `getGitStatusContextCombinedName`
 
@@ -36,9 +36,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should be formated (closed) | 91 | pending | — | — | — |
-| should be formated (closed v2) | 96 | pending | — | — | — |
-| should be formated (not closed) | 101 | pending | — | — | — |
+| should be formated (closed) | 91 | ported | `azure_utils.rs` | `azure_pr_state_closed` | — |
+| should be formated (closed v2) | 96 | ported | `azure_utils.rs` | `azure_pr_state_merged` | — |
+| should be formated (not closed) | 101 | ported | `azure_utils.rs` | `azure_pr_state_open` | — |
 
 ### `streamToString`
 
