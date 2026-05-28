@@ -195,6 +195,29 @@ pub fn extract(content: &str) -> Vec<GitSubmoduleDep> {
     deps
 }
 
+// ── updateArtifacts ───────────────────────────────────────────────────────────
+
+/// A single file change produced by `update_artifacts`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SubmoduleArtifact {
+    pub path: String,
+    pub contents: String,
+}
+
+/// Produce artifact additions for each updated submodule dependency.
+///
+/// Ports `updateArtifacts` from `lib/modules/manager/git-submodules/artifacts.ts`.
+pub fn update_artifacts(dep_names: &[&str]) -> Vec<SubmoduleArtifact> {
+    dep_names
+        .iter()
+        .map(|&dep_name| SubmoduleArtifact {
+            path: dep_name.to_owned(),
+            contents: String::new(),
+        })
+        .collect()
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -373,6 +396,26 @@ mod tests {
 "#;
         let deps = extract(content);
         assert_eq!(deps[0].url, "https://gitlab.com/some/repo");
+    }
+
+    // Ported: "returns empty content" — git-submodules/artifact.spec.ts line 5
+    #[test]
+    fn update_artifacts_empty_dep_name() {
+        let result = update_artifacts(&[""]);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].path, "");
+        assert_eq!(result[0].contents, "");
+    }
+
+    // Ported: "returns two modules" — git-submodules/artifact.spec.ts line 16
+    #[test]
+    fn update_artifacts_two_modules() {
+        let result = update_artifacts(&["renovate", "renovate-pro"]);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].path, "renovate");
+        assert_eq!(result[0].contents, "");
+        assert_eq!(result[1].path, "renovate-pro");
+        assert_eq!(result[1].contents, "");
     }
 
     // Ported: "when using SSH clone URL" — git-submodules/extract.spec.ts line 73

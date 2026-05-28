@@ -29,7 +29,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/glasskube/extract.spec.ts` | Done | [details](lib/modules/manager/glasskube/extract.spec.ts.md) |
 | `lib/modules/manager/gleam/extract.spec.ts` | Done | [details](lib/modules/manager/gleam/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/extract.spec.ts` | Done | [details](lib/modules/manager/git-submodules/extract.spec.ts.md) |
-| `lib/modules/manager/git-submodules/artifact.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/artifact.spec.ts.md) |
+| `lib/modules/manager/git-submodules/artifact.spec.ts` | Done | [details](lib/modules/manager/git-submodules/artifact.spec.ts.md) |
 | `lib/modules/manager/github-actions/extract.spec.ts` | Done | [details](lib/modules/manager/github-actions/extract.spec.ts.md) |
 | `lib/modules/manager/github-actions/integration.spec.ts` | Not done | [details](lib/modules/manager/github-actions/integration.spec.ts.md) |
 | `lib/modules/manager/github-actions/parse.spec.ts` | Done | [details](lib/modules/manager/github-actions/parse.spec.ts.md) |
