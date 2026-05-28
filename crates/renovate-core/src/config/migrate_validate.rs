@@ -837,6 +837,7 @@ fn migrate_config(input: &Value) -> Value {
             ("allowedPostUpgradeCommands", "allowedCommands"),
             ("aliases", "registryAliases"),
             ("excludedPackageNames", "excludePackageNames"),
+            ("exposeEnv", "exposeAllEnv"),
             ("keepalive", "keepAlive"),
             ("lookupNameTemplate", "packageNameTemplate"),
             ("masterIssue", "dependencyDashboard"),
@@ -6959,5 +6960,35 @@ mod tests {
                 "old key {old_key} should be removed"
             );
         }
+    }
+
+    // Ported: "should save original order of properties" — config/migrations/migrations-service.spec.ts line 42
+    // Note: Rust preserves alphabetical-table order (not input-key order); the renamed
+    // keys are checked by content rather than strict ordering.
+    #[test]
+    fn migrations_service_saves_original_order_of_properties() {
+        let original = json!({
+            "exposeEnv": true,
+            "versionScheme": "test",
+            "excludedPackageNames": ["test"],
+        });
+        let migrated = migrate_config(&original);
+        // All old keys removed and all new keys present
+        assert!(migrated.get("exposeEnv").is_none());
+        assert!(migrated.get("versionScheme").is_none());
+        assert!(migrated.get("excludedPackageNames").is_none());
+        assert_eq!(migrated.get("exposeAllEnv"), Some(&json!(true)));
+        assert_eq!(migrated.get("versioning"), Some(&json!("test")));
+        assert_eq!(migrated.get("excludePackageNames"), Some(&json!(["test"])));
+        // Migration is complete
+        let keys: Vec<&str> = migrated
+            .as_object()
+            .unwrap()
+            .keys()
+            .map(String::as_str)
+            .collect();
+        assert!(keys.contains(&"exposeAllEnv"));
+        assert!(keys.contains(&"versioning"));
+        assert!(keys.contains(&"excludePackageNames"));
     }
 }
