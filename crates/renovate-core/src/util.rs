@@ -265,6 +265,49 @@ pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
 }
 
 // ---------------------------------------------------------------------------
+// Date utilities — lib/util/date.ts
+// ---------------------------------------------------------------------------
+
+const ONE_MINUTE_MS: i64 = 60_000;
+const ONE_HOUR_MS: i64 = 3_600_000;
+
+/// Return elapsed days between `timestamp` ISO string and `now_ms`.
+/// When `floor` is true, truncates to integer days.
+pub fn get_elapsed_days(timestamp: &str, floor: bool, now_ms: i64) -> f64 {
+    use chrono::DateTime;
+    let past_ms = DateTime::parse_from_rfc3339(timestamp)
+        .map(|d| d.timestamp_millis())
+        .unwrap_or(now_ms);
+    let diff_days = (now_ms - past_ms) as f64 / (ONE_HOUR_MS * 24) as f64;
+    if floor { diff_days.floor() } else { diff_days }
+}
+
+/// Return elapsed minutes between `date_ms` and `now_ms`.
+pub fn get_elapsed_minutes(date_ms: i64, now_ms: i64) -> i64 {
+    (now_ms - date_ms) / ONE_MINUTE_MS
+}
+
+/// Return elapsed hours between `timestamp` ISO string and `now_ms`.
+/// Returns 0 for invalid timestamps.
+pub fn get_elapsed_hours(timestamp: &str, now_ms: i64) -> i64 {
+    use chrono::DateTime;
+    let past_ms = match DateTime::parse_from_rfc3339(timestamp) {
+        Ok(d) => d.timestamp_millis(),
+        Err(_) => return 0,
+    };
+    ((now_ms - past_ms) / ONE_HOUR_MS).max(0)
+}
+
+/// Return elapsed milliseconds between `timestamp` ISO string and `now_ms`.
+pub fn get_elapsed_ms(timestamp: &str, now_ms: i64) -> i64 {
+    use chrono::DateTime;
+    let past_ms = DateTime::parse_from_rfc3339(timestamp)
+        .map(|d| d.timestamp_millis())
+        .unwrap_or(now_ms);
+    now_ms - past_ms
+}
+
+// ---------------------------------------------------------------------------
 // hash — lib/util/hash.ts
 // ---------------------------------------------------------------------------
 
@@ -1211,5 +1254,83 @@ dep1 = "^1.0.0"
         let massaged = massage_toml(input);
         // After massage, should parse without error
         assert!(parse_toml(&massaged).is_ok(), "massaged TOML should parse: {massaged}");
+    }
+
+    // -----------------------------------------------------------------------
+    // date utilities
+    // -----------------------------------------------------------------------
+
+    // t0 = 2020-10-10T00:00:00Z as millis
+    const T0_MS: i64 = 1_602_288_000_000; // 2020-10-10T00:00:00.000Z
+
+    // Ported: "returns elapsed days" — util/date.spec.ts line 22
+    #[test]
+    fn test_get_elapsed_days_exact() {
+        // t = t0 - 42 days
+        let t_ms = T0_MS - 42 * 24 * 60 * 60 * 1000;
+        let ts = format_ts(t_ms);
+        assert_eq!(get_elapsed_days(&ts, true, T0_MS), 42.0);
+    }
+
+    // Ported: "returns floor'd version of floating point when partial days" — util/date.spec.ts line 27
+    #[test]
+    fn test_get_elapsed_days_floor_partial() {
+        // t = t0 - 42.5 days
+        let t_ms = T0_MS - (42 * 24 + 12) * 60 * 60 * 1000;
+        let ts = format_ts(t_ms);
+        assert_eq!(get_elapsed_days(&ts, true, T0_MS), 42.0);
+    }
+
+    // Ported: "returns floating point when partial days" — util/date.spec.ts line 34
+    #[test]
+    fn test_get_elapsed_days_no_floor() {
+        let t_ms = T0_MS - (42 * 24 + 12) * 60 * 60 * 1000;
+        let ts = format_ts(t_ms);
+        assert_eq!(get_elapsed_days(&ts, false, T0_MS), 42.5);
+    }
+
+    // Ported: "returns all decimal places" — util/date.spec.ts line 39
+    #[test]
+    fn test_get_elapsed_days_decimal() {
+        let t_ms = T0_MS - (42 * 24 + 2) * 60 * 60 * 1000;
+        let ts = format_ts(t_ms);
+        let result = get_elapsed_days(&ts, false, T0_MS);
+        // 42 + 2/24 = 42.083333...
+        assert!((result - 42.083_333_333_333_336).abs() < 1e-9, "got {result}");
+    }
+
+    // Ported: "returns elapsed minutes" — util/date.spec.ts line 47
+    #[test]
+    fn test_get_elapsed_minutes() {
+        let t_ms = T0_MS - 42 * 60 * 1000; // 42 minutes before t0
+        assert_eq!(get_elapsed_minutes(t_ms, T0_MS), 42);
+    }
+
+    // Ported: "returns elapsed hours" — util/date.spec.ts line 54
+    #[test]
+    fn test_get_elapsed_hours() {
+        let t_ms = T0_MS - 42 * 60 * 60 * 1000;
+        let ts = format_ts(t_ms);
+        assert_eq!(get_elapsed_hours(&ts, T0_MS), 42);
+    }
+
+    // Ported: "returns zero when date passed is invalid" — util/date.spec.ts line 60
+    #[test]
+    fn test_get_elapsed_hours_invalid() {
+        assert_eq!(get_elapsed_hours("invalid_date_string", T0_MS), 0);
+    }
+
+    // Ported: "returns elapsed time in milliseconds" — util/date.spec.ts line 66
+    #[test]
+    fn test_get_elapsed_ms() {
+        let t_ms = T0_MS - 42;
+        let ts = format_ts(t_ms);
+        assert_eq!(get_elapsed_ms(&ts, T0_MS), 42);
+    }
+
+    fn format_ts(ms: i64) -> String {
+        use chrono::{TimeZone, Utc};
+        let dt = Utc.timestamp_millis_opt(ms).unwrap();
+        dt.to_rfc3339()
     }
 }
