@@ -697,6 +697,17 @@ pub struct WwwAuthChallenge {
     pub params: Option<WwwAuthParams>,
 }
 
+/// Check whether an HTTP response status is "OK".
+///
+/// Ports `isResponseOk` from `lib/util/http/hooks.ts`.
+///
+/// - `follow_redirect = true`: success range is 200–299 or 304
+/// - `follow_redirect = false`: success range is 200–399 or 304
+pub fn is_response_ok(status_code: u16, follow_redirect: bool) -> bool {
+    let limit = if follow_redirect { 299 } else { 399 };
+    (status_code >= 200 && status_code <= limit) || status_code == 304
+}
+
 /// Parse a `WWW-Authenticate` header (or slice of headers).
 ///
 /// Mirrors `lib/util/http/www-authenticate.ts` `parse()`.
@@ -1128,5 +1139,20 @@ mod www_auth_tests {
     fn retry_after_value_invalid_returns_none() {
         let now = Utc::now();
         assert!(parse_retry_after_value("invalid", now).is_none());
+    }
+
+    // Ported: "returns $expected for status code $statusCode and followRedirect $followRedirect" — util/http/hooks.spec.ts line 5
+    #[test]
+    fn test_is_response_ok() {
+        // When followRedirect=false, limit is 399; 304 always OK.
+        assert!(is_response_ok(200, false));
+        assert!(is_response_ok(299, false));
+        assert!(is_response_ok(304, false));
+        assert!(is_response_ok(302, false));
+        assert!(!is_response_ok(400, false));
+        // When followRedirect=true, limit is 299; 304 always OK.
+        assert!(is_response_ok(304, true));
+        assert!(!is_response_ok(302, true));
+        assert!(!is_response_ok(400, true));
     }
 }
