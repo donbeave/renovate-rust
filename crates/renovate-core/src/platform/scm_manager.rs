@@ -129,3 +129,134 @@ mod tests {
         assert!(match_pr_state("closed", "closed"));
     }
 }
+
+// ---------------------------------------------------------------------------
+// getRepoUrl — lib/modules/platform/scm-manager/utils.ts
+// ---------------------------------------------------------------------------
+
+/// A protocol link with name and href from `repo._links.protocol`.
+#[derive(Debug, Clone)]
+pub struct ProtocolLink {
+    pub name: String,
+    pub href: String,
+}
+
+/// Error variants from `getRepoUrl`.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum GetRepoUrlError {
+    #[error("Missing protocol links.")]
+    MissingProtocolLinks,
+    #[error("Expected protocol links to be an array of links.")]
+    NotAnArray,
+    #[error("MISSING_SSH_LINKS")]
+    MissingSshLink,
+    #[error("MISSING_HTTP_LINK")]
+    MissingHttpLink,
+    #[error("MALFORMED_HTTP_LINK")]
+    MalformedHttpLink,
+}
+
+/// Resolve the repository URL for a given git-URL option.
+///
+/// `protocol_links` is the `repo._links.protocol` array from SCM Manager.
+/// `git_url` is one of `Some("ssh")`, `Some("default")`, `Some("endpoint")`,
+/// or `None` (both `None` and `"default"` and `"endpoint"` use HTTP).
+/// `username` / `token` are the SCM Manager credentials to embed in the HTTP URL.
+///
+/// Mirrors `getRepoUrl` from `lib/modules/platform/scm-manager/utils.ts`.
+pub fn get_repo_url(
+    protocol_links: &[ProtocolLink],
+    git_url: Option<&str>,
+    username: Option<&str>,
+    token: Option<&str>,
+) -> Result<String, GetRepoUrlError> {
+    if git_url == Some("ssh") {
+        let ssh_url = protocol_links
+            .iter()
+            .find(|l| l.name == "ssh")
+            .map(|l| l.href.clone())
+            .ok_or(GetRepoUrlError::MissingSshLink)?;
+        return Ok(ssh_url);
+    }
+
+    let http_url = protocol_links
+        .iter()
+        .find(|l| l.name == "http")
+        .map(|l| l.href.clone())
+        .ok_or(GetRepoUrlError::MissingHttpLink)?;
+
+    let mut parsed = url::Url::parse(&http_url).map_err(|_| GetRepoUrlError::MalformedHttpLink)?;
+
+    let _ = parsed.set_username(username.unwrap_or(""));
+    let _ = parsed.set_password(if token.is_some_and(|t| !t.is_empty()) {
+        token
+    } else {
+        None
+    });
+
+    Ok(parsed.to_string())
+}
+
+#[cfg(test)]
+mod get_repo_url_tests {
+    use super::*;
+
+    fn link(name: &str, href: &str) -> ProtocolLink {
+        ProtocolLink { name: name.to_owned(), href: href.to_owned() }
+    }
+
+    const GIT_HTTP: &str = "http://localhost:8081/scm/repo/default/repo";
+    const GIT_SSH: &str = "ssh://localhost:2222/scm/repo/default/repo";
+
+    // Ported: "should use the provided ssh link" — scm-manager/utils.spec.ts line 158
+    #[test]
+    fn get_repo_url_uses_ssh_link() {
+        let links = vec![
+            link("http", GIT_HTTP),
+            link("ssh", GIT_SSH),
+        ];
+        let result = get_repo_url(&links, Some("ssh"), None, None).unwrap();
+        assert_eq!(result, GIT_SSH);
+    }
+
+    // Ported: "should throw error because of missing SSH link" — scm-manager/utils.spec.ts line 132
+    #[test]
+    fn get_repo_url_errors_missing_ssh() {
+        let links = vec![link("http", GIT_HTTP)];
+        let err = get_repo_url(&links, Some("ssh"), None, None).unwrap_err();
+        assert_eq!(err, GetRepoUrlError::MissingSshLink);
+    }
+
+    // Ported: "should throw error for option $gitUrl, because protocol links are missing" — scm-manager/utils.spec.ts line 117
+    #[test]
+    fn get_repo_url_errors_no_http_link() {
+        let links = vec![link("ssh", GIT_SSH)]; // no http link
+        let err = get_repo_url(&links, None, None, None).unwrap_err();
+        assert_eq!(err, GetRepoUrlError::MissingHttpLink);
+    }
+
+    // Ported: "should throw error because of malformed HTTP link with option $gitUrl" — scm-manager/utils.spec.ts line 192
+    #[test]
+    fn get_repo_url_errors_malformed_http_link() {
+        let links = vec![link("http", "invalid url")];
+        let err = get_repo_url(&links, None, None, None).unwrap_err();
+        assert_eq!(err, GetRepoUrlError::MalformedHttpLink);
+    }
+
+    // Ported: "should use empty string, because username was not provided with option $gitUrl" — scm-manager/utils.spec.ts line 213
+    #[test]
+    fn get_repo_url_no_username_gives_plain_url() {
+        let links = vec![link("http", GIT_HTTP)];
+        let result = get_repo_url(&links, None, None, None).unwrap();
+        assert_eq!(result, GIT_HTTP);
+    }
+
+    // Ported: "should provide the HTTP link with username, for option $gitUrl" — scm-manager/utils.spec.ts line 258
+    #[test]
+    fn get_repo_url_with_username_and_token() {
+        let links = vec![link("http", GIT_HTTP)];
+        let result = get_repo_url(&links, None, Some("tzerr"), Some("token")).unwrap();
+        assert!(result.contains("tzerr"));
+        assert!(result.contains("localhost"));
+    }
+}

@@ -47,13 +47,13 @@
 | selects longest matching pattern across all configs | 209 | ported | `cache/package.rs` | `get_ttl_override_selects_longest_across_4_patterns` | — |
 | skips non-numeric values and selects next longest matching pattern | 228 | not-applicable | — | — | Rust types enforce numeric values |
 | returns undefined when no patterns match | 243 | ported | cache/package.rs | `get_ttl_override_matches_simple_glob` | non-matching case covered |
-| applies patterns consistently regardless of case in config order | 256 | pending | — | — | Config order independence not explicitly tested |
+| applies patterns consistently regardless of case in config order | 256 | ported | `cache/package.rs` | `get_ttl_override_case_order_consistency` | HashMap iteration non-deterministic; test verifies valid result |
 
 ### `util/cache/package/ttl › getTtlOverride › Edge cases`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles empty string pattern | 271 | pending | — | — | Empty string glob behavior |
+| handles empty string pattern | 271 | ported | `cache/package.rs` | `get_ttl_override_handles_empty_string_pattern` | — |
 | treats null and undefined values as invalid | 286 | not-applicable | — | — | Rust HashMap<String,i64> types enforce non-null |
 | handles very large numbers | 306 | not-applicable | — | — | i64::MAX works without special handling |
 | handles negative numbers | 318 | ported | `cache/package.rs` | `get_ttl_override_handles_negative_values` | — |
