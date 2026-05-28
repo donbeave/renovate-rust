@@ -886,6 +886,48 @@ fn migrate_config(input: &Value) -> Value {
             map.remove("requiredStatusChecks");
             map.insert("ignoreTests".to_owned(), Value::Bool(true));
         }
+        // Flatten nested packageRules — mirrors TypeScript `migrateConfig` behavior.
+        // A rule that contains its own `packageRules` array is replaced by merged
+        // parent+subrule combinations with the nested array removed.
+        if let Some(Value::Array(rules)) = map.remove("packageRules") {
+            let mut flattened: Vec<Value> = Vec::new();
+            let mut had_nested = false;
+            for rule in rules {
+                if let Value::Object(ref obj) = rule {
+                    if let Some(Value::Array(subrules)) = obj.get("packageRules") {
+                        if subrules.is_empty() {
+                            // Empty nested packageRules — keep rule but drop the empty array.
+                            let mut parent = obj.clone();
+                            parent.remove("packageRules");
+                            flattened.push(Value::Object(parent));
+                        } else {
+                            had_nested = true;
+                            let mut parent = obj.clone();
+                            parent.remove("packageRules");
+                            for subrule in subrules {
+                                let mut combined = parent.clone();
+                                if let Value::Object(sub_obj) = subrule {
+                                    for (k, v) in sub_obj {
+                                        combined.insert(k.clone(), v.clone());
+                                    }
+                                }
+                                combined.remove("packageRules");
+                                flattened.push(Value::Object(combined));
+                            }
+                        }
+                        continue;
+                    }
+                }
+                flattened.push(rule);
+            }
+            if had_nested {
+                // Migrate deprecated fields in the newly merged subrules.
+                migrate_package_rules(&mut flattened);
+            }
+            if !flattened.is_empty() {
+                map.insert("packageRules".to_owned(), Value::Array(flattened));
+            }
+        }
         // pip-compile: apply fileMatch migration and convert .in → .txt patterns.
         // Mirrors the TypeScript logic in lib/config/migration.ts.
         if let Some(Value::Object(pip)) = map.get_mut("pip-compile") {
@@ -918,6 +960,25 @@ fn migrate_config(input: &Value) -> Value {
                             s.replace(".in$/", ".txt$/")
                         };
                     }
+                }
+            }
+        }
+        // Recurse into nested object-valued config fields — mirrors TypeScript
+        // `migrateConfig`'s recursive call for sub-configs (lockFileMaintenance,
+        // manager overrides, etc.).  Skip special non-config fields.
+        const SKIP_RECURSE: &[&str] = &[
+            "errors", "warnings", "migratedConfig", "onboardingConfig",
+        ];
+        let keys_to_recurse: Vec<String> = map
+            .iter()
+            .filter(|(k, v)| v.is_object() && !SKIP_RECURSE.contains(&k.as_str()))
+            .map(|(k, _)| k.clone())
+            .collect();
+        for key in keys_to_recurse {
+            if let Some(child) = map.get(&key).cloned() {
+                let migrated_child = migrate_config(&child);
+                if migrated_child != child {
+                    map.insert(key, migrated_child);
                 }
             }
         }
@@ -5422,7 +5483,8 @@ mod tests {
                     },
                     {
                         "matchPackageNames": ["foo"],
-                        "packageRules": [{"depTypeList": ["bar"], "automerge": true}]
+                        "matchDepTypes": ["bar"],
+                        "automerge": true
                     },
                     {"matchDepTypes": ["peerDependencies"], "versionStrategy": "widen"},
                     {"matchDepTypes": ["dependencies"], "versionStrategy": "widen"},
@@ -6646,6 +6708,43 @@ mod tests {
             .any(|m| m.as_str() == Some("gradle")));
         assert!(!rules[0]["matchManagers"].as_array().unwrap().iter()
             .any(|m| m.as_str() == Some("gradle-lite")));
+    }
+
+    // Ported: "migrates subconfig" — config/migration.spec.ts line 308
+    #[test]
+    fn migrates_subconfig() {
+        let result = migrate_config(&json!({
+            "lockFileMaintenance": {
+                "depTypes": [
+                    "dependencies",
+                    {"depType": "optionalDependencies", "respectLatest": false}
+                ]
+            }
+        }));
+        let rules = result["lockFileMaintenance"]["packageRules"]
+            .as_array()
+            .expect("lockFileMaintenance.packageRules should be an array");
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0]["respectLatest"], json!(false));
+    }
+
+    // Ported: "migrates more packageFiles" — config/migration.spec.ts line 360
+    #[test]
+    fn migrates_more_package_files() {
+        let result = migrate_config(&json!({
+            "packageFiles": [{
+                "packageFile": "package.json",
+                "packageRules": [
+                    {"pinVersions": true, "depTypeList": ["devDependencies"]},
+                    {"pinVersions": true, "depTypeList": ["dependencies"]}
+                ]
+            }]
+        }));
+        let paths = result["includePaths"].as_array().expect("includePaths");
+        assert_eq!(paths.len(), 1);
+        assert!(result.get("packageFiles").is_none());
+        let rules = result["packageRules"].as_array().expect("packageRules");
+        assert_eq!(rules.len(), 2);
     }
 
     // Ported: "migrates pip-compile" — config/migration.spec.ts line 696

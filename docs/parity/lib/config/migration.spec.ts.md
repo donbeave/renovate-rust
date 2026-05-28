@@ -5,7 +5,7 @@
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 27 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 29 | **Actionable:** 29 | **Status:** partial
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 
@@ -21,9 +21,9 @@
 | migrates packages | 257 | ported | `repo_config.rs` | `deprecated_packages_field_merged_into_package_rules` | — |
 | overrides existing automerge setting | 279 | ported | — | — | — |
 | does not migrate config | 297 | ported | `repo_config.rs` | `non_deprecated_config_fields_parse_without_migration_effects` | — |
-| migrates subconfig | 308 | pending | — | — | — |
+| migrates subconfig | 308 | ported | `migrate_validate.rs` | `migrates_subconfig` | — |
 | migrates packageFiles | 334 | ported | — | — | — |
-| migrates more packageFiles | 360 | pending | — | — | — |
+| migrates more packageFiles | 360 | ported | `migrate_validate.rs` | `migrates_more_package_files` | — |
 | removes invalid configs | 389 | ported | — | — | — |
 | migrates preset strings to array | 419 | ported | `repo_config.rs` | `extends_string_coerced_to_array` (+ extends_string_js_app_shorthand_normalized, extends_mixed_array_js_app_shorthand_normalized) | — |
 | migrates unpublishSafe | 441 | ported | `repo_config.rs` | `unpublish_safe_true_injects_minimum_release_age_preset` (+ unpublish_safe_true_with_existing_extends_appends_preset, unpublish_safe_true_with_empty_extends_injects_preset, unpublish_safe_true_with_multiple_extends_appends_preset, unpublish_safe_false_does_not_inject, unpublish_safe_with_unpublish_safe_preset_already_in_extends_does_not_duplicate, unpublish_safe_with_default_unpublish_safe_preset_does_not_duplicate, unpublish_safe_true_with_disabled_preset_still_injects_preset) | — |
@@ -45,7 +45,7 @@
 | migrates gitLabAutomerge | 791 | ported | `repo_config.rs` | `git_lab_automerge_migrated_to_platform_automerge` | — |
 | migrates dryRun | 820 | ported | `config_builder.rs` | `dry_run_legacy_true_maps_to_full` (+ dry_run_legacy_false_disables_dry_run) | — |
 | migrates baseBranches and baseBranch | 835 | ported | `repo_config.rs` | `base_branches_and_base_branch_migrated_to_patterns` | — |
-| logs errors | 844 | pending | — | — | — |
+| logs errors | 844 | not-applicable | — | — | TypeScript dependency-injection mock; mocks MigrationsService.run to throw — no equivalent Rust runtime behavior |
 
 ---
 
