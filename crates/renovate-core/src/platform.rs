@@ -18,6 +18,7 @@ pub mod gitlab;
 pub mod local;
 pub mod pr_body;
 pub mod scm_manager;
+pub mod util;
 
 use thiserror::Error;
 
