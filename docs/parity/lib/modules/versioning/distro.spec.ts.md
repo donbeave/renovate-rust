@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/distro.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/distro.spec.ts
-**Total tests:** 15 | **Ported:** 10 | **Actionable:** 15 | **Status:** partial
+**Total tests:** 15 | **Ported:** 12 | **Actionable:** 15 | **Status:** partial
 
 ### `modules/versioning/distro`
 
@@ -23,8 +23,8 @@
 | sends a float as an argument | 136 | ported | `ubuntu.rs` | `distro_get_n_latest` | — |
 | sends an out of bound argument | 143 | ported | `ubuntu.rs` | `distro_get_n_latest` | — |
 | sends another out of bound argument | 147 | ported | `ubuntu.rs` | `distro_get_n_latest` | — |
-| retrieves focal release schedule | 151 | pending | — | — | — |
-| retrieves non-existent release schedule | 158 | pending | — | — | — |
+| retrieves focal release schedule | 151 | ported | `ubuntu.rs` | `distro_get_schedule` | — |
+| retrieves non-existent release schedule | 158 | ported | `ubuntu.rs` | `distro_get_schedule` | — |
 | works with debian | 162 | pending | — | — | — |
 
 ---

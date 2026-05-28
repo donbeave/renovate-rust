@@ -285,6 +285,16 @@ pub fn exists(input: &str) -> bool {
     release_by_version(ver).is_some()
 }
 
+/// Return the schedule record for `input` (codename or version number).
+///
+/// Returns `(version, codename, release_date)` or `None` if not found.
+///
+/// Mirrors `DistroInfo.getSchedule()` from `lib/modules/versioning/distro.ts`.
+pub fn get_schedule(input: &str) -> Option<(&'static str, &'static str, &'static str)> {
+    let ver = version_by_codename(input);
+    release_by_version(ver).map(|r| (r.version, r.codename, r.release))
+}
+
 /// Return the n-th most recent **released** version record as of `now`.
 ///
 /// `n=0` = most recent, `n=1` = second most recent, etc.  Returns `None`
@@ -295,10 +305,7 @@ pub fn get_n_latest(n: i32, now: &str) -> Option<(&'static str, &'static str)> {
     if n < 0 {
         return None;
     }
-    let mut released: Vec<&UbuntuRelease> = RELEASES
-        .iter()
-        .filter(|r| r.release <= now)
-        .collect();
+    let mut released: Vec<&UbuntuRelease> = RELEASES.iter().filter(|r| r.release <= now).collect();
     // Sort descending by release date
     released.sort_by(|a, b| b.release.cmp(a.release));
     released.get(n as usize).map(|r| (r.version, r.codename))
@@ -931,6 +938,19 @@ mod tests {
         assert_eq!(codename_by_version("16.06"), "16.06");
     }
 
+    // Ported: "retrieves focal release schedule" — versioning/distro.spec.ts line 151
+    // Ported: "retrieves non-existent release schedule" — versioning/distro.spec.ts line 158
+    #[test]
+    fn distro_get_schedule() {
+        // focal → version 20.04, codename focal, release 2020-04-23
+        let sched = get_schedule("20.04").expect("focal schedule");
+        assert_eq!(sched.0, "20.04"); // version
+        assert_eq!(sched.1, "focal"); // codename (series)
+        assert_eq!(sched.2, "2020-04-23"); // release date
+        // Non-existent version
+        assert!(get_schedule("20.06").is_none());
+    }
+
     // Ported: "isReleased("$version") === $expected" — versioning/distro.spec.ts line 98
     // Fixed date: 2021-03-20
     // DistroInfo.isReleased() resolves codenames first via getVersionByCodename().
@@ -942,17 +962,17 @@ mod tests {
             let ver = version_by_codename(input);
             is_released(ver, now)
         };
-        assert!(check("focal"));    // 2020-04-23 < 2021-03-20
-        assert!(check("groovy"));   // 2020-10-22 < 2021-03-20
+        assert!(check("focal")); // 2020-04-23 < 2021-03-20
+        assert!(check("groovy")); // 2020-10-22 < 2021-03-20
         assert!(!check("hirsute")); // 2021-04-22 > 2021-03-20
-        assert!(!check("impish"));  // 2021-10-14 > 2021-03-20
-        assert!(!check("jammy"));   // 2022-04-21 > 2021-03-20
+        assert!(!check("impish")); // 2021-10-14 > 2021-03-20
+        assert!(!check("jammy")); // 2022-04-21 > 2021-03-20
         assert!(check("20.04"));
         assert!(check("20.10"));
         assert!(!check("21.04"));
         assert!(!check("21.10"));
         assert!(!check("22.04"));
-        assert!(!check("24.04"));   // not in releases list
+        assert!(!check("24.04")); // not in releases list
     }
 
     // Ported: "exists("$version") === $expected" — versioning/distro.spec.ts line 61
