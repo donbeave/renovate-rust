@@ -524,6 +524,37 @@ pub fn get_changed_labels(
     (to_add, to_remove)
 }
 
+/// Determine whether labels need to be updated on the PR.
+///
+/// Returns `false` when:
+/// - `pr_initial_labels` is `None` (PR was created before label tracking)
+/// - configured labels equal initial labels (no change needed)
+/// - labels have been modified by user (initial != current)
+///
+/// Mirrors `shouldUpdateLabels` from `lib/workers/repository/update/pr/labels.ts`.
+pub fn should_update_labels(
+    pr_initial_labels: Option<&[&str]>,
+    pr_current_labels: Option<&[&str]>,
+    configured_labels: Option<&[&str]>,
+) -> bool {
+    let Some(initial) = pr_initial_labels else {
+        return false;
+    };
+    let configured: Vec<&str> = configured_labels.unwrap_or(&[]).to_vec();
+    let mut configured_sorted = configured.clone();
+    configured_sorted.sort_unstable();
+    let mut initial_sorted: Vec<&str> = initial.to_vec();
+    initial_sorted.sort_unstable();
+    if configured_sorted == initial_sorted {
+        return false;
+    }
+    let current: Vec<&str> = pr_current_labels.unwrap_or(&[]).to_vec();
+    if are_labels_modified(initial, &current) {
+        return false;
+    }
+    true
+}
+
 /// Return `true` when old and new labels differ (order-insensitive).
 ///
 /// Mirrors `areLabelsModified` from `lib/workers/repository/update/pr/labels.ts`.
@@ -3451,6 +3482,62 @@ mod tests {
     fn test_are_labels_modified_false() {
         assert!(!are_labels_modified(&["node", "npm"], &["node", "npm"]));
         assert!(!are_labels_modified(&[], &[]));
+    }
+
+    // ── should_update_labels ─────────────────────────────────────────────────
+
+    // Ported: "returns true" — pr/labels.spec.ts line 153
+    #[test]
+    fn test_should_update_labels_true() {
+        // configured subset of initial → update needed
+        assert!(should_update_labels(
+            Some(&["npm", "node"]),
+            Some(&["npm", "node"]),
+            Some(&["npm"])
+        ));
+        // no configured labels but has initial → update needed
+        assert!(should_update_labels(
+            Some(&["npm", "node"]),
+            Some(&["npm", "node"]),
+            None
+        ));
+        // initial empty but configured has labels → update needed
+        assert!(should_update_labels(
+            Some(&[]),
+            Some(&[]),
+            Some(&["npm", "node"])
+        ));
+    }
+
+    // Ported: "returns false if no labels found in debugData" — pr/labels.spec.ts line 162
+    #[test]
+    fn test_should_update_labels_false_no_initial() {
+        assert!(!should_update_labels(
+            None,
+            Some(&["npm", "node"]),
+            Some(&["npm", "node"])
+        ));
+    }
+
+    // Ported: "returns false if labels have been modified by user" — pr/labels.spec.ts line 168
+    #[test]
+    fn test_should_update_labels_false_user_modified() {
+        // initial: [npm, node], current: [npm] → user removed node → don't update
+        assert!(!should_update_labels(
+            Some(&["npm", "node"]),
+            Some(&["npm"]),
+            Some(&["npm"])
+        ));
+    }
+
+    // Ported: "returns false if labels are not changed" — pr/labels.spec.ts line 174
+    #[test]
+    fn test_should_update_labels_false_unchanged() {
+        assert!(!should_update_labels(
+            Some(&["npm", "node"]),
+            Some(&["npm", "node"]),
+            Some(&["npm", "node"])
+        ));
     }
 
     // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11

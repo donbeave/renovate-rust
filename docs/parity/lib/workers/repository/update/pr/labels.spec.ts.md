@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/labels.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/labels.spec.ts
-**Total tests:** 20 | **Ported:** 10 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 20 | **Ported:** 14 | **Actionable:** 20 | **Status:** partial
 
 ### `workers/repository/update/pr/labels › prepareLabels(config)`
 
@@ -47,7 +47,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true | 153 | pending | — | — | — |
+| returns true | 153 | ported | `util.rs` | `test_should_update_labels_true` | — |
 | returns false if no labels found in debugData | 163 | pending | — | — | — |
 | returns false if labels have been modified by user | 169 | pending | — | — | — |
 | returns false if labels are not changed | 173 | pending | — | — | — |
