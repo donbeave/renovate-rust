@@ -427,6 +427,35 @@ pub fn get_remapped_level<'a>(
 
 const MODULE_LABEL_COLOR: &str = "C5DEF5";
 
+/// Quote a string for safe shell use (mirrors Python/Node shlex.quote).
+fn shlex_quote(s: &str) -> String {
+    if s.is_empty() {
+        return "''".to_owned();
+    }
+    format!("'{}'", s.replace('\'', "'\"'\"'"))
+}
+
+/// Format `gh label create` commands for missing labels, sorted by name.
+///
+/// Mirrors `formatCreateLabelCommands` from `tools/utils/sync-module-labels.ts`.
+pub fn format_create_label_commands(repo: &str, labels: &[GithubLabel]) -> String {
+    let mut sorted_labels: Vec<&GithubLabel> = labels.iter().collect();
+    sorted_labels.sort_by(|a, b| a.name.cmp(&b.name));
+    sorted_labels
+        .iter()
+        .map(|label| {
+            format!(
+                "gh label create {} -R {} --color {} --description {}",
+                shlex_quote(&label.name),
+                shlex_quote(repo),
+                shlex_quote(label.color),
+                shlex_quote(&label.description),
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 /// Return the label description for a module kind and id.
 ///
 /// Mirrors `getLabelDescription` from `tools/utils/sync-module-labels.ts`.
@@ -3212,6 +3241,29 @@ mod tests {
         let missing = get_missing_module_labels(&expected, &existing);
         assert_eq!(missing.len(), 1);
         assert_eq!(missing[0].name, "manager:jsonata");
+    }
+
+    // Ported: "renders stable label creation commands for missing labels" — test/other/sync-module-labels.spec.ts line 36
+    #[test]
+    fn test_format_create_label_commands() {
+        let labels = vec![
+            GithubLabel {
+                color: MODULE_LABEL_COLOR,
+                description: "Bob's manager label".to_owned(),
+                name: "manager:jsonata".to_owned(),
+            },
+            create_module_label("datasource", "docker"),
+        ];
+        let result = format_create_label_commands("renovatebot/renovate", &labels);
+        // Sorted by name: datasource:docker comes before manager:jsonata
+        let lines: Vec<&str> = result.lines().collect();
+        assert_eq!(lines.len(), 2);
+        assert!(lines[0].contains("datasource:docker"));
+        assert!(lines[0].contains("renovatebot/renovate"));
+        assert!(lines[0].contains("C5DEF5"));
+        assert!(lines[0].contains("Related to the docker datasource"));
+        assert!(lines[1].contains("manager:jsonata"));
+        assert!(lines[1].contains("Bob"));
     }
 
     // Ported: "returns reconfigure branch name" — workers/repository/reconfigure/utils.spec.ts line 64
