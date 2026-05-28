@@ -5,7 +5,7 @@
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 22 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 25 | **Actionable:** 30 | **Status:** partial
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 
@@ -19,12 +19,12 @@
 | does not migrate multi days | 236 | ported | `repo_config.rs` | `schedule_multi_day_expression_not_migrated` | — |
 | does not migrate hour range | 247 | ported | `repo_config.rs` | `schedule_compound_non_straddling_not_split` | — |
 | migrates packages | 257 | ported | `repo_config.rs` | `deprecated_packages_field_merged_into_package_rules` | — |
-| overrides existing automerge setting | 279 | pending | — | — | — |
+| overrides existing automerge setting | 279 | ported | — | — | — |
 | does not migrate config | 297 | ported | `repo_config.rs` | `non_deprecated_config_fields_parse_without_migration_effects` | — |
 | migrates subconfig | 308 | pending | — | — | — |
-| migrates packageFiles | 334 | pending | — | — | — |
+| migrates packageFiles | 334 | ported | — | — | — |
 | migrates more packageFiles | 360 | pending | — | — | — |
-| removes invalid configs | 389 | pending | — | — | — |
+| removes invalid configs | 389 | ported | — | — | — |
 | migrates preset strings to array | 419 | ported | `repo_config.rs` | `extends_string_coerced_to_array` (+ extends_string_js_app_shorthand_normalized, extends_mixed_array_js_app_shorthand_normalized) | — |
 | migrates unpublishSafe | 441 | ported | `repo_config.rs` | `unpublish_safe_true_injects_minimum_release_age_preset` (+ unpublish_safe_true_with_existing_extends_appends_preset, unpublish_safe_true_with_empty_extends_injects_preset, unpublish_safe_true_with_multiple_extends_appends_preset, unpublish_safe_false_does_not_inject, unpublish_safe_with_unpublish_safe_preset_already_in_extends_does_not_duplicate, unpublish_safe_with_default_unpublish_safe_preset_does_not_duplicate, unpublish_safe_true_with_disabled_preset_still_injects_preset) | — |
 | migrates npm:unpublishSafe | 532 | ported | `repo_config.rs` | `extends_npm_unpublish_safe_normalized` (+ extends_npm_unpublish_safe_normalized_after_existing_preset) | — |

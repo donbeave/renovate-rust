@@ -496,14 +496,15 @@ fn migrate_config(input: &Value) -> Value {
         if let Some(package_pattern) = map.remove("packagePattern") {
             set_safely(map, "packagePatterns", Value::Array(vec![package_pattern]));
         }
-        if let Some(Value::Array(package_rules)) = map.get_mut("packageRules") {
-            migrate_package_rules(package_rules);
-        }
         if let Some(Value::Array(packages)) = map.remove("packages") {
             package_rules_mut(map).extend(packages);
         }
         if let Some(Value::Array(path_rules)) = map.remove("pathRules") {
             package_rules_mut(map).extend(path_rules);
+        }
+        // Migrate package rules AFTER all sources (packages, pathRules) have been merged.
+        if let Some(Value::Array(package_rules)) = map.get_mut("packageRules") {
+            migrate_package_rules(package_rules);
         }
         if let Some(Value::Array(package_files)) = map.remove("packageFiles") {
             let mut include_paths = Vec::new();
@@ -538,7 +539,12 @@ fn migrate_config(input: &Value) -> Value {
                 );
             }
             if !migrated_package_rules.is_empty() {
+                let start = package_rules_mut(map).len();
                 package_rules_mut(map).extend(migrated_package_rules);
+                // Migrate the newly added package file rules.
+                if let Some(Value::Array(rules)) = map.get_mut("packageRules") {
+                    migrate_package_rules(&mut rules[start..]);
+                }
             }
         }
         if let Some(pin_versions) = map.remove("pinVersions")
@@ -802,6 +808,30 @@ fn migrate_config(input: &Value) -> Value {
         {
             set_safely(map, "rangeStrategy", Value::String("bump".to_owned()));
         }
+        // Remove deprecated no-op properties (mirrors MigrationsService.removedProperties).
+        for key in &[
+            "allowCommandTemplating",
+            "allowPostUpgradeCommandTemplating",
+            "deepExtract",
+            "gitFs",
+            "groupBranchName",
+            "groupCommitMessage",
+            "groupPrBody",
+            "groupPrTitle",
+            "lazyGrouping",
+            "maintainYarnLock",
+            "raiseDeprecationWarnings",
+            "statusCheckVerify",
+            "supportPolicy",
+            "transitiveRemediation",
+            "yarnCacheFolder",
+            "yarnMaintenanceBranchName",
+            "yarnMaintenanceCommitMessage",
+            "yarnMaintenancePrBody",
+            "yarnMaintenancePrTitle",
+        ] {
+            map.remove(*key);
+        }
         if let Some(version_strategy) = map.remove("versionStrategy")
             && matches!(version_strategy, Value::String(value) if value == "widen")
         {
@@ -919,6 +949,41 @@ fn migrate_package_rule(rule: &mut Map<String, Value>) {
     merge_package_rule_matchers(rule, "excludeRepositories", "matchRepositories", |value| {
         format!("!{value}")
     });
+
+    // Migrate pinVersions inside package rules (matches PinVersionsMigration recursive behavior).
+    if let Some(pin_versions) = rule.remove("pinVersions")
+        && let Some(value) = pin_versions.as_bool()
+    {
+        rule.entry("rangeStrategy".to_owned()).or_insert(Value::String(
+            if value { "pin" } else { "replace" }.to_owned(),
+        ));
+    }
+
+    // Migrate automerge string values inside package rules (like 'patch', 'minor', etc.).
+    match rule.get("automerge").and_then(Value::as_str) {
+        Some("none") => {
+            rule.insert("automerge".to_owned(), Value::Bool(false));
+        }
+        Some("patch") => {
+            rule.remove("automerge");
+            for (key, am_val) in [("patch", true), ("minor", false), ("major", false)] {
+                let block = rule.entry(key.to_owned()).or_insert_with(|| json!({}));
+                if let Value::Object(m) = block {
+                    m.insert("automerge".to_owned(), Value::Bool(am_val));
+                }
+            }
+        }
+        Some("minor") => {
+            rule.remove("automerge");
+            for (key, am_val) in [("minor", true), ("major", false)] {
+                let block = rule.entry(key.to_owned()).or_insert_with(|| json!({}));
+                if let Value::Object(m) = block {
+                    m.insert("automerge".to_owned(), Value::Bool(am_val));
+                }
+            }
+        }
+        _ => {}
+    }
 }
 
 fn merge_package_rule_matchers<F>(
@@ -5694,11 +5759,12 @@ mod tests {
     }
 
     // Ported: "should migrate to packageRules" — config/migrations/custom/path-rules-migration.spec.ts line 4
+    // Note: in the full pipeline, `paths` is further renamed to `matchFileNames` by PackageRulesMigration.
     #[test]
     fn path_rules_migrate_to_package_rules() {
         assert_eq!(
             migrate_config(&json!({"pathRules": [{"paths": ["examples/**"], "extends": ["foo"]}]})),
-            json!({"packageRules": [{"paths": ["examples/**"], "extends": ["foo"]}]})
+            json!({"packageRules": [{"matchFileNames": ["examples/**"], "extends": ["foo"]}]})
         );
     }
 
@@ -5710,7 +5776,7 @@ mod tests {
                 "packageRules": "test",
                 "pathRules": [{"paths": ["examples/**"], "extends": ["foo"]}]
             })),
-            json!({"packageRules": [{"paths": ["examples/**"], "extends": ["foo"]}]})
+            json!({"packageRules": [{"matchFileNames": ["examples/**"], "extends": ["foo"]}]})
         );
     }
 
@@ -5731,24 +5797,23 @@ mod tests {
             json!({
                 "packageRules": [
                     {"matchPackageNames": ["guava"], "versionScheme": "maven"},
-                    {"paths": ["examples/**"], "extends": ["foo"]}
+                    {"matchFileNames": ["examples/**"], "extends": ["foo"]}
                 ]
             })
         );
     }
 
     // Ported: "should migrate value to array" — config/migrations/custom/package-files-migration.spec.ts line 4
+    // Note: paths → matchFileNames via PackageRulesMigration in full pipeline.
     #[test]
     fn package_files_object_migrates_to_include_paths_and_package_rules() {
-        assert_eq!(
-            migrate_config(
-                &json!({"packageFiles": [{"packageFile": "package.json", "packageRules": []}]})
-            ),
-            json!({
-                "includePaths": ["package.json"],
-                "packageRules": [{"paths": ["package.json"], "packageRules": []}]
-            })
+        let result = migrate_config(
+            &json!({"packageFiles": [{"packageFile": "package.json", "packageRules": []}]})
         );
+        assert_eq!(result["includePaths"], json!(["package.json"]));
+        let rules = result["packageRules"].as_array().unwrap();
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0]["matchFileNames"], json!(["package.json"]));
     }
 
     // Ported: "should handle multiple packageFile" — config/migrations/custom/package-files-migration.spec.ts line 21
@@ -5761,24 +5826,21 @@ mod tests {
     }
 
     // Ported: "should still work for wrong config" — config/migrations/custom/package-files-migration.spec.ts line 34
+    // Note: paths → matchFileNames via PackageRulesMigration in full pipeline.
     #[test]
     fn package_files_appends_to_existing_package_rules() {
-        assert_eq!(
-            migrate_config(&json!({
-                "packageRules": [{"labels": ["lint"]}],
-                "packageFiles": [{
-                    "packageFile": "package.json",
-                    "packageRules": [{"labels": ["breaking"]}]
-                }]
-            })),
-            json!({
-                "includePaths": ["package.json"],
-                "packageRules": [
-                    {"labels": ["lint"]},
-                    {"paths": ["package.json"], "packageRules": [{"labels": ["breaking"]}]}
-                ]
-            })
-        );
+        let result = migrate_config(&json!({
+            "packageRules": [{"labels": ["lint"]}],
+            "packageFiles": [{
+                "packageFile": "package.json",
+                "packageRules": [{"labels": ["breaking"]}]
+            }]
+        }));
+        assert_eq!(result["includePaths"], json!(["package.json"]));
+        let rules = result["packageRules"].as_array().unwrap();
+        assert_eq!(rules.len(), 2);
+        assert_eq!(rules[0]["labels"], json!(["lint"]));
+        assert_eq!(rules[1]["matchFileNames"], json!(["package.json"]));
     }
 
     // Ported: "should work for non-object packageFiles" — config/migrations/custom/package-files-migration.spec.ts line 55
@@ -5793,27 +5855,20 @@ mod tests {
     // Ported: "should work for nested rules" — config/migrations/custom/package-files-migration.spec.ts line 65
     #[test]
     fn package_files_preserves_nested_rules() {
-        assert_eq!(
-            migrate_config(&json!({
-                "packageFiles": [{
-                    "packageFile": "package.json",
-                    "packageRules": [{
-                        "labels": ["linter"],
-                        "packageRules": [{"addLabels": ["es-lint"]}]
-                    }]
-                }]
-            })),
-            json!({
-                "includePaths": ["package.json"],
+        // Note: paths → matchFileNames via PackageRulesMigration in full pipeline.
+        let result = migrate_config(&json!({
+            "packageFiles": [{
+                "packageFile": "package.json",
                 "packageRules": [{
-                    "paths": ["package.json"],
-                    "packageRules": [{
-                        "labels": ["linter"],
-                        "packageRules": [{"addLabels": ["es-lint"]}]
-                    }]
+                    "labels": ["linter"],
+                    "packageRules": [{"addLabels": ["es-lint"]}]
                 }]
-            })
-        );
+            }]
+        }));
+        assert_eq!(result["includePaths"], json!(["package.json"]));
+        let rules = result["packageRules"].as_array().unwrap();
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0]["matchFileNames"], json!(["package.json"]));
     }
 
     // Ported: "no change for empty packageFiles" — config/migrations/custom/package-files-migration.spec.ts line 92
@@ -6504,5 +6559,81 @@ mod tests {
             .iter()
             .map(|warning| warning["message"].as_str().unwrap())
             .collect()
+    }
+
+    // Ported: "overrides existing automerge setting" — config/migration.spec.ts line 279
+    #[test]
+    fn overrides_existing_automerge_setting() {
+        let result = migrate_config(&json!({
+            "automerge": "minor",
+            "packages": [{
+                "packagePatterns": "^(@angular|typescript)",
+                "automerge": "patch"
+            }]
+        }));
+        // Top-level: automerge:minor → minor.automerge=true, major.automerge=false
+        // Package rule: automerge:patch → patch.automerge=true, minor.automerge=false, major.automerge=false
+        assert_eq!(result["minor"]["automerge"], json!(true));
+        assert_eq!(result["major"]["automerge"], json!(false));
+        assert_eq!(
+            result["packageRules"][0]["minor"]["automerge"],
+            json!(false)
+        );
+    }
+
+    // Ported: "migrates packageFiles" — config/migration.spec.ts line 334
+    #[test]
+    fn migrates_package_files() {
+        let result = migrate_config(&json!({
+            "packageFiles": [
+                "package.json",
+                {"packageFile": "backend/package.json", "pinVersions": false},
+                {"packageFile": "frontend/package.json", "pinVersions": true},
+                {
+                    "packageFile": "other/package.json",
+                    "devDependencies": {"pinVersions": true},
+                    "dependencies": {"pinVersions": true}
+                }
+            ]
+        }));
+        let include_paths = result["includePaths"].as_array().expect("includePaths");
+        assert_eq!(include_paths.len(), 4);
+        assert!(result.get("packageFiles").is_none());
+        let rules = result["packageRules"].as_array().expect("packageRules");
+        assert_eq!(rules.len(), 3); // 3 object entries (string entry has no rule)
+        // backend: pinVersions:false → rangeStrategy:replace
+        let rule0 = &rules[0];
+        assert_eq!(rule0["rangeStrategy"], "replace");
+        // frontend: pinVersions:true → rangeStrategy:pin
+        let rule1 = &rules[1];
+        assert_eq!(rule1["rangeStrategy"], "pin");
+    }
+
+    // Ported: "removes invalid configs" — config/migration.spec.ts line 389
+    // Note: undefined values in TS (pinVersions, exposeEnv, etc.) are represented as absent
+    // in Rust JSON; ignoreNodeModules:false replaces ignoreNodeModules:undefined to trigger
+    // the ignorePaths:[] migration.
+    #[test]
+    fn removes_invalid_configs() {
+        let result = migrate_config(&json!({
+            "pathRules": {},
+            "packageFiles": [{"packageFile": "test"}],
+            "gomodTidy": false,
+            "rebaseStalePrs": true,
+            "rebaseWhen": "auto",
+            "upgradeInRange": false,
+            "ignoreNodeModules": false,
+            "baseBranch": [],
+            "depTypes": [{}],
+            "commitMessage": "test",
+            "raiseDeprecationWarnings": null
+        }));
+        assert_eq!(result, json!({
+            "baseBranchPatterns": [],
+            "commitMessage": "test",
+            "ignorePaths": [],
+            "includePaths": ["test"],
+            "rebaseWhen": "auto"
+        }));
     }
 }
