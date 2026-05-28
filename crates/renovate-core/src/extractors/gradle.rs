@@ -1017,6 +1017,26 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         assert_eq!(deps[0].current_value, "1.1.4");
     }
 
+    // Ported: "ignores empty TOML file" — gradle/extract/catalog.spec.ts line 180
+    #[test]
+    fn catalog_empty_toml_returns_empty() {
+        let deps = extract_version_catalog("");
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "skips version entries with no resolvable literal value" — gradle/extract/catalog.spec.ts line 185
+    #[test]
+    fn catalog_skips_non_literal_versions() {
+        let content = r#"
+[versions]
+kotlin = "1.5.21"
+bad = { reject = "1.0.0" }
+"#;
+        let deps = extract_version_catalog(content);
+        // Neither kotlin nor bad produces a dep (only libraries/plugins do)
+        assert!(deps.is_empty());
+    }
+
     // Ported: "returns null" — gradle/extract.spec.ts line 37
     #[test]
     fn empty_returns_empty() {
