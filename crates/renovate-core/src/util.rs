@@ -503,6 +503,41 @@ pub fn prepare_labels(labels: &[&str], add_labels: &[&str]) -> Vec<String> {
     combined
 }
 
+/// Return `(labels_to_add, labels_to_remove)` for the transition from
+/// `old_labels` to `new_labels`.
+///
+/// Mirrors `getChangedLabels` from `lib/workers/repository/update/pr/labels.ts`.
+pub fn get_changed_labels(
+    old_labels: &[&str],
+    new_labels: &[&str],
+) -> (Vec<String>, Vec<String>) {
+    let to_add: Vec<String> = new_labels
+        .iter()
+        .filter(|l| !old_labels.contains(l))
+        .map(|l| l.to_string())
+        .collect();
+    let to_remove: Vec<String> = old_labels
+        .iter()
+        .filter(|l| !new_labels.contains(l))
+        .map(|l| l.to_string())
+        .collect();
+    (to_add, to_remove)
+}
+
+/// Return `true` when old and new labels differ (order-insensitive).
+///
+/// Mirrors `areLabelsModified` from `lib/workers/repository/update/pr/labels.ts`.
+pub fn are_labels_modified(old_labels: &[&str], new_labels: &[&str]) -> bool {
+    if old_labels.len() != new_labels.len() {
+        return true;
+    }
+    let mut old_sorted: Vec<&str> = old_labels.to_vec();
+    let mut new_sorted: Vec<&str> = new_labels.to_vec();
+    old_sorted.sort_unstable();
+    new_sorted.sort_unstable();
+    old_sorted != new_sorted
+}
+
 /// Return the label description for a module kind and id.
 ///
 /// Mirrors `getLabelDescription` from `tools/utils/sync-module-labels.ts`.
@@ -3385,6 +3420,37 @@ mod tests {
     fn test_prepare_labels_empty_strings_ignored() {
         let result = prepare_labels(&["labelA", ""], &[" ", "labelB"]);
         assert_eq!(result, vec!["labelA", "labelB"]);
+    }
+
+    // ── get_changed_labels / are_labels_modified ─────────────────────────────
+
+    // Ported: "adds new labels" — pr/labels.spec.ts line 126
+    #[test]
+    fn test_get_changed_labels_add() {
+        let (to_add, to_remove) = get_changed_labels(&["npm"], &["node", "npm"]);
+        assert_eq!(to_add, vec!["node"]);
+        assert!(to_remove.is_empty());
+    }
+
+    // Ported: "removes old labels" — pr/labels.spec.ts line 133
+    #[test]
+    fn test_get_changed_labels_remove() {
+        let (to_add, to_remove) = get_changed_labels(&["node", "npm"], &["npm"]);
+        assert!(to_add.is_empty());
+        assert_eq!(to_remove, vec!["node"]);
+    }
+
+    // Ported: "returns true" — pr/labels.spec.ts line 142
+    #[test]
+    fn test_are_labels_modified_true() {
+        assert!(are_labels_modified(&["npm", "node"], &["npm"]));
+    }
+
+    // Ported: "returns false" — pr/labels.spec.ts line 146
+    #[test]
+    fn test_are_labels_modified_false() {
+        assert!(!are_labels_modified(&["node", "npm"], &["node", "npm"]));
+        assert!(!are_labels_modified(&[], &[]));
     }
 
     // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11

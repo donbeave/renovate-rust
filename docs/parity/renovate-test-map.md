@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4548 / 11677 total tests ported (38%) · pending 6679 · not-applicable 450 (2% of total) — updated 2026-05-28
+**Progress:** 4551 / 11677 total tests ported (38%) · pending 6660 · not-applicable 466 (4% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -699,7 +699,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/terragrunt/modules.spec.ts` | Done | [details](lib/modules/manager/terragrunt/modules.spec.ts.md) |
 | `lib/modules/manager/terragrunt/util.spec.ts` | Done | [details](lib/modules/manager/terragrunt/util.spec.ts.md) |
 | `lib/modules/manager/vendir/artifacts.spec.ts` | Not done | [details](lib/modules/manager/vendir/artifacts.spec.ts.md) |
-| `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-got-wrapper.spec.ts.md) |
+| `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | Done | [details](lib/modules/platform/azure/azure-got-wrapper.spec.ts.md) |
 | `lib/modules/platform/azure/azure-helper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-helper.spec.ts.md) |
 | `lib/modules/platform/azure/index.spec.ts` | Not done | [details](lib/modules/platform/azure/index.spec.ts.md) |
 | `lib/modules/platform/azure/util.spec.ts` | Done | [details](lib/modules/platform/azure/util.spec.ts.md) |
@@ -707,7 +707,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/bitbucket/index.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/index.spec.ts.md) |
 | `lib/modules/platform/bitbucket/pr-cache.spec.ts` | Done | [details](lib/modules/platform/bitbucket/pr-cache.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/index.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/index.spec.ts.md) |
-| `lib/modules/platform/bitbucket-server/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/pr-cache.spec.ts.md) |
+| `lib/modules/platform/bitbucket-server/pr-cache.spec.ts` | Done | [details](lib/modules/platform/bitbucket-server/pr-cache.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/utils.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/utils.spec.ts.md) |
 | `lib/modules/platform/codecommit/index.spec.ts` | Not done | [details](lib/modules/platform/codecommit/index.spec.ts.md) |
 | `lib/modules/platform/forgejo/forgejo-helper.spec.ts` | Not done | [details](lib/modules/platform/forgejo/forgejo-helper.spec.ts.md) |
@@ -725,7 +725,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/gitea/schema.spec.ts` | Done | [details](lib/modules/platform/gitea/schema.spec.ts.md) |
 | `lib/modules/platform/gitea/utils.spec.ts` | Done | [details](lib/modules/platform/gitea/utils.spec.ts.md) |
 | `lib/modules/platform/github/api-cache.spec.ts` | Done | [details](lib/modules/platform/github/api-cache.spec.ts.md) |
-| `lib/modules/platform/github/branch.spec.ts` | Not done | [details](lib/modules/platform/github/branch.spec.ts.md) |
+| `lib/modules/platform/github/branch.spec.ts` | Done | [details](lib/modules/platform/github/branch.spec.ts.md) |
 | `lib/modules/platform/github/index.spec.ts` | Not done | [details](lib/modules/platform/github/index.spec.ts.md) |
 | `lib/modules/platform/github/issue.spec.ts` | Not done | [details](lib/modules/platform/github/issue.spec.ts.md) |
 | `lib/modules/platform/github/massage-markdown-links.spec.ts` | Done | [details](lib/modules/platform/github/massage-markdown-links.spec.ts.md) |
@@ -882,7 +882,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/reconfigure/comment.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/comment.spec.ts.md) |
 | `lib/workers/repository/reconfigure/index.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/index.spec.ts.md) |
 | `lib/workers/repository/reconfigure/reconfigure-cache.spec.ts` | Done | [details](lib/workers/repository/reconfigure/reconfigure-cache.spec.ts.md) |
-| `lib/workers/repository/reconfigure/utils.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/utils.spec.ts.md) |
+| `lib/workers/repository/reconfigure/utils.spec.ts` | Done | [details](lib/workers/repository/reconfigure/utils.spec.ts.md) |
 | `lib/workers/repository/reconfigure/validate.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/validate.spec.ts.md) |
 | `lib/workers/repository/result.spec.ts` | Done | [details](lib/workers/repository/result.spec.ts.md) |
 | `lib/workers/repository/update/branch/artifacts.spec.ts` | Not done | [details](lib/workers/repository/update/branch/artifacts.spec.ts.md) |
