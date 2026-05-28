@@ -68,9 +68,61 @@ pub fn get_sibling_file_name(file_name: &str, sibling_name: &str) -> String {
     }
 }
 
+pub const FILE_ACCESS_VIOLATION_ERROR: &str = "FILE_ACCESS_VIOLATION_ERROR";
+
+/// Resolve `path` relative to `base_dir` and return the absolute path.
+///
+/// Returns `Err(FILE_ACCESS_VIOLATION_ERROR)` when the resolved path escapes
+/// `base_dir`.  Mirrors `ensureLocalPath` / `ensureCachePath` from
+/// `lib/util/fs/util.ts`.
+pub fn ensure_base_path(path: &str, base_dir: &str) -> Result<String, &'static str> {
+    let normalized = path.replace('\\', "/");
+    let resolved = if normalized.is_empty() {
+        normalize_path(base_dir)
+    } else if normalized.starts_with('/') {
+        normalize_path(&normalized)
+    } else {
+        normalize_path(&format!("{}/{}", base_dir, normalized))
+    };
+    if !resolved.starts_with(base_dir) {
+        return Err(FILE_ACCESS_VIOLATION_ERROR);
+    }
+    Ok(resolved)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Ported: "ensureLocalPath('$path', '$fullPath')" — util/fs/util.spec.ts line 14
+    // Ported: "ensureCachePath('$path', '$fullPath')" — util/fs/util.spec.ts line 33
+    #[test]
+    fn ensure_base_path_resolves_relative_paths() {
+        let local_dir = "/foo";
+        let cache_dir = "/bar";
+        // Empty path → base_dir itself
+        assert_eq!(ensure_base_path("", local_dir), Ok("/foo".to_owned()));
+        assert_eq!(ensure_base_path("", cache_dir), Ok("/bar".to_owned()));
+        // Relative subpath → joined with base
+        assert_eq!(ensure_base_path("baz", local_dir), Ok("/foo/baz".to_owned()));
+        assert_eq!(ensure_base_path("baz", cache_dir), Ok("/bar/baz".to_owned()));
+    }
+
+    // Ported: "ensureLocalPath('$path', '${localDir}') - throws" — util/fs/util.spec.ts line 22
+    // Ported: "ensureCachePath('$path', '${cacheDir}') - throws" — util/fs/util.spec.ts line 41
+    #[test]
+    fn ensure_base_path_rejects_escaping_paths() {
+        let local_dir = "/foo";
+        let cache_dir = "/bar";
+        for path in &["..", "../etc/passwd", "/foo/../bar", "/foo/../../etc/passwd", "/baz"] {
+            assert_eq!(ensure_base_path(path, local_dir), Err(FILE_ACCESS_VIOLATION_ERROR),
+                "ensure_base_path({path:?}, {local_dir:?}) should be Err");
+        }
+        for path in &["..", "../etc/passwd", "/bar/../foo", "/bar/../../etc/passwd", "/baz", r#"/baz""#] {
+            assert_eq!(ensure_base_path(path, cache_dir), Err(FILE_ACCESS_VIOLATION_ERROR),
+                "ensure_base_path({path:?}, {cache_dir:?}) should be Err");
+        }
+    }
 
     // Ported: "isValidPath($value) == $expected" — util/fs/util.spec.ts line 53
     #[test]
