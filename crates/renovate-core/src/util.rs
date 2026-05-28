@@ -4663,6 +4663,19 @@ mod tests {
         assert!(lines[1].contains("Bob"));
     }
 
+    // Ported: "includes labels for known runtime module ids" — test/other/sync-module-labels.spec.ts line 62
+    #[test]
+    fn test_get_expected_module_labels_contains_known_ids() {
+        // Build labels from all known managers (same as getExpectedModuleLabels but just managers)
+        let managers = crate::managers::all_manager_ids();
+        let label_names: std::collections::HashSet<String> = managers
+            .iter()
+            .map(|id| format!("manager:{}", id))
+            .collect();
+        assert!(label_names.contains("manager:jsonata"), "should contain manager:jsonata");
+        assert!(label_names.contains("manager:helm-values"), "should contain manager:helm-values");
+    }
+
     // Ported: "returns reconfigure branch name" — workers/repository/reconfigure/utils.spec.ts line 64
     #[test]
     fn test_get_reconfigure_branch_name() {

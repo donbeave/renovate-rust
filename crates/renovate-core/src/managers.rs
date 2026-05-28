@@ -806,6 +806,18 @@ pub fn is_custom_manager(manager: &str) -> bool {
     CUSTOM_MANAGER_LIST.contains(&manager)
 }
 
+/// Return all known manager IDs.
+pub fn all_manager_ids() -> Vec<&'static str> {
+    let mut ids: Vec<&str> = MANAGER_DEFS.iter().map(|m| m.name).collect();
+    // Also include custom managers
+    for cm in CUSTOM_MANAGER_LIST {
+        if !ids.contains(cm) {
+            ids.push(cm);
+        }
+    }
+    ids
+}
+
 /// Apply a regex repeatedly to content, collecting all non-overlapping matches.
 ///
 /// Mirrors `lib/modules/manager/custom/regex/utils.ts` `regexMatchAll()`.
