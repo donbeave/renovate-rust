@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4356 / 11677 total tests ported (37%) · pending 7141 · not-applicable 180 (2% of total) — updated 2026-05-28
+**Progress:** 4357 / 11677 total tests ported (37%) · pending 7123 · not-applicable 197 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -397,8 +397,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/sanitize.spec.ts` | Done | [details](lib/util/sanitize.spec.ts.md) |
 | `lib/util/clone.spec.ts` | Done | [details](lib/util/clone.spec.ts.md) |
 | `lib/util/filter-map.spec.ts` | Done | [details](lib/util/filter-map.spec.ts.md) |
-| `lib/util/env.spec.ts` | Not done | [details](lib/util/env.spec.ts.md) |
-| `lib/util/ignore.spec.ts` | Not done | [details](lib/util/ignore.spec.ts.md) |
+| `lib/util/env.spec.ts` | Done | [details](lib/util/env.spec.ts.md) |
+| `lib/util/ignore.spec.ts` | Done | [details](lib/util/ignore.spec.ts.md) |
 | `lib/util/coerce.spec.ts` | Done | [details](lib/util/coerce.spec.ts.md) |
 | `lib/util/sample.spec.ts` | Done | [details](lib/util/sample.spec.ts.md) |
 | `lib/util/promises.spec.ts` | Done | [details](lib/util/promises.spec.ts.md) |
