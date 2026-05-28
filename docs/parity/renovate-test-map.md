@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4166 / 11677 total tests ported (36%) · pending 7423 · not-applicable 88 (1% of total) — updated 2026-05-28
+**Progress:** 4174 / 11677 total tests ported (36%) · pending 7415 · not-applicable 88 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -410,7 +410,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/common.spec.ts` | Not done | [details](lib/util/common.spec.ts.md) |
 | `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
 | `lib/util/interpolator.spec.ts` | Not done | [details](lib/util/interpolator.spec.ts.md) |
-| `lib/util/date.spec.ts` | Not done | [details](lib/util/date.spec.ts.md) |
+| `lib/util/date.spec.ts` | Done | [details](lib/util/date.spec.ts.md) |
 | `lib/util/fingerprint.spec.ts` | Done | [details](lib/util/fingerprint.spec.ts.md) |
 | `lib/util/hash.spec.ts` | Done | [details](lib/util/hash.spec.ts.md) |
 | `lib/util/regex.spec.ts` | Not done | [details](lib/util/regex.spec.ts.md) |
@@ -489,7 +489,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/poetry/index.spec.ts` | Not done | [details](lib/modules/versioning/poetry/index.spec.ts.md) |
 | `lib/modules/versioning/semver/index.spec.ts` | Done | [details](lib/modules/versioning/semver/index.spec.ts.md) |
 | `lib/modules/versioning/semver/common.spec.ts` | Done | [details](lib/modules/versioning/semver/common.spec.ts.md) |
-| `lib/modules/versioning/swift/index.spec.ts` | Not done | [details](lib/modules/versioning/swift/index.spec.ts.md) |
+| `lib/modules/versioning/swift/index.spec.ts` | Done | [details](lib/modules/versioning/swift/index.spec.ts.md) |
 | `lib/modules/versioning/go-mod-directive/index.spec.ts` | Done | [details](lib/modules/versioning/go-mod-directive/index.spec.ts.md) |
 | `lib/modules/versioning/deb/index.spec.ts` | Done | [details](lib/modules/versioning/deb/index.spec.ts.md) |
 | `lib/modules/versioning/nuget/version.spec.ts` | Done | [details](lib/modules/versioning/nuget/version.spec.ts.md) |
