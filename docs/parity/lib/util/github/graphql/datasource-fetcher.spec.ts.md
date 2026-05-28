@@ -5,42 +5,42 @@
 ## `lib/util/github/graphql/datasource-fetcher.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/datasource-fetcher.spec.ts
-**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** not-applicable
 
 ### `util/github/graphql/datasource-fetcher › query`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| can perform query and receive result | 119 | pending | — | — | — |
-| performs query when persistence flag is set and cache is expired | 139 | pending | — | — | — |
-| throws on unknown errors | 160 | pending | — | — | — |
-| throws single GraphQL error wrapped into Error | 171 | pending | — | — | — |
-| throws multiple GraphQL errors wrapped into AggregatedError | 185 | pending | — | — | — |
-| throws when neither of data or errors were provided | 202 | pending | — | — | — |
-| throws when repository field is absent | 210 | pending | — | — | — |
-| throws when payload field is absent | 223 | pending | — | — | — |
-| receives, transforms, and return data | 236 | pending | — | — | — |
-| handles paginated data | 263 | pending | — | — | — |
+| can perform query and receive result | 119 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| performs query when persistence flag is set and cache is expired | 139 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| throws on unknown errors | 160 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| throws single GraphQL error wrapped into Error | 171 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| throws multiple GraphQL errors wrapped into AggregatedError | 185 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| throws when neither of data or errors were provided | 202 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| throws when repository field is absent | 210 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| throws when payload field is absent | 223 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| receives, transforms, and return data | 236 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| handles paginated data | 263 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
 
 ### `util/github/graphql/datasource-fetcher › query › Page shrinking`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| shrinks page from 100 to 50 | 333 | pending | — | — | — |
-| shrinks page from 50 to 25 | 360 | pending | — | — | — |
-| re-throws if shrinking did not help | 390 | pending | — | — | — |
+| shrinks page from 100 to 50 | 333 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| shrinks page from 50 to 25 | 360 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
+| re-throws if shrinking did not help | 390 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
 
 ### `util/github/graphql/datasource-fetcher › query › Cacheable flag`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| private=$isPrivate => isPersistent=$isPersistent | 416 | pending | — | — | — |
+| private=$isPrivate => isPersistent=$isPersistent | 416 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
 
 ### `util/github/graphql/datasource-fetcher › query › maxItems limit`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| stops pagination after maxItems | 450 | pending | — | — | — |
+| stops pagination after maxItems | 450 | not-applicable | — | — | Requires httpMock.scope + vi.mock for package cache |
 
 ---
 

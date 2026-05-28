@@ -457,6 +457,32 @@ pub fn format_create_label_commands(repo: &str, labels: &[GithubLabel]) -> Strin
 }
 
 // ---------------------------------------------------------------------------
+// Package abandonment — lib/workers/repository/process/lookup/abandonment.ts
+// ---------------------------------------------------------------------------
+
+/// Calculate whether a package is abandoned based on the most recent timestamp.
+///
+/// Returns `Some(true)` if abandoned, `Some(false)` if active, `None` if the
+/// check could not be performed (no threshold, invalid threshold, no timestamp).
+///
+/// Mirrors `calculateAbandonment` from the TypeScript reference but returns
+/// `Option<bool>` instead of mutating the release result.
+pub fn calculate_abandonment(
+    most_recent_timestamp_iso: Option<&str>,
+    abandonment_threshold: Option<&str>,
+    now_ms: i64,
+) -> Option<bool> {
+    let threshold_str = abandonment_threshold?;
+    let threshold_ms = to_ms(threshold_str)?;
+    let timestamp_str = most_recent_timestamp_iso?;
+    let most_recent_ms = chrono::DateTime::parse_from_rfc3339(timestamp_str)
+        .ok()?
+        .timestamp_millis();
+    let abandonment_ms = most_recent_ms + threshold_ms;
+    Some(abandonment_ms < now_ms)
+}
+
+// ---------------------------------------------------------------------------
 // PR label utilities — lib/workers/repository/update/pr/labels.ts
 // ---------------------------------------------------------------------------
 
@@ -3239,6 +3265,60 @@ mod tests {
     // ── module label utilities ────────────────────────────────────────────────
 
     // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
+    // ── calculate_abandonment ─────────────────────────────────────────────────
+
+    // Fixed "now" for abandonment tests: 2023-01-01T00:00:00.000Z
+    const MOCK_NOW_MS: i64 = 1672531200000; // 2023-01-01T00:00:00Z
+
+    // Ported: "returns None when no abandonment threshold is provided" — lookup/abandonment.spec.ts line 27
+    #[test]
+    fn test_abandonment_no_threshold() {
+        let result = calculate_abandonment(Some("2022-01-01T00:00:00.000Z"), None, MOCK_NOW_MS);
+        assert_eq!(result, None);
+    }
+
+    // Ported: "returns None when abandonment threshold is invalid" — lookup/abandonment.spec.ts line 39
+    #[test]
+    fn test_abandonment_invalid_threshold() {
+        let result = calculate_abandonment(
+            Some("2022-01-01T00:00:00.000Z"),
+            Some("invalid"),
+            MOCK_NOW_MS,
+        );
+        assert_eq!(result, None);
+    }
+
+    // Ported: "returns None when no mostRecentTimestamp is available" — lookup/abandonment.spec.ts line 54
+    #[test]
+    fn test_abandonment_no_timestamp() {
+        let result = calculate_abandonment(None, Some("1 year"), MOCK_NOW_MS);
+        assert_eq!(result, None);
+    }
+
+    // Ported: "marks a package as abandoned when mostRecentTimestamp plus threshold is before now" — lookup/abandonment.spec.ts line 69
+    #[test]
+    fn test_abandonment_old_package_is_abandoned() {
+        // 2 years old package, threshold 1 year → abandoned
+        let result = calculate_abandonment(
+            Some("2021-01-01T00:00:00.000Z"),
+            Some("1 year"),
+            MOCK_NOW_MS,
+        );
+        assert_eq!(result, Some(true));
+    }
+
+    // Ported: "does not mark as abandoned when mostRecentTimestamp plus threshold is after now" — lookup/abandonment.spec.ts line 83
+    #[test]
+    fn test_abandonment_recent_package_not_abandoned() {
+        // Package from 6 months ago, threshold 1 year → not abandoned
+        let result = calculate_abandonment(
+            Some("2022-07-01T00:00:00.000Z"),
+            Some("1 year"),
+            MOCK_NOW_MS,
+        );
+        assert_eq!(result, Some(false));
+    }
+
     // ── prepare_labels ────────────────────────────────────────────────────────
 
     // Ported: "returns empty array if no labels are configured" — pr/labels.spec.ts line 11

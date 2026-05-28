@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/util.spec.ts
-**Total tests:** 29 | **Ported:** 26 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 26 | **Actionable:** 29 | **Status:** partial (1 pending, 2 not-applicable)
 
 ### `getGitStatusContextCombinedName`
 
@@ -44,8 +44,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| converts Readable stream to string | 108 | pending | — | — | — |
-| handles error | 113 | pending | — | — | — |
+| converts Readable stream to string | 108 | not-applicable | — | — | Node.js Readable stream — no Rust equivalent in this codebase |
+| handles error | 113 | not-applicable | — | — | Node.js Readable stream — no Rust equivalent in this codebase |
 
 ### `getStorageExtraCloneOpts`
 
