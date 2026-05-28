@@ -216,7 +216,7 @@ pub async fn fetch_latest(
     let latest = result.and_then(|r| {
         let mut versions: Vec<&str> = r.releases.iter().map(|rel| rel.version.as_str()).collect();
         versions.sort_by(|a, b| cmp_version(a, b));
-        versions.last().map(|s| s.to_string())
+        versions.last().map(|s| (*s).to_owned())
     });
     let update_available = latest
         .as_deref()

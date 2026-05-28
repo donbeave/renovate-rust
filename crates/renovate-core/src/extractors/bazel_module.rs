@@ -1722,7 +1722,7 @@ mod tests {
             options: opts
                 .iter()
                 .map(|(n, v)| BazelrcOption {
-                    name: n.to_string(),
+                    name: (*n).to_owned(),
                     value: v.map(|s| s.to_owned()),
                 })
                 .collect(),

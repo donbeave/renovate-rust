@@ -78,7 +78,7 @@ pub fn get_child_process_env(
     let mut out = std::collections::HashMap::new();
     for key in BASIC_ENV_VARS.iter().chain(custom_vars.iter()) {
         if let Some(val) = env_source.get(*key) {
-            out.insert((*key).to_string(), val.clone());
+            out.insert((*key).to_owned(), val.clone());
         }
     }
     for (key, val) in env_source {
@@ -185,7 +185,7 @@ impl LookupStats {
 
     /// Record a duration for a datasource.
     pub fn write(&mut self, datasource: &str, duration: i64) {
-        self.data.entry(datasource.to_string()).or_default().push(duration);
+        self.data.entry(datasource.to_owned()).or_default().push(duration);
     }
 
     /// Generate the timing report for all datasources.
@@ -216,6 +216,73 @@ impl PackageCacheStats {
 ///
 /// Mirrors `GitOperationStats` from `lib/util/stats.ts`.
 pub type GitOperationStats = LookupStats;
+
+/// Datasource cache action type.
+#[derive(Debug, Clone, PartialEq)]
+pub enum DatasourceCacheAction { Hit, Miss, Set, Skip }
+
+/// One datasource cache data point.
+#[derive(Debug, Clone)]
+pub struct DatasourceCacheDataPoint {
+    pub datasource: String,
+    pub registry_url: String,
+    pub package_name: String,
+    pub action: DatasourceCacheAction,
+}
+
+/// Aggregated short stats for a registry URL.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct DatasourceCacheShortStats {
+    pub hit: u32, pub miss: u32, pub set: u32, pub skip: u32,
+}
+
+/// Accumulates datasource cache hit/miss/set/skip stats.
+///
+/// Mirrors `DatasourceCacheStats` from `lib/util/stats.ts`.
+#[derive(Debug, Default)]
+pub struct DatasourceCacheStats {
+    data_points: Vec<DatasourceCacheDataPoint>,
+}
+
+impl DatasourceCacheStats {
+    pub fn new() -> Self { Self::default() }
+    fn push(&mut self, ds: &str, reg: &str, pkg: &str, action: DatasourceCacheAction) {
+        self.data_points.push(DatasourceCacheDataPoint { datasource: ds.to_string(), registry_url: reg.to_string(), package_name: pkg.to_string(), action });
+    }
+    pub fn hit(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Hit); }
+    pub fn miss(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Miss); }
+    pub fn set(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Set); }
+    pub fn skip(&mut self, ds: &str, reg: &str, pkg: &str) { self.push(ds, reg, pkg, DatasourceCacheAction::Skip); }
+
+    /// Returns (long report, short report).
+    pub fn get_report(&self) -> (
+        std::collections::HashMap<String, std::collections::HashMap<String, std::collections::HashMap<String, (Option<&'static str>, Option<&'static str>)>>>,
+        std::collections::HashMap<String, std::collections::HashMap<String, DatasourceCacheShortStats>>,
+    ) {
+        let mut long = std::collections::HashMap::new();
+        let mut short = std::collections::HashMap::new();
+        for dp in &self.data_points {
+            let (read, write): (Option<&'static str>, Option<&'static str>) = match dp.action {
+                DatasourceCacheAction::Hit => (Some("hit"), None),
+                DatasourceCacheAction::Miss => (Some("miss"), None),
+                DatasourceCacheAction::Set => (None, Some("set")),
+                DatasourceCacheAction::Skip => (None, Some("skip")),
+            };
+            long.entry(dp.datasource.clone()).or_insert_with(std::collections::HashMap::new)
+                .entry(dp.registry_url.clone()).or_insert_with(std::collections::HashMap::new)
+                .insert(dp.package_name.clone(), (read, write));
+            let s = short.entry(dp.datasource.clone()).or_insert_with(std::collections::HashMap::new)
+                .entry(dp.registry_url.clone()).or_insert_with(DatasourceCacheShortStats::default);
+            match dp.action {
+                DatasourceCacheAction::Hit => s.hit += 1,
+                DatasourceCacheAction::Miss => s.miss += 1,
+                DatasourceCacheAction::Set => s.set += 1,
+                DatasourceCacheAction::Skip => s.skip += 1,
+            }
+        }
+        (long, short)
+    }
+}
 
 /// Per-URL HTTP cache entry.
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -287,7 +354,7 @@ impl AbandonedPackageStats {
     pub fn new() -> Self { Self::default() }
 
     pub fn write(&mut self, datasource: &str, package_name: &str, most_recent_timestamp: &str) {
-        self.entries.push((datasource.to_string(), package_name.to_string(), most_recent_timestamp.to_string()));
+        self.entries.push((datasource.to_owned(), package_name.to_owned(), most_recent_timestamp.to_owned()));
     }
 
     pub fn get_data(&self) -> &[(String, String, String)] { &self.entries }
@@ -350,8 +417,8 @@ impl HttpStats {
 
     pub fn write(&mut self, method: &str, url: &str, req_ms: i64, queue_ms: i64, status: u32) {
         self.data_points.push(HttpRequestDataPoint {
-            method: method.to_string(),
-            url: url.to_string(),
+            method: method.to_owned(),
+            url: url.to_owned(),
             req_ms, queue_ms, status,
         });
     }
@@ -404,7 +471,7 @@ impl HttpStats {
 fn parse_hostname(url: &str) -> Option<String> {
     let after_scheme = url.split("://").nth(1)?;
     let host = after_scheme.split('/').next()?;
-    Some(host.to_string())
+    Some(host.to_owned())
 }
 
 fn parse_origin(url: &str) -> Option<String> {
@@ -417,7 +484,7 @@ fn parse_origin(url: &str) -> Option<String> {
 fn parse_path(url: &str) -> Option<String> {
     let after_scheme = url.split("://").nth(1)?;
     let slash = after_scheme.find('/')?;
-    Some(after_scheme[slash..].to_string())
+    Some(after_scheme[slash..].to_owned())
 }
 
 /// Return `true` when `token` is a GitHub Classic Personal Access Token (`ghp_`).
@@ -859,13 +926,13 @@ pub fn parse_goproxy(input: &str) -> Vec<GoproxyItem> {
         let pos = remaining.find(|c| c == ',' || c == '|');
         match pos {
             None => {
-                items.push(GoproxyItem { url: remaining.to_string(), fallback: None });
+                items.push(GoproxyItem { url: remaining.to_owned(), fallback: None });
                 break;
             }
             Some(i) => {
                 let url = &remaining[..i];
                 let sep = remaining.chars().nth(i).unwrap();
-                items.push(GoproxyItem { url: url.to_string(), fallback: Some(sep) });
+                items.push(GoproxyItem { url: url.to_owned(), fallback: Some(sep) });
                 remaining = &remaining[i + 1..];
             }
         }
@@ -999,9 +1066,9 @@ pub fn transform_github_release(
     }
 
     Some(GithubReleaseItem {
-        version: version.to_string(),
+        version: version.to_owned(),
         release_timestamp: normalised_ts,
-        url: url.to_string(),
+        url: url.to_owned(),
         id,
         name: name.map(String::from),
         description: description.map(String::from),
@@ -1058,18 +1125,18 @@ pub fn transform_github_tag(version: Option<&str>, target: Option<GithubTagTarge
     match target {
         GithubTagTarget::Commit { oid, release_timestamp } => {
             Some(GithubTagItem {
-                version: version.to_string(),
-                git_ref: version.to_string(),
-                hash: oid.to_string(),
-                release_timestamp: release_timestamp.to_string(),
+                version: version.to_owned(),
+                git_ref: version.to_owned(),
+                hash: oid.to_owned(),
+                release_timestamp: release_timestamp.to_owned(),
             })
         }
         GithubTagTarget::Tag { tagger_timestamp, nested_oid } => {
             Some(GithubTagItem {
-                version: version.to_string(),
-                git_ref: version.to_string(),
-                hash: nested_oid.to_string(),
-                release_timestamp: tagger_timestamp.to_string(),
+                version: version.to_owned(),
+                git_ref: version.to_owned(),
+                hash: nested_oid.to_owned(),
+                release_timestamp: tagger_timestamp.to_owned(),
             })
         }
     }
@@ -1416,7 +1483,7 @@ impl<'a> BunyanRecord<'a> {
 ///
 /// Mirrors `getMeta()` from `lib/logger/pretty-stdout.ts`.
 pub fn get_meta(rec: Option<&BunyanRecord<'_>>, colorize: bool) -> String {
-    let rec = match rec { None => return String::new(), Some(r) => r };
+    let Some(rec) = rec else { return String::new(); };
     let module_part = rec.module.map(|m| format!(" [{}]", m)).unwrap_or_default();
     let meta_pairs = rec.meta_pairs();
     if meta_pairs.is_empty() { return module_part; }
@@ -4263,6 +4330,27 @@ mod tests {
         // Total req times: 100 + 200 + 400 + 800 = 1500, avg = 375
         assert_eq!(example_stats.req_avg_ms, 375);
         assert_eq!(example_stats.req_max_ms, 800);
+    }
+
+    // ── DatasourceCacheStats ──────────────────────────────────────────────────
+
+    // Ported: "collects data points" — util/stats.spec.ts line 668
+    #[test]
+    fn test_datasource_cache_stats_collects() {
+        let mut stats = DatasourceCacheStats::new();
+        stats.hit("crate", "https://foo.example.com", "foo");
+        stats.miss("maven", "https://bar.example.com", "bar");
+        stats.set("npm", "https://baz.example.com", "baz");
+        stats.skip("rubygems", "https://qux.example.com", "qux");
+        let (long, short) = stats.get_report();
+        assert_eq!(short.get("crate").unwrap().get("https://foo.example.com").unwrap().hit, 1);
+        assert_eq!(short.get("maven").unwrap().get("https://bar.example.com").unwrap().miss, 1);
+        assert_eq!(short.get("npm").unwrap().get("https://baz.example.com").unwrap().set, 1);
+        assert_eq!(short.get("rubygems").unwrap().get("https://qux.example.com").unwrap().skip, 1);
+        let crate_long = long.get("crate").unwrap().get("https://foo.example.com").unwrap().get("foo").unwrap();
+        assert_eq!(crate_long.0, Some("hit"));
+        let npm_long = long.get("npm").unwrap().get("https://baz.example.com").unwrap().get("baz").unwrap();
+        assert_eq!(npm_long.1, Some("set"));
     }
 
     // ── HttpCacheStats ────────────────────────────────────────────────────────

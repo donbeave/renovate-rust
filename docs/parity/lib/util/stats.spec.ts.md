@@ -5,7 +5,7 @@
 ## `lib/util/stats.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/stats.spec.ts
-**Total tests:** 33 | **Ported:** 16 | **Actionable:** 33 | **Status:** partial
+**Total tests:** 33 | **Ported:** 17 | **Actionable:** 33 | **Status:** partial
 
 ### `util/stats › makeTimingReport`
 
@@ -47,7 +47,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| collects data points | 668 | pending | — | — | — |
+| collects data points | 668 | ported | `util.rs` | `test_datasource_cache_stats_collects` | — |
 | reports | 708 | not-applicable | — | — | Checks logger.logger.trace/debug spy; not portable without tracing test infrastructure |
 
 ### `util/stats › HttpStats`

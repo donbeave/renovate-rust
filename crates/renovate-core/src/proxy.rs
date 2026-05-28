@@ -32,7 +32,7 @@ pub fn bootstrap(env: &mut HashMap<String, String>) -> bool {
         if !env.contains_key(*upper)
             && let Some(v) = env.get(lower.as_str()).cloned()
         {
-            env.insert(upper.to_string(), v);
+            env.insert((*upper).to_owned(), v);
         }
         // Uppercase present → copy down
         if let Some(v) = env.get(*upper).cloned()
@@ -51,7 +51,7 @@ mod tests {
     fn env(pairs: &[(&str, &str)]) -> HashMap<String, String> {
         pairs
             .iter()
-            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .map(|(k, v)| ((*k).to_owned(), (*v).to_owned()))
             .collect()
     }
 

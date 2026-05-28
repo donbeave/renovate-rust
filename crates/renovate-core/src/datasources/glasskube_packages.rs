@@ -87,9 +87,8 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let versions: VersionsYaml = match parse_yaml(&versions_text) {
-        Some(v) => v,
-        None => return Ok(None),
+    let Some(versions): Option<VersionsYaml> = parse_yaml(&versions_text) else {
+        return Ok(None);
     };
 
     let releases: Vec<GlasskubeRelease> = versions
@@ -122,9 +121,8 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let manifest: PackageManifest = match parse_yaml(&manifest_text) {
-        Some(m) => m,
-        None => return Ok(None),
+    let Some(manifest): Option<PackageManifest> = parse_yaml(&manifest_text) else {
+        return Ok(None);
     };
 
     let mut source_url = None;

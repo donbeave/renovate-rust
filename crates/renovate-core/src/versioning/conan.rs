@@ -88,14 +88,14 @@ fn normalize_range_loose(s: &str) -> String {
     static RE_PREREL: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\d)([a-zA-Z])").unwrap());
     let s = RE_LEADING.replace_all(s, "$1");
     let s = RE_PREREL.replace_all(&s, "$1-$2");
-    s.to_string()
+    s.into_owned()
 }
 
 // Rust semver requires comma-separated AND comparators; convert "1.0 <2.0" → "1.0,<2.0".
 fn normalize_and_range(s: &str) -> String {
     static RE: LazyLock<Regex> =
         LazyLock::new(|| Regex::new(r"(\d)\s+(>=?|<=?|~>|~=|[~^=])").unwrap());
-    RE.replace_all(s, "$1,$2").to_string()
+    RE.replace_all(s, "$1,$2").into_owned()
 }
 
 // Returns true for versions like "2.0.0b1", "1.0a2" where prerelease is embedded

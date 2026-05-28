@@ -112,7 +112,7 @@ pub fn parse_releases(html: &str) -> Vec<RubyRelease> {
         // Third td (optional): changelog link.
         let changelog_url = tds.get(2).and_then(|td| {
             href_re().captures(td).map(|c| {
-                let href = c[1].to_string();
+                let href = c[1].to_owned();
                 if href.starts_with("http") {
                     href
                 } else {

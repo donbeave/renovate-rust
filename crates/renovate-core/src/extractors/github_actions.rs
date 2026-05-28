@@ -163,9 +163,8 @@ static PARSE_USES_LINE_RE: LazyLock<Regex> =
 /// Returns an empty vec when the default github.com registry should be used,
 /// or `[enterprise_url, "https://github.com"]` for GitHub Enterprise endpoints.
 fn detect_registry_urls(ctx: &GithubActionsContext) -> Vec<String> {
-    let endpoint = match &ctx.endpoint {
-        Some(e) => e.as_str(),
-        None => return vec![],
+    let Some(endpoint) = ctx.endpoint.as_deref() else {
+        return vec![];
     };
     if ctx.platform.as_deref() != Some("github") {
         return vec![];

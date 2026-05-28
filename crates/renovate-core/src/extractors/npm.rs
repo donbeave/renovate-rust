@@ -1245,9 +1245,8 @@ pub fn bump_npm_package_version(content: &str, current_value: &str, bump_version
         LazyLock::new(|| regex::Regex::new(r#"(?P<prefix>"version":\s*")[^"]*"#).unwrap());
 
     let new_version = if let Some(mirror_pkg) = bump_version.strip_prefix("mirror:") {
-        let parsed: serde_json::Value = match serde_json::from_str(content) {
-            Ok(v) => v,
-            Err(_) => return content.to_owned(),
+        let Ok(parsed): Result<serde_json::Value, _> = serde_json::from_str(content) else {
+            return content.to_owned();
         };
         let mirror_version = parsed
             .get("dependencies")

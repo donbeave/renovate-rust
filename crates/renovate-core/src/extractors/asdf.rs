@@ -186,7 +186,7 @@ static JAVA_RE: LazyLock<Regex> =
 fn parse_line(line: &str) -> Option<AsdfDep> {
     let cap = LINE_RE.captures(line)?;
     let tool_name = cap[1].to_owned();
-    let raw_version = cap[2].to_string();
+    let raw_version = cap[2].to_owned();
 
     // Dynamic tools: override lookup entirely.
     if let Some(dep) = try_dynamic_tool(&tool_name, &raw_version) {

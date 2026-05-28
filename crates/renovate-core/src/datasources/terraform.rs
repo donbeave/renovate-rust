@@ -449,7 +449,7 @@ mod terraform_module_utils_tests {
     fn sd(pairs: &[(&str, &str)]) -> std::collections::HashMap<String, String> {
         pairs
             .iter()
-            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .map(|(k, v)| ((*k).to_owned(), (*v).to_owned()))
             .collect()
     }
 

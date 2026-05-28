@@ -60,7 +60,7 @@ fn version_from_prefix(prefix: &str, channel: &str) -> Option<String> {
     // an empty version string (which we then reject below).
     let without_trailing = prefix.strip_suffix('/')?;
     let parts: Vec<&str> = without_trailing.split('/').collect();
-    let version = parts.last()?.to_string();
+    let version = (*parts.last()?).to_owned();
 
     if version.is_empty() || version == "latest" {
         return None;

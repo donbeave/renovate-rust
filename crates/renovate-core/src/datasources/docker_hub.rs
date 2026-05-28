@@ -428,7 +428,7 @@ mod tests {
         // or "22.04.1" (3-component); only other 2-component versions are compatible.
         let tags: Vec<String> = ["22", "22.04", "22.04.1", "23.10", "24"]
             .iter()
-            .map(|s| s.to_string())
+            .map(|s| (*s).to_owned())
             .collect();
         let s = docker_update_summary("22.04", &tags);
         assert_eq!(s.latest.as_deref(), Some("23.10"));
@@ -450,7 +450,7 @@ mod tests {
     fn detects_update_for_plain_version() {
         let tags: Vec<String> = ["22.04", "22.04.1", "22.04.2", "23.10"]
             .iter()
-            .map(|s| s.to_string())
+            .map(|s| (*s).to_owned())
             .collect();
         let s = docker_update_summary("22.04", &tags);
         assert_eq!(s.latest.as_deref(), Some("23.10"));
@@ -482,7 +482,7 @@ mod tests {
         // "-alpine" and "-slim" should be treated separately.
         let tags: Vec<String> = ["18-alpine", "20-alpine", "18-slim", "20-slim"]
             .iter()
-            .map(|s| s.to_string())
+            .map(|s| (*s).to_owned())
             .collect();
         let s_alpine = docker_update_summary("18-alpine", &tags);
         assert_eq!(s_alpine.latest.as_deref(), Some("20-alpine"));

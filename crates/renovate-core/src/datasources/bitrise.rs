@@ -163,9 +163,8 @@ pub async fn fetch_releases(
     }
     let body: serde_json::Value = resp.json().await.map_err(BitriseError::Json)?;
 
-    let items = match body.as_array() {
-        Some(arr) => arr.clone(),
-        None => return Ok(None),
+    let Some(items) = body.as_array().cloned() else {
+        return Ok(None);
     };
 
     let mut releases = Vec::new();

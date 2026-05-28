@@ -4,7 +4,7 @@
 /// `lib/workers/repository/onboarding/pr/config-description.ts`.
 /// Returns an empty string when there is nothing to describe.
 pub fn get_config_desc(descriptions: &[&str], schedule: Option<&str>) -> String {
-    let mut desc_arr: Vec<String> = descriptions.iter().map(|s| s.to_string()).collect();
+    let mut desc_arr: Vec<String> = descriptions.iter().map(|s| (*s).to_owned()).collect();
 
     if let Some(sched) = schedule
         && sched != "at any time"

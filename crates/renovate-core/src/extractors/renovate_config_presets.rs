@@ -428,7 +428,7 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
             let preset_name = s[pkg.len() + 1..].to_owned();
             return ParsedPreset {
                 preset_source: "internal".into(),
-                repo: pkg.to_string(),
+                repo: (*pkg).to_owned(),
                 preset_name,
                 preset_path: None,
                 tag: None,

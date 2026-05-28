@@ -369,7 +369,7 @@ pub fn get_satisfying_version(versions: &[&str], range: &str) -> Option<String> 
             Ordering::Equal
         }
     });
-    matching.last().map(|s| s.to_owned())
+    matching.last().map(|s| (*s).to_string())
 }
 
 pub fn min_satisfying_version(versions: &[&str], range: &str) -> Option<String> {
@@ -391,7 +391,7 @@ pub fn min_satisfying_version(versions: &[&str], range: &str) -> Option<String> 
             Ordering::Equal
         }
     });
-    matching.first().map(|s| s.to_owned())
+    matching.first().map(|s| (*s).to_string())
 }
 
 pub fn get_new_value(

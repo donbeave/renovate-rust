@@ -84,7 +84,7 @@ fn to_ms_timestamp(s: &str) -> Option<String> {
     // Strip trailing 'Z' or timezone
     let digits: String = rest.chars().take_while(|c| c.is_ascii_digit()).collect();
     let ms: String = if digits.len() >= 3 {
-        digits[..3].to_string()
+        digits[..3].to_owned()
     } else {
         format!("{:0<3}", digits)
     };

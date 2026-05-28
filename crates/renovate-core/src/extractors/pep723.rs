@@ -56,10 +56,10 @@ static BLOCK_RE: LazyLock<Regex> =
 
 /// Extract PEP 723 dependencies from a Python file.
 pub fn extract(content: &str) -> Vec<Pep723Dep> {
-    let block = match BLOCK_RE.captures(content) {
-        Some(cap) => cap[1].to_owned(),
-        None => return Vec::new(),
+    let Some(cap) = BLOCK_RE.captures(content) else {
+        return Vec::new();
     };
+    let block = cap[1].to_owned();
 
     // Strip `# ` or `#` prefix from each line to recover the TOML text.
     let toml_text: String = block

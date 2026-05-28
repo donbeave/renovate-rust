@@ -518,7 +518,7 @@ pub async fn get_releases(
         .filter_map(|line| serde_json::from_str::<FullCrateRecord>(line).ok())
         .map(|record| {
             let (version, version_orig) = if let Some(idx) = record.vers.find('+') {
-                (record.vers[..idx].to_string(), Some(record.vers))
+                (record.vers[..idx].to_owned(), Some(record.vers))
             } else {
                 (record.vers, None)
             };

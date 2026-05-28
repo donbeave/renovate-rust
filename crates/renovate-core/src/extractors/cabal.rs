@@ -58,7 +58,7 @@ pub fn extract(content: &str) -> Vec<CabalDep> {
         if dep_field.is_none() {
             if let Some(cap) = BUILD_DEPENDS.captures(line) {
                 field_indent = leading_spaces(raw);
-                let inline = cap[1].to_string();
+                let inline = cap[1].to_owned();
                 dep_field = Some(inline);
             }
             continue;
@@ -74,7 +74,7 @@ pub fn extract(content: &str) -> Vec<CabalDep> {
             // Check if this new line starts another build-depends.
             if let Some(cap) = BUILD_DEPENDS.captures(line) {
                 field_indent = indent;
-                dep_field = Some(cap[1].to_string());
+                dep_field = Some(cap[1].to_owned());
             }
         } else {
             // Continue collecting field content.
