@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/labels.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/labels.spec.ts
-**Total tests:** 20 | **Ported:** 5 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 20 | **Ported:** 6 | **Actionable:** 20 | **Status:** partial
 
 ### `workers/repository/update/pr/labels › prepareLabels(config)`
 
@@ -16,7 +16,7 @@
 | only addLabels | 22 | ported | `util.rs` | `test_prepare_labels_only_add_labels` | — |
 | merge labels and addLabels | 30 | ported | `util.rs` | `test_prepare_labels_merge` | — |
 | deduplicate merged labels and addLabels | 39 | ported | `util.rs` | `test_prepare_labels_deduplicate` | — |
-| empty labels ignored | 48 | pending | — | — | — |
+| empty labels ignored | 48 | ported | `util.rs` | `test_prepare_labels_empty_strings_ignored` | — |
 | null labels ignored | 57 | pending | — | — | — |
 | template labels | 68 | pending | — | — | — |
 | template labels with empty datasource | 77 | pending | — | — | — |

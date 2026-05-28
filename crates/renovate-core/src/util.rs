@@ -3380,6 +3380,13 @@ mod tests {
         assert_eq!(result, vec!["labelA", "labelB", "labelC"]);
     }
 
+    // Ported: "empty labels ignored" — pr/labels.spec.ts line 48
+    #[test]
+    fn test_prepare_labels_empty_strings_ignored() {
+        let result = prepare_labels(&["labelA", ""], &[" ", "labelB"]);
+        assert_eq!(result, vec!["labelA", "labelB"]);
+    }
+
     // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
     #[test]
     fn test_create_module_label() {
