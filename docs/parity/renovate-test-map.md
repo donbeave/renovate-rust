@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4125 / 11677 total tests ported (35%) · pending 7466 · not-applicable 86 (1% of total) — updated 2026-05-28
+**Progress:** 4152 / 11677 total tests ported (36%) · pending 7437 · not-applicable 88 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -399,12 +399,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/filter-map.spec.ts` | Done | [details](lib/util/filter-map.spec.ts.md) |
 | `lib/util/env.spec.ts` | Not done | [details](lib/util/env.spec.ts.md) |
 | `lib/util/ignore.spec.ts` | Not done | [details](lib/util/ignore.spec.ts.md) |
-| `lib/util/coerce.spec.ts` | Not done | [details](lib/util/coerce.spec.ts.md) |
-| `lib/util/sample.spec.ts` | Not done | [details](lib/util/sample.spec.ts.md) |
+| `lib/util/coerce.spec.ts` | Done | [details](lib/util/coerce.spec.ts.md) |
+| `lib/util/sample.spec.ts` | Done | [details](lib/util/sample.spec.ts.md) |
 | `lib/util/promises.spec.ts` | Not done | [details](lib/util/promises.spec.ts.md) |
 | `lib/util/markdown.spec.ts` | Not done | [details](lib/util/markdown.spec.ts.md) |
 | `lib/util/html.spec.ts` | Not done | [details](lib/util/html.spec.ts.md) |
-| `lib/util/lazy.spec.ts` | Not done | [details](lib/util/lazy.spec.ts.md) |
+| `lib/util/lazy.spec.ts` | Done | [details](lib/util/lazy.spec.ts.md) |
 | `lib/util/mutex.spec.ts` | Not done | [details](lib/util/mutex.spec.ts.md) |
 | `lib/util/yaml.spec.ts` | Not done | [details](lib/util/yaml.spec.ts.md) |
 | `lib/util/common.spec.ts` | Not done | [details](lib/util/common.spec.ts.md) |

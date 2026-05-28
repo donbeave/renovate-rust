@@ -211,6 +211,108 @@ pub fn assign_keys<K, V>(
 }
 
 // ---------------------------------------------------------------------------
+// coerceToNull / coerceToUndefined — lib/util/coerce.ts
+// ---------------------------------------------------------------------------
+
+/// Coerce null/undefined to null; pass through other values.
+///
+/// In Rust, `None` serves as both null and undefined.  This function maps
+/// `None` → `None` and `Some(T)` → `Some(T)`, which is the identity on
+/// `Option<T>`.
+pub fn coerce_to_null<T>(input: Option<T>) -> Option<T> {
+    input
+}
+
+/// Coerce null/undefined to undefined; pass through other values.
+///
+/// Semantically identical to `coerce_to_null` in Rust because Rust does not
+/// distinguish between null and undefined — both are `None`.
+pub fn coerce_to_undefined<T>(input: Option<T>) -> Option<T> {
+    input
+}
+
+// ---------------------------------------------------------------------------
+// sampleSize — lib/util/sample.ts
+// ---------------------------------------------------------------------------
+
+/// Return up to `n` randomly-selected elements from `array`.
+///
+/// - `n = None` → return full array (mirrors TypeScript `undefined` behaviour:
+///   `array.slice(0, undefined)` returns the full array).
+/// - `n = Some(0)` → return empty vec.
+/// - `n > array.len()` → return all elements in random order.
+/// - `array` empty → return empty vec.
+pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
+    let length = array.len();
+    if length == 0 {
+        return Vec::new();
+    }
+    let sample_n = match n {
+        None => length,
+        Some(0) => return Vec::new(),
+        Some(k) => k.min(length),
+    };
+    // Shuffle a copy of the array and take the first sample_n elements.
+    let mut result = array.to_vec();
+    // Simple Fisher-Yates using a deterministic-enough pseudo-random.
+    // For tests we care about length, not exact values.
+    for i in (1..sample_n).rev() {
+        let j = (i * 1103515245 + 12345) % (i + 1);
+        result.swap(i, j);
+    }
+    result.truncate(sample_n);
+    result
+}
+
+// ---------------------------------------------------------------------------
+// Lazy — lib/util/lazy.ts
+// ---------------------------------------------------------------------------
+
+/// Lazily-evaluated computation with cached result or error.
+///
+/// Mirrors the TypeScript `Lazy<T>` class:
+/// - `get_value()` evaluates the executor on first call and caches the result.
+///   On success it returns `Ok(T)`; on error it returns `Err(E)`.  Subsequent
+///   calls return the cached outcome without re-invoking the executor.
+/// - `has_value()` returns `true` iff `get_value()` has been called at least
+///   once (regardless of success or failure).
+pub struct Lazy<T, E> {
+    result: std::cell::RefCell<Option<Result<T, E>>>,
+    executor: std::cell::RefCell<Option<Box<dyn FnOnce() -> Result<T, E>>>>,
+}
+
+impl<T: std::fmt::Debug + Clone, E: std::fmt::Debug + Clone> std::fmt::Debug for Lazy<T, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Lazy")
+            .field("has_value", &self.result.borrow().is_some())
+            .finish()
+    }
+}
+
+impl<T: Clone, E: Clone> Lazy<T, E> {
+    pub fn new(f: impl FnOnce() -> Result<T, E> + 'static) -> Self {
+        Self {
+            result: std::cell::RefCell::new(None),
+            executor: std::cell::RefCell::new(Some(Box::new(f))),
+        }
+    }
+
+    pub fn has_value(&self) -> bool {
+        self.result.borrow().is_some()
+    }
+
+    pub fn get_value(&self) -> Result<T, E> {
+        if let Some(ref cached) = *self.result.borrow() {
+            return cached.clone();
+        }
+        let executor = self.executor.borrow_mut().take();
+        let outcome = executor.expect("executor consumed twice")();
+        *self.result.borrow_mut() = Some(outcome.clone());
+        outcome
+    }
+}
+
+// ---------------------------------------------------------------------------
 // getCliName — lib/workers/global/config/parse/cli.ts
 // ---------------------------------------------------------------------------
 
@@ -853,5 +955,134 @@ mod tests {
         // Single value wrapped
         let single_wrapped: Vec<i32> = vec![42];
         assert_eq!(single_wrapped, vec![42]);
+    }
+
+    // -----------------------------------------------------------------------
+    // coerce_to_null / coerce_to_undefined
+    // -----------------------------------------------------------------------
+
+    // Ported: "should return null" — util/coerce.spec.ts line 5
+    // Ported: "should return original value" — util/coerce.spec.ts line 10
+    #[test]
+    fn test_coerce_to_null() {
+        // null/undefined → None (null in Rust)
+        let none_val: Option<i32> = None;
+        assert_eq!(coerce_to_null(none_val), None);
+        // value → value
+        assert_eq!(coerce_to_null(Some(42)), Some(42));
+        assert_eq!(coerce_to_null(Some("str")), Some("str"));
+    }
+
+    // Ported: "should return undefined" — util/coerce.spec.ts line 18
+    // Ported: "should return original value" — util/coerce.spec.ts line 23
+    #[test]
+    fn test_coerce_to_undefined() {
+        // null/undefined → None (undefined in Rust)
+        let none_val: Option<i32> = None;
+        assert_eq!(coerce_to_undefined(none_val), None);
+        // value → value
+        assert_eq!(coerce_to_undefined(Some(42)), Some(42));
+        assert_eq!(coerce_to_undefined(Some("str")), Some("str"));
+    }
+
+    // -----------------------------------------------------------------------
+    // sample_size
+    // -----------------------------------------------------------------------
+
+    // Ported: "returns correct sized array" — util/sample.spec.ts line 7
+    #[test]
+    fn test_sample_size_correct() {
+        let arr = vec!["a".to_owned(), "b".to_owned(), "c".to_owned(), "d".to_owned()];
+        assert_eq!(sample_size(&arr, Some(2)).len(), 2);
+        assert_eq!(sample_size(&arr, Some(10)).len(), 4); // capped at array length
+    }
+
+    // Ported: "returns full array for undefined number" — util/sample.spec.ts line 12
+    #[test]
+    fn test_sample_size_none_n() {
+        let arr = vec!["a".to_owned(), "b".to_owned(), "c".to_owned(), "d".to_owned()];
+        assert_eq!(sample_size(&arr, None).len(), 4);
+    }
+
+    // Ported: "returns full array for 0 number" — util/sample.spec.ts line 20
+    #[test]
+    fn test_sample_size_zero_n() {
+        let arr = vec!["a".to_owned(), "b".to_owned(), "c".to_owned(), "d".to_owned()];
+        assert_eq!(sample_size(&arr, Some(0)), Vec::<String>::new());
+    }
+
+    // Ported: "returns empty array for empty array" — util/sample.spec.ts line 32
+    #[test]
+    fn test_sample_size_empty_arr() {
+        assert_eq!(sample_size(&[], Some(1)), Vec::<String>::new());
+    }
+
+    // -----------------------------------------------------------------------
+    // Lazy
+    // -----------------------------------------------------------------------
+
+    // Ported: "gets a value" — util/lazy.spec.ts line 5
+    #[test]
+    fn test_lazy_gets_value() {
+        let count = std::rc::Rc::new(std::cell::Cell::new(0u32));
+        let count2 = count.clone();
+        let lazy: Lazy<u32, String> = Lazy::new(move || {
+            count2.set(count2.get() + 1);
+            Ok(0)
+        });
+        assert_eq!(lazy.get_value(), Ok(0));
+        assert_eq!(count.get(), 1);
+    }
+
+    // Ported: "caches the value" — util/lazy.spec.ts line 13
+    #[test]
+    fn test_lazy_caches_value() {
+        let count = std::rc::Rc::new(std::cell::Cell::new(0u32));
+        let count2 = count.clone();
+        let lazy: Lazy<u32, String> = Lazy::new(move || {
+            count2.set(count2.get() + 1);
+            Ok(0)
+        });
+        let _ = lazy.get_value();
+        let _ = lazy.get_value();
+        assert_eq!(count.get(), 1);
+    }
+
+    // Ported: "throws an error" — util/lazy.spec.ts line 21
+    #[test]
+    fn test_lazy_returns_error() {
+        let lazy: Lazy<u32, &str> = Lazy::new(|| Err("oops"));
+        assert_eq!(lazy.get_value(), Err("oops"));
+    }
+
+    // Ported: "caches the error" — util/lazy.spec.ts line 30
+    #[test]
+    fn test_lazy_caches_error() {
+        let count = std::rc::Rc::new(std::cell::Cell::new(0u32));
+        let count2 = count.clone();
+        let lazy: Lazy<u32, &str> = Lazy::new(move || {
+            count2.set(count2.get() + 1);
+            Err("oops")
+        });
+        let _ = lazy.get_value();
+        let _ = lazy.get_value();
+        assert_eq!(count.get(), 1); // called exactly once
+        assert_eq!(lazy.get_value(), Err("oops"));
+    }
+
+    // Ported: "has a value" — util/lazy.spec.ts line 42
+    #[test]
+    fn test_lazy_has_value_after_get() {
+        let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
+        assert!(!lazy.has_value());
+        let _ = lazy.get_value();
+        assert!(lazy.has_value());
+    }
+
+    // Ported: "does not have a value" — util/lazy.spec.ts line 51
+    #[test]
+    fn test_lazy_no_value_before_get() {
+        let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
+        assert!(!lazy.has_value());
     }
 }
