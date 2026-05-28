@@ -172,6 +172,77 @@ pub fn make_timing_report(data: &[i64]) -> TimingReport {
 // GitHub token utilities — lib/util/check-token.ts
 // ---------------------------------------------------------------------------
 
+/// Accumulates timing data points per-datasource and generates reports.
+///
+/// Mirrors the `LookupStats` class from `lib/util/stats.ts`.
+#[derive(Debug, Default)]
+pub struct LookupStats {
+    data: std::collections::HashMap<String, Vec<i64>>,
+}
+
+impl LookupStats {
+    pub fn new() -> Self { Self::default() }
+
+    /// Record a duration for a datasource.
+    pub fn write(&mut self, datasource: &str, duration: i64) {
+        self.data.entry(datasource.to_string()).or_default().push(duration);
+    }
+
+    /// Generate the timing report for all datasources.
+    pub fn get_report(&self) -> std::collections::HashMap<String, TimingReport> {
+        self.data.iter().map(|(k, v)| (k.clone(), make_timing_report(v))).collect()
+    }
+}
+
+/// Accumulates get/set timing for the package cache.
+///
+/// Mirrors `PackageCacheStats` from `lib/util/stats.ts`.
+#[derive(Debug, Default)]
+pub struct PackageCacheStats {
+    gets: Vec<i64>,
+    sets: Vec<i64>,
+}
+
+impl PackageCacheStats {
+    pub fn new() -> Self { Self::default() }
+    pub fn write_get(&mut self, ms: i64) { self.gets.push(ms); }
+    pub fn write_set(&mut self, ms: i64) { self.sets.push(ms); }
+    pub fn get_report(&self) -> (TimingReport, TimingReport) {
+        (make_timing_report(&self.gets), make_timing_report(&self.sets))
+    }
+}
+
+/// Accumulates per-operation git timing stats.
+///
+/// Mirrors `GitOperationStats` from `lib/util/stats.ts`.
+pub type GitOperationStats = LookupStats;
+
+/// Accumulates abandoned-package data points.
+///
+/// Mirrors `AbandonedPackageStats` from `lib/util/stats.ts`.
+#[derive(Debug, Default)]
+pub struct AbandonedPackageStats {
+    entries: Vec<(String, String, String)>, // (datasource, package_name, most_recent_timestamp)
+}
+
+impl AbandonedPackageStats {
+    pub fn new() -> Self { Self::default() }
+
+    pub fn write(&mut self, datasource: &str, package_name: &str, most_recent_timestamp: &str) {
+        self.entries.push((datasource.to_string(), package_name.to_string(), most_recent_timestamp.to_string()));
+    }
+
+    pub fn get_data(&self) -> &[(String, String, String)] { &self.entries }
+
+    pub fn get_report(&self) -> std::collections::HashMap<String, std::collections::HashMap<String, String>> {
+        let mut report = std::collections::HashMap::new();
+        for (ds, pkg, ts) in &self.entries {
+            report.entry(ds.clone()).or_insert_with(std::collections::HashMap::new).insert(pkg.clone(), ts.clone());
+        }
+        report
+    }
+}
+
 /// Return `true` when `token` is a GitHub Classic Personal Access Token (`ghp_`).
 pub fn is_github_personal_access_token(token: &str) -> bool {
     token.starts_with("ghp_")
@@ -3911,6 +3982,110 @@ mod tests {
         assert_eq!(r.total_ms, 700);
         assert_eq!(r.avg_ms, 233);
         assert_eq!(r.median_ms, 200);
+    }
+
+    // ── PackageCacheStats ─────────────────────────────────────────────────────
+
+    // Ported: "returns empty report" — util/stats.spec.ts line 578
+    #[test]
+    fn test_package_cache_stats_empty_report() {
+        let stats = PackageCacheStats::new();
+        let (get, set) = stats.get_report();
+        assert_eq!(get.count, 0); assert_eq!(get.avg_ms, 0);
+        assert_eq!(set.count, 0); assert_eq!(set.avg_ms, 0);
+    }
+
+    // Ported: "writes data points" — util/stats.spec.ts line 586
+    #[test]
+    fn test_package_cache_stats_writes_data_points() {
+        let mut stats = PackageCacheStats::new();
+        stats.write_get(100); stats.write_get(200); stats.write_get(400);
+        stats.write_set(1000);
+        let (get, set) = stats.get_report();
+        assert_eq!(get.count, 3); assert_eq!(get.avg_ms, 233); assert_eq!(get.max_ms, 400); assert_eq!(get.median_ms, 200); assert_eq!(get.total_ms, 700);
+        assert_eq!(set.count, 1); assert_eq!(set.avg_ms, 1000); assert_eq!(set.max_ms, 1000); assert_eq!(set.total_ms, 1000);
+    }
+
+    // ── AbandonedPackageStats ─────────────────────────────────────────────────
+
+    // Ported: "returns empty report" — util/stats.spec.ts line 1016
+    #[test]
+    fn test_abandoned_package_stats_empty_report() {
+        let stats = AbandonedPackageStats::new();
+        assert!(stats.get_report().is_empty());
+    }
+
+    // Ported: "writes data points" — util/stats.spec.ts line 1021
+    #[test]
+    fn test_abandoned_package_stats_writes_data_points() {
+        let mut stats = AbandonedPackageStats::new();
+        stats.write("npm", "package1", "2023-01-01T00:00:00.000Z");
+        stats.write("npm", "package2", "2023-02-01T00:00:00.000Z");
+        stats.write("docker", "image1", "2023-03-01T00:00:00.000Z");
+        let data = stats.get_data();
+        assert_eq!(data.len(), 3);
+        assert_eq!(data[0], ("npm".to_string(), "package1".to_string(), "2023-01-01T00:00:00.000Z".to_string()));
+        let report = stats.get_report();
+        let npm = report.get("npm").unwrap();
+        assert_eq!(npm.get("package1").unwrap(), "2023-01-01T00:00:00.000Z");
+        assert_eq!(npm.get("package2").unwrap(), "2023-02-01T00:00:00.000Z");
+        let docker = report.get("docker").unwrap();
+        assert_eq!(docker.get("image1").unwrap(), "2023-03-01T00:00:00.000Z");
+    }
+
+    // ── GitOperationStats ─────────────────────────────────────────────────────
+
+    // Ported: "returns empty report" — util/stats.spec.ts line 1112
+    #[test]
+    fn test_git_operation_stats_empty_report() {
+        let stats = GitOperationStats::new();
+        assert!(stats.get_report().is_empty());
+    }
+
+    // Ported: "writes data points" — util/stats.spec.ts line 1117
+    #[test]
+    fn test_git_operation_stats_writes_data_points() {
+        let mut stats = GitOperationStats::new();
+        stats.write("pull", 1000);
+        stats.write("push", 100);
+        stats.write("push", 50000);
+        let report = stats.get_report();
+        let pull = report.get("pull").unwrap();
+        assert_eq!(pull.count, 1); assert_eq!(pull.avg_ms, 1000);
+        let push = report.get("push").unwrap();
+        assert_eq!(push.count, 2); assert_eq!(push.total_ms, 50100); assert_eq!(push.max_ms, 50000);
+    }
+
+    // ── LookupStats ───────────────────────────────────────────────────────────
+
+    // Ported: "returns empty report" — util/stats.spec.ts line 64
+    #[test]
+    fn test_lookup_stats_empty_report() {
+        let stats = LookupStats::new();
+        let report = stats.get_report();
+        assert!(report.is_empty());
+    }
+
+    // Ported: "writes data points" — util/stats.spec.ts line 69
+    #[test]
+    fn test_lookup_stats_writes_data_points() {
+        let mut stats = LookupStats::new();
+        stats.write("npm", 100);
+        stats.write("npm", 200);
+        stats.write("npm", 400);
+        stats.write("docker", 1000);
+        let report = stats.get_report();
+        let docker = report.get("docker").unwrap();
+        assert_eq!(docker.count, 1);
+        assert_eq!(docker.avg_ms, 1000);
+        assert_eq!(docker.max_ms, 1000);
+        assert_eq!(docker.total_ms, 1000);
+        let npm = report.get("npm").unwrap();
+        assert_eq!(npm.count, 3);
+        assert_eq!(npm.avg_ms, 233);
+        assert_eq!(npm.max_ms, 400);
+        assert_eq!(npm.median_ms, 200);
+        assert_eq!(npm.total_ms, 700);
     }
 
     // -----------------------------------------------------------------------

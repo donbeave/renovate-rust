@@ -5,7 +5,7 @@
 ## `lib/util/stats.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/stats.spec.ts
-**Total tests:** 33 | **Ported:** 3 | **Actionable:** 33 | **Status:** partial
+**Total tests:** 33 | **Ported:** 11 | **Actionable:** 33 | **Status:** partial
 
 ### `util/stats › makeTimingReport`
 
@@ -19,8 +19,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty report | 64 | pending | — | — | — |
-| writes data points | 69 | pending | — | — | — |
+| returns empty report | 64 | ported | `util.rs` | `test_lookup_stats_empty_report` | — |
+| writes data points | 69 | ported | `util.rs` | `test_lookup_stats_writes_data_points` | — |
 | wraps a function | 95 | not-applicable | — | — | Uses vi.useFakeTimers() to advance time; not portable without fake-timer test infrastructure |
 | logs report | 113 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
 
@@ -37,8 +37,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty report | 578 | pending | — | — | — |
-| writes data points | 586 | pending | — | — | — |
+| returns empty report | 578 | ported | `util.rs` | `test_package_cache_stats_empty_report` | — |
+| writes data points | 586 | ported | `util.rs` | `test_package_cache_stats_writes_data_points` | — |
 | wraps get function | 612 | not-applicable | — | — | Uses vi.useFakeTimers() to advance time; not portable without fake-timer test infrastructure |
 | wraps set function | 625 | not-applicable | — | — | Uses vi.useFakeTimers() to advance time; not portable without fake-timer test infrastructure |
 | logs report | 637 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
@@ -71,8 +71,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty report | 1016 | pending | — | — | — |
-| writes data points | 1021 | pending | — | — | — |
+| returns empty report | 1016 | ported | `util.rs` | `test_abandoned_package_stats_empty_report` | — |
+| writes data points | 1021 | ported | `util.rs` | `test_abandoned_package_stats_writes_data_points` | — |
 | logs report | 1069 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
 | does not log report when no data | 1096 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
 
@@ -80,10 +80,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty report | 1112 | pending | — | — | — |
-| writes data points | 1117 | pending | — | — | — |
+| returns empty report | 1112 | ported | `util.rs` | `test_git_operation_stats_empty_report` | — |
+| writes data points | 1117 | ported | `util.rs` | `test_git_operation_stats_writes_data_points` | — |
 | rounds total towards ceiling when preparing report | 1141 | pending | — | — | — |
 | logs report | 1161 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
 
 ---
-
