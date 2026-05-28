@@ -859,4 +859,72 @@ mod tests {
         assert!(matches("20.04", "20.04"));
         assert!(!matches("20.04", "20.04.0"));
     }
+
+    // ── distro.spec.ts — Ubuntu DistroInfo ────────────────────────────────
+
+    // Ported: "isCodename("$version") === $expected" — versioning/distro.spec.ts line 12
+    #[test]
+    fn distro_is_codename() {
+        assert!(is_codename("jammy"));
+        assert!(is_codename("impish"));
+        assert!(is_codename("hirsute"));
+        assert!(is_codename("groovy"));
+        assert!(is_codename("focal"));
+        assert!(is_codename("eoan"));
+        assert!(!is_codename("Wily Werewolf")); // full name, not lowercase series
+        assert!(!is_codename("asdf"));
+        assert!(!is_codename("Yakkety")); // capitalized
+    }
+
+    // Ported: "getVersionByCodename("$version") === $expected" — versioning/distro.spec.ts line 27
+    #[test]
+    fn distro_get_version_by_codename() {
+        assert_eq!(version_by_codename("jammy"), "22.04");
+        assert_eq!(version_by_codename("impish"), "21.10");
+        assert_eq!(version_by_codename("hirsute"), "21.04");
+        assert_eq!(version_by_codename("groovy"), "20.10");
+        assert_eq!(version_by_codename("focal"), "20.04");
+        assert_eq!(version_by_codename("eoan"), "19.10");
+        // Non-codenames return as-is
+        assert_eq!(version_by_codename("asd"), "asd");
+        assert_eq!(version_by_codename("16.06"), "16.06");
+    }
+
+    // Ported: "getCodenameByVersion("$version") === $expected" — versioning/distro.spec.ts line 44
+    #[test]
+    fn distro_get_codename_by_version() {
+        assert_eq!(codename_by_version("22.04"), "jammy");
+        assert_eq!(codename_by_version("21.10"), "impish");
+        assert_eq!(codename_by_version("21.04"), "hirsute");
+        assert_eq!(codename_by_version("20.10"), "groovy");
+        assert_eq!(codename_by_version("20.04"), "focal");
+        assert_eq!(codename_by_version("19.10"), "eoan");
+        // Non-versions return as-is
+        assert_eq!(codename_by_version("asd"), "asd");
+        assert_eq!(codename_by_version("16.06"), "16.06");
+    }
+
+    // Ported: "isReleased("$version") === $expected" — versioning/distro.spec.ts line 98
+    // Fixed date: 2021-03-20
+    // DistroInfo.isReleased() resolves codenames first via getVersionByCodename().
+    #[test]
+    fn distro_is_released() {
+        let now = "2021-03-20";
+        // Helper: convert codename → version, then check is_released
+        let check = |input: &str| {
+            let ver = version_by_codename(input);
+            is_released(ver, now)
+        };
+        assert!(check("focal"));    // 2020-04-23 < 2021-03-20
+        assert!(check("groovy"));   // 2020-10-22 < 2021-03-20
+        assert!(!check("hirsute")); // 2021-04-22 > 2021-03-20
+        assert!(!check("impish"));  // 2021-10-14 > 2021-03-20
+        assert!(!check("jammy"));   // 2022-04-21 > 2021-03-20
+        assert!(check("20.04"));
+        assert!(check("20.10"));
+        assert!(!check("21.04"));
+        assert!(!check("21.10"));
+        assert!(!check("22.04"));
+        assert!(!check("24.04"));   // not in releases list
+    }
 }
