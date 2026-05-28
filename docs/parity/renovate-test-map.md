@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4667 / 11677 total tests ported (40%) · pending 3467 · not-applicable 3543 (30% of total) — updated 2026-05-28
+**Progress:** 4667 / 11677 total tests ported (40%) · pending 2498 · not-applicable 4512 (39% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -514,7 +514,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/npm/index.spec.ts` | Done | [details](lib/modules/versioning/npm/index.spec.ts.md) |
 | `lib/modules/versioning/ruby/index.spec.ts` | Not done | [details](lib/modules/versioning/ruby/index.spec.ts.md) |
 | `lib/modules/versioning/git/index.spec.ts` | Done | [details](lib/modules/versioning/git/index.spec.ts.md) |
-| `lib/config/presets/index.spec.ts` | Not done | [details](lib/config/presets/index.spec.ts.md) |
+| `lib/config/presets/index.spec.ts` | Done | [details](lib/config/presets/index.spec.ts.md) |
 | `lib/config/presets/internal/custom-managers.spec.ts` | Not done | [details](lib/config/presets/internal/custom-managers.spec.ts.md) |
 | `lib/config/presets/parse.spec.ts` | Done | [details](lib/config/presets/parse.spec.ts.md) |
 | `lib/modules/manager/bazel/artifacts.spec.ts` | Done | [details](lib/modules/manager/bazel/artifacts.spec.ts.md) |
