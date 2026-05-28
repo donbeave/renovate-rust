@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/common.spec.ts
-**Total tests:** 30 | **Ported:** 0 | **Actionable:** 30 | **Status:** pending
+**Total tests:** 30 | **Ported:** 6 | **Actionable:** 30 | **Status:** partial
 
 ### `modules/datasource/common › getDatasourceFor`
 
@@ -28,32 +28,32 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true for valid input | 62 | pending | — | — | — |
-| returns false for invalid input | 70 | pending | — | — | — |
-| returns false for input with missing properties | 78 | pending | — | — | — |
-| returns false for input with non-string properties | 85 | pending | — | — | — |
+| returns true for valid input | 62 | not-applicable | — | — | TypeScript runtime type guard; Rust type system handles this statically |
+| returns false for invalid input | 70 | not-applicable | — | — | TypeScript runtime type guard |
+| returns false for input with missing properties | 78 | not-applicable | — | — | TypeScript runtime type guard |
+| returns false for input with non-string properties | 85 | not-applicable | — | — | TypeScript runtime type guard |
 
 ### `modules/datasource/common › applyExtractVersion`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return the same release result if extractVersion is not defined | 95 | pending | — | — | — |
-| should extract version from release using provided regex | 103 | pending | — | — | — |
-| should return null for releases with invalid version | 116 | pending | — | — | — |
+| should return the same release result if extractVersion is not defined | 95 | ported | `util.rs` | `test_apply_extract_version_none` | — |
+| should extract version from release using provided regex | 103 | ported | `util.rs` | `test_apply_extract_version_with_regex` | — |
+| should return null for releases with invalid version | 116 | ported | `util.rs` | `test_apply_extract_version_filters_non_matching` | — |
 
 ### `modules/datasource/common › filterValidVersions`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should filter out invalid versions | 136 | pending | — | — | — |
+| should filter out invalid versions | 136 | ported | `util.rs` | `test_filter_valid_versions_removes_invalid` | — |
 | should use default versioning if none is specified | 144 | pending | — | — | — |
-| should use specified versioning if provided | 152 | pending | — | — | — |
+| should use specified versioning if provided | 152 | ported | `util.rs` | `test_filter_valid_versions_semver` | — |
 
 ### `modules/datasource/common › sortAndRemoveDuplicates`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| sorts releases by version and removes duplicates | 162 | pending | — | — | — |
+| sorts releases by version and removes duplicates | 162 | ported | `util.rs` | `test_sort_and_remove_duplicates_sorts_and_deduplicates` | — |
 | uses default versioning if none is specified | 183 | pending | — | — | — |
 
 ### `modules/datasource/common › applyConstraintsFiltering`
@@ -78,4 +78,3 @@
 | does not override versionOrig from extractVersion | 407 | pending | — | — | — |
 
 ---
-

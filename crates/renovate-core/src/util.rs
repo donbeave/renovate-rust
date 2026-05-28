@@ -942,6 +942,64 @@ pub fn calculate_most_recent_timestamp<'a>(
 }
 
 // ---------------------------------------------------------------------------
+// Datasource common utilities — lib/modules/datasource/common.ts
+// ---------------------------------------------------------------------------
+
+/// One release entry for datasource operations.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DatasourceRelease {
+    pub version: String,
+    pub version_orig: Option<String>,
+}
+
+/// Apply an `extractVersion` regex to a list of releases.
+///
+/// Mirrors `applyExtractVersion()` from `lib/modules/datasource/common.ts`.
+pub fn apply_extract_version(releases: Vec<DatasourceRelease>, extract_version: Option<&str>) -> Vec<DatasourceRelease> {
+    let pattern = match extract_version {
+        None | Some("") => return releases,
+        Some(p) => p,
+    };
+    let re = match regex::Regex::new(pattern) {
+        Ok(r) => r,
+        Err(_) => return releases,
+    };
+    releases.into_iter().filter_map(|mut r| {
+        let caps = re.captures(&r.version)?;
+        let extracted = caps.name("version")?.as_str().to_string();
+        r.version_orig = Some(r.version.clone());
+        r.version = extracted;
+        Some(r)
+    }).collect()
+}
+
+/// Filter releases to only those where `is_version(version)` returns true.
+///
+/// Mirrors `filterValidVersions()` from `lib/modules/datasource/common.ts`.
+pub fn filter_valid_versions(releases: Vec<DatasourceRelease>, is_version: impl Fn(&str) -> bool) -> Vec<DatasourceRelease> {
+    releases.into_iter().filter(|r| is_version(&r.version)).collect()
+}
+
+/// Sort releases and remove consecutive duplicates.
+///
+/// Mirrors `sortAndRemoveDuplicates()` from `lib/modules/datasource/common.ts`.
+pub fn sort_and_remove_duplicates(
+    mut releases: Vec<DatasourceRelease>,
+    sort_versions: impl Fn(&str, &str) -> std::cmp::Ordering,
+) -> Vec<DatasourceRelease> {
+    releases.sort_by(|a, b| sort_versions(&a.version, &b.version));
+    let mut out = Vec::with_capacity(releases.len());
+    let mut prev: Option<String> = None;
+    for r in releases {
+        if prev.as_deref() != Some(&r.version) {
+            prev = Some(r.version.clone());
+            out.push(r);
+        }
+    }
+    out
+}
+
+// ---------------------------------------------------------------------------
 // PR configuration description — lib/workers/repository/update/pr/body/config-description.ts
 // ---------------------------------------------------------------------------
 
@@ -5714,6 +5772,69 @@ dep1 = "^1.0.0"
             let got = satisfies_date_range(date, range, t0_ms);
             assert_eq!(got, *expected, "satisfiesDateRange({date:?}, {range:?})");
         }
+    }
+
+    // ── datasource common functions ──────────────────────────────────────────
+
+    fn mk_release(version: &str) -> DatasourceRelease {
+        DatasourceRelease { version: version.to_string(), version_orig: None }
+    }
+
+    // Ported: "should return the same release result if extractVersion is not defined" — modules/datasource/common.spec.ts line 95
+    #[test]
+    fn test_apply_extract_version_none() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0")];
+        let result = apply_extract_version(releases.clone(), None);
+        assert_eq!(result, releases);
+    }
+
+    // Ported: "should extract version from release using provided regex" — modules/datasource/common.spec.ts line 103
+    #[test]
+    fn test_apply_extract_version_with_regex() {
+        let releases = vec![mk_release("v1.0.0"), mk_release("v2.0.0")];
+        let result = apply_extract_version(releases, Some("^v(?<version>.+)$"));
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].version, "1.0.0");
+        assert_eq!(result[0].version_orig, Some("v1.0.0".to_string()));
+        assert_eq!(result[1].version, "2.0.0");
+    }
+
+    // Ported: "should return null for releases with invalid version" — modules/datasource/common.spec.ts line 116
+    #[test]
+    fn test_apply_extract_version_filters_non_matching() {
+        let releases = vec![mk_release("v1.0.0"), mk_release("invalid")];
+        let result = apply_extract_version(releases, Some("^v(?<version>.+)$"));
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].version, "1.0.0");
+    }
+
+    // Ported: "should filter out invalid versions" — modules/datasource/common.spec.ts line 136
+    #[test]
+    fn test_filter_valid_versions_removes_invalid() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("invalid")];
+        let result = filter_valid_versions(releases, crate::versioning::npm::is_version);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].version, "1.0.0");
+        assert_eq!(result[1].version, "2.0.0");
+    }
+
+    // Ported: "should use specified versioning if provided" — modules/datasource/common.spec.ts line 152
+    #[test]
+    fn test_filter_valid_versions_semver() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0"), mk_release("invalid")];
+        let result = filter_valid_versions(releases, crate::versioning::npm::is_version);
+        assert_eq!(result.len(), 2);
+    }
+
+    // Ported: "sorts releases by version and removes duplicates" — modules/datasource/common.spec.ts line 162
+    #[test]
+    fn test_sort_and_remove_duplicates_sorts_and_deduplicates() {
+        let releases = vec![mk_release("2.0.0"), mk_release("1.0.0"), mk_release("1.0.0"), mk_release("3.0.0")];
+        let result = sort_and_remove_duplicates(releases, crate::versioning::npm::sort_versions);
+        assert_eq!(result.len(), 3);
+        assert_eq!(result[0].version, "1.0.0");
+        assert_eq!(result[1].version, "2.0.0");
+        assert_eq!(result[2].version, "3.0.0");
     }
 
     // ── get_pr_config_description ────────────────────────────────────────────
