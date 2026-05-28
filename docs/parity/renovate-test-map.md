@@ -435,7 +435,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
 | `lib/modules/platform/comment.spec.ts` | Not done | [details](lib/modules/platform/comment.spec.ts.md) |
 | `lib/modules/platform/scm.spec.ts` | Not done | [details](lib/modules/platform/scm.spec.ts.md) |
-| `lib/modules/platform/pr-body.spec.ts` | Not done | [details](lib/modules/platform/pr-body.spec.ts.md) |
+| `lib/modules/platform/pr-body.spec.ts` | Done | [details](lib/modules/platform/pr-body.spec.ts.md) |
 | `lib/modules/platform/index.spec.ts` | Not done | [details](lib/modules/platform/index.spec.ts.md) |
 | `lib/modules/platform/types.spec.ts` | Done | [details](lib/modules/platform/types.spec.ts.md) |
 | `lib/modules/platform/util.spec.ts` | Not done | [details](lib/modules/platform/util.spec.ts.md) |
