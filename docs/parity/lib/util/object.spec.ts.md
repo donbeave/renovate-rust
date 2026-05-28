@@ -5,22 +5,22 @@
 ## `lib/util/object.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/object.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `util/object`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| finds key in regular object | 4 | pending | — | — | — |
-| detects missing key in regular object | 8 | pending | — | — | — |
-| returns false for wrong instance type | 12 | pending | — | — | — |
+| finds key in regular object | 4 | ported | `util.rs` | `test_has_key` | — |
+| detects missing key in regular object | 8 | ported | `util.rs` | `test_has_key` | — |
+| returns false for wrong instance type | 12 | not-applicable | — | — | TypeScript type-system test; Rust's type system prevents passing non-map at compile time |
 
 ### `util/object › coerceObject`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return empty object | 17 | pending | — | — | — |
-| should return input object | 22 | pending | — | — | — |
+| should return empty object | 17 | ported | `util.rs` | `test_coerce_object` | — |
+| should return input object | 22 | ported | `util.rs` | `test_coerce_object` | — |
 
 ---
 

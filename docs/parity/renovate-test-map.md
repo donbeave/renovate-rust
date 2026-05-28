@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3964 / 11677 total tests ported (34%) · pending 7643 · not-applicable 72 (1% of total) — updated 2026-05-27
+**Progress:** 4079 / 11677 total tests ported (35%) · pending 7515 · not-applicable 83 (1% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -389,7 +389,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/package-rules/index.spec.ts` | Not done | [details](lib/util/package-rules/index.spec.ts.md) |
 | `lib/renovate.spec.ts` | Not done | [details](lib/renovate.spec.ts.md) |
 | `lib/proxy.spec.ts` | Not done | [details](lib/proxy.spec.ts.md) |
-| `lib/util/range.spec.ts` | Not done | [details](lib/util/range.spec.ts.md) |
+| `lib/util/range.spec.ts` | Done | [details](lib/util/range.spec.ts.md) |
 | `lib/util/compress.spec.ts` | Not done | [details](lib/util/compress.spec.ts.md) |
 | `lib/util/split.spec.ts` | Not done | [details](lib/util/split.spec.ts.md) |
 | `lib/util/streams.spec.ts` | Not done | [details](lib/util/streams.spec.ts.md) |
@@ -408,24 +408,24 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/mutex.spec.ts` | Not done | [details](lib/util/mutex.spec.ts.md) |
 | `lib/util/yaml.spec.ts` | Not done | [details](lib/util/yaml.spec.ts.md) |
 | `lib/util/common.spec.ts` | Not done | [details](lib/util/common.spec.ts.md) |
-| `lib/util/string.spec.ts` | Not done | [details](lib/util/string.spec.ts.md) |
+| `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
 | `lib/util/interpolator.spec.ts` | Not done | [details](lib/util/interpolator.spec.ts.md) |
 | `lib/util/date.spec.ts` | Not done | [details](lib/util/date.spec.ts.md) |
 | `lib/util/fingerprint.spec.ts` | Not done | [details](lib/util/fingerprint.spec.ts.md) |
 | `lib/util/hash.spec.ts` | Not done | [details](lib/util/hash.spec.ts.md) |
 | `lib/util/regex.spec.ts` | Not done | [details](lib/util/regex.spec.ts.md) |
 | `lib/util/result.spec.ts` | Not done | [details](lib/util/result.spec.ts.md) |
-| `lib/util/number.spec.ts` | Not done | [details](lib/util/number.spec.ts.md) |
-| `lib/util/assign-keys.spec.ts` | Not done | [details](lib/util/assign-keys.spec.ts.md) |
+| `lib/util/number.spec.ts` | Done | [details](lib/util/number.spec.ts.md) |
+| `lib/util/assign-keys.spec.ts` | Done | [details](lib/util/assign-keys.spec.ts.md) |
 | `lib/util/check-token.spec.ts` | Not done | [details](lib/util/check-token.spec.ts.md) |
 | `lib/util/minimatch.spec.ts` | Not done | [details](lib/util/minimatch.spec.ts.md) |
 | `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
 | `lib/util/unicode.spec.ts` | Not done | [details](lib/util/unicode.spec.ts.md) |
 | `lib/util/pretty-time.spec.ts` | Not done | [details](lib/util/pretty-time.spec.ts.md) |
 | `lib/util/array.spec.ts` | Not done | [details](lib/util/array.spec.ts.md) |
-| `lib/util/uniq.spec.ts` | Not done | [details](lib/util/uniq.spec.ts.md) |
-| `lib/util/object.spec.ts` | Not done | [details](lib/util/object.spec.ts.md) |
-| `lib/util/memoize.spec.ts` | Not done | [details](lib/util/memoize.spec.ts.md) |
+| `lib/util/uniq.spec.ts` | Done | [details](lib/util/uniq.spec.ts.md) |
+| `lib/util/object.spec.ts` | Done | [details](lib/util/object.spec.ts.md) |
+| `lib/util/memoize.spec.ts` | Done | [details](lib/util/memoize.spec.ts.md) |
 | `lib/util/mask.spec.ts` | Not done | [details](lib/util/mask.spec.ts.md) |
 | `lib/util/host-rules.spec.ts` | Not done | [details](lib/util/host-rules.spec.ts.md) |
 | `lib/util/stats.spec.ts` | Not done | [details](lib/util/stats.spec.ts.md) |
