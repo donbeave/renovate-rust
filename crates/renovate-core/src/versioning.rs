@@ -22,6 +22,7 @@ pub mod hex;
 pub mod glasskube;
 pub mod go_mod_directive;
 pub mod deb;
+pub mod regex_versioning;
 pub mod swift;
 pub mod gradle;
 pub mod ivy;

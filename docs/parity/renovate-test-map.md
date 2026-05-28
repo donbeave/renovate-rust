@@ -481,7 +481,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/elm/index.spec.ts` | Done | [details](lib/modules/versioning/elm/index.spec.ts.md) |
 | `lib/modules/versioning/pep440/range.spec.ts` | Done | [details](lib/modules/versioning/pep440/range.spec.ts.md) |
 | `lib/modules/versioning/pep440/index.spec.ts` | Done | [details](lib/modules/versioning/pep440/index.spec.ts.md) |
-| `lib/modules/versioning/regex/index.spec.ts` | Not done | [details](lib/modules/versioning/regex/index.spec.ts.md) |
+| `lib/modules/versioning/regex/index.spec.ts` | Done | [details](lib/modules/versioning/regex/index.spec.ts.md) |
 | `lib/modules/versioning/lambda-node/index.spec.ts` | Done | [details](lib/modules/versioning/lambda-node/index.spec.ts.md) |
 | `lib/modules/versioning/gradle/index.spec.ts` | Done | [details](lib/modules/versioning/gradle/index.spec.ts.md) |
 | `lib/modules/versioning/devbox/index.spec.ts` | Done | [details](lib/modules/versioning/devbox/index.spec.ts.md) |
