@@ -12,6 +12,100 @@ thread_local! {
 }
 
 // ---------------------------------------------------------------------------
+// Manager utilities — lib/modules/manager/util.ts
+// ---------------------------------------------------------------------------
+
+/// Result of `apply_git_source`.
+#[derive(Debug, Default, PartialEq)]
+pub struct GitSourceResult {
+    pub datasource: &'static str,
+    pub registry_urls: Option<Vec<String>>,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub replace_string: Option<String>,
+    pub skip_reason: Option<&'static str>,
+}
+
+/// Parse host and full_name from a git URL (HTTPS or SSH).
+pub fn parse_git_url_host_and_name(url: &str) -> Option<(String, String)> {
+    // SCP-like: git@host:owner/repo.git
+    if !url.contains("://") {
+        if let Some(at_pos) = url.find('@') {
+            let rest = &url[at_pos + 1..];
+            if let Some(colon_pos) = rest.find(':') {
+                let host = rest[..colon_pos].to_owned();
+                let path = rest[colon_pos + 1..].trim_end_matches(".git").to_owned();
+                return Some((host, path));
+            }
+        }
+        return None;
+    }
+    let without_scheme = url
+        .strip_prefix("https://")
+        .or_else(|| url.strip_prefix("http://"))
+        .or_else(|| url.strip_prefix("ssh://"))
+        .or_else(|| url.strip_prefix("git://"))?;
+    let without_user = if let Some(at_pos) = without_scheme.find('@') {
+        &without_scheme[at_pos + 1..]
+    } else {
+        without_scheme
+    };
+    let slash_pos = without_user.find('/')?;
+    let host = without_user[..slash_pos].to_owned();
+    let raw_path = without_user[slash_pos + 1..].trim_end_matches(".git");
+    Some((host, raw_path.to_owned()))
+}
+
+/// Determine datasource and package metadata from a git URL, tag, rev, or branch.
+///
+/// Mirrors `applyGitSource` from `lib/modules/manager/util.ts`.
+pub fn apply_git_source(
+    git: &str,
+    rev: Option<&str>,
+    tag: Option<&str>,
+    branch: Option<&str>,
+) -> GitSourceResult {
+    if let Some(tag) = tag {
+        let platform = detect_platform(git);
+        if platform == Some("github") || platform == Some("gitlab") {
+            if let Some((host, full_name)) = parse_git_url_host_and_name(git) {
+                let datasource = if platform == Some("github") { "github-tags" } else { "gitlab-tags" };
+                return GitSourceResult {
+                    datasource,
+                    registry_urls: Some(vec![format!("https://{host}")]),
+                    package_name: full_name,
+                    current_value: Some(tag.to_owned()),
+                    ..Default::default()
+                };
+            }
+        }
+        return GitSourceResult {
+            datasource: "git-tags",
+            package_name: git.to_owned(),
+            current_value: Some(tag.to_owned()),
+            ..Default::default()
+        };
+    }
+    if let Some(rev) = rev {
+        return GitSourceResult {
+            datasource: "git-refs",
+            package_name: git.to_owned(),
+            current_digest: Some(rev.to_owned()),
+            replace_string: Some(rev.to_owned()),
+            ..Default::default()
+        };
+    }
+    GitSourceResult {
+        datasource: "git-refs",
+        package_name: git.to_owned(),
+        current_value: branch.map(|b| b.to_owned()),
+        skip_reason: Some(if branch.is_some() { "git-dependency" } else { "unspecified-version" }),
+        ..Default::default()
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Changelog URL slugify — lib/workers/repository/update/pr/changelog/common.ts
 // ---------------------------------------------------------------------------
 
@@ -1884,6 +1978,90 @@ mod tests {
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
         assert!(!lazy.has_value());
+    }
+
+    // -----------------------------------------------------------------------
+    // apply_git_source
+    // -----------------------------------------------------------------------
+
+    // Ported: "applies GitHub source for tag" — modules/manager/util.spec.ts line 14
+    #[test]
+    fn test_apply_git_source_github_https() {
+        let r = apply_git_source("https://github.com/foo/bar", None, Some("v1.2.3"), None);
+        assert_eq!(r.datasource, "github-tags");
+        assert_eq!(r.registry_urls, Some(vec!["https://github.com".to_owned()]));
+        assert_eq!(r.package_name, "foo/bar");
+        assert_eq!(r.current_value, Some("v1.2.3".to_owned()));
+    }
+
+    // Ported: "applies GitLab source for tag" — modules/manager/util.spec.ts line 30
+    #[test]
+    fn test_apply_git_source_gitlab() {
+        let r = apply_git_source("https://gitlab.com/foo/bar", None, Some("v1.2.3"), None);
+        assert_eq!(r.datasource, "gitlab-tags");
+        assert_eq!(r.registry_urls, Some(vec!["https://gitlab.com".to_owned()]));
+        assert_eq!(r.package_name, "foo/bar");
+    }
+
+    // Ported: "applies other git source for tag" — modules/manager/util.spec.ts line 46
+    #[test]
+    fn test_apply_git_source_generic() {
+        let r = apply_git_source("https://a-git-source.com/foo/bar", None, Some("v1.2.3"), None);
+        assert_eq!(r.datasource, "git-tags");
+        assert_eq!(r.package_name, "https://a-git-source.com/foo/bar");
+    }
+
+    // Ported: "applies GitHub source for tag with SSH URL" — modules/manager/util.spec.ts line 81
+    #[test]
+    fn test_apply_git_source_github_ssh() {
+        let r = apply_git_source("ssh://git@github.com/foo/bar", None, Some("v1.2.3"), None);
+        assert_eq!(r.datasource, "github-tags");
+        assert_eq!(r.registry_urls, Some(vec!["https://github.com".to_owned()]));
+        assert_eq!(r.package_name, "foo/bar");
+    }
+
+    // Ported: "applies GitLab source for tag with SSH URL" — modules/manager/util.spec.ts line 97
+    #[test]
+    fn test_apply_git_source_gitlab_ssh() {
+        let r = apply_git_source("ssh://git@gitlab.com/foo/bar", None, Some("v1.2.3"), None);
+        assert_eq!(r.datasource, "gitlab-tags");
+        assert_eq!(r.package_name, "foo/bar");
+    }
+
+    // Ported: "applies GitHub source for tag with HTTPS URL" — modules/manager/util.spec.ts line 113
+    #[test]
+    fn test_apply_git_source_github_https_explicit() {
+        let r = apply_git_source("https://github.com/foo/bar", None, Some("v1.2.3"), None);
+        assert_eq!(r.datasource, "github-tags");
+    }
+
+    // Ported: "applies git source for rev" — modules/manager/util.spec.ts line 129
+    #[test]
+    fn test_apply_git_source_rev() {
+        let r = apply_git_source("https://github.com/foo/bar", Some("abc1234"), None, None);
+        assert_eq!(r.datasource, "git-refs");
+        assert_eq!(r.package_name, "https://github.com/foo/bar");
+        assert_eq!(r.current_digest, Some("abc1234".to_owned()));
+        assert_eq!(r.replace_string, Some("abc1234".to_owned()));
+        assert_eq!(r.skip_reason, None);
+    }
+
+    // Ported: "skips git source for branch" — modules/manager/util.spec.ts line 145
+    #[test]
+    fn test_apply_git_source_branch() {
+        let r = apply_git_source("https://github.com/foo/bar", None, None, Some("main"));
+        assert_eq!(r.datasource, "git-refs");
+        assert_eq!(r.current_value, Some("main".to_owned()));
+        assert_eq!(r.skip_reason, Some("git-dependency"));
+    }
+
+    // Ported: "skips git source for git only" — modules/manager/util.spec.ts line 160
+    #[test]
+    fn test_apply_git_source_git_only() {
+        let r = apply_git_source("https://github.com/foo/bar", None, None, None);
+        assert_eq!(r.datasource, "git-refs");
+        assert_eq!(r.current_value, None);
+        assert_eq!(r.skip_reason, Some("unspecified-version"));
     }
 
     // -----------------------------------------------------------------------
