@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/util.spec.ts
-**Total tests:** 29 | **Ported:** 20 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 23 | **Actionable:** 29 | **Status:** partial
 
 ### `getGitStatusContextCombinedName`
 
@@ -51,9 +51,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should configure basic auth | 122 | pending | — | — | — |
-| should configure personal access token | 130 | pending | — | — | — |
-| should configure bearer token | 137 | pending | — | — | — |
+| should configure basic auth | 122 | ported | `azure_utils.rs` | `storage_extra_clone_opts_basic_auth` | — |
+| should configure personal access token | 130 | ported | `azure_utils.rs` | `storage_extra_clone_opts_pat` | — |
+| should configure bearer token | 137 | ported | `azure_utils.rs` | `storage_extra_clone_opts_bearer` | — |
 
 ### `max4000Chars`
 

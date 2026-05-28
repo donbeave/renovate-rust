@@ -2,6 +2,38 @@
 //!
 //! Mirrors: `lib/modules/platform/azure/util.ts`
 
+/// Return the git extra-clone options for Azure DevOps authentication.
+///
+/// Returns a map with key `"-c"` and value `"http.extraHeader=AUTHORIZATION: <type> <value>"`.
+///
+/// Mirrors `getStorageExtraCloneOpts` from `lib/modules/platform/azure/util.ts`.
+pub fn get_storage_extra_clone_opts(
+    token: Option<&str>,
+    username: Option<&str>,
+    password: Option<&str>,
+) -> std::collections::HashMap<String, String> {
+    use base64::{Engine as _, engine::general_purpose};
+    let (auth_type, auth_value) = if token.is_none()
+        && username.is_some_and(|u| !u.is_empty())
+        && password.is_some_and(|p| !p.is_empty())
+    {
+        let encoded = general_purpose::STANDARD
+            .encode(format!("{}:{}", username.unwrap_or(""), password.unwrap_or("")));
+        ("basic".to_owned(), encoded)
+    } else if token.is_some_and(|t| t.len() == 52) {
+        let encoded = general_purpose::STANDARD.encode(format!(":{}", token.unwrap_or("")));
+        ("basic".to_owned(), encoded)
+    } else {
+        ("bearer".to_owned(), token.unwrap_or("").to_owned())
+    };
+    let mut map = std::collections::HashMap::new();
+    map.insert(
+        "-c".to_owned(),
+        format!("http.extraHeader=AUTHORIZATION: {auth_type} {auth_value}"),
+    );
+    map
+}
+
 /// Combines a git status context's genre and name into a single slash-separated string.
 ///
 /// Mirrors `getGitStatusContextCombinedName` from `lib/modules/platform/azure/util.ts`.
@@ -315,5 +347,41 @@ mod tests {
             get_repo_by_name("foo/foo", &repos).unwrap().id.as_deref(),
             Some("1")
         );
+    }
+
+    // ── getStorageExtraCloneOpts ─────────────────────────────────────────────
+
+    // Ported: "should configure basic auth" — modules/platform/azure/util.spec.ts line 122
+    #[test]
+    fn storage_extra_clone_opts_basic_auth() {
+        use base64::{Engine as _, engine::general_purpose};
+        let result = get_storage_extra_clone_opts(None, Some("user"), Some("pass"));
+        let expected_b64 = general_purpose::STANDARD.encode("user:pass");
+        let c_value = result.get("-c").unwrap();
+        assert!(c_value.contains("basic"));
+        assert!(c_value.contains(&expected_b64));
+    }
+
+    // Ported: "should configure personal access token" — modules/platform/azure/util.spec.ts line 130
+    #[test]
+    fn storage_extra_clone_opts_pat() {
+        use base64::{Engine as _, engine::general_purpose};
+        let token = "1234567890123456789012345678901234567890123456789012"; // 52 chars
+        assert_eq!(token.len(), 52);
+        let result = get_storage_extra_clone_opts(Some(token), None, None);
+        let expected_b64 = general_purpose::STANDARD.encode(format!(":{token}"));
+        let c_value = result.get("-c").unwrap();
+        assert!(c_value.contains("basic"));
+        assert!(c_value.contains(&expected_b64));
+    }
+
+    // Ported: "should configure bearer token" — modules/platform/azure/util.spec.ts line 137
+    #[test]
+    fn storage_extra_clone_opts_bearer() {
+        let token = "sometoken";
+        let result = get_storage_extra_clone_opts(Some(token), None, None);
+        let c_value = result.get("-c").unwrap();
+        assert!(c_value.contains("bearer"));
+        assert!(c_value.contains(token));
     }
 }
