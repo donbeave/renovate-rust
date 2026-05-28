@@ -290,7 +290,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/migration.spec.ts` | Done | [details](lib/config/migration.spec.ts.md) |
 | `lib/config/options/index.spec.ts` | Not done | [details](lib/config/options/index.spec.ts.md) |
 | `lib/config/options/env-options.spec.ts` | Not done | [details](lib/config/options/env-options.spec.ts.md) |
-| `lib/config/migrations/migrations-service.spec.ts` | Not done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
+| `lib/config/migrations/migrations-service.spec.ts` | Done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
 | `lib/config/migrations/base/abstract-migration.spec.ts` | Done | [details](lib/config/migrations/base/abstract-migration.spec.ts.md) |
 | `lib/config/migrations/custom/binary-source-migration.spec.ts` | Done | [details](lib/config/migrations/custom/binary-source-migration.spec.ts.md) |
 | `lib/config/migrations/custom/extends-migration.spec.ts` | Done | [details](lib/config/migrations/custom/extends-migration.spec.ts.md) |
