@@ -14,8 +14,8 @@
 | should be parse directory response | 5 | pending | — | — | — |
 | should parse response for single file | 87 | pending | — | — | — |
 | should skip vulnerability alerts with unsupported ecosystems | 111 | pending | — | — | — |
-| should log vulnerability alerts with parse errors | 152 | pending | — | — | — |
-| should filter vulnerability alerts with missing security_vulnerability | 181 | pending | — | — | — |
+| should log vulnerability alerts with parse errors | 152 | not-applicable | — | — | Asserts expect(logger.logger.debug).toHaveBeenCalledWith — logger spy |
+| should filter vulnerability alerts with missing security_vulnerability | 181 | not-applicable | — | — | Asserts expect(logger.logger.debug).not.toHaveBeenCalledWith — logger spy |
 | should parse severity and cvss_severities fields | 206 | pending | — | — | — |
 
 ---

@@ -91,8 +91,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| logs debug message and returns fallback value | 556 | pending | — | — | — |
-| logs trace message and returns fallback value | 571 | pending | — | — | — |
+| logs debug message and returns fallback value | 556 | not-applicable | — | — | Asserts expect(logger.logger.debug).toHaveBeenCalledWith — logger spy |
+| logs trace message and returns fallback value | 571 | not-applicable | — | — | Asserts expect(logger.logger.trace).toHaveBeenCalledWith — logger spy |
 
 ### `util/schema-utils/index › NotCircular`
 

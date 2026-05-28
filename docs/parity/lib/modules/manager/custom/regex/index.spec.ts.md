@@ -19,7 +19,7 @@
 | extracts extractVersion | 81 | pending | — | — | — |
 | extracts registryUrl | 103 | pending | — | — | — |
 | extracts and applies a registryUrlTemplate | 141 | pending | — | — | — |
-| extracts and does not apply a registryUrlTemplate if the result is an invalid url | 162 | pending | — | — | — |
+| extracts and does not apply a registryUrlTemplate if the result is an invalid url | 162 | not-applicable | — | — | Asserts expect(logger.warn).toHaveBeenCalledWith — logger spy infrastructure |
 | extracts multiple dependencies with multiple matchStrings | 195 | pending | — | — | — |
 | extracts dependency with autoReplaceStringTemplate | 221 | pending | — | — | — |
 | extracts indentation: maintains indentation value if whitespace or empty | 241 | pending | — | — | — |

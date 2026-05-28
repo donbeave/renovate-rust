@@ -11,10 +11,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null if catalogName is missing and logs error | 8 | pending | — | — | — |
+| returns null if catalogName is missing and logs error | 8 | not-applicable | — | — | Asserts expect(logger.logger.error).toHaveBeenCalledWith — logger spy |
 | ensure continuation even if catalog list and update does not match | 33 | pending | — | — | — |
 | ensure continuation even if dependency and update does not match | 55 | pending | — | — | — |
-| ensure trace logging | 78 | pending | — | — | — |
+| ensure trace logging | 78 | not-applicable | — | — | Asserts expect(logger.logger.trace).toHaveBeenCalledWith — logger spy |
 
 ### `updateDependency`
 

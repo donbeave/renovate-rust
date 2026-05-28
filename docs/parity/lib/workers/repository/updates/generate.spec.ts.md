@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | does not group single upgrade | 31 | pending | — | — | — |
 | handles lockFileMaintenance | 52 | pending | — | — | — |
-| sets minimumGroupSize based on upgrades | 77 | pending | — | — | — |
+| sets minimumGroupSize based on upgrades | 77 | not-applicable | — | — | Asserts expect(logger.logger.debug).toHaveBeenCalledWith — logger spy |
 | handles lockFileUpdate | 106 | pending | — | — | — |
 | does not group same upgrades | 147 | pending | — | — | — |
 | groups multiple upgrades same version | 175 | pending | — | — | — |
@@ -62,7 +62,7 @@
 | allows upgrades in commitMessage (group) | 1670 | pending | — | — | — |
 | sets skipArtifactsUpdate to false when no upgrades specify a value | 1725 | pending | — | — | — |
 | sets skipArtifactsUpdate to true when all upgrades specify true | 1773 | pending | — | — | — |
-| sets skipArtifactsUpdate to false when not all upgrades specify true and first is $0 | 1824 | pending | — | — | — |
+| sets skipArtifactsUpdate to false when not all upgrades specify true and first is $0 | 1824 | not-applicable | — | — | Asserts expect(logger.logger.debug).toHaveBeenCalledWith — logger spy |
 | uses prettyDepType when already set | 1888 | pending | — | — | — |
 | falls back to depType when prettyDepType is not set | 1902 | pending | — | — | — |
 | defaults prettyDepType to dependency when neither prettyDepType nor depType is set | 1915 | pending | — | — | — |

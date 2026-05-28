@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null on invalid input | 8 | pending | — | — | — |
+| returns null on invalid input | 8 | not-applicable | — | — | Asserts expect(logger.logger.error).toHaveBeenCalledExactlyOnceWith — logger spy |
 | handles implicit default catalog dependency | 19 | pending | — | — | — |
 | handles explicit default catalog dependency | 46 | pending | — | — | — |
 | handles explicit named catalog dependency | 75 | pending | — | — | — |

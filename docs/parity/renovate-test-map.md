@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4722 / 11677 total tests ported (40%) · pending 2299 · not-applicable 4656 (40% of total) — updated 2026-05-28
+**Progress:** 4722 / 11677 total tests ported (40%) · pending 2237 · not-applicable 4718 (40% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -105,7 +105,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/flux/extract.spec.ts` | Done | [details](lib/modules/manager/flux/extract.spec.ts.md) |
 | `lib/modules/manager/bazel-module/extract.spec.ts` | Done | [details](lib/modules/manager/bazel-module/extract.spec.ts.md) |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | Done | [details](lib/modules/manager/cpanfile/extract.spec.ts.md) |
-| `lib/modules/manager/pip-compile/extract.spec.ts` | Not done | [details](lib/modules/manager/pip-compile/extract.spec.ts.md) |
+| `lib/modules/manager/pip-compile/extract.spec.ts` | Done | [details](lib/modules/manager/pip-compile/extract.spec.ts.md) |
 | `lib/modules/manager/maven/extract.spec.ts` | Done | [details](lib/modules/manager/maven/extract.spec.ts.md) |
 | `lib/modules/manager/poetry/extract.spec.ts` | Done | [details](lib/modules/manager/poetry/extract.spec.ts.md) |
 | `lib/modules/manager/sbt/extract.spec.ts` | Done | [details](lib/modules/manager/sbt/extract.spec.ts.md) |
@@ -530,7 +530,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bazelisk/extract.spec.ts` | Done | [details](lib/modules/manager/bazelisk/extract.spec.ts.md) |
 | `lib/modules/manager/bitrise/utils.spec.ts` | Done | [details](lib/modules/manager/bitrise/utils.spec.ts.md) |
 | `lib/modules/manager/bun/artifacts.spec.ts` | Done | [details](lib/modules/manager/bun/artifacts.spec.ts.md) |
-| `lib/modules/manager/bun/extract.spec.ts` | Not done | [details](lib/modules/manager/bun/extract.spec.ts.md) |
+| `lib/modules/manager/bun/extract.spec.ts` | Done | [details](lib/modules/manager/bun/extract.spec.ts.md) |
 | `lib/modules/manager/bun/utils.spec.ts` | Done | [details](lib/modules/manager/bun/utils.spec.ts.md) |
 | `lib/modules/manager/bun-version/index.spec.ts` | Done | [details](lib/modules/manager/bun-version/index.spec.ts.md) |
 | `lib/modules/manager/bundler/artifacts.spec.ts` | Done | [details](lib/modules/manager/bundler/artifacts.spec.ts.md) |

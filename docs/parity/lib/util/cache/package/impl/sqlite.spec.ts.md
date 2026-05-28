@@ -20,8 +20,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| logs a warning and continues when serialization fails | 120 | pending | — | — | — |
-| logs a warning and continues when the write fails | 137 | pending | — | — | — |
+| logs a warning and continues when serialization fails | 120 | not-applicable | — | — | Asserts expect(logger.once.warn).toHaveBeenCalledWith — logger spy |
+| logs a warning and continues when the write fails | 137 | not-applicable | — | — | Asserts expect(logger.once.warn).toHaveBeenCalledWith — logger spy |
 
 ### `util/cache/package/impl/sqlite › set and get`
 
