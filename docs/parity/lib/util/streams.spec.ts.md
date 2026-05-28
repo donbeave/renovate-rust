@@ -5,13 +5,13 @@
 ## `lib/util/streams.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/streams.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
 
 ### `util/streams › streamToString`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles Readables | 6 | pending | — | — | — |
+| handles Readables | 6 | not-applicable | — | — | OTel/Node.js-specific; no Rust equivalent |
 
 ---
 

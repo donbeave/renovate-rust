@@ -387,12 +387,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/global/config/parse/env.spec.ts` | Not done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
 | `lib/workers/repository/init/merge.spec.ts` | Not done | [details](lib/workers/repository/init/merge.spec.ts.md) |
 | `lib/util/package-rules/index.spec.ts` | Not done | [details](lib/util/package-rules/index.spec.ts.md) |
-| `lib/renovate.spec.ts` | Not done | [details](lib/renovate.spec.ts.md) |
+| `lib/renovate.spec.ts` | Done | [details](lib/renovate.spec.ts.md) |
 | `lib/proxy.spec.ts` | Not done | [details](lib/proxy.spec.ts.md) |
 | `lib/util/range.spec.ts` | Done | [details](lib/util/range.spec.ts.md) |
-| `lib/util/compress.spec.ts` | Not done | [details](lib/util/compress.spec.ts.md) |
-| `lib/util/split.spec.ts` | Not done | [details](lib/util/split.spec.ts.md) |
-| `lib/util/streams.spec.ts` | Not done | [details](lib/util/streams.spec.ts.md) |
+| `lib/util/compress.spec.ts` | Done | [details](lib/util/compress.spec.ts.md) |
+| `lib/util/split.spec.ts` | Done | [details](lib/util/split.spec.ts.md) |
+| `lib/util/streams.spec.ts` | Done | [details](lib/util/streams.spec.ts.md) |
 | `lib/util/timestamp.spec.ts` | Done | [details](lib/util/timestamp.spec.ts.md) |
 | `lib/util/sanitize.spec.ts` | Done | [details](lib/util/sanitize.spec.ts.md) |
 | `lib/util/clone.spec.ts` | Done | [details](lib/util/clone.spec.ts.md) |
@@ -401,11 +401,11 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/ignore.spec.ts` | Not done | [details](lib/util/ignore.spec.ts.md) |
 | `lib/util/coerce.spec.ts` | Done | [details](lib/util/coerce.spec.ts.md) |
 | `lib/util/sample.spec.ts` | Done | [details](lib/util/sample.spec.ts.md) |
-| `lib/util/promises.spec.ts` | Not done | [details](lib/util/promises.spec.ts.md) |
+| `lib/util/promises.spec.ts` | Done | [details](lib/util/promises.spec.ts.md) |
 | `lib/util/markdown.spec.ts` | Not done | [details](lib/util/markdown.spec.ts.md) |
 | `lib/util/html.spec.ts` | Not done | [details](lib/util/html.spec.ts.md) |
 | `lib/util/lazy.spec.ts` | Done | [details](lib/util/lazy.spec.ts.md) |
-| `lib/util/mutex.spec.ts` | Not done | [details](lib/util/mutex.spec.ts.md) |
+| `lib/util/mutex.spec.ts` | Done | [details](lib/util/mutex.spec.ts.md) |
 | `lib/util/yaml.spec.ts` | Not done | [details](lib/util/yaml.spec.ts.md) |
 | `lib/util/common.spec.ts` | Not done | [details](lib/util/common.spec.ts.md) |
 | `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
@@ -777,7 +777,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/git/private-key.spec.ts` | Not done | [details](lib/util/git/private-key.spec.ts.md) |
 | `lib/util/git/semantic.spec.ts` | Done | [details](lib/util/git/semantic.spec.ts.md) |
 | `lib/util/git/set-branch-commit.spec.ts` | Not done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
-| `lib/util/git/span-processor.spec.ts` | Not done | [details](lib/util/git/span-processor.spec.ts.md) |
+| `lib/util/git/span-processor.spec.ts` | Done | [details](lib/util/git/span-processor.spec.ts.md) |
 | `lib/util/git/update-date-cache.spec.ts` | Not done | [details](lib/util/git/update-date-cache.spec.ts.md) |
 | `lib/util/git/url.spec.ts` | Not done | [details](lib/util/git/url.spec.ts.md) |
 | `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | Not done | [details](lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts.md) |
