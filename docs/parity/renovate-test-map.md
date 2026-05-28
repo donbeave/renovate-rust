@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4526 / 11677 total tests ported (38%) · pending 6932 · not-applicable 219 (2% of total) — updated 2026-05-28
+**Progress:** 4530 / 11677 total tests ported (38%) · pending 6921 · not-applicable 219 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -171,7 +171,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/deb/utils.spec.ts` | Done | [details](lib/modules/datasource/deb/utils.spec.ts.md) |
 | `lib/modules/datasource/deb/index.spec.ts` | Not done | [details](lib/modules/datasource/deb/index.spec.ts.md) |
 | `lib/modules/datasource/deb/packages.spec.ts` | Not done | [details](lib/modules/datasource/deb/packages.spec.ts.md) |
-| `lib/modules/datasource/deb/url.spec.ts` | Not done | [details](lib/modules/datasource/deb/url.spec.ts.md) |
+| `lib/modules/datasource/deb/url.spec.ts` | Done | [details](lib/modules/datasource/deb/url.spec.ts.md) |
 | `lib/modules/datasource/utils.spec.ts` | Not done | [details](lib/modules/datasource/utils.spec.ts.md) |
 | `lib/modules/datasource/span-processor.spec.ts` | Done | [details](lib/modules/datasource/span-processor.spec.ts.md) |
 | `lib/modules/datasource/postprocess-release.spec.ts` | Not done | [details](lib/modules/datasource/postprocess-release.spec.ts.md) |
@@ -417,7 +417,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/result.spec.ts` | Done | [details](lib/util/result.spec.ts.md) |
 | `lib/util/number.spec.ts` | Done | [details](lib/util/number.spec.ts.md) |
 | `lib/util/assign-keys.spec.ts` | Done | [details](lib/util/assign-keys.spec.ts.md) |
-| `lib/util/check-token.spec.ts` | Not done | [details](lib/util/check-token.spec.ts.md) |
+| `lib/util/check-token.spec.ts` | Done | [details](lib/util/check-token.spec.ts.md) |
 | `lib/util/minimatch.spec.ts` | Not done | [details](lib/util/minimatch.spec.ts.md) |
 | `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
 | `lib/util/unicode.spec.ts` | Not done | [details](lib/util/unicode.spec.ts.md) |

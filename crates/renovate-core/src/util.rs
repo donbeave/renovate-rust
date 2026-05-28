@@ -421,6 +421,54 @@ pub fn get_remapped_level<'a>(
     None
 }
 
+// ---------------------------------------------------------------------------
+// Module label utilities — tools/utils/sync-module-labels.ts
+// ---------------------------------------------------------------------------
+
+const MODULE_LABEL_COLOR: &str = "C5DEF5";
+
+/// Return the label description for a module kind and id.
+///
+/// Mirrors `getLabelDescription` from `tools/utils/sync-module-labels.ts`.
+pub fn get_label_description(kind: &str, module_id: &str) -> String {
+    format!("Related to the {module_id} {kind}")
+}
+
+/// A GitHub label structure.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GithubLabel {
+    pub color: &'static str,
+    pub description: String,
+    pub name: String,
+}
+
+/// Create a module label for the given kind and module id.
+///
+/// Mirrors `createModuleLabel` from `tools/utils/sync-module-labels.ts`.
+pub fn create_module_label(kind: &str, module_id: &str) -> GithubLabel {
+    GithubLabel {
+        color: MODULE_LABEL_COLOR,
+        description: get_label_description(kind, module_id),
+        name: format!("{kind}:{module_id}"),
+    }
+}
+
+/// Return labels in `expected` that are not in `existing` (by name).
+///
+/// Mirrors `getMissingModuleLabels` from `tools/utils/sync-module-labels.ts`.
+pub fn get_missing_module_labels(
+    expected: &[GithubLabel],
+    existing: &[GithubLabel],
+) -> Vec<GithubLabel> {
+    let existing_names: std::collections::HashSet<&str> =
+        existing.iter().map(|l| l.name.as_str()).collect();
+    expected
+        .iter()
+        .filter(|l| !existing_names.contains(l.name.as_str()))
+        .cloned()
+        .collect()
+}
+
 /// Mirrors `setReconfigureBranchCache` from
 /// `lib/workers/repository/reconfigure/reconfigure-cache.ts`.
 pub fn set_reconfigure_branch_cache(cache: &mut serde_json::Value, sha: &str, is_valid: bool) {
@@ -3137,6 +3185,34 @@ mod tests {
     // -----------------------------------------------------------------------
     // reconfigure_branch_cache
     // -----------------------------------------------------------------------
+
+    // ── module label utilities ────────────────────────────────────────────────
+
+    // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
+    #[test]
+    fn test_create_module_label() {
+        let label = create_module_label("manager", "jsonata");
+        assert_eq!(label.color, "C5DEF5");
+        assert_eq!(label.description, "Related to the jsonata manager");
+        assert_eq!(label.name, "manager:jsonata");
+    }
+
+    // Ported: "reports missing labels without flagging existing ones" — test/other/sync-module-labels.spec.ts line 19
+    #[test]
+    fn test_get_missing_module_labels() {
+        let expected = vec![
+            create_module_label("datasource", "docker"),
+            create_module_label("manager", "jsonata"),
+            create_module_label("platform", "scm-manager"),
+        ];
+        let existing = vec![
+            create_module_label("datasource", "docker"),
+            create_module_label("platform", "scm-manager"),
+        ];
+        let missing = get_missing_module_labels(&expected, &existing);
+        assert_eq!(missing.len(), 1);
+        assert_eq!(missing[0].name, "manager:jsonata");
+    }
 
     // Ported: "returns reconfigure branch name" — workers/repository/reconfigure/utils.spec.ts line 64
     #[test]
