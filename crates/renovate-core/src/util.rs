@@ -355,6 +355,36 @@ pub fn get_reconfigure_branch_name(prefix: &str) -> String {
     format!("{prefix}reconfigure")
 }
 
+// ---------------------------------------------------------------------------
+// Log level remap — lib/logger/remap.ts
+// ---------------------------------------------------------------------------
+
+/// A log level remap rule.
+#[derive(Debug)]
+pub struct LogLevelRemap<'a> {
+    pub match_message: &'a str,
+    pub new_log_level: &'a str,
+}
+
+/// Return the remapped log level for `msg`, or `None` if no remap matches.
+///
+/// Mirrors `getRemappedLevel` from `lib/logger/remap.ts`.
+pub fn get_remapped_level<'a>(
+    msg: &str,
+    repository_remaps: Option<&[LogLevelRemap<'a>]>,
+    global_remaps: Option<&[LogLevelRemap<'a>]>,
+) -> Option<&'a str> {
+    use crate::string_match::match_regex_or_glob;
+    for remaps in [repository_remaps, global_remaps].into_iter().flatten() {
+        for remap in remaps {
+            if match_regex_or_glob(msg, remap.match_message) {
+                return Some(remap.new_log_level);
+            }
+        }
+    }
+    None
+}
+
 /// Mirrors `setReconfigureBranchCache` from
 /// `lib/workers/repository/reconfigure/reconfigure-cache.ts`.
 pub fn set_reconfigure_branch_cache(
@@ -2985,6 +3015,54 @@ mod tests {
     fn test_get_reconfigure_branch_name() {
         assert_eq!(get_reconfigure_branch_name("renovate/"), "renovate/reconfigure");
         assert_eq!(get_reconfigure_branch_name("prefix/"), "prefix/reconfigure");
+    }
+
+    // ── get_remapped_level ────────────────────────────────────────────────────
+
+    fn make_remap<'a>(pattern: &'a str, level: &'a str) -> LogLevelRemap<'a> {
+        LogLevelRemap { match_message: pattern, new_log_level: level }
+    }
+
+    // Ported: "returns null if no remaps are set" — logger/remap.spec.ts line 15
+    #[test]
+    fn test_remap_no_remaps_returns_none() {
+        assert_eq!(get_remapped_level("foo", None, None), None);
+    }
+
+    // Ported: "performs global remaps" — logger/remap.spec.ts line 24
+    #[test]
+    fn test_remap_global_remaps() {
+        let global = vec![make_remap("*foo*", "error")];
+        assert_eq!(get_remapped_level("foo", Some(&[]), Some(&global)), Some("error"));
+    }
+
+    // Ported: "performs repository-level remaps" — logger/remap.spec.ts line 33
+    #[test]
+    fn test_remap_repo_remaps() {
+        let repo = vec![make_remap("*bar*", "error")];
+        assert_eq!(get_remapped_level("bar", Some(&repo), None), Some("error"));
+    }
+
+    // Ported: "prioritizes repository-level remaps over global remaps" — logger/remap.spec.ts line 44
+    #[test]
+    fn test_remap_repo_wins_over_global() {
+        let global = vec![make_remap("*foo*", "warn")];
+        let repo = vec![make_remap("*foo*", "error")];
+        assert_eq!(get_remapped_level("foo", Some(&repo), Some(&global)), Some("error"));
+    }
+
+    // Ported: "supports regex patterns" — logger/remap.spec.ts line 55
+    #[test]
+    fn test_remap_regex_pattern() {
+        let global = vec![make_remap("/^foo/i", "trace")];
+        assert_eq!(get_remapped_level("FOO", None, Some(&global)), Some("trace"));
+    }
+
+    // Ported: "does not match against invalid regex patterns" — logger/remap.spec.ts line 64
+    #[test]
+    fn test_remap_invalid_regex_returns_none() {
+        let global = vec![make_remap("/invalid[/", "error")];
+        assert!(get_remapped_level("foo", None, Some(&global)).is_none());
     }
 
     // Ported: "sets new cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 16

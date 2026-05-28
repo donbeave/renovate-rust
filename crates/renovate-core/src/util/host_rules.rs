@@ -121,14 +121,12 @@ pub fn matches_host(url: &str, match_host: &str) -> bool {
     };
 
     let parsed_match = Url::parse(match_host);
-    if is_http_url(&parsed_url) {
-        if let Ok(ref pmh) = parsed_match {
-            if is_http_url(pmh) {
+    if is_http_url(&parsed_url)
+        && let Ok(ref pmh) = parsed_match
+            && is_http_url(pmh) {
                 // Both are HTTP URLs — prefix match on the full href
                 return parsed_url.as_str().starts_with(pmh.as_str());
             }
-        }
-    }
 
     // Non-HTTP match_host: compare hostnames
     let hostname = parsed_url.host_str().unwrap_or("");
@@ -156,10 +154,7 @@ pub fn matches_host(url: &str, match_host: &str) -> bool {
 /// Migrate legacy host-name fields into `matchHost`, returning a typed rule.
 ///
 /// Mirrors `migrateRule` from `lib/util/host-rules.ts`.
-pub fn migrate_rule(
-    mut rule: HostRule,
-    legacy: LegacyHostRule,
-) -> Result<HostRule, String> {
+pub fn migrate_rule(mut rule: HostRule, legacy: &LegacyHostRule) -> Result<HostRule, String> {
     let candidates: Vec<&str> = [
         rule.match_host.as_deref(),
         legacy.host_name.as_deref(),
@@ -200,7 +195,7 @@ pub fn add(rule: HostRule) -> Result<(), String> {
 
 /// Add a host rule with optional legacy field migration.
 pub fn add_with_legacy(rule: HostRule, legacy: LegacyHostRule) -> Result<(), String> {
-    let mut rule = migrate_rule(rule, legacy)?;
+    let mut rule = migrate_rule(rule, &legacy)?;
 
     if let Some(ref mh) = rule.match_host.clone() {
         let massaged = massage_host_url(mh);
@@ -266,11 +261,10 @@ pub fn find(search: &HostRuleSearch) -> CombinedHostRule {
 
             if rule.match_host.is_some() && rule.resolved_host.is_some() {
                 host_match = false;
-                if let Some(ref url) = search.url {
-                    if let Some(ref mh) = rule.match_host {
+                if let Some(ref url) = search.url
+                    && let Some(ref mh) = rule.match_host {
                         host_match = matches_host(url, mh);
                     }
-                }
             }
 
             if rule.read_only.is_some() {
@@ -378,9 +372,7 @@ pub fn host_type_for_url(url: &str) -> Option<String> {
             .collect();
         // Sort by matchHost length ascending; we want the *last* (longest) via `.pop()`
         candidates.sort_by_key(|r| r.match_host.as_deref().map_or(0, str::len));
-        candidates
-            .pop()
-            .and_then(|r| r.host_type.clone())
+        candidates.pop().and_then(|r| r.host_type.clone())
     })
 }
 
@@ -750,9 +742,7 @@ mod tests {
 
         let r = find(&HostRuleSearch {
             host_type: Some("github".to_owned()),
-            url: Some(
-                "https://api.github.com/repos/org-b/someRepo/tags?per_page=100".to_owned(),
-            ),
+            url: Some("https://api.github.com/repos/org-b/someRepo/tags?per_page=100".to_owned()),
             ..Default::default()
         });
         assert_eq!(r.token.as_deref(), Some("def"));
@@ -798,9 +788,7 @@ mod tests {
 
         let r = find(&HostRuleSearch {
             host_type: Some("github-tags".to_owned()),
-            url: Some(
-                "https://api.github.com/repos/org-b/someRepo/tags?per_page=100".to_owned(),
-            ),
+            url: Some("https://api.github.com/repos/org-b/someRepo/tags?per_page=100".to_owned()),
             ..Default::default()
         });
         assert_eq!(r.token.as_deref(), Some("def"));
