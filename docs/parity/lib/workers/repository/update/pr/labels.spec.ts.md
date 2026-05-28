@@ -5,17 +5,17 @@
 ## `lib/workers/repository/update/pr/labels.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/labels.spec.ts
-**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+**Total tests:** 20 | **Ported:** 5 | **Actionable:** 20 | **Status:** partial
 
 ### `workers/repository/update/pr/labels › prepareLabels(config)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty array if no labels are configured | 11 | pending | — | — | — |
-| only labels | 16 | pending | — | — | — |
-| only addLabels | 22 | pending | — | — | — |
-| merge labels and addLabels | 30 | pending | — | — | — |
-| deduplicate merged labels and addLabels | 39 | pending | — | — | — |
+| returns empty array if no labels are configured | 11 | ported | `util.rs` | `test_prepare_labels_empty` | — |
+| only labels | 16 | ported | `util.rs` | `test_prepare_labels_only_labels` | — |
+| only addLabels | 22 | ported | `util.rs` | `test_prepare_labels_only_add_labels` | — |
+| merge labels and addLabels | 30 | ported | `util.rs` | `test_prepare_labels_merge` | — |
+| deduplicate merged labels and addLabels | 39 | ported | `util.rs` | `test_prepare_labels_deduplicate` | — |
 | empty labels ignored | 48 | pending | — | — | — |
 | null labels ignored | 57 | pending | — | — | — |
 | template labels | 68 | pending | — | — | — |
