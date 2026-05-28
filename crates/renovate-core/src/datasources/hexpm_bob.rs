@@ -122,7 +122,9 @@ pub async fn fetch_releases(
     package_name: &str,
     http: &HttpClient,
 ) -> Result<Option<HexpmBobResult>, HexpmBobError> {
-    let Some(pkg_type) = get_package_type(package_name) else { return Ok(None) };
+    let Some(pkg_type) = get_package_type(package_name) else {
+        return Ok(None);
+    };
 
     let url = format!(
         "{}/builds/{}/builds.txt",

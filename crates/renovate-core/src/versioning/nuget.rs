@@ -633,11 +633,15 @@ pub fn nuget_is_greater_than(version: &str, other: &str) -> bool {
 ///
 /// Mirrors `lib/modules/versioning/nuget/index.ts` `isLessThanRange()`.
 pub fn nuget_is_less_than_range(version: &str, range: &str) -> bool {
-    let Some(v) = parse_version(version) else { return false };
+    let Some(v) = parse_version(version) else {
+        return false;
+    };
     if let Some(u) = parse_version(range) {
         return compare_version_data(&v, &u) < 0;
     }
-    let Some(r) = parse_range(range) else { return false };
+    let Some(r) = parse_range(range) else {
+        return false;
+    };
     match &r {
         NugetRangeData::Exact(er) => compare_version_data(&v, &er.version) < 0,
         NugetRangeData::Bracket(br) => match &br.min {
@@ -672,7 +676,9 @@ pub fn nuget_get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Op
     let mut result: Option<&str> = None;
     let mut v_max: Option<NugetVersionData> = None;
     for &ver in versions {
-        let Some(v) = parse_version(ver) else { continue };
+        let Some(v) = parse_version(ver) else {
+            continue;
+        };
         if !filter(&v) {
             continue;
         }
@@ -698,7 +704,9 @@ pub fn nuget_min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Op
     let mut result: Option<&str> = None;
     let mut v_min: Option<NugetVersionData> = None;
     for &ver in versions {
-        let Some(v) = parse_version(ver) else { continue };
+        let Some(v) = parse_version(ver) else {
+            continue;
+        };
         if !filter(&v) {
             continue;
         }
@@ -803,11 +811,15 @@ pub fn nuget_sort_versions(a: &str, b: &str) -> i32 {
 ///
 /// Mirrors `lib/modules/versioning/nuget/index.ts` `matches()`.
 pub fn nuget_matches(version: &str, range: &str) -> bool {
-    let Some(v) = parse_version(version) else { return false };
+    let Some(v) = parse_version(version) else {
+        return false;
+    };
     if let Some(u) = parse_version(range) {
         return compare_version_data(&v, &u) >= 0;
     }
-    let Some(r) = parse_range(range) else { return false };
+    let Some(r) = parse_range(range) else {
+        return false;
+    };
     matches_range(&v, &r)
 }
 

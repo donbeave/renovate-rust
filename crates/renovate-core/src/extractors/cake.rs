@@ -240,7 +240,10 @@ bar
 
         // Cake.MinVer — custom registry with index.json
         let minver = find("Cake.MinVer").expect("Cake.MinVer");
-        assert_eq!(minver.registry_url, "https://example.com/feed/v3/index.json");
+        assert_eq!(
+            minver.registry_url,
+            "https://example.com/feed/v3/index.json"
+        );
 
         // Baz.Baz — file:// → skipped in Rust (TypeScript returns with skipReason unsupported-url)
         assert!(find("Baz.Baz").is_none());

@@ -1186,9 +1186,10 @@ fn normalize_lock_provider_name(provider: &str) -> String {
     }
     // Plain {registryHost}/{namespace}/{type}: strip the registry hostname prefix.
     if let Some((host, rest)) = provider.split_once('/')
-        && host.contains('.') {
-            return rest.to_owned();
-        }
+        && host.contains('.')
+    {
+        return rest.to_owned();
+    }
     provider.to_owned()
 }
 

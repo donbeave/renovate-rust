@@ -80,7 +80,9 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let Some((project_part, pkg_part)) = package_name.split_once(':') else { return Ok(None) };
+    let Some((project_part, pkg_part)) = package_name.split_once(':') else {
+        return Ok(None);
+    };
 
     let project_encoded = percent_encode_path(project_part);
     let pkg_encoded = percent_encode_path(pkg_part);
@@ -129,7 +131,8 @@ mod tests {
     // Ported: "returns package from custom registry" — gitlab-packages/index.spec.ts line 12
     #[test]
     fn filter_by_package_name() {
-        let pkgs = [ApiPackage {
+        let pkgs = [
+            ApiPackage {
                 name: "mypkg".into(),
                 version: "1.0.0".into(),
                 created_at: Some("2020-03-04T12:01:37.000-06:00".into()),
@@ -152,20 +155,25 @@ mod tests {
                 version: "v2.0.0".into(),
                 created_at: Some("2020-05-04T12:01:37.000-06:00".into()),
                 conan_package_name: None,
-            }];
-        
-        assert_eq!(pkgs
-            .iter()
-            .filter(|p| {
-                let effective = p.conan_package_name.as_deref().unwrap_or(&p.name);
-                effective == "mypkg"
-            }).count(), 3);
+            },
+        ];
+
+        assert_eq!(
+            pkgs.iter()
+                .filter(|p| {
+                    let effective = p.conan_package_name.as_deref().unwrap_or(&p.name);
+                    effective == "mypkg"
+                })
+                .count(),
+            3
+        );
     }
 
     // Ported: "returns conan package from custom registry" — gitlab-packages/index.spec.ts line 60
     #[test]
     fn filter_by_conan_package_name() {
-        let pkgs = [ApiPackage {
+        let pkgs = [
+            ApiPackage {
                 name: "myconanpkg/1.0.0@mycompany/stable".into(),
                 version: "1.0.0".into(),
                 created_at: Some("2020-03-04T12:01:37.000-06:00".into()),
@@ -176,14 +184,18 @@ mod tests {
                 version: "v2.0.0".into(),
                 created_at: Some("2020-05-04T12:01:37.000-06:00".into()),
                 conan_package_name: Some("otherpkg".into()),
-            }];
-        
-        assert_eq!(pkgs
-            .iter()
-            .filter(|p| {
-                let effective = p.conan_package_name.as_deref().unwrap_or(&p.name);
-                effective == "myconanpkg"
-            }).count(), 1);
+            },
+        ];
+
+        assert_eq!(
+            pkgs.iter()
+                .filter(|p| {
+                    let effective = p.conan_package_name.as_deref().unwrap_or(&p.name);
+                    effective == "myconanpkg"
+                })
+                .count(),
+            1
+        );
         assert_eq!(
             rfc3339_to_utc_iso("2020-03-04T12:01:37.000-06:00").as_deref(),
             Some("2020-03-04T18:01:37.000Z")
@@ -194,7 +206,7 @@ mod tests {
     #[test]
     fn empty_releases_yields_none() {
         let pkgs: Vec<ApiPackage> = vec![];
-        
+
         assert!(!pkgs.iter().any(|p| {
             let effective = p.conan_package_name.as_deref().unwrap_or(&p.name);
             effective == "mypkg"

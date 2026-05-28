@@ -60,10 +60,12 @@ fn compare(version: &str, other: &str) -> Ordering {
     };
     let len = a.len().max(b.len());
     for i in 0..len {
-        if let (Some(x), Some(y)) = (a.get(i), b.get(i)) { match x.cmp(y) {
-            Ordering::Equal => {}
-            o => return o,
-        } }
+        if let (Some(x), Some(y)) = (a.get(i), b.get(i)) {
+            match x.cmp(y) {
+                Ordering::Equal => {}
+                o => return o,
+            }
+        }
     }
     Ordering::Equal
 }

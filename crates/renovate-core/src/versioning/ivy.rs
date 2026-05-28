@@ -115,7 +115,9 @@ pub fn matches_range(version: &str, range: &str) -> bool {
     if version.is_empty() || range.is_empty() {
         return false;
     }
-    let Some(dynamic) = parse_dynamic_revision(range) else { return maven::compare(version, range) == Ordering::Equal };
+    let Some(dynamic) = parse_dynamic_revision(range) else {
+        return maven::compare(version, range) == Ordering::Equal;
+    };
 
     match dynamic.rev_type {
         RevType::Latest => {

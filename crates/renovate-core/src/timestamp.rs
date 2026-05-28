@@ -85,11 +85,12 @@ fn parse_string(s: &str) -> Option<String> {
     // Use a normalized form
     let normalized = normalize_month_day(s);
     if let Some(ref n) = normalized
-        && let Ok(nd) = NaiveDate::parse_from_str(n, "%b %d, %Y") {
-            let ndt = nd.and_hms_opt(0, 0, 0)?;
-            let dt = Utc.from_utc_datetime(&ndt);
-            return ms_to_iso(dt.timestamp_millis());
-        }
+        && let Ok(nd) = NaiveDate::parse_from_str(n, "%b %d, %Y")
+    {
+        let ndt = nd.and_hms_opt(0, 0, 0)?;
+        let dt = Utc.from_utc_datetime(&ndt);
+        return ms_to_iso(dt.timestamp_millis());
+    }
 
     None
 }

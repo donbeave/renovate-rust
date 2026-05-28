@@ -74,12 +74,22 @@ impl PartialEq for TimingReport {
 pub fn make_timing_report(data: &[i64]) -> TimingReport {
     let count = data.len();
     let total_ms: i64 = data.iter().sum();
-    let avg_ms = if count > 0 { (total_ms as f64 / count as f64).round() as i64 } else { 0 };
+    let avg_ms = if count > 0 {
+        (total_ms as f64 / count as f64).round() as i64
+    } else {
+        0
+    };
     let max_ms = data.iter().copied().max().unwrap_or(0);
     let mut sorted = data.to_vec();
     sorted.sort_unstable();
     let median_ms = if count > 0 { sorted[count / 2] } else { 0 };
-    TimingReport { count, avg_ms, median_ms, max_ms, total_ms }
+    TimingReport {
+        count,
+        avg_ms,
+        median_ms,
+        max_ms,
+        total_ms,
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -120,23 +130,27 @@ pub fn take_personal_access_token_if_possible<'a>(
 ) -> Option<&'a str> {
     // If git_tags_token is a PAT, prefer it
     if let Some(t) = git_tags_token
-        && is_github_personal_access_token(t) {
-            return Some(t);
-        }
+        && is_github_personal_access_token(t)
+    {
+        return Some(t);
+    }
     // If github_token is a PAT, prefer it
     if let Some(t) = github_token
-        && is_github_personal_access_token(t) {
-            return Some(t);
-        }
+        && is_github_personal_access_token(t)
+    {
+        return Some(t);
+    }
     // Fine-grained PAT
     if let Some(t) = git_tags_token
-        && is_github_fine_grained_personal_access_token(t) {
-            return Some(t);
-        }
+        && is_github_fine_grained_personal_access_token(t)
+    {
+        return Some(t);
+    }
     if let Some(t) = github_token
-        && is_github_fine_grained_personal_access_token(t) {
-            return Some(t);
-        }
+        && is_github_fine_grained_personal_access_token(t)
+    {
+        return Some(t);
+    }
     // Fallback: prefer git_tags_token
     git_tags_token.or(github_token)
 }
@@ -155,20 +169,23 @@ pub fn get_http_url(url: &str, token: Option<&str>) -> String {
     let url = url.trim();
     // git@host:path SCP-like format
     if !url.contains("://")
-        && let Some(rest) = url.strip_prefix("git@") {
-            let (host, path) = if let Some(colon) = rest.find(':') {
-                (&rest[..colon], rest[colon + 1..].trim_end_matches(".git"))
-            } else {
-                (rest, "")
-            };
-            let platform = detect_platform(&format!("https://{host}")).unwrap_or("");
-            let creds = token.map(|t| build_git_credentials(platform, t)).unwrap_or_default();
-            return if creds.is_empty() {
-                format!("https://{host}/{path}")
-            } else {
-                format!("https://{creds}@{host}/{path}")
-            };
-        }
+        && let Some(rest) = url.strip_prefix("git@")
+    {
+        let (host, path) = if let Some(colon) = rest.find(':') {
+            (&rest[..colon], rest[colon + 1..].trim_end_matches(".git"))
+        } else {
+            (rest, "")
+        };
+        let platform = detect_platform(&format!("https://{host}")).unwrap_or("");
+        let creds = token
+            .map(|t| build_git_credentials(platform, t))
+            .unwrap_or_default();
+        return if creds.is_empty() {
+            format!("https://{host}/{path}")
+        } else {
+            format!("https://{creds}@{host}/{path}")
+        };
+    }
     // Detect scheme
     let (scheme, rest) = if let Some(r) = url.strip_prefix("https://") {
         ("https", r)
@@ -193,13 +210,19 @@ pub fn get_http_url(url: &str, token: Option<&str>) -> String {
         let slash_pos = rest_no_at.find('/').unwrap_or(rest_no_at.len());
         let host = &rest_no_at[..slash_pos];
         let path = &rest_no_at[slash_pos..];
-        let host_no_port = if let Some(c) = host.find(':') { &host[..c] } else { host };
+        let host_no_port = if let Some(c) = host.find(':') {
+            &host[..c]
+        } else {
+            host
+        };
         format!("{host_no_port}{path}")
     } else {
         rest_no_at.to_owned()
     };
     let platform = detect_platform(&format!("{scheme}://{host_path}")).unwrap_or("");
-    let creds = token.map(|t| build_git_credentials(platform, t)).unwrap_or_default();
+    let creds = token
+        .map(|t| build_git_credentials(platform, t))
+        .unwrap_or_default();
     if creds.is_empty() {
         format!("{scheme}://{host_path}")
     } else {
@@ -210,10 +233,18 @@ pub fn get_http_url(url: &str, token: Option<&str>) -> String {
 fn build_git_credentials(platform: &str, token: &str) -> String {
     match platform {
         "github" => {
-            if token.contains(':') { token.to_owned() } else { format!("x-access-token:{token}") }
+            if token.contains(':') {
+                token.to_owned()
+            } else {
+                format!("x-access-token:{token}")
+            }
         }
         "gitlab" => {
-            if token.contains(':') { token.to_owned() } else { format!("gitlab-ci-token:{token}") }
+            if token.contains(':') {
+                token.to_owned()
+            } else {
+                format!("gitlab-ci-token:{token}")
+            }
         }
         _ => token.to_owned(),
     }
@@ -246,7 +277,10 @@ pub fn generate_helm_envs(
 ) -> std::collections::HashMap<&'static str, String> {
     let mut envs = std::collections::HashMap::new();
     envs.insert("HELM_REGISTRY_CONFIG", format!("{cache_dir}/registry.json"));
-    envs.insert("HELM_REPOSITORY_CONFIG", format!("{cache_dir}/repositories.yaml"));
+    envs.insert(
+        "HELM_REPOSITORY_CONFIG",
+        format!("{cache_dir}/repositories.yaml"),
+    );
     envs.insert("HELM_REPOSITORY_CACHE", format!("{cache_dir}/repositories"));
     if needs_experimental_oci {
         envs.insert("HELM_EXPERIMENTAL_OCI", "1".to_owned());
@@ -268,7 +302,10 @@ pub fn helm_needs_experimental_oci(helm_constraint: &str) -> bool {
     // Normalize space-separated constraints to comma-separated for semver crate
     let candidates: [String; 2] = [
         constraint.to_owned(),
-        constraint.replace(" <", ", <").replace(" >=", ", >=").replace(" >", ", >"),
+        constraint
+            .replace(" <", ", <")
+            .replace(" >=", ", >=")
+            .replace(" >", ", >"),
     ];
     for c in &candidates {
         if let Ok(req) = VersionReq::parse(c) {
@@ -306,7 +343,11 @@ const MANAGERS_WITH_UPDATE_LOCKED: &[&str] = &[
 ///   `update-lockfile` (npm-specific heuristic).
 ///
 /// Mirrors `getRangeStrategy` from `lib/modules/manager/index.ts`.
-pub fn get_range_strategy(manager: &str, range_strategy: &str, dep_type: Option<&str>) -> &'static str {
+pub fn get_range_strategy(
+    manager: &str,
+    range_strategy: &str,
+    dep_type: Option<&str>,
+) -> &'static str {
     match range_strategy {
         "in-range-only" => "update-lockfile",
         "auto" => {
@@ -382,11 +423,7 @@ pub fn get_remapped_level<'a>(
 
 /// Mirrors `setReconfigureBranchCache` from
 /// `lib/workers/repository/reconfigure/reconfigure-cache.ts`.
-pub fn set_reconfigure_branch_cache(
-    cache: &mut serde_json::Value,
-    sha: &str,
-    is_valid: bool,
-) {
+pub fn set_reconfigure_branch_cache(cache: &mut serde_json::Value, sha: &str, is_valid: bool) {
     if let serde_json::Value::Object(map) = cache {
         map.insert(
             "reconfigureBranchCache".to_owned(),
@@ -490,15 +527,19 @@ pub fn apply_git_source(
         if (platform == Some("github") || platform == Some("gitlab"))
             && let Some((host, full_name)) = parse_git_url_host_and_name(git)
         {
-                let datasource = if platform == Some("github") { "github-tags" } else { "gitlab-tags" };
-                return GitSourceResult {
-                    datasource,
-                    registry_urls: Some(vec![format!("https://{host}")]),
-                    package_name: full_name,
-                    current_value: Some(tag.to_owned()),
-                    ..Default::default()
-                };
-            }
+            let datasource = if platform == Some("github") {
+                "github-tags"
+            } else {
+                "gitlab-tags"
+            };
+            return GitSourceResult {
+                datasource,
+                registry_urls: Some(vec![format!("https://{host}")]),
+                package_name: full_name,
+                current_value: Some(tag.to_owned()),
+                ..Default::default()
+            };
+        }
         return GitSourceResult {
             datasource: "git-tags",
             package_name: git.to_owned(),
@@ -519,7 +560,11 @@ pub fn apply_git_source(
         datasource: "git-refs",
         package_name: git.to_owned(),
         current_value: branch.map(|b| b.to_owned()),
-        skip_reason: Some(if branch.is_some() { "git-dependency" } else { "unspecified-version" }),
+        skip_reason: Some(if branch.is_some() {
+            "git-dependency"
+        } else {
+            "unspecified-version"
+        }),
         ..Default::default()
     }
 }
@@ -548,7 +593,9 @@ pub fn slugify_url(url: &str) -> String {
                 result.push(ch);
                 prev_dash = false;
             }
-            None => { prev_dash = false; } // removed chars don't reset dash
+            None => {
+                prev_dash = false;
+            } // removed chars don't reset dash
         }
     }
     result.trim_end_matches('-').to_owned()
@@ -575,7 +622,7 @@ fn transliterate_for_slug(c: char) -> Option<char> {
         'ε' => Some('e'),
         _ if c.is_ascii_alphanumeric() => Some(c.to_ascii_lowercase()),
         _ if c.is_ascii() => Some('-'), // ASCII non-alphanumeric → dash
-        _ => None, // non-ASCII non-mapped → removed
+        _ => None,                      // non-ASCII non-mapped → removed
     }
 }
 
@@ -592,7 +639,9 @@ pub fn validate_interpolated_values(
     name_pattern: &str,
 ) -> Result<(), String> {
     use regex::Regex;
-    let Some(input) = input else { return Ok(()); };
+    let Some(input) = input else {
+        return Ok(());
+    };
     let re = Regex::new(name_pattern).map_err(|e| e.to_string())?;
     match input {
         serde_json::Value::Object(map) => {
@@ -601,7 +650,9 @@ pub fn validate_interpolated_values(
                     return Err(format!("CONFIG_SECRETS_INVALID: invalid key {k:?}"));
                 }
                 if !v.is_string() {
-                    return Err(format!("CONFIG_SECRETS_INVALID: value for {k:?} must be string"));
+                    return Err(format!(
+                        "CONFIG_SECRETS_INVALID: value for {k:?} must be string"
+                    ));
                 }
             }
             Ok(())
@@ -622,7 +673,11 @@ pub fn validate_interpolated_values(
 /// Strips Handlebars/Nunjucks templates before parsing when `remove_templates`
 /// is true.
 pub fn parse_yaml(content: &str, remove_templates: bool) -> Result<Vec<serde_json::Value>, String> {
-    let text = if remove_templates { strip_templates(content) } else { content.to_owned() };
+    let text = if remove_templates {
+        strip_templates(content)
+    } else {
+        content.to_owned()
+    };
     if text.trim().is_empty() {
         return Ok(Vec::new());
     }
@@ -648,7 +703,11 @@ pub fn parse_single_yaml(
     content: &str,
     remove_templates: bool,
 ) -> Result<Option<serde_json::Value>, String> {
-    let text = if remove_templates { strip_templates(content) } else { content.to_owned() };
+    let text = if remove_templates {
+        strip_templates(content)
+    } else {
+        content.to_owned()
+    };
     if text.trim().is_empty() {
         return Ok(None);
     }
@@ -676,10 +735,7 @@ pub fn detect_platform(url: &str) -> Option<&'static str> {
     if hostname.contains("bitbucket") {
         return Some("bitbucket-server");
     }
-    if hostname.contains("forgejo")
-        || hostname == "codeberg.org"
-        || hostname == "codefloe.com"
-    {
+    if hostname.contains("forgejo") || hostname == "codeberg.org" || hostname == "codefloe.com" {
         return Some("forgejo");
     }
     if hostname == "gitea.com" || hostname.contains("gitea") {
@@ -703,10 +759,18 @@ pub fn detect_platform(url: &str) -> Option<&'static str> {
 /// Mirrors the `*_API_USING_HOST_TYPES` constants in `lib/constants/platforms.ts`.
 fn platform_from_host_type(host_type: &str) -> Option<&'static str> {
     const AZURE: &[&str] = &["azure", "azure-tags"];
-    const BITBUCKET_SERVER: &[&str] =
-        &["bitbucket-server", "bitbucket-server-changelog", "bitbucket-server-tags"];
+    const BITBUCKET_SERVER: &[&str] = &[
+        "bitbucket-server",
+        "bitbucket-server-changelog",
+        "bitbucket-server-tags",
+    ];
     const BITBUCKET: &[&str] = &["bitbucket", "bitbucket-changelog", "bitbucket-tags"];
-    const FORGEJO: &[&str] = &["forgejo", "forgejo-changelog", "forgejo-releases", "forgejo-tags"];
+    const FORGEJO: &[&str] = &[
+        "forgejo",
+        "forgejo-changelog",
+        "forgejo-releases",
+        "forgejo-tags",
+    ];
     const GITEA: &[&str] = &["gitea", "gitea-changelog", "gitea-releases", "gitea-tags"];
     const GITHUB: &[&str] = &[
         "github",
@@ -796,10 +860,21 @@ pub fn is_http_url(url: &str) -> bool {
 /// Ensure that `url`'s path starts with `prefix`.
 pub fn ensure_path_prefix(url: &str, prefix: &str) -> String {
     // Parse scheme + host, then handle path
-    if let Some(after_scheme) = url.strip_prefix("https://").or_else(|| url.strip_prefix("http://")) {
-        let scheme = if url.starts_with("https://") { "https://" } else { "http://" };
+    if let Some(after_scheme) = url
+        .strip_prefix("https://")
+        .or_else(|| url.strip_prefix("http://"))
+    {
+        let scheme = if url.starts_with("https://") {
+            "https://"
+        } else {
+            "http://"
+        };
         let (host_part, path_part) = after_scheme.split_once('/').unwrap_or((after_scheme, ""));
-        let full_path = if path_part.is_empty() { "/".to_owned() } else { format!("/{path_part}") };
+        let full_path = if path_part.is_empty() {
+            "/".to_owned()
+        } else {
+            format!("/{path_part}")
+        };
         if full_path.starts_with(prefix) {
             return url.to_owned();
         }
@@ -807,7 +882,11 @@ pub fn ensure_path_prefix(url: &str, prefix: &str) -> String {
         let (path_only, query) = full_path.split_once('?').unwrap_or((&full_path, ""));
         let new_path = format!("{prefix}{path_only}");
         let result = format!("{scheme}{host_part}{new_path}");
-        if query.is_empty() { result } else { format!("{result}?{query}") }
+        if query.is_empty() {
+            result
+        } else {
+            format!("{result}?{query}")
+        }
     } else {
         url.to_owned()
     }
@@ -938,7 +1017,9 @@ pub fn parse_link_header(
         // Extract ; key="value" params
         for param in rest.split(';') {
             let param = param.trim();
-            if param.is_empty() { continue; }
+            if param.is_empty() {
+                continue;
+            }
             if let Some((k, v)) = param.split_once('=') {
                 let k = k.trim().to_owned();
                 let v = v.trim().trim_matches('"').to_owned();
@@ -951,7 +1032,11 @@ pub fn parse_link_header(
             result.insert(rel, link);
         }
     }
-    if result.is_empty() { None } else { Some(result) }
+    if result.is_empty() {
+        None
+    } else {
+        Some(result)
+    }
 }
 
 fn split_link_header(header: &str) -> Vec<&str> {
@@ -1030,9 +1115,7 @@ pub fn replace_at(content: &str, index: usize, old_string: &str, new_string: &st
 /// which is equivalent for ASCII input).
 pub fn loose_equals(a: Option<&str>, b: Option<&str>) -> bool {
     match (a, b) {
-        (Some(a), Some(b)) if !a.is_empty() && !b.is_empty() => {
-            a.eq_ignore_ascii_case(b)
-        }
+        (Some(a), Some(b)) if !a.is_empty() && !b.is_empty() => a.eq_ignore_ascii_case(b),
         _ => a == b,
     }
 }
@@ -1099,8 +1182,7 @@ fn find_bytes(haystack: &[u8], needle: &[u8], start: usize) -> Option<usize> {
     if n == 0 {
         return Some(start);
     }
-    (start..haystack.len().saturating_sub(n - 1))
-        .find(|&i| &haystack[i..i + n] == needle)
+    (start..haystack.len().saturating_sub(n - 1)).find(|&i| &haystack[i..i + n] == needle)
 }
 
 // ---------------------------------------------------------------------------
@@ -1153,7 +1235,9 @@ pub fn memoize<T: Clone, F: FnOnce() -> T>(f: F) -> impl FnMut() -> T {
         if let Some(ref val) = memo {
             return val.clone();
         }
-        let val = f_opt.take().expect("memoized fn consumed twice unexpectedly")();
+        let val = f_opt
+            .take()
+            .expect("memoized fn consumed twice unexpectedly")();
         memo = Some(val.clone());
         val
     }
@@ -1316,9 +1400,8 @@ pub fn sanitize_markdown(markdown: &str) -> String {
     }
     // 6: undo in URL ellipsis
     {
-        let re = UNDO_URL_ELLIPSIS.get_or_init(|| {
-            Regex::new(r"(\(https://[^)]*?)\.\.\.@&#8203;").unwrap()
-        });
+        let re = UNDO_URL_ELLIPSIS
+            .get_or_init(|| Regex::new(r"(\(https://[^)]*?)\.\.\.@&#8203;").unwrap());
         res = re.replace_all(&res, "$1...@").to_string();
     }
     // 7: standalone #N
@@ -1453,9 +1536,7 @@ fn split_time_spec(s: &str) -> Vec<String> {
     for (i, &b) in bytes.iter().enumerate() {
         current.push(b as char);
         let is_last = i == bytes.len() - 1;
-        let next_is_digit_or_end = is_last
-            || bytes[i + 1].is_ascii_digit()
-            || bytes[i + 1] == b' ';
+        let next_is_digit_or_end = is_last || bytes[i + 1].is_ascii_digit() || bytes[i + 1] == b' ';
         if b.is_ascii_alphabetic() && (next_is_digit_or_end) {
             let t = current.trim().to_owned();
             if !t.is_empty() {
@@ -1501,18 +1582,16 @@ fn parse_single_spec(spec: &str) -> Option<i64> {
     Some((num * multiplier) as i64)
 }
 
-
 fn preprocess_time_spec(s: &str) -> String {
     // Convert "N M" (months) to "N month" and "N Y" to "N year"
     // The TypeScript applyCustomFormat handles this via regex
     static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-    let re = RE.get_or_init(|| {
-        regex::Regex::new(r"(\d+)\s*(?:months?|M)").unwrap()
-    });
+    let re = RE.get_or_init(|| regex::Regex::new(r"(\d+)\s*(?:months?|M)").unwrap());
     re.replace_all(s, |caps: &regex::Captures| {
         let n: i64 = caps[1].parse().unwrap_or(0);
         format!("{}d", n * 30)
-    }).to_string()
+    })
+    .to_string()
 }
 
 /// Check whether `date` satisfies a `range` expression like `"< 1 year"` or
@@ -1526,11 +1605,17 @@ pub fn satisfies_date_range(date: &str, range: &str, now_ms: i64) -> Option<bool
     // Extract operator and age part
     let (operator, age) = {
         let stripped = range.trim_start_matches(|c: char| c.is_whitespace());
-        if let Some(rest) = stripped.strip_prefix(">=") { (">=", rest.trim()) }
-        else if let Some(rest) = stripped.strip_prefix("<=") { ("<=", rest.trim()) }
-        else if let Some(rest) = stripped.strip_prefix('>') { (">", rest.trim()) }
-        else if let Some(rest) = stripped.strip_prefix('<') { ("<", rest.trim()) }
-        else { return None; }
+        if let Some(rest) = stripped.strip_prefix(">=") {
+            (">=", rest.trim())
+        } else if let Some(rest) = stripped.strip_prefix("<=") {
+            ("<=", rest.trim())
+        } else if let Some(rest) = stripped.strip_prefix('>') {
+            (">", rest.trim())
+        } else if let Some(rest) = stripped.strip_prefix('<') {
+            ("<", rest.trim())
+        } else {
+            return None;
+        }
     };
     let date_ms = DateTime::parse_from_rfc3339(date)
         .or_else(|_| DateTime::parse_from_rfc3339(&format!("{date}T00:00:00Z")))
@@ -1747,12 +1832,7 @@ pub fn get_cli_name(name: &str, cli_enabled: bool) -> String {
 // ---------------------------------------------------------------------------
 
 const TEMPLATE_FIELDS: &[&str] = &["prBody"];
-const CONTENT_FIELDS: &[&str] = &[
-    "content",
-    "contents",
-    "packageLockParsed",
-    "yarnLockParsed",
-];
+const CONTENT_FIELDS: &[&str] = &["content", "contents", "packageLockParsed", "yarnLockParsed"];
 const ARRAY_FIELDS: &[&str] = &["packageFiles", "upgrades"];
 
 /// Scrub sensitive or large fields from a log config value.
@@ -1909,16 +1989,14 @@ pub fn process_result(
 pub fn sanitize_urls(text: &str) -> String {
     use std::sync::LazyLock;
     // Matches scheme://credentials@host  (scheme is 3-9 alpha chars)
-    static URL_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
-        regex::Regex::new(r"(?i)[a-z]{3,9}://[^@/]+@[a-z0-9.\-]+").unwrap()
-    });
+    static URL_RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r"(?i)[a-z]{3,9}://[^@/]+@[a-z0-9.\-]+").unwrap());
     // Matches //credentials@ within a URL
     static URL_CRED_RE: LazyLock<regex::Regex> =
         LazyLock::new(|| regex::Regex::new(r"//[^@]+@").unwrap());
     // Matches data URI with content after the semicolon
-    static DATA_URI_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
-        regex::Regex::new(r"(?i)^(data:[0-9a-z-]+/[0-9a-z-]+;).+").unwrap()
-    });
+    static DATA_URI_RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r"(?i)^(data:[0-9a-z-]+/[0-9a-z-]+;).+").unwrap());
 
     // First handle data URIs (apply to whole string if it matches)
     let text = if DATA_URI_RE.is_match(text) {
@@ -2230,10 +2308,7 @@ mod tests {
             strip_templates("Unmatched {% pattern missing end."),
             "Unmatched {% pattern missing end."
         );
-        assert_eq!(
-            strip_templates("{% entire text %}"),
-            ""
-        );
+        assert_eq!(strip_templates("{% entire text %}"), "");
     }
 
     // Ported: "capitalizes" — util/string.spec.ts line 81
@@ -2271,8 +2346,7 @@ mod tests {
         let empty: Option<HashMap<&str, &str>> = Some(HashMap::new());
         assert_eq!(empty.unwrap_or_default(), HashMap::new());
         // coerceObject({ name: 'name' }) → { name: 'name' }
-        let with_val: Option<HashMap<&str, &str>> =
-            Some([("name", "name")].into_iter().collect());
+        let with_val: Option<HashMap<&str, &str>> = Some([("name", "name")].into_iter().collect());
         assert_eq!(
             with_val.unwrap_or_default(),
             [("name", "name")].into_iter().collect::<HashMap<_, _>>()
@@ -2280,8 +2354,7 @@ mod tests {
         // coerceObject(undefined, { name: 'name' }) → { name: 'name' }
         let none_with_default: Option<HashMap<&str, &str>> = None;
         assert_eq!(
-            none_with_default
-                .unwrap_or_else(|| [("name", "name")].into_iter().collect()),
+            none_with_default.unwrap_or_else(|| [("name", "name")].into_iter().collect()),
             [("name", "name")].into_iter().collect::<HashMap<_, _>>()
         );
     }
@@ -2294,12 +2367,9 @@ mod tests {
     #[test]
     fn test_assign_keys() {
         use std::collections::HashMap;
-        let mut left: HashMap<&str, i32> = [("foo", 0), ("bar", 0), ("baz", 42)]
-            .into_iter()
-            .collect();
-        let right: HashMap<&str, i32> = [("foo", 1), ("bar", 2), ("baz", 3)]
-            .into_iter()
-            .collect();
+        let mut left: HashMap<&str, i32> =
+            [("foo", 0), ("bar", 0), ("baz", 42)].into_iter().collect();
+        let right: HashMap<&str, i32> = [("foo", 1), ("bar", 2), ("baz", 3)].into_iter().collect();
         assign_keys(&mut left, &right, &["foo", "bar"]);
         assert_eq!(left["foo"], 1);
         assert_eq!(left["bar"], 2);
@@ -2357,7 +2427,10 @@ mod tests {
     // Ported: "generates RENOVATE_ env" — workers/global/config/parse/env.spec.ts line 434
     #[test]
     fn test_get_env_name_generated() {
-        assert_eq!(get_env_name("oneTwoThree", None, true), "RENOVATE_ONE_TWO_THREE");
+        assert_eq!(
+            get_env_name("oneTwoThree", None, true),
+            "RENOVATE_ONE_TWO_THREE"
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -2386,15 +2459,9 @@ mod tests {
         // null/undefined → None
         assert_eq!(massage_throwable::<String>(None), None);
         // Error message → Some(message)
-        assert_eq!(
-            massage_throwable(Some("test")),
-            Some("test".to_owned())
-        );
+        assert_eq!(massage_throwable(Some("test")), Some("test".to_owned()));
         // Number → Some(string)
-        assert_eq!(
-            massage_throwable(Some(123i64)),
-            Some("123".to_owned())
-        );
+        assert_eq!(massage_throwable(Some(123i64)), Some("123".to_owned()));
     }
 
     // -----------------------------------------------------------------------
@@ -2470,11 +2537,7 @@ mod tests {
             ("user@domain.com", "user@domain.com"),
         ];
         for (input, expected) in &cases {
-            assert_eq!(
-                sanitize_urls(input),
-                *expected,
-                "sanitize_urls({input:?})"
-            );
+            assert_eq!(sanitize_urls(input), *expected, "sanitize_urls({input:?})");
         }
     }
 
@@ -2486,14 +2549,32 @@ mod tests {
     #[test]
     fn test_make_timing_report_empty() {
         let r = make_timing_report(&[]);
-        assert_eq!(r, TimingReport { count: 0, avg_ms: 0, median_ms: 0, max_ms: 0, total_ms: 0 });
+        assert_eq!(
+            r,
+            TimingReport {
+                count: 0,
+                avg_ms: 0,
+                median_ms: 0,
+                max_ms: 0,
+                total_ms: 0
+            }
+        );
     }
 
     // Ported: "supports single data point" — util/stats.spec.ts line 32
     #[test]
     fn test_make_timing_report_single() {
         let r = make_timing_report(&[100]);
-        assert_eq!(r, TimingReport { count: 1, avg_ms: 100, median_ms: 100, max_ms: 100, total_ms: 100 });
+        assert_eq!(
+            r,
+            TimingReport {
+                count: 1,
+                avg_ms: 100,
+                median_ms: 100,
+                max_ms: 100,
+                total_ms: 100
+            }
+        );
     }
 
     // Ported: "supports multiple data points" — util/stats.spec.ts line 42
@@ -2625,7 +2706,9 @@ mod tests {
     #[test]
     fn test_is_github_server_to_server_token() {
         assert!(is_github_server_to_server_token("ghs_XXXXXX"));
-        assert!(is_github_server_to_server_token("ghs_0123456_eyJhbGciOiJSUzI1NiJ9"));
+        assert!(is_github_server_to_server_token(
+            "ghs_0123456_eyJhbGciOiJSUzI1NiJ9"
+        ));
         assert!(!is_github_server_to_server_token("ghp_XXXXXX"));
         assert!(!is_github_server_to_server_token("XXXXXX"));
     }
@@ -2636,7 +2719,9 @@ mod tests {
     // Ported: "returns false when string is not a token at all" — util/check-token.spec.ts line 189
     #[test]
     fn test_is_github_fine_grained_pat() {
-        assert!(is_github_fine_grained_personal_access_token("github_pat_XXXXXX"));
+        assert!(is_github_fine_grained_personal_access_token(
+            "github_pat_XXXXXX"
+        ));
         assert!(!is_github_fine_grained_personal_access_token("ghp_XXXXXX"));
         assert!(!is_github_fine_grained_personal_access_token("ghs_XXXXXX"));
         assert!(!is_github_fine_grained_personal_access_token("XXXXXX"));
@@ -2650,7 +2735,10 @@ mod tests {
         assert_eq!(find_github_token(Some("ghp_TOKEN")), Some("ghp_TOKEN"));
         assert_eq!(find_github_token(None), None);
         assert_eq!(find_github_token(Some("")), None);
-        assert_eq!(find_github_token(Some("x-access-token:ghp_TOKEN")), Some("ghp_TOKEN"));
+        assert_eq!(
+            find_github_token(Some("x-access-token:ghp_TOKEN")),
+            Some("ghp_TOKEN")
+        );
     }
 
     // Ported: "returns undefined when both token are undefined" — util/check-token.spec.ts line 216
@@ -2748,7 +2836,10 @@ mod tests {
     #[test]
     fn test_get_http_url_ssh_with_port() {
         assert_eq!(
-            get_http_url("ssh://git@gitlab.example.com:22222/typo3-extensions/poll-pro.git", None),
+            get_http_url(
+                "ssh://git@gitlab.example.com:22222/typo3-extensions/poll-pro.git",
+                None
+            ),
             "https://gitlab.example.com/typo3-extensions/poll-pro.git"
         );
     }
@@ -2756,13 +2847,19 @@ mod tests {
     // Ported: "returns gitlab url with token" — util/git/url.spec.ts line 60
     #[test]
     fn test_get_http_url_gitlab_token() {
-        assert_eq!(get_http_url("http://gitlab.com/", Some("token")), "http://gitlab-ci-token:token@gitlab.com/");
+        assert_eq!(
+            get_http_url("http://gitlab.com/", Some("token")),
+            "http://gitlab-ci-token:token@gitlab.com/"
+        );
     }
 
     // Ported: "returns github url with token" — util/git/url.spec.ts line 75
     #[test]
     fn test_get_http_url_github_token() {
-        assert_eq!(get_http_url("http://github.com/", Some("token")), "http://x-access-token:token@github.com/");
+        assert_eq!(
+            get_http_url("http://github.com/", Some("token")),
+            "http://x-access-token:token@github.com/"
+        );
     }
 
     // Ported: "removes username/password from URL" — util/git/url.spec.ts line 100
@@ -2778,7 +2875,10 @@ mod tests {
     #[test]
     fn test_get_http_url_replaces_credentials() {
         assert_eq!(
-            get_http_url("https://user:password@foo.bar/someOrg/someRepo", Some("another-user:a-secret-pwd")),
+            get_http_url(
+                "https://user:password@foo.bar/someOrg/someRepo",
+                Some("another-user:a-secret-pwd")
+            ),
             "https://another-user:a-secret-pwd@foo.bar/someOrg/someRepo"
         );
     }
@@ -2818,7 +2918,12 @@ mod tests {
     // Ported: "returns correct sized array" — util/sample.spec.ts line 7
     #[test]
     fn test_sample_size_correct() {
-        let arr = vec!["a".to_owned(), "b".to_owned(), "c".to_owned(), "d".to_owned()];
+        let arr = vec![
+            "a".to_owned(),
+            "b".to_owned(),
+            "c".to_owned(),
+            "d".to_owned(),
+        ];
         assert_eq!(sample_size(&arr, Some(2)).len(), 2);
         assert_eq!(sample_size(&arr, Some(10)).len(), 4); // capped at array length
     }
@@ -2826,14 +2931,24 @@ mod tests {
     // Ported: "returns full array for undefined number" — util/sample.spec.ts line 12
     #[test]
     fn test_sample_size_none_n() {
-        let arr = vec!["a".to_owned(), "b".to_owned(), "c".to_owned(), "d".to_owned()];
+        let arr = vec![
+            "a".to_owned(),
+            "b".to_owned(),
+            "c".to_owned(),
+            "d".to_owned(),
+        ];
         assert_eq!(sample_size(&arr, None).len(), 4);
     }
 
     // Ported: "returns full array for 0 number" — util/sample.spec.ts line 20
     #[test]
     fn test_sample_size_zero_n() {
-        let arr = vec!["a".to_owned(), "b".to_owned(), "c".to_owned(), "d".to_owned()];
+        let arr = vec![
+            "a".to_owned(),
+            "b".to_owned(),
+            "c".to_owned(),
+            "d".to_owned(),
+        ];
         assert_eq!(sample_size(&arr, Some(0)), Vec::<String>::new());
     }
 
@@ -2875,15 +2990,24 @@ mod tests {
     #[test]
     fn test_helm_envs_no_experimental_oci_specific_version() {
         let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci("3.8.0"));
-        assert!(!envs.contains_key("HELM_EXPERIMENTAL_OCI"), "3.8.0 should not need OCI flag");
-        assert_eq!(envs["HELM_REGISTRY_CONFIG"], format!("{PRIVATE_CACHE}/registry.json"));
+        assert!(
+            !envs.contains_key("HELM_EXPERIMENTAL_OCI"),
+            "3.8.0 should not need OCI flag"
+        );
+        assert_eq!(
+            envs["HELM_REGISTRY_CONFIG"],
+            format!("{PRIVATE_CACHE}/registry.json")
+        );
     }
 
     // Ported: "generates envs for helm version range not requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 34
     #[test]
     fn test_helm_envs_no_experimental_oci_range() {
         let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci(">=3.7.0"));
-        assert!(!envs.contains_key("HELM_EXPERIMENTAL_OCI"), ">=3.7.0 should not need OCI (intersects >=3.8.0)");
+        assert!(
+            !envs.contains_key("HELM_EXPERIMENTAL_OCI"),
+            ">=3.7.0 should not need OCI (intersects >=3.8.0)"
+        );
     }
 
     // Ported: "generates envs for specific helm version requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 49
@@ -2914,13 +3038,19 @@ mod tests {
     // Ported: "returns manager strategy" — modules/manager/range.spec.ts line 13
     #[test]
     fn test_get_range_strategy_npm_auto_dependencies() {
-        assert_eq!(get_range_strategy("npm", "auto", Some("dependencies")), "update-lockfile");
+        assert_eq!(
+            get_range_strategy("npm", "auto", Some("dependencies")),
+            "update-lockfile"
+        );
     }
 
     // Ported: "defaults to update-lockfile if updateLockedDependency() is supported" — modules/manager/range.spec.ts line 22
     #[test]
     fn test_get_range_strategy_bundler_auto() {
-        assert_eq!(get_range_strategy("bundler", "auto", None), "update-lockfile");
+        assert_eq!(
+            get_range_strategy("bundler", "auto", None),
+            "update-lockfile"
+        );
     }
 
     // Ported: "defaults to replace" — modules/manager/range.spec.ts line 30
@@ -3011,14 +3141,20 @@ mod tests {
     // Ported: "returns reconfigure branch name" — workers/repository/reconfigure/utils.spec.ts line 64
     #[test]
     fn test_get_reconfigure_branch_name() {
-        assert_eq!(get_reconfigure_branch_name("renovate/"), "renovate/reconfigure");
+        assert_eq!(
+            get_reconfigure_branch_name("renovate/"),
+            "renovate/reconfigure"
+        );
         assert_eq!(get_reconfigure_branch_name("prefix/"), "prefix/reconfigure");
     }
 
     // ── get_remapped_level ────────────────────────────────────────────────────
 
     fn make_remap<'a>(pattern: &'a str, level: &'a str) -> LogLevelRemap<'a> {
-        LogLevelRemap { match_message: pattern, new_log_level: level }
+        LogLevelRemap {
+            match_message: pattern,
+            new_log_level: level,
+        }
     }
 
     // Ported: "returns null if no remaps are set" — logger/remap.spec.ts line 15
@@ -3031,7 +3167,10 @@ mod tests {
     #[test]
     fn test_remap_global_remaps() {
         let global = vec![make_remap("*foo*", "error")];
-        assert_eq!(get_remapped_level("foo", Some(&[]), Some(&global)), Some("error"));
+        assert_eq!(
+            get_remapped_level("foo", Some(&[]), Some(&global)),
+            Some("error")
+        );
     }
 
     // Ported: "performs repository-level remaps" — logger/remap.spec.ts line 33
@@ -3046,14 +3185,20 @@ mod tests {
     fn test_remap_repo_wins_over_global() {
         let global = vec![make_remap("*foo*", "warn")];
         let repo = vec![make_remap("*foo*", "error")];
-        assert_eq!(get_remapped_level("foo", Some(&repo), Some(&global)), Some("error"));
+        assert_eq!(
+            get_remapped_level("foo", Some(&repo), Some(&global)),
+            Some("error")
+        );
     }
 
     // Ported: "supports regex patterns" — logger/remap.spec.ts line 55
     #[test]
     fn test_remap_regex_pattern() {
         let global = vec![make_remap("/^foo/i", "trace")];
-        assert_eq!(get_remapped_level("FOO", None, Some(&global)), Some("trace"));
+        assert_eq!(
+            get_remapped_level("FOO", None, Some(&global)),
+            Some("trace")
+        );
     }
 
     // Ported: "does not match against invalid regex patterns" — logger/remap.spec.ts line 64
@@ -3162,11 +3307,19 @@ mod tests {
             ..Default::default()
         })
         .unwrap();
-        let r = apply_git_source("https://git.example.com/foo/bar", None, Some("v1.2.3"), None);
+        let r = apply_git_source(
+            "https://git.example.com/foo/bar",
+            None,
+            Some("v1.2.3"),
+            None,
+        );
         assert_eq!(r.datasource, "github-tags");
         assert_eq!(r.package_name, "foo/bar");
         assert_eq!(r.current_value, Some("v1.2.3".to_owned()));
-        assert_eq!(r.registry_urls, Some(vec!["https://git.example.com".to_owned()]));
+        assert_eq!(
+            r.registry_urls,
+            Some(vec!["https://git.example.com".to_owned()])
+        );
         host_rules::clear();
     }
 
@@ -3192,7 +3345,12 @@ mod tests {
     // Ported: "applies other git source for tag" — modules/manager/util.spec.ts line 46
     #[test]
     fn test_apply_git_source_generic() {
-        let r = apply_git_source("https://a-git-source.com/foo/bar", None, Some("v1.2.3"), None);
+        let r = apply_git_source(
+            "https://a-git-source.com/foo/bar",
+            None,
+            Some("v1.2.3"),
+            None,
+        );
         assert_eq!(r.datasource, "git-tags");
         assert_eq!(r.package_name, "https://a-git-source.com/foo/bar");
     }
@@ -3258,10 +3416,22 @@ mod tests {
     #[test]
     fn test_slugify_url() {
         let cases: &[(&str, &str)] = &[
-            ("https://github-enterprise.example.com/çhãlk/chálk", "https-github-enterprise-example-com-chalk-chalk"),
-            ("https://github.com/chalk/chalk", "https-github-com-chalk-chalk"),
-            ("https://github-enterprise.example.com/", "https-github-enterprise-example-com"),
-            ("https://github.com/sindresorhus/delay", "https-github-com-sindresorhus-delay"),
+            (
+                "https://github-enterprise.example.com/çhãlk/chálk",
+                "https-github-enterprise-example-com-chalk-chalk",
+            ),
+            (
+                "https://github.com/chalk/chalk",
+                "https-github-com-chalk-chalk",
+            ),
+            (
+                "https://github-enterprise.example.com/",
+                "https-github-enterprise-example-com",
+            ),
+            (
+                "https://github.com/sindresorhus/delay",
+                "https-github-com-sindresorhus-delay",
+            ),
         ];
         for (url, expected) in cases {
             let got = slugify_url(url);
@@ -3276,7 +3446,10 @@ mod tests {
     // Ported: "should return empty array for empty string" — util/yaml.spec.ts line 7
     #[test]
     fn test_parse_yaml_empty() {
-        assert_eq!(parse_yaml("", false).unwrap(), Vec::<serde_json::Value>::new());
+        assert_eq!(
+            parse_yaml("", false).unwrap(),
+            Vec::<serde_json::Value>::new()
+        );
     }
 
     // Ported: "should parse content with single document" — util/yaml.spec.ts line 11
@@ -3398,17 +3571,38 @@ mod tests {
         let cases: &[(&str, Option<&str>)] = &[
             ("some-invalid@url:::", None),
             ("https://enterprise.example.com/chalk/chalk", None),
-            ("https://dev.azure.com/my-organization/my-project/_git/my-repo.git", Some("azure")),
-            ("https://myorg.visualstudio.com/my-project/_git/my-repo.git", Some("azure")),
-            ("https://bitbucket.org/some-org/some-repo", Some("bitbucket")),
-            ("https://bitbucket.com/some-org/some-repo", Some("bitbucket")),
-            ("https://bitbucket.example.com/some-org/some-repo", Some("bitbucket-server")),
+            (
+                "https://dev.azure.com/my-organization/my-project/_git/my-repo.git",
+                Some("azure"),
+            ),
+            (
+                "https://myorg.visualstudio.com/my-project/_git/my-repo.git",
+                Some("azure"),
+            ),
+            (
+                "https://bitbucket.org/some-org/some-repo",
+                Some("bitbucket"),
+            ),
+            (
+                "https://bitbucket.com/some-org/some-repo",
+                Some("bitbucket"),
+            ),
+            (
+                "https://bitbucket.example.com/some-org/some-repo",
+                Some("bitbucket-server"),
+            ),
             ("https://gitea.com/semantic-release/gitlab", Some("gitea")),
-            ("https://forgejo.example.com/semantic-release/gitlab", Some("forgejo")),
+            (
+                "https://forgejo.example.com/semantic-release/gitlab",
+                Some("forgejo"),
+            ),
             ("https://codeberg.org/forgejo/forgejo", Some("forgejo")),
             ("https://codefloe.com/some-org/some-repo", Some("forgejo")),
             ("https://github.com/semantic-release/gitlab", Some("github")),
-            ("https://github-enterprise.example.com/chalk/chalk", Some("github")),
+            (
+                "https://github-enterprise.example.com/chalk/chalk",
+                Some("github"),
+            ),
             ("https://gitlab.com/some-org/some-repo", Some("gitlab")),
         ];
         for (url, expected) in cases {
@@ -3464,12 +3658,30 @@ mod tests {
         })
         .unwrap();
 
-        assert_eq!(detect_platform("https://az.example.com/chalk/chalk"), Some("azure"));
-        assert_eq!(detect_platform("https://bb.example.com/chalk/chalk"), Some("bitbucket"));
-        assert_eq!(detect_platform("https://gt.example.com/chalk/chalk"), Some("gitea"));
-        assert_eq!(detect_platform("https://fj.example.com/chalk/chalk"), Some("forgejo"));
-        assert_eq!(detect_platform("https://gh.example.com/chalk/chalk"), Some("github"));
-        assert_eq!(detect_platform("https://gl.example.com/chalk/chalk"), Some("gitlab"));
+        assert_eq!(
+            detect_platform("https://az.example.com/chalk/chalk"),
+            Some("azure")
+        );
+        assert_eq!(
+            detect_platform("https://bb.example.com/chalk/chalk"),
+            Some("bitbucket")
+        );
+        assert_eq!(
+            detect_platform("https://gt.example.com/chalk/chalk"),
+            Some("gitea")
+        );
+        assert_eq!(
+            detect_platform("https://fj.example.com/chalk/chalk"),
+            Some("forgejo")
+        );
+        assert_eq!(
+            detect_platform("https://gh.example.com/chalk/chalk"),
+            Some("github")
+        );
+        assert_eq!(
+            detect_platform("https://gl.example.com/chalk/chalk"),
+            Some("gitlab")
+        );
         assert_eq!(detect_platform("https://f.example.com/chalk/chalk"), None);
 
         host_rules::clear();
@@ -3581,7 +3793,11 @@ mod tests {
             ("http://foo.io/aaa/", "/bbb", "http://foo.io/aaa/bbb"),
             ("http://foo.io/aaa/", "bbb", "http://foo.io/aaa/bbb"),
             ("http://foo.io", "http://bar.io/bbb", "http://bar.io/bbb"),
-            ("http://foo.io/aaa", "http://bar.io/bbb/", "http://bar.io/bbb/"),
+            (
+                "http://foo.io/aaa",
+                "http://bar.io/bbb/",
+                "http://bar.io/bbb/",
+            ),
             ("http://foo.io", "aaa?bbb=z", "http://foo.io/aaa?bbb=z"),
             ("http://foo.io", "/aaa?bbb=z", "http://foo.io/aaa?bbb=z"),
             ("http://foo.io", "aaa/?bbb=z", "http://foo.io/aaa?bbb=z"),
@@ -3665,7 +3881,10 @@ mod tests {
     fn test_ensure_trailing_slash() {
         assert_eq!(ensure_trailing_slash(""), "/");
         assert_eq!(ensure_trailing_slash("/"), "/");
-        assert_eq!(ensure_trailing_slash("https://example.com"), "https://example.com/");
+        assert_eq!(
+            ensure_trailing_slash("https://example.com"),
+            "https://example.com/"
+        );
     }
 
     // Ported: "ensures path prefix" — util/url.spec.ts line 146
@@ -3691,7 +3910,10 @@ mod tests {
         let base = "https://some.test";
         assert_eq!(join_url_parts(&[base, "foo"]), format!("{base}/foo"));
         assert_eq!(join_url_parts(&[base, "/?foo"]), format!("{base}?foo"));
-        assert_eq!(join_url_parts(&[base, "/foo/bar/"]), format!("{base}/foo/bar/"));
+        assert_eq!(
+            join_url_parts(&[base, "/foo/bar/"]),
+            format!("{base}/foo/bar/")
+        );
         assert_eq!(
             join_url_parts(&[&format!("{base}/foo/"), "/foo/bar"]),
             format!("{base}/foo/foo/bar")
@@ -3728,7 +3950,10 @@ mod tests {
         );
         let result = parse_link_header(Some(header)).unwrap();
         let next = result.get("next").unwrap();
-        assert_eq!(next.get("url").unwrap(), "https://api.github.com/user/9287/repos?page=3&per_page=100");
+        assert_eq!(
+            next.get("url").unwrap(),
+            "https://api.github.com/user/9287/repos?page=3&per_page=100"
+        );
         assert_eq!(next.get("rel").unwrap(), "next");
         assert_eq!(next.get("page").unwrap(), "3");
         assert_eq!(next.get("per_page").unwrap(), "100");
@@ -3741,8 +3966,14 @@ mod tests {
     #[test]
     fn test_massage_host_url() {
         assert_eq!(massage_host_url("domain.com"), "domain.com");
-        assert_eq!(massage_host_url("domain.com:8080"), "https://domain.com:8080");
-        assert_eq!(massage_host_url("domain.com/some/path"), "https://domain.com/some/path");
+        assert_eq!(
+            massage_host_url("domain.com:8080"),
+            "https://domain.com:8080"
+        );
+        assert_eq!(
+            massage_host_url("domain.com/some/path"),
+            "https://domain.com/some/path"
+        );
         assert_eq!(massage_host_url("https://domain.com"), "https://domain.com");
     }
 
@@ -3757,8 +3988,14 @@ mod tests {
         // Rust regex crate rejects unsupported features (lookahead/backrefs)
         // that could cause catastrophic backtracking or are not RE2-compatible.
         // This mirrors the TypeScript `regEx` which uses RE2 and rejects `x++`.
-        assert!(regex::Regex::new(r"(?=foo)").is_err(), "lookahead should be rejected");
-        assert!(regex::Regex::new(r"\1").is_err(), "backreference should be rejected");
+        assert!(
+            regex::Regex::new(r"(?=foo)").is_err(),
+            "lookahead should be rejected"
+        );
+        assert!(
+            regex::Regex::new(r"\1").is_err(),
+            "backreference should be rejected"
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -3772,11 +4009,20 @@ mod tests {
         let input = "#### What's Changed\n* fix by @user in https://github.com/foo/foo/pull/1\n\n#### New Contributors\n* @user made their first in https://github.com/foo/foo/pull/2\n\n#### [Heading](https://github.com/foo/foo/blob/HEAD/CHANGELOG.md#1234-2023)\n* link [#1234](https://github.com/some/repo/issues/1234)";
         let output = sanitize_markdown(input);
         // @ should be ZWS'd
-        assert!(output.contains("@&#8203;user"), "expected @&#8203;user in: {output}");
+        assert!(
+            output.contains("@&#8203;user"),
+            "expected @&#8203;user in: {output}"
+        );
         // #1234 in link text should be ZWS'd
-        assert!(output.contains("#&#8203;1234"), "expected #&#8203;1234 in: {output}");
+        assert!(
+            output.contains("#&#8203;1234"),
+            "expected #&#8203;1234 in: {output}"
+        );
         // The heading URL anchor (#1234-2023) should not be broken
-        assert!(output.contains("CHANGELOG.md#1234-2023"), "heading anchor should be intact");
+        assert!(
+            output.contains("CHANGELOG.md#1234-2023"),
+            "heading anchor should be intact"
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -3845,7 +4091,10 @@ mod tests {
     #[test]
     fn test_hash_sha256() {
         let h = hash_data(b"https://example.com/test.txt", Some("sha256"));
-        assert_eq!(h, "d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020");
+        assert_eq!(
+            h,
+            "d1dc63218c42abba594fff6450457dc8c4bfdd7c22acf835a50ca0e5d2693020"
+        );
     }
 
     // Ported: "hashes data with sha512" — util/hash.spec.ts line 15
@@ -3892,7 +4141,10 @@ include = [
         let result = parse_toml(input);
         assert!(result.is_ok());
         let v = result.unwrap();
-        assert_eq!(v["tool"]["poetry"]["include"][0].as_str(), Some("README.md"));
+        assert_eq!(
+            v["tool"]["poetry"]["include"][0].as_str(),
+            Some("README.md")
+        );
     }
 
     // Ported: "handles invalid toml" — util/toml.spec.ts line 24
@@ -3917,7 +4169,10 @@ dep1 = "^1.0.0"
 "#;
         let massaged = massage_toml(input);
         // After massage, should parse without error
-        assert!(parse_toml(&massaged).is_ok(), "massaged TOML should parse: {massaged}");
+        assert!(
+            parse_toml(&massaged).is_ok(),
+            "massaged TOML should parse: {massaged}"
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -3960,7 +4215,10 @@ dep1 = "^1.0.0"
         let ts = format_ts(t_ms);
         let result = get_elapsed_days(&ts, false, T0_MS);
         // 42 + 2/24 = 42.083333...
-        assert!((result - 42.083_333_333_333_336).abs() < 1e-9, "got {result}");
+        assert!(
+            (result - 42.083_333_333_333_336).abs() < 1e-9,
+            "got {result}"
+        );
     }
 
     // Ported: "returns elapsed minutes" — util/date.spec.ts line 47
@@ -4057,7 +4315,7 @@ dep1 = "^1.0.0"
     // Ported: "returns $expected when input is $input" — util/clone.spec.ts line 4
     #[test]
     fn test_clone_values() {
-        use serde_json::{json, Value};
+        use serde_json::{Value, json};
         // Verify deep clone preserves values and produces independent copy
         let cases: &[Value] = &[
             Value::Null,
@@ -4081,7 +4339,7 @@ dep1 = "^1.0.0"
     // Ported: "maintains same order" — util/clone.spec.ts line 26
     #[test]
     fn test_clone_maintains_order() {
-        use serde_json::{json, Map, Value};
+        use serde_json::{Map, Value, json};
         // serde_json with preserve_order maintains insertion order
         let mut m = Map::new();
         m.insert("b".to_owned(), json!("foo"));
@@ -4089,7 +4347,12 @@ dep1 = "^1.0.0"
         m.insert("c".to_owned(), json!("baz"));
         let obj = Value::Object(m);
         let cloned = obj;
-        let keys: Vec<&str> = cloned.as_object().unwrap().keys().map(|k| k.as_str()).collect();
+        let keys: Vec<&str> = cloned
+            .as_object()
+            .unwrap()
+            .keys()
+            .map(|k| k.as_str())
+            .collect();
         assert_eq!(keys, vec!["b", "a", "c"]);
     }
 
@@ -4112,5 +4375,3 @@ dep1 = "^1.0.0"
         }
     }
 }
-
-

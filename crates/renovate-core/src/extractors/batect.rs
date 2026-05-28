@@ -170,7 +170,10 @@ fn flush_include_item(
         }
         // `type: file, path: …` — only follow if no `repo:` field
         // (invalid if both type:file and repo: are set).
-        Some("file") if repo.is_none() && let Some(p) = path => {
+        Some("file")
+            if repo.is_none()
+                && let Some(p) = path =>
+        {
             result.referenced_files.push(resolve_path(dir, &p));
         }
         _ => {}

@@ -733,41 +733,47 @@ fn range_effective_bounds(range: &str) -> (Option<String>, Option<String>) {
     let range = range.trim();
     // Caret: ^X.Y.Z → [X.Y.Z, (X+1).0.0)
     if let Some(rest) = range.strip_prefix('^')
-        && let Ok(v) = Version::parse(rest.trim()) {
-            let hi = Version::new(v.major + 1, 0, 0);
-            return (Some(format!("{v}")), Some(format!("{hi}")));
-        }
+        && let Ok(v) = Version::parse(rest.trim())
+    {
+        let hi = Version::new(v.major + 1, 0, 0);
+        return (Some(format!("{v}")), Some(format!("{hi}")));
+    }
     // Tilde: ~X.Y.Z → [X.Y.Z, X.(Y+1).0)
     if let Some(rest) = range.strip_prefix('~')
-        && let Ok(v) = Version::parse(rest.trim()) {
-            let hi = Version::new(v.major, v.minor + 1, 0);
-            return (Some(format!("{v}")), Some(format!("{hi}")));
-        }
+        && let Ok(v) = Version::parse(rest.trim())
+    {
+        let hi = Version::new(v.major, v.minor + 1, 0);
+        return (Some(format!("{v}")), Some(format!("{hi}")));
+    }
     // >= X.Y.Z → [X.Y.Z, ∞)
     if let Some(rest) = range.strip_prefix(">=")
-        && let Ok(v) = Version::parse(rest.trim()) {
-            return (Some(format!("{v}")), None);
-        }
+        && let Ok(v) = Version::parse(rest.trim())
+    {
+        return (Some(format!("{v}")), None);
+    }
     // > X.Y.Z → (X.Y.Z, ∞) — treat lower as exclusive but represent as ~next
     if let Some(rest) = range.strip_prefix('>')
-        && let Ok(v) = Version::parse(rest.trim()) {
-            let next = Version::new(v.major, v.minor, v.patch + 1);
-            return (Some(format!("{next}")), None);
-        }
+        && let Ok(v) = Version::parse(rest.trim())
+    {
+        let next = Version::new(v.major, v.minor, v.patch + 1);
+        return (Some(format!("{next}")), None);
+    }
     // <= X.Y.Z → (-∞, X.Y.Z]
     if let Some(rest) = range.strip_prefix("<=")
-        && let Ok(v) = Version::parse(rest.trim()) {
-            return (None, Some(format!("{v}")));
-        }
+        && let Ok(v) = Version::parse(rest.trim())
+    {
+        return (None, Some(format!("{v}")));
+    }
     // < X.Y.Z → (-∞, X.Y.Z)
     if let Some(rest) = range.strip_prefix('<')
-        && let Ok(v) = Version::parse(rest.trim()) {
-            // Strip pre-release for bound comparison purposes: <8.0.0-DEV and <8.0.0
-            // should both contribute an upper bound of ~8.0.0. Represent as X.Y.Z
-            // without pre-release so caret comparisons work correctly.
-            let bound = format!("{}.{}.{}", v.major, v.minor, v.patch);
-            return (None, Some(bound));
-        }
+        && let Ok(v) = Version::parse(rest.trim())
+    {
+        // Strip pre-release for bound comparison purposes: <8.0.0-DEV and <8.0.0
+        // should both contribute an upper bound of ~8.0.0. Represent as X.Y.Z
+        // without pre-release so caret comparisons work correctly.
+        let bound = format!("{}.{}.{}", v.major, v.minor, v.patch);
+        return (None, Some(bound));
+    }
     (None, None)
 }
 
@@ -785,24 +791,27 @@ pub fn get_new_value(
         let npm_current_value = poetry2npm(current_value)?;
         if let Some(massaged_new) = poetry2semver(new_version, false)
             && Version::parse(&massaged_new).is_ok()
-                && is_version(&massaged_new)
-                && super::npm::matches_range(&massaged_new, &npm_current_value)
-            {
-                return Some(current_value.to_owned());
-            }
+            && is_version(&massaged_new)
+            && super::npm::matches_range(&massaged_new, &npm_current_value)
+        {
+            return Some(current_value.to_owned());
+        }
         // Check for single-comparator caret/tilde
         let parsed_range = parse_range_elements(&npm_current_value);
         if let Some(element) = parsed_range.last()
-            && parsed_range.len() == 1 {
-                if element.starts_with('^')
-                    && let Some(v) = handle_short("^", &npm_current_value, new_version) {
-                        return Some(npm2poetry(&v));
-                    }
-                if element.starts_with('~')
-                    && let Some(v) = handle_short("~", &npm_current_value, new_version) {
-                        return Some(npm2poetry(&v));
-                    }
+            && parsed_range.len() == 1
+        {
+            if element.starts_with('^')
+                && let Some(v) = handle_short("^", &npm_current_value, new_version)
+            {
+                return Some(npm2poetry(&v));
             }
+            if element.starts_with('~')
+                && let Some(v) = handle_short("~", &npm_current_value, new_version)
+            {
+                return Some(npm2poetry(&v));
+            }
+        }
     }
 
     // Must have a 3-component release

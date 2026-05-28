@@ -154,7 +154,9 @@ async fn fetch_prefix_dev(
             Err(_) => return Ok(None),
         };
 
-        let Some(current) = resp.data.package.and_then(|p| p.variants) else { break };
+        let Some(current) = resp.data.package.and_then(|p| p.variants) else {
+            break;
+        };
 
         let total_pages = current.pages;
         all_variants.extend(current.page);

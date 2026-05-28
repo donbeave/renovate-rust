@@ -91,7 +91,9 @@ fn npm2hex(input: &str) -> String {
 // ── Semver matching helpers ───────────────────────────────────────────────────
 
 fn semver_satisfies_range(version: &str, range: &str) -> bool {
-    let Ok(v) = Version::parse(version) else { return false };
+    let Ok(v) = Version::parse(version) else {
+        return false;
+    };
     semver_matches_v(&v, range)
 }
 
@@ -151,8 +153,7 @@ fn normalize_and_part(part: &str) -> String {
     let mut constraints: Vec<String> = Vec::new();
     let mut current: Option<String> = None;
     for word in &words {
-        let is_op_start =
-            word.starts_with(['>', '<', '=', '!', '^', '~']);
+        let is_op_start = word.starts_with(['>', '<', '=', '!', '^', '~']);
         if is_op_start {
             if let Some(c) = current.take() {
                 constraints.push(c);
@@ -442,13 +443,17 @@ pub fn get_pinned_value(version: &str) -> String {
 }
 
 pub fn matches_range(version: &str, range: &str) -> bool {
-    let Ok(v) = Version::parse(&hex2npm(version)) else { return false };
+    let Ok(v) = Version::parse(&hex2npm(version)) else {
+        return false;
+    };
     semver_matches_v(&v, &hex2npm(range))
 }
 
 pub fn is_less_than_range(version: &str, range: &str) -> bool {
     let npm_range = hex2npm(range);
-    let Ok(v) = Version::parse(version) else { return false };
+    let Ok(v) = Version::parse(version) else {
+        return false;
+    };
     if semver_matches_v(&v, &npm_range) {
         return false;
     }

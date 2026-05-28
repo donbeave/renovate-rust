@@ -26,12 +26,14 @@ pub fn to_semver_range(range: &str) -> Option<String> {
     // from: "X.Y.Z"
     if let Some(rest) = t.strip_prefix("from").map(|r| r.trim()) {
         if let Some(rest) = rest.strip_prefix(':').map(|r| r.trim())
-            && rest.starts_with('"') && rest.ends_with('"') {
-                let ver_str = &rest[1..rest.len() - 1];
-                let v = Version::parse(ver_str).ok()?;
-                let next_major = v.major + 1;
-                return Some(format!(">={ver_str}, <{next_major}.0.0"));
-            }
+            && rest.starts_with('"')
+            && rest.ends_with('"')
+        {
+            let ver_str = &rest[1..rest.len() - 1];
+            let v = Version::parse(ver_str).ok()?;
+            let next_major = v.major + 1;
+            return Some(format!(">={ver_str}, <{next_major}.0.0"));
+        }
         return None;
     }
 
@@ -74,18 +76,22 @@ pub fn to_semver_range(range: &str) -> Option<String> {
 
     // ..."X.Y.Z" or ..<"X.Y.Z"
     if let Some(rest) = t.strip_prefix("...").map(|r| r.trim())
-        && rest.starts_with('"') && rest.ends_with('"') {
-            let ver_str = &rest[1..rest.len() - 1];
-            Version::parse(ver_str).ok()?;
-            return Some(format!("<={ver_str}"));
-        }
+        && rest.starts_with('"')
+        && rest.ends_with('"')
+    {
+        let ver_str = &rest[1..rest.len() - 1];
+        Version::parse(ver_str).ok()?;
+        return Some(format!("<={ver_str}"));
+    }
 
     if let Some(rest) = t.strip_prefix("..<").map(|r| r.trim())
-        && rest.starts_with('"') && rest.ends_with('"') {
-            let ver_str = &rest[1..rest.len() - 1];
-            Version::parse(ver_str).ok()?;
-            return Some(format!("<{ver_str}"));
-        }
+        && rest.starts_with('"')
+        && rest.ends_with('"')
+    {
+        let ver_str = &rest[1..rest.len() - 1];
+        Version::parse(ver_str).ok()?;
+        return Some(format!("<{ver_str}"));
+    }
 
     None
 }
@@ -154,17 +160,29 @@ pub fn matches_range(version: &str, range: &str) -> bool {
     if is_version(range) {
         return equals(clean_v, strip_v(range.trim()));
     }
-    let Some(semver_range) = to_semver_range(range) else { return false };
-    let Ok(v) = Version::parse(clean_v) else { return false };
-    let Ok(req) = VersionReq::parse(&semver_range) else { return false };
+    let Some(semver_range) = to_semver_range(range) else {
+        return false;
+    };
+    let Ok(v) = Version::parse(clean_v) else {
+        return false;
+    };
+    let Ok(req) = VersionReq::parse(&semver_range) else {
+        return false;
+    };
     req.matches(&v)
 }
 
 pub fn is_less_than_range(version: &str, range: &str) -> bool {
-    let Some(semver_range) = to_semver_range(range) else { return false };
+    let Some(semver_range) = to_semver_range(range) else {
+        return false;
+    };
     let clean_v = strip_v(version.trim());
-    let Ok(v) = Version::parse(clean_v) else { return false };
-    let Ok(req) = VersionReq::parse(&semver_range) else { return false };
+    let Ok(v) = Version::parse(clean_v) else {
+        return false;
+    };
+    let Ok(req) = VersionReq::parse(&semver_range) else {
+        return false;
+    };
     if req.matches(&v) {
         return false;
     }

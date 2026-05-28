@@ -288,10 +288,7 @@ fn rez2pep440(input: &str) -> String {
 fn pep4402rez_inclusive_bound(pep440_val: &str) -> String {
     pep440_val
         .split(',')
-        .map(|part| {
-            part.trim()
-                .trim_start_matches(['<', '>', '='])
-        })
+        .map(|part| part.trim().trim_start_matches(['<', '>', '=']))
         .collect::<Vec<_>>()
         .join("..")
 }
@@ -313,7 +310,6 @@ fn extract_first_version_group(s: &str) -> String {
 // ── Semver matching helpers ───────────────────────────────────────────────────
 
 fn pad_partial_version(v: &str) -> String {
-    
     match v.split('.').count() {
         1 => format!("{}.0.0", v),
         2 => format!("{}.0", v),
@@ -569,9 +565,13 @@ pub fn is_greater_than(a: &str, b: &str) -> bool {
 
 pub fn is_less_than_range(version: &str, range: &str) -> bool {
     let padded = pad_zeroes(version);
-    let Ok(ver) = Version::parse(&padded) else { return false };
+    let Ok(ver) = Version::parse(&padded) else {
+        return false;
+    };
     let npm = rez2npm(range);
-    let Some(req) = npm_to_version_req(&npm) else { return false };
+    let Some(req) = npm_to_version_req(&npm) else {
+        return false;
+    };
     // If version satisfies range, it is not less than it
     if req.matches(&ver) {
         return false;
@@ -594,7 +594,9 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
 
 pub fn matches_range(version: &str, range: &str) -> bool {
     let padded = pad_zeroes(version);
-    let Ok(ver) = Version::parse(&padded) else { return false };
+    let Ok(ver) = Version::parse(&padded) else {
+        return false;
+    };
     let npm = rez2npm(range);
     version_satisfies_npm_range(&ver, &npm)
 }

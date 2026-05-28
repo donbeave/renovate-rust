@@ -168,15 +168,17 @@ fn get_source_url(entry: &RawChartEntry) -> Option<String> {
             } else {
                 None
             }
-        } {
-            return Some(captures);
         }
+    {
+        return Some(captures);
+    }
 
     // Check home URL
     if let Some(home) = &entry.home
-        && is_possible_chart_repo(home) {
-            return Some(home.clone());
-        }
+        && is_possible_chart_repo(home)
+    {
+        return Some(home.clone());
+    }
 
     // Check sources
     for source in &entry.sources {
@@ -290,7 +292,9 @@ pub async fn fetch_releases(
     let base = repository_url.trim_end_matches('/');
     let url = format!("{base}/index.yaml");
 
-    let Ok(resp) = http.get(&url).send().await else { return Ok(None) };
+    let Ok(resp) = http.get(&url).send().await else {
+        return Ok(None);
+    };
 
     let status = resp.status();
     if status.is_server_error() {
@@ -300,7 +304,9 @@ pub async fn fetch_releases(
         return Ok(None);
     }
 
-    let Ok(text) = resp.text().await else { return Ok(None) };
+    let Ok(text) = resp.text().await else {
+        return Ok(None);
+    };
 
     Ok(parse_all_versions_with_registry(
         &text,

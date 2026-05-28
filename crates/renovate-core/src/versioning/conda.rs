@@ -13,9 +13,10 @@ enum CondaPart {
 
 fn extract_epoch(s: &str) -> (u64, &str) {
     if let Some(pos) = s.find('!')
-        && let Ok(e) = s[..pos].parse::<u64>() {
-            return (e, &s[pos + 1..]);
-        }
+        && let Ok(e) = s[..pos].parse::<u64>()
+    {
+        return (e, &s[pos + 1..]);
+    }
     (0, s)
 }
 
@@ -299,10 +300,7 @@ pub fn get_patch(s: &str) -> Option<u64> {
 }
 
 pub fn is_single_version(s: &str) -> bool {
-    let Some(stripped) = s
-        .strip_prefix("==")
-        .or_else(|| s.strip_prefix('='))
-    else {
+    let Some(stripped) = s.strip_prefix("==").or_else(|| s.strip_prefix('=')) else {
         return false;
     };
     let rest = stripped.trim_start();

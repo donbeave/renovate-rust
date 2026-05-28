@@ -495,9 +495,10 @@ pub fn parse_range(range_str: &str) -> Option<Vec<RangeInterval>> {
         if idx == last_idx && rv.is_empty() {
             if right_type == RangePointType::Excluding && is_version_str(lv) {
                 if let Some(ref pv) = prev_value
-                    && compare(pv, lv) == Ordering::Greater {
-                        return None;
-                    }
+                    && compare(pv, lv) == Ordering::Greater
+                {
+                    return None;
+                }
                 result.push(RangeInterval {
                     left_type,
                     left_value: Some(lv.to_owned()),
@@ -515,9 +516,10 @@ pub fn parse_range(range_str: &str) -> Option<Vec<RangeInterval>> {
                 return None;
             }
             if let Some(ref pv) = prev_value
-                && compare(pv, lv) == Ordering::Greater {
-                    return None;
-                }
+                && compare(pv, lv) == Ordering::Greater
+            {
+                return None;
+            }
             prev_value = Some(rv.to_owned());
             result.push(RangeInterval {
                 left_type,
@@ -555,7 +557,9 @@ pub fn range_to_str(ranges: Option<&[RangeInterval]>) -> Option<String> {
 }
 
 pub fn auto_extend_maven_range(current: &str, new_version: &str) -> String {
-    let Some(mut range) = parse_range(current) else { return current.to_owned() };
+    let Some(mut range) = parse_range(current) else {
+        return current.to_owned();
+    };
 
     let is_point = range.len() == 1 && {
         let r = &range[0];
@@ -684,7 +688,9 @@ pub fn matches_range(version: &str, range: &str) -> bool {
     if is_version_str(range) {
         return compare(version, range) == Ordering::Equal;
     }
-    let Some(ranges) = parse_range(range) else { return false };
+    let Some(ranges) = parse_range(range) else {
+        return false;
+    };
     for r in &ranges {
         let left_ok = match &r.left_value {
             None => true,

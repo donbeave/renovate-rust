@@ -87,11 +87,7 @@ fn parse_steplib_url(registry_url: &str) -> Option<(String, String, String)> {
     // github.com uses the central API; everything else uses /api/v3 (GHE or test servers)
     if host == "github.com" {
         let registry_url = format!("https://github.com/{full_name}.git");
-        return Some((
-            "https://api.github.com".to_owned(),
-            full_name,
-            registry_url,
-        ));
+        return Some(("https://api.github.com".to_owned(), full_name, registry_url));
     }
 
     let api_base = format!("{scheme}://{host}/api/v3");
@@ -110,8 +106,12 @@ fn is_semver_version(name: &str) -> bool {
 /// Decode base64-encoded YAML content and extract `published_at` + `source_code_url`.
 fn parse_step_yaml(content_b64: &str) -> (Option<String>, Option<String>) {
     let raw = content_b64.replace(['\n', ' '], "");
-    let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(&raw) else { return (None, None) };
-    let Ok(yaml) = std::str::from_utf8(&bytes) else { return (None, None) };
+    let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(&raw) else {
+        return (None, None);
+    };
+    let Ok(yaml) = std::str::from_utf8(&bytes) else {
+        return (None, None);
+    };
 
     let mut published_at: Option<String> = None;
     let mut source_code_url: Option<String> = None;

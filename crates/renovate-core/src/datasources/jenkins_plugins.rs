@@ -103,7 +103,9 @@ pub async fn fetch_releases(
 
     let info: InfoResponse = http.get_json(&info_url).await?;
 
-    let Some(plugin_info) = info.plugins.get(package_name) else { return Ok(None) };
+    let Some(plugin_info) = info.plugins.get(package_name) else {
+        return Ok(None);
+    };
 
     let source_url = plugin_info.source_url.clone();
 

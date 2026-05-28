@@ -165,11 +165,7 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
             }
             let nv = Version::parse(new_ver).unwrap();
             let uv = Version::parse(&upper).unwrap();
-            let new_upper = if nv >= uv {
-                next_major(new_ver)
-            } else {
-                upper
-            };
+            let new_upper = if nv >= uv { next_major(new_ver) } else { upper };
             Some(format!("{lower} <= v < {new_upper}"))
         }
         "replace" => Some(format!("{new_ver} <= v < {}", next_major(new_ver))),

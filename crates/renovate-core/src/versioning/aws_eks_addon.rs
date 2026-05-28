@@ -52,9 +52,10 @@ pub fn parse_eks_addons_filter(json: &str) -> Result<EksAddonsFilter, String> {
         return Err(format!("invalid addonName: {:?}", filter.addon_name));
     }
     if let Some(ref kv) = filter.kubernetes_version
-        && !K8S_VERSION_RE.is_match(kv) {
-            return Err(format!("invalid kubernetesVersion: {:?}", kv));
-        }
+        && !K8S_VERSION_RE.is_match(kv)
+    {
+        return Err(format!("invalid kubernetesVersion: {:?}", kv));
+    }
     Ok(filter)
 }
 

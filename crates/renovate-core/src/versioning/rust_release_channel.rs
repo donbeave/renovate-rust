@@ -416,23 +416,22 @@ pub fn get_new_value(
 
     // Channel names without dates stay as channel names
     match current_channel {
-        Channel::Stable | Channel::Beta | Channel::Nightly => {
-            Some(current_value.to_owned())
-        }
+        Channel::Stable | Channel::Beta | Channel::Nightly => Some(current_value.to_owned()),
         Channel::Version(cv) => {
             if let Channel::Version(nv) = new_channel {
                 if cv.patch.is_none() {
                     return Some(format!("{}.{}", nv.major, nv.minor));
                 }
                 if let Some(cp) = &cv.prerelease
-                    && cp.number.is_none() {
-                        return Some(format!(
-                            "{}.{}.{}-beta",
-                            nv.major,
-                            nv.minor,
-                            nv.patch.unwrap_or(0)
-                        ));
-                    }
+                    && cp.number.is_none()
+                {
+                    return Some(format!(
+                        "{}.{}.{}-beta",
+                        nv.major,
+                        nv.minor,
+                        nv.patch.unwrap_or(0)
+                    ));
+                }
             }
             Some(new_version.to_owned())
         }

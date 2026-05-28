@@ -127,9 +127,8 @@ pub fn parse_jvm_toolchain_version(content: &str) -> Option<String> {
 /// `lib/modules/manager/gradle-wrapper/utils.ts`.
 pub fn parse_java_language_version(content: &str) -> Option<String> {
     use regex::Regex;
-    static RE: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
-        Regex::new(r"JavaLanguageVersion\.of\((\d+)\)").unwrap()
-    });
+    static RE: std::sync::LazyLock<Regex> =
+        std::sync::LazyLock::new(|| Regex::new(r"JavaLanguageVersion\.of\((\d+)\)").unwrap());
     RE.captures(content)
         .and_then(|caps| caps.get(1))
         .map(|m| m.as_str().to_owned())
@@ -334,11 +333,7 @@ zipStorePath=wrapper/dists
     // Ported: "extract languageVersion value" — gradle-wrapper/util.spec.ts line 83
     #[test]
     fn parse_java_language_version_extracts_value() {
-        let content =
-            "java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }";
-        assert_eq!(
-            parse_java_language_version(content),
-            Some("21".to_owned())
-        );
+        let content = "java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }";
+        assert_eq!(parse_java_language_version(content), Some("21".to_owned()));
     }
 }

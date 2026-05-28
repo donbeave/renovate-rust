@@ -30,14 +30,16 @@ pub fn bootstrap(env: &mut HashMap<String, String>) -> bool {
         let lower = upper.to_lowercase();
         // Uppercase missing but lowercase present → copy up
         if !env.contains_key(*upper)
-            && let Some(v) = env.get(lower.as_str()).cloned() {
-                env.insert(upper.to_string(), v);
-            }
+            && let Some(v) = env.get(lower.as_str()).cloned()
+        {
+            env.insert(upper.to_string(), v);
+        }
         // Uppercase present → copy down
         if let Some(v) = env.get(*upper).cloned()
-            && !v.is_empty() {
-                env.insert(lower.clone(), v);
-            }
+            && !v.is_empty()
+        {
+            env.insert(lower.clone(), v);
+        }
     }
     has_proxy_in_env(env)
 }

@@ -105,8 +105,12 @@ impl RegexVersioning {
     }
 
     fn compare(&self, a: &str, b: &str) -> Ordering {
-        let Some(left) = self.parse(a) else { return Ordering::Greater };
-        let Some(right) = self.parse(b) else { return Ordering::Greater };
+        let Some(left) = self.parse(a) else {
+            return Ordering::Greater;
+        };
+        let Some(right) = self.parse(b) else {
+            return Ordering::Greater;
+        };
 
         // Compare release arrays element-by-element; default to 0.
         let len = left.release.len().max(right.release.len());

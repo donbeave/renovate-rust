@@ -276,9 +276,10 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
         return false;
     }
     if let Ok(req) = VersionReq::parse(range)
-        && req.matches(&v) {
-            return false;
-        }
+        && req.matches(&v)
+    {
+        return false;
+    }
     // Tokenize the range (handles both `>=1.0.0` and `>= 1.0.0` and trailing commas)
     let tokens: Vec<&str> = range
         .split([',', ' '])
@@ -302,12 +303,13 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
             (None, 1)
         };
         if let Some(v_str) = version_str_opt
-            && let Ok(bound) = Version::parse(v_str.trim()) {
-                let replace = min_bound.as_ref().is_none_or(|mb: &Version| bound < *mb);
-                if replace {
-                    min_bound = Some(bound);
-                }
+            && let Ok(bound) = Version::parse(v_str.trim())
+        {
+            let replace = min_bound.as_ref().is_none_or(|mb: &Version| bound < *mb);
+            if replace {
+                min_bound = Some(bound);
             }
+        }
         i += advance;
     }
     if let Some(bound) = min_bound {
@@ -423,7 +425,9 @@ fn intersects_single(a: &str, b: &str) -> bool {
     let req_a = VersionReq::parse(a);
     let req_b = VersionReq::parse(b);
     // If either fails to parse as VersionReq, check exact version match
-    let (Ok(req_a), Ok(req_b)) = (req_a, req_b) else { return false };
+    let (Ok(req_a), Ok(req_b)) = (req_a, req_b) else {
+        return false;
+    };
     // Check if the lower bound of a satisfies b, or vice versa
     // Extract candidate versions from each range's min bound
     for candidate_str in extract_range_bounds(a)
@@ -431,19 +435,23 @@ fn intersects_single(a: &str, b: &str) -> bool {
         .chain(extract_range_bounds(b).iter())
     {
         if let Ok(v) = Version::parse(candidate_str)
-            && req_a.matches(&v) && req_b.matches(&v) {
-                return true;
-            }
+            && req_a.matches(&v)
+            && req_b.matches(&v)
+        {
+            return true;
+        }
     }
     // Also try exact version if either is a plain version
     if let Ok(v) = Version::parse(a.strip_prefix('=').unwrap_or(a).trim())
-        && req_b.matches(&v) {
-            return true;
-        }
+        && req_b.matches(&v)
+    {
+        return true;
+    }
     if let Ok(v) = Version::parse(b.strip_prefix('=').unwrap_or(b).trim())
-        && req_a.matches(&v) {
-            return true;
-        }
+        && req_a.matches(&v)
+    {
+        return true;
+    }
     false
 }
 
@@ -534,9 +542,10 @@ pub fn get_new_value(
         let dots = rest.matches('.').count();
         // For replace: if new version satisfies the current range, keep it
         if range_strategy == "replace"
-            && matches_range(new_version.trim_start_matches('v'), current_value) {
-                return Some(current_value.to_owned());
-            }
+            && matches_range(new_version.trim_start_matches('v'), current_value)
+        {
+            return Some(current_value.to_owned());
+        }
         let result = if range_strategy == "bump" {
             // Bump: express the full new version (including any prerelease)
             format!("^{}", new_version.trim_start_matches('v'))

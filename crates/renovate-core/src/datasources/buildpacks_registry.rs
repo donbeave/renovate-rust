@@ -59,7 +59,9 @@ pub async fn fetch_releases(
     let base = registry_url.trim_end_matches('/');
     let url = format!("{base}/api/v1/buildpacks/{package_name}");
 
-    let Ok(text) = http.get_raw_with_accept(&url, "application/json").await else { return Ok(None) };
+    let Ok(text) = http.get_raw_with_accept(&url, "application/json").await else {
+        return Ok(None);
+    };
 
     let api: ApiResponse = match serde_json::from_str(&text) {
         Ok(v) => v,

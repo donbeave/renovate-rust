@@ -57,7 +57,9 @@ pub async fn fetch_releases(
     let base = registry_url.trim_end_matches('/');
     let url = format!("{}/package/{}.json", base, urlencoding(package_name));
 
-    let Ok(resp) = http.get_retrying(&url).await else { return Ok(None) };
+    let Ok(resp) = http.get_retrying(&url).await else {
+        return Ok(None);
+    };
 
     let status = resp.status();
     if status.is_client_error() {

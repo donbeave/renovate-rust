@@ -16,7 +16,11 @@ struct DecryptedObject {
 }
 
 fn ensure_trailing_slash(s: &str) -> String {
-    if s.ends_with('/') { s.to_owned() } else { format!("{s}/") }
+    if s.ends_with('/') {
+        s.to_owned()
+    } else {
+        format!("{s}/")
+    }
 }
 
 /// Validate that a decrypted value is authorised for the given repository.
@@ -56,7 +60,10 @@ pub fn validate_decrypted_value(decrypted_obj_str: &str, repository: &str) -> Op
     } else {
         // Scoped to org only — any repo under the org is allowed
         for rp in &repositories {
-            if org_prefixes.iter().any(|prefix| rp.starts_with(prefix.as_str())) {
+            if org_prefixes
+                .iter()
+                .any(|prefix| rp.starts_with(prefix.as_str()))
+            {
                 return Some(value);
             }
         }
@@ -74,37 +81,101 @@ mod tests {
     fn validate_decrypted_value_platforms_non_azure() {
         let cases: &[(&str, &str, Option<&str>)] = &[
             // Malformed JSON → None
-            (r#"{"o":"abcd",         "r":"",     "v":"123#"#, "abcd/edf", None),
+            (
+                r#"{"o":"abcd",         "r":"",     "v":"123#"#,
+                "abcd/edf",
+                None,
+            ),
             // Empty value → None
-            (r#"{"o":"abcd",         "r":"",     "v":""}"#, "abcd/edf", None),
+            (
+                r#"{"o":"abcd",         "r":"",     "v":""}"#,
+                "abcd/edf",
+                None,
+            ),
             // Empty org → None
-            (r#"{"o":"",             "r":"",     "v":"val"}"#, "abcd/edf", None),
+            (
+                r#"{"o":"",             "r":"",     "v":"val"}"#,
+                "abcd/edf",
+                None,
+            ),
             // Exact org+repo match
-            (r#"{"o":"abcd",         "r":"edf",  "v":"val-1"}"#, "abcd/edf", Some("val-1")),
+            (
+                r#"{"o":"abcd",         "r":"edf",  "v":"val-1"}"#,
+                "abcd/edf",
+                Some("val-1"),
+            ),
             // Org prefix match (no specific repo)
-            (r#"{"o":"abcd",         "r":"",     "v":"val-2"}"#, "abcd/edf", Some("val-2")),
+            (
+                r#"{"o":"abcd",         "r":"",     "v":"val-2"}"#,
+                "abcd/edf",
+                Some("val-2"),
+            ),
             // Nested org/repo match
-            (r#"{"o":"abcd/fgh",     "r":"ef",   "v":"val-3"}"#, "abcd/fgh/ef", Some("val-3")),
+            (
+                r#"{"o":"abcd/fgh",     "r":"ef",   "v":"val-3"}"#,
+                "abcd/fgh/ef",
+                Some("val-3"),
+            ),
             // Nested org prefix match
-            (r#"{"o":"abcd/fgh",     "r":"",     "v":"val-4"}"#, "abcd/fgh/ef", Some("val-4")),
+            (
+                r#"{"o":"abcd/fgh",     "r":"",     "v":"val-4"}"#,
+                "abcd/fgh/ef",
+                Some("val-4"),
+            ),
             // Deep org/repo match
-            (r#"{"o":"a/b/c/d",      "r":"ef",   "v":"val-5"}"#, "a/b/c/d/ef", Some("val-5")),
+            (
+                r#"{"o":"a/b/c/d",      "r":"ef",   "v":"val-5"}"#,
+                "a/b/c/d/ef",
+                Some("val-5"),
+            ),
             // Scoped to different repo → None
-            (r#"{"o":"abcd/fgh",     "r":"any",  "v":"val-6"}"#, "abcd/fgh/ef", None),
+            (
+                r#"{"o":"abcd/fgh",     "r":"any",  "v":"val-6"}"#,
+                "abcd/fgh/ef",
+                None,
+            ),
             // Org mismatch → None
-            (r#"{"o":"abcd/xy",      "r":"",     "v":"val-7"}"#, "abcd/fgh/ef", None),
+            (
+                r#"{"o":"abcd/xy",      "r":"",     "v":"val-7"}"#,
+                "abcd/fgh/ef",
+                None,
+            ),
             // Org mismatch → None
-            (r#"{"o":"xy",           "r":"",     "v":"val-8"}"#, "abcd/fgh/ef", None),
+            (
+                r#"{"o":"xy",           "r":"",     "v":"val-8"}"#,
+                "abcd/fgh/ef",
+                None,
+            ),
             // Comma-separated org list, second matches
-            (r#"{"o":"xy, abcd/fgh", "r":"ef",   "v":"val-9"}"#, "abcd/fgh/ef", Some("val-9")),
+            (
+                r#"{"o":"xy, abcd/fgh", "r":"ef",   "v":"val-9"}"#,
+                "abcd/fgh/ef",
+                Some("val-9"),
+            ),
             // Comma-separated org list, second matches
-            (r#"{"o":"xy ,abcd",     "r":"ef",   "v":"val-10"}"#, "abcd/ef", Some("val-10")),
+            (
+                r#"{"o":"xy ,abcd",     "r":"ef",   "v":"val-10"}"#,
+                "abcd/ef",
+                Some("val-10"),
+            ),
             // Comma-separated org list, first matches (prefix)
-            (r#"{"o":"abcd, xy",     "r":"",     "v":"val-11"}"#, "abcd/fgh/ef", Some("val-11")),
+            (
+                r#"{"o":"abcd, xy",     "r":"",     "v":"val-11"}"#,
+                "abcd/fgh/ef",
+                Some("val-11"),
+            ),
             // Comma-separated org list
-            (r#"{"o":"abcd,xy ",     "r":"",     "v":"val-12"}"#, "abcd/ef", Some("val-12")),
+            (
+                r#"{"o":"abcd,xy ",     "r":"",     "v":"val-12"}"#,
+                "abcd/ef",
+                Some("val-12"),
+            ),
             // First org in list is " xy", trimmed to "xy" — doesn't match abcd/...
-            (r#"{"o":" xy,abc",      "r":"",     "v":"val-13"}"#, "abcd/fgh/ef", None),
+            (
+                r#"{"o":" xy,abc",      "r":"",     "v":"val-13"}"#,
+                "abcd/fgh/ef",
+                None,
+            ),
         ];
         for &(str_, repo, expected) in cases {
             let result = validate_decrypted_value(str_, repo);

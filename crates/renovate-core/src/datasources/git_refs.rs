@@ -67,17 +67,18 @@ pub fn parse_ls_remote(output: &str) -> Vec<RawRef> {
                 hash,
             });
         } else if let Some(rest) = refpath.strip_prefix("refs/")
-            && let Some((type_, value)) = rest.split_once('/') {
-                if let Some(base) = value.strip_suffix("^{}") {
-                    deref_hashes.insert(base.to_owned(), hash);
-                } else {
-                    raw.push(RawRef {
-                        type_: type_.to_owned(),
-                        value: value.to_owned(),
-                        hash,
-                    });
-                }
+            && let Some((type_, value)) = rest.split_once('/')
+        {
+            if let Some(base) = value.strip_suffix("^{}") {
+                deref_hashes.insert(base.to_owned(), hash);
+            } else {
+                raw.push(RawRef {
+                    type_: type_.to_owned(),
+                    value: value.to_owned(),
+                    hash,
+                });
             }
+        }
     }
 
     raw.into_iter()

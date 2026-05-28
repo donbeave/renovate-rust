@@ -91,9 +91,10 @@ fn parse_version(version: &str) -> Option<ParsedVersion> {
 
     let mut release = vec![major, minor, patch, supplement];
     if let Some(m) = caps.name("build")
-        && let Ok(b) = m.as_str().parse::<u64>() {
-            release.push(b);
-        }
+        && let Ok(b) = m.as_str().parse::<u64>()
+    {
+        release.push(b);
+    }
 
     Some(ParsedVersion {
         release,

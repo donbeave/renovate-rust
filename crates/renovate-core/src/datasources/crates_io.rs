@@ -488,12 +488,16 @@ pub async fn get_releases(
     registry_url: &str,
     http: &HttpClient,
 ) -> Result<Option<CrateReleasesResult>, CratesIoError> {
-    let Some(raw_url) = parse_registry_url(registry_url) else { return Ok(None) };
+    let Some(raw_url) = parse_registry_url(registry_url) else {
+        return Ok(None);
+    };
 
     let path = index_path(package_name);
     let url = format!("{}/{}", raw_url.trim_end_matches('/'), path);
 
-    let Ok(resp) = http.get_retrying(&url).await else { return Ok(None) };
+    let Ok(resp) = http.get_retrying(&url).await else {
+        return Ok(None);
+    };
     let status = resp.status();
 
     if status.as_u16() == 404 {

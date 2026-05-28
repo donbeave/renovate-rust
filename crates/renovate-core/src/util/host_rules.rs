@@ -123,10 +123,11 @@ pub fn matches_host(url: &str, match_host: &str) -> bool {
     let parsed_match = Url::parse(match_host);
     if is_http_url(&parsed_url)
         && let Ok(ref pmh) = parsed_match
-            && is_http_url(pmh) {
-                // Both are HTTP URLs — prefix match on the full href
-                return parsed_url.as_str().starts_with(pmh.as_str());
-            }
+        && is_http_url(pmh)
+    {
+        // Both are HTTP URLs — prefix match on the full href
+        return parsed_url.as_str().starts_with(pmh.as_str());
+    }
 
     // Non-HTTP match_host: compare hostnames
     let hostname = parsed_url.host_str().unwrap_or("");
@@ -263,9 +264,10 @@ pub fn find(search: &HostRuleSearch) -> CombinedHostRule {
             if rule.match_host.is_some() && rule.resolved_host.is_some() {
                 host_match = false;
                 if let Some(ref url) = search.url
-                    && let Some(ref mh) = rule.match_host {
-                        host_match = matches_host(url, mh);
-                    }
+                    && let Some(ref mh) = rule.match_host
+                {
+                    host_match = matches_host(url, mh);
+                }
             }
 
             if rule.read_only.is_some() {

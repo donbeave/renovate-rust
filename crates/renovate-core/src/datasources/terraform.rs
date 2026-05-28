@@ -392,8 +392,12 @@ mod tests {
 fn join_url_parts(a: &str, b: &str) -> String {
     let a = a.trim_end_matches('/');
     let b = b.trim_start_matches('/');
-    if b.is_empty() { return a.to_owned(); }
-    if a.is_empty() { return b.to_owned(); }
+    if b.is_empty() {
+        return a.to_owned();
+    }
+    if a.is_empty() {
+        return b.to_owned();
+    }
     format!("{a}/{b}")
 }
 
@@ -423,10 +427,7 @@ pub fn create_sd_backend_url(
 ///
 /// Mirrors `getRegistryRepository` from
 /// `lib/modules/datasource/terraform-module/utils.ts`.
-pub fn get_registry_repository(
-    package_name: &str,
-    registry_url: Option<&str>,
-) -> (String, String) {
+pub fn get_registry_repository(package_name: &str, registry_url: Option<&str>) -> (String, String) {
     let mut parts: Vec<&str> = package_name.split('/').collect();
     let registry = if parts.len() > 3 && parts[0].contains('.') {
         parts.remove(0).to_owned()
@@ -446,7 +447,10 @@ mod terraform_module_utils_tests {
     use super::*;
 
     fn sd(pairs: &[(&str, &str)]) -> std::collections::HashMap<String, String> {
-        pairs.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect()
+        pairs
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect()
     }
 
     // Ported: "returns URL with relative SD for modules" — terraform-module/utils.spec.ts line 7
@@ -458,7 +462,10 @@ mod terraform_module_utils_tests {
             &sd(&[("modules.v1", "/v1/modules/")]),
             "hashicorp/consul/aws",
         );
-        assert_eq!(result, "https://registry.example.com/v1/modules/hashicorp/consul/aws");
+        assert_eq!(
+            result,
+            "https://registry.example.com/v1/modules/hashicorp/consul/aws"
+        );
     }
 
     // Ported: "returns URL with relative SD for providers" — terraform-module/utils.spec.ts line 21
@@ -470,7 +477,10 @@ mod terraform_module_utils_tests {
             &sd(&[("providers.v1", "/v1/providers/")]),
             "hashicorp/azure",
         );
-        assert_eq!(result, "https://registry.example.com/v1/providers/hashicorp/azure");
+        assert_eq!(
+            result,
+            "https://registry.example.com/v1/providers/hashicorp/azure"
+        );
     }
 
     // Ported: "returns URL with absolute SD for modules" — terraform-module/utils.spec.ts line 35
@@ -482,7 +492,10 @@ mod terraform_module_utils_tests {
             &sd(&[("modules.v1", "https://other.example.com/v1/modules/")]),
             "hashicorp/consul/aws",
         );
-        assert_eq!(result, "https://other.example.com/v1/modules/hashicorp/consul/aws");
+        assert_eq!(
+            result,
+            "https://other.example.com/v1/modules/hashicorp/consul/aws"
+        );
     }
 
     // Ported: "returns URL with absolute SD for providers and missing trailing slash" — terraform-module/utils.spec.ts line 49
@@ -494,7 +507,10 @@ mod terraform_module_utils_tests {
             &sd(&[("providers.v1", "https://other.example.com/v1/providers")]),
             "hashicorp/azure",
         );
-        assert_eq!(result, "https://other.example.com/v1/providers/hashicorp/azure");
+        assert_eq!(
+            result,
+            "https://other.example.com/v1/providers/hashicorp/azure"
+        );
     }
 
     // Ported: "returns URL with with empty SD" — terraform-module/utils.spec.ts line 63
@@ -524,7 +540,10 @@ mod terraform_module_utils_tests {
     // Ported: "uses the configured registry URL for standard package names" — terraform-module/utils.spec.ts line 87
     #[test]
     fn get_registry_repository_standard() {
-        let (registry, repo) = get_registry_repository("hashicorp/consul/aws", Some("https://registry.terraform.io"));
+        let (registry, repo) = get_registry_repository(
+            "hashicorp/consul/aws",
+            Some("https://registry.terraform.io"),
+        );
         assert_eq!(registry, "https://registry.terraform.io");
         assert_eq!(repo, "hashicorp/consul/aws");
     }
@@ -532,7 +551,8 @@ mod terraform_module_utils_tests {
     // Ported: "extracts the registry from packageName when it is embedded" — terraform-module/utils.spec.ts line 99
     #[test]
     fn get_registry_repository_embedded() {
-        let (registry, repo) = get_registry_repository("registry.terraform.io/hashicorp/consul/aws", None);
+        let (registry, repo) =
+            get_registry_repository("registry.terraform.io/hashicorp/consul/aws", None);
         assert_eq!(registry, "https://registry.terraform.io");
         assert_eq!(repo, "hashicorp/consul/aws");
     }
@@ -540,7 +560,8 @@ mod terraform_module_utils_tests {
     // Ported: "normalizes an embedded registry without a scheme" — terraform-module/utils.spec.ts line 111
     #[test]
     fn get_registry_repository_no_scheme() {
-        let (registry, repo) = get_registry_repository("terraform.company.com/hashicorp/consul/aws", Some(""));
+        let (registry, repo) =
+            get_registry_repository("terraform.company.com/hashicorp/consul/aws", Some(""));
         assert_eq!(registry, "https://terraform.company.com");
         assert_eq!(repo, "hashicorp/consul/aws");
     }

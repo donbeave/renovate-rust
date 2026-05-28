@@ -65,7 +65,9 @@ fn version_re() -> &'static Regex {
 /// valid rows. Never returns Err — HTTP errors are handled by `fetch_releases`.
 pub fn parse_releases(html: &str) -> Vec<RubyRelease> {
     // Find the release-list table.
-    let Some(start) = html.find("release-list") else { return Vec::new() };
+    let Some(start) = html.find("release-list") else {
+        return Vec::new();
+    };
 
     let table_start = match html[start..].find("<table") {
         Some(p) => start + p,

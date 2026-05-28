@@ -153,8 +153,7 @@ fn preprocess_single_range(s: &str) -> String {
     let s = s.replace("~=", "~");
     // Plain dotted version (no operator, no wildcard, no spaces, e.g. "3.17.2") → exact match.
     // Rust semver treats bare versions as caret ranges; npm/conan treats them as exact.
-    if s
-        .chars()
+    if s.chars()
         .next()
         .map(|c| c.is_ascii_digit())
         .unwrap_or(false)
@@ -218,7 +217,9 @@ fn try_satisfies_single(version_str: &str, range: &str, opts: &ConanOptions) -> 
         } else {
             None
         }
-    }) else { return false };
+    }) else {
+        return false;
+    };
 
     // No prerelease coercion here — that belongs in matches_with_opts only.
     let v_for_check = v;
@@ -441,9 +442,10 @@ fn matches_with_opts(version: &str, clean_range: &str, opts: &ConanOptions) -> b
     // If includePrerelease and version has prerelease: coerce to base version
     if opts.include_prerelease
         && let Ok(v) = Version::parse(version)
-            && !v.pre.is_empty() {
-                cv = format!("{}.{}.{}", v.major, v.minor, v.patch);
-            }
+        && !v.pre.is_empty()
+    {
+        cv = format!("{}.{}.{}", v.major, v.minor, v.patch);
+    }
     try_satisfies_range(&cv, clean_range, opts)
 }
 
@@ -460,13 +462,15 @@ pub fn is_compatible(version: &str, range: &str) -> bool {
     // We need: if version has prerelease and !include_prerelease → return false
     let v_parsed = Version::parse(&cv).ok();
     if let Some(ref v) = v_parsed
-        && !v.pre.is_empty() && !opts.include_prerelease {
-            let first_char = v.pre.as_str().chars().next();
-            if first_char.map(|c| !c.is_ascii_digit()).unwrap_or(false) {
-                // prerelease starts with alpha → makeVersion returns false → isCompatible = false
-                return false;
-            }
+        && !v.pre.is_empty()
+        && !opts.include_prerelease
+    {
+        let first_char = v.pre.as_str().chars().next();
+        if first_char.map(|c| !c.is_ascii_digit()).unwrap_or(false) {
+            // prerelease starts with alpha → makeVersion returns false → isCompatible = false
+            return false;
         }
+    }
 
     // makeVersion is truthy → check !isLessThanRange
     if v_parsed.is_some() || coerce_version(&cv).is_some() {
@@ -517,7 +521,9 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
     }
 
     // Try to parse version
-    let Some(v) = parse_version_loose(&cv) else { return false };
+    let Some(v) = parse_version_loose(&cv) else {
+        return false;
+    };
 
     // For each OR part, check if there's a part with no lower bound
     // If any OR part has no lower bound (like <X), version can't be less than that part
@@ -866,7 +872,7 @@ fn replace_range(clean_range: &str, new_version: &str) -> Option<String> {
     }
 
     // Plain version or number
-    
+
     Some(match cv.split('.').count() {
         1 => format!("{new_major}"),
         2 => format!("{new_major}.{new_minor}"),
@@ -992,9 +998,10 @@ fn bump_range(clean_range: &str, new_version: &str, opts: &ConanOptions) -> Opti
                 if and_sub.len() == 1 {
                     let bumped = bump_range_single(part, new_version, opts);
                     if let Some(b) = &bumped
-                        && try_satisfies_single(new_version, b, opts) {
-                            return b.clone();
-                        }
+                        && try_satisfies_single(new_version, b, opts)
+                    {
+                        return b.clone();
+                    }
                     replace_range(part, new_version).unwrap_or_else(|| part.to_string())
                 } else {
                     // AND sub-range

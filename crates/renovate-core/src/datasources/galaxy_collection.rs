@@ -153,7 +153,9 @@ pub async fn fetch_releases(
     package_name: &str,
     http: &HttpClient,
 ) -> Result<Option<GalaxyCollectionResult>, GalaxyCollectionError> {
-    let Some(base_url) = construct_base_url(registry_url, package_name) else { return Ok(None) };
+    let Some(base_url) = construct_base_url(registry_url, package_name) else {
+        return Ok(None);
+    };
 
     // Fetch base project info
     let base: BaseResponse = match http.get_json::<serde_json::Value>(&base_url).await {

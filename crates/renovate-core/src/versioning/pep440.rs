@@ -232,7 +232,9 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
         return Some(new_version.clone());
     }
 
-    let Ok(clauses) = parse_current_range(current_value) else { return None };
+    let Ok(clauses) = parse_current_range(current_value) else {
+        return None;
+    };
 
     if clauses.is_empty() {
         return Some(current_value.clone());
@@ -279,15 +281,16 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
     let result = check_range_and_remove_unnecessary_range_limit(&result, new_version);
 
     if let Ok(specs) = VersionSpecifiers::from_str(&result)
-        && !specs.contains(&new_ver) {
-            tracing::warn!(
-                result,
-                new_version,
-                current_value,
-                "pep440: failed to calculate newValue"
-            );
-            return None;
-        }
+        && !specs.contains(&new_ver)
+    {
+        tracing::warn!(
+            result,
+            new_version,
+            current_value,
+            "pep440: failed to calculate newValue"
+        );
+        return None;
+    }
 
     Some(result)
 }
@@ -308,9 +311,10 @@ pub fn check_range_and_remove_unnecessary_range_limit(range: &str, new_version: 
             VersionSpecifiers::from_str(parts[0]),
             Version::from_str(new_version),
         )
-            && specs.contains(&ver) {
-                return parts[0].to_owned();
-            }
+        && specs.contains(&ver)
+    {
+        return parts[0].to_owned();
+    }
     range.to_owned()
 }
 

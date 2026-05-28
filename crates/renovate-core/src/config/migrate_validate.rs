@@ -862,33 +862,35 @@ fn migrate_config(input: &Value) -> Value {
         }
         // Migrate gradle-lite → gradle (mirrors the TypeScript gradle-lite migration).
         if let Some(gradle_lite_val) = map.remove("gradle-lite")
-            && let Value::Object(gradle_lite_obj) = gradle_lite_val {
-                let gradle_entry = map
-                    .entry("gradle".to_owned())
-                    .or_insert_with(|| Value::Object(serde_json::Map::new()));
-                if let Value::Object(gradle_obj) = gradle_entry {
-                    for (k, v) in gradle_lite_obj {
-                        gradle_obj.entry(k).or_insert(v);
-                    }
+            && let Value::Object(gradle_lite_obj) = gradle_lite_val
+        {
+            let gradle_entry = map
+                .entry("gradle".to_owned())
+                .or_insert_with(|| Value::Object(serde_json::Map::new()));
+            if let Value::Object(gradle_obj) = gradle_entry {
+                for (k, v) in gradle_lite_obj {
+                    gradle_obj.entry(k).or_insert(v);
                 }
             }
+        }
         // Replace 'gradle-lite' with 'gradle' in matchManagers inside package rules.
         if let Some(Value::Array(rules)) = map.get_mut("packageRules") {
             for rule in rules.iter_mut() {
                 if let Value::Object(rule_obj) = rule
-                    && let Some(Value::Array(match_managers)) = rule_obj.get_mut("matchManagers") {
-                        let has_gradle_lite = match_managers
-                            .iter()
-                            .any(|m| m.as_str() == Some("gradle-lite"));
-                        if has_gradle_lite {
-                            let has_gradle =
-                                match_managers.iter().any(|m| m.as_str() == Some("gradle"));
-                            if !has_gradle {
-                                match_managers.push(Value::String("gradle".to_owned()));
-                            }
-                            match_managers.retain(|m| m.as_str() != Some("gradle-lite"));
+                    && let Some(Value::Array(match_managers)) = rule_obj.get_mut("matchManagers")
+                {
+                    let has_gradle_lite = match_managers
+                        .iter()
+                        .any(|m| m.as_str() == Some("gradle-lite"));
+                    if has_gradle_lite {
+                        let has_gradle =
+                            match_managers.iter().any(|m| m.as_str() == Some("gradle"));
+                        if !has_gradle {
+                            match_managers.push(Value::String("gradle".to_owned()));
                         }
+                        match_managers.retain(|m| m.as_str() != Some("gradle-lite"));
                     }
+                }
             }
         }
         if matches!(map.get("platformCommit"), Some(Value::Bool(true))) {
@@ -914,29 +916,30 @@ fn migrate_config(input: &Value) -> Value {
             let mut had_nested = false;
             for rule in rules {
                 if let Value::Object(ref obj) = rule
-                    && let Some(Value::Array(subrules)) = obj.get("packageRules") {
-                        if subrules.is_empty() {
-                            // Empty nested packageRules — keep rule but drop the empty array.
-                            let mut parent = obj.clone();
-                            parent.remove("packageRules");
-                            flattened.push(Value::Object(parent));
-                        } else {
-                            had_nested = true;
-                            let mut parent = obj.clone();
-                            parent.remove("packageRules");
-                            for subrule in subrules {
-                                let mut combined = parent.clone();
-                                if let Value::Object(sub_obj) = subrule {
-                                    for (k, v) in sub_obj {
-                                        combined.insert(k.clone(), v.clone());
-                                    }
+                    && let Some(Value::Array(subrules)) = obj.get("packageRules")
+                {
+                    if subrules.is_empty() {
+                        // Empty nested packageRules — keep rule but drop the empty array.
+                        let mut parent = obj.clone();
+                        parent.remove("packageRules");
+                        flattened.push(Value::Object(parent));
+                    } else {
+                        had_nested = true;
+                        let mut parent = obj.clone();
+                        parent.remove("packageRules");
+                        for subrule in subrules {
+                            let mut combined = parent.clone();
+                            if let Value::Object(sub_obj) = subrule {
+                                for (k, v) in sub_obj {
+                                    combined.insert(k.clone(), v.clone());
                                 }
-                                combined.remove("packageRules");
-                                flattened.push(Value::Object(combined));
                             }
+                            combined.remove("packageRules");
+                            flattened.push(Value::Object(combined));
                         }
-                        continue;
                     }
+                    continue;
+                }
                 flattened.push(rule);
             }
             if had_nested {
@@ -6951,7 +6954,10 @@ mod tests {
                 Some(&serde_json::Value::String("test".to_owned())),
                 "should rename {old_key} -> {new_key}"
             );
-            assert!(result.get(old_key).is_none(), "old key {old_key} should be removed");
+            assert!(
+                result.get(old_key).is_none(),
+                "old key {old_key} should be removed"
+            );
         }
     }
 }

@@ -220,9 +220,10 @@ fn extract_lines(
                 if let Some(u) = cap.name("registryUrl") {
                     result.registry_urls.push(u.as_str().to_owned());
                 } else if let Some(n) = cap.name("sourceName")
-                    && let Some(url) = variables.get(n.as_str()) {
-                        result.registry_urls.push(url.clone());
-                    }
+                    && let Some(url) = variables.get(n.as_str())
+                {
+                    result.registry_urls.push(url.clone());
+                }
             }
             i += 1;
             continue;
@@ -362,9 +363,10 @@ fn extract_lines(
         // Gem line
         if let Some(mut dep) = parse_gem_line(trimmed, variables) {
             if let Some(url) = source_registry_url
-                && dep.registry_urls.is_empty() {
-                    dep.registry_urls = vec![url.to_owned()];
-                }
+                && dep.registry_urls.is_empty()
+            {
+                dep.registry_urls = vec![url.to_owned()];
+            }
             result.deps.push(dep);
         }
 
@@ -425,9 +427,10 @@ fn parse_gem_line(line: &str, variables: &HashMap<String, String>) -> Option<Bun
         if let Some(url) = sc.name("registryUrl") {
             dep.registry_urls = vec![url.as_str().to_owned()];
         } else if let Some(n) = sc.name("sourceName")
-            && let Some(url) = variables.get(n.as_str()) {
-                dep.registry_urls = vec![url.clone()];
-            }
+            && let Some(url) = variables.get(n.as_str())
+        {
+            dep.registry_urls = vec![url.clone()];
+        }
     }
 
     Some(dep)
@@ -1261,7 +1264,8 @@ end
             username: Some("user".to_owned()),
             password: Some("pass".to_owned()),
             ..Default::default()
-        }).unwrap();
+        })
+        .unwrap();
         assert!(find_all_authenticatable("bundler").is_empty());
         crate::util::host_rules::clear();
     }
@@ -1270,7 +1274,14 @@ end
     #[test]
     fn find_all_authenticatable_empty_if_no_username() {
         crate::util::host_rules::clear();
-        crate::util::host_rules::add(make_rule("bundler", Some("example.com"), None, Some("pass"), None)).unwrap();
+        crate::util::host_rules::add(make_rule(
+            "bundler",
+            Some("example.com"),
+            None,
+            Some("pass"),
+            None,
+        ))
+        .unwrap();
         assert!(find_all_authenticatable("bundler").is_empty());
         crate::util::host_rules::clear();
     }
@@ -1279,7 +1290,14 @@ end
     #[test]
     fn find_all_authenticatable_empty_if_no_credentials() {
         crate::util::host_rules::clear();
-        crate::util::host_rules::add(make_rule("bundler", Some("example.com"), Some("user"), None, None)).unwrap();
+        crate::util::host_rules::add(make_rule(
+            "bundler",
+            Some("example.com"),
+            Some("user"),
+            None,
+            None,
+        ))
+        .unwrap();
         assert!(find_all_authenticatable("bundler").is_empty());
         crate::util::host_rules::clear();
     }
@@ -1288,7 +1306,14 @@ end
     #[test]
     fn find_all_authenticatable_returns_rule_with_match_host_and_password() {
         crate::util::host_rules::clear();
-        crate::util::host_rules::add(make_rule("bundler", Some("example.com"), Some("user"), Some("pass"), None)).unwrap();
+        crate::util::host_rules::add(make_rule(
+            "bundler",
+            Some("example.com"),
+            Some("user"),
+            Some("pass"),
+            None,
+        ))
+        .unwrap();
         let result = find_all_authenticatable("bundler");
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].resolved_host.as_deref(), Some("example.com"));
@@ -1299,7 +1324,14 @@ end
     #[test]
     fn find_all_authenticatable_returns_rule_with_match_host_and_token() {
         crate::util::host_rules::clear();
-        crate::util::host_rules::add(make_rule("bundler", Some("example.com"), None, None, Some("token123"))).unwrap();
+        crate::util::host_rules::add(make_rule(
+            "bundler",
+            Some("example.com"),
+            None,
+            None,
+            Some("token123"),
+        ))
+        .unwrap();
         let result = find_all_authenticatable("bundler");
         assert_eq!(result.len(), 1);
         crate::util::host_rules::clear();
@@ -1309,7 +1341,14 @@ end
     #[test]
     fn find_all_authenticatable_returns_rule_with_base_url_and_password() {
         crate::util::host_rules::clear();
-        crate::util::host_rules::add(make_rule("bundler", Some("https://example.com"), Some("user"), Some("pass"), None)).unwrap();
+        crate::util::host_rules::add(make_rule(
+            "bundler",
+            Some("https://example.com"),
+            Some("user"),
+            Some("pass"),
+            None,
+        ))
+        .unwrap();
         let result = find_all_authenticatable("bundler");
         assert_eq!(result.len(), 1);
         crate::util::host_rules::clear();
@@ -1319,7 +1358,14 @@ end
     #[test]
     fn find_all_authenticatable_returns_rule_with_base_url_and_token() {
         crate::util::host_rules::clear();
-        crate::util::host_rules::add(make_rule("bundler", Some("https://example.com"), None, None, Some("token"))).unwrap();
+        crate::util::host_rules::add(make_rule(
+            "bundler",
+            Some("https://example.com"),
+            None,
+            None,
+            Some("token"),
+        ))
+        .unwrap();
         let result = find_all_authenticatable("bundler");
         assert_eq!(result.len(), 1);
         crate::util::host_rules::clear();

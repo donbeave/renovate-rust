@@ -386,10 +386,9 @@ pub fn parse_pom_info(xml: &str) -> PomInfo {
                     if !text.is_empty() && tag == "url" {
                         if in_scm && result.source_url.is_none() {
                             result.source_url = process_scm_url(&text);
-                        } else if !in_scm && result.homepage.is_none()
-                            && !text.contains("${") {
-                                result.homepage = Some(text);
-                            }
+                        } else if !in_scm && result.homepage.is_none() && !text.contains("${") {
+                            result.homepage = Some(text);
+                        }
                     }
                 }
             }

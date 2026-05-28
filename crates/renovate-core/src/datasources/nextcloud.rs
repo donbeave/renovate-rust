@@ -108,7 +108,9 @@ pub async fn fetch_releases(
         Err(e) => return Err(NextcloudError::Http(e)),
     };
 
-    let Some(app) = apps.into_iter().find(|a| a.id == package_name) else { return Ok(None) };
+    let Some(app) = apps.into_iter().find(|a| a.id == package_name) else {
+        return Ok(None);
+    };
 
     let source_url = if is_github_nextcloud(&app.website) {
         Some(app.website.clone())

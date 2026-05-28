@@ -45,10 +45,11 @@ fn letter_digit_regex() -> &'static Regex {
 /// Extract the `-pXX` suffix from a composer version, returning `(without_patch, had_patch)`.
 fn remove_patch_part(input: &str) -> (String, bool) {
     if let Some(caps) = patch_part_regex().captures(input)
-        && let Some(suffix) = caps.name("suffix") {
-            let without = input[..suffix.start()].to_owned();
-            return (without, true);
-        }
+        && let Some(suffix) = caps.name("suffix")
+    {
+        let without = input[..suffix.start()].to_owned();
+        return (without, true);
+    }
     (input.to_owned(), false)
 }
 
@@ -226,10 +227,7 @@ pub fn is_valid(input: &str) -> bool {
     let npm = composer2npm(input);
     // OR ranges: validate each alternative independently
     if npm.contains("||") {
-        return npm
-            .split("||")
-            .map(str::trim)
-            .all(super::npm::is_valid);
+        return npm.split("||").map(str::trim).all(super::npm::is_valid);
     }
     super::npm::is_valid(&npm)
 }

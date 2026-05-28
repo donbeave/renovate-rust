@@ -1522,7 +1522,9 @@ pub fn get_yarn_locked_dependencies(
 
     let flush =
         |constraint: &str, entry_version: Option<&str>, results: &mut Vec<YarnLockEntrySummary>| {
-            let Some(entry_ver) = entry_version else { return };
+            let Some(entry_ver) = entry_version else {
+                return;
+            };
             if entry_ver != current_version {
                 return;
             }
@@ -1586,9 +1588,10 @@ pub fn get_yarn_locked_dependencies(
         if let Some(ver) = trimmed
             .strip_prefix("version ")
             .or_else(|| trimmed.strip_prefix("version:"))
-            && current_entry_version.is_none() {
-                current_entry_version = parse_yarn_string_value(ver);
-            }
+            && current_entry_version.is_none()
+        {
+            current_entry_version = parse_yarn_string_value(ver);
+        }
     }
     // Flush last entry
     if let Some(ref c) = current_constraint {

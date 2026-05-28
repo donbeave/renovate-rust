@@ -1659,10 +1659,12 @@ require (
             },
         ];
         let table = extra_deps_table(&deps);
-        let expected = ["| **Package**          | **Change**           |",
+        let expected = [
+            "| **Package**          | **Change**           |",
             "| :------------------- | :------------------- |",
             "| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |",
-            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |"]
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
+        ]
         .join("\n");
         assert_eq!(table, expected);
     }

@@ -14,8 +14,7 @@
 ///
 /// Mirrors `constructComponentUrls` from `lib/modules/datasource/deb/url.ts`.
 pub fn construct_component_urls(registry_url: &str) -> Result<Vec<String>, String> {
-    let parsed = url::Url::parse(registry_url)
-        .map_err(|e| format!("Invalid registry URL: {e}"))?;
+    let parsed = url::Url::parse(registry_url).map_err(|e| format!("Invalid registry URL: {e}"))?;
 
     // Extract required params
     let components_str = parsed
@@ -47,9 +46,7 @@ pub fn construct_component_urls(registry_url: &str) -> Result<Vec<String>, Strin
     let components: Vec<&str> = components_str.split(',').collect();
     let urls = components
         .iter()
-        .map(|component| {
-            format!("{base_str}/dists/{suite}/{component}/binary-{binary_arch}")
-        })
+        .map(|component| format!("{base_str}/dists/{suite}/{component}/binary-{binary_arch}"))
         .collect();
 
     Ok(urls)
@@ -108,22 +105,27 @@ mod tests {
         let registry_url =
             "https://deb.debian.org/debian?suite=stable&components=main,contrib&binaryArch=amd64";
         let result = construct_component_urls(registry_url).unwrap();
-        assert_eq!(result, vec![
-            "https://deb.debian.org/debian/dists/stable/main/binary-amd64",
-            "https://deb.debian.org/debian/dists/stable/contrib/binary-amd64",
-        ]);
+        assert_eq!(
+            result,
+            vec![
+                "https://deb.debian.org/debian/dists/stable/main/binary-amd64",
+                "https://deb.debian.org/debian/dists/stable/contrib/binary-amd64",
+            ]
+        );
     }
 
     // Ported: "constructs URLs correctly from registry URL with deprecated release" — datasource/deb/url.spec.ts line 22
     #[test]
     fn construct_component_urls_with_release() {
-        let registry_url =
-            "https://deb.debian.org/debian?release=bullseye&components=main,contrib&binaryArch=amd64";
+        let registry_url = "https://deb.debian.org/debian?release=bullseye&components=main,contrib&binaryArch=amd64";
         let result = construct_component_urls(registry_url).unwrap();
-        assert_eq!(result, vec![
-            "https://deb.debian.org/debian/dists/bullseye/main/binary-amd64",
-            "https://deb.debian.org/debian/dists/bullseye/contrib/binary-amd64",
-        ]);
+        assert_eq!(
+            result,
+            vec![
+                "https://deb.debian.org/debian/dists/bullseye/main/binary-amd64",
+                "https://deb.debian.org/debian/dists/bullseye/contrib/binary-amd64",
+            ]
+        );
     }
 
     // Ported: "parses the checksum for the specified package" — datasource/deb/checksum.spec.ts line 27
@@ -150,7 +152,11 @@ mod tests {
     fn extract_rejects_unsupported_compression() {
         let result = check_compression_supported("xz");
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Unsupported compression standard"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Unsupported compression standard")
+        );
     }
 
     // Ported: "throws an error if required parameters are missing" — datasource/deb/url.spec.ts line 33
@@ -159,6 +165,10 @@ mod tests {
         let registry_url = "https://deb.debian.org/debian?components=main,contrib";
         let result = construct_component_urls(registry_url);
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Missing required query parameter"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Missing required query parameter")
+        );
     }
 }
