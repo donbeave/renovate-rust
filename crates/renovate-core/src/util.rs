@@ -2139,6 +2139,28 @@ mod tests {
     }
 
     // -----------------------------------------------------------------------
+    // is_artifactory_server
+    // -----------------------------------------------------------------------
+
+    // Ported: "is artifactory server invalid" — modules/datasource/utils.spec.ts line 10
+    #[test]
+    fn test_is_artifactory_server_invalid() {
+        use std::collections::HashMap;
+        let mut headers = HashMap::new();
+        headers.insert("invalid-header".to_owned(), "version".to_owned());
+        assert!(!is_artifactory_server(&headers));
+    }
+
+    // Ported: "is artifactory server valid" — modules/datasource/utils.spec.ts line 19
+    #[test]
+    fn test_is_artifactory_server_valid() {
+        use std::collections::HashMap;
+        let mut headers = HashMap::new();
+        headers.insert("x-jfrog-version".to_owned(), "version".to_owned());
+        assert!(is_artifactory_server(&headers));
+    }
+
+    // -----------------------------------------------------------------------
     // helm environment variables
     // -----------------------------------------------------------------------
 
