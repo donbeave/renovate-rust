@@ -17,6 +17,7 @@ pub mod onboarding;
 pub mod package_rule;
 pub mod platform;
 pub mod platform_constants;
+pub mod proxy;
 pub mod replacements;
 pub mod repo_config;
 pub mod schedule;

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4445 / 11677 total tests ported (38%) · pending 7019 · not-applicable 213 (2% of total) — updated 2026-05-28
+**Progress:** 4450 / 11677 total tests ported (38%) · pending 7014 · not-applicable 213 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -388,7 +388,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/init/merge.spec.ts` | Not done | [details](lib/workers/repository/init/merge.spec.ts.md) |
 | `lib/util/package-rules/index.spec.ts` | Not done | [details](lib/util/package-rules/index.spec.ts.md) |
 | `lib/renovate.spec.ts` | Done | [details](lib/renovate.spec.ts.md) |
-| `lib/proxy.spec.ts` | Not done | [details](lib/proxy.spec.ts.md) |
+| `lib/proxy.spec.ts` | Done | [details](lib/proxy.spec.ts.md) |
 | `lib/util/range.spec.ts` | Done | [details](lib/util/range.spec.ts.md) |
 | `lib/util/compress.spec.ts` | Done | [details](lib/util/compress.spec.ts.md) |
 | `lib/util/split.spec.ts` | Done | [details](lib/util/split.spec.ts.md) |
