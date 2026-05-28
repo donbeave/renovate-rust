@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/util.spec.ts
-**Total tests:** 29 | **Ported:** 26 | **Actionable:** 29 | **Status:** partial (1 pending, 2 not-applicable)
+**Total tests:** 29 | **Ported:** 26 | **Actionable:** 28 | **Status:** partial (1 pending, 2 not-applicable)
 
 ### `getGitStatusContextCombinedName`
 
@@ -79,7 +79,7 @@
 | finds repo | 163 | ported | `azure_utils.rs` | `get_repo_by_name_finds_first_match` | — |
 | supports shorthand names | 181 | ported | `azure_utils.rs` | `get_repo_by_name_shorthand` | — |
 | is case-independent | 189 | ported | `azure_utils.rs` | `get_repo_by_name_case_insensitive` | — |
-| throws when repo name is invalid | 200 | pending | — | — | — |
+| throws when repo name is invalid | 200 | not-applicable | — | — | TypeScript throws for null/undefined inputs; Rust uses typed inputs and returns None for invalid names |
 
 ---
 

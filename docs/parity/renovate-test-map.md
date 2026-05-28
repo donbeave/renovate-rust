@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4547 / 11677 total tests ported (38%) · pending 6681 · not-applicable 449 (2% of total) — updated 2026-05-28
+**Progress:** 4547 / 11677 total tests ported (38%) · pending 6680 · not-applicable 450 (2% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -702,7 +702,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-got-wrapper.spec.ts.md) |
 | `lib/modules/platform/azure/azure-helper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-helper.spec.ts.md) |
 | `lib/modules/platform/azure/index.spec.ts` | Not done | [details](lib/modules/platform/azure/index.spec.ts.md) |
-| `lib/modules/platform/azure/util.spec.ts` | Not done | [details](lib/modules/platform/azure/util.spec.ts.md) |
+| `lib/modules/platform/azure/util.spec.ts` | Done | [details](lib/modules/platform/azure/util.spec.ts.md) |
 | `lib/modules/platform/bitbucket/comments.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/comments.spec.ts.md) |
 | `lib/modules/platform/bitbucket/index.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/index.spec.ts.md) |
 | `lib/modules/platform/bitbucket/pr-cache.spec.ts` | Done | [details](lib/modules/platform/bitbucket/pr-cache.spec.ts.md) |
