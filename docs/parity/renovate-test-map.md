@@ -620,7 +620,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/nix/range.spec.ts` | Done | [details](lib/modules/manager/nix/range.spec.ts.md) |
 | `lib/modules/manager/nodenv/extract.spec.ts` | Done | [details](lib/modules/manager/nodenv/extract.spec.ts.md) |
 | `lib/modules/manager/npm/artifacts.spec.ts` | Not done | [details](lib/modules/manager/npm/artifacts.spec.ts.md) |
-| `lib/modules/manager/npm/detect.spec.ts` | Not done | [details](lib/modules/manager/npm/detect.spec.ts.md) |
+| `lib/modules/manager/npm/detect.spec.ts` | Done | [details](lib/modules/manager/npm/detect.spec.ts.md) |
 | `lib/modules/manager/npm/extract/common/catalogs.spec.ts` | Done | [details](lib/modules/manager/npm/extract/common/catalogs.spec.ts.md) |
 | `lib/modules/manager/npm/extract/common/package-file.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/common/package-file.spec.ts.md) |
 | `lib/modules/manager/npm/extract/post/locked-versions.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/post/locked-versions.spec.ts.md) |

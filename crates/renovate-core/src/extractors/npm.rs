@@ -272,6 +272,28 @@ where
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
+/// Read global npm config from a `.npmrc` file path.
+///
+/// Mirrors `detectGlobalConfig` from `lib/modules/manager/npm/detect.ts`.
+/// Accepts an explicit path for testability.
+pub fn detect_global_config_from(npmrc_path: &str) -> serde_json::Value {
+    match std::fs::read_to_string(npmrc_path) {
+        Ok(content) if !content.is_empty() => {
+            serde_json::json!({ "npmrc": content, "npmrcMerge": true })
+        }
+        _ => serde_json::Value::Object(serde_json::Map::new()),
+    }
+}
+
+/// Read global npm config from `~/.npmrc`.
+///
+/// Mirrors `detectGlobalConfig` from `lib/modules/manager/npm/detect.ts`.
+pub fn detect_global_config() -> serde_json::Value {
+    let home = std::env::var("HOME").unwrap_or_default();
+    let npmrc_path = format!("{home}/.npmrc");
+    detect_global_config_from(&npmrc_path)
+}
+
 /// Parse a `package.json` string and extract all npm dependencies.
 ///
 /// Returns a flat list of deps across all four sections, each annotated with
@@ -3446,5 +3468,27 @@ chalk@^2.4.1:
             !res.contains("  version \"0.48.0\""),
             "old version should be gone"
         );
+    }
+
+    // Ported: "detects .npmrc in home directory" — manager/npm/detect.spec.ts line 8
+    #[test]
+    fn detect_global_config_reads_npmrc() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let npmrc_path = dir.path().join(".npmrc");
+        std::fs::write(&npmrc_path, "registry=https://registry.npmjs.org\n").unwrap();
+
+        let res = detect_global_config_from(npmrc_path.to_str().unwrap());
+        assert_eq!(
+            res.get("npmrc").and_then(|v| v.as_str()),
+            Some("registry=https://registry.npmjs.org\n")
+        );
+        assert_eq!(res.get("npmrcMerge").and_then(|v| v.as_bool()), Some(true));
+    }
+
+    // Ported: "handles no .npmrc" — manager/npm/detect.spec.ts line 24
+    #[test]
+    fn detect_global_config_no_npmrc() {
+        let res = detect_global_config_from("/nonexistent/path/.npmrc");
+        assert!(res.get("npmrc").is_none());
     }
 }
