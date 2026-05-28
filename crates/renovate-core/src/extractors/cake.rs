@@ -197,4 +197,64 @@ bar
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
+
+    // Ported: "extracts" — modules/manager/cake/index.spec.ts line 21
+    // Note: file:// references (Baz.Baz) are silently dropped in Rust (TS returns them with skipReason)
+    #[test]
+    fn extracts_build_cake_fixture() {
+        let content = concat!(
+            "foo\n",
+            "#addin nuget:?package=Foo.Foo\n",
+            "#addin \"nuget:?package=Bim.Bim&version=6.6.6\"\n",
+            "#tool nuget:https://example.com?package=Bar.Bar&version=2.2.2\n",
+            "#tool nuget:https://example.com/feed/v3/?package=Cake.Git&version=2.2.3\n",
+            "#tool nuget:https://example.com/feed/v3/index.json?package=Cake.MinVer&version=2.2.4\n",
+            "#module nuget:file:///tmp/?package=Baz.Baz&version=3.3.3\n",
+            "#load nuget:?package=Cake.7zip&version=1.0.3\n",
+            "#l nuget:?package=Cake.asciidoctorj&version=1.0.0\n",
+            "// #module nuget:?package=Qux.Qux&version=4.4.4\n",
+            "/*\n",
+            "#module nuget:?package=Quux.Quux&version=5.5.5\n",
+            "*/\n",
+            "bar\n",
+        );
+        let deps = extract(content);
+        let find = |name: &str| deps.iter().find(|d| d.package_name == name);
+
+        // Foo.Foo — no version, no registry
+        let foo = find("Foo.Foo").expect("Foo.Foo");
+        assert!(foo.current_value.is_empty());
+        assert!(foo.registry_url.is_empty());
+
+        // Bim.Bim — version but no registry
+        let bim = find("Bim.Bim").expect("Bim.Bim");
+        assert_eq!(bim.current_value, "6.6.6");
+
+        // Bar.Bar — custom registry
+        let bar = find("Bar.Bar").expect("Bar.Bar");
+        assert_eq!(bar.registry_url, "https://example.com");
+
+        // Cake.Git — custom registry with v3 feed
+        let git = find("Cake.Git").expect("Cake.Git");
+        assert_eq!(git.registry_url, "https://example.com/feed/v3");
+
+        // Cake.MinVer — custom registry with index.json
+        let minver = find("Cake.MinVer").expect("Cake.MinVer");
+        assert_eq!(minver.registry_url, "https://example.com/feed/v3/index.json");
+
+        // Baz.Baz — file:// → skipped in Rust (TypeScript returns with skipReason unsupported-url)
+        assert!(find("Baz.Baz").is_none());
+
+        // Cake.7zip — #load directive
+        let zip = find("Cake.7zip").expect("Cake.7zip");
+        assert_eq!(zip.current_value, "1.0.3");
+
+        // Cake.asciidoctorj — #l shorthand
+        let ascii = find("Cake.asciidoctorj").expect("Cake.asciidoctorj");
+        assert_eq!(ascii.current_value, "1.0.0");
+
+        // Commented-out and block-comment packages should be absent
+        assert!(find("Qux.Qux").is_none());
+        assert!(find("Quux.Quux").is_none());
+    }
 }
