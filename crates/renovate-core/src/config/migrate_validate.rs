@@ -832,6 +832,29 @@ fn migrate_config(input: &Value) -> Value {
         ] {
             map.remove(*key);
         }
+        // Rename deprecated property names (mirrors MigrationsService.renamedProperties).
+        for (old_key, new_key) in &[
+            ("allowedPostUpgradeCommands", "allowedCommands"),
+            ("aliases", "registryAliases"),
+            ("excludedPackageNames", "excludePackageNames"),
+            ("keepalive", "keepAlive"),
+            ("lookupNameTemplate", "packageNameTemplate"),
+            ("masterIssue", "dependencyDashboard"),
+            ("masterIssueApproval", "dependencyDashboardApproval"),
+            ("masterIssueAutoclose", "dependencyDashboardAutoclose"),
+            ("masterIssueFooter", "dependencyDashboardFooter"),
+            ("masterIssueHeader", "dependencyDashboardHeader"),
+            ("masterIssueLabels", "dependencyDashboardLabels"),
+            ("masterIssueTitle", "dependencyDashboardTitle"),
+            ("multipleMajorPrs", "separateMultipleMajor"),
+            ("regexManagers", "customManagers"),
+            ("separatePatchReleases", "separateMinorPatch"),
+            ("versionScheme", "versioning"),
+        ] {
+            if let Some(val) = map.remove(*old_key) {
+                set_safely(map, new_key, val);
+            }
+        }
         if let Some(version_strategy) = map.remove("versionStrategy")
             && matches!(version_strategy, Value::String(value) if value == "widen")
         {
@@ -6897,6 +6920,38 @@ mod tests {
         for &prop in &removed {
             let result = migrate_config(&json!({prop: "test"}));
             assert!(result.get(prop).is_none(), "should remove {}", prop);
+        }
+    }
+
+    // Ported: "should rename renamed properties" — config/migrations/migrations-service.spec.ts line 23
+    #[test]
+    fn migrations_service_renames_properties() {
+        let renames: &[(&str, &str)] = &[
+            ("aliases", "registryAliases"),
+            ("excludedPackageNames", "excludePackageNames"),
+            ("keepalive", "keepAlive"),
+            ("lookupNameTemplate", "packageNameTemplate"),
+            ("masterIssue", "dependencyDashboard"),
+            ("masterIssueApproval", "dependencyDashboardApproval"),
+            ("masterIssueAutoclose", "dependencyDashboardAutoclose"),
+            ("masterIssueFooter", "dependencyDashboardFooter"),
+            ("masterIssueHeader", "dependencyDashboardHeader"),
+            ("masterIssueLabels", "dependencyDashboardLabels"),
+            ("masterIssueTitle", "dependencyDashboardTitle"),
+            ("multipleMajorPrs", "separateMultipleMajor"),
+            ("regexManagers", "customManagers"),
+            ("separatePatchReleases", "separateMinorPatch"),
+            ("versionScheme", "versioning"),
+            ("allowedPostUpgradeCommands", "allowedCommands"),
+        ];
+        for &(old_key, new_key) in renames {
+            let result = migrate_config(&json!({old_key: "test"}));
+            assert_eq!(
+                result.get(new_key),
+                Some(&serde_json::Value::String("test".to_owned())),
+                "should rename {old_key} -> {new_key}"
+            );
+            assert!(result.get(old_key).is_none(), "old key {old_key} should be removed");
         }
     }
 }
