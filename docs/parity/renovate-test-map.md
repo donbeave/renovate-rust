@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4556 / 11677 total tests ported (38%) · pending 6649 · not-applicable 472 (4% of total) — updated 2026-05-28
+**Progress:** 4562 / 11677 total tests ported (38%) · pending 6612 · not-applicable 503 (4% of total) — updated 2026-05-28
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -138,16 +138,16 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/aws-eks-addon/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-eks-addon/index.spec.ts.md) |
 | `lib/modules/datasource/aws-eks-addon/schema.spec.ts` | Done | [details](lib/modules/datasource/aws-eks-addon/schema.spec.ts.md) |
 | `lib/modules/datasource/aws-machine-image/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-machine-image/index.spec.ts.md) |
-| `lib/modules/datasource/aws-rds/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-rds/index.spec.ts.md) |
+| `lib/modules/datasource/aws-rds/index.spec.ts` | Done | [details](lib/modules/datasource/aws-rds/index.spec.ts.md) |
 | `lib/modules/datasource/datasource.spec.ts` | Done | [details](lib/modules/datasource/datasource.spec.ts.md) |
-| `lib/modules/datasource/azure-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
+| `lib/modules/datasource/azure-tags/index.spec.ts` | Done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
 | `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/schema.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) |
 | `lib/modules/datasource/cpan/schema.spec.ts` | Done | [details](lib/modules/datasource/cpan/schema.spec.ts.md) |
 | `lib/modules/datasource/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/datasource/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/datasource/nextcloud/index.spec.ts` | Done | [details](lib/modules/datasource/nextcloud/index.spec.ts.md) |
 | `lib/modules/datasource/github-digest/index.spec.ts` | Not done | [details](lib/modules/datasource/github-digest/index.spec.ts.md) |
-| `lib/modules/datasource/github-release-attachments/index.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/index.spec.ts.md) |
+| `lib/modules/datasource/github-release-attachments/index.spec.ts` | Done | [details](lib/modules/datasource/github-release-attachments/index.spec.ts.md) |
 | `lib/modules/datasource/github-release-attachments/digest.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/digest.spec.ts.md) |
 | `lib/modules/datasource/python-version/index.spec.ts` | Done | [details](lib/modules/datasource/python-version/index.spec.ts.md) |
 | `lib/modules/datasource/deno/index.spec.ts` | Done | [details](lib/modules/datasource/deno/index.spec.ts.md) |
@@ -172,7 +172,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/deb/index.spec.ts` | Not done | [details](lib/modules/datasource/deb/index.spec.ts.md) |
 | `lib/modules/datasource/deb/packages.spec.ts` | Done | [details](lib/modules/datasource/deb/packages.spec.ts.md) |
 | `lib/modules/datasource/deb/url.spec.ts` | Done | [details](lib/modules/datasource/deb/url.spec.ts.md) |
-| `lib/modules/datasource/utils.spec.ts` | Not done | [details](lib/modules/datasource/utils.spec.ts.md) |
+| `lib/modules/datasource/utils.spec.ts` | Done | [details](lib/modules/datasource/utils.spec.ts.md) |
 | `lib/modules/datasource/span-processor.spec.ts` | Done | [details](lib/modules/datasource/span-processor.spec.ts.md) |
 | `lib/modules/datasource/postprocess-release.spec.ts` | Not done | [details](lib/modules/datasource/postprocess-release.spec.ts.md) |
 | `lib/modules/datasource/java-version/index.spec.ts` | Done | [details](lib/modules/datasource/java-version/index.spec.ts.md) |
@@ -363,7 +363,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/cmd-serializer.spec.ts` | Done | [details](lib/logger/cmd-serializer.spec.ts.md) |
 | `lib/logger/config-serializer.spec.ts` | Done | [details](lib/logger/config-serializer.spec.ts.md) |
 | `lib/logger/remap.spec.ts` | Done | [details](lib/logger/remap.spec.ts.md) |
-| `lib/logger/renovate-logger.spec.ts` | Not done | [details](lib/logger/renovate-logger.spec.ts.md) |
+| `lib/logger/renovate-logger.spec.ts` | Done | [details](lib/logger/renovate-logger.spec.ts.md) |
 | `lib/logger/pretty-stdout.spec.ts` | Not done | [details](lib/logger/pretty-stdout.spec.ts.md) |
 | `lib/logger/err-serializer.spec.ts` | Not done | [details](lib/logger/err-serializer.spec.ts.md) |
 | `lib/logger/once.spec.ts` | Not done | [details](lib/logger/once.spec.ts.md) |
@@ -461,7 +461,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/same-major/index.spec.ts` | Done | [details](lib/modules/versioning/same-major/index.spec.ts.md) |
 | `lib/modules/versioning/hex/index.spec.ts` | Done | [details](lib/modules/versioning/hex/index.spec.ts.md) |
 | `lib/modules/versioning/debian/index.spec.ts` | Not done | [details](lib/modules/versioning/debian/index.spec.ts.md) |
-| `lib/modules/versioning/debian/common.spec.ts` | Not done | [details](lib/modules/versioning/debian/common.spec.ts.md) |
+| `lib/modules/versioning/debian/common.spec.ts` | Done | [details](lib/modules/versioning/debian/common.spec.ts.md) |
 | `lib/modules/versioning/ivy/index.spec.ts` | Done | [details](lib/modules/versioning/ivy/index.spec.ts.md) |
 | `lib/modules/versioning/python/index.spec.ts` | Done | [details](lib/modules/versioning/python/index.spec.ts.md) |
 | `lib/modules/versioning/conda/index.spec.ts` | Done | [details](lib/modules/versioning/conda/index.spec.ts.md) |
@@ -848,7 +848,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/extract/manager-files.spec.ts` | Not done | [details](lib/workers/repository/extract/manager-files.spec.ts.md) |
 | `lib/workers/repository/extract/supersedes.spec.ts` | Done | [details](lib/workers/repository/extract/supersedes.spec.ts.md) |
 | `lib/workers/repository/finalize/prune.spec.ts` | Not done | [details](lib/workers/repository/finalize/prune.spec.ts.md) |
-| `lib/workers/repository/finalize/repository-statistics.spec.ts` | Not done | [details](lib/workers/repository/finalize/repository-statistics.spec.ts.md) |
+| `lib/workers/repository/finalize/repository-statistics.spec.ts` | Done | [details](lib/workers/repository/finalize/repository-statistics.spec.ts.md) |
 | `lib/workers/repository/index.spec.ts` | Done | [details](lib/workers/repository/index.spec.ts.md) |
 | `lib/workers/repository/init/index.spec.ts` | Done | [details](lib/workers/repository/init/index.spec.ts.md) |
 | `lib/workers/repository/init/inherited.spec.ts` | Not done | [details](lib/workers/repository/init/inherited.spec.ts.md) |
@@ -868,7 +868,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/process/extract-update.spec.ts` | Not done | [details](lib/workers/repository/process/extract-update.spec.ts.md) |
 | `lib/workers/repository/process/fetch.spec.ts` | Not done | [details](lib/workers/repository/process/fetch.spec.ts.md) |
 | `lib/workers/repository/process/index.spec.ts` | Not done | [details](lib/workers/repository/process/index.spec.ts.md) |
-| `lib/workers/repository/process/libyear.spec.ts` | Not done | [details](lib/workers/repository/process/libyear.spec.ts.md) |
+| `lib/workers/repository/process/libyear.spec.ts` | Done | [details](lib/workers/repository/process/libyear.spec.ts.md) |
 | `lib/workers/repository/process/limits.spec.ts` | Not done | [details](lib/workers/repository/process/limits.spec.ts.md) |
 | `lib/workers/repository/process/lookup/abandonment.spec.ts` | Done | [details](lib/workers/repository/process/lookup/abandonment.spec.ts.md) |
 | `lib/workers/repository/process/lookup/filter-checks.spec.ts` | Not done | [details](lib/workers/repository/process/lookup/filter-checks.spec.ts.md) |
@@ -917,7 +917,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/pr/changelog/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/index.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/release-notes.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/release-notes.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/releases.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/releases.spec.ts.md) |
-| `lib/workers/repository/update/pr/changelog/source.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/source.spec.ts.md) |
+| `lib/workers/repository/update/pr/changelog/source.spec.ts` | Done | [details](lib/workers/repository/update/pr/changelog/source.spec.ts.md) |
 | `lib/workers/repository/update/pr/code-owners.spec.ts` | Not done | [details](lib/workers/repository/update/pr/code-owners.spec.ts.md) |
 | `lib/workers/repository/update/pr/index.spec.ts` | Done | [details](lib/workers/repository/update/pr/index.spec.ts.md) |
 | `lib/workers/repository/update/pr/labels.spec.ts` | Done | [details](lib/workers/repository/update/pr/labels.spec.ts.md) |

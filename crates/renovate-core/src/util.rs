@@ -457,6 +457,59 @@ pub fn format_create_label_commands(repo: &str, labels: &[GithubLabel]) -> Strin
 }
 
 // ---------------------------------------------------------------------------
+// Changelog source utilities — lib/workers/repository/update/pr/changelog/source.ts
+// ---------------------------------------------------------------------------
+
+/// Return the base URL from a source URL (scheme + host + "/").
+///
+/// Mirrors `GitHubChangeLogSource.getBaseUrl` from
+/// `lib/workers/repository/update/pr/changelog/source.ts`.
+pub fn changelog_get_base_url(source_url: Option<&str>) -> String {
+    let url = source_url.unwrap_or("").trim();
+    if url.is_empty() {
+        return String::new();
+    }
+    match url::Url::parse(url) {
+        Ok(parsed) => {
+            let scheme = parsed.scheme();
+            let host = parsed.host_str().unwrap_or("");
+            if host.is_empty() { String::new() } else { format!("{scheme}://{host}/") }
+        }
+        Err(_) => String::new(),
+    }
+}
+
+/// Extract the owner/repo path from a source URL.
+///
+/// Mirrors `GitHubChangeLogSource.getRepositoryFromUrl` from
+/// `lib/workers/repository/update/pr/changelog/source.ts`.
+pub fn changelog_get_repository_from_url(source_url: Option<&str>) -> String {
+    let url = source_url.unwrap_or("").trim();
+    if url.is_empty() {
+        return String::new();
+    }
+    let Ok(parsed) = url::Url::parse(url) else {
+        return String::new();
+    };
+    let path = parsed.path().trim_start_matches('/');
+    let parts: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    if parts.len() >= 2 {
+        format!("{}/{}", parts[0], parts[1])
+    } else {
+        String::new()
+    }
+}
+
+/// Return `true` when `repo` has exactly the form `"owner/repo"`.
+///
+/// Mirrors `GitHubChangeLogSource.hasValidRepository` from
+/// `lib/workers/repository/update/pr/changelog/source.ts`.
+pub fn changelog_has_valid_repository(repo: &str) -> bool {
+    let parts: Vec<&str> = repo.split('/').collect();
+    parts.len() == 2 && parts.iter().all(|p| !p.is_empty())
+}
+
+// ---------------------------------------------------------------------------
 // Package abandonment — lib/workers/repository/process/lookup/abandonment.ts
 // ---------------------------------------------------------------------------
 
@@ -3331,6 +3384,39 @@ mod tests {
     // ── module label utilities ────────────────────────────────────────────────
 
     // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
+    // ── changelog source ─────────────────────────────────────────────────────
+
+    // Ported: "handles unsupported sourceUrl" (getBaseUrl) — changelog/source.spec.ts line 13
+    // Ported: "handles sourceUrl" (getBaseUrl) — changelog/source.spec.ts line 22
+    #[test]
+    fn test_changelog_get_base_url() {
+        assert_eq!(changelog_get_base_url(None), "");
+        assert_eq!(
+            changelog_get_base_url(Some("https://github.com/renovatebot/renovate")),
+            "https://github.com/"
+        );
+    }
+
+    // Ported: "handles unsupported sourceUrl" (getRepositoryFromUrl) — changelog/source.spec.ts line 28
+    // Ported: "handles sourceUrl" (getRepositoryFromUrl) — changelog/source.spec.ts line 37
+    #[test]
+    fn test_changelog_get_repository_from_url() {
+        assert_eq!(changelog_get_repository_from_url(None), "");
+        assert_eq!(
+            changelog_get_repository_from_url(Some("https://github.com/renovatebot/renovate")),
+            "renovatebot/renovate"
+        );
+    }
+
+    // Ported: "handles invalid repository" — changelog/source.spec.ts line 45
+    // Ported: "handles valid repository" — changelog/source.spec.ts line 50
+    #[test]
+    fn test_changelog_has_valid_repository() {
+        assert!(!changelog_has_valid_repository("foo"));
+        assert!(!changelog_has_valid_repository("some/repo/name"));
+        assert!(changelog_has_valid_repository("some/repo"));
+    }
+
     // ── calculate_abandonment ─────────────────────────────────────────────────
 
     // Fixed "now" for abandonment tests: 2023-01-01T00:00:00.000Z
