@@ -5,7 +5,7 @@
 ## `lib/util/git/url.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/url.spec.ts
-**Total tests:** 23 | **Ported:** 0 | **Actionable:** 23 | **Status:** pending
+**Total tests:** 23 | **Ported:** 8 | **Actionable:** 23 | **Status:** partial
 
 ### `util/git/url › parseGitUrl`
 
@@ -17,15 +17,15 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns https url for git url | 40 | pending | — | — | — |
-| returns https url for https url | 44 | pending | — | — | — |
-| returns http url for http url | 48 | pending | — | — | — |
-| returns http url for ssh url with port | 52 | pending | — | — | — |
-| returns gitlab url with token | 60 | pending | — | — | — |
-| returns github url with token | 75 | pending | — | — | — |
+| returns https url for git url | 40 | ported | `util.rs` | `test_get_http_url_git` | — |
+| returns https url for https url | 44 | ported | `util.rs` | `test_get_http_url_https` | — |
+| returns http url for http url | 48 | ported | `util.rs` | `test_get_http_url_http` | — |
+| returns http url for ssh url with port | 52 | ported | `util.rs` | `test_get_http_url_ssh_with_port` | — |
+| returns gitlab url with token | 60 | ported | `util.rs` | `test_get_http_url_gitlab_token` | — |
+| returns github url with token | 75 | ported | `util.rs` | `test_get_http_url_github_token` | — |
 | returns bitbucket-server url | 90 | pending | — | — | — |
-| removes username/password from URL | 100 | pending | — | — | — |
-| replaces username/password with given token | 106 | pending | — | — | — |
+| removes username/password from URL | 100 | ported | `util.rs` | `test_get_http_url_removes_credentials` | — |
+| replaces username/password with given token | 106 | ported | `util.rs` | `test_get_http_url_replaces_credentials` | — |
 
 ### `util/git/url › getRemoteUrlWithToken()`
 
