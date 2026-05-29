@@ -5,7 +5,7 @@
 ## `lib/modules/manager/deno/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/update.spec.ts
-**Total tests:** 38 | **Ported:** 26 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 27 | **Actionable:** 38 | **Status:** partial
 
 ### `updateDependency › deno.json/jsonc`
 
@@ -37,6 +37,6 @@
 | handles complex JSON with nested structures | 648 | ported | `extractors/deno.rs` | `deno_update_complex_json` | —  | — | — | — |
 | handles the case where the desired version is already supported | 689 | ported | `extractors/deno.rs` | `deno_update_already_at_version` | — |
 | returns null if empty file | 712 | ported | `extractors/deno.rs` | `deno_update_empty_file` | — |
-| handles error during update gracefully | 731 | pending | — | — | — |
+| handles error during update gracefully | 731 | ported | `extractors/deno.rs` | `deno_update_invalid_json_returns_none` | — |
 
 ---
