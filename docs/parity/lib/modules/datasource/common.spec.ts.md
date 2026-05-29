@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/common.spec.ts
-**Total tests:** 30 | **Ported:** 17 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 21 | **Actionable:** 30 | **Status:** partial
 
 ### `modules/datasource/common › getDatasourceFor`
 
@@ -28,10 +28,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true for valid input | 62 | pending | — | — | —|
-| returns false for invalid input | 70 | pending | — | — | —|
-| returns false for input with missing properties | 78 | pending | — | — | —|
-| returns false for input with non-string properties | 85 | pending | — | — | —|
+| returns true for valid input | 62 | ported | `datasources.rs` | `is_get_pkg_releases_config_valid` | —  | — | — | —|
+| returns false for invalid input | 70 | ported | `datasources.rs` | `is_get_pkg_releases_config_empty_datasource` | —  | — | — | —|
+| returns false for input with missing properties | 78 | ported | `datasources.rs` | `is_get_pkg_releases_config_missing_package_name` | —  | — | — | —|
+| returns false for input with non-string properties | 85 | ported | `datasources.rs` | `is_get_pkg_releases_config_non_string_datasource` | —  | — | — | —|
 
 ### `modules/datasource/common › applyExtractVersion`
 

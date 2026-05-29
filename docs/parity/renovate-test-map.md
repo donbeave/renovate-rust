@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,046 / 11,666 total tests ported (43%) · pending 4,989 · not-applicable 1,631 (14% of total) — updated 2026-05-29
+**Progress:** 5,053 / 11,666 total tests ported (43%) · pending 4,977 · not-applicable 1,636 (14% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -172,7 +172,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/deb/index.spec.ts` | Not done | [details](lib/modules/datasource/deb/index.spec.ts.md) |
 | `lib/modules/datasource/deb/packages.spec.ts` | Not done | [details](lib/modules/datasource/deb/packages.spec.ts.md) |
 | `lib/modules/datasource/deb/url.spec.ts` | Not done | [details](lib/modules/datasource/deb/url.spec.ts.md) |
-| `lib/modules/datasource/utils.spec.ts` | Not done | [details](lib/modules/datasource/utils.spec.ts.md) |
+| `lib/modules/datasource/utils.spec.ts` | Done | [details](lib/modules/datasource/utils.spec.ts.md) |
 | `lib/modules/datasource/span-processor.spec.ts` | Not done | [details](lib/modules/datasource/span-processor.spec.ts.md) |
 | `lib/modules/datasource/postprocess-release.spec.ts` | Not done | [details](lib/modules/datasource/postprocess-release.spec.ts.md) |
 | `lib/modules/datasource/java-version/index.spec.ts` | Done | [details](lib/modules/datasource/java-version/index.spec.ts.md) |
@@ -195,7 +195,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/unity3d/index.spec.ts` | Done | [details](lib/modules/datasource/unity3d/index.spec.ts.md) |
 | `lib/modules/datasource/hackage/index.spec.ts` | Done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
 | `lib/modules/datasource/endoflife-date/index.spec.ts` | Done | [details](lib/modules/datasource/endoflife-date/index.spec.ts.md) |
-| `lib/modules/datasource/java-version/common.spec.ts` | Not done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
+| `lib/modules/datasource/java-version/common.spec.ts` | Done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
 | `lib/modules/datasource/git-refs/index.spec.ts` | Not done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
 | `lib/modules/datasource/dotnet-version/index.spec.ts` | Done | [details](lib/modules/datasource/dotnet-version/index.spec.ts.md) |
 | `lib/modules/datasource/elm-package/index.spec.ts` | Done | [details](lib/modules/datasource/elm-package/index.spec.ts.md) |
