@@ -3651,6 +3651,67 @@ pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
 }
 
 // ---------------------------------------------------------------------------
+// Repository error classification — lib/workers/repository/error.ts
+// ---------------------------------------------------------------------------
+
+/// Classify a repository error message by checking for known git/network error
+/// patterns.
+///
+/// Returns the Renovate error constant string for the error class:
+/// - `"external-host-error"` — git 5xx errors, access denied, remote hung up
+/// - `"temporary-error"` — git not-a-repository fatal error
+/// - `"unknown-error"` — anything else not in the known-constants list
+/// - or the original message if it is a recognized Renovate constant
+///
+/// Mirrors the pattern-matching in `handleError()` from
+/// `lib/workers/repository/error.ts`.
+pub fn classify_repo_error(message: &str) -> &str {
+    // Known Renovate constants pass through (they're handled separately in the
+    // full pipeline, but pattern-match the message here for error tests).
+    const KNOWN_CONSTANTS: &[&str] = &[
+        "temporary-error",
+        "external-host-error",
+        "unknown-error",
+        "repository-uninitiated",
+        "repository-empty",
+        "repository-renamed",
+        "repository-archived",
+        "repository-mirrored",
+        "repository-disabled",
+        "repository-not-found",
+        "repository-forked",
+        "repository-blocked",
+        "repository-access-forbidden",
+        "repository-changed",
+        "repository-no-config",
+        "platform-rate-limit-exceeded",
+        "platform-bad-credentials",
+        "missing-api-credentials",
+        "manager-lockfile-error",
+    ];
+    if KNOWN_CONSTANTS.contains(&message) {
+        return message;
+    }
+
+    // Git 5xx error
+    if message.contains("The requested URL returned error: 5") {
+        return "external-host-error";
+    }
+    // Git remote access denied or remote hung up
+    if message.contains("remote end hung up unexpectedly")
+        || message.contains("access denied or repository not exported")
+    {
+        return "external-host-error";
+    }
+    // Git not a repository
+    if message.contains("fatal: not a git repository") {
+        return "temporary-error";
+    }
+
+    "unknown-error"
+}
+
+// ---------------------------------------------------------------------------
 // Repository path utilities — lib/workers/global/index.ts
 // ---------------------------------------------------------------------------
 
@@ -7824,6 +7885,35 @@ dep1 = "^1.0.0"
         let found = find_hidden_unicode_chars(content);
         assert!(found.is_empty());
         assert!(!is_binary_content(content.as_bytes()));
+    }
+
+    // ── classify_repo_error ───────────────────────────────────────────────────
+
+    // Ported: "rewrites git 5xx error" — workers/repository/error.spec.ts line 91
+    #[test]
+    fn classify_repo_error_rewrites_git_5xx() {
+        let msg = "fatal: unable to access 'https://**redacted**@gitlab.com/learnox/learnox.git/': The requested URL returned error: 500\n";
+        assert_eq!(classify_repo_error(msg), "external-host-error");
+    }
+
+    // Ported: "rewrites git remote error" — workers/repository/error.spec.ts line 99
+    #[test]
+    fn classify_repo_error_rewrites_git_remote_error() {
+        let msg = "fatal: remote error: access denied or repository not exported: /b/nw/bd/27/47/159945428/108610112.git\n";
+        assert_eq!(classify_repo_error(msg), "external-host-error");
+    }
+
+    // Ported: "rewrites git fatal error" — workers/repository/error.spec.ts line 107
+    #[test]
+    fn classify_repo_error_rewrites_git_fatal() {
+        let msg = "fatal: not a git repository (or any parent up to mount point /mnt)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n";
+        assert_eq!(classify_repo_error(msg), "temporary-error");
+    }
+
+    // Ported: "handles unknown error" — workers/repository/error.spec.ts line 115
+    #[test]
+    fn classify_repo_error_unknown() {
+        assert_eq!(classify_repo_error("abcdefg"), "unknown-error");
     }
 
     // ── parse_repo_org ────────────────────────────────────────────────────────

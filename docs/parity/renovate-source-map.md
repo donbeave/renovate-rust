@@ -659,8 +659,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/npm/npmrc.ts` | — | not-started | npmrc parsing not ported |
 | `lib/modules/manager/npm/update/dependency/index.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | update_dependency_package_json: JSON format-preserving replacement with verified string matching; handles all dep types including packageManager, pnpm.overrides, nested overrides, resolutions, dependenciesMeta, pnpm patch pattern; all 24 spec tests ported |
 | `lib/modules/manager/npm/update/dependency/common.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | npm_get_new_git_value, npm_get_new_alias_value |
-| `lib/modules/manager/npm/update/dependency/pnpm.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | update_pnpm_workspace_dependency: YAML format-preserving scalar replacement for catalog and overrides entries; Missing: full pnpm workspace overrides test coverage |
-| `lib/modules/manager/npm/update/dependency/yarn.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | update_yarnrc_catalog_dependency: YAML format-preserving scalar replacement for yarn catalog entries; Missing: full test coverage for named catalogs and edge cases |
+| `lib/modules/manager/npm/update/dependency/pnpm.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | update_pnpm_workspace_dependency: all 24 tests ported; YAML format-preserving replacement with anchor, flow-style, quote-style, and key-rename support |
+| `lib/modules/manager/npm/update/dependency/yarn.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | update_yarnrc_catalog_dependency: all 25 of 26 tests ported (1 not-applicable: trace logger mock); YAML format-preserving replacement with anchor, flow-style, quote-style support |
 | `lib/modules/manager/npm/utils.ts` | — | not-started | Not ported |
 
 ### nuget
