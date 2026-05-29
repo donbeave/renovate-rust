@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,060 / 11,666 total tests ported (43%) · pending 4,955 · not-applicable 1,651 (14% of total) — updated 2026-05-29
+**Progress:** 5,060 / 11,666 total tests ported (43%) · pending 4,952 · not-applicable 1,654 (14% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -590,7 +590,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/gradle/update.spec.ts` | Done | [details](lib/modules/manager/gradle/update.spec.ts.md) |
 | `lib/modules/manager/gradle/utils.spec.ts` | Done | [details](lib/modules/manager/gradle/utils.spec.ts.md) |
 | `lib/modules/manager/gradle-wrapper/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gradle-wrapper/artifacts.spec.ts.md) |
-| `lib/modules/manager/gradle-wrapper/util.spec.ts` | Not done | [details](lib/modules/manager/gradle-wrapper/util.spec.ts.md) |
+| `lib/modules/manager/gradle-wrapper/util.spec.ts` | Done | [details](lib/modules/manager/gradle-wrapper/util.spec.ts.md) |
 | `lib/modules/manager/haskell-cabal/extract.spec.ts` | Done | [details](lib/modules/manager/haskell-cabal/extract.spec.ts.md) |
 | `lib/modules/manager/haskell-cabal/index.spec.ts` | Done | [details](lib/modules/manager/haskell-cabal/index.spec.ts.md) |
 | `lib/modules/manager/helmfile/artifacts.spec.ts` | Not done | [details](lib/modules/manager/helmfile/artifacts.spec.ts.md) |

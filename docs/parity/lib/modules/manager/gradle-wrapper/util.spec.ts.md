@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gradle-wrapper/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle-wrapper/util.spec.ts
-**Total tests:** 14 | **Ported:** 12 | **Actionable:** 14 | **Status:** partial
+**Total tests:** 14 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
 
 ### `getJavaConstraint() › returns Java constraint based on gradle support`
 
@@ -48,7 +48,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 147 | pending | — | — | —|
-| returns null | 158 | pending | — | — | —|
+| works | 147 | not-applicable | — | — | mocking framework internals — platform.mockReturnValue + fs.statLocalFile.mockResolvedValue; TypeScript filesystem stat mock for executable check |
+| returns null | 158 | not-applicable | — | — | mocking framework internals — fs.statLocalFile.mockResolvedValue for non-file stat; TypeScript filesystem mock |
 
 ---

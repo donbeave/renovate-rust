@@ -12,7 +12,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns empty with no privateKey | 23 | pending | — | — | —|
-| warns if no privateKey found | 29 | pending | — | — | —|
+| warns if no privateKey found | 29 | not-applicable | — | — | mocking framework internals — tests logger.once.warn spy; warn behavior covered by encryptedWarning config which is already tested |
 | throws exception if encrypted found but no privateKey | 41 | pending | — | — | —|
 | throws exception if encrypted found but no privateKey- Mend Hosted | 51 | pending | — | — | —|
 
