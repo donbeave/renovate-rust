@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,886 · not-applicable 2,711 (23% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,877 · not-applicable 2,720 (23% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -261,7 +261,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/maven/util.spec.ts` | Done | [details](lib/modules/datasource/maven/util.spec.ts.md) |
 | `lib/modules/datasource/maven/s3.spec.ts` | Not done | [details](lib/modules/datasource/maven/s3.spec.ts.md) |
 | `lib/modules/datasource/maven/index.spec.ts` | Not done | [details](lib/modules/datasource/maven/index.spec.ts.md) |
-| `lib/config/migrate-validate.spec.ts` | Not done | [details](lib/config/migrate-validate.spec.ts.md) |
+| `lib/config/migrate-validate.spec.ts` | Done | [details](lib/config/migrate-validate.spec.ts.md) |
 | `lib/config/massage.spec.ts` | Done | [details](lib/config/massage.spec.ts.md) |
 | `lib/config/secrets.spec.ts` | Done | [details](lib/config/secrets.spec.ts.md) |
 | `lib/config/inherit.spec.ts` | Done | [details](lib/config/inherit.spec.ts.md) |
@@ -278,10 +278,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/presets/internal/monorepos.spec.ts` | Done | [details](lib/config/presets/internal/monorepos.spec.ts.md) |
 | `lib/config/presets/internal/schedule.spec.ts` | Done | [details](lib/config/presets/internal/schedule.spec.ts.md) |
 | `lib/config/presets/internal/workarounds.spec.ts` | Done | [details](lib/config/presets/internal/workarounds.spec.ts.md) |
-| `lib/config/presets/local/common.spec.ts` | Not done | [details](lib/config/presets/local/common.spec.ts.md) |
+| `lib/config/presets/local/common.spec.ts` | Done | [details](lib/config/presets/local/common.spec.ts.md) |
 | `lib/config/presets/local/index.spec.ts` | Done | [details](lib/config/presets/local/index.spec.ts.md) |
 | `lib/config/presets/npm/index.spec.ts` | Not done | [details](lib/config/presets/npm/index.spec.ts.md) |
-| `lib/config/presets/util.spec.ts` | Not done | [details](lib/config/presets/util.spec.ts.md) |
+| `lib/config/presets/util.spec.ts` | Done | [details](lib/config/presets/util.spec.ts.md) |
 | `lib/config/parse.spec.ts` | Done | [details](lib/config/parse.spec.ts.md) |
 | `lib/config/app-strings.spec.ts` | Done | [details](lib/config/app-strings.spec.ts.md) |
 | `lib/config/defaults.spec.ts` | Done | [details](lib/config/defaults.spec.ts.md) |
