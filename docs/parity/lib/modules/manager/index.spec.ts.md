@@ -5,7 +5,7 @@
 ## `lib/modules/manager/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/index.spec.ts
-**Total tests:** 22 | **Ported:** 5 | **Actionable:** 22 | **Status:** partial
+**Total tests:** 22 | **Ported:** 6 | **Actionable:** 22 | **Status:** partial
 
 ### `modules/manager/index › supportedDatasources`
 
@@ -77,8 +77,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true | 252 | pending | — | — | — |
-| returns false | 258 | pending | — | — | — |
+| returns true | 252 | ported | `managers.rs` | `manager_registry_manager_exists` | — |
+| returns false | 258 | ported | `managers.rs` | `manager_registry_manager_exists` | — |
 
 ### `modules/manager/index › getPrettyDepType`
 

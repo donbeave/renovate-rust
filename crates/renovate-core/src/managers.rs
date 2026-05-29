@@ -1695,12 +1695,19 @@ mod tests {
     }
 
     // Ported: "gets something" — modules/manager/index.spec.ts line 38
+    // Ported: "returns true" — modules/manager/index.spec.ts line 252 (isKnownManager)
+    // Ported: "returns false" — modules/manager/index.spec.ts line 258 (isKnownManager)
     #[test]
     fn manager_registry_manager_exists() {
         assert!(manager_exists("dockerfile"));
         assert!(manager_exists("regex"));
         assert!(manager_exists("custom.regex"));
         assert!(!manager_exists("unknown-manager"));
+        // isKnownManager 'returns true' cases:
+        assert!(manager_exists("npm"));
+        // isKnownManager 'returns false' cases:
+        assert!(!manager_exists("npm-unkown"));
+        assert!(!manager_exists("custom.unknown"));
     }
 
     // Ported: "iterates through managers" — modules/manager/index.spec.ts line 108
