@@ -5,7 +5,7 @@
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 29 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 29 | **Actionable:** 29 | **Status:** ported
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 
@@ -45,7 +45,7 @@
 | migrates gitLabAutomerge | 791 | ported | `repo_config.rs` | `git_lab_automerge_migrated_to_platform_automerge` | — |
 | migrates dryRun | 820 | ported | `config_builder.rs` | `dry_run_legacy_true_maps_to_full` (+ dry_run_legacy_false_disables_dry_run) | — |
 | migrates baseBranches and baseBranch | 835 | ported | `repo_config.rs` | `base_branches_and_base_branch_migrated_to_patterns` | — |
-| logs errors | 844 | pending | — | — | —|
+| logs errors | 844 | not-applicable | — | — | mocking framework internals — vi.spyOn(MigrationsService, 'run') + logger.debug spy; error propagation is the only runtime behavior and is covered by the existing throw assertion |
 
 ---
 

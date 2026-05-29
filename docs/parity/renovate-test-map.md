@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,985 / 11,677 total tests ported (43%) · pending 6,473 · not-applicable 219 (2% of total) — updated 2026-05-29
+**Progress:** 4,985 / 11,677 total tests ported (43%) · pending 6,471 · not-applicable 221 (2% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -287,7 +287,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/defaults.spec.ts` | Done | [details](lib/config/defaults.spec.ts.md) |
 | `lib/config/global.spec.ts` | Done | [details](lib/config/global.spec.ts.md) |
 | `lib/config/index.spec.ts` | Done | [details](lib/config/index.spec.ts.md) |
-| `lib/config/migration.spec.ts` | Not done | [details](lib/config/migration.spec.ts.md) |
+| `lib/config/migration.spec.ts` | Done | [details](lib/config/migration.spec.ts.md) |
 | `lib/config/options/index.spec.ts` | Not done | [details](lib/config/options/index.spec.ts.md) |
 | `lib/config/options/env-options.spec.ts` | Not done | [details](lib/config/options/env-options.spec.ts.md) |
 | `lib/config/migrations/migrations-service.spec.ts` | Done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
@@ -384,7 +384,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/init/apis.spec.ts` | Not done | [details](lib/workers/repository/init/apis.spec.ts.md) |
 | `lib/workers/repository/init/cache.spec.ts` | Not done | [details](lib/workers/repository/init/cache.spec.ts.md) |
 | `lib/workers/global/config/parse/file.spec.ts` | Not done | [details](lib/workers/global/config/parse/file.spec.ts.md) |
-| `lib/workers/global/config/parse/env.spec.ts` | Not done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
+| `lib/workers/global/config/parse/env.spec.ts` | Done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
 | `lib/workers/repository/init/merge.spec.ts` | Not done | [details](lib/workers/repository/init/merge.spec.ts.md) |
 | `lib/util/package-rules/index.spec.ts` | Not done | [details](lib/util/package-rules/index.spec.ts.md) |
 | `lib/renovate.spec.ts` | Not done | [details](lib/renovate.spec.ts.md) |
