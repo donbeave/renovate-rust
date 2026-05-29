@@ -1800,6 +1800,123 @@ pub fn pretty_stdout_indent(s: &str, leading: bool) -> String {
     format!("{}{}", prefix, indented)
 }
 
+/// Bunyan fields that are excluded from details output.
+const BUNYAN_FIELDS: &[&str] = &["name", "hostname", "pid", "level", "v", "time", "msg", "start_time"];
+/// Meta fields that are excluded from details output.
+const PRETTY_META_FIELDS: &[&str] = &["repository", "baseBranch", "packageFile", "depType", "dependency", "dependencies", "branch"];
+
+/// Compact JSON stringify with spaces after `:` and `,`.
+/// Mirrors `json-stringify-pretty-compact` behavior for small objects.
+fn compact_stringify(v: &serde_json::Value) -> String {
+    match v {
+        serde_json::Value::Object(m) => {
+            let parts: Vec<String> = m.iter()
+                .map(|(k, v)| format!("{:?}: {}", k, compact_stringify(v)))
+                .collect();
+            format!("{{{}}}", parts.join(", "))
+        }
+        serde_json::Value::Array(a) => {
+            let parts: Vec<String> = a.iter().map(compact_stringify).collect();
+            format!("[{}]", parts.join(", "))
+        }
+        _ => serde_json::to_string(v).unwrap_or_default(),
+    }
+}
+
+/// Extract non-meta, non-bunyan fields from a log record and format them.
+///
+/// Mirrors `getDetails()` from `lib/logger/pretty-stdout.ts`.
+pub fn get_details(rec: Option<&serde_json::Value>) -> String {
+    let Some(rec) = rec else { return String::new(); };
+    let Some(obj) = rec.as_object() else { return String::new(); };
+
+    // Filter to only non-bunyan, non-meta, non-module keys
+    let filtered: Vec<(&str, &serde_json::Value)> = obj.iter()
+        .filter(|(k, _)| {
+            *k != "module"
+                && !BUNYAN_FIELDS.contains(&k.as_str())
+                && !PRETTY_META_FIELDS.contains(&k.as_str())
+        })
+        .map(|(k, v)| (k.as_str(), v))
+        .collect();
+
+    if filtered.is_empty() {
+        return String::new();
+    }
+
+    // Handle err.stack specially
+    if let Some((_, err_val)) = filtered.iter().find(|(k, _)| *k == "err") {
+        if let Some(err_obj) = err_val.as_object() {
+            if let Some(serde_json::Value::String(stack)) = err_obj.get("stack") {
+                let mut err_rest = err_obj.clone();
+                err_rest.remove("stack");
+                let stack = stack.clone();
+                let mut parts: Vec<String> = Vec::new();
+                for (key, val) in &filtered {
+                    if *key == "err" {
+                        if !err_rest.is_empty() {
+                            parts.push(pretty_stdout_indent(
+                                &format!("\"err\": {}", compact_stringify(&serde_json::Value::Object(err_rest.clone()))),
+                                true,
+                            ));
+                        }
+                    } else {
+                        parts.push(pretty_stdout_indent(
+                            &format!("\"{}\":{} {}", key, "", compact_stringify(val)),
+                            true,
+                        ));
+                    }
+                }
+                let json_part = parts.join(",\n");
+                let stack_part = pretty_stdout_indent(&stack, true);
+                return if json_part.is_empty() {
+                    format!("{}\n", stack_part)
+                } else {
+                    format!("{}\n{}\n", json_part, stack_part)
+                };
+            }
+        }
+    }
+
+    let lines: Vec<String> = filtered.iter()
+        .map(|(key, val)| pretty_stdout_indent(&format!("\"{}\": {}", key, compact_stringify(val)), true))
+        .collect();
+    format!("{}\n", lines.join(",\n"))
+}
+
+const LEVELS: &[(u64, &str)] = &[
+    (10, "TRACE"), (20, "DEBUG"), (30, " INFO"), (40, " WARN"), (50, "ERROR"), (60, "FATAL"),
+];
+
+/// Format a Bunyan log record for pretty stdout output.
+///
+/// Mirrors `formatRecord()` from `lib/logger/pretty-stdout.ts`.
+pub fn format_record(rec: &serde_json::Value, colorize: bool) -> String {
+    let level_num = rec.get("level").and_then(|v| v.as_u64()).unwrap_or(0);
+    let level = LEVELS.iter()
+        .find(|(n, _)| *n == level_num)
+        .map(|(_, s)| *s)
+        .unwrap_or("TRACE");
+    let msg = rec.get("msg").and_then(|v| v.as_str()).unwrap_or("");
+    // Build a minimal BunyanRecord for getMeta
+    let meta = {
+        let br = BunyanRecord {
+            repository: rec.get("repository").and_then(|v| v.as_str()),
+            base_branch: rec.get("baseBranch").and_then(|v| v.as_str()),
+            package_file: rec.get("packageFile").and_then(|v| v.as_str()),
+            dep_type: rec.get("depType").and_then(|v| v.as_str()),
+            dependency: rec.get("dependency").and_then(|v| v.as_str()),
+            dependencies: rec.get("dependencies").and_then(|v| v.as_str()),
+            branch: rec.get("branch").and_then(|v| v.as_str()),
+            module: rec.get("module").and_then(|v| v.as_str()),
+        };
+        get_meta(Some(&br), colorize)
+    };
+    let details = get_details(Some(rec));
+    let _ = colorize; // level colorization not implemented
+    format!("{}: {}{}\n{}", level, msg, meta, details)
+}
+
 // ---------------------------------------------------------------------------
 // Exec utilities — lib/util/exec/utils.ts
 // ---------------------------------------------------------------------------
@@ -7448,6 +7565,97 @@ dep1 = "^1.0.0"
             ..Default::default()
         };
         assert_eq!(get_meta(Some(&rec), false), " (repository=a/b) [test]");
+    }
+
+    // ── getDetails / formatRecord ────────────────────────────────────────────
+
+    // Ported: "returns empty string if null rec" — logger/pretty-stdout.spec.ts line 57
+    #[test]
+    fn test_get_details_null_rec() {
+        assert_eq!(get_details(None), "");
+    }
+
+    // Ported: "returns empty string if empty rec" — logger/pretty-stdout.spec.ts line 61
+    #[test]
+    fn test_get_details_empty_rec() {
+        assert_eq!(get_details(Some(&serde_json::json!({}))), "");
+    }
+
+    // Ported: "returns empty string if all are meta fields" — logger/pretty-stdout.spec.ts line 67
+    #[test]
+    fn test_get_details_all_meta_fields() {
+        let rec = serde_json::json!({"branch": "bar", "v": 0});
+        assert_eq!(get_details(Some(&rec)), "");
+    }
+
+    // Ported: "supports a config" — logger/pretty-stdout.spec.ts line 75
+    #[test]
+    fn test_get_details_config() {
+        let rec = serde_json::json!({"v": 0, "config": {"a": "b", "d": ["e", "f"]}});
+        let result = get_details(Some(&rec));
+        assert_eq!(result, "       \"config\": {\"a\": \"b\", \"d\": [\"e\", \"f\"]}\n");
+    }
+
+    // Ported: "formats err.stack as readable multi-line output" — logger/pretty-stdout.spec.ts line 88
+    #[test]
+    fn test_get_details_err_with_stack() {
+        let rec = serde_json::json!({
+            "v": 0,
+            "err": {
+                "message": "something broke",
+                "stack": "Error: something broke\n    at foo (file.js:1:1)"
+            }
+        });
+        let result = get_details(Some(&rec));
+        // err has message + stack: show err without stack, then stack on separate lines
+        assert!(result.contains("\"err\": {\"message\": \"something broke\"}"));
+        assert!(result.contains("Error: something broke"));
+        assert!(result.contains("    at foo (file.js:1:1)"));
+    }
+
+    // Ported: "formats err.stack without other err fields" — logger/pretty-stdout.spec.ts line 108
+    #[test]
+    fn test_get_details_err_stack_only() {
+        let rec = serde_json::json!({
+            "v": 0,
+            "err": {
+                "stack": "Error: oops\n    at bar (file.js:2:2)"
+            }
+        });
+        let result = get_details(Some(&rec));
+        // Only stack, no other err fields
+        assert!(!result.contains("\"err\":"));
+        assert!(result.contains("Error: oops"));
+        assert!(result.contains("    at bar (file.js:2:2)"));
+    }
+
+    // Ported: "formats record" — logger/pretty-stdout.spec.ts line 136
+    #[test]
+    fn test_format_record() {
+        let rec = serde_json::json!({
+            "level": 10,
+            "msg": "test message",
+            "v": 0,
+            "config": {"a": "b", "d": ["e", "f"]}
+        });
+        let result = format_record(&rec, false);
+        assert!(result.starts_with("TRACE: test message\n"));
+        assert!(result.contains("\"config\": {\"a\": \"b\", \"d\": [\"e\", \"f\"]}"));
+    }
+
+    // Ported: "formats record without colors" — logger/pretty-stdout.spec.ts line 155
+    #[test]
+    fn test_format_record_no_colors() {
+        let rec = serde_json::json!({
+            "level": 10,
+            "msg": "test message",
+            "v": 0,
+            "config": {"a": "b", "d": ["e", "f"]}
+        });
+        let result = format_record(&rec, false);
+        // No ANSI escape codes
+        assert!(!result.contains("\x1b["));
+        assert!(result.starts_with("TRACE: test message"));
     }
 
     // ── as_raw_commands ──────────────────────────────────────────────────────
