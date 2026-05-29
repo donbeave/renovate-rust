@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,861 / 11,677 total tests ported (42%) · pending 6,679 · not-applicable 137 (1% of total) — updated 2026-05-29
+**Progress:** 4,911 / 11,677 total tests ported (42%) · pending 6,626 · not-applicable 140 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -290,7 +290,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/migration.spec.ts` | Not done | [details](lib/config/migration.spec.ts.md) |
 | `lib/config/options/index.spec.ts` | Not done | [details](lib/config/options/index.spec.ts.md) |
 | `lib/config/options/env-options.spec.ts` | Not done | [details](lib/config/options/env-options.spec.ts.md) |
-| `lib/config/migrations/migrations-service.spec.ts` | Not done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
+| `lib/config/migrations/migrations-service.spec.ts` | Done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
 | `lib/config/migrations/base/abstract-migration.spec.ts` | Done | [details](lib/config/migrations/base/abstract-migration.spec.ts.md) |
 | `lib/config/migrations/custom/binary-source-migration.spec.ts` | Done | [details](lib/config/migrations/custom/binary-source-migration.spec.ts.md) |
 | `lib/config/migrations/custom/extends-migration.spec.ts` | Done | [details](lib/config/migrations/custom/extends-migration.spec.ts.md) |

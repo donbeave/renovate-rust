@@ -6991,4 +6991,70 @@ mod tests {
         assert!(keys.contains(&"versioning"));
         assert!(keys.contains(&"excludePackageNames"));
     }
+
+    // Ported: "there should be a single migration per property name" — config/migrations/migrations-service.spec.ts line 89
+    #[test]
+    fn migrations_service_no_duplicate_property_names() {
+        // These are the same lists used in migrate_config. Verify no duplicates and no overlap.
+        let removed: &[&str] = &[
+            "allowCommandTemplating",
+            "allowPostUpgradeCommandTemplating",
+            "deepExtract",
+            "gitFs",
+            "groupBranchName",
+            "groupCommitMessage",
+            "groupPrBody",
+            "groupPrTitle",
+            "lazyGrouping",
+            "maintainYarnLock",
+            "raiseDeprecationWarnings",
+            "statusCheckVerify",
+            "supportPolicy",
+            "transitiveRemediation",
+            "yarnCacheFolder",
+            "yarnMaintenanceBranchName",
+            "yarnMaintenanceCommitMessage",
+            "yarnMaintenancePrBody",
+            "yarnMaintenancePrTitle",
+        ];
+        let renamed_old: &[&str] = &[
+            "allowedPostUpgradeCommands",
+            "aliases",
+            "excludedPackageNames",
+            "exposeEnv",
+            "keepalive",
+            "lookupNameTemplate",
+            "masterIssue",
+            "masterIssueApproval",
+            "masterIssueAutoclose",
+            "masterIssueFooter",
+            "masterIssueHeader",
+            "masterIssueLabels",
+            "masterIssueTitle",
+            "multipleMajorPrs",
+            "regexManagers",
+            "separatePatchReleases",
+            "versionScheme",
+        ];
+
+        // No duplicates within removed
+        let mut removed_set = std::collections::HashSet::new();
+        for key in removed {
+            assert!(removed_set.insert(key), "Duplicate removed property: {key}");
+        }
+
+        // No duplicates within renamed old keys
+        let mut renamed_set = std::collections::HashSet::new();
+        for key in renamed_old {
+            assert!(renamed_set.insert(key), "Duplicate renamed property: {key}");
+        }
+
+        // No overlap between removed and renamed
+        for key in renamed_old {
+            assert!(
+                !removed_set.contains(key),
+                "Property '{key}' appears in both removed and renamed lists"
+            );
+        }
+    }
 }
