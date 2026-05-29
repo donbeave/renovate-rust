@@ -958,6 +958,19 @@ mod registry_tests {
         assert_eq!(dep.source_url.as_deref(), Some("https://github.com/some/package"));
     }
 
+    // Ported: "Should handle parsing/converting of GitHub sourceUrls with http and www correctly"
+    //         — modules/datasource/metadata.spec.ts line 319
+    #[test]
+    fn add_metadata_github_http_www_url() {
+        let mut dep = ReleaseResult {
+            source_url: Some("http://www.github.com/mockk/mockk/".into()),
+            releases: vec![Release { version: "1.9.3".into(), ..Default::default() }],
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "io.mockk:mockk");
+        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/mockk/mockk"));
+    }
+
     // ── apply_constraints_filtering tests ─────────────────────────────────
 
     // Ported: "should remove constraints from releases if constraintsFiltering is not strict" — modules/datasource/common.spec.ts line 201

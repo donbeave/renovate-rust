@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/metadata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata.spec.ts
-**Total tests:** 32 | **Ported:** 31 | **Actionable:** 32 | **Status:** partial
+**Total tests:** 32 | **Ported:** 32 | **Actionable:** 32 | **Status:** ported
 
 ### `modules/datasource/metadata`
 
@@ -23,7 +23,7 @@
 | Should handle failed parsing of sourceUrls for GitLab | 251 | ported | `datasources.rs` | `add_metadata_gitlab_invalid_url_unchanged` | — |
 | Should handle failed parsing of sourceUrls for other | 274 | ported | `datasources.rs` | `add_metadata_invalid_url_stays` | —  | — | — | — |
 | Should handle non-url | 297 | ported | `datasources.rs` | `add_metadata_removes_non_url_source` | —  | — | — | — |
-| Should handle parsing/converting of GitHub sourceUrls with http and www correctly | 319 | pending | — | — | — |
+| Should handle parsing/converting of GitHub sourceUrls with http and www correctly | 319 | ported | `datasources.rs` | `add_metadata_github_http_www_url` | — |
 | Should move github homepage to sourceUrl | 331 | ported | `datasources.rs` | `add_metadata_github_homepage_to_source_url` | —  | — | — | — |
 | Should handle parsing/converting of GitLab sourceUrls with http and www correctly | 345 | ported | `datasources.rs` | `add_metadata_gitlab_http_source_url` | —  | — | — | — |
 | Should normalize releaseTimestamp | 357 | ported | `datasources.rs` | `add_metadata_github_tree_no_subdir` | Tests GitHub /tree/master without subdir  | — | — | — |
