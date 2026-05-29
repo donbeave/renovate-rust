@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,969 / 11,677 total tests ported (43%) · pending 6,553 · not-applicable 155 (1% of total) — updated 2026-05-29
+**Progress:** 4,976 / 11,677 total tests ported (43%) · pending 6,544 · not-applicable 157 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -447,7 +447,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/metadata.spec.ts` | Not done | [details](lib/modules/manager/metadata.spec.ts.md) |
 | `lib/modules/versioning/schema.spec.ts` | Done | [details](lib/modules/versioning/schema.spec.ts.md) |
 | `lib/modules/versioning/index.spec.ts` | Not done | [details](lib/modules/versioning/index.spec.ts.md) |
-| `lib/modules/versioning/versioning-metadata.spec.ts` | Not done | [details](lib/modules/versioning/versioning-metadata.spec.ts.md) |
+| `lib/modules/versioning/versioning-metadata.spec.ts` | Done | [details](lib/modules/versioning/versioning-metadata.spec.ts.md) |
 | `lib/modules/versioning/generic.spec.ts` | Done | [details](lib/modules/versioning/generic.spec.ts.md) |
 | `lib/modules/versioning/distro.spec.ts` | Done | [details](lib/modules/versioning/distro.spec.ts.md) |
 | `lib/modules/versioning/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/versioning/kubernetes-api/index.spec.ts.md) |

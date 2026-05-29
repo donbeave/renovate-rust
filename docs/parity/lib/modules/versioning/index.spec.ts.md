@@ -14,7 +14,7 @@
 | should return versioning list | 8 | pending | — | — | —|
 | should fallback to semver-coerced | 12 | pending | — | — | —|
 | should accept config | 18 | pending | — | — | —|
-| matches the API contract | 22 | not-applicable | — | — | Tests TypeScript OOP API contract via dynamic import and Zod schema; TypeScript-specific reflection |
+| matches the API contract | 22 | not-applicable | — | — | TypeScript module system test; uses Zod schema + dynamic import to validate versioning API contract; TypeScript-specific reflection |
 
 ---
 

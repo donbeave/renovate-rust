@@ -5,14 +5,14 @@
 ## `lib/modules/versioning/versioning-metadata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/versioning-metadata.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `modules/versioning/versioning-metadata › %s`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| readme with no h1 or h2 markdown headers | 13 | pending | — | — | —|
-| contains mandatory fields | 40 | pending | — | — | —|
+| readme with no h1 or h2 markdown headers | 13 | not-applicable | — | — | TypeScript module system test; iterates versioning directories via Node.js fs.readdirSync and reads readme.md files |
+| contains mandatory fields | 40 | not-applicable | — | — | TypeScript module system test; uses Zod schema + dynamic import to validate versioning module exports |
 
 ---
 

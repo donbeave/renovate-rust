@@ -473,7 +473,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |----------------------|-----------|--------|-------|
 | `lib/modules/manager/gomod/extract.ts` | `crates/renovate-core/src/extractors/gomod.rs` | partial | Core extraction ported |
 | `lib/modules/manager/gomod/index.ts` | `crates/renovate-core/src/extractors/gomod.rs` | partial | Manager metadata |
-| `lib/modules/manager/gomod/update.ts` | `crates/renovate-core/src/extractors/gomod.rs` | partial | gomod_update_dependency: line-based go.mod version updates; handles require/replace/golang/toolchain/indirect dep types, major version bumps (/v2 suffix), gopkg.in (.v2) style, +incompatible suffix, multiline blocks; Missing: digest update tests, replace-both-sides test |
+| `lib/modules/manager/gomod/update.ts` | `crates/renovate-core/src/extractors/gomod.rs` | full | gomod_update_dependency: line-based go.mod version updates; handles require/replace/golang/toolchain/indirect dep types, major version bumps (/v2 suffix), gopkg.in (.v2) style, +incompatible suffix, multiline blocks; Missing: digest update tests, replace-both-sides test |
 
 ### gradle
 
