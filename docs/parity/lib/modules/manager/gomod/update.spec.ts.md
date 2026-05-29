@@ -37,7 +37,7 @@
 | handles +incompatible tag without duplicating it | 433 | ported | `extractors/gomod.rs` | `gomod_update_incompatible_no_duplicate` | — |
 | handles replace line with minor version update | 454 | ported | `extractors/gomod.rs` | `gomod_update_replace_minor` | — |
 | handles replace line with major version update | 472 | ported | `extractors/gomod.rs` | `gomod_update_replace_major` | — |
-| handles replace line with major version update that bumps both sides of the replace | 490 | pending | — | — | — |
+| handles replace line with major version update that bumps both sides of the replace | 490 | ported | `extractors/gomod.rs` | `gomod_update_replace_both_sides_major` | — |
 | handles replace line with digest | 521 | ported | `extractors/gomod.rs` | `gomod_update_replace_with_digest` | — |
 | handles no pinned version to latest available version | 538 | ported | `extractors/gomod.rs` | `gomod_update_no_pinned_version` | — |
 | handles multiline replace update | 554 | ported | `extractors/gomod.rs` | `gomod_update_multiline_replace` | — |

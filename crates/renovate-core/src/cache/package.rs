@@ -979,6 +979,16 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(-1));
     }
 
+    // Ported: "handles very large numbers" — util/cache/package/ttl.spec.ts line 306
+    #[test]
+    fn get_ttl_override_handles_very_large_numbers() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-npm".to_owned(), 999_999_999i64)].into(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(999_999_999));
+    }
+
     // Ported: "resolves TTL with glob pattern overrides" — util/cache/package/ttl.spec.ts line 391
     #[test]
     fn resolve_ttl_values_with_glob_override() {
