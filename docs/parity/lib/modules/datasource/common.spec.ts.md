@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/common.spec.ts
-**Total tests:** 30 | **Ported:** 27 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 28 | **Actionable:** 29 | **Status:** partial
 
 ### `modules/datasource/common › getDatasourceFor`
 
@@ -46,7 +46,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | should filter out invalid versions | 136 | ported | `util.rs` | `test_filter_valid_versions_removes_invalid` | — |
-| should use default versioning if none is specified | 144 | pending | — | — | — |
+| should use default versioning if none is specified | 144 | ported | `util.rs` | `test_filter_valid_versions_default_filters_invalid` | — |
 | should use specified versioning if provided | 152 | ported | `util.rs` | `test_filter_valid_versions_semver` | — |
 
 ### `modules/datasource/common › sortAndRemoveDuplicates`
@@ -54,7 +54,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | sorts releases by version and removes duplicates | 162 | ported | `util.rs` | `test_sort_and_remove_duplicates_sorts_and_deduplicates` | — |
-| uses default versioning if none is specified | 183 | pending | — | — | —|
+| uses default versioning if none is specified | 183 | not-applicable | — | — | mocking framework internals — tests logger.warn spy; functional behavior covered by sortAndRemoveDuplicates tests |
 
 ### `modules/datasource/common › applyConstraintsFiltering`
 

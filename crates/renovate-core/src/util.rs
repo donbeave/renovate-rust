@@ -8749,6 +8749,42 @@ dep1 = "^1.0.0"
         assert_eq!(result.len(), 2);
     }
 
+    // Ported: "should use default versioning if none is specified" — modules/datasource/common.spec.ts line 144
+    // TypeScript uses `datasource: 'foobar'` (unknown) → falls back to semver-coerced;
+    // 'invalid' version is filtered out, valid semver versions remain.
+    #[test]
+    fn test_filter_valid_versions_default_filters_invalid() {
+        let releases = vec![
+            mk_release("1.0.0"),
+            mk_release("2.0.0"),
+            mk_release("invalid"),
+        ];
+        let result = filter_valid_versions_default(releases);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].version, "1.0.0");
+        assert_eq!(result[1].version, "2.0.0");
+    }
+
+    // Ported: "should use default versioning if none is specified" — modules/datasource/common.spec.ts line 144
+    #[test]
+    fn test_filter_valid_versions_default_versioning() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0")];
+        let result = filter_valid_versions_default(releases);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].version, "1.0.0");
+        assert_eq!(result[1].version, "2.0.0");
+    }
+
+    // Ported: "uses default versioning if none is specified" — modules/datasource/common.spec.ts line 183
+    #[test]
+    fn test_sort_and_remove_duplicates_default_versioning() {
+        let releases = vec![mk_release("1.0.0"), mk_release("2.0.0")];
+        let result = sort_and_remove_duplicates_default(releases);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].version, "1.0.0");
+        assert_eq!(result[1].version, "2.0.0");
+    }
+
     // ── apply_version_compatibility ───────────────────────────────────────────
 
     // Ported: "returns immediately if no versionCompatibility" — modules/datasource/common.spec.ts line 378
