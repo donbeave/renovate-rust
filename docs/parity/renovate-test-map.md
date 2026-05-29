@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,877 · not-applicable 2,720 (23% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,856 · not-applicable 2,741 (23% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -382,7 +382,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/package-rules/jsonata.spec.ts` | Done | [details](lib/util/package-rules/jsonata.spec.ts.md) |
 | `lib/workers/global/config/parse/cli.spec.ts` | Done | [details](lib/workers/global/config/parse/cli.spec.ts.md) |
 | `lib/workers/repository/init/apis.spec.ts` | Done | [details](lib/workers/repository/init/apis.spec.ts.md) |
-| `lib/workers/repository/init/cache.spec.ts` | Not done | [details](lib/workers/repository/init/cache.spec.ts.md) |
+| `lib/workers/repository/init/cache.spec.ts` | Done | [details](lib/workers/repository/init/cache.spec.ts.md) |
 | `lib/workers/global/config/parse/file.spec.ts` | Done | [details](lib/workers/global/config/parse/file.spec.ts.md) |
 | `lib/workers/global/config/parse/env.spec.ts` | Done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
 | `lib/workers/repository/init/merge.spec.ts` | Done | [details](lib/workers/repository/init/merge.spec.ts.md) |
@@ -828,7 +828,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/global/index.spec.ts` | Done | [details](lib/workers/global/index.spec.ts.md) |
 | `lib/workers/global/initialize.spec.ts` | Done | [details](lib/workers/global/initialize.spec.ts.md) |
 | `lib/workers/global/limits.spec.ts` | Done | [details](lib/workers/global/limits.spec.ts.md) |
-| `lib/workers/repository/changelog/index.spec.ts` | Not done | [details](lib/workers/repository/changelog/index.spec.ts.md) |
+| `lib/workers/repository/changelog/index.spec.ts` | Done | [details](lib/workers/repository/changelog/index.spec.ts.md) |
 | `lib/workers/repository/common.spec.ts` | Done | [details](lib/workers/repository/common.spec.ts.md) |
 | `lib/workers/repository/config-migration/branch/commit-message.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) |
 | `lib/workers/repository/config-migration/branch/create.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/create.spec.ts.md) |
@@ -842,7 +842,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/error-config.spec.ts` | Done | [details](lib/workers/repository/error-config.spec.ts.md) |
 | `lib/workers/repository/error.spec.ts` | Done | [details](lib/workers/repository/error.spec.ts.md) |
 | `lib/workers/repository/errors-warnings.spec.ts` | Done | [details](lib/workers/repository/errors-warnings.spec.ts.md) |
-| `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | Not done | [details](lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) |
+| `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | Done | [details](lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) |
 | `lib/workers/repository/extract/file-match.spec.ts` | Done | [details](lib/workers/repository/extract/file-match.spec.ts.md) |
 | `lib/workers/repository/extract/index.spec.ts` | Done | [details](lib/workers/repository/extract/index.spec.ts.md) |
 | `lib/workers/repository/extract/manager-files.spec.ts` | Done | [details](lib/workers/repository/extract/manager-files.spec.ts.md) |
@@ -889,8 +889,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/branch/auto-replace.spec.ts` | Done | [details](lib/workers/repository/update/branch/auto-replace.spec.ts.md) |
 | `lib/workers/repository/update/branch/automerge.spec.ts` | Done | [details](lib/workers/repository/update/branch/automerge.spec.ts.md) |
 | `lib/workers/repository/update/branch/bump-versions.spec.ts` | Done | [details](lib/workers/repository/update/branch/bump-versions.spec.ts.md) |
-| `lib/workers/repository/update/branch/check-existing.spec.ts` | Not done | [details](lib/workers/repository/update/branch/check-existing.spec.ts.md) |
-| `lib/workers/repository/update/branch/commit.spec.ts` | Not done | [details](lib/workers/repository/update/branch/commit.spec.ts.md) |
+| `lib/workers/repository/update/branch/check-existing.spec.ts` | Done | [details](lib/workers/repository/update/branch/check-existing.spec.ts.md) |
+| `lib/workers/repository/update/branch/commit.spec.ts` | Done | [details](lib/workers/repository/update/branch/commit.spec.ts.md) |
 | `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts` | Done | [details](lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts.md) |
 | `lib/workers/repository/update/branch/get-updated.spec.ts` | Done | [details](lib/workers/repository/update/branch/get-updated.spec.ts.md) |
 | `lib/workers/repository/update/branch/index.spec.ts` | Done | [details](lib/workers/repository/update/branch/index.spec.ts.md) |
@@ -906,7 +906,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/pr/body/header.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/header.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/index.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/index.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/notes.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/notes.spec.ts.md) |
-| `lib/workers/repository/update/pr/body/updates-table.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/updates-table.spec.ts.md) |
+| `lib/workers/repository/update/pr/body/updates-table.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/updates-table.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/common.spec.ts` | Done | [details](lib/workers/repository/update/pr/changelog/common.spec.ts.md) |
@@ -926,7 +926,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/pr/pr-reuse.spec.ts` | Done | [details](lib/workers/repository/update/pr/pr-reuse.spec.ts.md) |
 | `lib/workers/repository/updates/branch-name.spec.ts` | Done | [details](lib/workers/repository/updates/branch-name.spec.ts.md) |
 | `lib/workers/repository/updates/branchify.spec.ts` | Done | [details](lib/workers/repository/updates/branchify.spec.ts.md) |
-| `lib/workers/repository/updates/flatten.spec.ts` | Not done | [details](lib/workers/repository/updates/flatten.spec.ts.md) |
+| `lib/workers/repository/updates/flatten.spec.ts` | Done | [details](lib/workers/repository/updates/flatten.spec.ts.md) |
 | `lib/workers/repository/updates/generate.spec.ts` | Not done | [details](lib/workers/repository/updates/generate.spec.ts.md) |
 | `test/docs/documentation.spec.ts` | Done | [details](test/docs/documentation.spec.ts.md) |
 | `test/other/sync-module-labels.spec.ts` | Done | [details](test/other/sync-module-labels.spec.ts.md) |
