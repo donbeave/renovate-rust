@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,987 / 11,677 total tests ported (43%) · pending 6,465 · not-applicable 225 (2% of total) — updated 2026-05-29
+**Progress:** 4,987 / 11,677 total tests ported (43%) · pending 6,439 · not-applicable 251 (2% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -368,7 +368,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/err-serializer.spec.ts` | Not done | [details](lib/logger/err-serializer.spec.ts.md) |
 | `lib/logger/once.spec.ts` | Not done | [details](lib/logger/once.spec.ts.md) |
 | `lib/logger/utils.spec.ts` | Done | [details](lib/logger/utils.spec.ts.md) |
-| `lib/logger/index.spec.ts` | Not done | [details](lib/logger/index.spec.ts.md) |
+| `lib/logger/index.spec.ts` | Done | [details](lib/logger/index.spec.ts.md) |
 | `lib/util/string-match.spec.ts` | Done | [details](lib/util/string-match.spec.ts.md) |
 | `lib/util/package-rules/managers.spec.ts` | Done | [details](lib/util/package-rules/managers.spec.ts.md) |
 | `lib/util/package-rules/dep-names.spec.ts` | Done | [details](lib/util/package-rules/dep-names.spec.ts.md) |
