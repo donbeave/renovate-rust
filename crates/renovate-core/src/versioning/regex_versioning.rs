@@ -138,6 +138,49 @@ impl RegexVersioning {
         Ordering::Equal
     }
 
+    /// Returns the numeric comparison value like TypeScript's `_compare()`.
+    ///
+    /// Returns the actual difference of the first differing release component
+    /// (e.g. -2 for major 1 vs 3), or -1/+1 for prerelease ordering, or 0 for
+    /// equal versions. Mirrors the return value of `GenericVersioningApi._compare`.
+    fn compare_numeric(&self, a: &str, b: &str) -> i32 {
+        let Some(left) = self.parse(a) else {
+            return 1;
+        };
+        let Some(right) = self.parse(b) else {
+            return 1;
+        };
+
+        let len = left.release.len().max(right.release.len());
+        for i in 0..len {
+            let lv = left.release.get(i).copied().unwrap_or(0) as i64;
+            let rv = right.release.get(i).copied().unwrap_or(0) as i64;
+            if lv != rv {
+                let diff = lv - rv;
+                return if diff > i32::MAX as i64 {
+                    i32::MAX
+                } else if diff < i32::MIN as i64 {
+                    i32::MIN
+                } else {
+                    diff as i32
+                };
+            }
+        }
+
+        match (&left.prerelease, &right.prerelease) {
+            (Some(lp), Some(rp)) => {
+                match numeric_aware_cmp(lp, rp) {
+                    Ordering::Less => -1,
+                    Ordering::Equal => 0,
+                    Ordering::Greater => 1,
+                }
+            }
+            (Some(_), None) => -1,
+            (None, Some(_)) => 1,
+            (None, None) => 0,
+        }
+    }
+
     // ── Public methods ────────────────────────────────────────────────────────
 
     pub fn is_valid(&self, version: &str) -> bool {
@@ -179,11 +222,7 @@ impl RegexVersioning {
     }
 
     pub fn sort_versions(&self, a: &str, b: &str) -> i32 {
-        match self.compare(a, b) {
-            Ordering::Less => -1,
-            Ordering::Equal => 0,
-            Ordering::Greater => 1,
-        }
+        self.compare_numeric(a, b)
     }
 
     pub fn matches_range(&self, version: &str, range: &str) -> bool {
@@ -193,9 +232,14 @@ impl RegexVersioning {
     pub fn is_compatible(&self, version: &str, current: &str) -> bool {
         let pv = self.parse(version);
         let pc = self.parse(current);
-        match (pv, pc) {
-            (Some(v), Some(c)) => v.compatibility == c.compatibility,
-            _ => false,
+        match pv {
+            None => false,
+            Some(v) => {
+                // When current fails to parse, compare against None (no compatibility group)
+                // mirrors TypeScript: parsedVersion.compatibility === parsedCurrent?.compatibility
+                let current_compat = pc.as_ref().and_then(|c| c.compatibility.as_deref());
+                v.compatibility.as_deref() == current_compat
+            }
         }
     }
 
@@ -213,6 +257,9 @@ impl RegexVersioning {
         current_version: Option<&str>,
         new_version: &str,
     ) -> Option<String> {
+        if new_version.is_empty() {
+            return None;
+        }
         if current_version == Some(&format!("v{current_value}")) {
             return Some(new_version.trim_start_matches('v').to_owned());
         }
@@ -582,6 +629,218 @@ mod tests {
         );
         assert_eq!(
             re.min_satisfying_version(versions, "12.7.0-debian-12-r100"),
+            None
+        );
+    }
+
+    // ── generic.spec.ts — GenericVersioningApi DummyScheme tests ────────────
+    //
+    // TypeScript uses GenericVersioningApi with _parse() → RegexVersioning
+    // with the same named-group pattern is the Rust equivalent.
+
+    fn dummy() -> RegexVersioning {
+        // mirrors the TypeScript DummyScheme pattern exactly
+        RegexVersioning::new(
+            r"^(?P<major>\d)\.(?P<minor>\d)\.(?P<patch>\d)(?:-(?P<prerelease>.+))?$",
+        )
+        .unwrap()
+    }
+
+    // Ported: "Scheme keys" — versioning/generic.spec.ts line 54
+    #[test]
+    fn generic_scheme_keys_api_methods_exist() {
+        let api = dummy();
+        // Verify all expected public API methods exist by calling them
+        assert!(api.is_valid("1.2.3"));
+        assert!(api.is_stable("1.2.3"));
+        assert!(api.get_major("1.2.3").is_some());
+        assert!(api.get_minor("1.2.3").is_some());
+        assert!(api.get_patch("1.2.3").is_some());
+        assert!(api.equals("1.2.3", "1.2.3"));
+        assert!(api.is_greater_than("3.2.1", "1.2.3"));
+        assert!(api.is_compatible("1.2.3", "1.0.0"));
+        // isSingleVersion and isVersion in TypeScript = is_valid in Rust for RegexVersioning
+        assert!(api.is_valid("1.2.3"));
+        assert!(api.matches_range("1.2.3", "1.2.3"));
+        assert!(api.sort_versions("1.2.3", "1.2.3") == 0);
+        assert!(api.is_less_than_range("1.2.3", "3.2.1"));
+        assert!(api.get_new_value("1.2.3", Some("1.2.3"), "3.2.1").is_some());
+    }
+
+    // Ported: "equals" — versioning/generic.spec.ts line 82
+    #[test]
+    fn generic_equals() {
+        let api = dummy();
+        assert!(api.equals("1.2.3", "1.2.3"));
+        assert!(!api.equals("1.2.3", "3.2.1"));
+    }
+
+    // Ported: "getMajor" — versioning/generic.spec.ts line 87
+    #[test]
+    fn generic_get_major() {
+        let api = dummy();
+        assert_eq!(api.get_major("4.5.6"), Some(4));
+        assert_eq!(api.get_major("invalid"), None);
+    }
+
+    // Ported: "getMinor" — versioning/generic.spec.ts line 92
+    #[test]
+    fn generic_get_minor() {
+        let api = dummy();
+        assert_eq!(api.get_minor("4.5.6"), Some(5));
+        assert_eq!(api.get_minor("invalid"), None);
+    }
+
+    // Ported: "getPatch" — versioning/generic.spec.ts line 97
+    #[test]
+    fn generic_get_patch() {
+        let api = dummy();
+        assert_eq!(api.get_patch("4.5.6"), Some(6));
+        assert_eq!(api.get_patch("invalid"), None);
+    }
+
+    // Ported: "getNewValue" — versioning/generic.spec.ts line 102
+    #[test]
+    fn generic_get_new_value() {
+        let api = dummy();
+        assert_eq!(
+            api.get_new_value("1.2.3", Some("1.2.3"), "3.2.1"),
+            Some("3.2.1".to_owned())
+        );
+        // currentVersion is v-prefixed → strip v from newVersion
+        assert_eq!(
+            api.get_new_value("1.2.3", Some("v1.2.3"), "v3.2.1"),
+            Some("3.2.1".to_owned())
+        );
+        // empty newVersion (equivalent to partial<NewValueConfig>({})) → None
+        assert_eq!(api.get_new_value("", None, ""), None);
+    }
+
+    // Ported: "isCompatible" — versioning/generic.spec.ts line 124
+    #[test]
+    fn generic_is_compatible() {
+        let api = dummy();
+        assert!(api.is_compatible("1.2.3", ""));
+    }
+
+    // Ported: "isGreaterThan" — versioning/generic.spec.ts line 128
+    #[test]
+    fn generic_is_greater_than() {
+        let api = dummy();
+        assert!(!api.is_greater_than("1.2.3", "3.2.1"));
+        assert!(api.is_greater_than("3.2.1", "1.2.3"));
+        assert!(api.is_greater_than("1.2.3-a10", "1.2.3-a1"));
+    }
+
+    // Ported: "isSingleVersion" — versioning/generic.spec.ts line 134
+    // TypeScript isSingleVersion = is_valid in Rust for RegexVersioning (all valid versions are single)
+    #[test]
+    fn generic_is_single_version() {
+        let api = dummy();
+        assert!(api.is_valid("1.2.3"));
+    }
+
+    // Ported: "isStable" — versioning/generic.spec.ts line 138
+    #[test]
+    fn generic_is_stable() {
+        let api = dummy();
+        assert!(api.is_stable("1.2.3"));
+    }
+
+    // Ported: "isValid" — versioning/generic.spec.ts line 142
+    #[test]
+    fn generic_is_valid() {
+        let api = dummy();
+        assert!(api.is_valid("1.2.3"));
+        assert!(api.is_valid("1.2.3-a1"));
+        assert!(!api.is_valid("invalid"));
+    }
+
+    // Ported: "isVersion" — versioning/generic.spec.ts line 148
+    // TypeScript isVersion = is_valid in Rust for RegexVersioning
+    #[test]
+    fn generic_is_version() {
+        let api = dummy();
+        assert!(api.is_valid("1.2.3"));
+        assert!(!api.is_valid("invalid"));
+    }
+
+    // Ported: "matches" — versioning/generic.spec.ts line 153
+    #[test]
+    fn generic_matches() {
+        let api = dummy();
+        assert!(api.matches_range("1.2.3", "1.2.3"));
+        assert!(!api.matches_range("1.2.3", "3.2.1"));
+    }
+
+    // Ported: "sortVersions" — versioning/generic.spec.ts line 158
+    #[test]
+    fn generic_sort_versions() {
+        let api = dummy();
+        assert_eq!(api.sort_versions("1.2.3", "1.2.3"), 0);
+        assert_eq!(api.sort_versions("1.2.3", "3.2.1"), -2);
+        assert_eq!(api.sort_versions("3.2.1", "1.2.3"), 2);
+    }
+
+    // Ported: "isLessThanRange" — versioning/generic.spec.ts line 164
+    #[test]
+    fn generic_is_less_than_range() {
+        let api = dummy();
+        assert!(api.is_less_than_range("1.2.3", "3.2.1"));
+        assert!(!api.is_less_than_range("3.2.1", "1.2.3"));
+    }
+
+    // Ported: "minSatisfyingVersion" — versioning/generic.spec.ts line 169
+    #[test]
+    fn generic_min_satisfying_version() {
+        let api = dummy();
+        assert_eq!(
+            api.min_satisfying_version(&["1.2.3"], "1.2.3"),
+            Some("1.2.3")
+        );
+        assert_eq!(
+            api.min_satisfying_version(&["1.1.1", "2.2.2", "3.3.3"], "2.2.2"),
+            Some("2.2.2")
+        );
+        assert_eq!(
+            api.min_satisfying_version(&["1.1.1", "2.2.2", "3.3.3"], "1.2.3"),
+            None
+        );
+    }
+
+    // Ported: "isSame" — versioning/generic.spec.ts line 189
+    // TypeScript: isSame(type, a, b) compares a component of two versions
+    #[test]
+    fn generic_is_same() {
+        let api = dummy();
+        // major: 4 == 4 (4.5.6 vs 4.6.0)
+        assert_eq!(api.get_major("4.5.6"), api.get_major("4.6.0")); // both 4
+        // major: 4 != 5 (4.5.6 vs 5.0.0)
+        assert_ne!(api.get_major("4.5.6"), api.get_major("5.0.0")); // 4 vs 5
+        // minor: 5 == 5 (4.5.6 vs 5.5.0)
+        assert_eq!(api.get_minor("4.5.6"), api.get_minor("5.5.0")); // both 5
+        // minor: 5 != 6 (4.5.6 vs 4.6.0)
+        assert_ne!(api.get_minor("4.5.6"), api.get_minor("4.6.0")); // 5 vs 6
+        // patch: 6 == 6 (4.5.6 vs 5.5.6)
+        assert_eq!(api.get_patch("4.5.6"), api.get_patch("5.5.6")); // both 6
+        // patch: 6 != 0 (4.5.6 vs 4.6.0)
+        assert_ne!(api.get_patch("4.5.6"), api.get_patch("4.6.0")); // 6 vs 0
+    }
+
+    // Ported: "getSatisfyingVersion" — versioning/generic.spec.ts line 179
+    #[test]
+    fn generic_get_satisfying_version() {
+        let api = dummy();
+        assert_eq!(
+            api.get_satisfying_version(&["1.2.3"], "1.2.3"),
+            Some("1.2.3")
+        );
+        assert_eq!(
+            api.get_satisfying_version(&["1.1.1", "2.2.2", "3.3.3"], "2.2.2"),
+            Some("2.2.2")
+        );
+        assert_eq!(
+            api.get_satisfying_version(&["1.1.1", "2.2.2", "3.3.3"], "1.2.3"),
             None
         );
     }
