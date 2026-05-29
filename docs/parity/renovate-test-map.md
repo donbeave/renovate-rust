@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,913 / 11,677 total tests ported (42%) · pending 6,621 · not-applicable 143 (1% of total) — updated 2026-05-29
+**Progress:** 4,916 / 11,677 total tests ported (42%) · pending 6,618 · not-applicable 143 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -163,7 +163,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/forgejo-releases/index.spec.ts` | Done | [details](lib/modules/datasource/forgejo-releases/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-releases/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-releases/index.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-tags/index.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-tags/index.spec.ts.md) |
-| `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
+| `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy-collection/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy-collection/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy/index.spec.ts.md) |
 | `lib/modules/datasource/repology/index.spec.ts` | Not done | [details](lib/modules/datasource/repology/index.spec.ts.md) |
@@ -193,7 +193,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/devbox/index.spec.ts` | Done | [details](lib/modules/datasource/devbox/index.spec.ts.md) |
 | `lib/modules/datasource/jenkins-plugins/index.spec.ts` | Done | [details](lib/modules/datasource/jenkins-plugins/index.spec.ts.md) |
 | `lib/modules/datasource/unity3d/index.spec.ts` | Done | [details](lib/modules/datasource/unity3d/index.spec.ts.md) |
-| `lib/modules/datasource/hackage/index.spec.ts` | Not done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
+| `lib/modules/datasource/hackage/index.spec.ts` | Done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
 | `lib/modules/datasource/endoflife-date/index.spec.ts` | Done | [details](lib/modules/datasource/endoflife-date/index.spec.ts.md) |
 | `lib/modules/datasource/java-version/common.spec.ts` | Not done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
 | `lib/modules/datasource/git-refs/index.spec.ts` | Not done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |

@@ -238,4 +238,13 @@ mod tests {
         assert_eq!(result.releases[1].version, "4.20.0.1");
         assert!(!result.releases[1].is_deprecated);
     }
+
+    // Ported: "return null with empty registryUrl" — datasource/hackage/index.spec.ts line 19
+    #[tokio::test]
+    async fn returns_null_with_empty_registry_url() {
+        let http = HttpClient::new().unwrap();
+        // Empty registry URL → URL construction produces a relative path → HTTP fails → None
+        let result = fetch_releases("", "base", &http).await.unwrap();
+        assert!(result.is_none());
+    }
 }

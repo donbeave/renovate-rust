@@ -261,16 +261,11 @@ mod tests {
     // Ported: "returns null on missing registryUrl" — datasource/bitbucket-server-tags/index.spec.ts line 80
     #[tokio::test]
     async fn returns_null_on_missing_registry_url() {
-        // No registry URL → the function gets no mock server, so it would fail with a network error
-        // In the TS test, a null registryUrl is passed. We model this as returning None for empty.
-        // For Rust: an empty registryUrl means we can't build a URL. Return None.
         let http = HttpClient::new().unwrap();
-        // We simulate by passing an empty string as registryUrl
-        // In practice the caller handles missing registryUrl before calling
-        // This test verifies the TS behavior of returning null for missing registryUrl
-        // which in Rust is handled at the caller level (before calling fetch_releases)
-        // Mark as trivially passing: TS returns null for missing registryUrl (caller check)
-        let _ = http;
+        // Empty registry URL → relative URL → HTTP fails; TypeScript getPkgReleases
+        // wrapper returns null for any failure when registryUrl is missing
+        let result = fetch_releases("", "some-org/notexisting", &http).await;
+        assert!(result.is_err() || matches!(result, Ok(None)));
     }
 
     // Ported: "handles not found" — datasource/bitbucket-server-tags/index.spec.ts line 88
@@ -414,8 +409,11 @@ mod tests {
     // Ported: "returns null on missing registryUrl" (getDigest) — datasource/bitbucket-server-tags/index.spec.ts line 211
     #[tokio::test]
     async fn get_digest_returns_null_on_missing_registry_url() {
-        // Same as above — no registryUrl means caller returns null before calling fetch_latest_commit
-        // Mark trivially passing
+        let http = HttpClient::new().unwrap();
+        // Empty registry URL → URL is relative → HTTP request fails → None
+        let result = fetch_latest_commit("", "some-org/notexisting", &http).await;
+        // Either Ok(None) or Err — both are "null" in TypeScript terms
+        assert!(result.is_err() || matches!(result, Ok(None)));
     }
 
     // Ported: "handles not found" (getDigest) — datasource/bitbucket-server-tags/index.spec.ts line 219
