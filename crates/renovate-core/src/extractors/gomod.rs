@@ -868,6 +868,228 @@ pub fn get_extra_deps_notice(
     Some(lines.join("\n"))
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// gomod updateDependency — lib/modules/manager/gomod/update.ts
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Manager-specific data for a gomod upgrade.
+#[derive(Debug, Clone, Default)]
+pub struct GoModManagerData {
+    /// 0-based line number in the go.mod file to update.
+    pub line_number: usize,
+    /// True when the dep is inside a `require (...)` block (indented line).
+    pub multi_line: bool,
+}
+
+/// Upgrade descriptor for `gomod_update_dependency`.
+#[derive(Debug, Clone, Default)]
+pub struct GoModUpdateUpgrade {
+    pub dep_name: Option<String>,
+    pub dep_type: Option<String>,
+    pub update_type: Option<String>,
+    pub new_value: Option<String>,
+    pub new_major: Option<u64>,
+    pub new_digest: Option<String>,
+    pub current_digest: Option<String>,
+    pub current_value: Option<String>,
+    pub manager_data: Option<GoModManagerData>,
+}
+
+/// Remove `/v<N>` or `.v<N>` version suffix from a package name.
+/// Mirrors `getNameWithNoVersion()` from `lib/modules/manager/gomod/update.ts`.
+fn gomod_name_without_version(name: &str) -> String {
+    // Remove trailing /v<digits>
+    let name = regex::Regex::new(r"/v\d+$")
+        .map(|re| re.replace(name, "").into_owned())
+        .unwrap_or_else(|_| name.to_owned());
+    // gopkg.in uses .v<digits> instead
+    if name.starts_with("gopkg.in") {
+        regex::Regex::new(r"\.v\d+$")
+            .map(|re| re.replace(&name, "").into_owned())
+            .unwrap_or(name)
+    } else {
+        name
+    }
+}
+
+/// Update a single dependency in a go.mod file.
+/// Mirrors `updateDependency()` from `lib/modules/manager/gomod/update.ts`.
+pub fn gomod_update_dependency(
+    file_content: &str,
+    upgrade: &GoModUpdateUpgrade,
+) -> Option<String> {
+    let current_name = upgrade.dep_name.as_deref()?;
+    let manager_data = upgrade.manager_data.as_ref()?;
+    let new_value = upgrade.new_value.as_deref().unwrap_or("");
+    let dep_type = upgrade.dep_type.as_deref().unwrap_or("");
+    let update_type = upgrade.update_type.as_deref().unwrap_or("");
+
+    if update_type == "replacement" {
+        return None;
+    }
+
+    let current_name_no_version = gomod_name_without_version(current_name);
+
+    // Split on any newline (\r\n or \n).
+    let lines: Vec<&str> = file_content.split('\n').collect();
+    let line_number = manager_data.line_number;
+    if line_number >= lines.len() {
+        return None;
+    }
+    let line_to_change = lines[line_number];
+
+    // Verify the line contains the dependency name (sans version suffix).
+    let rethink = "rethinkdb/rethinkdb-go.v5";
+    if !line_to_change.contains(current_name_no_version.as_str())
+        && !line_to_change.contains(rethink)
+    {
+        return None;
+    }
+
+    // Build the regex to match the version part of the line.
+    let update_line_exp: Option<regex::Regex> = if dep_type == "golang" || dep_type == "toolchain" {
+        regex::Regex::new(r"(?P<depPart>(?:toolchain )?go)(?P<divider>\s*)(?:[^\s]+|[\w]+)").ok()
+    } else if dep_type == "replace" {
+        if manager_data.multi_line {
+            regex::Regex::new(
+                r"^(?P<depPart>\s+[^\s]+[\s]+=>+\s+)(?P<divider>[^\s]+\s+)[^\s]+",
+            )
+            .ok()
+        } else {
+            regex::Regex::new(
+                r"^(?P<depPart>replace\s+[^\s]+[\s]+=>+\s+)(?P<divider>[^\s]+\s+)[^\s]+",
+            )
+            .ok()
+        }
+    } else if dep_type == "require" || dep_type == "indirect" {
+        if manager_data.multi_line {
+            regex::Regex::new(r"^(?P<depPart>\s+[^\s]+)(?P<divider>\s+)[^\s]+").ok()
+        } else {
+            regex::Regex::new(r"^(?P<depPart>require\s+[^\s]+)(?P<divider>\s+)[^\s]+").ok()
+        }
+    } else {
+        None
+    };
+
+    // If we have a regex but it doesn't match, bail.
+    if let Some(ref re) = update_line_exp {
+        if !re.is_match(line_to_change) {
+            return None;
+        }
+    }
+
+    // Perform the replacement.
+    let mut new_line: String = if update_type == "digest" {
+        // Digest update: use newValue directly for pseudo-versions.
+        if new_value.starts_with("v0.0.0-") {
+            if let Some(ref re) = update_line_exp {
+                re.replace(
+                    line_to_change,
+                    format!("$depPart${{divider}}{}", new_value),
+                )
+                .into_owned()
+            } else {
+                line_to_change.to_owned()
+            }
+        } else {
+            // Non-pseudo-version digest fallback.
+            let (cur_d, new_d) = (
+                upgrade.current_digest.as_deref().unwrap_or(""),
+                upgrade.new_digest.as_deref().unwrap_or(""),
+            );
+            let new_digest_sized = &new_d[..cur_d.len().min(new_d.len())];
+            if line_to_change.contains(new_digest_sized) {
+                return Some(file_content.to_owned());
+            }
+            if let Some(ref re) = update_line_exp {
+                re.replace(
+                    line_to_change,
+                    format!("$depPart${{divider}}{}", new_digest_sized),
+                )
+                .into_owned()
+            } else {
+                line_to_change.to_owned()
+            }
+        }
+    } else if let Some(ref re) = update_line_exp {
+        re.replace(
+            line_to_change,
+            format!("$depPart${{divider}}{}", new_value),
+        )
+        .into_owned()
+    } else {
+        line_to_change.to_owned()
+    };
+
+    // Handle major updates.
+    if update_type == "major" {
+        let new_major = upgrade.new_major.unwrap_or(0);
+        if current_name.starts_with("gopkg.in/") {
+            // gopkg.in uses .v<N> suffix in the dep name.
+            // Mirrors: newLine.replace(`.${oldV}`, `.v${newMajor}`)
+            let old_v_suffix = current_name.split('.').last().unwrap_or("v1");
+            let old_dotv = format!(".{}", old_v_suffix);
+            let new_dotv = format!(".v{}", new_major);
+            new_line = new_line.replacen(&old_dotv, &new_dotv, 1);
+            // Package rename: gorethink → rethinkdb.
+            new_line = new_line.replace(
+                "gorethink/gorethink.v5",
+                "rethinkdb/rethinkdb-go.v5",
+            );
+        } else if new_major > 1
+            && !new_line.contains(&format!("/v{}", new_major))
+            && !new_value.ends_with("+incompatible")
+        {
+            if current_name == current_name_no_version.as_str() {
+                // No existing version suffix → append /v<N>.
+                new_line = new_line.replace(
+                    current_name,
+                    &format!("{}/v{}", current_name, new_major),
+                );
+            } else {
+                // Replace existing version suffix.
+                let old_v = upgrade.current_value.as_deref().unwrap_or("").split('.').next().unwrap_or("v1");
+                let re_str = format!(r"/{}(\s+)", regex::escape(old_v));
+                if let Ok(re) = regex::Regex::new(&re_str) {
+                    new_line = re
+                        .replace(&new_line, format!("/v{}$1", new_major))
+                        .into_owned();
+                }
+            }
+        }
+    }
+
+    // Handle +incompatible suffix.
+    if line_to_change.ends_with("+incompatible") && !new_value.ends_with("+incompatible") {
+        let to_add = if update_type == "major"
+            && upgrade.new_major.map(|m| m >= 2).unwrap_or(false)
+        {
+            ""
+        } else {
+            "+incompatible"
+        };
+        new_line.push_str(to_add);
+    }
+
+    if new_line == line_to_change {
+        return Some(file_content.to_owned());
+    }
+
+    // Ensure indirect comment on indirect dep.
+    if dep_type == "indirect" {
+        let indirect_re =
+            regex::Regex::new(r"\s*(?://\s*indirect(?:\s*;)?\s*)*$").ok()?;
+        new_line = indirect_re
+            .replace(&new_line, " // indirect")
+            .into_owned();
+    }
+
+    let mut result_lines: Vec<String> = lines.iter().map(|s| (*s).to_owned()).collect();
+    result_lines[line_number] = new_line;
+    Some(result_lines.join("
+"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1949,5 +2171,342 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
     fn go_directive_constraint_no_match_prev_minor() {
         assert!(!semver_coerced::matches("1.18.0", "~1.19.x"));
         assert!(!semver_coerced::matches("1.18.5", "~1.19.x"));
+    }
+
+    // ── gomod updateDependency tests ───────────────────────────────────────
+
+    const GOMOD1: &str = include_str!("../../tests/fixtures/gomod/1-go-mod");
+    const GOMOD2: &str = include_str!("../../tests/fixtures/gomod/2-go-mod");
+    const GOMOD3: &str = include_str!("../../tests/fixtures/gomod/3-go-mod");
+
+    fn mk_gomod_upgrade(
+        dep_name: &str,
+        dep_type: &str,
+        new_value: &str,
+        line: usize,
+        multi: bool,
+    ) -> GoModUpdateUpgrade {
+        GoModUpdateUpgrade {
+            dep_name: Some(dep_name.into()),
+            dep_type: Some(dep_type.into()),
+            new_value: Some(new_value.into()),
+            manager_data: Some(GoModManagerData { line_number: line, multi_line: multi }),
+            ..Default::default()
+        }
+    }
+
+    // Ported: "replaces existing value" — gomod/update.spec.ts line 12
+    #[test]
+    fn gomod_update_replace_value() {
+        let u = mk_gomod_upgrade("github.com/pkg/errors", "require", "v0.8.0", 2, false);
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert_ne!(res, GOMOD1);
+        assert!(res.contains("v0.8.0"));
+    }
+
+    // Ported: "replaces golang version update" — gomod/update.spec.ts line 28
+    #[test]
+    fn gomod_update_golang_version() {
+        let u = mk_gomod_upgrade("go", "golang", "1.18", 2, false);
+        let res = gomod_update_dependency(GOMOD3, &u).unwrap();
+        assert_ne!(res, GOMOD3);
+        assert!(res.contains("1.18"));
+    }
+
+    // Ported: "replaces go toolchain" — gomod/update.spec.ts line 44
+    #[test]
+    fn gomod_update_toolchain() {
+        let u = mk_gomod_upgrade("go", "toolchain", "1.22.2", 134, false);
+        let res = gomod_update_dependency(GOMOD3, &u).unwrap();
+        assert_ne!(res, GOMOD3);
+        assert!(res.contains("1.22.2"));
+    }
+
+    // Ported: "returns same" — gomod/update.spec.ts line 90
+    #[test]
+    fn gomod_update_returns_same_if_no_change() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/pkg/errors".into()),
+            new_value: Some("v0.7.0".into()),
+            manager_data: Some(GoModManagerData { line_number: 2, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert_eq!(res, GOMOD1);
+    }
+
+    // Ported: "bumps major v0 > v1" — gomod/update.spec.ts line 104
+    #[test]
+    fn gomod_update_major_v0_to_v1() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/pkg/errors".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v1.0.0".into()),
+            current_value: Some("v0.7.0".into()),
+            new_major: Some(1),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 2, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("github.com/pkg/errors v1.0.0"));
+    }
+
+    // Ported: "replaces major updates > 1" — gomod/update.spec.ts line 123
+    #[test]
+    fn gomod_update_major_adds_v2_suffix() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/pkg/errors".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v2.0.0".into()),
+            current_value: Some("v0.7.0".into()),
+            new_major: Some(2),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 2, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("github.com/pkg/errors/v2 v2.0.0"));
+    }
+
+    // Ported: "bumps major with single package name component" — gomod/update.spec.ts line 142
+    #[test]
+    fn gomod_update_major_single_component() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("sigs.k8s.io/structured-merge-diff/v4".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v6.0.0".into()),
+            current_value: Some("v4.7.0".into()),
+            new_major: Some(6),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 15, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("sigs.k8s.io/structured-merge-diff/v6 v6.0.0"));
+    }
+
+    // Ported: "bumps major with multiple package name components" — gomod/update.spec.ts line 161
+    #[test]
+    fn gomod_update_major_multiple_components() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/cucumber/common/messages/go/v18".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v19.0.0".into()),
+            current_value: Some("v18.0.0".into()),
+            new_major: Some(19),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 16, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("github.com/cucumber/common/messages/go/v19 v19.0.0"));
+    }
+
+    // Ported: "replaces major gopkg.in updates" — gomod/update.spec.ts line 182
+    #[test]
+    fn gomod_update_major_gopkg_in() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("gopkg.in/russross/blackfriday.v1".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v2.0.0".into()),
+            current_value: Some("v1.0.0".into()),
+            new_major: Some(2),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 7, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("gopkg.in/russross/blackfriday.v2 v2.0.0"));
+    }
+
+    // Ported: "skip replacing incompatible major updates" — gomod/update.spec.ts line 202
+    #[test]
+    fn gomod_update_major_skip_incompatible() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/Azure/azure-sdk-for-go".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v26.0.0+incompatible".into()),
+            current_value: Some("v25.1.0+incompatible".into()),
+            new_major: Some(26),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 8, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("github.com/Azure/azure-sdk-for-go v26.0.0+incompatible"));
+    }
+
+    // Ported: "returns null if mismatch" — gomod/update.spec.ts line 223
+    #[test]
+    fn gomod_update_returns_null_if_mismatch() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/aws/aws-sdk-go".into()),
+            new_value: Some("v1.15.36".into()),
+            manager_data: Some(GoModManagerData { line_number: 2, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u);
+        assert!(res.is_none());
+    }
+
+    // Ported: "returns null if error" — gomod/update.spec.ts line 237
+    #[test]
+    fn gomod_update_returns_null_on_empty() {
+        let res = gomod_update_dependency("", &GoModUpdateUpgrade::default());
+        assert!(res.is_none());
+    }
+
+    // Ported: "replaces multiline" — gomod/update.spec.ts line 247
+    #[test]
+    fn gomod_update_multiline() {
+        let u = mk_gomod_upgrade("github.com/fatih/color", "require", "v1.8.0", 8, true);
+        let res = gomod_update_dependency(GOMOD2, &u).unwrap();
+        assert!(res.contains("github.com/fatih/color v1.8.0"));
+    }
+
+    // Ported: "replaces major multiline" — gomod/update.spec.ts line 280
+    #[test]
+    fn gomod_update_major_multiline() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/emirpasic/gods".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v2.0.0".into()),
+            current_value: Some("v1.9.0".into()),
+            new_major: Some(2),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 7, multi_line: true }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD2, &u).unwrap();
+        assert!(res.contains("github.com/emirpasic/gods/v2 v2.0.0"));
+    }
+
+    // Ported: "bumps major multiline" — gomod/update.spec.ts line 299
+    #[test]
+    fn gomod_update_major_multiline_bump() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/src-d/gcfg/v2".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v3.0.0".into()),
+            current_value: Some("v2.3.0".into()),
+            new_major: Some(3),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 47, multi_line: true }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD2, &u).unwrap();
+        assert!(res.contains("github.com/src-d/gcfg/v3 v3.0.0"));
+    }
+
+    // Ported: "bumps major v0 > v1 multiline" — gomod/update.spec.ts line 317
+    #[test]
+    fn gomod_update_major_v0_v1_multiline() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("golang.org/x/text".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v1.0.0".into()),
+            current_value: Some("v0.3.0".into()),
+            new_major: Some(1),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 56, multi_line: true }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD2, &u).unwrap();
+        assert!(res.contains("golang.org/x/text v1.0.0"));
+    }
+
+    // Ported: "handles multiline mismatch" — gomod/update.spec.ts line 395
+    #[test]
+    fn gomod_update_multiline_mismatch() {
+        let u = mk_gomod_upgrade("github.com/fatih/color", "require", "v1.8.0", 8, false);
+        let res = gomod_update_dependency(GOMOD2, &u);
+        assert!(res.is_none());
+    }
+
+    // Ported: "handles +incompatible tag" — gomod/update.spec.ts line 412
+    #[test]
+    fn gomod_update_incompatible_tag_preserved() {
+        let u = mk_gomod_upgrade("github.com/Azure/azure-sdk-for-go", "require", "v26.0.0", 8, false);
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("github.com/Azure/azure-sdk-for-go v26.0.0+incompatible"));
+    }
+
+    // Ported: "handles +incompatible tag without duplicating it" — gomod/update.spec.ts line 433
+    #[test]
+    fn gomod_update_incompatible_no_duplicate() {
+        let u = mk_gomod_upgrade("github.com/Azure/azure-sdk-for-go", "require", "v26.0.0+incompatible", 8, false);
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(!res.contains("v26.0.0+incompatible+incompatible"));
+        assert!(res.contains("github.com/Azure/azure-sdk-for-go v26.0.0+incompatible"));
+    }
+
+    // Ported: "handles replace line with minor version update" — gomod/update.spec.ts line 454
+    #[test]
+    fn gomod_update_replace_minor() {
+        let u = mk_gomod_upgrade("github.com/pravesht/gocql", "replace", "v0.0.1", 11, false);
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("github.com/pravesht/gocql v0.0.1"));
+    }
+
+    // Ported: "handles replace line with major version update" — gomod/update.spec.ts line 472
+    #[test]
+    fn gomod_update_replace_major() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/pravesht/gocql".into()),
+            dep_type: Some("replace".into()),
+            new_value: Some("v2.0.0".into()),
+            current_value: Some("v0.7.0".into()),
+            new_major: Some(2),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 11, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("github.com/pravesht/gocql/v2 v2.0.0"));
+    }
+
+    // Ported: "handles no pinned version to latest available version" — gomod/update.spec.ts line 538
+    #[test]
+    fn gomod_update_no_pinned_version() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/caarlos0/env".into()),
+            dep_type: Some("require".into()),
+            new_value: Some("v6.1.0".into()),
+            current_value: Some("v3.5.0+incompatible".into()),
+            new_major: Some(6),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 13, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("github.com/caarlos0/env/v6 v6.1.0"));
+    }
+
+    // Ported: "should return null for replacement" — gomod/update.spec.ts line 575
+    #[test]
+    fn gomod_update_null_for_replacement() {
+        let u = GoModUpdateUpgrade {
+            update_type: Some("replacement".into()),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency("", &u);
+        assert!(res.is_none());
+    }
+
+    // Ported: "should perform indirect upgrades when top-level" — gomod/update.spec.ts line 583
+    #[test]
+    fn gomod_update_indirect_top_level() {
+        let u = mk_gomod_upgrade("github.com/davecgh/go-spew", "indirect", "v1.1.1", 4, false);
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("v1.1.1 // indirect"));
+    }
+
+    // Ported: "should perform indirect upgrades when in require blocks" — gomod/update.spec.ts line 601
+    #[test]
+    fn gomod_update_indirect_in_block() {
+        let u = mk_gomod_upgrade("github.com/go-ole/go-ole", "indirect", "v1.5.0", 23, true);
+        let res = gomod_update_dependency(GOMOD3, &u).unwrap();
+        assert!(res.contains("v1.5.0 // indirect"));
     }
 }

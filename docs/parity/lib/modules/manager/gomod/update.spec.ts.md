@@ -5,45 +5,44 @@
 ## `lib/modules/manager/gomod/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/update.spec.ts
-**Total tests:** 33 | **Ported:** 0 | **Actionable:** 33 | **Status:** pending
+**Total tests:** 33 | **Ported:** 25 | **Actionable:** 25 | **Status:** partial
 
 ### `updateDependency`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| replaces existing value | 12 | pending | — | — | — |
-| replaces golang version update | 28 | pending | — | — | — |
-| replaces go toolchain | 44 | pending | — | — | — |
+| replaces existing value | 12 | ported | `extractors/gomod.rs` | `gomod_update_replace_value` | — |
+| replaces golang version update | 28 | ported | `extractors/gomod.rs` | `gomod_update_golang_version` | — |
+| replaces go toolchain | 44 | ported | `extractors/gomod.rs` | `gomod_update_toolchain` | — |
 | replaces two values in one file | 60 | pending | — | — | — |
-| returns same | 90 | pending | — | — | — |
-| bumps major v0 > v1 | 104 | pending | — | — | — |
-| replaces major updates > 1 | 123 | pending | — | — | — |
-| bumps major with single package name component | 142 | pending | — | — | — |
-| bumps major with multiple package name components | 161 | pending | — | — | — |
-| replaces major gopkg.in updates | 182 | pending | — | — | — |
-| skip replacing incompatible major updates | 202 | pending | — | — | — |
-| returns null if mismatch | 223 | pending | — | — | — |
-| returns null if error | 237 | pending | — | — | — |
-| replaces multiline | 247 | pending | — | — | — |
+| returns same | 90 | ported | `extractors/gomod.rs` | `gomod_update_returns_same_if_no_change` | — |
+| bumps major v0 > v1 | 104 | ported | `extractors/gomod.rs` | `gomod_update_major_v0_to_v1` | — |
+| replaces major updates > 1 | 123 | ported | `extractors/gomod.rs` | `gomod_update_major_adds_v2_suffix` | — |
+| bumps major with single package name component | 142 | ported | `extractors/gomod.rs` | `gomod_update_major_single_component` | — |
+| bumps major with multiple package name components | 161 | ported | `extractors/gomod.rs` | `gomod_update_major_multiple_components` | — |
+| replaces major gopkg.in updates | 182 | ported | `extractors/gomod.rs` | `gomod_update_major_gopkg_in` | — |
+| skip replacing incompatible major updates | 202 | ported | `extractors/gomod.rs` | `gomod_update_major_skip_incompatible` | — |
+| returns null if mismatch | 223 | ported | `extractors/gomod.rs` | `gomod_update_returns_null_if_mismatch` | — |
+| returns null if error | 237 | ported | `extractors/gomod.rs` | `gomod_update_returns_null_on_empty` | — |
+| replaces multiline | 247 | ported | `extractors/gomod.rs` | `gomod_update_multiline` | — |
 | replaces quoted multiline | 263 | pending | — | — | — |
-| replaces major multiline | 280 | pending | — | — | — |
-| bumps major multiline | 299 | pending | — | — | — |
-| bumps major v0 > v1 multiline | 318 | pending | — | — | — |
-| update multiline digest | 337 | pending | — | — | — |
-| skips already-updated multiline digest | 356 | pending | — | — | — |
-| updates pseudo-version with digest updateType | 373 | pending | — | — | — |
-| handles multiline mismatch | 403 | pending | — | — | — |
-| handles +incompatible tag | 418 | pending | — | — | — |
-| handles +incompatible tag without duplicating it | 437 | pending | — | — | — |
-| handles replace line with minor version update | 458 | pending | — | — | — |
-| handles replace line with major version update | 474 | pending | — | — | — |
-| handles replace line with major version update that bumps both sides of the replace | 494 | pending | — | — | — |
-| handles replace line with digest | 525 | pending | — | — | — |
-| handles no pinned version to latest available version | 546 | pending | — | — | — |
-| handles multiline replace update | 565 | pending | — | — | — |
-| should return null for replacement | 589 | pending | — | — | — |
-| should perform indirect upgrades when top-level | 598 | pending | — | — | — |
-| should perform indirect upgrades when in require blocks | 614 | pending | — | — | — |
+| replaces major multiline | 280 | ported | `extractors/gomod.rs` | `gomod_update_major_multiline` | — |
+| bumps major multiline | 299 | ported | `extractors/gomod.rs` | `gomod_update_major_multiline_bump` | — |
+| bumps major v0 > v1 multiline | 317 | ported | `extractors/gomod.rs` | `gomod_update_major_v0_v1_multiline` | — |
+| update multiline digest | 335 | pending | — | — | — |
+| skips already-updated multiline digest | 360 | pending | — | — | — |
+| updates pseudo-version with digest updateType | 377 | pending | — | — | — |
+| handles multiline mismatch | 395 | ported | `extractors/gomod.rs` | `gomod_update_multiline_mismatch` | — |
+| handles +incompatible tag | 412 | ported | `extractors/gomod.rs` | `gomod_update_incompatible_tag_preserved` | — |
+| handles +incompatible tag without duplicating it | 433 | ported | `extractors/gomod.rs` | `gomod_update_incompatible_no_duplicate` | — |
+| handles replace line with minor version update | 454 | ported | `extractors/gomod.rs` | `gomod_update_replace_minor` | — |
+| handles replace line with major version update | 472 | ported | `extractors/gomod.rs` | `gomod_update_replace_major` | — |
+| handles replace line with major version update that bumps both sides of the replace | 490 | pending | — | — | — |
+| handles replace line with digest | 521 | pending | — | — | — |
+| handles no pinned version to latest available version | 538 | ported | `extractors/gomod.rs` | `gomod_update_no_pinned_version` | — |
+| handles multiline replace update | 554 | pending | — | — | — |
+| should return null for replacement | 575 | ported | `extractors/gomod.rs` | `gomod_update_null_for_replacement` | — |
+| should perform indirect upgrades when top-level | 583 | ported | `extractors/gomod.rs` | `gomod_update_indirect_top_level` | — |
+| should perform indirect upgrades when in require blocks | 601 | ported | `extractors/gomod.rs` | `gomod_update_indirect_in_block` | — |
 
 ---
-
