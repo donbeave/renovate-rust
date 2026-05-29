@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 4,023 · not-applicable 2,574 (22% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,979 · not-applicable 2,618 (22% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -379,7 +379,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/package-rules/current-age.spec.ts` | Done | [details](lib/util/package-rules/current-age.spec.ts.md) |
 | `lib/util/package-rules/repositories.spec.ts` | Done | [details](lib/util/package-rules/repositories.spec.ts.md) |
 | `lib/util/package-rules/current-version.spec.ts` | Done | [details](lib/util/package-rules/current-version.spec.ts.md) |
-| `lib/util/package-rules/jsonata.spec.ts` | Not done | [details](lib/util/package-rules/jsonata.spec.ts.md) |
+| `lib/util/package-rules/jsonata.spec.ts` | Done | [details](lib/util/package-rules/jsonata.spec.ts.md) |
 | `lib/workers/global/config/parse/cli.spec.ts` | Done | [details](lib/workers/global/config/parse/cli.spec.ts.md) |
 | `lib/workers/repository/init/apis.spec.ts` | Done | [details](lib/workers/repository/init/apis.spec.ts.md) |
 | `lib/workers/repository/init/cache.spec.ts` | Not done | [details](lib/workers/repository/init/cache.spec.ts.md) |
@@ -515,7 +515,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/ruby/index.spec.ts` | Done | [details](lib/modules/versioning/ruby/index.spec.ts.md) |
 | `lib/modules/versioning/git/index.spec.ts` | Done | [details](lib/modules/versioning/git/index.spec.ts.md) |
 | `lib/config/presets/index.spec.ts` | Done | [details](lib/config/presets/index.spec.ts.md) |
-| `lib/config/presets/internal/custom-managers.spec.ts` | Not done | [details](lib/config/presets/internal/custom-managers.spec.ts.md) |
+| `lib/config/presets/internal/custom-managers.spec.ts` | Done | [details](lib/config/presets/internal/custom-managers.spec.ts.md) |
 | `lib/config/presets/parse.spec.ts` | Done | [details](lib/config/presets/parse.spec.ts.md) |
 | `lib/modules/manager/bazel/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bazel/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazel/common.spec.ts` | Done | [details](lib/modules/manager/bazel/common.spec.ts.md) |
@@ -928,7 +928,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/updates/branchify.spec.ts` | Done | [details](lib/workers/repository/updates/branchify.spec.ts.md) |
 | `lib/workers/repository/updates/flatten.spec.ts` | Not done | [details](lib/workers/repository/updates/flatten.spec.ts.md) |
 | `lib/workers/repository/updates/generate.spec.ts` | Not done | [details](lib/workers/repository/updates/generate.spec.ts.md) |
-| `test/docs/documentation.spec.ts` | Not done | [details](test/docs/documentation.spec.ts.md) |
+| `test/docs/documentation.spec.ts` | Done | [details](test/docs/documentation.spec.ts.md) |
 | `test/other/sync-module-labels.spec.ts` | Done | [details](test/other/sync-module-labels.spec.ts.md) |
 | `test/other/validate-config-files.spec.ts` | Done | [details](test/other/validate-config-files.spec.ts.md) |
 | `test/other/validate-docker.spec.ts` | Not done | [details](test/other/validate-docker.spec.ts.md) |
