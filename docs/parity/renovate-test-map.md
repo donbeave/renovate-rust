@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,831 · not-applicable 2,766 (24% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,826 · not-applicable 2,771 (24% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -140,7 +140,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/aws-machine-image/index.spec.ts` | Done | [details](lib/modules/datasource/aws-machine-image/index.spec.ts.md) |
 | `lib/modules/datasource/aws-rds/index.spec.ts` | Done | [details](lib/modules/datasource/aws-rds/index.spec.ts.md) |
 | `lib/modules/datasource/datasource.spec.ts` | Not done | [details](lib/modules/datasource/datasource.spec.ts.md) |
-| `lib/modules/datasource/azure-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
+| `lib/modules/datasource/azure-tags/index.spec.ts` | Done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
 | `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/schema.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) |
 | `lib/modules/datasource/cpan/schema.spec.ts` | Done | [details](lib/modules/datasource/cpan/schema.spec.ts.md) |
