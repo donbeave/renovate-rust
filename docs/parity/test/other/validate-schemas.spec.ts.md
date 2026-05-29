@@ -5,7 +5,7 @@
 ## `test/other/validate-schemas.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/test/other/validate-schemas.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** done
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
 
 ### `other/validate-schemas`
 
