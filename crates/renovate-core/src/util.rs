@@ -3651,6 +3651,53 @@ pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
 }
 
 // ---------------------------------------------------------------------------
+// Unicode hidden character utilities — lib/util/unicode.ts
+// ---------------------------------------------------------------------------
+
+/// Detect binary content by checking for null bytes in the first 8 KB.
+///
+/// Mirrors `isBinaryContent()` from `lib/util/unicode.ts`.
+pub fn is_binary_content(bytes: &[u8]) -> bool {
+    let sample_size = bytes.len().min(8192);
+    bytes[..sample_size].contains(&0u8)
+}
+
+/// Unicode code points that are considered "hidden" (invisible/control characters).
+///
+/// Mirrors `hiddenUnicodeCharactersRegex` from `lib/util/regex.ts`.
+const HIDDEN_UNICODE_CHARS: &[char] = &[
+    '\u{00A0}', // Non-breaking space
+    '\u{1680}', // Ogham space mark
+    '\u{2000}', '\u{2001}', '\u{2002}', '\u{2003}', '\u{2004}', '\u{2005}',
+    '\u{2006}', '\u{2007}', '\u{2008}', '\u{2009}', '\u{200A}', // Various spaces
+    '\u{2028}', // Line separator
+    '\u{2029}', // Paragraph separator
+    '\u{202F}', // Narrow no-break space
+    '\u{205F}', // Medium mathematical space
+    '\u{3000}', // Ideographic space
+    '\u{200B}', // Zero-width space
+    '\u{200C}', // Zero-width non-joiner
+    '\u{FEFF}', // BOM / zero-width no-break space
+    '\u{200E}', // Left-to-right mark
+    '\u{200F}', // Right-to-left mark
+    '\u{202A}', '\u{202B}', '\u{202C}', '\u{202D}', '\u{202E}', // Bidirectional controls
+    '\u{00AD}', // Soft hyphen
+];
+
+/// Return the hidden Unicode characters found in `content`.
+///
+/// Returns a `Vec<char>` of each hidden character occurrence. Empty if none found.
+///
+/// Mirrors the detection part of
+/// `logWarningIfUnicodeHiddenCharactersInPackageFile()` from `lib/util/unicode.ts`.
+pub fn find_hidden_unicode_chars(content: &str) -> Vec<char> {
+    content
+        .chars()
+        .filter(|c| HIDDEN_UNICODE_CHARS.contains(c))
+        .collect()
+}
+
+// ---------------------------------------------------------------------------
 // Markdown utilities — lib/util/markdown.ts
 // ---------------------------------------------------------------------------
 
@@ -7637,6 +7684,59 @@ dep1 = "^1.0.0"
     fn test_schema_parse_toml_invalid() {
         let r = schema_parse_toml("name = \"test\"\ninvalid toml syntax here\n");
         assert!(r.is_err());
+    }
+
+    // ── hidden unicode detection ──────────────────────────────────────────────
+
+    // Ported: "logs a warning for hidden Unicode characters in text files" — util/unicode.spec.ts line 146
+    // The TypeScript test checks logger.once.warn spy; Rust tests the detection function directly.
+    #[test]
+    fn hidden_unicode_chars_detected_in_text() {
+        let content = "some\u{00A0}content\u{200B}foo";
+        let found = find_hidden_unicode_chars(content);
+        assert_eq!(found.len(), 2);
+        assert!(found.contains(&'\u{00A0}'));
+        assert!(found.contains(&'\u{200B}'));
+    }
+
+    // Ported: "logs a trace message for BOM character only" — util/unicode.spec.ts line 156
+    #[test]
+    fn bom_character_detected() {
+        let content = "\u{FEFF}<Project Sdk=\"Microsoft.NET.Sdk\">";
+        let found = find_hidden_unicode_chars(content);
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0], '\u{FEFF}');
+    }
+
+    // Ported: "does not log a warning for binary files with null bytes but no hidden unicode" — util/unicode.spec.ts line 170
+    #[test]
+    fn binary_content_with_null_bytes_detected() {
+        let bytes = [0x50u8, 0x4b, 0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x74, 0x65, 0x78, 0x74];
+        assert!(is_binary_content(&bytes));
+        // No hidden unicode in this ASCII binary content
+        let text = String::from_utf8_lossy(&bytes);
+        let found = find_hidden_unicode_chars(&text);
+        assert!(found.is_empty());
+    }
+
+    // Ported: "logs a trace message (not warning) for binary files with hidden unicode" — util/unicode.spec.ts line 183
+    #[test]
+    fn binary_content_with_hidden_unicode_detected() {
+        // 0xe2 0x80 0x8b = UTF-8 encoding of U+200B (zero-width space)
+        let bytes = [0x50u8, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x74, 0x65, 0x78];
+        assert!(is_binary_content(&bytes));
+        let text = String::from_utf8_lossy(&bytes);
+        let found = find_hidden_unicode_chars(&text);
+        assert!(!found.is_empty());
+    }
+
+    // Ported: "does not log a warning when no hidden characters are present" — util/unicode.spec.ts line 203
+    #[test]
+    fn no_hidden_unicode_in_normal_text() {
+        let content = "normal text content";
+        let found = find_hidden_unicode_chars(content);
+        assert!(found.is_empty());
+        assert!(!is_binary_content(content.as_bytes()));
     }
 
     // ── parse_s3_url ─────────────────────────────────────────────────────────
