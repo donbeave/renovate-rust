@@ -2107,7 +2107,7 @@ pub fn npm_get_new_alias_value(value: Option<&str>, upgrade: &NpmUpdateUpgrade) 
 /// `expected`.
 ///
 /// Returns `None` when no verified replacement is found.
-fn json_replace_verified(
+pub(crate) fn json_replace_verified(
     expected: &serde_json::Value,
     content: &str,
     section_key: &str,
