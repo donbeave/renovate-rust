@@ -5,7 +5,7 @@
 ## `lib/modules/platform/github/schema.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/schema.spec.ts
-**Total tests:** 6 | **Ported:** 4 | **Actionable:** 6 | **Status:** partial
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `tests`
 
@@ -14,8 +14,8 @@
 | should be parse directory response | 5 | ported | `platform/github.rs` | `github_content_response_directory` | — |
 | should parse response for single file | 87 | ported | `platform/github.rs` | `github_content_response_single_file` | — |
 | should skip vulnerability alerts with unsupported ecosystems | 111 | ported | `platform/github.rs` | `github_vulnerability_alerts_filter_unsupported_ecosystem` | — |
-| should log vulnerability alerts with parse errors | 152 | pending | — | — | —|
-| should filter vulnerability alerts with missing security_vulnerability | 181 | pending | — | — | —|
+| should log vulnerability alerts with parse errors | 152 | ported | `platform/github.rs` | `github_vulnerability_alerts_logs_parse_errors_dotnet_filtered` | — |
+| should filter vulnerability alerts with missing security_vulnerability | 181 | ported | `platform/github.rs` | `github_vulnerability_alerts_filters_missing_security_vulnerability` | — |
 | should parse severity and cvss_severities fields | 206 | ported | `platform/github.rs` | `github_vulnerability_alerts_parse_severity_fields` | — |
 
 ---

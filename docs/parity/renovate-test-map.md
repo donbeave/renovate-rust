@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,007 / 11,677 total tests ported (43%) · pending 5,317 · not-applicable 1,353 (12% of total) — updated 2026-05-29
+**Progress:** 5,009 / 11,677 total tests ported (43%) · pending 5,315 · not-applicable 1,353 (12% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -729,7 +729,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/github/index.spec.ts` | Not done | [details](lib/modules/platform/github/index.spec.ts.md) |
 | `lib/modules/platform/github/issue.spec.ts` | Not done | [details](lib/modules/platform/github/issue.spec.ts.md) |
 | `lib/modules/platform/github/massage-markdown-links.spec.ts` | Done | [details](lib/modules/platform/github/massage-markdown-links.spec.ts.md) |
-| `lib/modules/platform/github/schema.spec.ts` | Not done | [details](lib/modules/platform/github/schema.spec.ts.md) |
+| `lib/modules/platform/github/schema.spec.ts` | Done | [details](lib/modules/platform/github/schema.spec.ts.md) |
 | `lib/modules/platform/github/scm.spec.ts` | Not done | [details](lib/modules/platform/github/scm.spec.ts.md) |
 | `lib/modules/platform/gitlab/code-owners.spec.ts` | Done | [details](lib/modules/platform/gitlab/code-owners.spec.ts.md) |
 | `lib/modules/platform/gitlab/utils.spec.ts` | Done | [details](lib/modules/platform/gitlab/utils.spec.ts.md) |
