@@ -771,3 +771,31 @@ fn github_vulnerability_alerts_parse_severity_fields() {
     assert_eq!(result[0]["security_advisory"]["cvss_severities"]["cvss_v3"]["score"], 9.8);
     assert!(result[0]["security_advisory"]["cvss_severities"]["cvss_v4"].is_null());
 }
+
+// Ported: "should log vulnerability alerts with parse errors" — modules/platform/github/schema.spec.ts line 152
+// The TypeScript test also checks logger.debug spy; Rust tests the filter behavior.
+// dotnet ecosystem alert is filtered out (returns empty), same behavior as the
+// "skip unsupported ecosystems" test which already covers this parse path.
+#[test]
+fn github_vulnerability_alerts_logs_parse_errors_dotnet_filtered() {
+    let input = serde_json::json!([{
+        "dismissed_reason": null,
+        "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
+        "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "dotnet", "name": "test-package"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
+    }]);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert!(result.is_empty());
+}
+
+// Ported: "should filter vulnerability alerts with missing security_vulnerability" — modules/platform/github/schema.spec.ts line 181
+#[test]
+fn github_vulnerability_alerts_filters_missing_security_vulnerability() {
+    let input = serde_json::json!([{
+        "dismissed_reason": null,
+        "security_advisory": {"ghsa_id": "GHSA-4444-5555-6666", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-5678"}], "severity": "high"},
+        "security_vulnerability": null,
+        "dependency": {"manifest_path": "package.json"},
+    }]);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert!(result.is_empty());
+}
