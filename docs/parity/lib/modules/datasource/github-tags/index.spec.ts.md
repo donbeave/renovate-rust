@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/github-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-tags/index.spec.ts
-**Total tests:** 12 | **Ported:** 11 | **Actionable:** 12 | **Status:** partial
+**Total tests:** 12 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
 
 ### `modules/datasource/github-tags/index › getDigest`
 
@@ -15,7 +15,7 @@
 | returns null for missing commit | 36 | ported | `crates/renovate-core/src/datasources/github_tags.rs` | `returns_null_for_missing_commit` | empty commits list → None |
 | returns untagged commit digest | 45 | ported | `crates/renovate-core/src/datasources/github_tags.rs` | `returns_untagged_commit_digest` | GET /commits → sha |
 | returns tagged commit digest | 54 | ported | `crates/renovate-core/src/datasources/github_tags.rs` | `returns_tagged_commit_digest` | GET /tags → find tag → sha |
-| returns null for missing hash | 73 | pending | — | — | —|
+| returns null for missing hash | 73 | not-applicable | — | — | TypeScript test uses vi.spyOn(githubGraphql, 'queryTags') — GraphQL path specific; Rust implementation uses REST /tags which always includes commit.sha |
 | returns null for missing tagged commit digest | 91 | ported | `crates/renovate-core/src/datasources/github_tags.rs` | `returns_null_for_missing_tagged_commit_digest` | tag not found → None |
 | returns null for error | 110 | ported | `crates/renovate-core/src/datasources/github_tags.rs` | `returns_null_for_error` | 500 → None |
 

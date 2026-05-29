@@ -5,7 +5,7 @@
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 43 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 43 | **Actionable:** 43 | **Status:** ported
 
 ### `parseKustomize` (top-level)
 
@@ -48,7 +48,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | should return null on a null input | 270 | ported | `kustomize.rs` | `extract_image_null_on_empty_name` | — |
-| should return null on invalid input | 278 | pending | — | — | —|
+| should return null on invalid input | 278 | not-applicable | — | — | TypeScript type-system test; uses @ts-expect-error to pass name: 3 (number), impossible in Rust's type system |
 | should correctly extract a default image | 287 | ported | `kustomize.rs` | `extracts_images` | — |
 | should correctly extract an image in a repo | 305 | ported | `kustomize.rs` | `extracts_image_in_repo` | — |
 | should correctly extract from a different registry | 323 | ported | `kustomize.rs` | `extracts_image_from_different_registry` | — |

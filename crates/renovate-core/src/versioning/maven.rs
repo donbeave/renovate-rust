@@ -1564,4 +1564,73 @@ mod tests {
             );
         }
     }
+
+    // Ported: "should tokenize" — maven/compare.spec.ts line 454
+    #[test]
+    fn tokenize_matches_renovate_maven_compare_spec() {
+        let none_prefix = Prefix::Other(String::new());
+
+        // '1.2.3' → [Number(1)/none, Number(2)/Dot, Number(3)/Dot]
+        let t = tokenize("1.2.3");
+        assert_eq!(t.len(), 3);
+        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Number(1), is_transition: false });
+        assert_eq!(t[1], Token { prefix: Prefix::Dot, value: TokenValue::Number(2), is_transition: false });
+        assert_eq!(t[2], Token { prefix: Prefix::Dot, value: TokenValue::Number(3), is_transition: false });
+
+        // 'v1.2.3' → [Number(1)/v-prefix, Number(2)/Dot, Number(3)/Dot]
+        let t = tokenize("v1.2.3");
+        assert_eq!(t.len(), 3);
+        assert_eq!(t[0], Token { prefix: Prefix::Other("v".to_owned()), value: TokenValue::Number(1), is_transition: false });
+        assert_eq!(t[1], Token { prefix: Prefix::Dot, value: TokenValue::Number(2), is_transition: false });
+        assert_eq!(t[2], Token { prefix: Prefix::Dot, value: TokenValue::Number(3), is_transition: false });
+
+        // 'version2.3' → [Qualifier("version")/none/transition, Number(2)/Hyphen, Number(3)/Dot]
+        let t = tokenize("version2.3");
+        assert_eq!(t.len(), 3);
+        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Qualifier("version".to_owned()), is_transition: true });
+        assert_eq!(t[1], Token { prefix: Prefix::Hyphen, value: TokenValue::Number(2), is_transition: false });
+        assert_eq!(t[2], Token { prefix: Prefix::Dot, value: TokenValue::Number(3), is_transition: false });
+
+        // 'alpha.beta.rc' → [Q("alpha"), Q("beta")/Dot, Q("rc")/Dot]
+        let t = tokenize("alpha.beta.rc");
+        assert_eq!(t.len(), 3);
+        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Qualifier("alpha".to_owned()), is_transition: false });
+        assert_eq!(t[1], Token { prefix: Prefix::Dot, value: TokenValue::Qualifier("beta".to_owned()), is_transition: false });
+        assert_eq!(t[2], Token { prefix: Prefix::Dot, value: TokenValue::Qualifier("rc".to_owned()), is_transition: false });
+
+        // '1.2.3-alpha.beta'
+        let t = tokenize("1.2.3-alpha.beta");
+        assert_eq!(t.len(), 5);
+        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Number(1), is_transition: false });
+        assert_eq!(t[1], Token { prefix: Prefix::Dot, value: TokenValue::Number(2), is_transition: false });
+        assert_eq!(t[2], Token { prefix: Prefix::Dot, value: TokenValue::Number(3), is_transition: false });
+        assert_eq!(t[3], Token { prefix: Prefix::Hyphen, value: TokenValue::Qualifier("alpha".to_owned()), is_transition: false });
+        assert_eq!(t[4], Token { prefix: Prefix::Dot, value: TokenValue::Qualifier("beta".to_owned()), is_transition: false });
+
+        // '1.2.x-3'
+        let t = tokenize("1.2.x-3");
+        assert_eq!(t.len(), 4);
+        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Number(1), is_transition: false });
+        assert_eq!(t[1], Token { prefix: Prefix::Dot, value: TokenValue::Number(2), is_transition: false });
+        assert_eq!(t[2], Token { prefix: Prefix::Dot, value: TokenValue::Qualifier("x".to_owned()), is_transition: false });
+        assert_eq!(t[3], Token { prefix: Prefix::Hyphen, value: TokenValue::Number(3), is_transition: false });
+
+        // '00.02.003' → leading zero stripped: [Number(0), Number(2)/Dot, Number(3)/Dot]
+        let t = tokenize("00.02.003");
+        assert_eq!(t.len(), 3);
+        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Number(0), is_transition: false });
+        assert_eq!(t[1], Token { prefix: Prefix::Dot, value: TokenValue::Number(2), is_transition: false });
+        assert_eq!(t[2], Token { prefix: Prefix::Dot, value: TokenValue::Number(3), is_transition: false });
+
+        // 'invalid.version'
+        let t = tokenize("invalid.version");
+        assert_eq!(t.len(), 2);
+        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Qualifier("invalid".to_owned()), is_transition: false });
+        assert_eq!(t[1], Token { prefix: Prefix::Dot, value: TokenValue::Qualifier("version".to_owned()), is_transition: false });
+
+        // '' → [zeroToken = Number(0)/none/not-transition]
+        let t = tokenize("");
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Number(0), is_transition: false });
+    }
 }

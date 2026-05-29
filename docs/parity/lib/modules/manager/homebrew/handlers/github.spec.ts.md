@@ -5,14 +5,14 @@
 ## `lib/modules/manager/homebrew/handlers/github.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/handlers/github.spec.ts
-**Total tests:** 8 | **Ported:** 7 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
 
 ### `parseUrl`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty string | 8 | ported | `homebrew.rs` | `github_parse_url_empty_string_returns_none` | — |
-| returns null for non-string input: %s | 12 | pending | — | — | —|
+| returns null for non-string input: %s | 12 | not-applicable | — | — | TypeScript type-system test; it.each([null, undefined]) with input as never cannot occur in Rust's type system |
 | parses valid releases URL | 19 | ported | `homebrew.rs` | `github_parse_url_releases` | — |
 | parses valid archive URL | 33 | ported | `homebrew.rs` | `github_parse_url_archive` | — |
 
