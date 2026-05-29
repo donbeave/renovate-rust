@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,019 / 11,677 total tests ported (43%) · pending 5,279 · not-applicable 1,379 (12% of total) — updated 2026-05-29
+**Progress:** 5,033 / 11,666 total tests ported (43%) · pending 5,235 · not-applicable 1,398 (12% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -401,11 +401,11 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/ignore.spec.ts` | Done | [details](lib/util/ignore.spec.ts.md) |
 | `lib/util/coerce.spec.ts` | Done | [details](lib/util/coerce.spec.ts.md) |
 | `lib/util/sample.spec.ts` | Done | [details](lib/util/sample.spec.ts.md) |
-| `lib/util/promises.spec.ts` | Not done | [details](lib/util/promises.spec.ts.md) |
+| `lib/util/promises.spec.ts` | Done | [details](lib/util/promises.spec.ts.md) |
 | `lib/util/markdown.spec.ts` | Not done | [details](lib/util/markdown.spec.ts.md) |
-| `lib/util/html.spec.ts` | Not done | [details](lib/util/html.spec.ts.md) |
+| `lib/util/html.spec.ts` | Done | [details](lib/util/html.spec.ts.md) |
 | `lib/util/lazy.spec.ts` | Done | [details](lib/util/lazy.spec.ts.md) |
-| `lib/util/mutex.spec.ts` | Not done | [details](lib/util/mutex.spec.ts.md) |
+| `lib/util/mutex.spec.ts` | Done | [details](lib/util/mutex.spec.ts.md) |
 | `lib/util/yaml.spec.ts` | Done | [details](lib/util/yaml.spec.ts.md) |
 | `lib/util/common.spec.ts` | Done | [details](lib/util/common.spec.ts.md) |
 | `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
@@ -430,7 +430,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/host-rules.spec.ts` | Done | [details](lib/util/host-rules.spec.ts.md) |
 | `lib/util/stats.spec.ts` | Done | [details](lib/util/stats.spec.ts.md) |
 | `lib/util/s3.spec.ts` | Not done | [details](lib/util/s3.spec.ts.md) |
-| `lib/util/jsonata.spec.ts` | Not done | [details](lib/util/jsonata.spec.ts.md) |
+| `lib/util/jsonata.spec.ts` | Done | [details](lib/util/jsonata.spec.ts.md) |
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
 | `lib/modules/platform/comment.spec.ts` | Not done | [details](lib/modules/platform/comment.spec.ts.md) |
