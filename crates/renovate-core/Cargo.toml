@@ -14,6 +14,7 @@ workspace = true
 
 [dependencies]
 base64.workspace = true
+brotli.workspace = true
 regex.workspace = true
 pep440_rs.workspace = true
 semver.workspace = true

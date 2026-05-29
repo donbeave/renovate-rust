@@ -390,7 +390,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/renovate.spec.ts` | Done | [details](lib/renovate.spec.ts.md) |
 | `lib/proxy.spec.ts` | Done | [details](lib/proxy.spec.ts.md) |
 | `lib/util/range.spec.ts` | Done | [details](lib/util/range.spec.ts.md) |
-| `lib/util/compress.spec.ts` | Not done | [details](lib/util/compress.spec.ts.md) |
+| `lib/util/compress.spec.ts` | Done | [details](lib/util/compress.spec.ts.md) |
 | `lib/util/split.spec.ts` | Done | [details](lib/util/split.spec.ts.md) |
 | `lib/util/streams.spec.ts` | Done | [details](lib/util/streams.spec.ts.md) |
 | `lib/util/timestamp.spec.ts` | Done | [details](lib/util/timestamp.spec.ts.md) |

@@ -4758,6 +4758,45 @@ fn sha512_hex(data: &[u8]) -> String {
 // Tests
 // ---------------------------------------------------------------------------
 
+
+// ---------------------------------------------------------------------------
+// compress — lib/util/compress.ts
+// ---------------------------------------------------------------------------
+
+/// Compress a string with Brotli (quality=8, mode=text) and return base64.
+/// Mirrors `compressToBase64()` from `lib/util/compress.ts`.
+pub fn compress_to_base64(input: &str) -> Result<String, String> {
+    use base64::{Engine, engine::general_purpose::STANDARD};
+    use brotli::CompressorWriter;
+    use std::io::Write;
+    
+    let mut compressed = Vec::new();
+    {
+        let mut writer = CompressorWriter::new(
+            &mut compressed,
+            4096,  // buffer size
+            8,     // quality (0-11)
+            22,    // lgwin (window size)
+        );
+        writer.write_all(input.as_bytes()).map_err(|e| e.to_string())?;
+    }
+    Ok(STANDARD.encode(&compressed))
+}
+
+/// Decompress a base64-encoded Brotli string.
+/// Mirrors `decompressFromBase64()` from `lib/util/compress.ts`.
+pub fn decompress_from_base64(input: &str) -> Result<String, String> {
+    use base64::{Engine, engine::general_purpose::STANDARD};
+    use brotli::Decompressor;
+    use std::io::Read;
+
+    let compressed = STANDARD.decode(input).map_err(|e| e.to_string())?;
+    let mut decompressor = Decompressor::new(compressed.as_slice(), 4096);
+    let mut decompressed = Vec::new();
+    decompressor.read_to_end(&mut decompressed).map_err(|e| e.to_string())?;
+    String::from_utf8(decompressed).map_err(|e| e.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -10095,3 +10134,13 @@ dep1 = "^1.0.0"
         assert!(result.contains(payload));
         assert!(result.contains("query($owner"));
     }
+    // Ported: "compresses strings" — util/compress.spec.ts line 5
+    #[test]
+    fn test_compress_to_base64() {
+        let compressed = compress_to_base64("foobar").unwrap();
+        assert_eq!(compressed, "iwKAZm9vYmFyAw==");
+
+        let decompressed = decompress_from_base64(&compressed).unwrap();
+        assert_eq!(decompressed, "foobar");
+    }
+
