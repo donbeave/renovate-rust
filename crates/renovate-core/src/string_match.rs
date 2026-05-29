@@ -587,4 +587,25 @@ mod tests {
         // Inline comment: "  renovate:ignore  " (with spaces)
         assert!(is_skip_comment("  renovate:ignore  "));
     }
+
+    // Ported: "matches" — util/minimatch.spec.ts line 20
+    // Tests the core glob path matching behavior:
+    // @opentelemetry/** matches @opentelemetry/http and /http/client
+    // @opentelemetry** (bare ** without path sep) does not cross / in globset
+    #[test]
+    fn minimatch_glob_path_matching() {
+        // /** form matches /http and /http/client
+        assert!(match_regex_or_glob("@opentelemetry/http", "@opentelemetry/**"));
+        assert!(match_regex_or_glob("@opentelemetry/http/client", "@opentelemetry/**"));
+        // bare ** doesn't cross / with literal_separator=true
+        assert!(!match_regex_or_glob("@opentelemetry/http", "@opentelemetry**"));
+    }
+
+    // Ported: "should correctly match filenames" — util/minimatch.spec.ts line 37
+    #[test]
+    fn minimatch_filter_filename_matching() {
+        // *.js matches test.js but not test.txt
+        assert!(match_regex_or_glob("test.js", "*.js"));
+        assert!(!match_regex_or_glob("test.txt", "*.js"));
+    }
 }
