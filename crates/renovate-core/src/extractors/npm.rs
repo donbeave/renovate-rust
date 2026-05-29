@@ -1740,6 +1740,110 @@ pub fn replace_constraint_version(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// package-lock findDepConstraints — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.ts
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// A parent dependency constraint found for a locked dep.
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct ParentDependency {
+    /// The constraint string (semver range or version).
+    pub constraint: String,
+    /// Which package.json section the constraint was found in.
+    pub dep_type: Option<String>,
+    /// Parent dep name when the constraint is from a transitive dep.
+    pub parent_dep_name: Option<String>,
+    /// Parent dep version when the constraint is from a transitive dep.
+    pub parent_version: Option<String>,
+}
+
+/// Find all parent dependency constraints for a given dep@version in a
+/// package-lock.json v1 lock file.
+///
+/// Mirrors `findDepConstraints()` from
+/// `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.ts`.
+pub fn package_lock_find_dep_constraints(
+    package_json: &serde_json::Value,
+    lock_entry: &serde_json::Value,
+    dep_name: &str,
+    current_version: &str,
+    new_version: &str,
+    parent_dep_name: Option<&str>,
+) -> Vec<ParentDependency> {
+    let mut parents: Vec<ParentDependency> = Vec::new();
+
+    // Check package.json direct dependencies.
+    for dep_section in &["dependencies", "devDependencies"] {
+        if let Some(constraint) = package_json
+            .get(*dep_section)
+            .and_then(|s| s.get(dep_name))
+            .and_then(|v| v.as_str())
+        {
+            if crate::versioning::npm::matches_range(current_version, constraint) {
+                parents.push(ParentDependency {
+                    constraint: constraint.to_owned(),
+                    dep_type: Some((*dep_section).to_owned()),
+                    parent_dep_name: None,
+                    parent_version: None,
+                });
+            }
+        }
+    }
+
+    // Check requires in this lock entry (transitive constraints).
+    let version = lock_entry.get("version").and_then(|v| v.as_str()).unwrap_or("");
+    if let Some(parent_name) = parent_dep_name {
+        if let Some(constraint) = lock_entry
+            .get("requires")
+            .and_then(|r| r.get(dep_name))
+            .and_then(|v| v.as_str())
+        {
+            // Normalize rc suffix: "1.0.0rc" → "1.0.0-rc"
+            let normalized = regex::Regex::new(r"(\d)rc$")
+                .map(|re| re.replace(constraint, "${1}-rc").into_owned())
+                .unwrap_or_else(|_| constraint.to_owned());
+            if crate::versioning::npm::is_valid(&normalized)
+                && crate::versioning::npm::matches_range(current_version, &normalized)
+            {
+                parents.push(ParentDependency {
+                    constraint: normalized.clone(),
+                    dep_type: None,
+                    parent_dep_name: Some(parent_name.to_owned()),
+                    parent_version: Some(version.to_owned()),
+                });
+            }
+        }
+    }
+
+    // Recurse into child dependencies.
+    if let Some(deps_map) = lock_entry.get("dependencies").and_then(|v| v.as_object()) {
+        for (pkg_name, dep) in deps_map {
+            let sub = package_lock_find_dep_constraints(
+                package_json,
+                dep,
+                dep_name,
+                current_version,
+                new_version,
+                Some(pkg_name.as_str()),
+            );
+            parents.extend(sub);
+        }
+    }
+
+    // Deduplicate by serialized form.
+    let mut result: Vec<ParentDependency> = Vec::new();
+    for p in parents {
+        let serialized = serde_json::to_string(&p).unwrap_or_default();
+        if !result
+            .iter()
+            .any(|r| serde_json::to_string(r).unwrap_or_default() == serialized)
+        {
+            result.push(p);
+        }
+    }
+    result
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // package-lock getLockedDependencies — lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.ts
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -4738,6 +4842,84 @@ chalk@^2.4.1:
         let yarn = res.additional_yarn_rc_yml.as_ref().unwrap();
         let reg = &yarn["npmRegistries"]["//registry.company.com/"];
         assert_eq!(reg["npmAuthIdent"], "user123:pass123");
+    }
+
+    // ── package-lock findDepConstraints tests ────────────────────────────
+
+    const PKG_JSON_FIXTURE: &str =
+        include_str!("../../tests/fixtures/npm/package-lock/package.json");
+
+    // Ported: "finds indirect dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 11
+    #[test]
+    fn dep_constraints_finds_indirect() {
+        let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
+        let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
+        let result = package_lock_find_dep_constraints(
+            &pkg_json,
+            &lock,
+            "send",
+            "0.2.0",
+            "0.2.1",
+            None,
+        );
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].constraint, "0.2.0");
+        assert_eq!(result[0].parent_dep_name.as_deref(), Some("express"));
+        assert_eq!(result[0].parent_version.as_deref(), Some("4.0.0"));
+    }
+
+    // Ported: "finds direct dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 29
+    #[test]
+    fn dep_constraints_finds_direct() {
+        let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
+        let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
+        let result = package_lock_find_dep_constraints(
+            &pkg_json,
+            &lock,
+            "express",
+            "4.0.0",
+            "4.5.0",
+            None,
+        );
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].constraint, "4.0.0");
+        assert_eq!(result[0].dep_type.as_deref(), Some("dependencies"));
+    }
+
+    // Ported: "skips non-matching direct dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 41
+    #[test]
+    fn dep_constraints_skips_nonmatching() {
+        let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
+        let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
+        let result = package_lock_find_dep_constraints(
+            &pkg_json,
+            &lock,
+            "express",
+            "4.4.0",
+            "4.5.0",
+            None,
+        );
+        assert!(result.is_empty());
+    }
+
+    // Ported: "finds direct devDependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 53
+    #[test]
+    fn dep_constraints_finds_dev_dep() {
+        let mut pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
+        // Move dependencies to devDependencies
+        let deps = pkg_json["dependencies"].take();
+        pkg_json["devDependencies"] = deps;
+        let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
+        let result = package_lock_find_dep_constraints(
+            &pkg_json,
+            &lock,
+            "express",
+            "4.0.0",
+            "4.5.0",
+            None,
+        );
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].dep_type.as_deref(), Some("devDependencies"));
     }
 
     // ── package-lock getLockedDependencies tests ─────────────────────────

@@ -639,7 +639,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/update/dependency/yarn.spec.ts` | Done | [details](lib/modules/manager/npm/update/dependency/yarn.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/index.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/index.spec.ts.md) |
-| `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts.md) |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts.md) |

@@ -222,6 +222,15 @@ pub fn matches_range(version: &str, range: &str) -> bool {
             .map(str::trim)
             .any(|alt| matches_range(version, alt));
     }
+    // In npm semantics, a bare version like "4.0.0" means EXACTLY =4.0.0.
+    // Rust's semver crate treats "4.0.0" as "^4.0.0" which is wrong for npm.
+    // Check for exact version match before delegating to VersionReq.
+    let bare_range = range.strip_prefix('=').unwrap_or(range).trim();
+    if !has_range_operator(range) && range.contains('.') {
+        if let Ok(range_v) = Version::parse(bare_range) {
+            return v == range_v;
+        }
+    }
     if let Ok(req) = VersionReq::parse(range) {
         return req.matches(&v);
     }
