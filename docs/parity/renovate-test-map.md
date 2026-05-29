@@ -265,7 +265,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/massage.spec.ts` | Done | [details](lib/config/massage.spec.ts.md) |
 | `lib/config/secrets.spec.ts` | Done | [details](lib/config/secrets.spec.ts.md) |
 | `lib/config/inherit.spec.ts` | Done | [details](lib/config/inherit.spec.ts.md) |
-| `lib/config/decrypt.spec.ts` | Not done | [details](lib/config/decrypt.spec.ts.md) |
+| `lib/config/decrypt.spec.ts` | Done | [details](lib/config/decrypt.spec.ts.md) |
 | `lib/config/decrypt/bcpgp.spec.ts` | Done | [details](lib/config/decrypt/bcpgp.spec.ts.md) |
 | `lib/config/decrypt/openpgp.spec.ts` | Done | [details](lib/config/decrypt/openpgp.spec.ts.md) |
 | `lib/config/presets/forgejo/index.spec.ts` | Done | [details](lib/config/presets/forgejo/index.spec.ts.md) |
