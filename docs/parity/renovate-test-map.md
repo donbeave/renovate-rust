@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,943 / 11,677 total tests ported (42%) · pending 6,579 · not-applicable 155 (1% of total) — updated 2026-05-29
+**Progress:** 4,969 / 11,677 total tests ported (43%) · pending 6,553 · not-applicable 155 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -768,7 +768,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/git/auth.spec.ts` | Not done | [details](lib/util/git/auth.spec.ts.md) |
 | `lib/util/git/author.spec.ts` | Done | [details](lib/util/git/author.spec.ts.md) |
 | `lib/util/git/behind-base-branch-cache.spec.ts` | Not done | [details](lib/util/git/behind-base-branch-cache.spec.ts.md) |
-| `lib/util/git/config.spec.ts` | Not done | [details](lib/util/git/config.spec.ts.md) |
+| `lib/util/git/config.spec.ts` | Done | [details](lib/util/git/config.spec.ts.md) |
 | `lib/util/git/conflicts-cache.spec.ts` | Not done | [details](lib/util/git/conflicts-cache.spec.ts.md) |
 | `lib/util/git/errors.spec.ts` | Done | [details](lib/util/git/errors.spec.ts.md) |
 | `lib/util/git/index.spec.ts` | Not done | [details](lib/util/git/index.spec.ts.md) |
