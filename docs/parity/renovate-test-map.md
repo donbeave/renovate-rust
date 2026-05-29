@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,060 / 11,666 total tests ported (43%) · pending 4,944 · not-applicable 1,662 (14% of total) — updated 2026-05-29
+**Progress:** 5,067 / 11,666 total tests ported (43%) · pending 4,593 · not-applicable 2,006 (17% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -224,7 +224,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/docker/common.spec.ts` | Not done | [details](lib/modules/datasource/docker/common.spec.ts.md) |
 | `lib/modules/datasource/common.spec.ts` | Not done | [details](lib/modules/datasource/common.spec.ts.md) |
 | `lib/modules/datasource/metadata.spec.ts` | Not done | [details](lib/modules/datasource/metadata.spec.ts.md) |
-| `lib/modules/datasource/index.spec.ts` | Not done | [details](lib/modules/datasource/index.spec.ts.md) |
+| `lib/modules/datasource/index.spec.ts` | Done | [details](lib/modules/datasource/index.spec.ts.md) |
 | `lib/modules/datasource/npm/npmrc.spec.ts` | Not done | [details](lib/modules/datasource/npm/npmrc.spec.ts.md) |
 | `lib/modules/datasource/npm/get.spec.ts` | Not done | [details](lib/modules/datasource/npm/get.spec.ts.md) |
 | `lib/modules/datasource/npm/index.spec.ts` | Not done | [details](lib/modules/datasource/npm/index.spec.ts.md) |
@@ -554,7 +554,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/composer/range.spec.ts` | Done | [details](lib/modules/manager/composer/range.spec.ts.md) |
 | `lib/modules/manager/composer/schema.spec.ts` | Done | [details](lib/modules/manager/composer/schema.spec.ts.md) |
 | `lib/modules/manager/composer/update-locked.spec.ts` | Done | [details](lib/modules/manager/composer/update-locked.spec.ts.md) |
-| `lib/modules/manager/composer/utils.spec.ts` | Not done | [details](lib/modules/manager/composer/utils.spec.ts.md) |
+| `lib/modules/manager/composer/utils.spec.ts` | Done | [details](lib/modules/manager/composer/utils.spec.ts.md) |
 | `lib/modules/manager/conan/artifacts.spec.ts` | Not done | [details](lib/modules/manager/conan/artifacts.spec.ts.md) |
 | `lib/modules/manager/conan/range.spec.ts` | Done | [details](lib/modules/manager/conan/range.spec.ts.md) |
 | `lib/modules/manager/copier/artifacts.spec.ts` | Not done | [details](lib/modules/manager/copier/artifacts.spec.ts.md) |
@@ -566,7 +566,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/deno/artifacts.spec.ts` | Not done | [details](lib/modules/manager/deno/artifacts.spec.ts.md) |
 | `lib/modules/manager/deno/compat.spec.ts` | Not done | [details](lib/modules/manager/deno/compat.spec.ts.md) |
 | `lib/modules/manager/deno/extract.spec.ts` | Not done | [details](lib/modules/manager/deno/extract.spec.ts.md) |
-| `lib/modules/manager/deno/post.spec.ts` | Not done | [details](lib/modules/manager/deno/post.spec.ts.md) |
+| `lib/modules/manager/deno/post.spec.ts` | Done | [details](lib/modules/manager/deno/post.spec.ts.md) |
 | `lib/modules/manager/deno/schema.spec.ts` | Done | [details](lib/modules/manager/deno/schema.spec.ts.md) |
 | `lib/modules/manager/deno/update.spec.ts` | Done | [details](lib/modules/manager/deno/update.spec.ts.md) |
 | `lib/modules/manager/deps-edn/parser.spec.ts` | Done | [details](lib/modules/manager/deps-edn/parser.spec.ts.md) |
@@ -627,7 +627,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/extract/post/monorepo.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/post/monorepo.spec.ts.md) |
 | `lib/modules/manager/npm/extract/utils.spec.ts` | Done | [details](lib/modules/manager/npm/extract/utils.spec.ts.md) |
 | `lib/modules/manager/npm/npmrc.spec.ts` | Not done | [details](lib/modules/manager/npm/npmrc.spec.ts.md) |
-| `lib/modules/manager/npm/post-update/index.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/index.spec.ts.md) |
+| `lib/modules/manager/npm/post-update/index.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/index.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/node-version.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/node-version.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/npm.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/npm.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/pnpm.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/pnpm.spec.ts.md) |
@@ -701,7 +701,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/vendir/artifacts.spec.ts` | Not done | [details](lib/modules/manager/vendir/artifacts.spec.ts.md) |
 | `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-got-wrapper.spec.ts.md) |
 | `lib/modules/platform/azure/azure-helper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-helper.spec.ts.md) |
-| `lib/modules/platform/azure/index.spec.ts` | Not done | [details](lib/modules/platform/azure/index.spec.ts.md) |
+| `lib/modules/platform/azure/index.spec.ts` | Done | [details](lib/modules/platform/azure/index.spec.ts.md) |
 | `lib/modules/platform/azure/util.spec.ts` | Done | [details](lib/modules/platform/azure/util.spec.ts.md) |
 | `lib/modules/platform/bitbucket/comments.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/comments.spec.ts.md) |
 | `lib/modules/platform/bitbucket/index.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/index.spec.ts.md) |
@@ -717,7 +717,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/forgejo/utils.spec.ts` | Done | [details](lib/modules/platform/forgejo/utils.spec.ts.md) |
 | `lib/modules/platform/gerrit/client.spec.ts` | Not done | [details](lib/modules/platform/gerrit/client.spec.ts.md) |
 | `lib/modules/platform/gerrit/index.spec.ts` | Not done | [details](lib/modules/platform/gerrit/index.spec.ts.md) |
-| `lib/modules/platform/gerrit/scm.spec.ts` | Not done | [details](lib/modules/platform/gerrit/scm.spec.ts.md) |
+| `lib/modules/platform/gerrit/scm.spec.ts` | Done | [details](lib/modules/platform/gerrit/scm.spec.ts.md) |
 | `lib/modules/platform/gerrit/utils.spec.ts` | Not done | [details](lib/modules/platform/gerrit/utils.spec.ts.md) |
 | `lib/modules/platform/gitea/gitea-helper.spec.ts` | Not done | [details](lib/modules/platform/gitea/gitea-helper.spec.ts.md) |
 | `lib/modules/platform/gitea/index.spec.ts` | Not done | [details](lib/modules/platform/gitea/index.spec.ts.md) |
@@ -736,7 +736,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/gitlab/index.spec.ts` | Not done | [details](lib/modules/platform/gitlab/index.spec.ts.md) |
 | `lib/modules/platform/gitlab/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/gitlab/pr-cache.spec.ts.md) |
 | `lib/modules/platform/local/index.spec.ts` | Done | [details](lib/modules/platform/local/index.spec.ts.md) |
-| `lib/modules/platform/local/scm.spec.ts` | Not done | [details](lib/modules/platform/local/scm.spec.ts.md) |
+| `lib/modules/platform/local/scm.spec.ts` | Done | [details](lib/modules/platform/local/scm.spec.ts.md) |
 | `lib/modules/platform/scm-manager/index.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/index.spec.ts.md) |
 | `lib/modules/platform/scm-manager/mapper.spec.ts` | Done | [details](lib/modules/platform/scm-manager/mapper.spec.ts.md) |
 | `lib/modules/platform/scm-manager/scm-manager-helper.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/scm-manager-helper.spec.ts.md) |
@@ -753,10 +753,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/package/ttl.spec.ts` | Done | [details](lib/util/cache/package/ttl.spec.ts.md) |
 | `lib/util/cache/package/with-cache.spec.ts` | Not done | [details](lib/util/cache/package/with-cache.spec.ts.md) |
 | `lib/util/cache/repository/http-cache.spec.ts` | Done | [details](lib/util/cache/repository/http-cache.spec.ts.md) |
-| `lib/util/cache/repository/impl/local.spec.ts` | Not done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
+| `lib/util/cache/repository/impl/local.spec.ts` | Done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
 | `lib/util/cache/repository/impl/s3.spec.ts` | Not done | [details](lib/util/cache/repository/impl/s3.spec.ts.md) |
 | `lib/util/cache/repository/index.spec.ts` | Done | [details](lib/util/cache/repository/index.spec.ts.md) |
-| `lib/util/exec/common.spec.ts` | Not done | [details](lib/util/exec/common.spec.ts.md) |
+| `lib/util/exec/common.spec.ts` | Done | [details](lib/util/exec/common.spec.ts.md) |
 | `lib/util/exec/containerbase.spec.ts` | Not done | [details](lib/util/exec/containerbase.spec.ts.md) |
 | `lib/util/exec/docker/index.spec.ts` | Not done | [details](lib/util/exec/docker/index.spec.ts.md) |
 | `lib/util/exec/env.spec.ts` | Done | [details](lib/util/exec/env.spec.ts.md) |
@@ -877,7 +877,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/process/lookup/timestamps.spec.ts` | Done | [details](lib/workers/repository/process/lookup/timestamps.spec.ts.md) |
 | `lib/workers/repository/process/lookup/utils.spec.ts` | Done | [details](lib/workers/repository/process/lookup/utils.spec.ts.md) |
 | `lib/workers/repository/process/sort.spec.ts` | Done | [details](lib/workers/repository/process/sort.spec.ts.md) |
-| `lib/workers/repository/process/vulnerabilities.spec.ts` | Not done | [details](lib/workers/repository/process/vulnerabilities.spec.ts.md) |
+| `lib/workers/repository/process/vulnerabilities.spec.ts` | Done | [details](lib/workers/repository/process/vulnerabilities.spec.ts.md) |
 | `lib/workers/repository/process/write.spec.ts` | Done | [details](lib/workers/repository/process/write.spec.ts.md) |
 | `lib/workers/repository/reconfigure/comment.spec.ts` | Done | [details](lib/workers/repository/reconfigure/comment.spec.ts.md) |
 | `lib/workers/repository/reconfigure/index.spec.ts` | Done | [details](lib/workers/repository/reconfigure/index.spec.ts.md) |
