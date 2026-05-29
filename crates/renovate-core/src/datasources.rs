@@ -207,6 +207,22 @@ pub fn get_datasource_list() -> Vec<&'static str> {
     KNOWN_DATASOURCES.iter().map(|d| d.id).collect()
 }
 
+/// Check if an input is a valid `GetPkgReleasesConfig`.
+///
+/// Requires `datasource` (non-empty string) and `packageName` (string).
+/// Mirrors `isGetPkgReleasesConfig()` from `lib/modules/datasource/common.ts`.
+pub fn is_get_pkg_releases_config(value: &serde_json::Value) -> bool {
+    let obj = match value.as_object() {
+        Some(o) => o,
+        None => return false,
+    };
+    let datasource = match obj.get("datasource").and_then(|v| v.as_str()) {
+        Some(s) if !s.is_empty() => s,
+        _ => return false,
+    };
+    obj.get("packageName").and_then(|v| v.as_str()).is_some()
+}
+
 #[cfg(test)]
 mod registry_tests {
     use super::*;
@@ -257,5 +273,33 @@ mod registry_tests {
     fn datasource_registry_datasource_defined_versioning() {
         // crate uses cargo versioning
         assert_eq!(get_datasource_default_versioning(Some("crate")), "cargo");
+    }
+
+    // Ported: "returns true for valid input" — modules/datasource/common.spec.ts line 62
+    #[test]
+    fn is_get_pkg_releases_config_valid() {
+        let input = serde_json::json!({"datasource": "npm", "packageName": "lodash"});
+        assert!(is_get_pkg_releases_config(&input));
+    }
+
+    // Ported: "returns false for invalid input" — modules/datasource/common.spec.ts line 70
+    #[test]
+    fn is_get_pkg_releases_config_empty_datasource() {
+        let input = serde_json::json!({"datasource": "", "packageName": "lodash"});
+        assert!(!is_get_pkg_releases_config(&input));
+    }
+
+    // Ported: "returns false for input with missing properties" — modules/datasource/common.spec.ts line 78
+    #[test]
+    fn is_get_pkg_releases_config_missing_package_name() {
+        let input = serde_json::json!({"datasource": "npm"});
+        assert!(!is_get_pkg_releases_config(&input));
+    }
+
+    // Ported: "returns false for input with non-string properties" — modules/datasource/common.spec.ts line 85
+    #[test]
+    fn is_get_pkg_releases_config_non_string_datasource() {
+        let input = serde_json::json!({"datasource": 123, "packageName": "lodash"});
+        assert!(!is_get_pkg_releases_config(&input));
     }
 }
