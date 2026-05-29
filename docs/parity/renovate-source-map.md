@@ -473,7 +473,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |----------------------|-----------|--------|-------|
 | `lib/modules/manager/gomod/extract.ts` | `crates/renovate-core/src/extractors/gomod.rs` | partial | Core extraction ported |
 | `lib/modules/manager/gomod/index.ts` | `crates/renovate-core/src/extractors/gomod.rs` | partial | Manager metadata |
-| `lib/modules/manager/gomod/update.ts` | `crates/renovate-core/src/extractors/gomod.rs` | full | gomod_update_dependency: line-based go.mod version updates; handles require/replace/golang/toolchain/indirect dep types, major version bumps (/v2 suffix), gopkg.in (.v2) style, +incompatible suffix, multiline blocks; Missing: digest update tests, replace-both-sides test |
+| `lib/modules/manager/gomod/update.ts` | `crates/renovate-core/src/extractors/gomod.rs` | full | gomod_update_dependency: all 33 tests ported; line-based go.mod updates with require/replace/golang/toolchain/indirect, major bumps (/v2), gopkg.in, +incompatible, multiline, digest, replace-both-sides |
 
 ### gradle
 
@@ -661,6 +661,11 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/npm/update/dependency/common.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | npm_get_new_git_value, npm_get_new_alias_value |
 | `lib/modules/manager/npm/update/dependency/pnpm.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | update_pnpm_workspace_dependency: all 24 tests ported; YAML format-preserving replacement with anchor, flow-style, quote-style, and key-rename support |
 | `lib/modules/manager/npm/update/dependency/yarn.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | update_yarnrc_catalog_dependency: all 25 of 26 tests ported (1 not-applicable: trace logger mock); YAML format-preserving replacement with anchor, flow-style, quote-style support |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | yarn_update_locked_dependency: all 6 tests ported; handles invalid parse, yarn2 unsupported, not-found, already-updated, out-of-range, and in-range update |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | get_yarn_locked_dependencies: all tests ported; finds entries matching dep+version in yarn v1 lock files |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | replace_constraint_version: all tests ported |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | package_lock_get_locked_dependencies: all 6 tests ported; recursive dependency tree search |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | package_lock_find_dep_constraints: all 4 tests ported; finds parent constraints for locked deps |
 | `lib/modules/manager/npm/utils.ts` | — | not-started | Not ported |
 
 ### nuget
