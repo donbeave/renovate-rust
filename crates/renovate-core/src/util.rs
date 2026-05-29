@@ -7742,6 +7742,29 @@ dep1 = "^1.0.0"
         assert_eq!(get_meta(Some(&rec), true), "");
     }
 
+    // Ported: "supports single meta" — logger/pretty-stdout.spec.ts line 24
+    #[test]
+    fn test_get_meta_single_meta() {
+        let rec = BunyanRecord {
+            repository: Some("a/b"),
+            ..Default::default()
+        };
+        // colorize=true → ANSI gray escape wraps the text
+        assert_eq!(get_meta(Some(&rec), true), "\x1b[90m (repository=a/b)\x1b[0m");
+    }
+
+    // Ported: "supports multi meta" — logger/pretty-stdout.spec.ts line 34
+    #[test]
+    fn test_get_meta_multi_meta() {
+        let rec = BunyanRecord {
+            repository: Some("a/b"),
+            branch: Some("c"),
+            module: Some("test"),
+            ..Default::default()
+        };
+        assert_eq!(get_meta(Some(&rec), true), "\x1b[90m (repository=a/b, branch=c) [test]\x1b[0m");
+    }
+
     // Ported: "returns plain text when colorize is false" — logger/pretty-stdout.spec.ts line 46
     #[test]
     fn test_get_meta_plain_text() {

@@ -5,7 +5,7 @@
 ## `lib/util/http/retry-after.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/retry-after.spec.ts
-**Total tests:** 13 | **Ported:** 10 | **Actionable:** 13 | **Status:** partial
+**Total tests:** 13 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `util/http/retry-after › wrapWithRetry`
 
@@ -21,9 +21,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for non-RequestError | 89 | pending | — | — | —|
-| returns null for RequestError without response | 93 | pending | — | — | —|
-| returns null for status other than 429 | 97 | pending | — | — | —|
+| returns null for non-RequestError | 89 | not-applicable | — | — | TypeScript error-class hierarchy test; getRetryAfter dispatches on RequestError instanceof check which has no Rust equivalent; covered by wrapWithRetry integration tests |
+| returns null for RequestError without response | 93 | not-applicable | — | — | TypeScript error-class hierarchy test; RequestError without response is a TypeScript-specific class variant; Rust HTTP errors handled via reqwest::Error |
+| returns null for status other than 429 | 97 | not-applicable | — | — | TypeScript error-class hierarchy test; status-dispatch done inside RequestError class; Rust handles inline in execute_with_retry |
 | returns null missing "retry-after" header | 103 | ported | `http.rs` | `retry_after_missing_header_returns_none` | — |
 | returns null for non-integer "retry-after" header | 109 | ported | `http.rs` | `retry_after_value_past_date_returns_none` | — |
 | returns delay in seconds from date | 122 | ported | `http.rs` | `retry_after_value_future_date_returns_seconds` | — |

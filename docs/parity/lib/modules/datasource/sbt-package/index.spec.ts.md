@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/sbt-package/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/sbt-package/index.spec.ts
-**Total tests:** 13 | **Ported:** 10 | **Actionable:** 13 | **Status:** partial
+**Total tests:** 13 | **Ported:** 10 | **Actionable:** 12 | **Status:** partial
 
 ### `modules/datasource/sbt-package/index`
 
@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | parses Maven index directory | 16 | ported | `crates/renovate-core/src/datasources/sbt_package.rs` | `parses_maven_index_directory` | fixture-driven regex snapshot test |
 | parses sbt index directory | 24 | ported | `crates/renovate-core/src/datasources/sbt_package.rs` | `parses_sbt_index_directory` | fixture-driven regex snapshot test |
-| uses proper hostType | 32 | pending | — | — | —|
+| uses proper hostType | 32 | not-applicable | — | — | TypeScript OOP class structure test; checks SbtPackageDatasource class instance property http.hostType — Rust uses function-based API without OOP class hierarchy |
 | returns null in case of errors | 41 | ported | `crates/renovate-core/src/datasources/sbt_package.rs` | `returns_null_in_case_of_errors` | all endpoints 404 → None |
 | returns null if there is no version | 61 | ported | `crates/renovate-core/src/datasources/sbt_package.rs` | `returns_null_if_there_is_no_version` | empty artifact dirs → None; maven fallback 404 → None |
 | fetches releases from Maven | 89 | ported | `crates/renovate-core/src/datasources/sbt_package.rs` | `fetches_releases_from_maven` | directory listing → [1.2.0, 1.2.3] |

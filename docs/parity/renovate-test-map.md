@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,859 / 11,677 total tests ported (42%) · pending 6,687 · not-applicable 131 (1% of total) — updated 2026-05-29
+**Progress:** 4,861 / 11,677 total tests ported (42%) · pending 6,679 · not-applicable 137 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -154,7 +154,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/flutter-version/index.spec.ts` | Done | [details](lib/modules/datasource/flutter-version/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-packages/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-packages/index.spec.ts.md) |
 | `lib/modules/datasource/hexpm-bob/index.spec.ts` | Done | [details](lib/modules/datasource/hexpm-bob/index.spec.ts.md) |
-| `lib/modules/datasource/sbt-plugin/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
+| `lib/modules/datasource/sbt-plugin/index.spec.ts` | Done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/util.spec.ts` | Done | [details](lib/modules/datasource/sbt-package/util.spec.ts.md) |
 | `lib/modules/datasource/node-version/index.spec.ts` | Done | [details](lib/modules/datasource/node-version/index.spec.ts.md) |
@@ -364,7 +364,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/config-serializer.spec.ts` | Done | [details](lib/logger/config-serializer.spec.ts.md) |
 | `lib/logger/remap.spec.ts` | Done | [details](lib/logger/remap.spec.ts.md) |
 | `lib/logger/renovate-logger.spec.ts` | Not done | [details](lib/logger/renovate-logger.spec.ts.md) |
-| `lib/logger/pretty-stdout.spec.ts` | Not done | [details](lib/logger/pretty-stdout.spec.ts.md) |
+| `lib/logger/pretty-stdout.spec.ts` | Done | [details](lib/logger/pretty-stdout.spec.ts.md) |
 | `lib/logger/err-serializer.spec.ts` | Not done | [details](lib/logger/err-serializer.spec.ts.md) |
 | `lib/logger/once.spec.ts` | Not done | [details](lib/logger/once.spec.ts.md) |
 | `lib/logger/utils.spec.ts` | Not done | [details](lib/logger/utils.spec.ts.md) |
@@ -808,7 +808,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/jira.spec.ts` | Not done | [details](lib/util/http/jira.spec.ts.md) |
 | `lib/util/http/queue.spec.ts` | Not done | [details](lib/util/http/queue.spec.ts.md) |
 | `lib/util/http/rate-limit.spec.ts` | Not done | [details](lib/util/http/rate-limit.spec.ts.md) |
-| `lib/util/http/retry-after.spec.ts` | Not done | [details](lib/util/http/retry-after.spec.ts.md) |
+| `lib/util/http/retry-after.spec.ts` | Done | [details](lib/util/http/retry-after.spec.ts.md) |
 | `lib/util/http/scm-manager.spec.ts` | Not done | [details](lib/util/http/scm-manager.spec.ts.md) |
 | `lib/util/http/throttle.spec.ts` | Not done | [details](lib/util/http/throttle.spec.ts.md) |
 | `lib/util/http/www-authenticate.spec.ts` | Done | [details](lib/util/http/www-authenticate.spec.ts.md) |
