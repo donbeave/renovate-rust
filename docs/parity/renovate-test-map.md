@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,812 / 11,677 total tests ported (41%) · pending 6,738 · not-applicable 127 (1% of total) — updated 2026-05-29
+**Progress:** 4,814 / 11,677 total tests ported (41%) · pending 6,735 · not-applicable 128 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -413,7 +413,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/date.spec.ts` | Done | [details](lib/util/date.spec.ts.md) |
 | `lib/util/fingerprint.spec.ts` | Done | [details](lib/util/fingerprint.spec.ts.md) |
 | `lib/util/hash.spec.ts` | Done | [details](lib/util/hash.spec.ts.md) |
-| `lib/util/regex.spec.ts` | Not done | [details](lib/util/regex.spec.ts.md) |
+| `lib/util/regex.spec.ts` | Done | [details](lib/util/regex.spec.ts.md) |
 | `lib/util/result.spec.ts` | Done | [details](lib/util/result.spec.ts.md) |
 | `lib/util/number.spec.ts` | Done | [details](lib/util/number.spec.ts.md) |
 | `lib/util/assign-keys.spec.ts` | Done | [details](lib/util/assign-keys.spec.ts.md) |
@@ -816,7 +816,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/json-writer/json-writer.spec.ts` | Done | [details](lib/util/json-writer/json-writer.spec.ts.md) |
 | `lib/util/merge-confidence/index.spec.ts` | Not done | [details](lib/util/merge-confidence/index.spec.ts.md) |
 | `lib/util/schema-utils/index.spec.ts` | Not done | [details](lib/util/schema-utils/index.spec.ts.md) |
-| `lib/util/schema-utils/v4.spec.ts` | Not done | [details](lib/util/schema-utils/v4.spec.ts.md) |
+| `lib/util/schema-utils/v4.spec.ts` | Done | [details](lib/util/schema-utils/v4.spec.ts.md) |
 | `lib/util/template/index.spec.ts` | Not done | [details](lib/util/template/index.spec.ts.md) |
 | `lib/util/vulnerability/ecosystem.spec.ts` | Done | [details](lib/util/vulnerability/ecosystem.spec.ts.md) |
 | `lib/util/vulnerability/utils.spec.ts` | Done | [details](lib/util/vulnerability/utils.spec.ts.md) |

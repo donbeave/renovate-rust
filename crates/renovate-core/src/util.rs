@@ -7465,11 +7465,10 @@ dep1 = "^1.0.0"
     // Ported: "fails for invalid JSONC" — util/schema-utils/v4.spec.ts line 119
     #[test]
     fn test_schema_parse_jsonc_invalid() {
-        let r = schema_parse_jsonc("{\"name\": \"test\"\n\"version\": \"1.0.0\"}");
-        // JSON5 parser is lenient - some invalid JSON is valid JSON5
-        // For strict JSONC parsing (no missing commas), this may succeed or fail
-        // This is acceptable behavior
-        let _ = r;
+        // Missing commas between properties — invalid JSONC (json5 also requires commas)
+        let input = "{\n  \"name\": \"test\"\n  \"version\": \"1.0.0\"\n  \"dependencies\": {\n    \"lodash\": \"^4.17.21\"\n  }\n}";
+        let r = schema_parse_jsonc(input);
+        assert!(r.is_err(), "JSONC with missing commas should fail");
     }
 
     // Ported: "parses valid YAML" — util/schema-utils/v4.spec.ts line 140
@@ -7498,6 +7497,14 @@ dep1 = "^1.0.0"
         assert_eq!(docs.len(), 2);
         assert_eq!(docs[0]["name"], "test1");
         assert_eq!(docs[1]["name"], "test2");
+    }
+
+    // Ported: "fails for invalid multidoc YAML" — util/schema-utils/v4.spec.ts line 209
+    #[test]
+    fn test_schema_parse_multidoc_yaml_invalid() {
+        let yaml = "---\nname: test1\nversion: 1.0.0\n---\nname: test2\n  invalid: indentation\n";
+        let r = schema_parse_multidoc_yaml(yaml);
+        assert!(r.is_err(), "multidoc YAML with invalid indentation should fail");
     }
 
     // Ported: "parses valid TOML" — util/schema-utils/v4.spec.ts line 225
@@ -9389,3 +9396,10 @@ dep1 = "^1.0.0"
         assert_eq!(result.get("RANDOM_VAR").map(String::as_str), Some("random"));
     }
 }
+
+    #[test]
+    fn jsonc_behavior_inline_check() {
+        let input = "{\n  \"name\": \"test\"\n  \"version\": \"1.0.0\"\n}";
+        let r = schema_parse_jsonc(input);
+        eprintln!("JSONC missing comma is_err: {}", r.is_err());
+    }
