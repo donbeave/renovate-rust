@@ -400,4 +400,124 @@ mod tests {
         let result = deno_update_dependency(content, &upgrade);
         assert!(result.is_none());
     }
+    // Ported: "updates dependency in tasks.command" — deno/update.spec.ts line 158
+    #[test]
+    fn deno_update_tasks_command() {
+        let content = r#"{"tasks":{"build":"deno run -A npm:dep1@4.0.0","dev":{"command":"deno run --allow-net npm:dep2@14.0.1"}}}"#;
+        let upgrade = mk_deno_upgrade("dep2", "tasks.command", "npm", "14.0.1", "16.0.0");
+        let result = deno_update_dependency(content, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["tasks"]["dev"]["command"].as_str().unwrap(), "deno run --allow-net npm:dep2@16.0.0");
+    }
+
+    // Ported: "returns null when tasks.command element not found" — deno/update.spec.ts line 221
+    #[test]
+    fn deno_update_tasks_command_not_found() {
+        let content = r#"{"tasks":{"build":"deno run -A npm:dep1@4.0.0","dev":{"command":"deno run --allow-net npm:dep2@14.0.1"}}}"#;
+        let upgrade = mk_deno_upgrade("dep1", "tasks.command", "npm", "4.0.0", "4.1.0");
+        let result = deno_update_dependency(content, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null when compilerOptions.types element not found" — deno/update.spec.ts line 308
+    #[test]
+    fn deno_update_compiler_types_not_found() {
+        let content = r#"{"compilerOptions":{"types":["npm:@types/other@18.0.0"]}}"#;
+        let upgrade = mk_deno_upgrade("@types/dep2", "compilerOptions.types", "npm", "18.0.0", "19.0.0");
+        let result = deno_update_dependency(content, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null when compilerOptions.jsxImportSource does not exist" — deno/update.spec.ts line 367
+    #[test]
+    fn deno_update_jsx_import_source_not_found() {
+        let content = r#"{"compilerOptions":{"types":["npm:@types/dep2@18.0.0"]}}"#;
+        let upgrade = mk_deno_upgrade("https://deno.land/x/dep2", "compilerOptions.jsxImportSource", "deno", "18.0.0", "19.0.0");
+        let result = deno_update_dependency(content, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null when compilerOptions.jsxImportSourceTypes does not exist" — deno/update.spec.ts line 394
+    #[test]
+    fn deno_update_jsx_import_source_types_not_found() {
+        let content = r#"{"compilerOptions":{"types":["npm:@types/dep2@18.0.0"]}}"#;
+        let upgrade = mk_deno_upgrade("@types/dep2", "compilerOptions.jsxImportSourceTypes", "npm", "18.0.0", "19.0.0");
+        let result = deno_update_dependency(content, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "updates dependency in compilerOptions.jsxImportSourceTypes" — deno/update.spec.ts line 421
+    #[test]
+    fn deno_update_jsx_import_source_types() {
+        let content = r#"{"compilerOptions":{"jsxImportSourceTypes":"npm:@types/dep2@18.0.0"}}"#;
+        let upgrade = mk_deno_upgrade("@types/dep2", "compilerOptions.jsxImportSourceTypes", "npm", "18.0.0", "19.0.0");
+        let result = deno_update_dependency(content, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["compilerOptions"]["jsxImportSourceTypes"].as_str().unwrap(), "npm:@types/dep2@19.0.0");
+    }
+
+    // Ported: "returns null when lint.plugins element not found" — deno/update.spec.ts line 481
+    #[test]
+    fn deno_update_lint_plugins_not_found() {
+        let content = r#"{"lint":{"plugins":["npm:dep2@5.0.0"]}}"#;
+        let upgrade = mk_deno_upgrade("dep1", "lint.plugins", "npm", "5.0.0", "6.0.0");
+        let result = deno_update_dependency(content, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null when lint.plugins is empty array" — deno/update.spec.ts line 508
+    #[test]
+    fn deno_update_lint_plugins_empty() {
+        let content = r#"{"lint":{"plugins":[]}}"#;
+        let upgrade = mk_deno_upgrade("dep1", "lint.plugins", "npm", "5.0.0", "6.0.0");
+        let result = deno_update_dependency(content, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "handles dependency without version" — deno/update.spec.ts line 535
+    #[test]
+    fn deno_update_dep_without_version() {
+        let content = r#"{"imports":{"dep1":"npm:dep1"}}"#;
+        let mut upgrade = mk_deno_upgrade("dep1", "imports", "npm", "", "1.0.0");
+        upgrade.current_value = None;
+        let result = deno_update_dependency(content, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["imports"]["dep1"].as_str().unwrap(), "npm:dep1@1.0.0");
+    }
+
+    // Ported: "currentValue is not defined when deno datasource" — deno/update.spec.ts line 602
+    #[test]
+    fn deno_update_no_current_value_deno() {
+        let content = r#"{"imports":{"fs":"https://deno.land/std/fs"}}"#;
+        let mut upgrade = mk_deno_upgrade("https://deno.land/std/fs", "imports", "deno", "", "2.0.0");
+        upgrade.current_value = None;
+        let result = deno_update_dependency(content, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["imports"]["fs"].as_str().unwrap(), "https://deno.land/std/fs@2.0.0");
+    }
+
+    // Ported: "returns null for missing required values" — deno/update.spec.ts line 629
+    #[test]
+    fn deno_update_missing_required_values() {
+        let upgrade = DenoUpdateUpgrade {
+            package_file: Some("deno.json".into()),
+            datasource: Some("npm".into()),
+            new_value: Some("2.0.0".into()),
+            ..Default::default()
+        };
+        let result = deno_update_dependency("{}", &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "handles complex JSON with nested structures" — deno/update.spec.ts line 648
+    #[test]
+    fn deno_update_complex_json() {
+        let content = r#"{"name":"my-deno-app","imports":{"dep1":"npm:dep1@1.0.0","dep2":"npm:dep2@1.0.0"}}"#;
+        let upgrade = mk_deno_upgrade("dep1", "imports", "npm", "1.0.0", "1.1.0");
+        let result = deno_update_dependency(content, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["imports"]["dep1"].as_str().unwrap(), "npm:dep1@1.1.0");
+        assert_eq!(parsed["imports"]["dep2"].as_str().unwrap(), "npm:dep2@1.0.0");
+    }
+
 }
