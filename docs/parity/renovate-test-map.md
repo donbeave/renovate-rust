@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,976 / 11,677 total tests ported (43%) · pending 6,491 · not-applicable 210 (2% of total) — updated 2026-05-29
+**Progress:** 4,976 / 11,677 total tests ported (43%) · pending 6,487 · not-applicable 214 (2% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -239,7 +239,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/bazel/index.spec.ts` | Not done | [details](lib/modules/datasource/bazel/index.spec.ts.md) |
 | `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts` | Done | [details](lib/modules/datasource/azure-pipelines-tasks/index.spec.ts.md) |
 | `lib/modules/datasource/helm/schema.spec.ts` | Done | [details](lib/modules/datasource/helm/schema.spec.ts.md) |
-| `lib/modules/datasource/npm/schema.spec.ts` | Not done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
+| `lib/modules/datasource/npm/schema.spec.ts` | Done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
 | `lib/modules/datasource/nuget/common.spec.ts` | Done | [details](lib/modules/datasource/nuget/common.spec.ts.md) |
 | `lib/modules/datasource/maven/cache.spec.ts` | Not done | [details](lib/modules/datasource/maven/cache.spec.ts.md) |
 | `lib/modules/datasource/maven/common.spec.ts` | Done | [details](lib/modules/datasource/maven/common.spec.ts.md) |
@@ -392,7 +392,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/range.spec.ts` | Done | [details](lib/util/range.spec.ts.md) |
 | `lib/util/compress.spec.ts` | Not done | [details](lib/util/compress.spec.ts.md) |
 | `lib/util/split.spec.ts` | Not done | [details](lib/util/split.spec.ts.md) |
-| `lib/util/streams.spec.ts` | Not done | [details](lib/util/streams.spec.ts.md) |
+| `lib/util/streams.spec.ts` | Done | [details](lib/util/streams.spec.ts.md) |
 | `lib/util/timestamp.spec.ts` | Done | [details](lib/util/timestamp.spec.ts.md) |
 | `lib/util/sanitize.spec.ts` | Done | [details](lib/util/sanitize.spec.ts.md) |
 | `lib/util/clone.spec.ts` | Done | [details](lib/util/clone.spec.ts.md) |
@@ -437,7 +437,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/scm.spec.ts` | Not done | [details](lib/modules/platform/scm.spec.ts.md) |
 | `lib/modules/platform/pr-body.spec.ts` | Done | [details](lib/modules/platform/pr-body.spec.ts.md) |
 | `lib/modules/platform/index.spec.ts` | Not done | [details](lib/modules/platform/index.spec.ts.md) |
-| `lib/modules/platform/types.spec.ts` | Not done | [details](lib/modules/platform/types.spec.ts.md) |
+| `lib/modules/platform/types.spec.ts` | Done | [details](lib/modules/platform/types.spec.ts.md) |
 | `lib/modules/platform/util.spec.ts` | Done | [details](lib/modules/platform/util.spec.ts.md) |
 | `lib/modules/platform/default-scm.spec.ts` | Not done | [details](lib/modules/platform/default-scm.spec.ts.md) |
 | `lib/modules/manager/range.spec.ts` | Done | [details](lib/modules/manager/range.spec.ts.md) |
@@ -777,7 +777,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/git/private-key.spec.ts` | Not done | [details](lib/util/git/private-key.spec.ts.md) |
 | `lib/util/git/semantic.spec.ts` | Done | [details](lib/util/git/semantic.spec.ts.md) |
 | `lib/util/git/set-branch-commit.spec.ts` | Not done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
-| `lib/util/git/span-processor.spec.ts` | Not done | [details](lib/util/git/span-processor.spec.ts.md) |
+| `lib/util/git/span-processor.spec.ts` | Done | [details](lib/util/git/span-processor.spec.ts.md) |
 | `lib/util/git/update-date-cache.spec.ts` | Not done | [details](lib/util/git/update-date-cache.spec.ts.md) |
 | `lib/util/git/url.spec.ts` | Not done | [details](lib/util/git/url.spec.ts.md) |
 | `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | Not done | [details](lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts.md) |
