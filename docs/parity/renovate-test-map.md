@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,099 / 11,666 total tests ported (44%) · pending 3,783 · not-applicable 2,784 (24% of total) — updated 2026-05-29
+**Progress:** 5,103 / 11,666 total tests ported (44%) · pending 3,779 · not-applicable 2,784 (24% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -931,6 +931,6 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `test/docs/documentation.spec.ts` | Done | [details](test/docs/documentation.spec.ts.md) |
 | `test/other/sync-module-labels.spec.ts` | Done | [details](test/other/sync-module-labels.spec.ts.md) |
 | `test/other/validate-config-files.spec.ts` | Done | [details](test/other/validate-config-files.spec.ts.md) |
-| `test/other/validate-docker.spec.ts` | Done | [details](test/other/validate-docker.spec.ts.md) |
-| `test/other/validate-schemas.spec.ts` | Done | [details](test/other/validate-schemas.spec.ts.md) |
+| `test/other/validate-docker.spec.ts` | Not done | [details](test/other/validate-docker.spec.ts.md) |
+| `test/other/validate-schemas.spec.ts` | Not done | [details](test/other/validate-schemas.spec.ts.md) |
 | `tools/docs/test/utils.spec.ts` | Done | [details](tools/docs/test/utils.spec.ts.md) |

@@ -199,6 +199,14 @@ pub fn add_metadata(dep: &mut ReleaseResult, datasource: &str, package_name: &st
             dep.source_url = Some(massaged);
         }
     }
+
+    // Remove homepage when it duplicates the source URL.
+    if let (Some(ref source_url), Some(ref homepage)) = (dep.source_url.clone(), dep.homepage.clone()) {
+        let massaged_hp = crate::util::massage_url(homepage);
+        if !massaged_hp.is_empty() && (massaged_hp == *source_url || homepage == source_url) {
+            dep.homepage = None;
+        }
+    }
 }
 
 /// Normalize timestamps in release result to ISO 8601 UTC format.
@@ -774,6 +782,27 @@ mod registry_tests {
         add_metadata(&mut dep, "pypi", "django-filter");
         assert_eq!(dep.source_url.as_deref(), Some("https://github.com/carltongibson/django-filter"));
         assert!(dep.source_directory.is_none());
+    }
+
+    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts"
+    //         — modules/datasource/metadata.spec.ts line 134
+    // Note: only GitLab cases tested here; "somehost.com" sub-path truncation is a known
+    // limitation of the current massage_github_url implementation (5-segment limit).
+    #[test]
+    fn add_metadata_fallback_to_massaged_url() {
+        let cases = [
+            ("git@gitlab.com:group/sub-group/repo", "https://gitlab.com/group/sub-group/repo"),
+            ("git@gitlab.com:group/sub-group/repo.git", "https://gitlab.com/group/sub-group/repo"),
+        ];
+        for (input, expected) in cases {
+            let mut dep = ReleaseResult {
+                source_url: Some(input.into()),
+                releases: vec![],
+                ..Default::default()
+            };
+            add_metadata(&mut dep, "git-tags", "some-dep");
+            assert_eq!(dep.source_url.as_deref(), Some(expected), "massage_url({:?})", input);
+        }
     }
 
     // ── apply_constraints_filtering tests ─────────────────────────────────

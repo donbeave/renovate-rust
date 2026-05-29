@@ -15,7 +15,7 @@
 | Should handle manualSourceUrls | 51 | ported | `datasources.rs` | `add_metadata_manual_source_url` | —  | — | — | — |
 | Should handle parsing of sourceUrls correctly | 82 | ported | `datasources.rs` | `add_metadata_parses_github_tree_url` | —  | — | — | — |
 | Should split the sourceDirectory out of sourceUrl for known platforms: $sourceUrl -> ($expectedSourceUrl, $expectedSourceDirectory) | 113 | ported | `datasources.rs` | `add_metadata_extracts_source_directory` | Ported bitnami/charts case; GitLab and custom host cases not yet ported  | — | — | — |
-| Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl | 134 | pending | — | — | — |
+| Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl | 134 | ported | `datasources.rs` | `add_metadata_fallback_to_massaged_url` | — |
 | Should not split a sourceDirectory when one cannot be detected $sourceUrl | 158 | ported | `datasources.rs` | `add_metadata_no_source_directory_for_simple_urls` | Tests bitnami, gitlab simple URLs  | — | — | — |
 | Should not overwrite any existing sourceDirectory | 180 | ported | `datasources.rs` | `add_metadata_preserves_existing_source_directory` | —  | — | — | — |
 | Should massage github sourceUrls | 197 | pending | — | — | — |
