@@ -1739,6 +1739,677 @@ pub fn replace_constraint_version(
     result.into_owned()
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// npm updateDependency — lib/modules/manager/npm/update/dependency/
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Manager-specific data attached to an npm upgrade.
+/// Mirrors `NpmManagerData` from `lib/modules/manager/npm/types.ts`.
+#[derive(Debug, Clone, Default)]
+pub struct NpmUpdateManagerData {
+    /// Key override: replaces `dep_name` as the lookup key in the JSON section.
+    pub key: Option<String>,
+    /// Parent chain used when the dep lives in a nested `overrides` object.
+    pub parents: Option<Vec<String>>,
+}
+
+/// Input for `update_dependency`.
+/// Mirrors `UpdateDependencyConfig` + `Upgrade<NpmManagerData>` from
+/// `lib/modules/manager/npm/update/dependency/index.ts`.
+#[derive(Debug, Clone, Default)]
+pub struct NpmUpdateUpgrade {
+    /// Which section the dep came from (e.g. `"dependencies"`, `"pnpm.overrides"`).
+    pub dep_type: String,
+    /// Package name as it appears in the manifest.
+    pub dep_name: String,
+    /// New semver version/range to write.
+    pub new_value: Option<String>,
+    /// New package name for rename-based replacements.
+    pub new_name: Option<String>,
+    /// New git digest (for `currentDigest` deps).
+    pub new_digest: Option<String>,
+    /// Current git digest (for `currentDigest` deps).
+    pub current_digest: Option<String>,
+    /// Current version value.
+    pub current_value: Option<String>,
+    /// Raw value stored in the file (for git deps; may include the git URL).
+    pub current_raw_value: Option<String>,
+    /// True when the dep is an `npm:pkg@ver` alias.
+    pub npm_package_alias: bool,
+    /// Real package name for alias deps.
+    pub package_name: Option<String>,
+    /// `"alias"` → write `npm:newName@newValue` instead of bare `newValue`.
+    pub replacement_approach: Option<String>,
+    /// Additional npm manager data.
+    pub manager_data: Option<NpmUpdateManagerData>,
+}
+
+/// Mirrors `getNewGitValue()` from common.ts.
+/// Returns the new raw value for a git-source dependency or `None` if not applicable.
+pub fn npm_get_new_git_value(upgrade: &NpmUpdateUpgrade) -> Option<String> {
+    let raw = upgrade.current_raw_value.as_deref()?;
+    if let Some(digest) = &upgrade.current_digest {
+        let new_digest = upgrade.new_digest.as_deref()?;
+        // Truncate new digest to same length as current digest.
+        let len = digest.len().min(new_digest.len());
+        Some(raw.replacen(digest.as_str(), &new_digest[..len], 1))
+    } else {
+        let cur = upgrade.current_value.as_deref()?;
+        let nv = upgrade.new_value.as_deref()?;
+        Some(raw.replacen(cur, nv, 1))
+    }
+}
+
+/// Mirrors `getNewNpmAliasValue()` from common.ts.
+/// Returns `"npm:packageName@value"` when the dep is an npm alias.
+pub fn npm_get_new_alias_value(value: Option<&str>, upgrade: &NpmUpdateUpgrade) -> Option<String> {
+    if !upgrade.npm_package_alias {
+        return None;
+    }
+    let pkg = upgrade.package_name.as_deref()?;
+    Some(format!("npm:{}@{}", pkg, value.unwrap_or("")))
+}
+
+/// Verify-and-replace a JSON value in a format-preserving way.
+///
+/// Searches `content` for the literal string `"old_val"` starting from after
+/// the first occurrence of `"section_key"` (the dep-type keyword).  For each
+/// candidate position it replaces `"old_val"` with `"new_val"`, re-parses the
+/// result, and returns the first replacement whose parsed form equals
+/// `expected`.
+///
+/// Returns `None` when no verified replacement is found.
+fn json_replace_verified(
+    expected: &serde_json::Value,
+    content: &str,
+    section_key: &str,
+    old_val: &str,
+    new_val: &str,
+) -> Option<String> {
+    let search_str = format!("\"{old_val}\"");
+    let new_str = format!("\"{new_val}\"");
+
+    // Skip to the section keyword.  If the keyword isn't literally in the
+    // file (e.g. "pnpm.overrides" never appears as a key in package.json),
+    // start near the beginning — matching TypeScript's `indexOf() + keyLen`
+    // behaviour where indexOf returns -1.
+    let search_start = content
+        .find(&format!("\"{section_key}\""))
+        .map(|i| i + section_key.len())
+        .unwrap_or_else(|| section_key.len().saturating_sub(1).min(content.len()));
+
+    let mut i = search_start;
+    while i < content.len() {
+        if content[i..].starts_with(&search_str) {
+            let candidate = format!(
+                "{}{}{}",
+                &content[..i],
+                new_str,
+                &content[i + search_str.len()..]
+            );
+            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&candidate) {
+                if &parsed == expected {
+                    return Some(candidate);
+                }
+            }
+        }
+        let step = content[i..].chars().next().map_or(1, |c| c.len_utf8());
+        i += step;
+    }
+    None
+}
+
+/// Rename a key inside a JSON object at `path` from `old_key` to `new_key`.
+/// No-op when the path doesn't exist or the key isn't found.
+fn json_rename_key(root: &mut serde_json::Value, path: &[&str], old_key: &str, new_key: &str) {
+    let mut current = root;
+    for key in path {
+        match current.get_mut(*key) {
+            Some(v) => current = v,
+            None => return,
+        }
+    }
+    if let Some(map) = current.as_object_mut() {
+        if let Some(val) = map.remove(old_key) {
+            map.insert(new_key.to_owned(), val);
+        }
+    }
+}
+
+/// Core JSON-based package.json update.
+/// Mirrors the non-YAML paths of `updateDependency()` from index.ts.
+fn update_dependency_package_json(
+    file_content: &str,
+    upgrade: &NpmUpdateUpgrade,
+) -> Option<String> {
+    let dep_type = upgrade.dep_type.as_str();
+    let dep_name: &str = upgrade
+        .manager_data
+        .as_ref()
+        .and_then(|m| m.key.as_deref())
+        .unwrap_or(upgrade.dep_name.as_str());
+
+    let override_parents: Option<Vec<String>> = upgrade
+        .manager_data
+        .as_ref()
+        .and_then(|m| m.parents.clone());
+    let is_override_object = override_parents.is_some() && dep_type == "overrides";
+
+    // Compute the effective new value (git digest / alias / plain).
+    let mut new_value: Option<String> = upgrade.new_value.clone();
+    new_value = npm_get_new_git_value(upgrade).or(new_value);
+    new_value = npm_get_new_alias_value(new_value.as_deref(), upgrade).or(new_value);
+    let new_value = new_value?;
+
+    let mut parsed: serde_json::Value = serde_json::from_str(file_content).ok()?;
+
+    // ── Determine old version and set the expected new state in `parsed` ───
+
+    let (old_version, effective_new_value) = if dep_type == "packageManager" {
+        let ov = parsed
+            .get("packageManager")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        // newValue becomes "name@ver" for packageManager.
+        let ev = format!("{}@{}", dep_name, new_value);
+        parsed["packageManager"] = serde_json::Value::String(ev.clone());
+        (ov, ev)
+    } else if is_override_object {
+        let parents = override_parents.as_ref().unwrap();
+        let last_parent = parents.last().map(|s| s.as_str()).unwrap_or("");
+        let mut target = parsed.get_mut("overrides")?;
+        for parent in parents {
+            target = target.get_mut(parent.as_str())?;
+        }
+        let override_key = if dep_name == last_parent { "." } else { dep_name };
+        let ov = target
+            .get(override_key)
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        let ev = new_value.clone();
+        target[override_key] = serde_json::Value::String(ev.clone());
+        (ov, ev)
+    } else if dep_type == "pnpm.overrides" {
+        let ov = parsed
+            .get("pnpm")
+            .and_then(|v| v.get("overrides"))
+            .and_then(|v| v.get(dep_name))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        let ev = new_value.clone();
+        if let Some(pnpm) = parsed.get_mut("pnpm") {
+            if let Some(overrides) = pnpm.get_mut("overrides") {
+                overrides[dep_name] = serde_json::Value::String(ev.clone());
+            }
+        }
+        (ov, ev)
+    } else {
+        let ov = parsed
+            .get(dep_type)
+            .and_then(|v| v.get(dep_name))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        let ev = new_value.clone();
+        parsed[dep_type][dep_name] = serde_json::Value::String(ev.clone());
+        (ov, ev)
+    };
+
+    if old_version == effective_new_value {
+        return Some(file_content.to_owned());
+    }
+
+    // ── pnpm patch: `patch:dep@npm:ver#patch-file` in resolutions ──────────
+    // When depType === "resolutions" and the value matches the patch: pattern,
+    // the new value gets the version replaced inside the patch URL.
+    let (search_old, search_new) = if dep_type == "resolutions" {
+        let escaped = regex::escape(dep_name);
+        let pat = format!(r"^(patch:{escaped}@(?:npm:)?).*#");
+        if let Ok(re) = regex::Regex::new(&pat) {
+            if let Some(caps) = re.captures(&old_version) {
+                let prefix = caps.get(1).map_or("", |m| m.as_str());
+                let after_hash = old_version.find('#').map(|i| &old_version[i..]).unwrap_or("#");
+                let patch_new = format!("{}{}{}", prefix, new_value, after_hash);
+                if let Some(section) = parsed.get_mut("resolutions") {
+                    section[dep_name] = serde_json::Value::String(patch_new.clone());
+                }
+                (old_version.clone(), patch_new)
+            } else {
+                (old_version.clone(), effective_new_value.clone())
+            }
+        } else {
+            (old_version.clone(), effective_new_value.clone())
+        }
+    } else {
+        (old_version.clone(), effective_new_value.clone())
+    };
+
+    let new_name_final = upgrade.new_name.as_deref();
+    let is_alias = upgrade.replacement_approach.as_deref() == Some("alias");
+
+    // ── main replacement ───────────────────────────────────────────────────
+
+    let mut result = if is_alias {
+        if let Some(new_name) = new_name_final {
+            let alias_val = format!("npm:{}@{}", new_name, new_value);
+            // Set the alias value as the expected dep value.
+            if dep_type != "packageManager" && dep_type != "pnpm.overrides" && !is_override_object
+            {
+                parsed[dep_type][dep_name] = serde_json::Value::String(alias_val.clone());
+            }
+            json_replace_verified(&parsed, file_content, dep_type, &search_old, &alias_val)?
+        } else {
+            json_replace_verified(&parsed, file_content, dep_type, &search_old, &search_new)?
+        }
+    } else {
+        let mid =
+            json_replace_verified(&parsed, file_content, dep_type, &search_old, &search_new)?;
+        if let Some(new_name) = new_name_final {
+            // Rename the dep key in the section.
+            json_rename_key(&mut parsed, &[dep_type], dep_name, new_name);
+            json_replace_verified(&parsed, &mid, dep_type, dep_name, new_name)?
+        } else {
+            mid
+        }
+    };
+
+    // ── also update matching entry in `resolutions` ─────────────────────────
+    if dep_type != "resolutions" {
+        let dep_key_opt: Option<String> = parsed.get("resolutions").and_then(|res| {
+            if res.get(dep_name).is_some() {
+                Some(dep_name.to_owned())
+            } else {
+                let glob = format!("**/{}", dep_name);
+                if res.get(glob.as_str()).is_some() {
+                    Some(glob)
+                } else {
+                    None
+                }
+            }
+        });
+
+        if let Some(dep_key) = dep_key_opt {
+            let res_old = parsed["resolutions"][dep_key.as_str()]
+                .as_str()
+                .map(|s| s.to_owned())
+                .unwrap_or_default();
+            // Apply pnpm patch pattern if applicable.
+            let res_new = {
+                let escaped = regex::escape(dep_name);
+                let pat = format!(r"^(patch:{escaped}@(?:npm:)?).*#");
+                if let Ok(re) = regex::Regex::new(&pat) {
+                    if let Some(caps) = re.captures(&res_old) {
+                        let prefix = caps.get(1).map_or("", |m| m.as_str());
+                        let after_hash =
+                            res_old.find('#').map(|i| &res_old[i..]).unwrap_or("#");
+                        format!("{}{}{}", prefix, new_value, after_hash)
+                    } else {
+                        new_value.clone()
+                    }
+                } else {
+                    new_value.clone()
+                }
+            };
+            parsed["resolutions"][dep_key.as_str()] = serde_json::Value::String(res_new.clone());
+            result = json_replace_verified(&parsed, &result, "resolutions", &res_old, &res_new)?;
+
+            if let Some(new_name) = new_name_final {
+                let new_dep_key = if dep_key.starts_with("**/") {
+                    format!("**/{}", new_name)
+                } else {
+                    new_name.to_owned()
+                };
+                json_rename_key(&mut parsed, &["resolutions"], &dep_key, &new_dep_key);
+                result =
+                    json_replace_verified(&parsed, &result, "resolutions", &dep_key, &new_dep_key)?;
+            }
+        }
+    }
+
+    // ── also update matching entries in `dependenciesMeta` ─────────────────
+    let meta_keys: Vec<String> = parsed
+        .get("dependenciesMeta")
+        .and_then(|m| m.as_object())
+        .map(|m| m.keys().cloned().collect())
+        .unwrap_or_default();
+
+    for dep_key in meta_keys {
+        let prefix = format!("{}@", dep_name);
+        if dep_key.starts_with(&prefix) {
+            let new_meta_key = format!("{}@{}", dep_name, new_value);
+            json_rename_key(&mut parsed, &["dependenciesMeta"], &dep_key, &new_meta_key);
+            result = json_replace_verified(
+                &parsed,
+                &result,
+                "dependenciesMeta",
+                &dep_key,
+                &new_meta_key,
+            )?;
+        }
+    }
+
+    Some(result)
+}
+
+/// Replace a YAML scalar value at a given path while preserving formatting.
+///
+/// Uses a line-by-line scanner with indentation tracking to find the specific
+/// key and replaces only the value portion, keeping whitespace, quote style,
+/// and trailing comments intact.
+fn yaml_replace_scalar_at_path(
+    content: &str,
+    path: &[&str],
+    old_value: &str,
+    new_value: &str,
+) -> Option<String> {
+    // Validate path exists and old_value matches via serde_yaml.
+    let yaml_parsed: serde_yaml::Value = serde_yaml::from_str(content).ok()?;
+    let mut cur = &yaml_parsed;
+    for key in path {
+        cur = cur.get(*key)?;
+    }
+    // Accept string or number forms.
+    let actual_str = cur
+        .as_str()
+        .or_else(|| {
+            // serde_yaml may represent unquoted numbers as i64/f64.
+            None // handled by string comparison below
+        })
+        .unwrap_or("");
+    let actual_owned;
+    let actual = if actual_str.is_empty() {
+        actual_owned = format!("{}", cur.as_i64().unwrap_or(0));
+        actual_owned.as_str()
+    } else {
+        actual_str
+    };
+    if actual != old_value {
+        return None;
+    }
+
+    // Scan line by line, tracking current YAML path by indentation.
+    let lines: Vec<&str> = content.split('\n').collect();
+    let ends_with_newline = content.ends_with('\n');
+
+    // We maintain a stack of (indent_level, path_index) to know where we are.
+    // Simple state machine: track current depth per path element.
+    let mut path_depth: usize = 0; // index into path[] we're currently matching
+    let mut section_indents: Vec<usize> = Vec::new(); // indent of each matched ancestor
+
+    let mut result_lines: Vec<String> = Vec::with_capacity(lines.len());
+
+    for line in &lines {
+        // Skip empty and comment lines — they don't affect path tracking.
+        let stripped = line.trim();
+        if stripped.is_empty() || stripped.starts_with('#') {
+            result_lines.push((*line).to_owned());
+            continue;
+        }
+
+        let indent = line.len() - line.trim_start().len();
+
+        // Check if we've left any ancestor sections by dedenting.
+        while !section_indents.is_empty() && indent <= *section_indents.last().unwrap() {
+            section_indents.pop();
+            if path_depth > 0 {
+                path_depth -= 1;
+            }
+        }
+
+        // Try to match the current path element.
+        if path_depth < path.len() {
+            let target_key = path[path_depth];
+            let key_prefix = format!("{}:", target_key);
+            if stripped.starts_with(&key_prefix) {
+                if path_depth == path.len() - 1 {
+                    // Final key — replace the value on this line.
+                    if let Some(new_line) =
+                        yaml_replace_line_value(line, target_key, old_value, new_value)
+                    {
+                        result_lines.push(new_line);
+                        // Push remaining lines unchanged.
+                        let remaining_start = result_lines.len();
+                        for remaining in &lines[remaining_start..] {
+                            result_lines.push((*remaining).to_owned());
+                        }
+                        let joined = result_lines.join("\n");
+                        return Some(if ends_with_newline {
+                            joined + "\n"
+                        } else {
+                            joined
+                        });
+                    }
+                } else {
+                    // Intermediate key — descend.
+                    section_indents.push(indent);
+                    path_depth += 1;
+                }
+            }
+        }
+
+        result_lines.push((*line).to_owned());
+    }
+
+    None
+}
+
+/// Replace the scalar value portion of a YAML line `"  key: old_value"` with
+/// `new_value`, preserving the original quote style (none / single / double),
+/// extra spacing, and trailing comment.
+fn yaml_replace_line_value(
+    line: &str,
+    key: &str,
+    old_value: &str,
+    new_value: &str,
+) -> Option<String> {
+    // Find `key:` in the line.
+    let key_colon = format!("{}:", key);
+    let key_pos = line.find(&key_colon)?;
+    let after_colon = &line[key_pos + key_colon.len()..];
+
+    // Split into (spacing, rest) where rest starts at the value.
+    let spacing_len = after_colon.len() - after_colon.trim_start().len();
+    let spacing = &after_colon[..spacing_len];
+    let rest = &after_colon[spacing_len..];
+
+    // Detect quote style.
+    let (quote, value_start) = if rest.starts_with('\'') {
+        (Some('\''), 1)
+    } else if rest.starts_with('"') {
+        (Some('"'), 1)
+    } else {
+        (None, 0)
+    };
+
+    let value_rest = &rest[value_start..];
+
+    let (value_end, after_value_start) = if let Some(q) = quote {
+        // Find closing quote.
+        let end = value_rest.find(q)?;
+        (end, end + 1)
+    } else {
+        // Unquoted: value ends at first whitespace or `#`.
+        let end = value_rest
+            .find(|c: char| c == ' ' || c == '\t' || c == '#')
+            .unwrap_or(value_rest.len());
+        (end, end)
+    };
+
+    let found_value = &value_rest[..value_end];
+    if found_value != old_value {
+        return None;
+    }
+
+    let suffix = &value_rest[after_value_start..];
+    let prefix = &line[..key_pos + key_colon.len()];
+
+    let new_quoted = if let Some(q) = quote {
+        format!("{}{}{}", q, new_value, q)
+    } else {
+        new_value.to_owned()
+    };
+
+    Some(format!("{}{}{}{}", prefix, spacing, new_quoted, suffix))
+}
+
+/// Mirrors `updatePnpmWorkspaceDependency()` from pnpm.ts.
+/// Updates a `pnpm-workspace.yaml` catalog or overrides entry.
+pub fn update_pnpm_workspace_dependency(
+    file_content: &str,
+    upgrade: &NpmUpdateUpgrade,
+) -> Option<String> {
+    let dep_type = upgrade.dep_type.as_str();
+    let dep_name = upgrade.dep_name.as_str();
+
+    let catalog_name = if dep_type == "pnpm-workspace.overrides" {
+        None
+    } else {
+        // "pnpm.catalog.default" → "default"
+        // "pnpm.catalog.mycat"   → "mycat"
+        dep_type.split('.').last().filter(|s| !s.is_empty())
+    };
+
+    let mut new_value: Option<String> = upgrade.new_value.clone();
+    new_value = npm_get_new_git_value(upgrade).or(new_value);
+    new_value = npm_get_new_alias_value(new_value.as_deref(), upgrade).or(new_value);
+    let new_value = new_value?;
+
+    if dep_type == "pnpm-workspace.overrides" {
+        // Path: overrides.depName — parse to get old value.
+        let yaml_val: serde_yaml::Value = serde_yaml::from_str(file_content).ok()?;
+        let ov = yaml_val
+            .get("overrides")
+            .and_then(|v| v.get(dep_name))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        if ov == new_value {
+            return Some(file_content.to_owned());
+        }
+        return yaml_replace_scalar_at_path(
+            file_content,
+            &["overrides", dep_name],
+            &ov,
+            &new_value,
+        );
+    }
+
+    // Catalog update.
+    let catalog_name = catalog_name?;
+
+    // Determine path: implicit default catalog uses `catalog.depName`,
+    // explicit default and named catalogs use `catalogs.catName.depName`.
+    let yaml_val: serde_yaml::Value = serde_yaml::from_str(file_content).ok()?;
+    let uses_implicit = yaml_val.get("catalog").is_some();
+
+    let (ov, path_keys): (String, Vec<String>) = if catalog_name == "default" && uses_implicit {
+        let ov = yaml_val
+            .get("catalog")
+            .and_then(|v| v.get(dep_name))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        (ov, vec!["catalog".to_owned(), dep_name.to_owned()])
+    } else {
+        let ov = yaml_val
+            .get("catalogs")
+            .and_then(|v| v.get(catalog_name))
+            .and_then(|v| v.get(dep_name))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        (
+            ov,
+            vec![
+                "catalogs".to_owned(),
+                catalog_name.to_owned(),
+                dep_name.to_owned(),
+            ],
+        )
+    };
+
+    if ov == new_value {
+        return Some(file_content.to_owned());
+    }
+
+    let path_str: Vec<&str> = path_keys.iter().map(|s| s.as_str()).collect();
+    yaml_replace_scalar_at_path(file_content, &path_str, &ov, &new_value)
+}
+
+/// Mirrors `updateYarnrcCatalogDependency()` from yarn.ts.
+/// Updates a `.yarnrc.yml` catalog entry.
+pub fn update_yarnrc_catalog_dependency(
+    file_content: &str,
+    upgrade: &NpmUpdateUpgrade,
+) -> Option<String> {
+    let dep_type = upgrade.dep_type.as_str();
+    let dep_name = upgrade.dep_name.as_str();
+
+    // "yarn.catalog.default" → "default"
+    // "yarn.catalog.mycat"   → "mycat"
+    let catalog_name = dep_type.split('.').last().filter(|s| !s.is_empty())?;
+
+    let mut new_value: Option<String> = upgrade.new_value.clone();
+    new_value = npm_get_new_git_value(upgrade).or(new_value);
+    new_value = npm_get_new_alias_value(new_value.as_deref(), upgrade).or(new_value);
+    let new_value = new_value?;
+
+    let yaml_val: serde_yaml::Value = serde_yaml::from_str(file_content).ok()?;
+
+    let (ov, path_keys): (String, Vec<String>) = if catalog_name == "default" {
+        let ov = yaml_val
+            .get("catalog")
+            .and_then(|v| v.get(dep_name))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        (ov, vec!["catalog".to_owned(), dep_name.to_owned()])
+    } else {
+        let ov = yaml_val
+            .get("catalogs")
+            .and_then(|v| v.get(catalog_name))
+            .and_then(|v| v.get(dep_name))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_owned())?;
+        (
+            ov,
+            vec![
+                "catalogs".to_owned(),
+                catalog_name.to_owned(),
+                dep_name.to_owned(),
+            ],
+        )
+    };
+
+    if ov == new_value {
+        return Some(file_content.to_owned());
+    }
+
+    let path_str: Vec<&str> = path_keys.iter().map(|s| s.as_str()).collect();
+    yaml_replace_scalar_at_path(file_content, &path_str, &ov, &new_value)
+}
+
+/// Update a dependency in a package.json or pnpm/yarn workspace YAML file.
+///
+/// Mirrors the top-level `updateDependency()` export from
+/// `lib/modules/manager/npm/update/dependency/index.ts`.
+///
+/// Returns the modified file content with formatting preserved, or `None` if
+/// the dependency entry could not be located or the update failed.
+pub fn npm_update_dependency(file_content: &str, upgrade: &NpmUpdateUpgrade) -> Option<String> {
+    let dep_type = upgrade.dep_type.as_str();
+
+    if dep_type.starts_with("pnpm.catalog") || dep_type == "pnpm-workspace.overrides" {
+        return update_pnpm_workspace_dependency(file_content, upgrade);
+    }
+    if dep_type.starts_with("yarn.catalog") {
+        return update_yarnrc_catalog_dependency(file_content, upgrade);
+    }
+
+    match update_dependency_package_json(file_content, upgrade) {
+        Some(content) => Some(content),
+        None => {
+            // Log equivalent: updateDependency error.
+            None
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3756,5 +4427,605 @@ chalk@^2.4.1:
         let yarn = res.additional_yarn_rc_yml.as_ref().unwrap();
         let reg = &yarn["npmRegistries"]["//registry.company.com/"];
         assert_eq!(reg["npmAuthIdent"], "user123:pass123");
+    }
+
+    // ── npm updateDependency tests ─────────────────────────────────────────
+
+    const INPUT01: &str = r#"{
+  "name": "renovate",
+  "description": "Client node modules for renovate",
+  "version": "1.0.0",
+  "author": "Rhys Arkins <rhys@keylocation.sg>",
+  "bugs": "https://github.com/singapore/renovate/issues",
+  "contributors": [
+    {
+      "name": "Rhys Arkins"
+    }
+  ],
+  "dependencies": {
+      "autoprefixer": "6.5.0",
+      "bower": "~1.6.0",
+      "browserify": "13.1.0",
+    "browserify-css": "0.9.2",
+    "cheerio": "=0.22.0",
+    "config": "1.21.0"
+  },
+  "devDependencies": {
+    "enabled": false,
+    "angular": "^1.5.8",
+    "angular-touch": "1.5.8",
+    "angular-sanitize":  "1.5.8",
+    "@angular/core": "4.0.0-beta.1"
+  },
+  "resolutions": {
+    "config": "1.21.0",
+    "**/@angular/cli": "8.0.0",
+    "**/angular": "1.33.0",
+    "config/glob": "1.0.0"
+  },
+  "homepage": "https://keylocation.sg",
+  "keywords": [
+    "Key Location",
+    "Singapore"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/singapore/renovate.git"
+  }
+}"#;
+
+    const INPUT01_GLOB: &str = r#"{
+  "name": "renovate",
+  "description": "Client node modules for renovate",
+  "version": "1.0.0",
+  "author": "Rhys Arkins <rhys@keylocation.sg>",
+  "bugs": "https://github.com/singapore/renovate/issues",
+  "contributors": [
+    {
+      "name": "Rhys Arkins"
+    }
+  ],
+  "dependencies": {
+      "autoprefixer": "6.5.0",
+      "bower": "~1.6.0",
+      "browserify": "13.1.0",
+    "browserify-css": "0.9.2",
+    "cheerio": "=0.22.0",
+    "config": "1.21.0"
+  },
+  "devDependencies": {
+    "enabled": false,
+    "angular": "^1.5.8",
+    "angular-touch": "1.5.8",
+    "angular-sanitize":  "1.5.8",
+    "@angular/core": "4.0.0-beta.1"
+  },
+  "resolutions": {
+    "//": ["This is a comment"],
+    "**/config": "1.21.0"
+  },
+  "homepage": "https://keylocation.sg",
+  "keywords": [
+    "Key Location",
+    "Singapore"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/singapore/renovate.git"
+  },
+  "workspaces": []
+}"#;
+
+    const INPUT01_PM: &str = r#"{
+  "name": "renovate",
+  "description": "Client node modules for renovate",
+  "version": "1.0.0",
+  "author": "Rhys Arkins <rhys@keylocation.sg>",
+  "bugs": "https://github.com/singapore/renovate/issues",
+  "contributors": [
+    {
+      "name": "Rhys Arkins"
+    }
+  ],
+  "packageManager": "yarn@3.0.0",
+  "dependencies": {
+      "autoprefixer": "6.5.0",
+      "bower": "~1.6.0",
+      "browserify": "13.1.0",
+    "browserify-css": "0.9.2",
+    "cheerio": "=0.22.0",
+    "config": "1.21.0"
+  },
+  "devDependencies": {
+    "enabled": false,
+    "angular": "^1.5.8",
+    "angular-touch": "1.5.8",
+    "angular-sanitize":  "1.5.8",
+    "@angular/core": "4.0.0-beta.1"
+  },
+  "resolutions": {
+    "config": "1.21.0",
+    "**/@angular/cli": "8.0.0",
+    "**/angular": "1.33.0",
+    "config/glob": "1.0.0"
+  },
+  "homepage": "https://keylocation.sg",
+  "keywords": [
+    "Key Location",
+    "Singapore"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/singapore/renovate.git"
+  }
+}"#;
+
+    // Ported: "replaces a dependency value" — npm/update/dependency/index.spec.ts line 13
+    #[test]
+    fn npm_update_dep_replaces_value() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "cheerio".into(),
+            new_value: Some("0.22.1".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["cheerio"], "0.22.1");
+        // formatting preserved: cheerio line changed, rest intact
+        assert!(result.contains("\"cheerio\": \"0.22.1\"")
+            || result.contains("\"cheerio\":\"0.22.1\""));
+    }
+
+    // Ported: "replaces a github dependency value" — npm/update/dependency/index.spec.ts line 28
+    #[test]
+    fn npm_update_dep_github_value() {
+        let input = r#"{"dependencies":{"gulp":"gulpjs/gulp#v4.0.0-alpha.2"}}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "gulp".into(),
+            current_value: Some("v4.0.0-alpha.2".into()),
+            current_raw_value: Some("gulpjs/gulp#v4.0.0-alpha.2".into()),
+            new_value: Some("v4.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["gulp"], "gulpjs/gulp#v4.0.0");
+    }
+
+    // Ported: "replaces a npm package alias" — npm/update/dependency/index.spec.ts line 52
+    #[test]
+    fn npm_update_dep_npm_alias() {
+        let input = r#"{"dependencies":{"hapi":"npm:@hapi/hapi@18.3.0"}}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "hapi".into(),
+            npm_package_alias: true,
+            package_name: Some("@hapi/hapi".into()),
+            current_value: Some("18.3.0".into()),
+            new_value: Some("18.3.1".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["hapi"], "npm:@hapi/hapi@18.3.1");
+    }
+
+    // Ported: "replaces a github short hash" — npm/update/dependency/index.spec.ts line 77
+    #[test]
+    fn npm_update_dep_short_hash() {
+        let input = r#"{"dependencies":{"gulp":"gulpjs/gulp#abcdef7"}}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "gulp".into(),
+            current_digest: Some("abcdef7".into()),
+            current_raw_value: Some("gulpjs/gulp#abcdef7".into()),
+            new_digest: Some("0000000000111111111122222222223333333333".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["gulp"], "gulpjs/gulp#0000000");
+    }
+
+    // Ported: "replaces a github fully specified version" — npm/update/dependency/index.spec.ts line 101
+    #[test]
+    fn npm_update_dep_git_tag() {
+        let input = r#"{"dependencies":{"n":"git+https://github.com/owner/n#v1.0.0"}}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "n".into(),
+            current_value: Some("v1.0.0".into()),
+            current_raw_value: Some("git+https://github.com/owner/n#v1.0.0".into()),
+            new_value: Some("v1.1.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("v1.1.0"));
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["dependencies"]["n"],
+            "git+https://github.com/owner/n#v1.1.0"
+        );
+    }
+
+    // Ported: "updates resolutions too" — npm/update/dependency/index.spec.ts line 123
+    #[test]
+    fn npm_update_dep_updates_resolutions() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "config".into(),
+            new_value: Some("1.22.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["config"], "1.22.0");
+        assert_eq!(parsed["resolutions"]["config"], "1.22.0");
+    }
+
+    // Ported: "updates glob resolutions" — npm/update/dependency/index.spec.ts line 138
+    #[test]
+    fn npm_update_dep_glob_resolutions() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "config".into(),
+            new_value: Some("1.22.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01_GLOB, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["config"], "1.22.0");
+        assert_eq!(parsed["resolutions"]["**/config"], "1.22.0");
+    }
+
+    // Ported: "updates glob resolutions without dep" — npm/update/dependency/index.spec.ts line 153
+    #[test]
+    fn npm_update_dep_glob_resolutions_no_dep() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "resolutions".into(),
+            dep_name: "@angular/cli".into(),
+            manager_data: Some(NpmUpdateManagerData {
+                key: Some("**/@angular/cli".into()),
+                ..Default::default()
+            }),
+            new_value: Some("8.1.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["resolutions"]["**/@angular/cli"], "8.1.0");
+    }
+
+    // Ported: "replaces only the first instance of a value" — npm/update/dependency/index.spec.ts line 170
+    #[test]
+    fn npm_update_dep_first_instance() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "devDependencies".into(),
+            dep_name: "angular-touch".into(),
+            new_value: Some("1.6.1".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["devDependencies"]["angular-touch"], "1.6.1");
+        // angular-sanitize should still be at 1.5.8
+        assert_eq!(parsed["devDependencies"]["angular-sanitize"], "1.5.8");
+    }
+
+    // Ported: "replaces only the second instance of a value" — npm/update/dependency/index.spec.ts line 185
+    #[test]
+    fn npm_update_dep_second_instance() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "devDependencies".into(),
+            dep_name: "angular-sanitize".into(),
+            new_value: Some("1.6.1".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["devDependencies"]["angular-sanitize"], "1.6.1");
+        // angular-touch should still be at 1.5.8
+        assert_eq!(parsed["devDependencies"]["angular-touch"], "1.5.8");
+    }
+
+    // Ported: "handles the case where the desired version is already supported" — npm/update/dependency/index.spec.ts line 200
+    #[test]
+    fn npm_update_dep_already_at_version() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "devDependencies".into(),
+            dep_name: "angular-touch".into(),
+            new_value: Some("1.5.8".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01, &upgrade).unwrap();
+        assert_eq!(result, INPUT01);
+    }
+
+    // Ported: "returns null if throws error" — npm/update/dependency/index.spec.ts line 214
+    #[test]
+    fn npm_update_dep_returns_null_on_error() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "blah".into(),
+            dep_name: "angular-touch-not".into(),
+            new_value: Some("1.5.8".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "updates packageManager" — npm/update/dependency/index.spec.ts line 228
+    #[test]
+    fn npm_update_dep_package_manager() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "packageManager".into(),
+            dep_name: "yarn".into(),
+            new_value: Some("3.1.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01_PM, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["packageManager"], "yarn@3.1.0");
+    }
+
+    // Ported: "returns null if empty file" — npm/update/dependency/index.spec.ts line 243
+    #[test]
+    fn npm_update_dep_null_on_empty() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "angular-touch-not".into(),
+            new_value: Some("1.5.8".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency("", &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "replaces package" — npm/update/dependency/index.spec.ts line 257
+    #[test]
+    fn npm_update_dep_replaces_package() {
+        let input = r#"{"dependencies":{"config":"1.21.0"}}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "config".into(),
+            new_name: Some("abc".into()),
+            new_value: Some("2.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["abc"], "2.0.0");
+        assert!(parsed["dependencies"]["config"].is_null());
+    }
+
+    // Ported: "supports alias-based replacement" — npm/update/dependency/index.spec.ts line 273
+    #[test]
+    fn npm_update_dep_alias_replacement() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "config".into(),
+            new_name: Some("abc".into()),
+            replacement_approach: Some("alias".into()),
+            new_value: Some("2.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["config"], "npm:abc@2.0.0");
+    }
+
+    // Ported: "replaces glob package resolutions" — npm/update/dependency/index.spec.ts line 291
+    #[test]
+    fn npm_update_dep_glob_package_resolution() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "config".into(),
+            new_name: Some("abc".into()),
+            new_value: Some("2.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(INPUT01_GLOB, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert!(parsed["resolutions"]["config"].is_null());
+        assert_eq!(parsed["resolutions"]["**/abc"], "2.0.0");
+    }
+
+    // Ported: "pins also the version in patch with npm protocol in resolutions" — npm/update/dependency/index.spec.ts line 307
+    #[test]
+    fn npm_update_dep_patch_npm_protocol() {
+        let input = r#"{
+  "name": "renovate-repro",
+  "dependencies": {
+    "lodash": "^4.16.0",
+    "mermaid": "8.8.1"
+  },
+  "resolutions": {
+    "lodash": "patch:lodash@npm:4.16.0#patches/lodash.patch"
+  },
+  "dependenciesMeta": {
+    "lodash@4.16.0": {
+      "unplugged": true
+    },
+    "mermaid@8.8.1": {
+      "optional": true
+    }
+  }
+}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "lodash".into(),
+            new_value: Some("4.17.21".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["lodash"], "4.17.21");
+        assert_eq!(
+            parsed["resolutions"]["lodash"],
+            "patch:lodash@npm:4.17.21#patches/lodash.patch"
+        );
+        assert!(parsed["dependenciesMeta"]["lodash@4.17.21"].is_object());
+    }
+
+    // Ported: "replaces also the version in patch with range in resolutions" — npm/update/dependency/index.spec.ts line 322
+    #[test]
+    fn npm_update_dep_patch_range() {
+        let input = r#"{
+  "name": "renovate-repro",
+  "dependencies": {
+    "metro": "^0.58.0"
+  },
+  "resolutions": {
+    "metro": "patch:metro@^0.58.0#./.patches/metro.patch"
+  }
+}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "metro".into(),
+            new_value: Some("^0.60.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed["dependencies"]["metro"], "^0.60.0");
+        assert_eq!(
+            parsed["resolutions"]["metro"],
+            "patch:metro@^0.60.0#./.patches/metro.patch"
+        );
+    }
+
+    // Ported: "handles override dependency" — npm/update/dependency/index.spec.ts line 337
+    #[test]
+    fn npm_update_dep_override() {
+        let input = r#"{
+        "overrides": {
+          "typescript": "0.0.5"
+        }
+      }"#;
+        let expected = r#"{
+        "overrides": {
+          "typescript": "0.60.0"
+        }
+      }"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "overrides".into(),
+            dep_name: "typescript".into(),
+            new_value: Some("0.60.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    // Ported: "handles override dependency object" — npm/update/dependency/index.spec.ts line 361
+    #[test]
+    fn npm_update_dep_override_object() {
+        let input = r#"{
+        "overrides": {
+          "awesome-typescript-loader": {
+           "typescript": "3.0.0"
+         }
+        }
+      }"#;
+        let expected = r#"{
+        "overrides": {
+          "awesome-typescript-loader": {
+           "typescript": "0.60.0"
+         }
+        }
+      }"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "overrides".into(),
+            dep_name: "typescript".into(),
+            new_value: Some("0.60.0".into()),
+            manager_data: Some(NpmUpdateManagerData {
+                parents: Some(vec!["awesome-typescript-loader".into()]),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    // Ported: "handles override dependency object where lastParent === depName" — npm/update/dependency/index.spec.ts line 390
+    #[test]
+    fn npm_update_dep_override_self_parent() {
+        let input = r#"{
+        "overrides": {
+          "typescript": {
+           ".": "3.0.0"
+         }
+        }
+      }"#;
+        let expected = r#"{
+        "overrides": {
+          "typescript": {
+           ".": "0.60.0"
+         }
+        }
+      }"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "overrides".into(),
+            dep_name: "typescript".into(),
+            new_value: Some("0.60.0".into()),
+            manager_data: Some(NpmUpdateManagerData {
+                parents: Some(vec!["typescript".into()]),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    // Ported: "handles pnpm.override dependency" — npm/update/dependency/index.spec.ts line 419
+    #[test]
+    fn npm_update_dep_pnpm_override() {
+        let input = r#"{
+        "pnpm": {
+          "overrides": {
+            "typescript": "0.0.5"
+          }
+        }
+      }"#;
+        let expected = r#"{
+        "pnpm": {
+          "overrides": {
+            "typescript": "0.60.0"
+          }
+        }
+      }"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.overrides".into(),
+            dep_name: "typescript".into(),
+            new_value: Some("0.60.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    // Ported: "handles yarn.catalogs dependencies" — npm/update/dependency/index.spec.ts line 446
+    #[test]
+    fn npm_update_dep_yarn_catalogs() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  typescript: 0.0.5\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalogs.default".into(),
+            dep_name: "typescript".into(),
+            new_value: Some("0.60.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalog"]["typescript"].as_str().unwrap_or(""),
+            "0.60.0"
+        );
     }
 }

@@ -634,7 +634,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/post-update/rules.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/rules.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/yarn.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/yarn.spec.ts.md) |
 | `lib/modules/manager/npm/range.spec.ts` | Done | [details](lib/modules/manager/npm/range.spec.ts.md) |
-| `lib/modules/manager/npm/update/dependency/index.spec.ts` | Not done | [details](lib/modules/manager/npm/update/dependency/index.spec.ts.md) |
+| `lib/modules/manager/npm/update/dependency/index.spec.ts` | Done | [details](lib/modules/manager/npm/update/dependency/index.spec.ts.md) |
 | `lib/modules/manager/npm/update/dependency/pnpm.spec.ts` | Not done | [details](lib/modules/manager/npm/update/dependency/pnpm.spec.ts.md) |
 | `lib/modules/manager/npm/update/dependency/yarn.spec.ts` | Not done | [details](lib/modules/manager/npm/update/dependency/yarn.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts.md) |
