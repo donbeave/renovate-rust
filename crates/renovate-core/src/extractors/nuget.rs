@@ -863,10 +863,18 @@ pub fn parse_nuget_registry_url(registry_url: &str) -> ParsedNuGetRegistryUrl {
             protocol_version = proto.parse::<u8>().unwrap_or(2);
             parsed.set_fragment(None);
         } else {
-            protocol_version = if parsed.path().ends_with(".json") { 3 } else { 2 };
+            protocol_version = if parsed.path().ends_with(".json") {
+                3
+            } else {
+                2
+            };
         }
     } else {
-        protocol_version = if parsed.path().ends_with(".json") { 3 } else { 2 };
+        protocol_version = if parsed.path().ends_with(".json") {
+            3
+        } else {
+            2
+        };
     }
 
     ParsedNuGetRegistryUrl {
@@ -973,9 +981,7 @@ pub fn create_nuget_config_xml(registries: &[NuGetRegistry]) -> String {
                     "<add key=\"ClearTextPassword\" value=\"{p}\" />\n"
                 ));
             }
-            contents.push_str(
-                "<add key=\"ValidAuthenticationTypes\" value=\"basic\" />",
-            );
+            contents.push_str("<add key=\"ValidAuthenticationTypes\" value=\"basic\" />");
             contents.push_str(&format!("</{escaped}>\n"));
         }
         contents.push_str("</packageSourceCredentials>\n");
@@ -1928,11 +1934,25 @@ Console.WriteLine("Hello World!");
     fn nuget_config_xml_basic_registries() {
         crate::util::host_rules::clear();
         let xml = create_nuget_config_xml(&[
-            NuGetRegistry { name: Some("myRegistry".to_owned()), url: "https://my-registry.example.org".to_owned(), source_mapped_package_patterns: None },
-            NuGetRegistry { name: Some("myRegistry2".to_owned()), url: "https://my-registry2.example.org/index.json".to_owned(), source_mapped_package_patterns: None },
-            NuGetRegistry { name: None, url: "https://my-unnamed-registry.example.org/index.json".to_owned(), source_mapped_package_patterns: None },
+            NuGetRegistry {
+                name: Some("myRegistry".to_owned()),
+                url: "https://my-registry.example.org".to_owned(),
+                source_mapped_package_patterns: None,
+            },
+            NuGetRegistry {
+                name: Some("myRegistry2".to_owned()),
+                url: "https://my-registry2.example.org/index.json".to_owned(),
+                source_mapped_package_patterns: None,
+            },
+            NuGetRegistry {
+                name: None,
+                url: "https://my-unnamed-registry.example.org/index.json".to_owned(),
+                source_mapped_package_patterns: None,
+            },
         ]);
-        assert!(xml.contains(r#"key="myRegistry" value="https://my-registry.example.org/" protocolVersion="2""#));
+        assert!(xml.contains(
+            r#"key="myRegistry" value="https://my-registry.example.org/" protocolVersion="2""#
+        ));
         assert!(xml.contains(r#"key="myRegistry2" value="https://my-registry2.example.org/index.json" protocolVersion="3""#));
         assert!(xml.contains(r#"key="Package source 1""#));
         assert!(!xml.contains("packageSourceCredentials"));
@@ -1943,9 +1963,11 @@ Console.WriteLine("Hello World!");
     #[test]
     fn nuget_config_xml_strips_protocol_version_from_hash() {
         crate::util::host_rules::clear();
-        let xml = create_nuget_config_xml(&[
-            NuGetRegistry { name: Some("myRegistry".to_owned()), url: "https://my-registry.example.org#protocolVersion=3".to_owned(), source_mapped_package_patterns: None },
-        ]);
+        let xml = create_nuget_config_xml(&[NuGetRegistry {
+            name: Some("myRegistry".to_owned()),
+            url: "https://my-registry.example.org#protocolVersion=3".to_owned(),
+            source_mapped_package_patterns: None,
+        }]);
         assert!(xml.contains(r#"value="https://my-registry.example.org/" protocolVersion="3""#));
         assert!(!xml.contains("#protocolVersion"));
     }
@@ -1955,9 +1977,21 @@ Console.WriteLine("Hello World!");
     fn nuget_config_xml_skips_duplicates() {
         crate::util::host_rules::clear();
         let xml = create_nuget_config_xml(&[
-            NuGetRegistry { name: Some("myRegistry".to_owned()), url: "https://my-registry.example.org".to_owned(), source_mapped_package_patterns: None },
-            NuGetRegistry { name: Some("duplicateRegistry".to_owned()), url: "https://my-registry.example.org".to_owned(), source_mapped_package_patterns: None },
-            NuGetRegistry { name: None, url: "https://my-unnamed-registry.example.org/index.json".to_owned(), source_mapped_package_patterns: None },
+            NuGetRegistry {
+                name: Some("myRegistry".to_owned()),
+                url: "https://my-registry.example.org".to_owned(),
+                source_mapped_package_patterns: None,
+            },
+            NuGetRegistry {
+                name: Some("duplicateRegistry".to_owned()),
+                url: "https://my-registry.example.org".to_owned(),
+                source_mapped_package_patterns: None,
+            },
+            NuGetRegistry {
+                name: None,
+                url: "https://my-unnamed-registry.example.org/index.json".to_owned(),
+                source_mapped_package_patterns: None,
+            },
         ]);
         assert!(xml.contains(r#"key="myRegistry""#));
         assert!(!xml.contains(r#"key="duplicateRegistry""#));
@@ -1969,8 +2003,19 @@ Console.WriteLine("Hello World!");
     fn nuget_config_xml_package_source_mapping() {
         crate::util::host_rules::clear();
         let xml = create_nuget_config_xml(&[
-            NuGetRegistry { name: Some("myRegistry".to_owned()), url: "https://my-registry.example.org".to_owned(), source_mapped_package_patterns: Some(vec!["*".to_owned()]) },
-            NuGetRegistry { name: Some("myRegistry2".to_owned()), url: "https://my-registry2.example.org/index.json".to_owned(), source_mapped_package_patterns: Some(vec!["LimitedPackages.*".to_owned(), "MySpecialPackage".to_owned()]) },
+            NuGetRegistry {
+                name: Some("myRegistry".to_owned()),
+                url: "https://my-registry.example.org".to_owned(),
+                source_mapped_package_patterns: Some(vec!["*".to_owned()]),
+            },
+            NuGetRegistry {
+                name: Some("myRegistry2".to_owned()),
+                url: "https://my-registry2.example.org/index.json".to_owned(),
+                source_mapped_package_patterns: Some(vec![
+                    "LimitedPackages.*".to_owned(),
+                    "MySpecialPackage".to_owned(),
+                ]),
+            },
         ]);
         assert!(xml.contains("packageSourceMapping"));
         assert!(xml.contains(r#"<packageSource key="myRegistry">"#));
@@ -1984,9 +2029,11 @@ Console.WriteLine("Hello World!");
     #[test]
     fn nuget_config_xml_no_package_source_mapping() {
         crate::util::host_rules::clear();
-        let xml = create_nuget_config_xml(&[
-            NuGetRegistry { name: Some("myRegistry".to_owned()), url: "https://my-registry.example.org".to_owned(), source_mapped_package_patterns: None },
-        ]);
+        let xml = create_nuget_config_xml(&[NuGetRegistry {
+            name: Some("myRegistry".to_owned()),
+            url: "https://my-registry.example.org".to_owned(),
+            source_mapped_package_patterns: None,
+        }]);
         assert!(!xml.contains("packageSourceMapping"));
     }
 
@@ -2000,10 +2047,13 @@ Console.WriteLine("Hello World!");
             username: Some("some-username".to_owned()),
             password: Some("some-password".to_owned()),
             ..Default::default()
-        }).unwrap();
-        let xml = create_nuget_config_xml(&[
-            NuGetRegistry { name: Some("myRegistry".to_owned()), url: "https://my-registry.example.org".to_owned(), source_mapped_package_patterns: None },
-        ]);
+        })
+        .unwrap();
+        let xml = create_nuget_config_xml(&[NuGetRegistry {
+            name: Some("myRegistry".to_owned()),
+            url: "https://my-registry.example.org".to_owned(),
+            source_mapped_package_patterns: None,
+        }]);
         assert!(xml.contains("packageSourceCredentials"));
         assert!(xml.contains(r#"<add key="Username" value="some-username" />"#));
         assert!(xml.contains(r#"<add key="ClearTextPassword" value="some-password" />"#));
@@ -2020,10 +2070,13 @@ Console.WriteLine("Hello World!");
             username: Some("some-username".to_owned()),
             password: Some("some-password".to_owned()),
             ..Default::default()
-        }).unwrap();
-        let xml = create_nuget_config_xml(&[
-            NuGetRegistry { name: Some("my very? weird!-regi$try_name".to_owned()), url: "https://my-registry.example.org".to_owned(), source_mapped_package_patterns: None },
-        ]);
+        })
+        .unwrap();
+        let xml = create_nuget_config_xml(&[NuGetRegistry {
+            name: Some("my very? weird!-regi$try_name".to_owned()),
+            url: "https://my-registry.example.org".to_owned(),
+            source_mapped_package_patterns: None,
+        }]);
         assert!(xml.contains("my_x0020_very_x003f__x0020_weird_x0021_-regi_x0024_try_name"));
         assert!(xml.contains(r#"<add key="Username" value="some-username" />"#));
     }

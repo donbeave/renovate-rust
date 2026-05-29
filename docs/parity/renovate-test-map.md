@@ -367,7 +367,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/pretty-stdout.spec.ts` | Not done | [details](lib/logger/pretty-stdout.spec.ts.md) |
 | `lib/logger/err-serializer.spec.ts` | Done | [details](lib/logger/err-serializer.spec.ts.md) |
 | `lib/logger/once.spec.ts` | Done | [details](lib/logger/once.spec.ts.md) |
-| `lib/logger/utils.spec.ts` | Not done | [details](lib/logger/utils.spec.ts.md) |
+| `lib/logger/utils.spec.ts` | Done | [details](lib/logger/utils.spec.ts.md) |
 | `lib/logger/index.spec.ts` | Done | [details](lib/logger/index.spec.ts.md) |
 | `lib/util/string-match.spec.ts` | Done | [details](lib/util/string-match.spec.ts.md) |
 | `lib/util/package-rules/managers.spec.ts` | Done | [details](lib/util/package-rules/managers.spec.ts.md) |

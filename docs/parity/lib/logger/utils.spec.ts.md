@@ -5,7 +5,7 @@
 ## `lib/logger/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/utils.spec.ts
-**Total tests:** 8 | **Ported:** 1 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 2 | **Actionable:** 8 | **Status:** partial
 
 ### `logger/utils`
 
@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | sanitizeValue("$input") == "$output" | 11 | ported | — | — | — |
 | sanitizes boxed String objects as strings | 26 | not-applicable | — | — | JavaScript boxed String objects (`new String(...)`) have no Rust equivalent |
-| preserves secret template strings in redacted fields | 39 | pending | — | — | — |
+| preserves secret template strings in redacted fields | 39 | ported | `util.rs` | `test_sanitize_value_preserves_secret_templates` | — |
 
 ### `logger/utils › prepareError`
 

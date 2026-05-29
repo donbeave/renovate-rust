@@ -268,10 +268,18 @@ impl GitOperationStats {
                     0
                 };
                 let max_ms = v.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-                let max_ms = if max_ms.is_infinite() { 0 } else { max_ms as i64 };
+                let max_ms = if max_ms.is_infinite() {
+                    0
+                } else {
+                    max_ms as i64
+                };
                 let mut sorted = v.clone();
                 sorted.sort_unstable_by(f64::total_cmp);
-                let median_ms = if count > 0 { sorted[count / 2] as i64 } else { 0 };
+                let median_ms = if count > 0 {
+                    sorted[count / 2] as i64
+                } else {
+                    0
+                };
                 (
                     k.clone(),
                     TimingReport {
@@ -4004,12 +4012,91 @@ pub fn process_result(
 
 // ---------------------------------------------------------------------------
 
-/// Redact HTTPS credentials in a command string.
+// ---------------------------------------------------------------------------
+// sanitizeValue — lib/logger/utils.ts
+// ---------------------------------------------------------------------------
+
+/// Fields that should be redacted in log output (same list as TypeScript).
+const REDACTED_FIELDS: &[&str] = &[
+    "authorization",
+    "token",
+    "githubAppKey",
+    "npmToken",
+    "npmrc",
+    "privateKey",
+    "privateKeyOld",
+    "gitPrivateKey",
+    "forkToken",
+    "password",
+    "httpsCertificate",
+    "httpsPrivateKey",
+    "httpsCertificateAuthority",
+];
+
+/// Fields whose value is replaced with `[content]` in log output (for sanitizeValue).
+const SANITIZE_CONTENT_FIELDS: &[&str] =
+    &["content", "contents", "packageLockParsed", "yarnLockParsed"];
+
+/// Sanitize a `serde_json::Value` for safe logging.
 ///
-/// Replaces `https://<anything>@` with `https://**redacted**@`, matching
-/// the TypeScript `cmdSerializer` behaviour.
-/// Redact URL credentials and data-URI content from a string.
-///
+/// Mirrors `sanitizeValue` from `lib/logger/utils.ts`:
+/// - Strings: sanitize URLs
+/// - Redacted fields: replace with `"***********"` unless value is a
+///   secrets template (`{{ secrets.* }}`)
+/// - Content fields: replace with `"[content]"`
+/// - `secrets` key: replace all values with `"***********"`
+/// - Objects/arrays: recurse
+pub fn sanitize_value(value: &serde_json::Value) -> serde_json::Value {
+    use regex::Regex;
+    use std::sync::LazyLock;
+    static SECRETS_TEMPLATE_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^\{\{\s*secrets\..*\}\}$").unwrap());
+
+    match value {
+        serde_json::Value::String(s) => serde_json::Value::String(sanitize_urls(s)),
+        serde_json::Value::Array(arr) => {
+            serde_json::Value::Array(arr.iter().map(sanitize_value).collect())
+        }
+        serde_json::Value::Object(map) => {
+            let mut result = serde_json::Map::new();
+            for (key, val) in map {
+                let sanitized_val = if REDACTED_FIELDS.contains(&key.as_str()) {
+                    if val
+                        .as_str()
+                        .is_some_and(|s| SECRETS_TEMPLATE_RE.is_match(s))
+                    {
+                        val.clone()
+                    } else {
+                        serde_json::Value::String("***********".to_owned())
+                    }
+                } else if SANITIZE_CONTENT_FIELDS.contains(&key.as_str()) {
+                    serde_json::Value::String("[content]".to_owned())
+                } else if key == "secrets" {
+                    if let serde_json::Value::Object(secrets_map) = val {
+                        let redacted: serde_json::Map<String, serde_json::Value> = secrets_map
+                            .keys()
+                            .map(|k| {
+                                (
+                                    k.clone(),
+                                    serde_json::Value::String("***********".to_owned()),
+                                )
+                            })
+                            .collect();
+                        serde_json::Value::Object(redacted)
+                    } else {
+                        val.clone()
+                    }
+                } else {
+                    sanitize_value(val)
+                };
+                result.insert(key.clone(), sanitized_val);
+            }
+            serde_json::Value::Object(result)
+        }
+        other => other.clone(),
+    }
+}
+
 /// Ports `sanitizeUrls` from `lib/logger/utils.ts`.
 ///
 /// Replaces `scheme://credentials@host` with `scheme://**redacted**@host`
@@ -4523,6 +4610,41 @@ mod tests {
         assert_eq!(result.status, ProcessStatus::Activated);
         assert_eq!(result.enabled, Some(true));
         assert_eq!(result.onboarded, Some(true));
+    }
+
+    // Ported: "preserves secret template strings in redacted fields" — logger/utils.spec.ts line 39
+    #[test]
+    fn test_sanitize_value_preserves_secret_templates() {
+        use serde_json::json;
+        let input = json!({
+            "normal": "value",
+            "token": "{{ secrets.MY_SECRET }}",
+            "password": "{{secrets.ANOTHER_SECRET}}",
+            "content": "{{ secrets.CONTENT_SECRET }}",
+            "npmToken": "{{ secrets.NPM_TOKEN }}",
+            "forkToken": "some-token",
+            "nested": {
+                "authorization": "{{ secrets.NESTED_SECRET }}",
+                "password": "some-password"
+            }
+        });
+        let result = sanitize_value(&input);
+        assert_eq!(result["normal"], "value");
+        // Secrets templates in redacted fields are preserved
+        assert_eq!(result["token"], "{{ secrets.MY_SECRET }}");
+        assert_eq!(result["password"], "{{secrets.ANOTHER_SECRET}}");
+        // content field → '[content]'
+        assert_eq!(result["content"], "[content]");
+        // npmToken is redacted but secrets template → preserved
+        assert_eq!(result["npmToken"], "{{ secrets.NPM_TOKEN }}");
+        // forkToken is redacted, not a secrets template → redacted
+        assert_eq!(result["forkToken"], "***********");
+        // nested
+        assert_eq!(
+            result["nested"]["authorization"],
+            "{{ secrets.NESTED_SECRET }}"
+        );
+        assert_eq!(result["nested"]["password"], "***********");
     }
 
     // Ported: 'sanitizeValue("$input") == "$output"' — logger/utils.spec.ts line 11

@@ -298,11 +298,7 @@ pub fn process_host_rules() -> HostRulesResult {
     let no_type_rules: Vec<_> = all_rules
         .iter()
         .filter(|r| r.host_type.is_none())
-        .filter(|r| {
-            !npm_rules
-                .iter()
-                .any(|n| n.match_host == r.match_host)
-        })
+        .filter(|r| !npm_rules.iter().any(|n| n.match_host == r.match_host))
         .collect();
     let effective_rules: Vec<_> = npm_rules.iter().chain(no_type_rules).collect();
 
@@ -319,8 +315,7 @@ pub fn process_host_rules() -> HostRulesResult {
         let _ = resolved_host; // used for existence check
 
         let uri = format!("//{match_host}/");
-        let cleaned_uri = if match_host.starts_with("http://")
-            || match_host.starts_with("https://")
+        let cleaned_uri = if match_host.starts_with("http://") || match_host.starts_with("https://")
         {
             let without_scheme = match_host
                 .trim_start_matches("https:")
@@ -357,8 +352,7 @@ pub fn process_host_rules() -> HostRulesResult {
                 base64::engine::general_purpose::STANDARD.encode(password.as_bytes());
             npmrc.push(format!("{cleaned_uri}:username={username}"));
             npmrc.push(format!("{cleaned_uri}:_password={password_b64}"));
-            let registry =
-                serde_json::json!({ "npmAuthIdent": format!("{username}:{password}") });
+            let registry = serde_json::json!({ "npmAuthIdent": format!("{username}:{password}") });
             yarn_registries.insert(cleaned_uri.clone(), registry.clone());
             yarn_registries.insert(uri.clone(), registry);
         }
