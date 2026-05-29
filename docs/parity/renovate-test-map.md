@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,814 / 11,677 total tests ported (41%) · pending 6,735 · not-applicable 128 (1% of total) — updated 2026-05-29
+**Progress:** 4,817 / 11,677 total tests ported (41%) · pending 6,729 · not-applicable 131 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -228,7 +228,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/npm/npmrc.spec.ts` | Not done | [details](lib/modules/datasource/npm/npmrc.spec.ts.md) |
 | `lib/modules/datasource/npm/get.spec.ts` | Not done | [details](lib/modules/datasource/npm/get.spec.ts.md) |
 | `lib/modules/datasource/npm/index.spec.ts` | Not done | [details](lib/modules/datasource/npm/index.spec.ts.md) |
-| `lib/modules/datasource/go/goproxy-parser.spec.ts` | Not done | [details](lib/modules/datasource/go/goproxy-parser.spec.ts.md) |
+| `lib/modules/datasource/go/goproxy-parser.spec.ts` | Done | [details](lib/modules/datasource/go/goproxy-parser.spec.ts.md) |
 | `lib/modules/datasource/go/base.spec.ts` | Not done | [details](lib/modules/datasource/go/base.spec.ts.md) |
 | `lib/modules/datasource/go/index.spec.ts` | Not done | [details](lib/modules/datasource/go/index.spec.ts.md) |
 | `lib/modules/datasource/go/releases-direct.spec.ts` | Not done | [details](lib/modules/datasource/go/releases-direct.spec.ts.md) |
@@ -398,7 +398,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/clone.spec.ts` | Done | [details](lib/util/clone.spec.ts.md) |
 | `lib/util/filter-map.spec.ts` | Done | [details](lib/util/filter-map.spec.ts.md) |
 | `lib/util/env.spec.ts` | Not done | [details](lib/util/env.spec.ts.md) |
-| `lib/util/ignore.spec.ts` | Not done | [details](lib/util/ignore.spec.ts.md) |
+| `lib/util/ignore.spec.ts` | Done | [details](lib/util/ignore.spec.ts.md) |
 | `lib/util/coerce.spec.ts` | Done | [details](lib/util/coerce.spec.ts.md) |
 | `lib/util/sample.spec.ts` | Done | [details](lib/util/sample.spec.ts.md) |
 | `lib/util/promises.spec.ts` | Not done | [details](lib/util/promises.spec.ts.md) |
