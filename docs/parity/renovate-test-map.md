@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,003 / 11,677 total tests ported (43%) · pending 5,529 · not-applicable 1,145 (10% of total) — updated 2026-05-29
+**Progress:** 5,003 / 11,677 total tests ported (43%) · pending 5,406 · not-applicable 1,268 (11% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -514,7 +514,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/npm/index.spec.ts` | Done | [details](lib/modules/versioning/npm/index.spec.ts.md) |
 | `lib/modules/versioning/ruby/index.spec.ts` | Done | [details](lib/modules/versioning/ruby/index.spec.ts.md) |
 | `lib/modules/versioning/git/index.spec.ts` | Done | [details](lib/modules/versioning/git/index.spec.ts.md) |
-| `lib/config/presets/index.spec.ts` | Not done | [details](lib/config/presets/index.spec.ts.md) |
+| `lib/config/presets/index.spec.ts` | Done | [details](lib/config/presets/index.spec.ts.md) |
 | `lib/config/presets/internal/custom-managers.spec.ts` | Not done | [details](lib/config/presets/internal/custom-managers.spec.ts.md) |
 | `lib/config/presets/parse.spec.ts` | Done | [details](lib/config/presets/parse.spec.ts.md) |
 | `lib/modules/manager/bazel/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bazel/artifacts.spec.ts.md) |
@@ -763,7 +763,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/exec/hermit.spec.ts` | Not done | [details](lib/util/exec/hermit.spec.ts.md) |
 | `lib/util/exec/index.spec.ts` | Not done | [details](lib/util/exec/index.spec.ts.md) |
 | `lib/util/exec/utils.spec.ts` | Not done | [details](lib/util/exec/utils.spec.ts.md) |
-| `lib/util/fs/index.spec.ts` | Not done | [details](lib/util/fs/index.spec.ts.md) |
+| `lib/util/fs/index.spec.ts` | Done | [details](lib/util/fs/index.spec.ts.md) |
 | `lib/util/fs/util.spec.ts` | Done | [details](lib/util/fs/util.spec.ts.md) |
 | `lib/util/git/auth.spec.ts` | Not done | [details](lib/util/git/auth.spec.ts.md) |
 | `lib/util/git/author.spec.ts` | Done | [details](lib/util/git/author.spec.ts.md) |
