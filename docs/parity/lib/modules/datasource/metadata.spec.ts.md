@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/metadata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata.spec.ts
-**Total tests:** 32 | **Ported:** 22 | **Actionable:** 32 | **Status:** partial
+**Total tests:** 32 | **Ported:** 30 | **Actionable:** 32 | **Status:** partial
 
 ### `modules/datasource/metadata`
 
@@ -24,8 +24,8 @@
 | Should handle failed parsing of sourceUrls for other | 274 | ported | `datasources.rs` | `add_metadata_invalid_url_stays` | —  | — | — | — |
 | Should handle non-url | 297 | ported | `datasources.rs` | `add_metadata_removes_non_url_source` | —  | — | — | — |
 | Should handle parsing/converting of GitHub sourceUrls with http and www correctly | 319 | pending | — | — | — |
-| Should move github homepage to sourceUrl | 331 | pending | — | — | — |
-| Should handle parsing/converting of GitLab sourceUrls with http and www correctly | 345 | pending | — | — | — |
+| Should move github homepage to sourceUrl | 331 | ported | `datasources.rs` | `add_metadata_github_homepage_to_source_url` | —  | — | — | — |
+| Should handle parsing/converting of GitLab sourceUrls with http and www correctly | 345 | ported | `datasources.rs` | `add_metadata_gitlab_http_source_url` | —  | — | — | — |
 | Should normalize releaseTimestamp | 357 | ported | `datasources.rs` | `add_metadata_github_tree_no_subdir` | Tests GitHub /tree/master without subdir  | — | — | — |
 | Should return an empty string when massaging an invalid url | 385 | ported | `util.rs` | `test_massage_url_invalid` | — |
 | massageUrl($url) === $expected | 389 | ported | `util.rs` | `test_massage_url_github` + `test_massage_url_gitlab` + `test_massage_url_other_host` | — |
@@ -37,10 +37,10 @@
 | Should massage github ssh git@ url to valid https url | 446 | ported | `util.rs` | `test_massage_github_url_ssh` | — |
 | Should massage github git url to valid https url | 452 | ported | `util.rs` | `test_massage_github_url_git` | — |
 | Should massage gitlab git url to valid https url | 458 | ported | `util.rs` | `test_massage_gitlab_url_git` | — |
-| Should remove homepage when homepage and sourceUrl are same | 464 | pending | — | — | — |
-| Should delete gitlab homepage if its same as sourceUrl | 503 | pending | — | — | — |
-| does not set homepage to sourceURl when undefined | 542 | pending | — | — | — |
-| does not set homepage to sourceURl when not github or gitlab | 580 | pending | — | — | — |
+| Should remove homepage when homepage and sourceUrl are same | 464 | ported | `datasources.rs` | `add_metadata_removes_duplicate_homepage` | —  | — | — | — |
+| Should delete gitlab homepage if its same as sourceUrl | 503 | ported | `datasources.rs` | `add_metadata_removes_duplicate_gitlab_homepage` | —  | — | — | — |
+| does not set homepage to sourceURl when undefined | 542 | ported | `datasources.rs` | `add_metadata_no_homepage_promotion_without_homepage` | —  | — | — | — |
+| does not set homepage to sourceURl when not github or gitlab | 580 | ported | `datasources.rs` | `add_metadata_non_github_homepage_not_promoted` | —  | — | — | — |
 | shouldDeleteHomepage($homepage, $sourceUrl) === $expected | 618 | ported | `util.rs` | `test_should_delete_homepage` | — |
 | should handle dep with no releases | 638 | pending | — | — | — |
 

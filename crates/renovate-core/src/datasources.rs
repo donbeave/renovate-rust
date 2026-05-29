@@ -805,6 +805,159 @@ mod registry_tests {
         }
     }
 
+    // ── add_metadata homepage and timestamp tests ───────────────────────────
+
+    // Ported: "Should move github homepage to sourceUrl" — metadata.spec.ts line 331
+    #[test]
+    fn add_metadata_github_homepage_to_source_url() {
+        let mut dep = ReleaseResult {
+            releases: vec![Release { version: "1.9.3".into(), ..Default::default() }],
+            homepage: Some("http://www.github.com/mockk/mockk/".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "io.mockk:mockk");
+        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/mockk/mockk"));
+        assert!(dep.homepage.is_none());
+    }
+
+    // Ported: "Should handle parsing/converting of GitLab sourceUrls with http and www correctly" — metadata.spec.ts line 345
+    #[test]
+    fn add_metadata_gitlab_http_source_url() {
+        let mut dep = ReleaseResult {
+            releases: vec![Release { version: "5.7.0".into(), ..Default::default() }],
+            source_url: Some("http://gitlab.com/meno/dropzone/".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "dropzone");
+        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/dropzone"));
+    }
+
+    // Ported: "Should remove homepage when homepage and sourceUrl are same" — metadata.spec.ts line 464
+    #[test]
+    fn add_metadata_removes_duplicate_homepage() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release { version: "1.0.1".into(), release_timestamp: Some("2000-01-01T12:34:56".into()), ..Default::default() },
+                Release { version: "1.0.2".into(), release_timestamp: Some("2000-01-02T12:34:56.000Z".into()), ..Default::default() },
+                Release { version: "1.0.3".into(), release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()), ..Default::default() },
+            ],
+            homepage: Some("https://github.com/foo/bar".into()),
+            source_url: Some("https://github.com/foo/bar".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "foobar");
+        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/foo/bar"));
+        assert!(dep.homepage.is_none()); // homepage removed as duplicate
+        // Timestamps normalized
+        assert_eq!(dep.releases[0].release_timestamp.as_deref(), Some("2000-01-01T12:34:56.000Z"));
+        assert_eq!(dep.releases[1].release_timestamp.as_deref(), Some("2000-01-02T12:34:56.000Z"));
+        assert_eq!(dep.releases[2].release_timestamp.as_deref(), Some("2000-01-03T12:34:56.000Z"));
+    }
+
+    // Ported: "does not set homepage to sourceUrl when undefined" — metadata.spec.ts line 542
+    #[test]
+    fn add_metadata_no_homepage_promotion_without_homepage() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release { version: "1.0.1".into(), release_timestamp: Some("2000-01-01T12:34:56".into()), ..Default::default() },
+            ],
+            source_url: Some("https://gitlab.com/meno/repo".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "foobar");
+        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/repo"));
+        assert!(dep.homepage.is_none());
+        assert_eq!(dep.releases[0].release_timestamp.as_deref(), Some("2000-01-01T12:34:56.000Z"));
+    }
+
+    // Ported: "does not set homepage to sourceUrl when not github or gitlab" — metadata.spec.ts line 580
+    #[test]
+    fn add_metadata_non_github_homepage_not_promoted() {
+        let mut dep = ReleaseResult {
+            releases: vec![Release { version: "1.0.1".into(), ..Default::default() }],
+            homepage: Some("https://somesource.com/".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "foobar");
+        // Non-GitHub/GitLab homepage should not become sourceUrl
+        assert!(dep.source_url.is_none());
+    }
+
+    // Ported: "Should delete gitlab homepage if its same as sourceUrl" — metadata.spec.ts line 503
+    #[test]
+    fn add_metadata_removes_duplicate_gitlab_homepage() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release { version: "1.0.1".into(), release_timestamp: Some("2000-01-01T12:34:56".into()), ..Default::default() },
+            ],
+            homepage: Some("https://gitlab.com/meno/repo".into()),
+            source_url: Some("https://gitlab.com/meno/repo".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "foobar");
+        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/repo"));
+        assert!(dep.homepage.is_none());
+        assert_eq!(dep.releases[0].release_timestamp.as_deref(), Some("2000-01-01T12:34:56.000Z"));
+    }
+
+    // Ported: "Should normalize releaseTimestamp" — metadata.spec.ts line 357
+    #[test]
+    fn add_metadata_normalizes_timestamps() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release { version: "1.0.1".into(), release_timestamp: Some("2000-01-01T12:34:56".into()), ..Default::default() },
+                Release { version: "1.0.2".into(), release_timestamp: Some("2000-01-02T12:34:56.000Z".into()), ..Default::default() },
+                Release { version: "1.0.3".into(), release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()), ..Default::default() },
+                Release { version: "1.0.4".into(), release_timestamp: Some("20000103150210".into()), ..Default::default() },
+            ],
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "foobar");
+        assert_eq!(dep.releases[0].release_timestamp.as_deref(), Some("2000-01-01T12:34:56.000Z"));
+        assert_eq!(dep.releases[1].release_timestamp.as_deref(), Some("2000-01-02T12:34:56.000Z"));
+        assert_eq!(dep.releases[2].release_timestamp.as_deref(), Some("2000-01-03T12:34:56.000Z"));
+        assert_eq!(dep.releases[3].release_timestamp.as_deref(), Some("2000-01-03T15:02:10.000Z"));
+    }
+
+    // Ported: "Should massage github sourceUrls" — modules/datasource/metadata.spec.ts line 197
+    #[test]
+    fn add_metadata_massage_github_pages_url() {
+        let mut dep = ReleaseResult {
+            source_url: Some("https://some.github.com/repo".into()),
+            releases: vec![],
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "pypi", "django-filter");
+        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/some/repo"));
+    }
+
+    // Ported: "Should handle failed parsing of sourceUrls for GitLab" — metadata.spec.ts line 251
+    #[test]
+    fn add_metadata_gitlab_invalid_url_unchanged() {
+        let mut dep = ReleaseResult {
+            source_url: Some("https://gitlab-nope".into()),
+            releases: vec![],
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "npm", "dropzone");
+        // "gitlab-nope" contains "gitlab" but has no valid path → unchanged
+        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab-nope"));
+    }
+
+    // Ported: "should handle dep with no releases" — metadata.spec.ts line 638
+    #[test]
+    fn add_metadata_no_releases() {
+        let mut dep = ReleaseResult {
+            releases: vec![],
+            source_url: Some("https://github.com/some/package".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "npm", "some-package");
+        // Should still set changelogUrl / sourceUrl etc.
+        assert!(dep.releases.is_empty());
+        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/some/package"));
+    }
+
     // ── apply_constraints_filtering tests ─────────────────────────────────
 
     // Ported: "should remove constraints from releases if constraintsFiltering is not strict" — modules/datasource/common.spec.ts line 201
