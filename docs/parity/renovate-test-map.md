@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,856 · not-applicable 2,741 (23% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,831 · not-applicable 2,766 (24% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -135,10 +135,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bazel-module/parser/context.spec.ts` | Done | [details](lib/modules/manager/bazel-module/parser/context.spec.ts.md) |
 | `lib/modules/datasource/artifactory/index.spec.ts` | Done | [details](lib/modules/datasource/artifactory/index.spec.ts.md) |
 | `lib/modules/datasource/bazel/schema.spec.ts` | Done | [details](lib/modules/datasource/bazel/schema.spec.ts.md) |
-| `lib/modules/datasource/aws-eks-addon/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-eks-addon/index.spec.ts.md) |
+| `lib/modules/datasource/aws-eks-addon/index.spec.ts` | Done | [details](lib/modules/datasource/aws-eks-addon/index.spec.ts.md) |
 | `lib/modules/datasource/aws-eks-addon/schema.spec.ts` | Done | [details](lib/modules/datasource/aws-eks-addon/schema.spec.ts.md) |
 | `lib/modules/datasource/aws-machine-image/index.spec.ts` | Done | [details](lib/modules/datasource/aws-machine-image/index.spec.ts.md) |
-| `lib/modules/datasource/aws-rds/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-rds/index.spec.ts.md) |
+| `lib/modules/datasource/aws-rds/index.spec.ts` | Done | [details](lib/modules/datasource/aws-rds/index.spec.ts.md) |
 | `lib/modules/datasource/datasource.spec.ts` | Not done | [details](lib/modules/datasource/datasource.spec.ts.md) |
 | `lib/modules/datasource/azure-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
 | `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/schema.spec.ts.md) |
@@ -259,7 +259,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/crate/index.spec.ts` | Not done | [details](lib/modules/datasource/crate/index.spec.ts.md) |
 | `lib/modules/datasource/maven/schema.spec.ts` | Done | [details](lib/modules/datasource/maven/schema.spec.ts.md) |
 | `lib/modules/datasource/maven/util.spec.ts` | Done | [details](lib/modules/datasource/maven/util.spec.ts.md) |
-| `lib/modules/datasource/maven/s3.spec.ts` | Not done | [details](lib/modules/datasource/maven/s3.spec.ts.md) |
+| `lib/modules/datasource/maven/s3.spec.ts` | Done | [details](lib/modules/datasource/maven/s3.spec.ts.md) |
 | `lib/modules/datasource/maven/index.spec.ts` | Not done | [details](lib/modules/datasource/maven/index.spec.ts.md) |
 | `lib/config/migrate-validate.spec.ts` | Done | [details](lib/config/migrate-validate.spec.ts.md) |
 | `lib/config/massage.spec.ts` | Done | [details](lib/config/massage.spec.ts.md) |
@@ -727,7 +727,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/github/api-cache.spec.ts` | Done | [details](lib/modules/platform/github/api-cache.spec.ts.md) |
 | `lib/modules/platform/github/branch.spec.ts` | Not done | [details](lib/modules/platform/github/branch.spec.ts.md) |
 | `lib/modules/platform/github/index.spec.ts` | Not done | [details](lib/modules/platform/github/index.spec.ts.md) |
-| `lib/modules/platform/github/issue.spec.ts` | Not done | [details](lib/modules/platform/github/issue.spec.ts.md) |
+| `lib/modules/platform/github/issue.spec.ts` | Done | [details](lib/modules/platform/github/issue.spec.ts.md) |
 | `lib/modules/platform/github/massage-markdown-links.spec.ts` | Done | [details](lib/modules/platform/github/massage-markdown-links.spec.ts.md) |
 | `lib/modules/platform/github/schema.spec.ts` | Done | [details](lib/modules/platform/github/schema.spec.ts.md) |
 | `lib/modules/platform/github/scm.spec.ts` | Done | [details](lib/modules/platform/github/scm.spec.ts.md) |
