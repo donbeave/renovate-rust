@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/metadata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata.spec.ts
-**Total tests:** 32 | **Ported:** 30 | **Actionable:** 32 | **Status:** partial
+**Total tests:** 32 | **Ported:** 31 | **Actionable:** 32 | **Status:** partial
 
 ### `modules/datasource/metadata`
 
@@ -18,9 +18,9 @@
 | Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl | 134 | ported | `datasources.rs` | `add_metadata_fallback_to_massaged_url` | — |
 | Should not split a sourceDirectory when one cannot be detected $sourceUrl | 158 | ported | `datasources.rs` | `add_metadata_no_source_directory_for_simple_urls` | Tests bitnami, gitlab simple URLs  | — | — | — |
 | Should not overwrite any existing sourceDirectory | 180 | ported | `datasources.rs` | `add_metadata_preserves_existing_source_directory` | —  | — | — | — |
-| Should massage github sourceUrls | 197 | pending | — | — | — |
+| Should massage github sourceUrls | 197 | ported | `datasources.rs` | `add_metadata_massage_github_pages_url` | — |
 | Should handle parsing of sourceUrls correctly for GitLab also | 228 | ported | `datasources.rs` | `add_metadata_gitlab_tree_url` | —  | — | — | — |
-| Should handle failed parsing of sourceUrls for GitLab | 251 | pending | — | — | — |
+| Should handle failed parsing of sourceUrls for GitLab | 251 | ported | `datasources.rs` | `add_metadata_gitlab_invalid_url_unchanged` | — |
 | Should handle failed parsing of sourceUrls for other | 274 | ported | `datasources.rs` | `add_metadata_invalid_url_stays` | —  | — | — | — |
 | Should handle non-url | 297 | ported | `datasources.rs` | `add_metadata_removes_non_url_source` | —  | — | — | — |
 | Should handle parsing/converting of GitHub sourceUrls with http and www correctly | 319 | pending | — | — | — |
@@ -42,6 +42,6 @@
 | does not set homepage to sourceURl when undefined | 542 | ported | `datasources.rs` | `add_metadata_no_homepage_promotion_without_homepage` | —  | — | — | — |
 | does not set homepage to sourceURl when not github or gitlab | 580 | ported | `datasources.rs` | `add_metadata_non_github_homepage_not_promoted` | —  | — | — | — |
 | shouldDeleteHomepage($homepage, $sourceUrl) === $expected | 618 | ported | `util.rs` | `test_should_delete_homepage` | — |
-| should handle dep with no releases | 638 | pending | — | — | — |
+| should handle dep with no releases | 638 | ported | `datasources.rs` | `add_metadata_no_releases` | — |
 
 ---
