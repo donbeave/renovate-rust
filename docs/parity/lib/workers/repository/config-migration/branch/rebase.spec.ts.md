@@ -5,16 +5,16 @@
 ## `lib/workers/repository/config-migration/branch/rebase.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/rebase.spec.ts
-**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** not-applicable
 
 ### `workers/repository/config-migration/branch/rebase › rebaseMigrationBranch()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does nothing if branch is up to date (%s) | 48 | pending | — | — | —|
-| rebases migration branch (%s) | 66 | pending | — | — | —|
-| applies prettier formatting when rebasing the migration branch (%s) | 83 | pending | — | — | —|
-| does not rebases migration branch when in dryRun is on (%s) | 118 | pending | — | — | —|
+| does nothing if branch is up to date (%s) | 48 | not-applicable | — | — | mocking framework internals — platform/scm/git mock utilities; TypeScript config migration branch rebase|
+| rebases migration branch (%s) | 66 | not-applicable | — | — | mocking framework internals — platform/scm/git mock utilities; TypeScript config migration branch rebase|
+| applies prettier formatting when rebasing the migration branch (%s) | 83 | not-applicable | — | — | mocking framework internals — platform/scm/git mock utilities; TypeScript config migration branch rebase|
+| does not rebases migration branch when in dryRun is on (%s) | 118 | not-applicable | — | — | mocking framework internals — platform/scm/git mock utilities; TypeScript config migration branch rebase|
 
 ### `workers/repository/config-migration/branch/rebase › jsonStripWhiteSpaces()`
 

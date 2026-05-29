@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,033 / 11,666 total tests ported (43%) · pending 5,143 · not-applicable 1,490 (13% of total) — updated 2026-05-29
+**Progress:** 5,033 / 11,666 total tests ported (43%) · pending 5,121 · not-applicable 1,512 (13% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -831,10 +831,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/changelog/index.spec.ts` | Not done | [details](lib/workers/repository/changelog/index.spec.ts.md) |
 | `lib/workers/repository/common.spec.ts` | Done | [details](lib/workers/repository/common.spec.ts.md) |
 | `lib/workers/repository/config-migration/branch/commit-message.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) |
-| `lib/workers/repository/config-migration/branch/create.spec.ts` | Not done | [details](lib/workers/repository/config-migration/branch/create.spec.ts.md) |
-| `lib/workers/repository/config-migration/branch/index.spec.ts` | Not done | [details](lib/workers/repository/config-migration/branch/index.spec.ts.md) |
+| `lib/workers/repository/config-migration/branch/create.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/create.spec.ts.md) |
+| `lib/workers/repository/config-migration/branch/index.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/index.spec.ts.md) |
 | `lib/workers/repository/config-migration/branch/migrated-data.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/migrated-data.spec.ts.md) |
-| `lib/workers/repository/config-migration/branch/rebase.spec.ts` | Not done | [details](lib/workers/repository/config-migration/branch/rebase.spec.ts.md) |
+| `lib/workers/repository/config-migration/branch/rebase.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/rebase.spec.ts.md) |
 | `lib/workers/repository/config-migration/index.spec.ts` | Done | [details](lib/workers/repository/config-migration/index.spec.ts.md) |
 | `lib/workers/repository/config-migration/pr/index.spec.ts` | Done | [details](lib/workers/repository/config-migration/pr/index.spec.ts.md) |
 | `lib/workers/repository/configured.spec.ts` | Done | [details](lib/workers/repository/configured.spec.ts.md) |
