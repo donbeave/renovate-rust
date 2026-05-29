@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,074 / 11,666 total tests ported (43%) · pending 3,810 · not-applicable 2,782 (24% of total) — updated 2026-05-29
+**Progress:** 5,080 / 11,666 total tests ported (44%) · pending 3,803 · not-applicable 2,783 (24% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -461,7 +461,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/same-major/index.spec.ts` | Done | [details](lib/modules/versioning/same-major/index.spec.ts.md) |
 | `lib/modules/versioning/hex/index.spec.ts` | Done | [details](lib/modules/versioning/hex/index.spec.ts.md) |
 | `lib/modules/versioning/debian/index.spec.ts` | Not done | [details](lib/modules/versioning/debian/index.spec.ts.md) |
-| `lib/modules/versioning/debian/common.spec.ts` | Not done | [details](lib/modules/versioning/debian/common.spec.ts.md) |
+| `lib/modules/versioning/debian/common.spec.ts` | Done | [details](lib/modules/versioning/debian/common.spec.ts.md) |
 | `lib/modules/versioning/ivy/index.spec.ts` | Done | [details](lib/modules/versioning/ivy/index.spec.ts.md) |
 | `lib/modules/versioning/python/index.spec.ts` | Done | [details](lib/modules/versioning/python/index.spec.ts.md) |
 | `lib/modules/versioning/conda/index.spec.ts` | Done | [details](lib/modules/versioning/conda/index.spec.ts.md) |

@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| no rolling release data | 15 | pending | — | — | —|
+| no rolling release data | 15 | not-applicable | — | — | mocking framework internals — dataFiles.set() mock + logger.debug spy|
 | isDatedCodeName("$input") === $expected | 31 | ported | `deb.rs` | `debian_is_dated_codename` | — |
 | getDatedContainerImageCodename("$input") === $expected | 48 | ported | `deb.rs` | `debian_get_dated_container_image_codename` | — |
 | getDatedContainerImageVersion("$input") === $expected | 69 | ported | `deb.rs` | `debian_get_dated_container_image_version` | — |
