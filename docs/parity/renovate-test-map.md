@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,060 / 11,666 total tests ported (43%) · pending 4,966 · not-applicable 1,640 (14% of total) — updated 2026-05-29
+**Progress:** 5,060 / 11,666 total tests ported (43%) · pending 4,955 · not-applicable 1,651 (14% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -174,7 +174,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/deb/url.spec.ts` | Not done | [details](lib/modules/datasource/deb/url.spec.ts.md) |
 | `lib/modules/datasource/utils.spec.ts` | Done | [details](lib/modules/datasource/utils.spec.ts.md) |
 | `lib/modules/datasource/span-processor.spec.ts` | Done | [details](lib/modules/datasource/span-processor.spec.ts.md) |
-| `lib/modules/datasource/postprocess-release.spec.ts` | Not done | [details](lib/modules/datasource/postprocess-release.spec.ts.md) |
+| `lib/modules/datasource/postprocess-release.spec.ts` | Done | [details](lib/modules/datasource/postprocess-release.spec.ts.md) |
 | `lib/modules/datasource/java-version/index.spec.ts` | Done | [details](lib/modules/datasource/java-version/index.spec.ts.md) |
 | `lib/modules/datasource/unity3d-packages/index.spec.ts` | Done | [details](lib/modules/datasource/unity3d-packages/index.spec.ts.md) |
 | `lib/modules/datasource/clojure/index.spec.ts` | Done | [details](lib/modules/datasource/clojure/index.spec.ts.md) |
@@ -806,11 +806,11 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
 | `lib/util/http/index.spec.ts` | Not done | [details](lib/util/http/index.spec.ts.md) |
 | `lib/util/http/jira.spec.ts` | Not done | [details](lib/util/http/jira.spec.ts.md) |
-| `lib/util/http/queue.spec.ts` | Not done | [details](lib/util/http/queue.spec.ts.md) |
+| `lib/util/http/queue.spec.ts` | Done | [details](lib/util/http/queue.spec.ts.md) |
 | `lib/util/http/rate-limit.spec.ts` | Not done | [details](lib/util/http/rate-limit.spec.ts.md) |
 | `lib/util/http/retry-after.spec.ts` | Done | [details](lib/util/http/retry-after.spec.ts.md) |
 | `lib/util/http/scm-manager.spec.ts` | Not done | [details](lib/util/http/scm-manager.spec.ts.md) |
-| `lib/util/http/throttle.spec.ts` | Not done | [details](lib/util/http/throttle.spec.ts.md) |
+| `lib/util/http/throttle.spec.ts` | Done | [details](lib/util/http/throttle.spec.ts.md) |
 | `lib/util/http/www-authenticate.spec.ts` | Done | [details](lib/util/http/www-authenticate.spec.ts.md) |
 | `lib/util/json-writer/editor-config.spec.ts` | Done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
 | `lib/util/json-writer/json-writer.spec.ts` | Done | [details](lib/util/json-writer/json-writer.spec.ts.md) |
