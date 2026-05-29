@@ -135,6 +135,7 @@ pub struct Release {
 ///
 /// Mirrors `addMetaData()` from `lib/modules/datasource/metadata.ts`.
 pub fn add_metadata(dep: &mut ReleaseResult, datasource: &str, package_name: &str) {
+    massage_timestamps(dep);
     let package_lower = package_name.to_lowercase();
 
     // Look up manual changelog URL.
@@ -200,7 +201,42 @@ pub fn add_metadata(dep: &mut ReleaseResult, datasource: &str, package_name: &st
     }
 }
 
-/// Extract source directory from a GitHub or GitLab tree URL.
+/// Normalize timestamps in release result to ISO 8601 UTC format.
+/// Mirrors `massageTimestamps()` from `lib/modules/datasource/metadata.ts`.
+fn massage_timestamps(dep: &mut ReleaseResult) {
+    for release in &mut dep.releases {
+        if let Some(ref ts) = release.release_timestamp.clone() {
+            release.release_timestamp = normalize_timestamp(ts);
+        }
+    }
+}
+
+/// Normalize a timestamp string to ISO 8601 UTC (`YYYY-MM-DDTHH:MM:SS.sssZ`).
+fn normalize_timestamp(ts: &str) -> Option<String> {
+    use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+
+    // Try standard ISO 8601 with timezone offset
+    if let Ok(dt) = DateTime::parse_from_rfc3339(ts) {
+        return Some(dt.with_timezone(&Utc).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string());
+    }
+
+    // Try without timezone (treat as UTC)
+    if let Ok(ndt) = NaiveDateTime::parse_from_str(ts, "%Y-%m-%dT%H:%M:%S") {
+        return Some(Utc.from_utc_datetime(&ndt).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string());
+    }
+    if let Ok(ndt) = NaiveDateTime::parse_from_str(ts, "%Y-%m-%dT%H:%M:%S%.f") {
+        return Some(Utc.from_utc_datetime(&ndt).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string());
+    }
+
+    // Try compact format like "20000103150210" → 2000-01-03 15:02:10
+    if let Ok(ndt) = NaiveDateTime::parse_from_str(ts, "%Y%m%d%H%M%S") {
+        return Some(Utc.from_utc_datetime(&ndt).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string());
+    }
+
+    None
+}
+
+/// Extract source directory from a GitHub or GitLab tree URL./// Extract source directory from a GitHub or GitLab tree URL.
 /// E.g.:
 ///   "https://github.com/owner/repo/tree/master/subdir" → (base, "subdir")
 ///   "https://gitlab.com/group/repo/tree/main/subdir" → (base, "subdir")
