@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/devbox/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/devbox/index.spec.ts
-**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** done
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `modules/datasource/devbox/index`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/buildpacks-registry/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/buildpacks-registry/index.spec.ts
-**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** done
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `modules/datasource/buildpacks-registry/index › getReleases`
 

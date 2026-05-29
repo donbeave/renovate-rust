@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/nuget/parser.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/nuget/parser.spec.ts
-**Total tests:** 15 | **Ported:** 15 | **Actionable:** 15 | **Status:** done
+**Total tests:** 15 | **Ported:** 15 | **Actionable:** 15 | **Status:** ported
 
 ### `modules/versioning/nuget/parser › parseVersion`
 

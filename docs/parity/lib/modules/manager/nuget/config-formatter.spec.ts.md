@@ -5,7 +5,7 @@
 ## `lib/modules/manager/nuget/config-formatter.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/config-formatter.spec.ts
-**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** done
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
 
 ### `createNuGetConfigXml`
 

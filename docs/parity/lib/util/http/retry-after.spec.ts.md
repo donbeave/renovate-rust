@@ -21,9 +21,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for non-RequestError | 89 | not-applicable | — | — | TypeScript `instanceof RequestError` check; Rust type system prevents non-Response input |
-| returns null for RequestError without response | 93 | not-applicable | — | — | TypeScript null response check on error object; Rust `parse_retry_after` takes `&Response` directly |
-| returns null for status other than 429 | 97 | not-applicable | — | — | TypeScript status-code guard in getRetryAfter; Rust handles status gating in retry loop |
+| returns null for non-RequestError | 89 | pending | — | — | —|
+| returns null for RequestError without response | 93 | pending | — | — | —|
+| returns null for status other than 429 | 97 | pending | — | — | —|
 | returns null missing "retry-after" header | 103 | ported | `http.rs` | `retry_after_missing_header_returns_none` | — |
 | returns null for non-integer "retry-after" header | 109 | ported | `http.rs` | `retry_after_value_past_date_returns_none` | — |
 | returns delay in seconds from date | 122 | ported | `http.rs` | `retry_after_value_future_date_returns_seconds` | — |

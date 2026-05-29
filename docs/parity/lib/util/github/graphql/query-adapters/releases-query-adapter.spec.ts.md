@@ -5,7 +5,7 @@
 ## `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts
-**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** done
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `util/github/graphql/query-adapters/releases-query-adapter`
 

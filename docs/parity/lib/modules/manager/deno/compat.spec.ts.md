@@ -5,23 +5,23 @@
 ## `lib/modules/manager/deno/compat.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/compat.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** not-applicable
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
 
 ### `extractDenoCompatiblePackageJson()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null if invalid package.json | 17 | not-applicable | — | — | Uses vi.mock fs + vi.mock find-packages; filesystem/module mocking infrastructure not portable |
-| handles null response | 24 | not-applicable | — | — | Uses vi.mock fs + vi.mock find-packages; filesystem/module mocking infrastructure not portable |
+| returns null if invalid package.json | 17 | pending | — | — | —|
+| handles null response | 24 | pending | — | — | —|
 
 ### `collectPackageJson()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| node-compat package.json | 44 | not-applicable | — | — | Uses vi.mock fs + vi.mock find-packages; filesystem/module mocking infrastructure not portable |
-| handles workspaces with valid workspace member | 77 | not-applicable | — | — | Uses vi.mock fs + vi.mock find-packages; filesystem/module mocking infrastructure not portable |
-| returns empty array when rootPackageFile is null | 141 | not-applicable | — | — | Uses vi.mock fs + vi.mock find-packages; filesystem/module mocking infrastructure not portable |
-| handles null packageFile in workspace members | 148 | not-applicable | — | — | Uses vi.mock fs + vi.mock find-packages; filesystem/module mocking infrastructure not portable |
+| node-compat package.json | 44 | pending | — | — | —|
+| handles workspaces with valid workspace member | 77 | pending | — | — | —|
+| returns empty array when rootPackageFile is null | 141 | pending | — | — | —|
+| handles null packageFile in workspace members | 148 | pending | — | — | —|
 
 ---
 

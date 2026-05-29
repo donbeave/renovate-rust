@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/ivy/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/ivy/index.spec.ts
-**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** done
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `modules/versioning/ivy/index`
 

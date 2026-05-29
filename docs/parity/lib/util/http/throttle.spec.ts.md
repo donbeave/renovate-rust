@@ -5,14 +5,14 @@
 ## `lib/util/http/throttle.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/throttle.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
 
 ### `util/http/throttle`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for invalid URL | 14 | not-applicable | — | — | JavaScript p-throttle rate limiting; Rust uses tokio rate limiting directly |
-| returns throttle for valid url | 18 | not-applicable | — | — | JavaScript p-throttle rate limiting; Rust uses tokio rate limiting directly |
+| returns null for invalid URL | 14 | pending | — | — | —|
+| returns throttle for valid url | 18 | pending | — | — | —|
 
 ---
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/result.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/result.spec.ts
-**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** done
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `workers/repository/result › processResult()`
 

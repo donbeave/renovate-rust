@@ -5,7 +5,7 @@
 ## `lib/modules/manager/bazel/parser.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel/parser.spec.ts
-**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** done
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `tests`
 

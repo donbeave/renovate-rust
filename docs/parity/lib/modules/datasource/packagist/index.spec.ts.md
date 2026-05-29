@@ -5,28 +5,28 @@
 ## `lib/modules/datasource/packagist/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/packagist/index.spec.ts
-**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** done
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
 
 ### `modules/datasource/packagist/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| supports custom registries | 39 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| supports plain packages | 56 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| handles timeouts | 80 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| handles auth rejections | 102 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| handles not found registries | 124 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| supports includes packages | 146 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| supports older sha1 hashes | 179 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| supports lazy repositories | 240 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| supports provider-includes | 279 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| handles provider-includes miss | 324 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| supports providers | 372 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| supports providers without a hash | 405 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| handles providers miss | 434 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| processes real versioned data | 470 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| adds packagist source implicitly | 490 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| fetches packagist V2 packages | 510 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
-| respects "available-packages" list | 546 | not-applicable | — | — | Requires httpMock for HTTP fixture responses |
+| supports custom registries | 39 | pending | — | — | —|
+| supports plain packages | 56 | pending | — | — | —|
+| handles timeouts | 80 | pending | — | — | —|
+| handles auth rejections | 102 | pending | — | — | —|
+| handles not found registries | 124 | pending | — | — | —|
+| supports includes packages | 146 | pending | — | — | —|
+| supports older sha1 hashes | 179 | pending | — | — | —|
+| supports lazy repositories | 240 | pending | — | — | —|
+| supports provider-includes | 279 | pending | — | — | —|
+| handles provider-includes miss | 324 | pending | — | — | —|
+| supports providers | 372 | pending | — | — | —|
+| supports providers without a hash | 405 | pending | — | — | —|
+| handles providers miss | 434 | pending | — | — | —|
+| processes real versioned data | 470 | pending | — | — | —|
+| adds packagist source implicitly | 490 | pending | — | — | —|
+| fetches packagist V2 packages | 510 | pending | — | — | —|
+| respects "available-packages" list | 546 | pending | — | — | —|
 
 ---

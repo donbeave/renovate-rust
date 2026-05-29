@@ -5,7 +5,7 @@
 ## `lib/modules/platform/pr-body.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/pr-body.spec.ts
-**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** done
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `modules/platform/pr-body › getPrBodyStruct`
 

@@ -18,9 +18,9 @@
 | throws for 5xx | 51 | ported | `crates/renovate-core/src/datasources/bazel.rs` | `throws_for_5xx` | 502 → Err |
 | metadata without yanked versions | 58 | ported | `crates/renovate-core/src/datasources/bazel.rs` | `metadata_without_yanked_versions` | releases + sourceUrl from homepage |
 | metadata with yanked versions | 77 | ported | `crates/renovate-core/src/datasources/bazel.rs` | `metadata_with_yanked_versions` | yanked → isDeprecated true |
-| should handle local file correctly | 106 | not-applicable | — | — | file:// URL support not in scope for Rust CLI |
-| should return null for invalid file path | 135 | not-applicable | — | — | file:// URL support not in scope for Rust CLI |
-| should return null for empty file content | 146 | not-applicable | — | — | file:// URL support not in scope for Rust CLI |
+| should handle local file correctly | 106 | pending | — | — | —|
+| should return null for invalid file path | 135 | pending | — | — | —|
+| should return null for empty file content | 146 | pending | — | — | —|
 
 ---
 

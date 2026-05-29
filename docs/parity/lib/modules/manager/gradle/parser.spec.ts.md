@@ -142,7 +142,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $pattern | 909 | not-applicable | — | — | Asserts expect(logger.logger.debug).toHaveBeenCalledWith — logger spy |
+| $pattern | 909 | pending | — | — | —|
 | exclusiveContent | 936 | pending | — | — | — |
 
 ### `version catalog`
@@ -179,7 +179,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | $def \| $input | 1267 | pending | — | — | — |
-| recursion check | 1313 | not-applicable | — | — | Asserts expect(logger.logger.debug).toHaveBeenCalledWith — logger spy |
+| recursion check | 1313 | pending | — | — | —|
 
 ### `implicit gradle plugins`
 

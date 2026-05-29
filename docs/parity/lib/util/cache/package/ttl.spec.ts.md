@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/ttl.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/ttl.spec.ts
-**Total tests:** 31 | **Ported:** 25 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 31 | **Ported:** 25 | **Actionable:** 31 | **Status:** partial
 
 ### `util/cache/package/ttl › getTtlOverride › No configuration`
 
@@ -19,7 +19,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns exact match when namespace exists in config | 30 | ported | cache/package.rs | `get_ttl_override_returns_exact_match` | — |
-| returns undefined when exact match is not a number | 45 | not-applicable | — | — | Rust HashMap<String,i64> types enforce numeric; non-numeric cannot be stored |
+| returns undefined when exact match is not a number | 45 | pending | — | — | —|
 | returns undefined when no matching namespace found | 58 | ported | cache/package.rs | `get_ttl_override_returns_exact_match` | no-match path covered |
 
 ### `util/cache/package/ttl › getTtlOverride › Glob patterns`
@@ -45,7 +45,7 @@
 | prioritizes exact match over glob patterns | 179 | ported | cache/package.rs | `get_ttl_override_exact_beats_glob` | — |
 | returns longest matching pattern when multiple patterns apply | 195 | ported | cache/package.rs | `get_ttl_override_longest_pattern_wins` | — |
 | selects longest matching pattern across all configs | 209 | ported | `cache/package.rs` | `get_ttl_override_selects_longest_across_4_patterns` | — |
-| skips non-numeric values and selects next longest matching pattern | 228 | not-applicable | — | — | Rust types enforce numeric values |
+| skips non-numeric values and selects next longest matching pattern | 228 | pending | — | — | —|
 | returns undefined when no patterns match | 243 | ported | cache/package.rs | `get_ttl_override_matches_simple_glob` | non-matching case covered |
 | applies patterns consistently regardless of case in config order | 256 | ported | `cache/package.rs` | `get_ttl_override_case_order_consistency` | HashMap iteration non-deterministic; test verifies valid result |
 
@@ -54,10 +54,10 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | handles empty string pattern | 271 | ported | `cache/package.rs` | `get_ttl_override_handles_empty_string_pattern` | — |
-| treats null and undefined values as invalid | 286 | not-applicable | — | — | Rust HashMap<String,i64> types enforce non-null |
-| handles very large numbers | 306 | not-applicable | — | — | i64::MAX works without special handling |
+| treats null and undefined values as invalid | 286 | pending | — | — | —|
+| handles very large numbers | 306 | pending | — | — | —|
 | handles negative numbers | 318 | ported | `cache/package.rs` | `get_ttl_override_handles_negative_values` | — |
-| treats string numbers as invalid, only accepts number types | 330 | not-applicable | — | — | Rust type system prevents string as i64 |
+| treats string numbers as invalid, only accepts number types | 330 | pending | — | — | —|
 
 ### `util/cache/package/ttl › resolveTtlValues › Default values`
 
@@ -86,6 +86,6 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | handles zero as valid override value | 461 | ported | `cache/package.rs` | `resolve_ttl_values_zero_override` | — |
-| uses fallback when override is not a number | 477 | not-applicable | — | — | Rust HashMap<String,i64> prevents non-numeric |
+| uses fallback when override is not a number | 477 | pending | — | — | —|
 
 ---

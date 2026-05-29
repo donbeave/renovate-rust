@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/conan/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/conan/index.spec.ts
-**Total tests:** 16 | **Ported:** 16 | **Actionable:** 16 | **Status:** done
+**Total tests:** 16 | **Ported:** 16 | **Actionable:** 16 | **Status:** ported
 
 ### `modules/versioning/conan/index`
 

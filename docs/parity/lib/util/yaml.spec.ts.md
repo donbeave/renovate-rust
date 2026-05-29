@@ -5,7 +5,7 @@
 ## `lib/util/yaml.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/yaml.spec.ts
-**Total tests:** 19 | **Ported:** 12 | **Actionable:** 19 | **Status:** partial
+**Total tests:** 19 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
 
 ### `util/yaml › loadAll`
 

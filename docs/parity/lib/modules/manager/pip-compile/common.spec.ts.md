@@ -11,8 +11,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| -v | 27 | not-applicable | — | — | Asserts expect(logger.warn).toHaveBeenCalledTimes(0) — logger spy |
-| -v | 48 | not-applicable | — | — | Asserts expect(logger.warn).toHaveBeenCalledTimes(0) — logger spy |
+| -v | 27 | pending | — | — | —|
+| -v | 48 | pending | — | — | —|
 | errors on malformed options with argument | 77 | pending | — | — | — |
 | errors on unknown options | 89 | pending | — | — | — |
 | always errors on not allowed options | 101 | pending | — | — | — |
@@ -37,12 +37,12 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles both registryUrls and additionalRegistryUrls | 232 | not-applicable | — | — | Uses vi.mock(host-rules) mockDeep + hostRules.find mock |
-| handles multiple additionalRegistryUrls | 259 | not-applicable | — | — | Uses vi.mock(host-rules) mockDeep + hostRules.find mock |
-| handles hosts with only a username | 288 | not-applicable | — | — | Uses vi.mock(host-rules) mockDeep + hostRules.find mock |
-| handles hosts with only a password | 306 | not-applicable | — | — | Uses vi.mock(host-rules) mockDeep + hostRules.find mock |
-| handles invalid URLs | 324 | not-applicable | — | — | Uses vi.mock(host-rules) mockDeep + hostRules.find mock |
-| handles multiple package files | 339 | not-applicable | — | — | Uses vi.mock(host-rules) mockDeep + hostRules.find mock |
+| handles both registryUrls and additionalRegistryUrls | 232 | pending | — | — | —|
+| handles multiple additionalRegistryUrls | 259 | pending | — | — | —|
+| handles hosts with only a username | 288 | pending | — | — | —|
+| handles hosts with only a password | 306 | pending | — | — | —|
+| handles invalid URLs | 324 | pending | — | — | —|
+| handles multiple package files | 339 | pending | — | — | —|
 
 ### `matchManager()`
 

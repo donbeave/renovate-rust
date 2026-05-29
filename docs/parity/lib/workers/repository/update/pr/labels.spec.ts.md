@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/labels.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/labels.spec.ts
-**Total tests:** 20 | **Ported:** 15 | **Actionable:** 15 | **Status:** ported
+**Total tests:** 20 | **Ported:** 14 | **Actionable:** 20 | **Status:** partial
 
 ### `workers/repository/update/pr/labels › prepareLabels(config)`
 
@@ -17,17 +17,17 @@
 | merge labels and addLabels | 30 | ported | `util.rs` | `test_prepare_labels_merge` | — |
 | deduplicate merged labels and addLabels | 39 | ported | `util.rs` | `test_prepare_labels_deduplicate` | — |
 | empty labels ignored | 48 | ported | `util.rs` | `test_prepare_labels_empty_strings_ignored` | — |
-| null labels ignored | 57 | not-applicable | — | — | TypeScript null-in-array behavior; Rust &str cannot be null |
-| template labels | 68 | not-applicable | — | — | Requires Handlebars template.compile; no Rust equivalent |
-| template labels with empty datasource | 77 | not-applicable | — | — | Requires Handlebars template.compile |
+| null labels ignored | 57 | pending | — | — | —|
+| template labels | 68 | pending | — | — | —|
+| template labels with empty datasource | 77 | pending | — | — | —|
 
 ### `workers/repository/update/pr/labels › prepareLabels(config) › trim labels that go over the max char limit`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| github | 94 | not-applicable | — | — | Requires platform.labelCharLimit() API |
-| gitlab | 102 | not-applicable | — | — | Requires platform.labelCharLimit() API |
-| gitea | 115 | not-applicable | — | — | Requires platform.labelCharLimit() API |
+| github | 94 | pending | — | — | —|
+| gitlab | 102 | pending | — | — | —|
+| gitea | 115 | pending | — | — | —|
 
 ### `workers/repository/update/pr/labels › getChangedLabels`
 

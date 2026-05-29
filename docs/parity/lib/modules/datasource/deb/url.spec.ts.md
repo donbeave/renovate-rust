@@ -15,7 +15,7 @@
 | constructs URLs correctly from registry URL with deprecated release | 22 | ported | `datasources/deb.rs` | `construct_component_urls_with_release` | — |
 | throws an error if required parameters are missing | 33 | ported | `datasources/deb.rs` | `construct_component_urls_missing_params` | — |
 | returns empty array for invalid registry URL | 41 | ported | `datasources/deb.rs` | `construct_component_urls_invalid_url` | TypeScript returns []; Rust returns Err |
-| should return true for different status code | 45 | not-applicable | — | — | Requires HTTP mock (httpMock.scope) |
-| should return true if request failed | 60 | not-applicable | — | — | Requires HTTP mock (httpMock.scope) |
+| should return true for different status code | 45 | pending | — | — | —|
+| should return true if request failed | 60 | pending | — | — | —|
 
 ---

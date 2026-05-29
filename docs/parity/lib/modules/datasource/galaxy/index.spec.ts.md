@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/galaxy/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/galaxy/index.spec.ts
-**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** done
+**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
 
 ### `modules/datasource/galaxy/index`
 

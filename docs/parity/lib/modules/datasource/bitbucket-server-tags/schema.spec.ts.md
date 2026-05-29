@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bitbucket-server-tags/schema.spec.ts
-**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** done
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `modules/datasource/bitbucket-server-tags/schema`
 

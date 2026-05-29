@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 64 | **Actionable:** 64 | **Status:** ported
+**Total tests:** 68 | **Ported:** 64 | **Actionable:** 68 | **Status:** partial
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -115,10 +115,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should correctly convert "* 22 4 * *" to human-readable format | 483 | not-applicable | — | — | Tests cronstrue.toString() TypeScript library output; no Rust cron-to-human-readable equivalent |
-| should correctly convert "* */2 * * *" to human-readable format | 490 | not-applicable | — | — | Tests cronstrue.toString() TypeScript library output; no Rust cron-to-human-readable equivalent |
-| should correctly convert "* 23 * * *" to human-readable format | 495 | not-applicable | — | — | Tests cronstrue.toString() TypeScript library output; no Rust cron-to-human-readable equivalent |
-| should not throw an error for an invalid cron expression "* * */2 6#1" | 500 | not-applicable | — | — | Tests cronstrue.toString() TypeScript library output; no Rust cron-to-human-readable equivalent |
+| should correctly convert "* 22 4 * *" to human-readable format | 483 | pending | — | — | —|
+| should correctly convert "* */2 * * *" to human-readable format | 490 | pending | — | — | —|
+| should correctly convert "* 23 * * *" to human-readable format | 495 | pending | — | — | —|
+| should not throw an error for an invalid cron expression "* * */2 6#1" | 500 | pending | — | — | —|
 
 ---
 

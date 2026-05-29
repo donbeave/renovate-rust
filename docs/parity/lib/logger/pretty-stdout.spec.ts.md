@@ -5,7 +5,7 @@
 ## `lib/logger/pretty-stdout.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/pretty-stdout.spec.ts
-**Total tests:** 15 | **Ported:** 12 | **Actionable:** 15 | **Status:** done
+**Total tests:** 15 | **Ported:** 12 | **Actionable:** 15 | **Status:** partial
 
 ### `logger/pretty-stdout › getMeta(rec)`
 
@@ -14,8 +14,8 @@
 | returns empty string if null rec | 9 | ported | `util.rs` | `test_get_meta_null_rec` | — |
 | returns empty string if empty rec | 13 | ported | `util.rs` | `test_get_meta_empty_rec` | — |
 | returns empty string if no meta fields | 17 | ported | `util.rs` | `test_get_meta_no_meta_fields` | — |
-| supports single meta | 24 | not-applicable | — | — | Uses Node.js util.styleText ANSI color API; no portable Rust equivalent |
-| supports multi meta | 34 | not-applicable | — | — | Uses Node.js util.styleText ANSI color API; no portable Rust equivalent |
+| supports single meta | 24 | pending | — | — | —|
+| supports multi meta | 34 | pending | — | — | —|
 | returns plain text when colorize is false | 46 | ported | `util.rs` | `test_get_meta_plain_text` | — |
 
 ### `logger/pretty-stdout › getDetails(rec)`
@@ -40,6 +40,6 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| writes formatted data to stdout | 175 | not-applicable | — | — | Requires vi.spyOn(process.stdout) mock |
+| writes formatted data to stdout | 175 | pending | — | — | —|
 
 ---

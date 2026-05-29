@@ -5,13 +5,13 @@
 ## `lib/util/split.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/split.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
 
 ### `util/split`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| adds splits and returns results | 4 | not-applicable | — | — | Uses vi.setSystemTime fake timers; timing split behavior is JS-specific infrastructure |
+| adds splits and returns results | 4 | pending | — | — | —|
 
 ---
 

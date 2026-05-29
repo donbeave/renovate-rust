@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/repology/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/repology/index.spec.ts
-**Total tests:** 19 | **Ported:** 18 | **Actionable:** 18 | **Status:** done
+**Total tests:** 19 | **Ported:** 18 | **Actionable:** 19 | **Status:** partial
 
 ### `modules/datasource/repology/index`
 
@@ -20,7 +20,7 @@
 | throws error on Resolver request timeout | 175 | ported | `crates/renovate-core/src/datasources/repology.rs` | `throws_error_on_resolver_request_timeout` | binname 500 → Err |
 | returns null on Resolver ambiguous binary package | 189 | ported | `crates/renovate-core/src/datasources/repology.rs` | `returns_null_on_resolver_ambiguous_binary_package` | 300 → None |
 | throws without repository and package name | 204 | ported | `crates/renovate-core/src/datasources/repology.rs` | `throws_without_repository_and_package_name` | no `/` → InvalidPackageName |
-| throws on disabled host | 214 | not-applicable | — | — | host-rules not implemented in Rust |
+| throws on disabled host | 214 | pending | — | — | —|
 | returns correct version for binary package | 225 | ported | `crates/renovate-core/src/datasources/repology.rs` | `returns_correct_version_for_binary_package` | nginx fixture; origversion |
 | returns correct version for source package | 241 | ported | `crates/renovate-core/src/datasources/repology.rs` | `returns_correct_version_for_source_package` | gcc-defaults fixture; srcname |
 | returns correct version for api package | 260 | ported | `crates/renovate-core/src/datasources/repology.rs` | `returns_correct_version_for_api_package` | 403 → API fallback |

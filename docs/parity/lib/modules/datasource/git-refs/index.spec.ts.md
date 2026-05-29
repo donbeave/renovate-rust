@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/git-refs/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-refs/index.spec.ts
-**Total tests:** 11 | **Ported:** 8 | **Actionable:** 11 | **Status:** done
+**Total tests:** 11 | **Ported:** 8 | **Actionable:** 11 | **Status:** partial
 
 ### `modules/datasource/git-refs/index`
 
@@ -19,8 +19,8 @@
 | returns digest for tag | 92 | ported | `crates/renovate-core/src/datasources/git_refs.rs` | `returns_digest_for_tag` | annotated tag → ^{} dereferenced hash |
 | ignores refs/for/ | 104 | ported | `crates/renovate-core/src/datasources/git_refs.rs` | `ignores_refs_for` | master returns heads hash not for hash |
 | returns digest for HEAD | 114 | ported | `crates/renovate-core/src/datasources/git_refs.rs` | `returns_digest_for_head` | None newValue → HEAD hash |
-| calls simpleGit with emptyEnv if no hostrules exist | 124 | not-applicable | — | — | mocks TypeScript-internal simpleGit infrastructure; no equivalent Rust mock surface |
-| calls simpleGit with git envs if hostrules exist | 135 | not-applicable | — | — | mocks TypeScript-internal simpleGit infrastructure; no equivalent Rust mock surface |
-| calls simpleGit with git envs if hostrules exist for datasource type git-refs | 162 | not-applicable | — | — | mocks TypeScript-internal simpleGit infrastructure; no equivalent Rust mock surface |
+| calls simpleGit with emptyEnv if no hostrules exist | 124 | pending | — | — | —|
+| calls simpleGit with git envs if hostrules exist | 135 | pending | — | — | —|
+| calls simpleGit with git envs if hostrules exist for datasource type git-refs | 162 | pending | — | — | —|
 
 ---

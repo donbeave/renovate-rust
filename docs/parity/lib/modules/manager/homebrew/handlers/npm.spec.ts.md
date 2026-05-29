@@ -5,14 +5,14 @@
 ## `lib/modules/manager/homebrew/handlers/npm.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/handlers/npm.spec.ts
-**Total tests:** 15 | **Ported:** 14 | **Actionable:** 15 | **Status:** done
+**Total tests:** 15 | **Ported:** 14 | **Actionable:** 15 | **Status:** partial
 
 ### `parseUrl`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty string | 8 | ported | `homebrew.rs` | `npm_parse_url_empty_string_returns_none` | — |
-| returns null for non-string input: %s | 12 | not-applicable | — | — | Rust `npm_parse_url` takes `&str`; null/undefined inputs are impossible at the type level |
+| returns null for non-string input: %s | 12 | pending | — | — | —|
 | returns null for non-npm registry URL | 19 | ported | `homebrew.rs` | `npm_parse_url_non_npm_registry_returns_none` | — |
 | returns null for custom npm registry | 25 | ported | `homebrew.rs` | `npm_parse_url_custom_registry_returns_none` | — |
 | parses scoped package URL | 33 | ported | `homebrew.rs` | `npm_parse_url_scoped_package` | — |

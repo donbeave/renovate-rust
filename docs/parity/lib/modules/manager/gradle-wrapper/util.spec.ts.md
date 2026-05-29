@@ -12,8 +12,8 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | $gradleVersion \| $javaConstraint | 20 | ported | `gradle_wrapper.rs` | `java_constraint_from_gradle_version_cases` (11 cases) | — |
-| returns toolChainVersion constraint if daemon JVM configured | 43 | not-applicable | — | — | Uses fs.readLocalFile mock; filesystem mocking not portable |
-| returns languageVersion constraint if found | 52 | not-applicable | — | — | Uses fs.localPathExists + fs.readLocalFile mocks |
+| returns toolChainVersion constraint if daemon JVM configured | 43 | pending | — | — | —|
+| returns languageVersion constraint if found | 52 | pending | — | — | —|
 
 ### `getJvmConfiguration`
 
@@ -27,7 +27,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | extract languageVersion value | 83 | ported | `gradle_wrapper.rs` | `parse_java_language_version_extracts_value` | — |
-| returns null if build.gradle or build.gradle.kts file not found | 92 | not-applicable | — | — | Uses fs.localPathExists + fs.readLocalFile mocks |
+| returns null if build.gradle or build.gradle.kts file not found | 92 | pending | — | — | —|
 | returns null if build.gradle does not include languageVersion | 102 | ported | `gradle_wrapper.rs` | `parse_java_language_version_returns_none_for_no_pattern` | — |
 
 ### `extractGradleVersion()`
@@ -48,7 +48,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 147 | not-applicable | — | — | Uses platform.mock + fs.statLocalFile mock |
-| returns null | 158 | not-applicable | — | — | Uses fs.statLocalFile mock |
+| works | 147 | pending | — | — | —|
+| returns null | 158 | pending | — | — | —|
 
 ---

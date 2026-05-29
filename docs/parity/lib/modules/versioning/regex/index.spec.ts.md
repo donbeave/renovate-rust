@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/regex/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/regex/index.spec.ts
-**Total tests:** 24 | **Ported:** 24 | **Actionable:** 24 | **Status:** done
+**Total tests:** 24 | **Ported:** 24 | **Actionable:** 24 | **Status:** ported
 
 ### `modules/versioning/regex/index`
 

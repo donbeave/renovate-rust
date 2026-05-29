@@ -5,7 +5,7 @@
 ## `lib/workers/repository/onboarding/pr/pr-list.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/pr/pr-list.spec.ts
-**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** done
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `workers/repository/onboarding/pr/pr-list › getExpectedPrList()`
 

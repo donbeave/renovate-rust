@@ -5,7 +5,7 @@
 ## `lib/util/host-rules.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/host-rules.spec.ts
-**Total tests:** 29 | **Ported:** 29 | **Actionable:** 29 | **Status:** done
+**Total tests:** 29 | **Ported:** 29 | **Actionable:** 29 | **Status:** ported
 
 ### `util/host-rules › add()`
 

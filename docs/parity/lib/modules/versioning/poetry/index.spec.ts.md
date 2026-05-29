@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/poetry/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/poetry/index.spec.ts
-**Total tests:** 14 | **Ported:** 14 | **Actionable:** 14 | **Status:** done
+**Total tests:** 14 | **Ported:** 14 | **Actionable:** 14 | **Status:** ported
 
 ### `modules/versioning/poetry/index`
 

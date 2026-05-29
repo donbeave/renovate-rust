@@ -16,7 +16,7 @@
 | isCompatible("$version") === $expected | 82 | pending | — | — | — |
 | isSingleVersion("$version") === $expected | 104 | pending | — | — | — |
 | isStable("$version") === $expected | 115 | pending | — | — | — |
-| ensures that rolling release is not refreshed within frame time window: $version | 169 | not-applicable | — | — | Asserts expect(logger.debug).toHaveBeenCalledTimes(0) — logger spy infrastructure |
+| ensures that rolling release is not refreshed within frame time window: $version | 169 | pending | — | — | —|
 | isVersion("$version") === $expected | 188 | pending | — | — | — |
 | getMajor, getMinor, getPatch for "$version" | 248 | pending | — | — | — |
 | equals($a, $b) === $expected | 273 | pending | — | — | — |
@@ -26,7 +26,7 @@
 | getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 383 | pending | — | — | — |
 | debian.sortVersions($a, $b) === $expected | 409 | pending | — | — | — |
 | matches("$version", "$range") === "$expected" | 429 | pending | — | — | — |
-| checks runtime date handling & refresh rolling release data | 441 | not-applicable | — | — | Uses vi.setSystemTime + expect(logger.debug).toHaveBeenCalled — fake timers + logger spy |
+| checks runtime date handling & refresh rolling release data | 441 | pending | — | — | —|
 
 ---
 

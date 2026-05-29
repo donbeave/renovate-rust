@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/maven/compare.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/maven/compare.spec.ts
-**Total tests:** 10 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+**Total tests:** 10 | **Ported:** 9 | **Actionable:** 10 | **Status:** partial
 
 ### `modules/versioning/maven/compare`
 
@@ -15,7 +15,7 @@
 | $x < $y | 106 | ported | crates/renovate-core/src/versioning/maven.rs | compare_ordering_matches_renovate_maven_compare_spec | — |
 | $qualifier | 203 | ported | crates/renovate-core/src/versioning/maven.rs | qualifier_mng7644_matches_renovate_maven_compare_spec | — |
 | isSubversion("$majorVersion", "$minorVersion") === $expected | 226 | ported | crates/renovate-core/src/versioning/maven.rs | is_subversion_matches_renovate_maven_compare_spec | — |
-| should tokenize | 454 | not-applicable | — | — | Tests TypeScript-specific exported token representation (string constants PREFIX_DOT, TYPE_NUMBER); Rust tokenize is private and its behavior is covered by compare() tests |
+| should tokenize | 454 | pending | — | — | —|
 | $x == $y | 463 | ported | crates/renovate-core/src/versioning/maven.rs | compare_nonstandard_equals_matches_renovate_maven_compare_spec | — |
 | $x < $y | 478 | ported | crates/renovate-core/src/versioning/maven.rs | compare_nonstandard_ordering_matches_renovate_maven_compare_spec | — |
 | filters out incorrect range: $input | 490 | ported | crates/renovate-core/src/versioning/maven.rs | parse_range_filters_invalid_matches_renovate_maven_compare_spec | — |

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gitlabci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/extract.spec.ts
-**Total tests:** 14 | **Ported:** 13 | **Actionable:** 13 | **Status:** ported
+**Total tests:** 14 | **Ported:** 13 | **Actionable:** 14 | **Status:** partial
 
 ### `extractAllPackageFile()`
 
@@ -19,7 +19,7 @@
 |---|---|---|---|---|---|
 | returns null for empty | 28 | ported | `gitlabci.rs` | `extract_all_returns_empty_for_empty_content` | — |
 | extracts from multidoc yaml | 36 | ported | `gitlabci.rs` | `multidoc_yaml_extracts_from_all_docs` | — |
-| extracts multiple included image lines | 46 | not-applicable | — | — | requires multi-file include resolution not available in unit test scope |
+| extracts multiple included image lines | 46 | pending | — | — | —|
 | extracts named services | 57 | ported | `gitlabci.rs` | `extracts_services` | — |
 | extracts multiple named services | 66 | ported | `gitlabci.rs` | `extracts_multiple_named_services` | — |
 | extracts multiple image lines | 75 | ported | `gitlabci.rs` | `extracts_top_level_image` | — |

@@ -15,12 +15,12 @@
 | renders rebaseWhen="never" | 25 | ported | `util.rs` | `test_config_desc_rebase_when_never` | — |
 | renders rebaseWhen="behind-base-branch" | 36 | ported | `util.rs` | `test_config_desc_rebase_when_behind` | — |
 | renders timezone | 45 | ported | `util.rs` | `test_config_desc_timezone` | — |
-| renders UTC as the default timezone | 54 | not-applicable | — | — | Requires cronstrue cron-to-English conversion; no Rust equivalent |
-| summarizes cron schedules | 62 | not-applicable | — | — | Requires cronstrue cron-to-English conversion; no Rust equivalent |
+| renders UTC as the default timezone | 54 | pending | — | — | —|
+| summarizes cron schedules | 62 | pending | — | — | —|
 | displays later schedules | 73 | ported | `util.rs` | `test_config_desc_later_schedules` | — |
 | renders undefined schedule | 81 | ported | `util.rs` | `test_config_desc_undefined_schedule` | — |
-| summarizes cron schedules (for automergeSchedule) | 86 | not-applicable | — | — | Requires cronstrue cron-to-English conversion |
-| summarizes both branch creation and automerge schedules | 97 | not-applicable | — | — | Requires cronstrue cron-to-English conversion |
+| summarizes cron schedules (for automergeSchedule) | 86 | pending | — | — | —|
+| summarizes both branch creation and automerge schedules | 97 | pending | — | — | —|
 | renders recreateClosed=true | 116 | ported | `util.rs` | `test_config_desc_recreate_closed_true` | — |
 | does not render recreateClosed=false | 124 | ported | `util.rs` | `test_config_desc_recreate_closed_false` | — |
 | does not render recreateClosed=undefined | 132 | ported | `util.rs` | `test_config_desc_recreate_closed_undefined` | — |

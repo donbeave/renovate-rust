@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/bitbucket-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bitbucket-tags/index.spec.ts
-**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** done
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `modules/datasource/bitbucket-tags/index`
 

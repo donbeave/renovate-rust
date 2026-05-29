@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/distro.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/distro.spec.ts
-**Total tests:** 15 | **Ported:** 14 | **Actionable:** 15 | **Status:** done
+**Total tests:** 15 | **Ported:** 15 | **Actionable:** 15 | **Status:** ported
 
 ### `modules/versioning/distro`
 

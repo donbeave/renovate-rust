@@ -22,9 +22,9 @@
 | returns parsed json | 123 | ported | `util.rs` | `test_parse_json_valid` | — |
 | supports jsonc | 131 | ported | `util.rs` | `test_parse_json_jsonc` | — |
 | throws error for invalid json | 149 | ported | `util.rs` | `test_parse_json_invalid` | — |
-| catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse | 153 | not-applicable | — | — | Requires logger.warn spy (expect(logger.logger.warn).toHaveBeenCalled) |
-| does not warn if filename ends with .jsonc | 167 | not-applicable | — | — | Requires logger.warn spy (expect(logger.logger.warn).not.toHaveBeenCalled) |
-| does not warn if filename ends with .json5 | 172 | not-applicable | — | — | Requires logger.warn spy (expect(logger.logger.warn).not.toHaveBeenCalled) |
+| catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse | 153 | pending | — | — | —|
+| does not warn if filename ends with .jsonc | 167 | pending | — | — | —|
+| does not warn if filename ends with .json5 | 172 | pending | — | — | —|
 
 ### `util/common › parseJsonc`
 

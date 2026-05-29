@@ -5,7 +5,7 @@
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 44 | **Actionable:** 44 | **Status:** ported
+**Total tests:** 45 | **Ported:** 44 | **Actionable:** 45 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -48,7 +48,7 @@
 |---|---|---|---|---|---|
 | crashes | 357 | ported | `config_env.rs` | `invalid_renovate_config_is_rejected` | — |
 | migrates RENOVATE_CONFIG | 367 | ported | `config_env.rs` | `renovate_config_automerge_any_is_migrated` | — |
-| warns if config in RENOVATE_CONFIG is invalid | 376 | not-applicable | — | — | TypeScript warning-based invalid-field behavior; Rust returns error for invalid RENOVATE_CONFIG fields |
+| warns if config in RENOVATE_CONFIG is invalid | 376 | pending | — | — | —|
 
 ### `workers/global/config/parse/env › .getConfig(env) › migrations`
 

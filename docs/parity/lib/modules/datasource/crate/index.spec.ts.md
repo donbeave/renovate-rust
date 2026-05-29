@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/crate/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/crate/index.spec.ts
-**Total tests:** 27 | **Ported:** 16 | **Actionable:** 27 | **Status:** done
+**Total tests:** 27 | **Ported:** 16 | **Actionable:** 27 | **Status:** partial
 
 ### `modules/datasource/crate/index › getIndexSuffix`
 
@@ -28,16 +28,16 @@
 | processes real data: libc | 263 | ported | `crates_io.rs` | `processes_real_data_libc` | NDJSON + API; yanked=isDeprecated; pubtime=releaseTimestamp; +metadata strips |
 | processes real data: amethyst | 281 | ported | `crates_io.rs` | `processes_real_data_amethyst` | homepage set; sourceUrl set; 1 yanked |
 | uses cached registry config for subsequent packages | 299 | ported | `crates_io.rs` | `uses_cached_registry_config_for_subsequent_packages` | two packages succeed |
-| refuses to clone if allowCustomCrateRegistries is not true | 329 | not-applicable | — | — | git-based registry requires GlobalConfig/SimpleGit TypeScript infrastructure |
-| clones cloudsmith private registry | 342 | not-applicable | — | — | git-based registry |
-| clones other private registry | 357 | not-applicable | — | — | git-based registry |
-| clones once then reuses the cache | 372 | not-applicable | — | — | git-based registry |
-| reads config.json from cloned registry | 389 | not-applicable | — | — | git-based registry |
-| guards against race conditions while cloning | 402 | not-applicable | — | — | acquireLock / mutex infrastructure |
-| returns null when git clone fails | 429 | not-applicable | — | — | git-based registry |
-| does not clone for sparse registries | 449 | not-applicable | — | — | git clone assertion only |
-| retries if shallow fails because of dumb http git repo | 467 | not-applicable | — | — | git-based registry |
-| retries if shallow fails but retry can also fail | 513 | not-applicable | — | — | git-based registry |
+| refuses to clone if allowCustomCrateRegistries is not true | 329 | pending | — | — | —|
+| clones cloudsmith private registry | 342 | pending | — | — | —|
+| clones other private registry | 357 | pending | — | — | —|
+| clones once then reuses the cache | 372 | pending | — | — | —|
+| reads config.json from cloned registry | 389 | pending | — | — | —|
+| guards against race conditions while cloning | 402 | pending | — | — | —|
+| returns null when git clone fails | 429 | pending | — | — | —|
+| does not clone for sparse registries | 449 | pending | — | — | —|
+| retries if shallow fails because of dumb http git repo | 467 | pending | — | — | —|
+| retries if shallow fails but retry can also fail | 513 | pending | — | — | —|
 
 ### `modules/datasource/crate/index › postprocessRelease`
 
@@ -52,6 +52,6 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| clones other private registry with explicit gitTimeout | 357 | not-applicable | — | — | git-based registry |
+| clones other private registry with explicit gitTimeout | 357 | pending | — | — | —|
 
 ---

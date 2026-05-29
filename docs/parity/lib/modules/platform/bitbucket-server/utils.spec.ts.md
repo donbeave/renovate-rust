@@ -40,7 +40,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| throws on invalid endpoint URL | 333 | not-applicable | — | — | Requires git.getUrl() mock; URL generation depends on git module |
+| throws on invalid endpoint URL | 333 | pending | — | — | —|
 | should not configure bearer token | 334 | ported | `util.rs` | `test_get_extra_clone_opts_no_token` | — |
 | should configure bearer token | 339 | ported | `util.rs` | `test_get_extra_clone_opts_with_token` | — |
 

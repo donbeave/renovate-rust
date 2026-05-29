@@ -20,7 +20,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns default versioning for undefined datasource | 39 | pending | — | — | — |
-| returns default versioning for unknown datasource | 43 | not-applicable | — | — | Requires logger spy to assert warning |
+| returns default versioning for unknown datasource | 43 | pending | — | — | —|
 | returns default versioning for datasource with missing default versioning configuration | 52 | pending | — | — | — |
 | returns datasource-defined default versioning | 56 | pending | — | — | — |
 
@@ -28,10 +28,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true for valid input | 62 | not-applicable | — | — | TypeScript runtime type guard; Rust type system handles this statically |
-| returns false for invalid input | 70 | not-applicable | — | — | TypeScript runtime type guard |
-| returns false for input with missing properties | 78 | not-applicable | — | — | TypeScript runtime type guard |
-| returns false for input with non-string properties | 85 | not-applicable | — | — | TypeScript runtime type guard |
+| returns true for valid input | 62 | pending | — | — | —|
+| returns false for invalid input | 70 | pending | — | — | —|
+| returns false for input with missing properties | 78 | pending | — | — | —|
+| returns false for input with non-string properties | 85 | pending | — | — | —|
 
 ### `modules/datasource/common › applyExtractVersion`
 
@@ -54,7 +54,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | sorts releases by version and removes duplicates | 162 | ported | `util.rs` | `test_sort_and_remove_duplicates_sorts_and_deduplicates` | — |
-| uses default versioning if none is specified | 183 | not-applicable | — | — | Requires logger spy to assert warning |
+| uses default versioning if none is specified | 183 | pending | — | — | —|
 
 ### `modules/datasource/common › applyConstraintsFiltering`
 

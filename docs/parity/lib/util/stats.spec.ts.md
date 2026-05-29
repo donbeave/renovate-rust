@@ -21,8 +21,8 @@
 |---|---|---|---|---|---|
 | returns empty report | 64 | ported | `util.rs` | `test_lookup_stats_empty_report` | — |
 | writes data points | 69 | ported | `util.rs` | `test_lookup_stats_writes_data_points` | — |
-| wraps a function | 95 | not-applicable | — | — | Uses vi.useFakeTimers() to advance time; not portable without fake-timer test infrastructure |
-| logs report | 113 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
+| wraps a function | 95 | pending | — | — | —|
+| logs report | 113 | pending | — | — | —|
 
 ### `util/stats › GetDatasourceReleasesStats`
 
@@ -30,8 +30,8 @@
 |---|---|---|---|---|---|
 | returns empty report | 152 | ported | `util.rs` | `test_get_datasource_releases_stats_empty` | — |
 | writes data points | 166 | ported | `util.rs` | `test_get_datasource_releases_stats_writes` | — |
-| wraps a function | 308 | not-applicable | — | — | Uses vi.useFakeTimers() to advance time; not portable without fake-timer test infrastructure |
-| logs report | 362 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
+| wraps a function | 308 | pending | — | — | —|
+| logs report | 362 | pending | — | — | —|
 
 ### `util/stats › PackageCacheStats`
 
@@ -39,16 +39,16 @@
 |---|---|---|---|---|---|
 | returns empty report | 578 | ported | `util.rs` | `test_package_cache_stats_empty_report` | — |
 | writes data points | 586 | ported | `util.rs` | `test_package_cache_stats_writes_data_points` | — |
-| wraps get function | 612 | not-applicable | — | — | Uses vi.useFakeTimers() to advance time; not portable without fake-timer test infrastructure |
-| wraps set function | 625 | not-applicable | — | — | Uses vi.useFakeTimers() to advance time; not portable without fake-timer test infrastructure |
-| logs report | 637 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
+| wraps get function | 612 | pending | — | — | —|
+| wraps set function | 625 | pending | — | — | —|
+| logs report | 637 | pending | — | — | —|
 
 ### `util/stats › DatasourceCacheStats`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | collects data points | 668 | ported | `util.rs` | `test_datasource_cache_stats_collects` | — |
-| reports | 708 | not-applicable | — | — | Checks logger.logger.trace/debug spy; not portable without tracing test infrastructure |
+| reports | 708 | pending | — | — | —|
 
 ### `util/stats › HttpStats`
 
@@ -56,7 +56,7 @@
 |---|---|---|---|---|---|
 | returns empty report | 722 | ported | `util.rs` | `test_http_stats_empty_report` | — |
 | writes data points | 733 | ported | `util.rs` | `test_http_stats_writes_data_points` | — |
-| logs report | 839 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
+| logs report | 839 | pending | — | — | —|
 
 ### `util/stats › HttpCacheStats`
 
@@ -65,7 +65,7 @@
 | returns empty data | 954 | ported | `util.rs` | `test_http_cache_stats_empty` | — |
 | ignores wrong url | 959 | ported | `util.rs` | `test_http_cache_stats_ignores_invalid_url` | — |
 | writes data points | 964 | ported | `util.rs` | `test_http_cache_stats_writes_data_points` | — |
-| prints report | 989 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
+| prints report | 989 | pending | — | — | —|
 
 ### `util/stats › AbandonedPackageStats`
 
@@ -73,8 +73,8 @@
 |---|---|---|---|---|---|
 | returns empty report | 1016 | ported | `util.rs` | `test_abandoned_package_stats_empty_report` | — |
 | writes data points | 1021 | ported | `util.rs` | `test_abandoned_package_stats_writes_data_points` | — |
-| logs report | 1069 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
-| does not log report when no data | 1096 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
+| logs report | 1069 | pending | — | — | —|
+| does not log report when no data | 1096 | pending | — | — | —|
 
 ### `util/stats › GitOperationsStats`
 
@@ -83,6 +83,6 @@
 | returns empty report | 1112 | ported | `util.rs` | `test_git_operation_stats_empty_report` | — |
 | writes data points | 1117 | ported | `util.rs` | `test_git_operation_stats_writes_data_points` | — |
 | rounds total towards ceiling when preparing report | 1141 | ported | `util.rs` | `test_git_operation_stats_ceils_total` | — |
-| logs report | 1161 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
+| logs report | 1161 | pending | — | — | —|
 
 ---

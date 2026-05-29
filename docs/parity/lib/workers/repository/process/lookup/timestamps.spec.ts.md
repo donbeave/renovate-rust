@@ -5,7 +5,7 @@
 ## `lib/workers/repository/process/lookup/timestamps.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/timestamps.spec.ts
-**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** done
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `workers/repository/process/lookup/timestamps › calculateLatestReleaseBump`
 

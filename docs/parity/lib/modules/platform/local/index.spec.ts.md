@@ -5,7 +5,7 @@
 ## `lib/modules/platform/local/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/local/index.spec.ts
-**Total tests:** 28 | **Ported:** 28 | **Actionable:** 28 | **Status:** done
+**Total tests:** 28 | **Ported:** 28 | **Actionable:** 28 | **Status:** ported
 
 ### `initPlatform`
 

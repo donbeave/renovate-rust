@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/gradle-version/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/gradle-version/index.spec.ts
-**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** done
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `modules/datasource/gradle-version/index › getReleases`
 

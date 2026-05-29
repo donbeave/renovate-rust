@@ -5,7 +5,7 @@
 ## `lib/util/schema-utils/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/schema-utils/index.spec.ts
-**Total tests:** 35 | **Ported:** 0 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 0 | **Actionable:** 35 | **Status:** pending
 
 ### `util/schema-utils/index › LooseArray`
 
@@ -91,21 +91,21 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| logs debug message and returns fallback value | 556 | not-applicable | — | — | Asserts expect(logger.logger.debug).toHaveBeenCalledWith — logger spy |
-| logs trace message and returns fallback value | 571 | not-applicable | — | — | Asserts expect(logger.logger.trace).toHaveBeenCalledWith — logger spy |
+| logs debug message and returns fallback value | 556 | pending | — | — | —|
+| logs trace message and returns fallback value | 571 | pending | — | — | —|
 
 ### `util/schema-utils/index › NotCircular`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| allows non-circular primitive values | 588 | not-applicable | — | — | JavaScript-specific circular reference detection via Zod; safe Rust code cannot produce circular references |
-| allows non-circular arrays | 598 | not-applicable | — | — | JavaScript-specific circular reference detection; impossible in safe Rust |
-| allows non-circular objects | 614 | not-applicable | — | — | JavaScript-specific circular reference detection; impossible in safe Rust |
-| allows objects reuse | 624 | not-applicable | — | — | JavaScript-specific circular reference detection; impossible in safe Rust |
-| rejects circular objects | 639 | not-applicable | — | — | JavaScript-specific circular reference detection; impossible in safe Rust |
-| rejects circular arrays | 659 | not-applicable | — | — | JavaScript-specific circular reference detection; impossible in safe Rust |
-| rejects deeply nested circular references | 679 | not-applicable | — | — | JavaScript-specific circular reference detection; impossible in safe Rust |
-| can be combined with other schema types | 708 | not-applicable | — | — | JavaScript-specific circular reference detection; impossible in safe Rust |
+| allows non-circular primitive values | 588 | pending | — | — | —|
+| allows non-circular arrays | 598 | pending | — | — | —|
+| allows non-circular objects | 614 | pending | — | — | —|
+| allows objects reuse | 624 | pending | — | — | —|
+| rejects circular objects | 639 | pending | — | — | —|
+| rejects circular arrays | 659 | pending | — | — | —|
+| rejects deeply nested circular references | 679 | pending | — | — | —|
+| can be combined with other schema types | 708 | pending | — | — | —|
 
 ---
 
