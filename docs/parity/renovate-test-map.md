@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,890 · not-applicable 2,707 (23% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,886 · not-applicable 2,711 (23% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -366,7 +366,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/renovate-logger.spec.ts` | Done | [details](lib/logger/renovate-logger.spec.ts.md) |
 | `lib/logger/pretty-stdout.spec.ts` | Done | [details](lib/logger/pretty-stdout.spec.ts.md) |
 | `lib/logger/err-serializer.spec.ts` | Not done | [details](lib/logger/err-serializer.spec.ts.md) |
-| `lib/logger/once.spec.ts` | Not done | [details](lib/logger/once.spec.ts.md) |
+| `lib/logger/once.spec.ts` | Done | [details](lib/logger/once.spec.ts.md) |
 | `lib/logger/utils.spec.ts` | Done | [details](lib/logger/utils.spec.ts.md) |
 | `lib/logger/index.spec.ts` | Done | [details](lib/logger/index.spec.ts.md) |
 | `lib/util/string-match.spec.ts` | Done | [details](lib/util/string-match.spec.ts.md) |
@@ -387,7 +387,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/global/config/parse/env.spec.ts` | Done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
 | `lib/workers/repository/init/merge.spec.ts` | Done | [details](lib/workers/repository/init/merge.spec.ts.md) |
 | `lib/util/package-rules/index.spec.ts` | Not done | [details](lib/util/package-rules/index.spec.ts.md) |
-| `lib/renovate.spec.ts` | Not done | [details](lib/renovate.spec.ts.md) |
+| `lib/renovate.spec.ts` | Done | [details](lib/renovate.spec.ts.md) |
 | `lib/proxy.spec.ts` | Done | [details](lib/proxy.spec.ts.md) |
 | `lib/util/range.spec.ts` | Done | [details](lib/util/range.spec.ts.md) |
 | `lib/util/compress.spec.ts` | Not done | [details](lib/util/compress.spec.ts.md) |

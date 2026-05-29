@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| starts | 10 | pending | — | — | —|
+| starts | 10 | not-applicable | — | — | mocking framework internals — vi.mock on OTel/workers/proxy; tests TypeScript module initialization via vi.importActual |
 
 ---
 
