@@ -1740,6 +1740,60 @@ pub fn replace_constraint_version(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// package-lock getLockedDependencies — lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.ts
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Find all matching locked dependency entries in a package-lock.json v1 entry.
+///
+/// Recursively searches `entry.dependencies` for entries matching `dep_name`
+/// at `current_version` (or any version if `current_version` is `None`).
+/// Sets the `bundled` flag when the entry or any parent was bundled.
+///
+/// Mirrors `getLockedDependencies()` from
+/// `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.ts`.
+pub fn package_lock_get_locked_dependencies(
+    entry: &serde_json::Value,
+    dep_name: &str,
+    current_version: Option<&str>,
+    bundled: bool,
+) -> Vec<serde_json::Value> {
+    let Some(deps_map) = entry.get("dependencies").and_then(|v| v.as_object()) else {
+        return Vec::new();
+    };
+    let entry_bundled = bundled || entry.get("bundled").and_then(|v| v.as_bool()).unwrap_or(false);
+    let mut results = Vec::new();
+
+    // Check for direct match.
+    if let Some(dep) = deps_map.get(dep_name) {
+        let version = dep.get("version").and_then(|v| v.as_str()).unwrap_or("");
+        let matches = current_version.map(|cv| cv == version).unwrap_or(true);
+        if matches {
+            let mut dep_clone = dep.clone();
+            if entry_bundled {
+                if let Some(obj) = dep_clone.as_object_mut() {
+                    obj.insert("bundled".to_owned(), serde_json::Value::Bool(true));
+                }
+            }
+            results.push(dep_clone);
+        }
+    }
+
+    // Recurse into all child deps.
+    for child_dep in deps_map.values() {
+        let child_bundled = entry_bundled || child_dep.get("bundled").and_then(|v| v.as_bool()).unwrap_or(false);
+        let sub = package_lock_get_locked_dependencies(
+            child_dep,
+            dep_name,
+            current_version,
+            child_bundled,
+        );
+        results.extend(sub);
+    }
+
+    results
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // yarn updateLockedDependency — lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.ts
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -4684,6 +4738,74 @@ chalk@^2.4.1:
         let yarn = res.additional_yarn_rc_yml.as_ref().unwrap();
         let reg = &yarn["npmRegistries"]["//registry.company.com/"];
         assert_eq!(reg["npmAuthIdent"], "user123:pass123");
+    }
+
+    // ── package-lock getLockedDependencies tests ─────────────────────────
+
+    const PKG_LOCK_V1: &str =
+        include_str!("../../tests/fixtures/npm/package-lock/package-lock-v1.json");
+    const BUNDLED_PKG_LOCK: &str =
+        include_str!("../../tests/fixtures/npm/package-lock/bundled.package-lock.json");
+
+    // Ported: "handles error" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 11
+    #[test]
+    fn pkg_lock_get_locked_handles_null() {
+        let result = package_lock_get_locked_dependencies(
+            &serde_json::Value::Null,
+            "some-dep",
+            Some("1.0.0"),
+            false,
+        );
+        assert!(result.is_empty());
+    }
+
+    // Ported: "returns empty if failed to parse" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 17
+    #[test]
+    fn pkg_lock_get_locked_returns_empty_for_no_deps() {
+        let result = package_lock_get_locked_dependencies(
+            &serde_json::json!({}),
+            "some-dep",
+            Some("1.0.0"),
+            false,
+        );
+        assert!(result.is_empty());
+    }
+
+    // Ported: "finds direct dependency" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 21
+    #[test]
+    fn pkg_lock_get_locked_finds_direct() {
+        let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
+        let result = package_lock_get_locked_dependencies(&lock, "express", Some("4.0.0"), false);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0]["version"].as_str(), Some("4.0.0"));
+        assert!(result[0]["resolved"].as_str().unwrap().contains("express-4.0.0"));
+    }
+
+    // Ported: "finds indirect dependency" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 32
+    #[test]
+    fn pkg_lock_get_locked_finds_indirect() {
+        let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
+        let result = package_lock_get_locked_dependencies(&lock, "send", Some("0.2.0"), false);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0]["version"].as_str(), Some("0.2.0"));
+    }
+
+    // Ported: "finds any version" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 43
+    #[test]
+    fn pkg_lock_get_locked_finds_any_version() {
+        let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
+        let result = package_lock_get_locked_dependencies(&lock, "send", None, false);
+        assert_eq!(result.len(), 2);
+    }
+
+    // Ported: "finds bundled dependency" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 49
+    #[test]
+    fn pkg_lock_get_locked_finds_bundled() {
+        let lock: serde_json::Value = serde_json::from_str(BUNDLED_PKG_LOCK).unwrap();
+        let result = package_lock_get_locked_dependencies(&lock, "ansi-regex", Some("3.0.0"), false);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0]["bundled"].as_bool(), Some(true));
+        assert_eq!(result[0]["version"].as_str(), Some("3.0.0"));
     }
 
     // ── yarn updateLockedDependency tests ─────────────────────────────────

@@ -9719,6 +9719,52 @@ dep1 = "^1.0.0"
     }
 }
 
+    // ── get_combined_env tests ────────────────────────────────────────────
+
+    // Ported: "return combined env" — util/env.spec.ts line 11
+    #[test]
+    fn test_get_combined_env_return_combined() {
+        use std::collections::HashMap;
+        let process_env: HashMap<String, String> =
+            [("RENOVATE_MEND_HOSTED".to_owned(), "true".to_owned())]
+                .into_iter()
+                .collect();
+        let custom_env: HashMap<String, String> =
+            [("SOME_CUSTOM_ENV_KEY".to_owned(), "SOME_CUSTOM_ENV_VALUE".to_owned())]
+                .into_iter()
+                .collect();
+        let user_env: HashMap<String, String> =
+            [("SOME_KEY".to_owned(), "SOME_VALUE".to_owned())]
+                .into_iter()
+                .collect();
+        let result = get_combined_env(&process_env, &custom_env, &user_env);
+        assert_eq!(result.get("RENOVATE_MEND_HOSTED").map(|s| s.as_str()), Some("true"));
+        assert_eq!(result.get("SOME_KEY").map(|s| s.as_str()), Some("SOME_VALUE"));
+        assert_eq!(result.get("SOME_CUSTOM_ENV_KEY").map(|s| s.as_str()), Some("SOME_CUSTOM_ENV_VALUE"));
+    }
+
+    // Ported: "maintains precendence" — util/env.spec.ts line 26
+    #[test]
+    fn test_get_combined_env_maintains_precedence() {
+        use std::collections::HashMap;
+        let process_env: HashMap<String, String> =
+            [("SOME_KEY".to_owned(), "processEnvValue".to_owned())]
+                .into_iter()
+                .collect();
+        let custom_env: HashMap<String, String> =
+            [("SOME_KEY".to_owned(), "customValue".to_owned())]
+                .into_iter()
+                .collect();
+        let user_env: HashMap<String, String> =
+            [("SOME_KEY".to_owned(), "userEnvValue".to_owned())]
+                .into_iter()
+                .collect();
+        let result = get_combined_env(&process_env, &custom_env, &user_env);
+        // user_env takes precedence over custom_env and process.env
+        assert_eq!(result.get("SOME_KEY").map(|s| s.as_str()), Some("userEnvValue"));
+    }
+
+
     #[test]
     fn jsonc_behavior_inline_check() {
         let input = "{\n  \"name\": \"test\"\n  \"version\": \"1.0.0\"\n}";
