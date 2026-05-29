@@ -5,24 +5,24 @@
 ## `lib/modules/datasource/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/common.spec.ts
-**Total tests:** 30 | **Ported:** 10 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 17 | **Actionable:** 30 | **Status:** partial
 
 ### `modules/datasource/common › getDatasourceFor`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for unknown datasource | 21 | pending | — | — | — |
-| supports custom datasource | 25 | pending | — | — | — |
-| returns datasource for known datasource | 31 | pending | — | — | — |
+| returns null for unknown datasource | 21 | ported | `datasources.rs` | `datasource_registry_unknown_returns_none` | —  | — | — | — |
+| supports custom datasource | 25 | ported | `datasources.rs` | `datasource_registry_custom_prefix` | —  | — | — | — |
+| returns datasource for known datasource | 31 | ported | `datasources.rs` | `datasource_registry_known_returns_some` | —  | — | — | — |
 
 ### `modules/datasource/common › getDefaultVersioning`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns default versioning for undefined datasource | 39 | pending | — | — | — |
-| returns default versioning for unknown datasource | 43 | pending | — | — | —|
-| returns default versioning for datasource with missing default versioning configuration | 52 | pending | — | — | — |
-| returns datasource-defined default versioning | 56 | pending | — | — | — |
+| returns default versioning for undefined datasource | 39 | ported | `datasources.rs` | `datasource_registry_default_versioning_undefined` | —  | — | — | — |
+| returns default versioning for unknown datasource | 43 | ported | `datasources.rs` | `datasource_registry_default_versioning_unknown` | —  | — | — | —|
+| returns default versioning for datasource with missing default versioning configuration | 52 | ported | `datasources.rs` | `datasource_registry_default_versioning_no_specific` | —  | — | — | — |
+| returns datasource-defined default versioning | 56 | ported | `datasources.rs` | `datasource_registry_datasource_defined_versioning` | —  | — | — | — |
 
 ### `modules/datasource/common › isGetPkgReleasesConfig`
 
