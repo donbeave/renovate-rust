@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 4,037 · not-applicable 2,560 (22% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 4,023 · not-applicable 2,574 (22% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -624,7 +624,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/extract/common/catalogs.spec.ts` | Done | [details](lib/modules/manager/npm/extract/common/catalogs.spec.ts.md) |
 | `lib/modules/manager/npm/extract/common/package-file.spec.ts` | Done | [details](lib/modules/manager/npm/extract/common/package-file.spec.ts.md) |
 | `lib/modules/manager/npm/extract/post/locked-versions.spec.ts` | Done | [details](lib/modules/manager/npm/extract/post/locked-versions.spec.ts.md) |
-| `lib/modules/manager/npm/extract/post/monorepo.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/post/monorepo.spec.ts.md) |
+| `lib/modules/manager/npm/extract/post/monorepo.spec.ts` | Done | [details](lib/modules/manager/npm/extract/post/monorepo.spec.ts.md) |
 | `lib/modules/manager/npm/extract/utils.spec.ts` | Done | [details](lib/modules/manager/npm/extract/utils.spec.ts.md) |
 | `lib/modules/manager/npm/npmrc.spec.ts` | Done | [details](lib/modules/manager/npm/npmrc.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/index.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/index.spec.ts.md) |
@@ -730,7 +730,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/github/issue.spec.ts` | Not done | [details](lib/modules/platform/github/issue.spec.ts.md) |
 | `lib/modules/platform/github/massage-markdown-links.spec.ts` | Done | [details](lib/modules/platform/github/massage-markdown-links.spec.ts.md) |
 | `lib/modules/platform/github/schema.spec.ts` | Done | [details](lib/modules/platform/github/schema.spec.ts.md) |
-| `lib/modules/platform/github/scm.spec.ts` | Not done | [details](lib/modules/platform/github/scm.spec.ts.md) |
+| `lib/modules/platform/github/scm.spec.ts` | Done | [details](lib/modules/platform/github/scm.spec.ts.md) |
 | `lib/modules/platform/gitlab/code-owners.spec.ts` | Done | [details](lib/modules/platform/gitlab/code-owners.spec.ts.md) |
 | `lib/modules/platform/gitlab/utils.spec.ts` | Done | [details](lib/modules/platform/gitlab/utils.spec.ts.md) |
 | `lib/modules/platform/gitlab/index.spec.ts` | Not done | [details](lib/modules/platform/gitlab/index.spec.ts.md) |
@@ -844,7 +844,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/errors-warnings.spec.ts` | Done | [details](lib/workers/repository/errors-warnings.spec.ts.md) |
 | `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | Not done | [details](lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) |
 | `lib/workers/repository/extract/file-match.spec.ts` | Done | [details](lib/workers/repository/extract/file-match.spec.ts.md) |
-| `lib/workers/repository/extract/index.spec.ts` | Not done | [details](lib/workers/repository/extract/index.spec.ts.md) |
+| `lib/workers/repository/extract/index.spec.ts` | Done | [details](lib/workers/repository/extract/index.spec.ts.md) |
 | `lib/workers/repository/extract/manager-files.spec.ts` | Done | [details](lib/workers/repository/extract/manager-files.spec.ts.md) |
 | `lib/workers/repository/extract/supersedes.spec.ts` | Done | [details](lib/workers/repository/extract/supersedes.spec.ts.md) |
 | `lib/workers/repository/finalize/prune.spec.ts` | Done | [details](lib/workers/repository/finalize/prune.spec.ts.md) |
