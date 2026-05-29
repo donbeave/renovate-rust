@@ -647,7 +647,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/update/package-version/index.spec.ts` | Done | [details](lib/modules/manager/npm/update/package-version/index.spec.ts.md) |
 | `lib/modules/manager/npm/utils.spec.ts` | Done | [details](lib/modules/manager/npm/utils.spec.ts.md) |
 | `lib/modules/manager/nuget/artifacts.spec.ts` | Done | [details](lib/modules/manager/nuget/artifacts.spec.ts.md) |
-| `lib/modules/manager/nuget/config-formatter.spec.ts` | Not done | [details](lib/modules/manager/nuget/config-formatter.spec.ts.md) |
+| `lib/modules/manager/nuget/config-formatter.spec.ts` | Done | [details](lib/modules/manager/nuget/config-formatter.spec.ts.md) |
 | `lib/modules/manager/nuget/package-tree.spec.ts` | Done | [details](lib/modules/manager/nuget/package-tree.spec.ts.md) |
 | `lib/modules/manager/nuget/update.spec.ts` | Done | [details](lib/modules/manager/nuget/update.spec.ts.md) |
 | `lib/modules/manager/nuget/util.spec.ts` | Done | [details](lib/modules/manager/nuget/util.spec.ts.md) |
