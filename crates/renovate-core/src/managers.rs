@@ -885,6 +885,33 @@ pub fn manager_exists(name: &str) -> bool {
     MANAGER_DEFS.iter().any(|m| m.name == normalized)
         || CUSTOM_MANAGER_LIST.contains(&normalized)
 }
+/// Return the human-readable dep type name for a given manager and depType.
+///
+/// Mirrors `getPrettyDepType()` from `lib/modules/manager/index.ts`.
+/// Only npm dep type metadata is currently implemented.
+pub fn get_pretty_dep_type(manager: &str, dep_type: &str) -> Option<&'static str> {
+    if !manager_exists(manager) {
+        return None;
+    }
+    // npm dep types — mirrors lib/modules/manager/npm/dep-types.ts
+    if matches!(manager, "npm" | "pnpm" | "yarn") {
+        return match dep_type {
+            "dependencies" => Some("dependency"),
+            "devDependencies" => Some("devDependency"),
+            "optionalDependencies" => Some("optionalDependency"),
+            "peerDependencies" => Some("peerDependency"),
+            "engines" => Some("engine"),
+            "volta" => Some("volta"),
+            "packageManager" => Some("packageManager"),
+            "resolutions" => Some("resolution"),
+            "overrides" => Some("override"),
+            "pnpm.overrides" => Some("pnpmOverride"),
+            _ => None,
+        };
+    }
+    None
+}
+
 
 /// Apply a regex repeatedly to content, collecting all non-overlapping matches.
 ///
@@ -1692,6 +1719,20 @@ mod tests {
         let result = get_enabled_managers_list(Some(&config));
         // custom.regex → regex, npm stays npm; sorted: npm < regex
         assert_eq!(result, vec!["npm", "regex"]);
+    }
+
+    // Ported: "when no manager found, returns undefined" — modules/manager/index.spec.ts line 265
+    // Ported: "when manager found, but no prettyDepType found, returns undefined" — modules/manager/index.spec.ts line 271, 275
+    // Ported: "when manager found, and a prettyDepType found, returns the defined prettyDepType" — modules/manager/index.spec.ts line 279
+    #[test]
+    fn manager_get_pretty_dep_type() {
+        // Unknown manager → None
+        assert_eq!(get_pretty_dep_type("invalid-manager", "unused"), None);
+        // Known manager, unknown depType → None
+        assert_eq!(get_pretty_dep_type("npm", "foo-bar-baz"), None);
+        assert_eq!(get_pretty_dep_type("regex", "foo-bar-baz"), None);
+        // Known manager, known depType → prettyDepType
+        assert_eq!(get_pretty_dep_type("npm", "dependencies"), Some("dependency"));
     }
 
     // Ported: "gets something" — modules/manager/index.spec.ts line 38

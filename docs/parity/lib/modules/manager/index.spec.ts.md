@@ -5,7 +5,7 @@
 ## `lib/modules/manager/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/index.spec.ts
-**Total tests:** 22 | **Ported:** 6 | **Actionable:** 22 | **Status:** partial
+**Total tests:** 22 | **Ported:** 10 | **Actionable:** 22 | **Status:** partial
 
 ### `modules/manager/index › supportedDatasources`
 
@@ -84,10 +84,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| when no manager found, returns undefined | 265 | pending | — | — | — |
-| when manager found, but no prettyDepType found, returns undefined | 271 | pending | — | — | — |
-| when manager found, but no prettyDepType found, returns undefined | 275 | pending | — | — | — |
-| when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType | 279 | pending | — | — | — |
+| when no manager found, returns undefined | 265 | ported | `managers.rs` | `manager_get_pretty_dep_type` | — |
+| when manager found, but no prettyDepType found, returns undefined | 271 | ported | `managers.rs` | `manager_get_pretty_dep_type` | — |
+| when manager found, but no prettyDepType found, returns undefined | 275 | ported | `managers.rs` | `manager_get_pretty_dep_type` | — |
+| when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType | 279 | ported | `managers.rs` | `manager_get_pretty_dep_type` | — |
 
 ---
 
