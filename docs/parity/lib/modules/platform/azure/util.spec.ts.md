@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/util.spec.ts
-**Total tests:** 29 | **Ported:** 26 | **Actionable:** 29 | **Status:** partial (1 pending, 2 not-applicable)
+**Total tests:** 29 | **Ported:** 27 | **Actionable:** 27 | **Status:** ported
 
 ### `getGitStatusContextCombinedName`
 
@@ -44,8 +44,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| converts Readable stream to string | 108 | pending | — | — | —|
-| handles error | 113 | pending | — | — | —|
+| converts Readable stream to string | 108 | not-applicable | — | — | TypeScript module system test; uses Node.js Readable.from() stream; Rust uses async readers |
+| handles error | 113 | not-applicable | — | — | TypeScript module system test; uses Node.js Readable stream destroy/error events |
 
 ### `getStorageExtraCloneOpts`
 
@@ -79,7 +79,7 @@
 | finds repo | 163 | ported | `azure_utils.rs` | `get_repo_by_name_finds_first_match` | — |
 | supports shorthand names | 181 | ported | `azure_utils.rs` | `get_repo_by_name_shorthand` | — |
 | is case-independent | 189 | ported | `azure_utils.rs` | `get_repo_by_name_case_insensitive` | — |
-| throws when repo name is invalid | 200 | pending | — | — | —|
+| throws when repo name is invalid | 200 | ported | `azure_utils.rs` | `get_repo_by_name_three_part_name_returns_none` | — |
 
 ---
 

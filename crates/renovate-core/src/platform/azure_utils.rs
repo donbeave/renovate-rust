@@ -419,4 +419,13 @@ mod tests {
         assert!(c_value.contains("bearer"));
         assert!(c_value.contains(token));
     }
+
+    // Ported: "throws when repo name is invalid" — modules/platform/azure/util.spec.ts line 224
+    // TypeScript throws; Rust returns None (same observable behavior: lookup fails for invalid name)
+    #[test]
+    fn get_repo_by_name_three_part_name_returns_none() {
+        // "foo/bar/baz" has 3 parts - invalid; TypeScript throws, Rust returns None
+        let result = get_repo_by_name("foo/bar/baz", &[]);
+        assert!(result.is_none());
+    }
 }
