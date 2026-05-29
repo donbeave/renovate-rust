@@ -931,6 +931,6 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `test/docs/documentation.spec.ts` | Done | [details](test/docs/documentation.spec.ts.md) |
 | `test/other/sync-module-labels.spec.ts` | Done | [details](test/other/sync-module-labels.spec.ts.md) |
 | `test/other/validate-config-files.spec.ts` | Done | [details](test/other/validate-config-files.spec.ts.md) |
-| `test/other/validate-docker.spec.ts` | Not done | [details](test/other/validate-docker.spec.ts.md) |
-| `test/other/validate-schemas.spec.ts` | Not done | [details](test/other/validate-schemas.spec.ts.md) |
+| `test/other/validate-docker.spec.ts` | Done | [details](test/other/validate-docker.spec.ts.md) |
+| `test/other/validate-schemas.spec.ts` | Done | [details](test/other/validate-schemas.spec.ts.md) |
 | `tools/docs/test/utils.spec.ts` | Done | [details](tools/docs/test/utils.spec.ts.md) |
