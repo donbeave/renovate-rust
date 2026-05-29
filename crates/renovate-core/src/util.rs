@@ -2794,7 +2794,7 @@ pub fn validate_interpolated_values(
     let Some(input) = input else {
         return Ok(());
     };
-    let re = Regex::new(name_pattern).map_err(|e| e.to_owned())?;
+    let re = Regex::new(name_pattern).map_err(|e| e.to_string())?;
     match input {
         serde_json::Value::Object(map) => {
             for (k, v) in map {
@@ -2842,7 +2842,7 @@ pub fn parse_yaml(content: &str, remove_templates: bool) -> Result<Vec<serde_jso
         if doc.is_empty() {
             continue;
         }
-        let value: serde_json::Value = serde_yaml::from_str(doc).map_err(|e| e.to_owned())?;
+        let value: serde_json::Value = serde_yaml::from_str(doc).map_err(|e| e.to_string())?;
         if !value.is_null() {
             docs.push(value);
         }
@@ -2863,7 +2863,7 @@ pub fn parse_single_yaml(
     if text.trim().is_empty() {
         return Ok(None);
     }
-    let value: serde_json::Value = serde_yaml::from_str(&text).map_err(|e| e.to_owned())?;
+    let value: serde_json::Value = serde_yaml::from_str(&text).map_err(|e| e.to_string())?;
     Ok(if value.is_null() { None } else { Some(value) })
 }
 
@@ -2977,7 +2977,7 @@ fn platform_from_host_type(host_type: &str) -> Option<&'static str> {
 pub fn parse_json(content: &str) -> Result<serde_json::Value, String> {
     serde_json::from_str(content)
         .or_else(|_| json5::from_str::<serde_json::Value>(content))
-        .map_err(|e| e.to_owned())
+        .map_err(|e| e.to_string())
 }
 
 /// Schema-utils v4 parse result (mirrors Zod's `SafeParseReturnType`).
@@ -3057,7 +3057,7 @@ pub fn schema_parse_toml(content: &str) -> SafeParseResult<serde_json::Value> {
         Ok(v) => {
             match serde_json::to_value(&v) {
                 Ok(json) => SafeParseResult::Ok(json),
-                Err(e) => SafeParseResult::Err(e.to_owned()),
+                Err(e) => SafeParseResult::Err(e.to_string()),
             }
         }
         Err(_) => SafeParseResult::Err("Invalid TOML".to_owned()),
@@ -4107,12 +4107,12 @@ pub fn config_serialize(config: &serde_json::Value) -> serde_json::Value {
 /// Convert an error/throwable value to an optional string message.
 ///
 /// - `None` input → `None`
-/// - `Display` input → `Some(value.to_owned())`
+/// - `Display` input → `Some(value.to_string())`
 ///
 /// Mirrors the TypeScript `massageThrowable` which returns `undefined` for
 /// null/undefined and the string representation otherwise.
 pub fn massage_throwable<T: std::fmt::Display>(e: Option<T>) -> Option<String> {
-    e.map(|v| v.to_owned())
+    e.map(|v| v.to_string())
 }
 
 // ---------------------------------------------------------------------------
