@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,067 / 11,666 total tests ported (43%) · pending 4,039 · not-applicable 2,560 (22% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 4,037 · not-applicable 2,560 (22% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -787,7 +787,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts.md) |
-| `lib/util/github/graphql/util.spec.ts` | Not done | [details](lib/util/github/graphql/util.spec.ts.md) |
+| `lib/util/github/graphql/util.spec.ts` | Done | [details](lib/util/github/graphql/util.spec.ts.md) |
 | `lib/util/github/tags.spec.ts` | Not done | [details](lib/util/github/tags.spec.ts.md) |
 | `lib/util/github/url.spec.ts` | Done | [details](lib/util/github/url.spec.ts.md) |
 | `lib/util/http/auth.spec.ts` | Done | [details](lib/util/http/auth.spec.ts.md) |
