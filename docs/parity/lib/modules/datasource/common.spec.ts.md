@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/common.spec.ts
-**Total tests:** 30 | **Ported:** 28 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 30 | **Ported:** 29 | **Actionable:** 29 | **Status:** ported
 
 ### `modules/datasource/common › getDatasourceFor`
 
@@ -66,7 +66,7 @@
 | should match exact constraints | 268 | ported | `datasources.rs` | `constraints_filtering_exact_match` | —  | — | — | — |
 | should handle config with a range constraint, and a release with an exact version | 287 | ported | `datasources.rs` | `constraints_filtering_range_config_exact_release` | —  | — | — | — |
 | should handle config with an exact version, and a release with a range constraint | 306 | ported | `datasources.rs` | `constraints_filtering_exact_config_range_release` | —  | — | — | — |
-| should allow constraintsVersioning to override the datasource's default versioning | 325 | pending | — | — | — |
+| should allow constraintsVersioning to override the datasource's default versioning | 325 | ported | `datasources.rs` | `constraints_filtering_constraints_versioning_override` | — |
 
 ### `modules/datasource/common › applyVersionCompatibility`
 

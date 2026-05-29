@@ -228,9 +228,13 @@ fn is_gitlab_url(url: &str) -> bool {
 }
 
 /// Config for constraint filtering.
+#[derive(Default)]
 pub struct ConstraintsFilteringConfig {
     pub constraints_filtering: Option<String>,
     pub constraints: Option<std::collections::HashMap<String, String>>,
+    /// Override versioning per constraint name, mirrors `constraintsVersioning`.
+    /// Currently only `"semver-coerced"` is supported; other values fall back to npm.
+    pub constraints_versioning: Option<std::collections::HashMap<String, String>>,
 }
 
 /// Apply constraint-based filtering to a release result.
@@ -305,19 +309,36 @@ pub fn apply_constraints_filtering(
                         continue;
                     }
 
+                    // Determine which versioning to use (constraintsVersioning override or npm)
+                    let use_semver_coerced = config
+                        .constraints_versioning
+                        .as_ref()
+                        .and_then(|cv| cv.get(name.as_str()))
+                        .map(|v| v == "semver-coerced")
+                        .unwrap_or(false);
+
                     // Check if any release constraint satisfies the config constraint.
                     let satisfies = values.iter().any(|rc_val| {
                         // Exact match
                         if config_constraint == rc_val {
                             return true;
                         }
-                        // Config is a range, release has exact version: check if version is in range
-                        if crate::versioning::npm::matches_range(rc_val, config_constraint) {
-                            return true;
-                        }
-                        // Release has a range, config has exact version: check if version is in range
-                        if crate::versioning::npm::matches_range(config_constraint, rc_val) {
-                            return true;
+                        if use_semver_coerced {
+                            // Use semver-coerced matching (matches = version satisfies range)
+                            if crate::versioning::semver_coerced::matches(rc_val, config_constraint) {
+                                return true;
+                            }
+                            if crate::versioning::semver_coerced::matches(config_constraint, rc_val) {
+                                return true;
+                            }
+                        } else {
+                            // Default: npm semver matching
+                            if crate::versioning::npm::matches_range(rc_val, config_constraint) {
+                                return true;
+                            }
+                            if crate::versioning::npm::matches_range(config_constraint, rc_val) {
+                                return true;
+                            }
                         }
                         false
                     });
@@ -655,6 +676,7 @@ mod registry_tests {
         let config = ConstraintsFilteringConfig {
             constraints_filtering: Some("none".into()),
             constraints: None,
+            constraints_versioning: None,
         };
         let res = apply_constraints_filtering(result, &config);
         assert_eq!(res.releases.len(), 2);
@@ -686,6 +708,7 @@ mod registry_tests {
         let config = ConstraintsFilteringConfig {
             constraints_filtering: Some("strict".into()),
             constraints: Some(constraints),
+            constraints_versioning: None,
         };
         let res = apply_constraints_filtering(result, &config);
         // 1.0.0 (no constraints) and 2.0.0 (null = any) are kept; 3.0.0 fails
@@ -712,6 +735,7 @@ mod registry_tests {
         let config = ConstraintsFilteringConfig {
             constraints_filtering: Some("strict".into()),
             constraints: None,
+            constraints_versioning: None,
         };
         let res = apply_constraints_filtering(result, &config);
         assert_eq!(res.releases.len(), 2);
@@ -740,6 +764,7 @@ mod registry_tests {
         let config = ConstraintsFilteringConfig {
             constraints_filtering: Some("strict".into()),
             constraints: Some(constraints),
+            constraints_versioning: None,
         };
         let res = apply_constraints_filtering(result, &config);
         assert_eq!(res.releases.len(), 1);
@@ -769,10 +794,60 @@ mod registry_tests {
         let config = ConstraintsFilteringConfig {
             constraints_filtering: Some("strict".into()),
             constraints: Some(constraints),
+            constraints_versioning: None,
         };
         let res = apply_constraints_filtering(result, &config);
         assert_eq!(res.releases.len(), 1);
         assert_eq!(res.releases[0].version, "2.0.0");
+    }
+
+    // Ported: "should allow constraintsVersioning to override the datasource's default versioning"
+    //         — modules/datasource/common.spec.ts line 325
+    // constraintsVersioning.rubygems = 'semver-coerced' → '^1.3' is valid semver
+    #[test]
+    fn constraints_filtering_constraints_versioning_override() {
+        let result = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "0.9.1".into(),
+                    constraints: Some(serde_json::json!({"rubygems": ["1.0.0"]})),
+                    ..Default::default()
+                },
+                Release {
+                    version: "3.1.3".into(),
+                    constraints: Some(serde_json::json!({"rubygems": ["1.2.3"]})),
+                    ..Default::default()
+                },
+                Release {
+                    version: "4.1.2".into(),
+                    constraints: Some(serde_json::json!({"rubygems": [">= 1.8.11"]})),
+                    ..Default::default()
+                },
+                Release {
+                    version: "8.1.3".into(),
+                    constraints: Some(serde_json::json!({"rubygems": [">= 1.8.11"]})),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let mut constraints = std::collections::HashMap::new();
+        constraints.insert("rubygems".into(), "^1.3".into());
+        let mut cv = std::collections::HashMap::new();
+        cv.insert("rubygems".into(), "semver-coerced".into());
+        let config = ConstraintsFilteringConfig {
+            constraints_filtering: Some("strict".into()),
+            constraints: Some(constraints),
+            constraints_versioning: Some(cv),
+        };
+        let res = apply_constraints_filtering(result, &config);
+        // 0.9.1 (rubygems 1.0.0): 1.0.0 doesn't satisfy ^1.3 → filtered
+        // 3.1.3 (rubygems 1.2.3): 1.2.3 doesn't satisfy ^1.3 → filtered
+        // 4.1.2 (rubygems >= 1.8.11): >= 1.8.11 satisfies ^1.3 → kept
+        // 8.1.3 (rubygems >= 1.8.11): kept
+        assert_eq!(res.releases.len(), 2, "Expected 4.1.2 and 8.1.3 to be kept");
+        assert!(res.releases.iter().any(|r| r.version == "4.1.2"));
+        assert!(res.releases.iter().any(|r| r.version == "8.1.3"));
     }
 
     // Ported: "should handle config with an exact version, and a release with a range constraint" — common.spec.ts line 306
@@ -798,6 +873,7 @@ mod registry_tests {
         let config = ConstraintsFilteringConfig {
             constraints_filtering: Some("strict".into()),
             constraints: Some(constraints),
+            constraints_versioning: None,
         };
         let res = apply_constraints_filtering(result, &config);
         assert_eq!(res.releases.len(), 1);
