@@ -666,6 +666,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/nuget/extract/single-csharp-file.ts` | `crates/renovate-core/src/extractors/nuget.rs` | partial | Inlined |
 | `lib/modules/manager/nuget/index.ts` | `crates/renovate-core/src/extractors/nuget.rs` | partial | Manager metadata |
 | `lib/modules/manager/nuget/schema.ts` | `crates/renovate-core/src/extractors/nuget.rs` | partial | Schema inlined |
+| `lib/modules/manager/nuget/config-formatter.ts` | `crates/renovate-core/src/extractors/nuget.rs` | full | create_nuget_config_xml, parse_nuget_registry_url, escape_nuget_name; all 7 spec tests ported |
 | `lib/modules/manager/nuget/artifacts.ts` | — | not-started | Artifacts not ported |
 | `lib/modules/manager/nuget/update.ts` | — | not-started | Not ported |
 | `lib/modules/manager/nuget/util.ts` | — | not-started | Not ported |
@@ -1125,7 +1126,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/versioning/bazel-module/index.ts` | `crates/renovate-core/src/versioning/bazel_module/mod.rs` | full | Full VersioningApi: getMajor/Minor/Patch, equals, isGreaterThan, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, sortVersions, isStable, isValid, isVersion, matches, getNewValue |
 | `lib/modules/versioning/deb/index.ts` | `crates/renovate-core/src/versioning/deb.rs` | full | Debian version parsing and dpkg comparison algorithm; isValid, equals, isGreaterThan, isSingleVersion, getMajor/Minor/Patch |
 | `lib/modules/versioning/regex/index.ts` | `crates/renovate-core/src/versioning/regex_versioning.rs` | full | Full regex-based VersioningApi with named capture groups (major/minor/patch/prerelease/compatibility/build/revision); generic comparison algorithm ported |
-| `lib/logger/utils.ts` | `crates/renovate-core/src/util.rs` | partial | sanitize_urls: URL credential redaction for all schemes, data URI redaction; Missing: sanitizeValue for objects, prepareError/prepareZodIssues |
+| `lib/logger/utils.ts` | `crates/renovate-core/src/util.rs` | partial | sanitize_urls: URL credential redaction for all schemes, data URI redaction; sanitizeValue for objects added; Missing: prepareError/prepareZodIssues |
 | `lib/modules/manager/git-submodules/artifacts.ts` | `crates/renovate-core/src/extractors/git_submodules.rs` | full | update_artifacts: creates file-addition entries for each updated submodule dep |
 | `lib/util/host-rules.ts` | `crates/renovate-core/src/util/host_rules.rs` | full | add/find/findAll/getAll/clear/hosts/hostType: full host-rule registry with matchHost prefix matching, hostname/domain suffix matching, readOnly and hostType filtering, legacy field migration |
 | `lib/util/http/hooks.ts` | `crates/renovate-core/src/http.rs` | full | is_response_ok: HTTP 200-299/304 OK check with followRedirect support |
