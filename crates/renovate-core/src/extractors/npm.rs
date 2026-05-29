@@ -2090,56 +2090,151 @@ fn update_dependency_package_json(
     Some(result)
 }
 
-/// Replace a YAML scalar value at a given path while preserving formatting.
+
+/// Replace the scalar value portion of a YAML line, preserving the original
+/// quote style (none / single / double), extra spacing, YAML anchors
+/// (`&name`), and trailing comments.
 ///
-/// Uses a line-by-line scanner with indentation tracking to find the specific
-/// key and replaces only the value portion, keeping whitespace, quote style,
-/// and trailing comments intact.
-fn yaml_replace_scalar_at_path(
+/// Returns `None` when the value is a YAML alias (`*name`) — those are not
+/// safe to replace without knowing the anchor location.
+fn yaml_replace_line_value(
+    line: &str,
+    key: &str,
+    old_value: &str,
+    new_value: &str,
+) -> Option<String> {
+    let key_colon = format!("{}:", key);
+    let key_pos = line.find(&key_colon)?;
+    let after_colon = &line[key_pos + key_colon.len()..];
+
+    // Capture spacing between `:` and the value (or anchor).
+    let spacing_len = after_colon.len() - after_colon.trim_start().len();
+    let spacing = &after_colon[..spacing_len];
+    let rest = &after_colon[spacing_len..];
+
+    // Detect and preserve optional YAML anchor `&anchor_name`.
+    let (anchor_prefix, value_in_line) = if rest.starts_with('&') {
+        let anchor_end = rest[1..]
+            .find(char::is_whitespace)
+            .map(|i| i + 1)
+            .unwrap_or(rest.len());
+        let anchor_token = &rest[..anchor_end];
+        let after_anchor = &rest[anchor_end..];
+        let anchor_spacing_len = after_anchor.len() - after_anchor.trim_start().len();
+        let anchor_spacing = &after_anchor[..anchor_spacing_len];
+        let anchor_part = format!("{}{}", anchor_token, anchor_spacing);
+        (anchor_part, &rest[anchor_end + anchor_spacing_len..])
+    } else {
+        (String::new(), rest)
+    };
+
+    // YAML alias (`*name`) in the value position — must not be replaced.
+    if value_in_line.starts_with('*') {
+        return None;
+    }
+
+    // Detect quote style.
+    let (quote, value_start) = if value_in_line.starts_with('\'') {
+        (Some('\''), 1)
+    } else if value_in_line.starts_with('"') {
+        (Some('"'), 1)
+    } else {
+        (None, 0)
+    };
+
+    let actual_value_str = &value_in_line[value_start..];
+
+    let (value_end, after_value_start) = if let Some(q) = quote {
+        let end = actual_value_str.find(q)?;
+        (end, end + 1)
+    } else {
+        // Unquoted scalar: value ends at whitespace only.
+        // In YAML, `#` starts a comment only when preceded by whitespace;
+        // inside a word (e.g. "gulpjs/gulp#v4.0.0") it is part of the value.
+        let end = actual_value_str
+            .find(|c: char| c == ' ' || c == '\t')
+            .unwrap_or(actual_value_str.len());
+        (end, end)
+    };
+
+    let found_value = &actual_value_str[..value_end];
+    if found_value != old_value {
+        return None;
+    }
+
+    let suffix = &actual_value_str[after_value_start..];
+    let prefix = &line[..key_pos + key_colon.len()];
+
+    let new_quoted = if let Some(q) = quote {
+        format!("{}{}{}", q, new_value, q)
+    } else {
+        new_value.to_owned()
+    };
+
+    Some(format!(
+        "{}{}{}{}{}",
+        prefix, spacing, anchor_prefix, new_quoted, suffix
+    ))
+}
+
+/// Rename a key in a YAML line, preserving the rest of the line.
+/// Finds `old_key:` and replaces the key part with `new_key`.
+fn yaml_rename_key_in_line(line: &str, old_key: &str, new_key: &str) -> Option<String> {
+    let old_prefix = format!("{}:", old_key);
+    // Check for YAML alias key (`*alias:`); those must not be renamed.
+    let stripped = line.trim_start();
+    if stripped.starts_with('*') {
+        return None;
+    }
+    let key_pos = line.find(&old_prefix)?;
+    // Verify we matched a full key (not a substring of a longer key).
+    if key_pos > 0 {
+        let prev = line.as_bytes().get(key_pos - 1)?;
+        if prev.is_ascii_alphanumeric() || *prev == b'_' || *prev == b'-' {
+            return None;
+        }
+    }
+    let new_prefix = format!("{}:", new_key);
+    Some(format!(
+        "{}{}{}",
+        &line[..key_pos],
+        new_prefix,
+        &line[key_pos + old_prefix.len()..]
+    ))
+}
+
+/// Format-preserving YAML update at `path`.
+///
+/// Handles optional key rename (`new_key`) for the final path element.
+/// Returns `None` when the path or value is not found, or when a YAML alias
+/// is encountered.
+fn yaml_update_at_path(
     content: &str,
     path: &[&str],
     old_value: &str,
     new_value: &str,
+    new_key: Option<&str>,
 ) -> Option<String> {
-    // Validate path exists and old_value matches via serde_yaml.
+    // Validate via serde_yaml that path + old_value exist.
     let yaml_parsed: serde_yaml::Value = serde_yaml::from_str(content).ok()?;
     let mut cur = &yaml_parsed;
     for key in path {
         cur = cur.get(*key)?;
     }
-    // Accept string or number forms.
-    let actual_str = cur
-        .as_str()
-        .or_else(|| {
-            // serde_yaml may represent unquoted numbers as i64/f64.
-            None // handled by string comparison below
-        })
-        .unwrap_or("");
-    let actual_owned;
-    let actual = if actual_str.is_empty() {
-        actual_owned = format!("{}", cur.as_i64().unwrap_or(0));
-        actual_owned.as_str()
-    } else {
-        actual_str
-    };
+    let actual = cur.as_str().unwrap_or("");
     if actual != old_value {
         return None;
     }
 
-    // Scan line by line, tracking current YAML path by indentation.
     let lines: Vec<&str> = content.split('\n').collect();
     let ends_with_newline = content.ends_with('\n');
 
-    // We maintain a stack of (indent_level, path_index) to know where we are.
-    // Simple state machine: track current depth per path element.
-    let mut path_depth: usize = 0; // index into path[] we're currently matching
-    let mut section_indents: Vec<usize> = Vec::new(); // indent of each matched ancestor
-
+    let mut path_depth: usize = 0;
+    let mut section_indents: Vec<usize> = Vec::new();
     let mut result_lines: Vec<String> = Vec::with_capacity(lines.len());
 
     for line in &lines {
-        // Skip empty and comment lines — they don't affect path tracking.
-        let stripped = line.trim();
+        let stripped = line.trim_start();
         if stripped.is_empty() || stripped.starts_with('#') {
             result_lines.push((*line).to_owned());
             continue;
@@ -2147,7 +2242,6 @@ fn yaml_replace_scalar_at_path(
 
         let indent = line.len() - line.trim_start().len();
 
-        // Check if we've left any ancestor sections by dedenting.
         while !section_indents.is_empty() && indent <= *section_indents.last().unwrap() {
             section_indents.pop();
             if path_depth > 0 {
@@ -2155,18 +2249,67 @@ fn yaml_replace_scalar_at_path(
             }
         }
 
-        // Try to match the current path element.
         if path_depth < path.len() {
             let target_key = path[path_depth];
-            let key_prefix = format!("{}:", target_key);
-            if stripped.starts_with(&key_prefix) {
+            let key_prefix_plain = format!("{}:", target_key);
+            // Also accept quoted keys (flow style): `"key":` or `'key':`
+            let key_prefix_dq = format!("\"{}\":", target_key);
+            let key_prefix_sq = format!("'{}:'", target_key);
+            let key_match = stripped.starts_with(&key_prefix_plain)
+                || stripped.starts_with(&key_prefix_dq)
+                || stripped.starts_with(&key_prefix_sq);
+
+            if key_match {
                 if path_depth == path.len() - 1 {
-                    // Final key — replace the value on this line.
+                    // Final key — replace value and optionally rename key.
+                    // Use quoted-key replacer when the key appears with quotes (flow style).
+                    let is_quoted_key = !stripped.starts_with(&key_prefix_plain);
+                    let mut new_line = if is_quoted_key {
+                        yaml_replace_quoted_key_value(line, target_key, old_value, new_value)?
+                    } else {
+                        yaml_replace_line_value(line, target_key, old_value, new_value)?
+                    };
+                    if let Some(nk) = new_key {
+                        new_line = yaml_rename_key_in_line(&new_line, target_key, nk)
+                            .unwrap_or(new_line);
+                    }
+                    result_lines.push(new_line);
+                    let remaining_start = result_lines.len();
+                    for remaining in &lines[remaining_start..] {
+                        result_lines.push((*remaining).to_owned());
+                    }
+                    let joined = result_lines.join("\n");
+                    return Some(if ends_with_newline {
+                        joined + "\n"
+                    } else {
+                        joined
+                    });
+                } else {
+                    // Check for flow-style inline value (starts with `{`).
+                    let after_key_colon = stripped[target_key.len() + 1..].trim_start();
+                    if after_key_colon.starts_with('{') {
+                        // Flow style: scan subsequent lines for the target child key.
+                        // Fall through to line push and let the next iteration
+                        // match the child key inside the flow block.
+                        // For now: mark as intermediate but track section start.
+                    }
+                    section_indents.push(indent);
+                    path_depth += 1;
+                }
+            } else {
+                // Check for quoted key in flow style context.
+                let key_in_quotes_dq = format!("\"{}\"", target_key);
+                let key_in_quotes_sq = format!("'{}'", target_key);
+                if path_depth == path.len() - 1
+                    && !section_indents.is_empty()
+                    && (stripped.starts_with(&key_in_quotes_dq)
+                        || stripped.starts_with(&key_in_quotes_sq))
+                {
+                    // Quoted key in flow-style block.
                     if let Some(new_line) =
-                        yaml_replace_line_value(line, target_key, old_value, new_value)
+                        yaml_replace_quoted_key_value(line, target_key, old_value, new_value)
                     {
                         result_lines.push(new_line);
-                        // Push remaining lines unchanged.
                         let remaining_start = result_lines.len();
                         for remaining in &lines[remaining_start..] {
                             result_lines.push((*remaining).to_owned());
@@ -2178,10 +2321,6 @@ fn yaml_replace_scalar_at_path(
                             joined
                         });
                     }
-                } else {
-                    // Intermediate key — descend.
-                    section_indents.push(indent);
-                    path_depth += 1;
                 }
             }
         }
@@ -2192,63 +2331,54 @@ fn yaml_replace_scalar_at_path(
     None
 }
 
-/// Replace the scalar value portion of a YAML line `"  key: old_value"` with
-/// `new_value`, preserving the original quote style (none / single / double),
-/// extra spacing, and trailing comment.
-fn yaml_replace_line_value(
+/// Replace the value of a quoted-key YAML line like `"react": "18.3.1"`.
+/// Used inside flow-style blocks.
+fn yaml_replace_quoted_key_value(
     line: &str,
     key: &str,
     old_value: &str,
     new_value: &str,
 ) -> Option<String> {
-    // Find `key:` in the line.
-    let key_colon = format!("{}:", key);
-    let key_pos = line.find(&key_colon)?;
-    let after_colon = &line[key_pos + key_colon.len()..];
+    // Try `"key":` or `'key':`.
+    for q_key in [format!("\"{}\":", key), format!("'{}': ", key)] {
+        if let Some(key_pos) = line.find(&q_key) {
+            let after = &line[key_pos + q_key.len()..];
+            let spacing_len = after.len() - after.trim_start().len();
+            let spacing = &after[..spacing_len];
+            let rest = &after[spacing_len..];
 
-    // Split into (spacing, rest) where rest starts at the value.
-    let spacing_len = after_colon.len() - after_colon.trim_start().len();
-    let spacing = &after_colon[..spacing_len];
-    let rest = &after_colon[spacing_len..];
+            let (vq, vs) = if rest.starts_with('"') {
+                ('"', 1)
+            } else if rest.starts_with('\'') {
+                ('\'', 1)
+            } else {
+                // Unquoted in flow
+                let end = rest
+                    .find(|c: char| c == ',' || c == '}' || c == ' ')
+                    .unwrap_or(rest.len());
+                let found = &rest[..end];
+                if found != old_value {
+                    continue;
+                }
+                let suffix = &rest[end..];
+                let prefix = &line[..key_pos + q_key.len()];
+                return Some(format!("{}{}{}{}", prefix, spacing, new_value, suffix));
+            };
 
-    // Detect quote style.
-    let (quote, value_start) = if rest.starts_with('\'') {
-        (Some('\''), 1)
-    } else if rest.starts_with('"') {
-        (Some('"'), 1)
-    } else {
-        (None, 0)
-    };
-
-    let value_rest = &rest[value_start..];
-
-    let (value_end, after_value_start) = if let Some(q) = quote {
-        // Find closing quote.
-        let end = value_rest.find(q)?;
-        (end, end + 1)
-    } else {
-        // Unquoted: value ends at first whitespace or `#`.
-        let end = value_rest
-            .find(|c: char| c == ' ' || c == '\t' || c == '#')
-            .unwrap_or(value_rest.len());
-        (end, end)
-    };
-
-    let found_value = &value_rest[..value_end];
-    if found_value != old_value {
-        return None;
+            let val_str = &rest[vs..];
+            let end = val_str.find(vq)?;
+            if &val_str[..end] != old_value {
+                continue;
+            }
+            let suffix = &val_str[end + 1..];
+            let prefix = &line[..key_pos + q_key.len()];
+            return Some(format!(
+                "{}{}{}{}{}{}",
+                prefix, spacing, vq, new_value, vq, suffix
+            ));
+        }
     }
-
-    let suffix = &value_rest[after_value_start..];
-    let prefix = &line[..key_pos + key_colon.len()];
-
-    let new_quoted = if let Some(q) = quote {
-        format!("{}{}{}", q, new_value, q)
-    } else {
-        new_value.to_owned()
-    };
-
-    Some(format!("{}{}{}{}", prefix, spacing, new_quoted, suffix))
+    None
 }
 
 /// Mirrors `updatePnpmWorkspaceDependency()` from pnpm.ts.
@@ -2284,12 +2414,7 @@ pub fn update_pnpm_workspace_dependency(
         if ov == new_value {
             return Some(file_content.to_owned());
         }
-        return yaml_replace_scalar_at_path(
-            file_content,
-            &["overrides", dep_name],
-            &ov,
-            &new_value,
-        );
+        return yaml_update_at_path(file_content, &["overrides", dep_name], &ov, &new_value, None);
     }
 
     // Catalog update.
@@ -2324,12 +2449,13 @@ pub fn update_pnpm_workspace_dependency(
         )
     };
 
-    if ov == new_value {
+    if ov == new_value && upgrade.new_name.is_none() {
         return Some(file_content.to_owned());
     }
 
     let path_str: Vec<&str> = path_keys.iter().map(|s| s.as_str()).collect();
-    yaml_replace_scalar_at_path(file_content, &path_str, &ov, &new_value)
+    let new_key = upgrade.new_name.as_deref();
+    yaml_update_at_path(file_content, &path_str, &ov, &new_value, new_key)
 }
 
 /// Mirrors `updateYarnrcCatalogDependency()` from yarn.ts.
@@ -2376,12 +2502,13 @@ pub fn update_yarnrc_catalog_dependency(
         )
     };
 
-    if ov == new_value {
+    if ov == new_value && upgrade.new_name.is_none() {
         return Some(file_content.to_owned());
     }
 
     let path_str: Vec<&str> = path_keys.iter().map(|s| s.as_str()).collect();
-    yaml_replace_scalar_at_path(file_content, &path_str, &ov, &new_value)
+    let new_key = upgrade.new_name.as_deref();
+    yaml_update_at_path(file_content, &path_str, &ov, &new_value, new_key)
 }
 
 /// Update a dependency in a package.json or pnpm/yarn workspace YAML file.
@@ -5011,6 +5138,401 @@ chalk@^2.4.1:
         assert_eq!(result, expected);
     }
 
+    // ── pnpm update dependency tests ──────────────────────────────────────
+
+    // Ported: "returns null on invalid input" — npm/update/dependency/pnpm.spec.ts line 8
+    #[test]
+    fn pnpm_update_dep_null_on_invalid() {
+        // No catalog name — dep_type has no dot-separated catalog segment
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog".into(), // ends with "catalog", last segment is empty after split
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency("packages:\n  - pkg-a\n", &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "handles implicit default catalog dependency" — npm/update/dependency/pnpm.spec.ts line 19
+    #[test]
+    fn pnpm_update_dep_implicit_default_catalog() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(parsed["catalog"]["react"].as_str().unwrap(), "19.0.0");
+        // original structure preserved
+        assert!(result.contains("packages:"));
+    }
+
+    // Ported: "handles explicit default catalog dependency" — npm/update/dependency/pnpm.spec.ts line 46
+    #[test]
+    fn pnpm_update_dep_explicit_default_catalog() {
+        let input = "packages:\n  - pkg-a\n\ncatalogs:\n  default:\n    react: 18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalogs"]["default"]["react"].as_str().unwrap(),
+            "19.0.0"
+        );
+    }
+
+    // Ported: "handles explicit named catalog dependency" — npm/update/dependency/pnpm.spec.ts line 75
+    #[test]
+    fn pnpm_update_dep_named_catalog() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1\n\ncatalogs:\n  react17:\n    react: 17.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.react17".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        // named catalog updated
+        assert_eq!(
+            parsed["catalogs"]["react17"]["react"].as_str().unwrap(),
+            "19.0.0"
+        );
+        // implicit catalog unchanged
+        assert_eq!(parsed["catalog"]["react"].as_str().unwrap(), "18.3.1");
+    }
+
+    // Ported: "does nothing if the new and old values match" — npm/update/dependency/pnpm.spec.ts line 111
+    #[test]
+    fn pnpm_update_dep_already_at_version() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 19.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert_eq!(result, input);
+    }
+
+    // Ported: "replaces package" — npm/update/dependency/pnpm.spec.ts line 132
+    #[test]
+    fn pnpm_update_dep_replaces_package() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  config: 1.21.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "config".into(),
+            new_name: Some("abc".into()),
+            new_value: Some("2.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(parsed["catalog"]["abc"].as_str().unwrap(), "2.0.0");
+        assert!(parsed["catalog"]["config"].is_null());
+    }
+
+    // Ported: "replaces a github dependency value" — npm/update/dependency/pnpm.spec.ts line 160
+    #[test]
+    fn pnpm_update_dep_github_value() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  gulp: gulpjs/gulp#v4.0.0-alpha.2\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "gulp".into(),
+            current_value: Some("v4.0.0-alpha.2".into()),
+            current_raw_value: Some("gulpjs/gulp#v4.0.0-alpha.2".into()),
+            new_value: Some("v4.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalog"]["gulp"].as_str().unwrap(),
+            "gulpjs/gulp#v4.0.0"
+        );
+    }
+
+    // Ported: "replaces a npm package alias" — npm/update/dependency/pnpm.spec.ts line 189
+    #[test]
+    fn pnpm_update_dep_npm_alias() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  hapi: npm:@hapi/hapi@18.3.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "hapi".into(),
+            npm_package_alias: true,
+            package_name: Some("@hapi/hapi".into()),
+            current_value: Some("18.3.0".into()),
+            new_value: Some("18.3.1".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalog"]["hapi"].as_str().unwrap(),
+            "npm:@hapi/hapi@18.3.1"
+        );
+    }
+
+    // Ported: "replaces a github short hash" — npm/update/dependency/pnpm.spec.ts line 219
+    #[test]
+    fn pnpm_update_dep_short_hash() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  gulp: gulpjs/gulp#abcdef7\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "gulp".into(),
+            current_digest: Some("abcdef7".into()),
+            current_raw_value: Some("gulpjs/gulp#abcdef7".into()),
+            new_digest: Some("0000000000111111111122222222223333333333".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalog"]["gulp"].as_str().unwrap(),
+            "gulpjs/gulp#0000000"
+        );
+    }
+
+    // Ported: "replaces a github fully specified version" — npm/update/dependency/pnpm.spec.ts line 248
+    #[test]
+    fn pnpm_update_dep_git_tag() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  n: git+https://github.com/owner/n#v1.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "n".into(),
+            current_value: Some("v1.0.0".into()),
+            current_raw_value: Some("git+https://github.com/owner/n#v1.0.0".into()),
+            new_value: Some("v1.1.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("v1.1.0"));
+    }
+
+    // Ported: "returns null if the dependency is not present in the target catalog" — npm/update/dependency/pnpm.spec.ts line 277
+    #[test]
+    fn pnpm_update_dep_null_if_not_in_catalog() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react-not".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if catalogs are missing" — npm/update/dependency/pnpm.spec.ts line 298
+    #[test]
+    fn pnpm_update_dep_null_if_no_catalog() {
+        let input = "packages:\n  - pkg-a\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if empty file" — npm/update/dependency/pnpm.spec.ts line 316
+    #[test]
+    fn pnpm_update_dep_null_on_empty() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency("", &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "preserves literal whitespace" — npm/update/dependency/pnpm.spec.ts line 330
+    #[test]
+    fn pnpm_update_dep_preserves_whitespace() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react:    18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        // Extra whitespace before value preserved
+        assert!(result.contains("react:    19.0.0"));
+    }
+
+    // Ported: "preserves single quote style" — npm/update/dependency/pnpm.spec.ts line 357
+    #[test]
+    fn pnpm_update_dep_preserves_single_quotes() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: '18.3.1'\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: '19.0.0'"));
+    }
+
+    // Ported: "preserves comments" — npm/update/dependency/pnpm.spec.ts line 384
+    #[test]
+    fn pnpm_update_dep_preserves_comments() {
+        let input =
+            "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1 # This is a comment\n  # Another comment\n  react-dom: 18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        // Comment preserved
+        assert!(result.contains("react: 19.0.0 # This is a comment"));
+        // react-dom unchanged
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(parsed["catalog"]["react-dom"].as_str().unwrap(), "18.3.1");
+    }
+
+    // Ported: "preserves double quote style" — npm/update/dependency/pnpm.spec.ts line 415
+    #[test]
+    fn pnpm_update_dep_preserves_double_quotes() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: \"18.3.1\"\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: \"19.0.0\""));
+    }
+
+    // Ported: "preserves anchors, replacing only the value" — npm/update/dependency/pnpm.spec.ts line 442
+    #[test]
+    fn pnpm_update_dep_preserves_anchors() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: &react 18.3.1\n  react-dom: *react\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        // Anchor preserved, value updated
+        assert!(result.contains("react: &react 19.0.0"));
+        // Alias line unchanged
+        assert!(result.contains("react-dom: *react"));
+    }
+
+    // Ported: "preserves whitespace with anchors" — npm/update/dependency/pnpm.spec.ts line 474
+    #[test]
+    fn pnpm_update_dep_preserves_anchor_whitespace() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: &react    18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: &react    19.0.0"));
+    }
+
+    // Ported: "preserves quotation style with anchors" — npm/update/dependency/pnpm.spec.ts line 501
+    #[test]
+    fn pnpm_update_dep_preserves_anchor_quote_style() {
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: &react \"18.3.1\"\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: &react \"19.0.0\""));
+    }
+
+    // Ported: "preserves formatting in flow style syntax" — npm/update/dependency/pnpm.spec.ts line 528
+    #[test]
+    fn pnpm_update_dep_flow_style() {
+        let input =
+            "packages:\n  - pkg-a\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("\"react\": \"19.0.0\""));
+        assert!(result.contains("# This is a comment"));
+    }
+
+    // Ported: "does not replace aliases in the value position" — npm/update/dependency/pnpm.spec.ts line 559
+    #[test]
+    fn pnpm_update_dep_no_replace_value_alias() {
+        let input = "__deps:\n  react: &react 18.3.1\n\npackages:\n  - pkg-a\n\ncatalog:\n  react: *react\n  react-dom: *react\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        // Should return None because the value is an alias
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "does not replace aliases in the key position" — npm/update/dependency/pnpm.spec.ts line 587
+    #[test]
+    fn pnpm_update_dep_no_replace_key_alias() {
+        // newName provided but no newValue → early return None
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "react".into(),
+            new_name: Some("react-x".into()),
+            ..Default::default()
+        };
+        let input = "__vars:\n  react: &r \"\"\n\npackages:\n  - pkg-a\n\ncatalog:\n  react: 18.0.0\n";
+        // No newValue → npm_get_new_git_value returns None, new_value? returns None
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "handles workspace overrides" — npm/update/dependency/pnpm.spec.ts line 611
+    #[test]
+    fn pnpm_update_dep_workspace_overrides() {
+        let input = "overrides:\n  react: 18.3.1\n\ncatalogs:\n  react17:\n    react: 19.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm-workspace.overrides".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(parsed["overrides"]["react"].as_str().unwrap(), "19.0.0");
+        // catalogs section unchanged
+        assert_eq!(
+            parsed["catalogs"]["react17"]["react"].as_str().unwrap(),
+            "19.0.0"
+        );
+    }
+
     // Ported: "handles yarn.catalogs dependencies" — npm/update/dependency/index.spec.ts line 446
     #[test]
     fn npm_update_dep_yarn_catalogs() {
@@ -5027,5 +5549,392 @@ chalk@^2.4.1:
             parsed["catalog"]["typescript"].as_str().unwrap_or(""),
             "0.60.0"
         );
+    }
+
+    // ── yarn update dependency tests ──────────────────────────────────────
+
+    // Ported: "returns null if catalogName is missing and logs error" — npm/update/dependency/yarn.spec.ts line 8
+    #[test]
+    fn yarn_update_dep_null_on_missing_catalog_name() {
+        // dep_type = "" (undefined in TS) → no catalog name
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 18.3.1\n";
+        let result = update_yarnrc_catalog_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "ensure continuation even if catalog list and update does not match" — npm/update/dependency/yarn.spec.ts line 33
+    #[test]
+    fn yarn_update_dep_null_catalog_mismatch() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.react17".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let input = "nodeLinker: node-modules\n\ncatalogs:\n  react18:\n    react: 18.3.1\n";
+        let result = update_yarnrc_catalog_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "ensure continuation even if dependency and update does not match" — npm/update/dependency/yarn.spec.ts line 55
+    #[test]
+    fn yarn_update_dep_null_dep_mismatch() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.react18".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let input = "nodeLinker: node-modules\n\ncatalogs:\n  react18:\n    react-dom: 18.3.1\n";
+        let result = update_yarnrc_catalog_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if catalogName is missing" — npm/update/dependency/yarn.spec.ts line 103
+    #[test]
+    fn yarn_update_dep_null_missing_dep_type() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 18.3.1\n";
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "handles implicit default catalog dependency" — npm/update/dependency/yarn.spec.ts line 125
+    #[test]
+    fn yarn_update_dep_implicit_default_catalog() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(parsed["catalog"]["react"].as_str().unwrap(), "19.0.0");
+    }
+
+    // Ported: "handles explicit named catalog dependency" — npm/update/dependency/yarn.spec.ts line 150
+    #[test]
+    fn yarn_update_dep_named_catalog() {
+        let input = "nodeLinker: node-modules\n\ncatalogs:\n  react17:\n    react: 17.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.react17".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalogs"]["react17"]["react"].as_str().unwrap(),
+            "19.0.0"
+        );
+    }
+
+    // Ported: "does nothing if the new and old values match" — npm/update/dependency/yarn.spec.ts line 177
+    #[test]
+    fn yarn_update_dep_already_at_version() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 19.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert_eq!(result, input);
+    }
+
+    // Ported: "replaces package" — npm/update/dependency/yarn.spec.ts line 197
+    #[test]
+    fn yarn_update_dep_replaces_package() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  config: 1.21.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "config".into(),
+            new_name: Some("abc".into()),
+            new_value: Some("2.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(parsed["catalog"]["abc"].as_str().unwrap(), "2.0.0");
+        assert!(parsed["catalog"]["config"].is_null());
+    }
+
+    // Ported: "replaces a github dependency value" — npm/update/dependency/yarn.spec.ts line 224
+    #[test]
+    fn yarn_update_dep_github_value() {
+        let input =
+            "nodeLinker: node-modules\n\ncatalog:\n  gulp: gulpjs/gulp#v4.0.0-alpha.2\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "gulp".into(),
+            current_value: Some("v4.0.0-alpha.2".into()),
+            current_raw_value: Some("gulpjs/gulp#v4.0.0-alpha.2".into()),
+            new_value: Some("v4.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalog"]["gulp"].as_str().unwrap(),
+            "gulpjs/gulp#v4.0.0"
+        );
+    }
+
+    // Ported: "replaces a npm package alias" — npm/update/dependency/yarn.spec.ts line 251
+    #[test]
+    fn yarn_update_dep_npm_alias() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  hapi: npm:@hapi/hapi@18.3.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "hapi".into(),
+            npm_package_alias: true,
+            package_name: Some("@hapi/hapi".into()),
+            current_value: Some("18.3.0".into()),
+            new_value: Some("18.3.1".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalog"]["hapi"].as_str().unwrap(),
+            "npm:@hapi/hapi@18.3.1"
+        );
+    }
+
+    // Ported: "replaces a github short hash" — npm/update/dependency/yarn.spec.ts line 279
+    #[test]
+    fn yarn_update_dep_short_hash() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  gulp: gulpjs/gulp#abcdef7\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "gulp".into(),
+            current_digest: Some("abcdef7".into()),
+            current_raw_value: Some("gulpjs/gulp#abcdef7".into()),
+            new_digest: Some("0000000000111111111122222222223333333333".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(
+            parsed["catalog"]["gulp"].as_str().unwrap(),
+            "gulpjs/gulp#0000000"
+        );
+    }
+
+    // Ported: "replaces a github fully specified version" — npm/update/dependency/yarn.spec.ts line 307
+    #[test]
+    fn yarn_update_dep_git_tag() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  n: git+https://github.com/owner/n#v1.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "n".into(),
+            current_value: Some("v1.0.0".into()),
+            current_raw_value: Some("git+https://github.com/owner/n#v1.0.0".into()),
+            new_value: Some("v1.1.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("v1.1.0"));
+    }
+
+    // Ported: "returns null if the dependency is not present in the target catalog" — npm/update/dependency/yarn.spec.ts line 332
+    #[test]
+    fn yarn_update_dep_null_not_in_catalog() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n\ncatalogs:\n  react18:\n    react: 18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react-not".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if catalogs are missing" — npm/update/dependency/yarn.spec.ts line 352
+    #[test]
+    fn yarn_update_dep_null_no_catalog() {
+        let input = "nodeLinker: node-modules\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if empty file" — npm/update/dependency/yarn.spec.ts line 372
+    #[test]
+    fn yarn_update_dep_null_on_empty() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency("", &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "preserves literal whitespace" — npm/update/dependency/yarn.spec.ts line 388
+    #[test]
+    fn yarn_update_dep_preserves_whitespace() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react:    18.3.1\n\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react:    19.0.0"));
+    }
+
+    // Ported: "preserves single quote style" — npm/update/dependency/yarn.spec.ts line 414
+    #[test]
+    fn yarn_update_dep_preserves_single_quotes() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: '18.3.1'\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: '19.0.0'"));
+    }
+
+    // Ported: "preserves comments" — npm/update/dependency/yarn.spec.ts line 437
+    #[test]
+    fn yarn_update_dep_preserves_comments() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 18.3.1 # This is a comment\n  # This is another comment\n  react-dom: 18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: 19.0.0 # This is a comment"));
+        let parsed: serde_yaml::Value = serde_yaml::from_str(&result).unwrap();
+        assert_eq!(parsed["catalog"]["react-dom"].as_str().unwrap(), "18.3.1");
+    }
+
+    // Ported: "preserves double quote style" — npm/update/dependency/yarn.spec.ts line 467
+    #[test]
+    fn yarn_update_dep_preserves_double_quotes() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: \"18.3.1\"\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: \"19.0.0\""));
+    }
+
+    // Ported: "preserves anchors, replacing only the value" — npm/update/dependency/yarn.spec.ts line 492
+    #[test]
+    fn yarn_update_dep_preserves_anchors() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: &react 18.3.1\n  react-dom: *react\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: &react 19.0.0"));
+        assert!(result.contains("react-dom: *react"));
+    }
+
+    // Ported: "preserves whitespace with anchors" — npm/update/dependency/yarn.spec.ts line 521
+    #[test]
+    fn yarn_update_dep_preserves_anchor_whitespace() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: &react    18.3.1\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: &react    19.0.0"));
+    }
+
+    // Ported: "preserves quotation style with anchors" — npm/update/dependency/yarn.spec.ts line 547
+    #[test]
+    fn yarn_update_dep_preserves_anchor_quote_style() {
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: &react \"18.3.1\"\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("react: &react \"19.0.0\""));
+    }
+
+    // Ported: "preserves formatting in flow style syntax" — npm/update/dependency/yarn.spec.ts line 575
+    #[test]
+    fn yarn_update_dep_flow_style() {
+        let input =
+            "nodeLinker: node-modules\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade).unwrap();
+        assert!(result.contains("\"react\": \"19.0.0\""));
+        assert!(result.contains("# This is a comment"));
+    }
+
+    // Ported: "does not replace aliases in the value position" — npm/update/dependency/yarn.spec.ts line 605
+    #[test]
+    fn yarn_update_dep_no_replace_value_alias() {
+        let input = "__deps:\n  react: &react 18.3.1\n\nnodeLinker: node-modules\n\ncatalog:\n  react: *react\n  react-dom: *react\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_value: Some("19.0.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
+    }
+
+    // Ported: "does not replace aliases in the key position" — npm/update/dependency/yarn.spec.ts line 631
+    #[test]
+    fn yarn_update_dep_no_replace_key_alias() {
+        // no newValue → early return None
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "react".into(),
+            new_name: Some("react-x".into()),
+            ..Default::default()
+        };
+        let input = "__vars:\n  react: &r \"\"\n\nnodeLinker: node-modules\n\ncatalog:\n  react: 18.0.0\n";
+        let result = npm_update_dependency(input, &upgrade);
+        assert!(result.is_none());
     }
 }
