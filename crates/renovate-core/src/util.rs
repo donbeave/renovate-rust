@@ -3651,6 +3651,41 @@ pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
 }
 
 // ---------------------------------------------------------------------------
+// Inherited/global config merging — lib/util/common.ts
+// ---------------------------------------------------------------------------
+
+/// Merge an inherited config value with a global config value.
+///
+/// Returns:
+/// - The inherited value when it is `Some(...)` AND the rule below does NOT apply.
+/// - Special case for `is_onboarding_auto_close_age = true`: returns the
+///   smaller of inherited and global (do not let inherit config raise the age
+///   above the global setting).
+/// - The global value when inherited is `None`.
+///
+/// Mirrors `getInheritedOrGlobal()` from `lib/util/common.ts`.
+pub fn get_inherited_or_global<T: PartialOrd + Copy>(
+    inherited: Option<T>,
+    global: Option<T>,
+    is_onboarding_auto_close_age: bool,
+) -> Option<T> {
+    match inherited {
+        Some(inh) => {
+            // For onboardingAutoCloseAge, do not let inherited exceed global
+            if is_onboarding_auto_close_age {
+                if let Some(glob) = global {
+                    if glob < inh {
+                        return Some(glob);
+                    }
+                }
+            }
+            Some(inh)
+        }
+        None => global,
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Repository error classification — lib/workers/repository/error.ts
 // ---------------------------------------------------------------------------
 
@@ -7885,6 +7920,71 @@ dep1 = "^1.0.0"
         let found = find_hidden_unicode_chars(content);
         assert!(found.is_empty());
         assert!(!is_binary_content(content.as_bytes()));
+    }
+
+    // ── get_inherited_or_global ───────────────────────────────────────────────
+
+    // Ported: "returns undefined if not set" — util/common.spec.ts line 198
+    #[test]
+    fn get_inherited_or_global_returns_none_when_not_set() {
+        let result: Option<i64> = get_inherited_or_global(None, None, false);
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns inherited value if only inherited value is set" — util/common.spec.ts line 202
+    #[test]
+    fn get_inherited_or_global_returns_inherited_when_only_inherited() {
+        let result = get_inherited_or_global(Some(42i64), None, false);
+        assert_eq!(result, Some(42));
+    }
+
+    // Ported: "returns global value if only global value is set" — util/common.spec.ts line 209
+    #[test]
+    fn get_inherited_or_global_returns_global_when_only_global() {
+        let result = get_inherited_or_global(None, Some(99i64), false);
+        assert_eq!(result, Some(99));
+    }
+
+    // Ported: "returns inherited value - when both global + inherited are set" — util/common.spec.ts line 216
+    #[test]
+    fn get_inherited_or_global_inherited_wins_when_both_set() {
+        let result = get_inherited_or_global(Some(5i64), Some(10i64), false);
+        assert_eq!(result, Some(5)); // inherited wins
+    }
+
+    // Ported: "returns inherited value when inherited < global" — util/common.spec.ts line 249
+    #[test]
+    fn get_inherited_or_global_age_inherited_less_than_global() {
+        let result = get_inherited_or_global(Some(5i64), Some(10i64), true);
+        assert_eq!(result, Some(5)); // inherited < global → return inherited
+    }
+
+    // Ported: "returns global value when inherited > global value" — util/common.spec.ts line 259
+    #[test]
+    fn get_inherited_or_global_age_inherited_greater_than_global() {
+        let result = get_inherited_or_global(Some(10i64), Some(5i64), true);
+        assert_eq!(result, Some(5)); // inherited > global → return global
+    }
+
+    // Ported: "returns inherited value when inherited == global" — util/common.spec.ts line 269
+    #[test]
+    fn get_inherited_or_global_age_equal() {
+        let result = get_inherited_or_global(Some(5i64), Some(5i64), true);
+        assert_eq!(result, Some(5));
+    }
+
+    // Ported: "returns inherited value when global value is not set" — util/common.spec.ts line 279
+    #[test]
+    fn get_inherited_or_global_age_global_not_set() {
+        let result = get_inherited_or_global(Some(10i64), None, true);
+        assert_eq!(result, Some(10)); // no global → return inherited
+    }
+
+    // Ported: "returns global value when inherited value is not set" — util/common.spec.ts line 289
+    #[test]
+    fn get_inherited_or_global_age_inherited_not_set() {
+        let result = get_inherited_or_global(None, Some(10i64), true);
+        assert_eq!(result, Some(10)); // no inherited → return global
     }
 
     // ── classify_repo_error ───────────────────────────────────────────────────

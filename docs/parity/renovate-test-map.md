@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,010 / 11,677 total tests ported (43%) · pending 5,312 · not-applicable 1,355 (12% of total) — updated 2026-05-29
+**Progress:** 5,019 / 11,677 total tests ported (43%) · pending 5,301 · not-applicable 1,357 (12% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -407,7 +407,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/lazy.spec.ts` | Done | [details](lib/util/lazy.spec.ts.md) |
 | `lib/util/mutex.spec.ts` | Not done | [details](lib/util/mutex.spec.ts.md) |
 | `lib/util/yaml.spec.ts` | Done | [details](lib/util/yaml.spec.ts.md) |
-| `lib/util/common.spec.ts` | Not done | [details](lib/util/common.spec.ts.md) |
+| `lib/util/common.spec.ts` | Done | [details](lib/util/common.spec.ts.md) |
 | `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
 | `lib/util/interpolator.spec.ts` | Done | [details](lib/util/interpolator.spec.ts.md) |
 | `lib/util/date.spec.ts` | Done | [details](lib/util/date.spec.ts.md) |

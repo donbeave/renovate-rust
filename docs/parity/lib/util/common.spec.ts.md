@@ -5,7 +5,7 @@
 ## `lib/util/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/common.spec.ts
-**Total tests:** 22 | **Ported:** 8 | **Actionable:** 19 | **Status:** partial
+**Total tests:** 22 | **Ported:** 17 | **Actionable:** 17 | **Status:** ported
 
 ### `util/common › detectPlatform`
 
@@ -37,21 +37,21 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns undefined if not set | 198 | pending | — | — | — |
-| returns inherited value if only inherited value is set | 202 | pending | — | — | — |
-| returns global value if only global value is set | 209 | pending | — | — | — |
-| returns inherited value - when both global + inherited are set | 216 | pending | — | — | — |
-| handles null inherited values | 227 | pending | — | — | — |
-| handles undefined inherited values | 238 | pending | — | — | — |
+| returns undefined if not set | 198 | ported | `util.rs` | `get_inherited_or_global_returns_none_when_not_set` | — |
+| returns inherited value if only inherited value is set | 202 | ported | `util.rs` | `get_inherited_or_global_returns_inherited_when_only_inherited` | — |
+| returns global value if only global value is set | 209 | ported | `util.rs` | `get_inherited_or_global_returns_global_when_only_global` | — |
+| returns inherited value - when both global + inherited are set | 216 | ported | `util.rs` | `get_inherited_or_global_inherited_wins_when_both_set` | — |
+| handles null inherited values | 227 | not-applicable | — | — | TypeScript type-system test; uses null as never to pass null where T[] expected; Rust type system prevents this |
+| handles undefined inherited values | 238 | not-applicable | — | — | TypeScript type-system test; uses undefined as never to pass undefined where T[] expected; Rust Option handles this at type level |
 
 ### `util/common › getInheritedOrGlobal › when requesting onboardingAutoCloseAge, do not allow inherit config to override global config`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns inherited value when inherited < global | 249 | pending | — | — | — |
-| returns global value when inherited > global value | 259 | pending | — | — | — |
-| returns inherited value when inherited == global | 269 | pending | — | — | — |
-| returns inherited value when global value is not set | 279 | pending | — | — | — |
-| returns global value when inherited value is not set | 289 | pending | — | — | — |
+| returns inherited value when inherited < global | 249 | ported | `util.rs` | `get_inherited_or_global_age_inherited_less_than_global` | — |
+| returns global value when inherited > global value | 259 | ported | `util.rs` | `get_inherited_or_global_age_inherited_greater_than_global` | — |
+| returns inherited value when inherited == global | 269 | ported | `util.rs` | `get_inherited_or_global_age_equal` | — |
+| returns inherited value when global value is not set | 279 | ported | `util.rs` | `get_inherited_or_global_age_global_not_set` | — |
+| returns global value when inherited value is not set | 289 | ported | `util.rs` | `get_inherited_or_global_age_inherited_not_set` | — |
 
 ---
