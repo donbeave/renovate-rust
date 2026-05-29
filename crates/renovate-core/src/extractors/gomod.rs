@@ -2509,4 +2509,147 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         let res = gomod_update_dependency(GOMOD3, &u).unwrap();
         assert!(res.contains("v1.5.0 // indirect"));
     }
+
+    // Ported: "replaces two values in one file" — gomod/update.spec.ts line 60
+    #[test]
+    fn gomod_update_two_values() {
+        let u1 = mk_gomod_upgrade("github.com/pkg/errors", "require", "v0.8.0", 2, false);
+        let res1 = gomod_update_dependency(GOMOD1, &u1).unwrap();
+        assert!(res1.contains("v0.8.0"));
+        let u2 = mk_gomod_upgrade("github.com/aws/aws-sdk-go", "require", "v1.15.36", 3, false);
+        let res2 = gomod_update_dependency(&res1, &u2).unwrap();
+        assert_ne!(res2, res1);
+        assert!(res2.contains("v1.15.36"));
+        assert!(res2.contains("v0.8.0"));
+    }
+
+    // Ported: "replaces quoted multiline" — gomod/update.spec.ts line 263
+    #[test]
+    fn gomod_update_quoted_multiline() {
+        let u = mk_gomod_upgrade("gopkg.in/src-d/go-billy.v4", "require", "v4.8.0", 57, true);
+        let res = gomod_update_dependency(GOMOD2, &u).unwrap();
+        assert!(res.contains("v4.8.0"));
+    }
+
+    // Ported: "update multiline digest" — gomod/update.spec.ts line 335
+    #[test]
+    fn gomod_update_multiline_digest() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/spf13/jwalterweatherman".into()),
+            dep_type: Some("require".into()),
+            update_type: Some("digest".into()),
+            current_digest: Some("14d3d4c51834".into()),
+            new_digest: Some("123456123456abcdef".into()),
+            manager_data: Some(GoModManagerData { line_number: 43, multi_line: true }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD2, &u).unwrap();
+        assert!(res.contains("github.com/spf13/jwalterweatherman 123456123456"));
+    }
+
+    // Ported: "skips already-updated multiline digest" — gomod/update.spec.ts line 360
+    #[test]
+    fn gomod_update_skips_already_updated_digest() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/spf13/jwalterweatherman".into()),
+            dep_type: Some("require".into()),
+            update_type: Some("digest".into()),
+            current_digest: Some("abcdefabcdef".into()),
+            new_digest: Some("14d3d4c51834000000".into()),
+            manager_data: Some(GoModManagerData { line_number: 43, multi_line: true }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD2, &u).unwrap();
+        assert_eq!(res, GOMOD2);
+    }
+
+    // Ported: "updates pseudo-version with digest updateType" — gomod/update.spec.ts line 377
+    #[test]
+    fn gomod_update_pseudo_version_digest() {
+        let content = "module example.com/test
+require (
+  knative.dev/pkg v0.0.0-20250312035536-b7bbf4be5dbd
+  k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
+)
+";
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("knative.dev/pkg".into()),
+            dep_type: Some("require".into()),
+            update_type: Some("digest".into()),
+            current_value: Some("v0.0.0-20250312035536-b7bbf4be5dbd".into()),
+            current_digest: Some("b7bbf4be5dbd".into()),
+            new_value: Some("v0.0.0-20260120122510-4a022ed9999a".into()),
+            new_digest: Some("4a022ed9999a".into()),
+            manager_data: Some(GoModManagerData { line_number: 2, multi_line: true }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(content, &u).unwrap();
+        assert!(res.contains("knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a"));
+    }
+
+    // Ported: "handles replace line with major version update that bumps both sides of the replace" — gomod/update.spec.ts line 493
+    #[test]
+    fn gomod_update_replace_both_sides_major() {
+        let content = "module github.com/walsm232/renovate-gomod-bug-test
+
+go 1.25
+
+replace (
+    github.com/grpc-ecosystem/grpc-gateway => github.com/grpc-ecosystem/grpc-gateway v1.16.0
+)
+";
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/grpc-ecosystem/grpc-gateway".into()),
+            dep_type: Some("replace".into()),
+            new_value: Some("v2.28.0".into()),
+            current_value: Some("v1.16.0".into()),
+            new_major: Some(2),
+            update_type: Some("major".into()),
+            manager_data: Some(GoModManagerData { line_number: 5, multi_line: true }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(content, &u).unwrap();
+        assert!(res.contains("github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0"));
+    }
+
+    // Ported: "handles replace line with digest" — gomod/update.spec.ts line 521
+    #[test]
+    fn gomod_update_replace_with_digest() {
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("github.com/pravesht/gocql".into()),
+            dep_type: Some("replace".into()),
+            new_value: Some("v2.0.0".into()),
+            current_value: Some("v0.7.0".into()),
+            new_major: Some(2),
+            update_type: Some("digest".into()),
+            current_digest: Some("14d3d4c51834".into()),
+            new_digest: Some("123456123456abcdef".into()),
+            manager_data: Some(GoModManagerData { line_number: 11, multi_line: false }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(GOMOD1, &u).unwrap();
+        assert!(res.contains("123456123456"));
+    }
+
+    // Ported: "handles multiline replace update" — gomod/update.spec.ts line 554
+    #[test]
+    fn gomod_update_multiline_replace() {
+        let content = "
+      go 1.23
+      replace (
+        k8s.io/client-go => k8s.io/client-go v0.21.9
+      )";
+        let u = GoModUpdateUpgrade {
+            dep_name: Some("k8s.io/client-go".into()),
+            dep_type: Some("replace".into()),
+            new_value: Some("v0.22.0".into()),
+            current_value: Some("v0.21.9".into()),
+            new_major: Some(2),
+            update_type: Some("minor".into()),
+            manager_data: Some(GoModManagerData { line_number: 3, multi_line: true }),
+            ..Default::default()
+        };
+        let res = gomod_update_dependency(content, &u).unwrap();
+        assert!(res.contains("k8s.io/client-go => k8s.io/client-go v0.22.0"));
+    }
 }
