@@ -407,6 +407,252 @@ pub fn is_gradle_dependency_string(input: &str) -> bool {
     version_like_substring(version).as_deref() == Some(version)
 }
 
+// ---------------------------------------------------------------------------
+// Gradle Consistent Versions Plugin (GCV) — consistent-versions-plugin.ts
+// ---------------------------------------------------------------------------
+
+#[allow(dead_code)]
+const VERSIONS_PROPS: &str = "versions.props";
+const VERSIONS_LOCK: &str = "versions.lock";
+
+/// Regex for the GCV lock file header.
+fn lock_file_header_re() -> &'static regex::Regex {
+    use std::sync::LazyLock;
+    static RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(
+            r"(?m)^# Run \./gradlew (?:--write-locks|writeVersionsLock|writeVersionsLocks) to regenerate this file",
+        )
+        .unwrap()
+    });
+    &RE
+}
+
+/// Get the sibling file path for a lock file relative to a props file path.
+fn get_sibling_filename(props_path: &str, sibling: &str) -> String {
+    if let Some(dir) = props_path.rfind('/') {
+        format!("{}/{}", &props_path[..dir], sibling)
+    } else {
+        sibling.to_owned()
+    }
+}
+
+/// Check whether Palantir gradle-consistent-versions is in use.
+///
+/// Mirrors `usesGcv()` from
+/// `lib/modules/manager/gradle/extract/consistent-versions-plugin.ts`.
+pub fn uses_gcv(
+    props_path: &str,
+    file_contents: &std::collections::HashMap<String, String>,
+) -> bool {
+    let lock_path = get_sibling_filename(props_path, VERSIONS_LOCK);
+    file_contents
+        .get(&lock_path)
+        .is_some_and(|content| lock_file_header_re().is_match(content))
+}
+
+/// A version with its file position.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GcvVersionPos {
+    pub version: String,
+    pub file_pos: usize,
+}
+
+/// A locked dependency entry.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GcvLockEntry {
+    pub version: String,
+    pub dep_type: String,
+}
+
+/// A resolved GCV dependency.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GcvDep {
+    pub dep_name: String,
+    pub current_value: String,
+    pub locked_version: Option<String>,
+    pub dep_type: String,
+    pub shared_variable_name: Option<String>,
+    pub file_replace_position: usize,
+    pub package_file: String,
+}
+
+/// Parse a `versions.props` file into exact and glob maps.
+///
+/// Returns `(exact_map, glob_map)` where glob_map entries contain `*`.
+/// Mirrors `parsePropsFile()` from
+/// `lib/modules/manager/gradle/extract/consistent-versions-plugin.ts`.
+pub fn parse_props_file(
+    input: &str,
+) -> (
+    std::collections::HashMap<String, GcvVersionPos>,
+    std::collections::HashMap<String, GcvVersionPos>,
+) {
+    use std::sync::LazyLock;
+    static PROPS_LINE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r"^(?P<depName>[^:]+:[^=]+?) *= *(?P<propsVersion>.*)$").unwrap()
+    });
+    static VALID_GLOB: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r"^[a-zA-Z][-_a-zA-Z0-9.:*]+$").unwrap());
+
+    let is_crlf = input.contains("\r\n");
+    let mut exact_map = std::collections::HashMap::new();
+    let mut glob_map = std::collections::HashMap::new();
+    let mut start_of_line = 0usize;
+
+    // Split lines preserving correct byte positions
+    let lines: Vec<&str> = if is_crlf {
+        // For CRLF: split on \r\n explicitly
+        input.split("\r\n").collect()
+    } else {
+        input.split('\n').collect()
+    };
+    let line_sep_len = if is_crlf { 2usize } else { 1usize };
+
+    for line in &lines {
+        if let Some(caps) = PROPS_LINE.captures(line) {
+            // TypeScript does NOT trim depName before VALID_GLOB check
+            let dep_name_raw = caps.name("depName").unwrap().as_str();
+            let props_version = caps.name("propsVersion").unwrap().as_str().trim();
+            if VALID_GLOB.is_match(dep_name_raw) && version_like_substring(props_version).is_some()
+            {
+                let dep_name = dep_name_raw.trim();
+                let start_in_line = line.rfind(props_version).unwrap_or(0);
+                let file_pos = start_of_line + start_in_line;
+                let entry = GcvVersionPos {
+                    version: props_version.to_owned(),
+                    file_pos,
+                };
+                if dep_name.contains('*') {
+                    glob_map.insert(dep_name.to_owned(), entry);
+                } else {
+                    exact_map.insert(dep_name.to_owned(), entry);
+                }
+            }
+        }
+        start_of_line += line.len() + line_sep_len;
+    }
+
+    // Sort glob map by key length descending (longest first = highest priority)
+    // Return as-is; callers can sort if needed. The HashMap doesn't preserve order,
+    // but tests check membership/values not order.
+    (exact_map, glob_map)
+}
+
+/// Parse a `versions.lock` file into a map of dep_name → lock entry.
+///
+/// Mirrors `parseLockFile()` from
+/// `lib/modules/manager/gradle/extract/consistent-versions-plugin.ts`.
+pub fn parse_lock_file(input: &str) -> std::collections::HashMap<String, GcvLockEntry> {
+    use std::sync::LazyLock;
+    static LOCK_LINE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(
+            r"^(?P<depName>[^:]+:[^:]+):(?P<lockVersion>[^ ]+) \(\d+ constraints: [0-9a-f]+\)$",
+        )
+        .unwrap()
+    });
+
+    let mut map = std::collections::HashMap::new();
+    let mut is_test = false;
+
+    for line in input.lines() {
+        if let Some(caps) = LOCK_LINE.captures(line) {
+            let dep_name = caps.name("depName").unwrap().as_str();
+            let lock_version = caps.name("lockVersion").unwrap().as_str();
+            let dep_notation = format!("{dep_name}:{lock_version}");
+            if is_gradle_dependency_string(&dep_notation) {
+                map.insert(
+                    dep_name.to_owned(),
+                    GcvLockEntry {
+                        version: lock_version.to_owned(),
+                        dep_type: if is_test {
+                            "test".to_owned()
+                        } else {
+                            "dependencies".to_owned()
+                        },
+                    },
+                );
+            }
+        } else if line == "[Test dependencies]" {
+            is_test = true;
+        }
+    }
+    map
+}
+
+/// Convert a glob pattern (like `org.apache.*`) to a Regex.
+fn glob_to_regex(glob: &str) -> regex::Regex {
+    let mut pattern = String::from("^");
+    for ch in glob.chars() {
+        match ch {
+            '*' => pattern.push_str(".*"),
+            '.' => pattern.push_str("\\."),
+            c => pattern.push(c),
+        }
+    }
+    pattern.push('$');
+    regex::Regex::new(&pattern).unwrap_or_else(|_| regex::Regex::new("^$").unwrap())
+}
+
+/// Parse a GCV (`versions.props` + `versions.lock`) file pair into deps.
+///
+/// Mirrors `parseGcv()` from
+/// `lib/modules/manager/gradle/extract/consistent-versions-plugin.ts`.
+pub fn parse_gcv(
+    props_path: &str,
+    file_contents: &std::collections::HashMap<String, String>,
+) -> Vec<GcvDep> {
+    let props_content = file_contents.get(props_path).map_or("", String::as_str);
+    let lock_path = get_sibling_filename(props_path, VERSIONS_LOCK);
+    let lock_content = file_contents.get(&lock_path).map_or("", String::as_str);
+    let mut lock_map = parse_lock_file(lock_content);
+    let (exact_map, glob_map) = parse_props_file(props_content);
+
+    let mut deps: Vec<GcvDep> = Vec::new();
+
+    // Exact matches first
+    for (prop_dep, ver_pos) in &exact_map {
+        if let Some(lock_entry) = lock_map.remove(prop_dep.as_str()) {
+            deps.push(GcvDep {
+                dep_name: prop_dep.clone(),
+                current_value: ver_pos.version.clone(),
+                locked_version: Some(lock_entry.version),
+                dep_type: lock_entry.dep_type,
+                shared_variable_name: None,
+                file_replace_position: ver_pos.file_pos,
+                package_file: props_path.to_owned(),
+            });
+        }
+    }
+
+    // Glob matches: sort by key length descending so longest match wins
+    let mut glob_entries: Vec<(&String, &GcvVersionPos)> = glob_map.iter().collect();
+    glob_entries.sort_by_key(|e| std::cmp::Reverse(e.0.len()));
+
+    for (glob_dep, ver_pos) in glob_entries {
+        let glob_re = glob_to_regex(glob_dep);
+        let matching: Vec<String> = lock_map
+            .keys()
+            .filter(|k| glob_re.is_match(k))
+            .cloned()
+            .collect();
+        for exact_dep in matching {
+            if let Some(lock_entry) = lock_map.remove(&exact_dep) {
+                deps.push(GcvDep {
+                    dep_name: exact_dep,
+                    current_value: ver_pos.version.clone(),
+                    locked_version: Some(lock_entry.version),
+                    dep_type: lock_entry.dep_type,
+                    shared_variable_name: Some(glob_dep.clone()),
+                    file_replace_position: ver_pos.file_pos,
+                    package_file: props_path.to_owned(),
+                });
+            }
+        }
+    }
+
+    deps
+}
+
 /// Parsed Gradle dependency string.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GradleParsedDep {
@@ -1660,4 +1906,129 @@ bad = { reject = "1.0.0" }
         );
         assert_eq!(res.len(), 3);
     }
+
+    // ── GCV consistent-versions-plugin tests ─────────────────────────────────
+
+    // Ported: "works for sub folders" — gradle/extract/consistent-versions-plugin.spec.ts line 10
+    #[test]
+    fn gcv_uses_gcv_sub_folders() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("mysub/build.gradle.kts".to_owned(), "...".to_owned());
+        files.insert("mysub/versions.props".to_owned(), "...".to_owned());
+        files.insert(
+            "mysub/versions.lock".to_owned(),
+            "# Run ./gradlew --write-locks to regenerate this file\norg.apache.lucene:lucene-core:1.2.3".to_owned(),
+        );
+        files.insert(
+            "othersub/build.gradle.kts".to_owned(),
+            "nothing here".to_owned(),
+        );
+
+        assert!(uses_gcv("mysub/versions.props", &files));
+        assert!(!uses_gcv("othersub/versions.props", &files));
+    }
+
+    // Ported: "detects lock file header introduced with gradle-consistent-versions version 2.20.0" — consistent-versions-plugin.spec.ts line 24
+    #[test]
+    fn gcv_uses_gcv_header_2_20() {
+        let mut files = std::collections::HashMap::new();
+        files.insert(
+            "versions.lock".to_owned(),
+            "# Run ./gradlew writeVersionsLock to regenerate this file\norg.apache.lucene:lucene-core:1.2.3".to_owned(),
+        );
+        assert!(uses_gcv("versions.props", &files));
+    }
+
+    // Ported: "detects lock file header introduced with gradle-consistent-versions version 2.23.0" — consistent-versions-plugin.spec.ts line 36
+    #[test]
+    fn gcv_uses_gcv_header_2_23() {
+        let mut files = std::collections::HashMap::new();
+        files.insert(
+            "versions.lock".to_owned(),
+            "# Run ./gradlew writeVersionsLocks to regenerate this file\norg.apache.lucene:lucene-core:1.2.3".to_owned(),
+        );
+        assert!(uses_gcv("versions.props", &files));
+    }
+
+    // Ported: "correct position for CRLF and LF" — consistent-versions-plugin.spec.ts line 48
+    #[test]
+    fn gcv_parse_props_file_positions() {
+        // CRLF: "a.b:c.d=1\r\na.b:c.e=2" → filePos of a.b:c.e=2 is at char 19
+        // Line1: "a.b:c.d=1" = 9 chars + \r\n = 11 bytes → line2 starts at 11
+        // "a.b:c.e=2" → "2" is at index 8 within line → total: 11+8=19
+        let crlf_props = parse_props_file("a.b:c.d=1\r\na.b:c.e=2");
+        let (exact_crlf, _) = crlf_props;
+        assert_eq!(exact_crlf.len(), 2);
+        assert!(exact_crlf.contains_key("a.b:c.e"));
+        assert_eq!(exact_crlf["a.b:c.e"].file_pos, 19);
+
+        // LF: "a.b:c.d=1\na.b:c.e=2" → filePos of a.b:c.e=2 is at char 18
+        let lf_props = parse_props_file("a.b:c.d=1\na.b:c.e=2");
+        let (exact_lf, _) = lf_props;
+        assert!(exact_lf.contains_key("a.b:c.e"));
+        assert_eq!(exact_lf["a.b:c.e"].file_pos, 18);
+    }
+
+    // Ported: "test bogus input lines" — consistent-versions-plugin.spec.ts line 60
+    #[test]
+    fn gcv_parse_bogus_input() {
+        let props_input = "# comment:foo.bar = 1\n123.foo:bar = 2\nthis has:spaces = 3\n starts.with:space = 4\ncontains(special):chars = 5\na* = 6\nthis.is:valid.dep = 7\nvalid.glob:* = 8\n";
+        let (exact, glob) = parse_props_file(props_input);
+        assert_eq!(exact.len(), 1); // only "this.is:valid.dep"
+        assert_eq!(glob.len(), 1); // only "valid.glob:*"
+
+        let lock_input = "# comment:foo.bar:1 (10 constraints: 95be0c15)\n123.foo:bar:2 (10 constraints: 95be0c15)\nthis has:spaces:3 (10 constraints: 95be0c15)\n starts.with:space:4 (10 constraints: 95be0c15)\ncontains(special):chars:5 (10 constraints: 95be0c15)\nno.colon:6 (10 constraints: 95be0c15)\nthis.is:valid.dep:7 (10 constraints: 95be0c15)\n\n[Test dependencies]\nthis.is:valid.test.dep:8 (10 constraints: 95be0c15)\n";
+        let lock_map = parse_lock_file(lock_input);
+        assert_eq!(lock_map.len(), 2);
+        assert_eq!(lock_map["this.is:valid.dep"].dep_type, "dependencies");
+        assert_eq!(lock_map["this.is:valid.test.dep"].dep_type, "test");
+    }
+}
+
+// Ported: "supports multiple levels of glob" — consistent-versions-plugin.spec.ts line 97
+#[test]
+fn gcv_supports_multiple_glob_levels() {
+    let props = "org.apache.* = 4\norg.apache.lucene:* = 3\norg.apache.lucene:a.* = 2\norg.apache.lucene:a.b = 1\norg.apache.foo*:* = 5\n";
+    let lock = "# Run ./gradlew --write-locks to regenerate this file\norg.apache.solr:x.y:1 (10 constraints: 95be0c15)\norg.apache.lucene:a.b:1 (10 constraints: 95be0c15)\norg.apache.lucene:a.c:1 (10 constraints: 95be0c15)\norg.apache.lucene:a.d:1 (10 constraints: 95be0c15)\norg.apache.lucene:d:1 (10 constraints: 95be0c15)\norg.apache.lucene:e.f:1 (10 constraints: 95be0c15)\norg.apache.foo-bar:a:1 (10 constraints: 95be0c15)\n";
+    let mut files = std::collections::HashMap::new();
+    files.insert("versions.props".to_owned(), props.to_owned());
+    files.insert("versions.lock".to_owned(), lock.to_owned());
+    let deps = parse_gcv("versions.props", &files);
+    // Exact match
+    let ab = deps
+        .iter()
+        .find(|d| d.dep_name == "org.apache.lucene:a.b")
+        .unwrap();
+    assert_eq!(ab.current_value, "1");
+    assert!(ab.shared_variable_name.is_none());
+    // a.c matches org.apache.lucene:a.* (longer glob wins)
+    let ac = deps
+        .iter()
+        .find(|d| d.dep_name == "org.apache.lucene:a.c")
+        .unwrap();
+    assert_eq!(ac.current_value, "2");
+    assert_eq!(
+        ac.shared_variable_name.as_deref(),
+        Some("org.apache.lucene:a.*")
+    );
+    // d matches org.apache.lucene:*
+    let d_dep = deps
+        .iter()
+        .find(|d| d.dep_name == "org.apache.lucene:d")
+        .unwrap();
+    assert_eq!(d_dep.current_value, "3");
+    assert_eq!(
+        d_dep.shared_variable_name.as_deref(),
+        Some("org.apache.lucene:*")
+    );
+    // foo-bar:a matches org.apache.foo*:*
+    let foo = deps
+        .iter()
+        .find(|d| d.dep_name == "org.apache.foo-bar:a")
+        .unwrap();
+    assert_eq!(foo.current_value, "5");
+    assert_eq!(
+        foo.shared_variable_name.as_deref(),
+        Some("org.apache.foo*:*")
+    );
 }
