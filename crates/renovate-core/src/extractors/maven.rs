@@ -975,6 +975,371 @@ fn is_settings_registry_url_path(stack: &[String]) -> bool {
     )
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// maven update — lib/modules/manager/maven/update.ts
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Upgrade parameters for `maven_update_dependency`.
+/// Mirrors the relevant fields from `Upgrade` in Renovate's `types.ts`.
+#[derive(Debug, Clone, Default)]
+pub struct MavenUpdateUpgrade {
+    pub dep_name: Option<String>,
+    pub new_name: Option<String>,
+    pub current_value: Option<String>,
+    pub new_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub new_digest: Option<String>,
+    pub datasource: Option<String>,
+    pub shared_variable_name: Option<String>,
+    /// Byte offset from the start of the XML content (after leading whitespace).
+    pub file_replace_position: usize,
+}
+
+/// Replace the text value of a named XML element.
+/// Mirrors `updateValue()` from `lib/modules/manager/maven/update.ts`.
+fn maven_update_value(content: &str, node_name: &str, old_value: &str, new_value: &str) -> String {
+    let element_start = format!("<{}", node_name);
+    let element_end_tag = format!("</{}", node_name);
+    let Some(start_idx) = content.find(&element_start) else {
+        return content.to_owned();
+    };
+    let Some(gt_idx) = content[start_idx..].find('>') else {
+        return content.to_owned();
+    };
+    let value_start = start_idx + gt_idx + 1;
+    let Some(end_idx) = content[value_start..].find(&element_end_tag) else {
+        return content.to_owned();
+    };
+    let value_end = value_start + end_idx;
+    let element_content = &content[value_start..value_end];
+    if element_content.trim() == old_value {
+        let replaced = element_content.replacen(old_value, new_value, 1);
+        format!("{}{}{}", &content[..value_start], replaced, &content[value_end..])
+    } else {
+        content.to_owned()
+    }
+}
+
+/// Update a Maven POM value at the given byte position.
+/// Mirrors `updateAtPosition()` from `lib/modules/manager/maven/update.ts`.
+///
+/// `ending_anchor` is usually `"</"` (the start of the closing tag).
+pub fn maven_update_at_position(
+    file_content: &str,
+    upgrade: &MavenUpdateUpgrade,
+    ending_anchor: &str,
+) -> Option<String> {
+    let pos = upgrade.file_replace_position;
+    if pos > file_content.len() {
+        return None;
+    }
+    let left_part = &file_content[..pos];
+    let right_part = &file_content[pos..];
+
+    let version_close_pos = right_part.find(ending_anchor)?;
+    let mut rest_part = right_part[version_close_pos..].to_owned();
+    let version_part = &right_part[..version_close_pos];
+    let version = version_part.trim();
+
+    let new_value = upgrade.new_value.as_deref().unwrap_or("");
+    let current_value = upgrade.current_value.as_deref().unwrap_or("");
+
+    if let Some(new_name) = upgrade.new_name.as_deref() {
+        // Rename dep: update groupId and/or artifactId in the enclosing block.
+        let block_tags = ["<parent", "<dependency", "<plugin", "<extension"];
+        let close_tags = ["</parent", "</dependency", "</plugin", "</extension"];
+
+        // Find the start of the enclosing block in left_part.
+        let block_start = block_tags
+            .iter()
+            .filter_map(|tag| left_part.rfind(tag))
+            .max()
+            .unwrap_or(0);
+
+        // Find the end of the enclosing block in rest_part.
+        let block_end_relative = close_tags
+            .iter()
+            .filter_map(|tag| rest_part.find(tag))
+            .min();
+
+        let Some(block_end) = block_end_relative else {
+            return None;
+        };
+
+        let mut left_block = left_part[block_start..].to_owned();
+        let mut right_block = rest_part[..block_end].to_owned();
+
+        let dep_name = upgrade.dep_name.as_deref().unwrap_or("");
+        let (group_id, artifact_id) = dep_name
+            .split_once(':')
+            .unwrap_or((dep_name, ""));
+        let (new_group_id, new_artifact_id) = new_name
+            .split_once(':')
+            .unwrap_or((new_name, ""));
+
+        if left_block.contains("<groupId") {
+            left_block = maven_update_value(&left_block, "groupId", group_id, new_group_id);
+        } else {
+            right_block = maven_update_value(&right_block, "groupId", group_id, new_group_id);
+        }
+
+        if left_block.contains("<artifactId") {
+            left_block =
+                maven_update_value(&left_block, "artifactId", artifact_id, new_artifact_id);
+        } else {
+            right_block =
+                maven_update_value(&right_block, "artifactId", artifact_id, new_artifact_id);
+        }
+
+        let left_prefix = &left_part[..block_start];
+        rest_part = right_block + &rest_part[block_end..];
+
+        // Also update the version if new_value differs from current.
+        let (final_left, final_right) = if !new_value.is_empty() && version != new_value {
+            let replaced = version_part.replacen(version, new_value, 1);
+            (
+                format!("{}{}{}", left_prefix, left_block, replaced),
+                rest_part,
+            )
+        } else {
+            (format!("{}{}", left_prefix, left_block), rest_part)
+        };
+        Some(format!("{}{}", final_left, final_right))
+    } else {
+        // Version-only update.
+        let is_docker = matches!(
+            upgrade.datasource.as_deref(),
+            Some("docker") | Some("buildpacks-registry")
+        );
+
+        if version == new_value && upgrade.shared_variable_name.is_none() {
+            // Already at desired version.
+            return Some(file_content.to_owned());
+        }
+
+        if version == current_value || upgrade.shared_variable_name.is_some() {
+            let replaced = version_part.replacen(version, new_value, 1);
+            Some(format!("{}{}{}", left_part, replaced, rest_part))
+        } else if is_docker {
+            let mut replaced = version.to_owned();
+            if !current_value.is_empty() {
+                replaced = replaced.replacen(current_value, new_value, 1);
+            }
+            if let (Some(cur_digest), Some(new_digest)) =
+                (upgrade.current_digest.as_deref(), upgrade.new_digest.as_deref())
+            {
+                replaced = replaced.replacen(cur_digest, new_digest, 1);
+            }
+            if replaced != version {
+                Some(format!("{}{}{}", left_part, replaced, rest_part))
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+}
+
+/// Update a Maven POM dependency entry in a format-preserving way.
+/// Mirrors `updateDependency()` from `lib/modules/manager/maven/update.ts`.
+pub fn maven_update_dependency(file_content: &str, upgrade: &MavenUpdateUpgrade) -> Option<String> {
+    let offset = file_content.find('<').unwrap_or(0);
+    let spaces = &file_content[..offset];
+    let rest_content = &file_content[offset..];
+    let updated = maven_update_at_position(rest_content, upgrade, "</")?;
+    if updated == rest_content {
+        Some(file_content.to_owned())
+    } else {
+        Some(format!("{}{}", spaces, updated))
+    }
+}
+
+/// The result of `maven_bump_package_version`.
+#[derive(Debug)]
+pub struct MavenBumpResult {
+    pub bumped_content: String,
+}
+
+/// Bump the `<version>` element in a Maven POM file.
+/// Mirrors `bumpPackageVersion()` from `lib/modules/manager/maven/update.ts`.
+///
+/// Handles SNAPSHOT qualifiers: a SNAPSHOT version like `0.0.1-SNAPSHOT` keeps
+/// its qualifier through the bump.  A release version gets `-SNAPSHOT` appended
+/// when `bump_version = "prerelease"`.
+pub fn maven_bump_package_version(
+    content: &str,
+    current_value: &str,
+    bump_version: &str,
+) -> MavenBumpResult {
+    let bumped_content = try_bump_pom_version(content, current_value, bump_version)
+        .unwrap_or_else(|| content.to_owned());
+    MavenBumpResult { bumped_content }
+}
+
+fn try_bump_pom_version(
+    content: &str,
+    current_value: &str,
+    bump_version: &str,
+) -> Option<String> {
+    // Must be a valid semver to bump.
+    let parsed = semver::Version::parse(current_value).ok()?;
+
+    let new_version = compute_bumped_pom_version(&parsed, current_value, bump_version)?;
+
+    // Find the root-level <version> element and replace its text content.
+    // We look for the text content of the first <version> element that is a
+    // direct child of the root (depth 1).
+    let version_pos = find_root_version_position(content)?;
+    let (val_start, val_end) = version_pos;
+    let found = &content[val_start..val_end];
+    if found != current_value {
+        return None;
+    }
+    Some(format!(
+        "{}{}{}",
+        &content[..val_start],
+        new_version,
+        &content[val_end..]
+    ))
+}
+
+/// Compute the new POM version string given the current semver and bump type.
+fn compute_bumped_pom_version(
+    parsed: &semver::Version,
+    _current_str: &str,
+    bump_version: &str,
+) -> Option<String> {
+    let pre_str = if parsed.pre.is_empty() {
+        None
+    } else {
+        Some(parsed.pre.as_str())
+    };
+
+    let is_snapshot = pre_str.map(|p| p.ends_with("SNAPSHOT")).unwrap_or(false);
+    let is_prerelease_non_snapshot = pre_str.is_some() && !is_snapshot;
+
+    if is_snapshot {
+        // Keep the same prerelease qualifier, bump the numeric component.
+        let qualifier = pre_str.unwrap_or("SNAPSHOT");
+        let pre_bump = if !bump_version.starts_with("pre") {
+            format!("pre{}", bump_version)
+        } else {
+            bump_version.to_owned()
+        };
+        let (new_major, new_minor, new_patch) = bump_numeric(
+            parsed.major,
+            parsed.minor,
+            parsed.patch,
+            &pre_bump,
+        )?;
+        Some(format!("{}.{}.{}-{}", new_major, new_minor, new_patch, qualifier))
+    } else if is_prerelease_non_snapshot {
+        // Prerelease with a non-SNAPSHOT qualifier: increment the pre identifier.
+        // e.g. "1.0.0-1" + prerelease → "1.0.0-2"
+        if bump_version == "prerelease" {
+            let pre = pre_str.unwrap_or("0");
+            // Try to increment the last numeric component of the pre string.
+            let new_pre = increment_prerelease_identifier(pre)?;
+            Some(format!("{}.{}.{}-{}", parsed.major, parsed.minor, parsed.patch, new_pre))
+        } else {
+            let (major, minor, patch) = bump_numeric(parsed.major, parsed.minor, parsed.patch, bump_version)?;
+            Some(format!("{}.{}.{}", major, minor, patch))
+        }
+    } else {
+        // Release version.
+        if bump_version == "prerelease" {
+            // Add -SNAPSHOT after bumping patch.
+            let (major, minor, patch) = bump_numeric(parsed.major, parsed.minor, parsed.patch, "prepatch")?;
+            Some(format!("{}.{}.{}-SNAPSHOT", major, minor, patch))
+        } else {
+            let (major, minor, patch) = bump_numeric(parsed.major, parsed.minor, parsed.patch, bump_version)?;
+            Some(format!("{}.{}.{}", major, minor, patch))
+        }
+    }
+}
+
+fn bump_numeric(major: u64, minor: u64, patch: u64, bump: &str) -> Option<(u64, u64, u64)> {
+    match bump {
+        "patch" | "prepatch" => Some((major, minor, patch + 1)),
+        "minor" | "preminor" => Some((major, minor + 1, 0)),
+        "major" | "premajor" => Some((major + 1, 0, 0)),
+        _ => None,
+    }
+}
+
+fn increment_prerelease_identifier(pre: &str) -> Option<String> {
+    // Try to parse the last dot-separated segment as a number.
+    let parts: Vec<&str> = pre.split('.').collect();
+    let last = parts.last()?;
+    if let Ok(n) = last.parse::<u64>() {
+        let mut new_parts = parts[..parts.len() - 1].to_vec();
+        new_parts.push(&*Box::leak(format!("{}", n + 1).into_boxed_str()));
+        Some(new_parts.join("."))
+    } else if let Ok(n) = pre.parse::<u64>() {
+        // Single numeric identifier like "1".
+        Some(format!("{}", n + 1))
+    } else {
+        None
+    }
+}
+
+/// Find the byte range of the text content in the root-level `<version>` element.
+/// Returns `(start, end)` byte offsets into `content`.
+fn find_root_version_position(content: &str) -> Option<(usize, usize)> {
+    use quick_xml::{events::Event, Reader};
+
+    let mut reader = Reader::from_str(content);
+    reader.config_mut().trim_text(false);
+    reader.config_mut().check_end_names = false;
+
+    let mut depth: usize = 0;
+    let mut in_version_at_depth_one = false;
+
+    loop {
+        let pos_before = reader.buffer_position() as usize;
+        match reader.read_event() {
+            Ok(Event::Start(e)) => {
+                depth += 1;
+                if depth == 2 {
+                    // Direct child of root.
+                    let name_bytes = e.name().as_ref().to_owned();
+                    let name = std::str::from_utf8(&name_bytes).unwrap_or("");
+                    if name == "version" {
+                        in_version_at_depth_one = true;
+                    }
+                }
+            }
+            Ok(Event::Text(e)) if in_version_at_depth_one => {
+                let start = pos_before;
+                let end = reader.buffer_position() as usize;
+                let text = std::str::from_utf8(e.as_ref()).unwrap_or("");
+                // Verify it spans the right range.
+                if end > start && start + text.len() == end {
+                    return Some((start, end));
+                }
+                // Fallback: search for text in content from pos_before.
+                let text_in_content = &content[start..];
+                if text_in_content.starts_with(text) {
+                    return Some((start, start + text.len()));
+                }
+                return None;
+            }
+            Ok(Event::End(_)) => {
+                if in_version_at_depth_one && depth == 2 {
+                    in_version_at_depth_one = false;
+                }
+                if depth > 0 {
+                    depth -= 1;
+                }
+            }
+            Ok(Event::Eof) | Err(_) => break,
+            _ => {}
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2231,5 +2596,291 @@ mod tests {
         assert_eq!(deps.len(), 1);
         // After max iterations the property remains unresolved — skip_reason is set.
         assert_eq!(deps[0].skip_reason, Some(MavenSkipReason::PropertyRef));
+    }
+
+    // ── maven updateDependency tests ───────────────────────────────────────
+
+    const SIMPLE_POM_FULL: &str = include_str!("../../tests/fixtures/maven/simple.pom.xml");
+    const MINIMUM_POM: &str = include_str!("../../tests/fixtures/maven/minimum.pom.xml");
+    const MINIMUM_SNAPSHOT_POM: &str =
+        include_str!("../../tests/fixtures/maven/minimum_snapshot.pom.xml");
+    const PRERELEASE_POM: &str = include_str!("../../tests/fixtures/maven/prerelease.pom.xml");
+    const FULL_CNB_POM: &str = include_str!("../../tests/fixtures/maven/full_cnb.pom.xml");
+
+    fn parse_xml_value(xml: &str, path: &[&str]) -> Option<String> {
+        // Simple XPath-like traversal using quick-xml to extract a text value.
+        use quick_xml::{events::Event, Reader};
+        let mut reader = Reader::from_str(xml);
+        reader.config_mut().trim_text(true);
+        reader.config_mut().check_end_names = false;
+        let mut stack: Vec<String> = Vec::new();
+        let mut result = None;
+        loop {
+            match reader.read_event() {
+                Ok(Event::Start(e)) => {
+                    let name =
+                        std::str::from_utf8(e.name().as_ref()).unwrap_or("").to_owned();
+                    stack.push(name);
+                }
+                Ok(Event::Text(e)) => {
+                    if result.is_none() {
+                        let text = std::str::from_utf8(e.as_ref()).unwrap_or("").trim().to_owned();
+                        if !text.is_empty() {
+                            let cur_path: Vec<&str> = stack.iter().map(|s| s.as_str()).collect();
+                            // Return first non-empty match where path ends with target path.
+                            if cur_path.len() >= path.len()
+                                && &cur_path[cur_path.len() - path.len()..] == path
+                            {
+                                result = Some(text);
+                            }
+                        }
+                    }
+                }
+                Ok(Event::End(_)) => {
+                    stack.pop();
+                }
+                Ok(Event::Eof) | Err(_) => break,
+                _ => {}
+            }
+        }
+        result
+    }
+
+    // Ported: "should update version" — maven/update.spec.ts line 15
+    #[test]
+    fn maven_update_dep_version() {
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some("org.example:foo".into()),
+            current_value: Some("0.0.1".into()),
+            new_value: Some("0.0.2".into()),
+            file_replace_position: 905,
+            ..Default::default()
+        };
+        let result = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
+        let value = parse_xml_value(
+            &result,
+            &["project", "dependencyManagement", "dependencies", "dependency", "version"],
+        );
+        assert_eq!(value.as_deref(), Some("0.0.2"));
+    }
+
+    // Ported: "should do simple replacement" — maven/update.spec.ts line 36
+    #[test]
+    fn maven_update_dep_simple_replacement() {
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some("org.example:foo".into()),
+            new_name: Some("org.example.new:foo".into()),
+            current_value: Some("0.0.1".into()),
+            new_value: Some("0.0.1".into()),
+            file_replace_position: 905,
+            ..Default::default()
+        };
+        let result = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
+        let group_id = parse_xml_value(
+            &result,
+            &["project", "dependencyManagement", "dependencies", "dependency", "groupId"],
+        );
+        assert_eq!(group_id.as_deref(), Some("org.example.new"));
+    }
+
+    // Ported: "should do full replacement" — maven/update.spec.ts line 58
+    #[test]
+    fn maven_update_dep_full_replacement() {
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some("org.example:foo".into()),
+            new_name: Some("org.example.new:bar".into()),
+            current_value: Some("0.0.1".into()),
+            new_value: Some("0.0.2".into()),
+            file_replace_position: 905,
+            ..Default::default()
+        };
+        let result = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
+        let group_id = parse_xml_value(
+            &result,
+            &["project", "dependencyManagement", "dependencies", "dependency", "groupId"],
+        );
+        let artifact_id = parse_xml_value(
+            &result,
+            &["project", "dependencyManagement", "dependencies", "dependency", "artifactId"],
+        );
+        let version = parse_xml_value(
+            &result,
+            &["project", "dependencyManagement", "dependencies", "dependency", "version"],
+        );
+        assert_eq!(group_id.as_deref(), Some("org.example.new"));
+        assert_eq!(artifact_id.as_deref(), Some("bar"));
+        assert_eq!(version.as_deref(), Some("0.0.2"));
+    }
+
+    // Ported: "should do replacement if version is first" — maven/update.spec.ts line 90
+    #[test]
+    fn maven_update_dep_replacement_version_first() {
+        let content = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\">\n  <dependencyManagement>\n    <dependencies>\n      <dependency>\n        <version>0.0.1</version>\n        <artifactId>foo</artifactId>\n        <groupId>org.example</groupId>\n      </dependency>\n    </dependencies>\n  </dependencyManagement>\n</project>\n";
+        // fileReplacePosition 132: offset in restContent after first '<'
+        // Let's find it dynamically
+        let first_lt = content.find('<').unwrap_or(0);
+        let rest = &content[first_lt..];
+        let pos = rest.find("0.0.1</version>").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some("org.example:foo".into()),
+            new_name: Some("org.example.new:bar".into()),
+            current_value: Some("0.0.1".into()),
+            new_value: Some("0.0.1".into()),
+            file_replace_position: pos,
+            ..Default::default()
+        };
+        let result = maven_update_dependency(content, &upgrade).unwrap();
+        let group_id = parse_xml_value(&result, &["project", "dependencyManagement", "dependencies", "dependency", "groupId"]);
+        let artifact_id = parse_xml_value(&result, &["project", "dependencyManagement", "dependencies", "dependency", "artifactId"]);
+        assert_eq!(group_id.as_deref(), Some("org.example.new"));
+        assert_eq!(artifact_id.as_deref(), Some("bar"));
+    }
+
+    // Ported: "should ignore replacement if name does not match" — maven/update.spec.ts line 134
+    #[test]
+    fn maven_update_dep_ignore_mismatched_name() {
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some("org.example.old:bar".into()),
+            new_name: Some("org.example:foo".into()),
+            current_value: Some("0.0.1".into()),
+            new_value: Some("0.0.1".into()),
+            file_replace_position: 905,
+            ..Default::default()
+        };
+        let result = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
+        // Should return original content (group doesn't match, so updateValue returns content unchanged)
+        // The result may differ due to version staying the same
+        // Just verify the group didn't change
+        let group_id = parse_xml_value(
+            &result,
+            &["project", "dependencyManagement", "dependencies", "dependency", "groupId"],
+        );
+        // groupId should remain "org.example" since name doesn't match
+        assert_eq!(group_id.as_deref(), Some("org.example"));
+    }
+
+    // Ported: "should update a cloud native buildpack version" — maven/update.spec.ts line 151
+    #[test]
+    fn maven_update_dep_cnb_version() {
+        let upgrade = MavenUpdateUpgrade {
+            datasource: Some("docker".into()),
+            dep_name: Some("paketo-buildpacks/nodejs".into()),
+            current_value: Some("6.1.1".into()),
+            new_value: Some("6.1.2".into()),
+            file_replace_position: 1430,
+            ..Default::default()
+        };
+        let result = maven_update_dependency(FULL_CNB_POM, &upgrade).unwrap();
+        assert!(result.contains("paketo-buildpacks/nodejs@6.1.2"));
+    }
+
+    // Ported: "should update a cloud native buildpack digest" — maven/update.spec.ts line 173
+    #[test]
+    fn maven_update_dep_cnb_digest() {
+        let upgrade = MavenUpdateUpgrade {
+            datasource: Some("docker".into()),
+            dep_name: Some("docker.io/paketobuildpacks/python".into()),
+            current_value: Some("2.22.1".into()),
+            new_value: Some("2.24.3".into()),
+            current_digest: Some("sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138".into()),
+            new_digest: Some("sha256:ab0cf962a92158f15d9e4fed6f905d5d292ed06a8e6291aa1ce3c33a5c78bde1".into()),
+            file_replace_position: 1634,
+            ..Default::default()
+        };
+        let result = maven_update_dependency(FULL_CNB_POM, &upgrade).unwrap();
+        assert!(result.contains("paketobuildpacks/python:2.24.3@sha256:ab0cf962a92158f15d9e4fed6f905d5d292ed06a8e6291aa1ce3c33a5c78bde1"));
+    }
+
+    // ── maven bumpPackageVersion tests ─────────────────────────────────────
+
+    // Ported: "bumps pom.xml version" — maven/update.spec.ts line 215
+    #[test]
+    fn maven_bump_version_patch() {
+        let result = maven_bump_package_version(SIMPLE_POM_FULL, "0.0.1", "patch");
+        let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
+        assert_eq!(version.as_deref(), Some("0.0.2"));
+    }
+
+    // Ported: "bumps pom.xml version keeping SNAPSHOT" — maven/update.spec.ts line 226
+    #[test]
+    fn maven_bump_version_snapshot_patch() {
+        let result = maven_bump_package_version(MINIMUM_SNAPSHOT_POM, "0.0.1-SNAPSHOT", "patch");
+        let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
+        assert_eq!(version.as_deref(), Some("0.0.2-SNAPSHOT"));
+    }
+
+    // Ported: "bumps pom.xml minor version keeping SNAPSHOT" — maven/update.spec.ts line 237
+    #[test]
+    fn maven_bump_version_snapshot_minor() {
+        let result = maven_bump_package_version(MINIMUM_SNAPSHOT_POM, "0.0.1-SNAPSHOT", "minor");
+        let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
+        assert_eq!(version.as_deref(), Some("0.1.0-SNAPSHOT"));
+    }
+
+    // Ported: "bumps pom.xml major version keeping SNAPSHOT" — maven/update.spec.ts line 248
+    #[test]
+    fn maven_bump_version_snapshot_major() {
+        let result = maven_bump_package_version(MINIMUM_SNAPSHOT_POM, "0.0.1-SNAPSHOT", "major");
+        let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
+        assert_eq!(version.as_deref(), Some("1.0.0-SNAPSHOT"));
+    }
+
+    // Ported: "bumps pom.xml version keeping qualifier with -SNAPSHOT" — maven/update.spec.ts line 259
+    #[test]
+    fn maven_bump_version_qualified_snapshot() {
+        let content = MINIMUM_SNAPSHOT_POM.replace("0.0.1-SNAPSHOT", "0.0.1-qualified-SNAPSHOT");
+        let result = maven_bump_package_version(&content, "0.0.1-qualified-SNAPSHOT", "patch");
+        let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
+        assert_eq!(version.as_deref(), Some("0.0.2-qualified-SNAPSHOT"));
+    }
+
+    // Ported: "does not bump version twice" — maven/update.spec.ts line 273
+    #[test]
+    fn maven_bump_version_not_twice() {
+        let result1 = maven_bump_package_version(SIMPLE_POM_FULL, "0.0.1", "patch");
+        let bumped = &result1.bumped_content;
+        let result2 = maven_bump_package_version(bumped, "0.0.1", "patch");
+        // Second bump should not change (version is 0.0.2, not 0.0.1)
+        assert_eq!(result2.bumped_content, *bumped);
+    }
+
+    // Ported: "does not bump version if version is not a semantic version" — maven/update.spec.ts line 288
+    #[test]
+    fn maven_bump_version_non_semver() {
+        let result = maven_bump_package_version(MINIMUM_POM, "1", "patch");
+        let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
+        // Non-semver stays as-is
+        assert_eq!(version.as_deref(), Some("1"));
+    }
+
+    // Ported: "does not bump version if pom.xml has no version" — maven/update.spec.ts line 299
+    #[test]
+    fn maven_bump_version_no_version() {
+        let result = maven_bump_package_version(MINIMUM_POM, "", "patch");
+        assert_eq!(result.bumped_content, MINIMUM_POM);
+    }
+
+    // Ported: "returns content if bumping errors" — maven/update.spec.ts line 305
+    #[test]
+    fn maven_bump_version_error_returns_content() {
+        // Invalid bump_version → returns original content
+        let result = maven_bump_package_version(SIMPLE_POM_FULL, "0.0.1", "invalid_bump_type");
+        assert_eq!(result.bumped_content, SIMPLE_POM_FULL);
+    }
+
+    // Ported: "bumps pom.xml version to SNAPSHOT with prerelease" — maven/update.spec.ts line 314
+    #[test]
+    fn maven_bump_version_prerelease_adds_snapshot() {
+        let result = maven_bump_package_version(SIMPLE_POM_FULL, "0.0.1", "prerelease");
+        let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
+        assert_eq!(version.as_deref(), Some("0.0.2-SNAPSHOT"));
+    }
+
+    // Ported: "bumps pom.xml version with prerelease semver level" — maven/update.spec.ts line 325
+    #[test]
+    fn maven_bump_version_prerelease_increment() {
+        let result = maven_bump_package_version(PRERELEASE_POM, "1.0.0-1", "prerelease");
+        let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
+        assert_eq!(version.as_deref(), Some("1.0.0-2"));
     }
 }
