@@ -631,7 +631,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/post-update/node-version.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/node-version.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/npm.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/npm.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/pnpm.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/pnpm.spec.ts.md) |
-| `lib/modules/manager/npm/post-update/rules.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/rules.spec.ts.md) |
+| `lib/modules/manager/npm/post-update/rules.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/rules.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/yarn.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/yarn.spec.ts.md) |
 | `lib/modules/manager/npm/range.spec.ts` | Done | [details](lib/modules/manager/npm/range.spec.ts.md) |
 | `lib/modules/manager/npm/update/dependency/index.spec.ts` | Not done | [details](lib/modules/manager/npm/update/dependency/index.spec.ts.md) |

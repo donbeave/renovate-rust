@@ -3629,6 +3629,75 @@ chalk@^2.4.1:
         );
     }
 
+    // Ported: "returns mixed rules content" — manager/npm/post-update/rules.spec.ts line 64
+    #[test]
+    fn process_host_rules_mixed_content() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            host_type: Some("npm".to_owned()),
+            match_host: Some("https://registry.npmjs.org".to_owned()),
+            token: Some("token123".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            host_type: Some("npm".to_owned()),
+            match_host: Some("https://registry.other.org".to_owned()),
+            auth_type: Some("Basic".to_owned()),
+            token: Some("basictoken123".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            host_type: Some("npm".to_owned()),
+            match_host: Some("registry.company.com".to_owned()),
+            username: Some("user123".to_owned()),
+            password: Some("pass123".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        let res = process_host_rules();
+        // npmrc content
+        assert!(
+            res.additional_npmrc_content
+                .contains(&"//registry.npmjs.org:_authToken=token123".to_owned())
+        );
+        assert!(
+            res.additional_npmrc_content
+                .contains(&"//registry.other.org:_auth=basictoken123".to_owned())
+        );
+        assert!(
+            res.additional_npmrc_content
+                .contains(&"//registry.company.com/:username=user123".to_owned())
+        );
+        assert!(
+            res.additional_npmrc_content
+                .contains(&"//registry.company.com/:_password=cGFzczEyMw==".to_owned())
+        );
+        // yarnrc has both cleaned and raw URI forms for HTTP matchHosts
+        let yarn = res.additional_yarn_rc_yml.as_ref().unwrap();
+        assert_eq!(
+            yarn["npmRegistries"]["//https://registry.npmjs.org/"]["npmAuthToken"],
+            "token123"
+        );
+        assert_eq!(
+            yarn["npmRegistries"]["//registry.npmjs.org"]["npmAuthToken"],
+            "token123"
+        );
+        assert_eq!(
+            yarn["npmRegistries"]["//https://registry.other.org/"]["npmAuthIdent"],
+            "basictoken123"
+        );
+        assert_eq!(
+            yarn["npmRegistries"]["//registry.other.org"]["npmAuthIdent"],
+            "basictoken123"
+        );
+        assert_eq!(
+            yarn["npmRegistries"]["//registry.company.com/"]["npmAuthIdent"],
+            "user123:pass123"
+        );
+    }
+
     // Ported: "handles no .npmrc" — manager/npm/detect.spec.ts line 24
     #[test]
     fn detect_global_config_no_npmrc() {

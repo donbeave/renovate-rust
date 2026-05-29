@@ -60,8 +60,8 @@ pub fn validate_git_no_verify(value: &serde_json::Value) -> Result<Vec<String>, 
                     Some(s) => result.push(s.to_owned()),
                     None => {
                         return Err(
-                            "config error: gitNoVerify should be an array of strings".to_owned(),
-                        )
+                            "config error: gitNoVerify should be an array of strings".to_owned()
+                        );
                     }
                 }
             }
