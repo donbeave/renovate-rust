@@ -1493,6 +1493,32 @@ pub fn compose_npm_lock_file(parsed: &serde_json::Value, indent: &str) -> String
 
 /// Detect the indentation string used in a JSON document.
 ///
+/// Check if a `package.json` content string has a valid `packageManager` field.
+///
+/// A valid `packageManager` field has format `name@version` with both parts
+/// non-empty.  Returns `false` for invalid JSON, missing field, or missing `@`.
+///
+/// Mirrors `hasPackageManager()` from
+/// `lib/modules/manager/npm/extract/common/package-file.ts`.
+pub fn has_package_manager(package_json_content: &str) -> bool {
+    let json: serde_json::Value = match serde_json::from_str(package_json_content) {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
+    let pm = match json.get("packageManager").and_then(|v| v.as_str()) {
+        Some(s) if !s.is_empty() => s,
+        _ => return false,
+    };
+    // Must contain '@' and have both non-empty name and version parts.
+    match pm.rfind('@') {
+        Some(pos) if pos > 0 => {
+            let version = &pm[pos + 1..];
+            !version.is_empty()
+        }
+        _ => false,
+    }
+}
+
 /// Mirrors `detect-indent` npm package behavior: finds the smallest
 /// indentation unit used in the file; defaults to two spaces.
 fn detect_json_indent(content: &str) -> String {
@@ -5658,6 +5684,50 @@ chalk@^2.4.1:
         };
         let result = npm_update_dependency(input, &upgrade).unwrap();
         assert_eq!(result, expected);
+    }
+
+    // ── has_package_manager tests ─────────────────────────────────────────
+
+    // Ported: "returns true for a valid packageManager with name@version(e.g. pnpm@8.15.4)" — npm/extract/common/package-file.spec.ts line 20
+    #[test]
+    fn has_package_manager_valid_version() {
+        assert!(has_package_manager(r#"{"packageManager":"pnpm@8.15.4"}"#));
+    }
+
+    // Ported: "returns true for a valid range like npm@^9" — npm/extract/common/package-file.spec.ts line 31
+    #[test]
+    fn has_package_manager_range() {
+        assert!(has_package_manager(r#"{"packageManager":"npm@^9"}"#));
+    }
+
+    // Ported: "returns true for yarn classic pin yarn@1.22.19" — npm/extract/common/package-file.spec.ts line 38
+    #[test]
+    fn has_package_manager_yarn_classic() {
+        assert!(has_package_manager(r#"{"packageManager":"yarn@1.22.19"}"#));
+    }
+
+    // Ported: "returns false when packageManager does not contain '@' (e.g. 'npm')" — npm/extract/common/package-file.spec.ts line 45
+    #[test]
+    fn has_package_manager_no_at() {
+        assert!(!has_package_manager(r#"{"packageManager":"npm"}"#));
+    }
+
+    // Ported: "returns false when packageManager is missing" — npm/extract/common/package-file.spec.ts line 52
+    #[test]
+    fn has_package_manager_missing() {
+        assert!(!has_package_manager(r#"{"name":"demo"}"#));
+    }
+
+    // Ported: "returns false when package.json is invalid" — npm/extract/common/package-file.spec.ts line 57
+    #[test]
+    fn has_package_manager_invalid_json() {
+        assert!(!has_package_manager("{ not: valid json"));
+    }
+
+    // Ported: "returns false if packageManager is an empty string" — npm/extract/common/package-file.spec.ts line 62
+    #[test]
+    fn has_package_manager_empty_string() {
+        assert!(!has_package_manager(r#"{"packageManager":""}"#));
     }
 
     // ── pnpm update dependency tests ──────────────────────────────────────
