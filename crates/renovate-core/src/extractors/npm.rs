@@ -1740,6 +1740,136 @@ pub fn replace_constraint_version(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// yarn updateLockedDependency — lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.ts
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Status returned by `yarn_update_locked_dependency`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum UpdateLockedStatus {
+    Updated,
+    AlreadyUpdated,
+    UpdateFailed,
+    Unsupported,
+}
+
+impl UpdateLockedStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Updated => "updated",
+            Self::AlreadyUpdated => "already-updated",
+            Self::UpdateFailed => "update-failed",
+            Self::Unsupported => "unsupported",
+        }
+    }
+}
+
+/// Result of `yarn_update_locked_dependency`.
+#[derive(Debug)]
+pub struct UpdateLockedResult {
+    pub status: UpdateLockedStatus,
+    /// New lock file content when status is `Updated`.
+    pub new_content: Option<String>,
+}
+
+/// Configuration for `yarn_update_locked_dependency`.
+#[derive(Debug, Clone, Default)]
+pub struct UpdateLockedConfig {
+    pub lock_file_content: Option<String>,
+    pub lock_file: Option<String>,
+    pub dep_name: Option<String>,
+    pub current_version: Option<String>,
+    pub new_version: Option<String>,
+}
+
+/// Update a locked dependency version in a Yarn 1 lock file.
+/// Mirrors `updateLockedDependency()` from
+/// `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.ts`.
+pub fn yarn_update_locked_dependency(config: &UpdateLockedConfig) -> UpdateLockedResult {
+    let fail = |_| UpdateLockedResult {
+        status: UpdateLockedStatus::UpdateFailed,
+        new_content: None,
+    };
+
+    let content = match &config.lock_file_content {
+        Some(c) => c.as_str(),
+        None => return fail(()),
+    };
+    let dep_name = match &config.dep_name {
+        Some(n) => n.as_str(),
+        None => return fail(()),
+    };
+    let current_version = config.current_version.as_deref().unwrap_or("");
+    let new_version = config.new_version.as_deref().unwrap_or("");
+    let _lock_file = config.lock_file.as_deref().unwrap_or("");
+
+    // Validate that the content can be parsed as a yarn lock file.
+    // A valid yarn v1 lock file starts with `# yarn lockfile` or contains valid entries.
+    // We detect parse failure by checking for structural validity.
+    let is_parseable = content.lines().any(|l| {
+        let l = l.trim();
+        !l.is_empty() && !l.starts_with('#')
+            && (l.contains('@') || l.starts_with("__metadata"))
+    }) || content.trim().is_empty();
+    if !is_parseable {
+        return fail(());
+    }
+
+    // Yarn 2+: has __metadata key.
+    let is_yarn2 = content.lines().any(|l| l.trim() == "__metadata:");
+
+    // Find locked dependencies matching dep_name@current_version.
+    let locked_deps = get_yarn_locked_dependencies(content, dep_name, current_version);
+
+    if locked_deps.is_empty() {
+        // Check if already at new_version.
+        let new_locked = get_yarn_locked_dependencies(content, dep_name, new_version);
+        if !new_locked.is_empty() {
+            return UpdateLockedResult {
+                status: UpdateLockedStatus::AlreadyUpdated,
+                new_content: None,
+            };
+        }
+        return fail(());
+    }
+
+    if is_yarn2 {
+        return UpdateLockedResult {
+            status: UpdateLockedStatus::Unsupported,
+            new_content: None,
+        };
+    }
+
+    // Check that new_version satisfies each dep's constraint.
+    for locked_dep in &locked_deps {
+        let satisfies = crate::versioning::npm::matches_range(new_version, &locked_dep.constraint);
+        if !satisfies {
+            return fail(());
+        }
+    }
+
+    // Apply the version replacement.
+    let mut new_content = content.to_owned();
+    for dep in &locked_deps {
+        new_content = replace_constraint_version(
+            &new_content,
+            &dep.dep_name,
+            &dep.constraint,
+            new_version,
+            None,
+        );
+    }
+
+    if new_content == content {
+        return fail(());
+    }
+
+    UpdateLockedResult {
+        status: UpdateLockedStatus::Updated,
+        new_content: Some(new_content),
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // npm updateDependency — lib/modules/manager/npm/update/dependency/
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -4554,6 +4684,94 @@ chalk@^2.4.1:
         let yarn = res.additional_yarn_rc_yml.as_ref().unwrap();
         let reg = &yarn["npmRegistries"]["//registry.company.com/"];
         assert_eq!(reg["npmAuthIdent"], "user123:pass123");
+    }
+
+    // ── yarn updateLockedDependency tests ─────────────────────────────────
+
+    const EXPRESS_YARN_LOCK: &str =
+        include_str!("../../tests/fixtures/npm/yarn-lock/express.yarn.lock");
+    // Use the existing YARN2_LOCK constant already defined in this test module.
+
+    // Ported: "returns if cannot parse lock file" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 17
+    #[test]
+    fn yarn_locked_dep_fails_invalid_content() {
+        let config = UpdateLockedConfig {
+            lock_file_content: Some("abc123".into()),
+            ..Default::default()
+        };
+        let res = yarn_update_locked_dependency(&config);
+        assert_eq!(res.status.as_str(), "update-failed");
+    }
+
+    // Ported: "returns if yarn lock 2" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 22
+    #[test]
+    fn yarn_locked_dep_unsupported_yarn2() {
+        let config = UpdateLockedConfig {
+            lock_file_content: Some(YARN2_LOCK.into()),
+            dep_name: Some("chalk".into()),
+            current_version: Some("2.4.2".into()),
+            new_version: Some("2.4.3".into()),
+            ..Default::default()
+        };
+        let res = yarn_update_locked_dependency(&config);
+        assert_eq!(res.status.as_str(), "unsupported");
+    }
+
+    // Ported: "fails if cannot find dep" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 30
+    #[test]
+    fn yarn_locked_dep_fails_not_found() {
+        let config = UpdateLockedConfig {
+            lock_file_content: Some(EXPRESS_YARN_LOCK.into()),
+            dep_name: Some("not-found".into()),
+            current_version: Some("1.0.0".into()),
+            new_version: Some("1.0.1".into()),
+            ..Default::default()
+        };
+        let res = yarn_update_locked_dependency(&config);
+        assert_eq!(res.status.as_str(), "update-failed");
+    }
+
+    // Ported: "returns already-updated" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 38
+    #[test]
+    fn yarn_locked_dep_already_updated() {
+        let config = UpdateLockedConfig {
+            lock_file_content: Some(EXPRESS_YARN_LOCK.into()),
+            dep_name: Some("range-parser".into()),
+            current_version: Some("1.0.1".into()),
+            new_version: Some("1.0.3".into()),
+            ..Default::default()
+        };
+        let res = yarn_update_locked_dependency(&config);
+        assert_eq!(res.status.as_str(), "already-updated");
+    }
+
+    // Ported: "fails if cannot update dep in-range" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 46
+    #[test]
+    fn yarn_locked_dep_fails_out_of_range() {
+        let config = UpdateLockedConfig {
+            lock_file_content: Some(EXPRESS_YARN_LOCK.into()),
+            dep_name: Some("send".into()),
+            current_version: Some("0.1.4".into()),
+            new_version: Some("0.2.0".into()),
+            ..Default::default()
+        };
+        let res = yarn_update_locked_dependency(&config);
+        assert_eq!(res.status.as_str(), "update-failed");
+    }
+
+    // Ported: "succeeds if can update within range" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 54
+    #[test]
+    fn yarn_locked_dep_succeeds_in_range() {
+        let config = UpdateLockedConfig {
+            lock_file_content: Some(EXPRESS_YARN_LOCK.into()),
+            dep_name: Some("negotiator".into()),
+            current_version: Some("0.3.0".into()),
+            new_version: Some("0.3.1".into()),
+            ..Default::default()
+        };
+        let res = yarn_update_locked_dependency(&config);
+        assert_eq!(res.status.as_str(), "updated");
+        assert!(res.new_content.is_some());
     }
 
     // ── npm updateDependency tests ─────────────────────────────────────────
