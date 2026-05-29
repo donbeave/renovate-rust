@@ -5,22 +5,22 @@
 ## `lib/util/cache/package/backend.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/backend.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** not-applicable
 
 ### `util/cache/package/backend`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns undefined when not initialized | 47 | pending | — | — | —|
-| silently ignores set when not initialized | 52 | pending | — | — | —|
-| silently ignores destroy when not initialized | 58 | pending | — | — | —|
-| initializes file backend | 62 | pending | — | — | —|
-| initializes redis backend | 69 | pending | — | — | —|
-| initializes sqlite backend | 79 | pending | — | — | —|
-| delegates get and set to backend instance | 88 | pending | — | — | —|
-| re-init destroys previous backend | 105 | pending | — | — | —|
-| clears backend when re-init has no config | 121 | pending | — | — | —|
-| destroys backend and clears state | 132 | pending | — | — | —|
+| returns undefined when not initialized | 47 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| silently ignores set when not initialized | 52 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| silently ignores destroy when not initialized | 58 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| initializes file backend | 62 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| initializes redis backend | 69 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| initializes sqlite backend | 79 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| delegates get and set to backend instance | 88 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| re-init destroys previous backend | 105 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| clears backend when re-init has no config | 121 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
+| destroys backend and clears state | 132 | not-applicable | — | — | mocking framework internals — vi.mock on PackageCacheFile/PackageCacheRedis/PackageCacheSqlite; TypeScript cache backend initialization|
 
 ---
 

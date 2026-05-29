@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,067 / 11,666 total tests ported (43%) · pending 4,411 · not-applicable 2,188 (19% of total) — updated 2026-05-29
+**Progress:** 5,067 / 11,666 total tests ported (43%) · pending 4,353 · not-applicable 2,246 (19% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -243,7 +243,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/nuget/common.spec.ts` | Done | [details](lib/modules/datasource/nuget/common.spec.ts.md) |
 | `lib/modules/datasource/maven/cache.spec.ts` | Not done | [details](lib/modules/datasource/maven/cache.spec.ts.md) |
 | `lib/modules/datasource/maven/common.spec.ts` | Done | [details](lib/modules/datasource/maven/common.spec.ts.md) |
-| `lib/modules/datasource/docker/dockerhub-cache.spec.ts` | Not done | [details](lib/modules/datasource/docker/dockerhub-cache.spec.ts.md) |
+| `lib/modules/datasource/docker/dockerhub-cache.spec.ts` | Done | [details](lib/modules/datasource/docker/dockerhub-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) |
 | `lib/modules/datasource/bitrise/index.spec.ts` | Done | [details](lib/modules/datasource/bitrise/index.spec.ts.md) |
@@ -274,7 +274,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/presets/gitlab/index.spec.ts` | Not done | [details](lib/config/presets/gitlab/index.spec.ts.md) |
 | `lib/config/presets/http/index.spec.ts` | Not done | [details](lib/config/presets/http/index.spec.ts.md) |
 | `lib/config/presets/internal/group.spec.ts` | Not done | [details](lib/config/presets/internal/group.spec.ts.md) |
-| `lib/config/presets/internal/index.spec.ts` | Not done | [details](lib/config/presets/internal/index.spec.ts.md) |
+| `lib/config/presets/internal/index.spec.ts` | Done | [details](lib/config/presets/internal/index.spec.ts.md) |
 | `lib/config/presets/internal/monorepos.spec.ts` | Done | [details](lib/config/presets/internal/monorepos.spec.ts.md) |
 | `lib/config/presets/internal/schedule.spec.ts` | Done | [details](lib/config/presets/internal/schedule.spec.ts.md) |
 | `lib/config/presets/internal/workarounds.spec.ts` | Done | [details](lib/config/presets/internal/workarounds.spec.ts.md) |
@@ -433,7 +433,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/jsonata.spec.ts` | Done | [details](lib/util/jsonata.spec.ts.md) |
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
-| `lib/modules/platform/comment.spec.ts` | Not done | [details](lib/modules/platform/comment.spec.ts.md) |
+| `lib/modules/platform/comment.spec.ts` | Done | [details](lib/modules/platform/comment.spec.ts.md) |
 | `lib/modules/platform/scm.spec.ts` | Not done | [details](lib/modules/platform/scm.spec.ts.md) |
 | `lib/modules/platform/pr-body.spec.ts` | Done | [details](lib/modules/platform/pr-body.spec.ts.md) |
 | `lib/modules/platform/index.spec.ts` | Not done | [details](lib/modules/platform/index.spec.ts.md) |
@@ -744,7 +744,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/utils/pr-body.spec.ts` | Done | [details](lib/modules/platform/utils/pr-body.spec.ts.md) |
 | `lib/modules/platform/utils/read-only-issue-body.spec.ts` | Done | [details](lib/modules/platform/utils/read-only-issue-body.spec.ts.md) |
 | `lib/util/cache/memory/index.spec.ts` | Done | [details](lib/util/cache/memory/index.spec.ts.md) |
-| `lib/util/cache/package/backend.spec.ts` | Not done | [details](lib/util/cache/package/backend.spec.ts.md) |
+| `lib/util/cache/package/backend.spec.ts` | Done | [details](lib/util/cache/package/backend.spec.ts.md) |
 | `lib/util/cache/package/impl/file.spec.ts` | Not done | [details](lib/util/cache/package/impl/file.spec.ts.md) |
 | `lib/util/cache/package/impl/redis.spec.ts` | Not done | [details](lib/util/cache/package/impl/redis.spec.ts.md) |
 | `lib/util/cache/package/impl/sqlite.spec.ts` | Not done | [details](lib/util/cache/package/impl/sqlite.spec.ts.md) |
@@ -769,10 +769,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/git/author.spec.ts` | Done | [details](lib/util/git/author.spec.ts.md) |
 | `lib/util/git/behind-base-branch-cache.spec.ts` | Done | [details](lib/util/git/behind-base-branch-cache.spec.ts.md) |
 | `lib/util/git/config.spec.ts` | Done | [details](lib/util/git/config.spec.ts.md) |
-| `lib/util/git/conflicts-cache.spec.ts` | Not done | [details](lib/util/git/conflicts-cache.spec.ts.md) |
+| `lib/util/git/conflicts-cache.spec.ts` | Done | [details](lib/util/git/conflicts-cache.spec.ts.md) |
 | `lib/util/git/errors.spec.ts` | Done | [details](lib/util/git/errors.spec.ts.md) |
 | `lib/util/git/index.spec.ts` | Not done | [details](lib/util/git/index.spec.ts.md) |
-| `lib/util/git/modified-cache.spec.ts` | Not done | [details](lib/util/git/modified-cache.spec.ts.md) |
+| `lib/util/git/modified-cache.spec.ts` | Done | [details](lib/util/git/modified-cache.spec.ts.md) |
 | `lib/util/git/pristine.spec.ts` | Done | [details](lib/util/git/pristine.spec.ts.md) |
 | `lib/util/git/private-key.spec.ts` | Done | [details](lib/util/git/private-key.spec.ts.md) |
 | `lib/util/git/semantic.spec.ts` | Done | [details](lib/util/git/semantic.spec.ts.md) |
