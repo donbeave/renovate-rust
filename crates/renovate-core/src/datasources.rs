@@ -227,6 +227,119 @@ fn is_gitlab_url(url: &str) -> bool {
     url.contains("gitlab.com") || url.contains("gitlab.")
 }
 
+/// Config for constraint filtering.
+pub struct ConstraintsFilteringConfig {
+    pub constraints_filtering: Option<String>,
+    pub constraints: Option<std::collections::HashMap<String, String>>,
+}
+
+/// Apply constraint-based filtering to a release result.
+///
+/// When `constraintsFiltering` is not `"strict"`, constraints are removed
+/// from releases but all releases are kept.  When strict, releases are
+/// filtered to only those whose constraints satisfy the config constraints.
+///
+/// Mirrors `applyConstraintsFiltering()` from `lib/modules/datasource/common.ts`.
+pub fn apply_constraints_filtering(
+    mut release_result: ReleaseResult,
+    config: &ConstraintsFilteringConfig,
+) -> ReleaseResult {
+    if config.constraints_filtering.as_deref() != Some("strict") {
+        // Remove constraints from all releases but keep them.
+        for release in &mut release_result.releases {
+            release.constraints = None;
+        }
+        return release_result;
+    }
+
+    // Strict mode: filter releases.
+    let config_constraints = match &config.constraints {
+        Some(c) if !c.is_empty() => c,
+        _ => {
+            // No config constraints → keep all, remove release constraints.
+            for release in &mut release_result.releases {
+                release.constraints = None;
+            }
+            return release_result;
+        }
+    };
+
+    let mut kept_releases = Vec::new();
+    for mut release in release_result.releases {
+        let release_constraints = release.constraints.take();
+
+        let keep = match release_constraints {
+            None => true, // no release constraints → keep
+            Some(rc) => {
+                let rc_map = match rc.as_object() {
+                    Some(m) => m,
+                    None => {
+                        kept_releases.push(release);
+                        continue;
+                    }
+                };
+
+                let mut satisfies_all = true;
+                for (name, config_constraint) in config_constraints {
+                    // Check if this constraint name is in the release.
+                    let release_constraint_arr = rc_map.get(name);
+                    let release_arr = match release_constraint_arr {
+                        None => {
+                            // No constraint for this name → keep
+                            continue;
+                        }
+                        Some(arr) => arr,
+                    };
+
+                    // Get the constraint values.
+                    let values: Vec<String> = if let Some(arr) = release_arr.as_array() {
+                        arr.iter()
+                            .filter_map(|v| v.as_str().map(|s| s.to_owned()))
+                            .collect()
+                    } else {
+                        Vec::new()
+                    };
+
+                    if values.is_empty() {
+                        // Empty array → keep
+                        continue;
+                    }
+
+                    // Check if any release constraint satisfies the config constraint.
+                    let satisfies = values.iter().any(|rc_val| {
+                        // Exact match
+                        if config_constraint == rc_val {
+                            return true;
+                        }
+                        // Config is a range, release has exact version: check if version is in range
+                        if crate::versioning::npm::matches_range(rc_val, config_constraint) {
+                            return true;
+                        }
+                        // Release has a range, config has exact version: check if version is in range
+                        if crate::versioning::npm::matches_range(config_constraint, rc_val) {
+                            return true;
+                        }
+                        false
+                    });
+
+                    if !satisfies {
+                        satisfies_all = false;
+                        break;
+                    }
+                }
+                satisfies_all
+            }
+        };
+
+        if keep {
+            kept_releases.push(release);
+        }
+    }
+
+    release_result.releases = kept_releases;
+    release_result
+}
+
 /// The default versioning ID used when no datasource-specific one is set.
 /// Mirrors `defaultVersioning = semverCoerced` from `lib/modules/versioning/index.ts`.
 pub const DATASOURCE_DEFAULT_VERSIONING: &str = "semver-coerced";
@@ -517,5 +630,177 @@ mod registry_tests {
         };
         add_metadata(&mut dep, "helm", "kube-prometheus");
         assert_eq!(dep.source_directory.as_deref(), Some("existing-dir"));
+    }
+
+    // ── apply_constraints_filtering tests ─────────────────────────────────
+
+    // Ported: "should remove constraints from releases if constraintsFiltering is not strict" — modules/datasource/common.spec.ts line 201
+    #[test]
+    fn constraints_filtering_non_strict_removes_constraints() {
+        let result = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "1.0.0".into(),
+                    constraints: Some(serde_json::json!({"foo": ["^1.0.0"]})),
+                    ..Default::default()
+                },
+                Release {
+                    version: "2.0.0".into(),
+                    constraints: Some(serde_json::json!({"foo": ["^2.0.0"]})),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let config = ConstraintsFilteringConfig {
+            constraints_filtering: Some("none".into()),
+            constraints: None,
+        };
+        let res = apply_constraints_filtering(result, &config);
+        assert_eq!(res.releases.len(), 2);
+        assert!(res.releases[0].constraints.is_none());
+        assert!(res.releases[1].constraints.is_none());
+    }
+
+    // Ported: "should filter releases based on constraints if constraintsFiltering is strict" — modules/datasource/common.spec.ts line 230
+    #[test]
+    fn constraints_filtering_strict_filters_releases() {
+        let result = ReleaseResult {
+            releases: vec![
+                Release { version: "1.0.0".into(), ..Default::default() },
+                Release {
+                    version: "2.0.0".into(),
+                    constraints: Some(serde_json::json!({"baz": [null]})),
+                    ..Default::default()
+                },
+                Release {
+                    version: "3.0.0".into(),
+                    constraints: Some(serde_json::json!({"baz": ["^0.9.0", "invalid"]})),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let mut constraints = std::collections::HashMap::new();
+        constraints.insert("baz".into(), "^1.0.0".into());
+        let config = ConstraintsFilteringConfig {
+            constraints_filtering: Some("strict".into()),
+            constraints: Some(constraints),
+        };
+        let res = apply_constraints_filtering(result, &config);
+        // 1.0.0 (no constraints) and 2.0.0 (null = any) are kept; 3.0.0 fails
+        assert_eq!(res.releases.len(), 2);
+        let versions: Vec<&str> = res.releases.iter().map(|r| r.version.as_str()).collect();
+        assert!(versions.contains(&"1.0.0"));
+        assert!(versions.contains(&"2.0.0"));
+    }
+
+    // Ported: "should return all releases when no configConstraints" — modules/datasource/common.spec.ts line 250
+    #[test]
+    fn constraints_filtering_strict_no_config_constraints() {
+        let result = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "1.0.0".into(),
+                    constraints: Some(serde_json::json!({"python": ["^1.0.0"]})),
+                    ..Default::default()
+                },
+                Release { version: "2.0.0".into(), ..Default::default() },
+            ],
+            ..Default::default()
+        };
+        let config = ConstraintsFilteringConfig {
+            constraints_filtering: Some("strict".into()),
+            constraints: None,
+        };
+        let res = apply_constraints_filtering(result, &config);
+        assert_eq!(res.releases.len(), 2);
+    }
+
+    // Ported: "should match exact constraints" — modules/datasource/common.spec.ts line 268
+    #[test]
+    fn constraints_filtering_exact_match() {
+        let result = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "1.0.0".into(),
+                    constraints: Some(serde_json::json!({"python": ["^1.0.0"]})),
+                    ..Default::default()
+                },
+                Release {
+                    version: "2.0.0".into(),
+                    constraints: Some(serde_json::json!({"python": [">=3.8"]})),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let mut constraints = std::collections::HashMap::new();
+        constraints.insert("python".into(), ">=3.8".into());
+        let config = ConstraintsFilteringConfig {
+            constraints_filtering: Some("strict".into()),
+            constraints: Some(constraints),
+        };
+        let res = apply_constraints_filtering(result, &config);
+        assert_eq!(res.releases.len(), 1);
+        assert_eq!(res.releases[0].version, "2.0.0");
+    }
+
+    // Ported: "should handle config with a range constraint, and a release with an exact version" — common.spec.ts line 287
+    #[test]
+    fn constraints_filtering_range_config_exact_release() {
+        let result = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "1.0.0".into(),
+                    constraints: Some(serde_json::json!({"python": ["1.0.0"]})),
+                    ..Default::default()
+                },
+                Release {
+                    version: "2.0.0".into(),
+                    constraints: Some(serde_json::json!({"python": ["3.8.1"]})),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let mut constraints = std::collections::HashMap::new();
+        constraints.insert("python".into(), ">=3.8".into());
+        let config = ConstraintsFilteringConfig {
+            constraints_filtering: Some("strict".into()),
+            constraints: Some(constraints),
+        };
+        let res = apply_constraints_filtering(result, &config);
+        assert_eq!(res.releases.len(), 1);
+        assert_eq!(res.releases[0].version, "2.0.0");
+    }
+
+    // Ported: "should handle config with an exact version, and a release with a range constraint" — common.spec.ts line 306
+    #[test]
+    fn constraints_filtering_exact_config_range_release() {
+        let result = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "1.0.0".into(),
+                    constraints: Some(serde_json::json!({"python": ["1.0.0"]})),
+                    ..Default::default()
+                },
+                Release {
+                    version: "2.0.0".into(),
+                    constraints: Some(serde_json::json!({"python": ["3.8.1"]})),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let mut constraints = std::collections::HashMap::new();
+        constraints.insert("python".into(), "3.8.1".into());
+        let config = ConstraintsFilteringConfig {
+            constraints_filtering: Some("strict".into()),
+            constraints: Some(constraints),
+        };
+        let res = apply_constraints_filtering(result, &config);
+        assert_eq!(res.releases.len(), 1);
+        assert_eq!(res.releases[0].version, "2.0.0");
     }
 }

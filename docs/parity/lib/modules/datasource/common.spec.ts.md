@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/common.spec.ts
-**Total tests:** 30 | **Ported:** 21 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 27 | **Actionable:** 30 | **Status:** partial
 
 ### `modules/datasource/common › getDatasourceFor`
 
@@ -60,12 +60,12 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should remove constraints from releases if constraintsFiltering is not strict | 201 | pending | — | — | — |
-| should filter releases based on constraints if constraintsFiltering is strict | 230 | pending | — | — | — |
-| should return all releases when no configConstraints | 250 | pending | — | — | — |
-| should match exact constraints | 268 | pending | — | — | — |
-| should handle config with a range constraint, and a release with an exact version | 287 | pending | — | — | — |
-| should handle config with an exact version, and a release with a range constraint | 306 | pending | — | — | — |
+| should remove constraints from releases if constraintsFiltering is not strict | 201 | ported | `datasources.rs` | `constraints_filtering_non_strict_removes_constraints` | —  | — | — | — |
+| should filter releases based on constraints if constraintsFiltering is strict | 230 | ported | `datasources.rs` | `constraints_filtering_strict_filters_releases` | —  | — | — | — |
+| should return all releases when no configConstraints | 250 | ported | `datasources.rs` | `constraints_filtering_strict_no_config_constraints` | —  | — | — | — |
+| should match exact constraints | 268 | ported | `datasources.rs` | `constraints_filtering_exact_match` | —  | — | — | — |
+| should handle config with a range constraint, and a release with an exact version | 287 | ported | `datasources.rs` | `constraints_filtering_range_config_exact_release` | —  | — | — | — |
+| should handle config with an exact version, and a release with a range constraint | 306 | ported | `datasources.rs` | `constraints_filtering_exact_config_range_release` | —  | — | — | — |
 | should allow constraintsVersioning to override the datasource's default versioning | 325 | pending | — | — | — |
 
 ### `modules/datasource/common › applyVersionCompatibility`

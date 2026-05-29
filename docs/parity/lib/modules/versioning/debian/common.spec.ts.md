@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/debian/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/debian/common.spec.ts
-**Total tests:** 5 | **Ported:** 4 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `modules/versioning/debian/common`
 
