@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,979 · not-applicable 2,618 (22% of total) — updated 2026-05-29
+**Progress:** 5,069 / 11,666 total tests ported (43%) · pending 3,927 · not-applicable 2,670 (23% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -258,7 +258,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/rubygems/index.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/index.spec.ts.md) |
 | `lib/modules/datasource/crate/index.spec.ts` | Not done | [details](lib/modules/datasource/crate/index.spec.ts.md) |
 | `lib/modules/datasource/maven/schema.spec.ts` | Done | [details](lib/modules/datasource/maven/schema.spec.ts.md) |
-| `lib/modules/datasource/maven/util.spec.ts` | Not done | [details](lib/modules/datasource/maven/util.spec.ts.md) |
+| `lib/modules/datasource/maven/util.spec.ts` | Done | [details](lib/modules/datasource/maven/util.spec.ts.md) |
 | `lib/modules/datasource/maven/s3.spec.ts` | Not done | [details](lib/modules/datasource/maven/s3.spec.ts.md) |
 | `lib/modules/datasource/maven/index.spec.ts` | Not done | [details](lib/modules/datasource/maven/index.spec.ts.md) |
 | `lib/config/migrate-validate.spec.ts` | Not done | [details](lib/config/migrate-validate.spec.ts.md) |
@@ -419,7 +419,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/assign-keys.spec.ts` | Done | [details](lib/util/assign-keys.spec.ts.md) |
 | `lib/util/check-token.spec.ts` | Done | [details](lib/util/check-token.spec.ts.md) |
 | `lib/util/minimatch.spec.ts` | Done | [details](lib/util/minimatch.spec.ts.md) |
-| `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
+| `lib/util/emoji.spec.ts` | Done | [details](lib/util/emoji.spec.ts.md) |
 | `lib/util/unicode.spec.ts` | Done | [details](lib/util/unicode.spec.ts.md) |
 | `lib/util/pretty-time.spec.ts` | Done | [details](lib/util/pretty-time.spec.ts.md) |
 | `lib/util/array.spec.ts` | Done | [details](lib/util/array.spec.ts.md) |
@@ -560,7 +560,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/copier/artifacts.spec.ts` | Not done | [details](lib/modules/manager/copier/artifacts.spec.ts.md) |
 | `lib/modules/manager/copier/update.spec.ts` | Done | [details](lib/modules/manager/copier/update.spec.ts.md) |
 | `lib/modules/manager/custom/index.spec.ts` | Done | [details](lib/modules/manager/custom/index.spec.ts.md) |
-| `lib/modules/manager/custom/jsonata/index.spec.ts` | Not done | [details](lib/modules/manager/custom/jsonata/index.spec.ts.md) |
+| `lib/modules/manager/custom/jsonata/index.spec.ts` | Done | [details](lib/modules/manager/custom/jsonata/index.spec.ts.md) |
 | `lib/modules/manager/custom/regex/index.spec.ts` | Not done | [details](lib/modules/manager/custom/regex/index.spec.ts.md) |
 | `lib/modules/manager/custom/regex/utils.spec.ts` | Done | [details](lib/modules/manager/custom/regex/utils.spec.ts.md) |
 | `lib/modules/manager/deno/artifacts.spec.ts` | Not done | [details](lib/modules/manager/deno/artifacts.spec.ts.md) |
@@ -585,7 +585,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/gradle/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gradle/artifacts.spec.ts.md) |
 | `lib/modules/manager/gradle/extract/catalog.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract/catalog.spec.ts.md) |
 | `lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts` | Done | [details](lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts.md) |
-| `lib/modules/manager/gradle/parser/common.spec.ts` | Not done | [details](lib/modules/manager/gradle/parser/common.spec.ts.md) |
+| `lib/modules/manager/gradle/parser/common.spec.ts` | Done | [details](lib/modules/manager/gradle/parser/common.spec.ts.md) |
 | `lib/modules/manager/gradle/parser.spec.ts` | Done | [details](lib/modules/manager/gradle/parser.spec.ts.md) |
 | `lib/modules/manager/gradle/update.spec.ts` | Done | [details](lib/modules/manager/gradle/update.spec.ts.md) |
 | `lib/modules/manager/gradle/utils.spec.ts` | Done | [details](lib/modules/manager/gradle/utils.spec.ts.md) |
