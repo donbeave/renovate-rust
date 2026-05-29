@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,045 / 11,666 total tests ported (43%) · pending 5,023 · not-applicable 1,598 (14% of total) — updated 2026-05-29
+**Progress:** 5,045 / 11,666 total tests ported (43%) · pending 5,006 · not-applicable 1,615 (14% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -762,7 +762,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/exec/env.spec.ts` | Done | [details](lib/util/exec/env.spec.ts.md) |
 | `lib/util/exec/hermit.spec.ts` | Not done | [details](lib/util/exec/hermit.spec.ts.md) |
 | `lib/util/exec/index.spec.ts` | Not done | [details](lib/util/exec/index.spec.ts.md) |
-| `lib/util/exec/utils.spec.ts` | Not done | [details](lib/util/exec/utils.spec.ts.md) |
+| `lib/util/exec/utils.spec.ts` | Done | [details](lib/util/exec/utils.spec.ts.md) |
 | `lib/util/fs/index.spec.ts` | Done | [details](lib/util/fs/index.spec.ts.md) |
 | `lib/util/fs/util.spec.ts` | Done | [details](lib/util/fs/util.spec.ts.md) |
 | `lib/util/git/auth.spec.ts` | Not done | [details](lib/util/git/auth.spec.ts.md) |
