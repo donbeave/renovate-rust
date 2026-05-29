@@ -34,6 +34,7 @@ pub mod copier;
 pub mod cpanfile;
 pub mod crossplane;
 pub mod crow;
+pub mod deno;
 pub mod deps_edn;
 pub mod devbox;
 pub mod devcontainer;
