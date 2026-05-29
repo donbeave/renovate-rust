@@ -5,7 +5,7 @@
 ## `lib/util/stats.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/stats.spec.ts
-**Total tests:** 33 | **Ported:** 19 | **Actionable:** 33 | **Status:** partial
+**Total tests:** 33 | **Ported:** 20 | **Actionable:** 33 | **Status:** partial
 
 ### `util/stats › makeTimingReport`
 
@@ -82,7 +82,7 @@
 |---|---|---|---|---|---|
 | returns empty report | 1112 | ported | `util.rs` | `test_git_operation_stats_empty_report` | — |
 | writes data points | 1117 | ported | `util.rs` | `test_git_operation_stats_writes_data_points` | — |
-| rounds total towards ceiling when preparing report | 1141 | pending | — | — | — |
+| rounds total towards ceiling when preparing report | 1141 | ported | `util.rs` | `test_git_operation_stats_ceils_total` | — |
 | logs report | 1161 | not-applicable | — | — | Checks logger.logger.debug spy; not portable without tracing test infrastructure |
 
 ---

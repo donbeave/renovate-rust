@@ -232,7 +232,60 @@ impl PackageCacheStats {
 /// Accumulates per-operation git timing stats.
 ///
 /// Mirrors `GitOperationStats` from `lib/util/stats.ts`.
-pub type GitOperationStats = LookupStats;
+/// Unlike `LookupStats`, this struct accepts `f64` durations and ceilings
+/// the total in `get_report()` (matching the TypeScript implementation).
+#[derive(Debug, Default)]
+pub struct GitOperationStats {
+    data: std::collections::HashMap<String, Vec<f64>>,
+}
+
+impl GitOperationStats {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Record a floating-point duration for an operation type.
+    pub fn write(&mut self, op: &str, duration: impl Into<f64>) {
+        self.data
+            .entry(op.to_owned())
+            .or_default()
+            .push(duration.into());
+    }
+
+    /// Generate the timing report for all operations.
+    ///
+    /// The `totalMs` field is ceiled (matching TypeScript's `Math.ceil`).
+    pub fn get_report(&self) -> std::collections::HashMap<String, TimingReport> {
+        self.data
+            .iter()
+            .map(|(k, v)| {
+                let count = v.len();
+                let total_f: f64 = v.iter().sum();
+                let total_ms = total_f.ceil() as i64;
+                let avg_ms = if count > 0 {
+                    (total_f / count as f64).round() as i64
+                } else {
+                    0
+                };
+                let max_ms = v.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+                let max_ms = if max_ms.is_infinite() { 0 } else { max_ms as i64 };
+                let mut sorted = v.clone();
+                sorted.sort_unstable_by(f64::total_cmp);
+                let median_ms = if count > 0 { sorted[count / 2] as i64 } else { 0 };
+                (
+                    k.clone(),
+                    TimingReport {
+                        count,
+                        avg_ms,
+                        median_ms,
+                        max_ms,
+                        total_ms,
+                    },
+                )
+            })
+            .collect()
+    }
+}
 
 /// Accumulates per-release-datasource timing stats.
 ///
@@ -4786,9 +4839,9 @@ mod tests {
     #[test]
     fn test_git_operation_stats_writes_data_points() {
         let mut stats = GitOperationStats::new();
-        stats.write("pull", 1000);
-        stats.write("push", 100);
-        stats.write("push", 50000);
+        stats.write("pull", 1000_f64);
+        stats.write("push", 100_f64);
+        stats.write("push", 50000_f64);
         let report = stats.get_report();
         let pull = report.get("pull").unwrap();
         assert_eq!(pull.count, 1);
@@ -4797,6 +4850,24 @@ mod tests {
         assert_eq!(push.count, 2);
         assert_eq!(push.total_ms, 50100);
         assert_eq!(push.max_ms, 50000);
+    }
+
+    // Ported: "rounds total towards ceiling when preparing report" — util/stats.spec.ts line 1141
+    #[test]
+    fn test_git_operation_stats_ceils_total() {
+        let mut stats = GitOperationStats::new();
+        stats.write("pull", 1000.4_f64);
+        stats.write("pull", 500.4_f64);
+        stats.write("pull", 700.2_f64);
+        stats.write("pull", 5.500_000_001_f64);
+        let report = stats.get_report();
+        let pull = report.get("pull").unwrap();
+        assert_eq!(pull.count, 4);
+        assert_eq!(pull.avg_ms, 552); // round(2206.5/4) = round(551.6) = 552
+        assert_eq!(pull.max_ms, 1000); // floor(1000.4)
+        assert_eq!(pull.median_ms, 700); // floor(700.2)
+        // NOTE: total is ceiled: 2206.500000001 → 2207
+        assert_eq!(pull.total_ms, 2207);
     }
 
     // ── GetDatasourceReleasesStats ────────────────────────────────────────────
