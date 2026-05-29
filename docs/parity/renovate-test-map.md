@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,976 / 11,677 total tests ported (43%) · pending 6,487 · not-applicable 214 (2% of total) — updated 2026-05-29
+**Progress:** 4,983 / 11,677 total tests ported (43%) · pending 6,480 · not-applicable 214 (2% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -391,7 +391,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/proxy.spec.ts` | Done | [details](lib/proxy.spec.ts.md) |
 | `lib/util/range.spec.ts` | Done | [details](lib/util/range.spec.ts.md) |
 | `lib/util/compress.spec.ts` | Not done | [details](lib/util/compress.spec.ts.md) |
-| `lib/util/split.spec.ts` | Not done | [details](lib/util/split.spec.ts.md) |
+| `lib/util/split.spec.ts` | Done | [details](lib/util/split.spec.ts.md) |
 | `lib/util/streams.spec.ts` | Done | [details](lib/util/streams.spec.ts.md) |
 | `lib/util/timestamp.spec.ts` | Done | [details](lib/util/timestamp.spec.ts.md) |
 | `lib/util/sanitize.spec.ts` | Done | [details](lib/util/sanitize.spec.ts.md) |
@@ -581,7 +581,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/gomod/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gomod/artifacts.spec.ts.md) |
 | `lib/modules/manager/gomod/integration.spec.ts` | Not done | [details](lib/modules/manager/gomod/integration.spec.ts.md) |
 | `lib/modules/manager/gomod/line-parser.spec.ts` | Done | [details](lib/modules/manager/gomod/line-parser.spec.ts.md) |
-| `lib/modules/manager/gomod/update.spec.ts` | Done | [details](lib/modules/manager/gomod/update.spec.ts.md) |
+| `lib/modules/manager/gomod/update.spec.ts` | Not done | [details](lib/modules/manager/gomod/update.spec.ts.md) |
 | `lib/modules/manager/gradle/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gradle/artifacts.spec.ts.md) |
 | `lib/modules/manager/gradle/extract/catalog.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract/catalog.spec.ts.md) |
 | `lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts` | Done | [details](lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts.md) |
