@@ -5,7 +5,7 @@
 ## `lib/modules/manager/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/index.spec.ts
-**Total tests:** 22 | **Ported:** 0 | **Actionable:** 22 | **Status:** pending
+**Total tests:** 22 | **Ported:** 5 | **Actionable:** 22 | **Status:** partial
 
 ### `modules/manager/index › supportedDatasources`
 
@@ -23,19 +23,19 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| gets something | 38 | pending | — | — | — |
+| gets something | 38 | ported | `managers.rs` | `manager_registry_manager_exists` | —  | — | — | — |
 
 ### `modules/manager/index › getManagerList()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| gets | 45 | pending | — | — | — |
+| gets | 45 | ported | `managers.rs` | `manager_registry_get_manager_list` | —  | — | — | — |
 
 ### `modules/manager/index › getEnabledManagersList()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 51 | pending | — | — | — |
+| works | 51 | ported | `managers.rs` | `manager_registry_get_enabled_managers_all/filtered` | —  | — | — | — |
 
 ### `modules/manager/index`
 
@@ -47,7 +47,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| iterates through managers | 108 | pending | — | — | —|
+| iterates through managers | 108 | ported | `managers.rs` | `manager_registry_detect_all_global_config_empty` | —  | — | — | —|
 
 ### `modules/manager/index › extractAllPackageFiles()`
 

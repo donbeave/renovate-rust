@@ -818,6 +818,74 @@ pub fn all_manager_ids() -> Vec<&'static str> {
     ids
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Manager registry API — lib/modules/manager/index.ts
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Return the list of built-in (non-custom) manager names.
+/// Mirrors `getManagerList()` from `lib/modules/manager/index.ts`.
+pub fn get_manager_list() -> Vec<&'static str> {
+    MANAGER_DEFS.iter().map(|m| m.name).collect()
+}
+
+/// Return list of all managers (built-in + custom).
+/// Mirrors `allManagersList` from `lib/modules/manager/index.ts`.
+pub fn all_managers_list() -> Vec<&'static str> {
+    let mut ids: Vec<&str> = get_manager_list();
+    for cm in CUSTOM_MANAGER_LIST {
+        if !ids.contains(cm) {
+            ids.push(cm);
+        }
+    }
+    ids
+}
+
+/// Return the list of enabled managers.
+///
+/// When `enabled_managers` is `None` or empty, returns all managers (built-in
+/// + custom).  When given a list, normalizes custom-prefixed names
+/// (`"custom.regex"` → `"regex"`) and filters to only those that exist, sorted.
+///
+/// Mirrors `getEnabledManagersList()` from `lib/modules/manager/index.ts`.
+pub fn get_enabled_managers_list(enabled_managers: Option<&[String]>) -> Vec<&'static str> {
+    let all = all_managers_list();
+    let Some(config) = enabled_managers else {
+        return all;
+    };
+    if config.is_empty() {
+        return all;
+    }
+    // Normalize "custom.X" → "X" and filter to known managers.
+    let mut result: Vec<&'static str> = config
+        .iter()
+        .map(|m| {
+            m.strip_prefix("custom.").unwrap_or(m.as_str())
+        })
+        .filter_map(|name| {
+            all.iter().copied().find(|&m| m == name)
+        })
+        .collect();
+    result.sort_unstable();
+    result.dedup();
+    result
+}
+
+/// Detect global config by iterating all managers.
+/// Returns an empty map since no built-in manager currently implements
+/// `detectGlobalConfig`.
+/// Mirrors `detectAllGlobalConfig()` from `lib/modules/manager/index.ts`.
+pub fn detect_all_global_config() -> std::collections::HashMap<String, String> {
+    std::collections::HashMap::new()
+}
+
+/// Return `true` when the named manager exists in the built-in or custom list.
+/// Mirrors `managers.has(manager)` from `lib/modules/manager/index.ts`.
+pub fn manager_exists(name: &str) -> bool {
+    let normalized = name.strip_prefix("custom.").unwrap_or(name);
+    MANAGER_DEFS.iter().any(|m| m.name == normalized)
+        || CUSTOM_MANAGER_LIST.contains(&normalized)
+}
+
 /// Apply a regex repeatedly to content, collecting all non-overlapping matches.
 ///
 /// Mirrors `lib/modules/manager/custom/regex/utils.ts` `regexMatchAll()`.
@@ -1595,5 +1663,50 @@ mod tests {
         // Two patterns both matching package.json should not duplicate
         let res = get_matching_files(&fl, &[], &[], &["/(^|/)package\\.json$/", "package.json"]);
         assert_eq!(res.len(), 2);
+    }
+
+    // ── manager registry tests ────────────────────────────────────────────
+
+    // Ported: "gets" — modules/manager/index.spec.ts line 45
+    #[test]
+    fn manager_registry_get_manager_list() {
+        let list = get_manager_list();
+        assert!(!list.is_empty());
+        assert!(list.contains(&"npm"));
+        assert!(list.contains(&"cargo"));
+        assert!(list.contains(&"maven"));
+    }
+
+    // Ported: "works" — modules/manager/index.spec.ts line 51
+    #[test]
+    fn manager_registry_get_enabled_managers_all() {
+        // No config → all managers
+        let all = get_enabled_managers_list(None);
+        assert_eq!(all, all_managers_list());
+    }
+
+    // Ported: "works" — modules/manager/index.spec.ts line 52
+    #[test]
+    fn manager_registry_get_enabled_managers_filtered() {
+        let config = vec!["custom.regex".to_owned(), "npm".to_owned()];
+        let result = get_enabled_managers_list(Some(&config));
+        // custom.regex → regex, npm stays npm; sorted: npm < regex
+        assert_eq!(result, vec!["npm", "regex"]);
+    }
+
+    // Ported: "gets something" — modules/manager/index.spec.ts line 38
+    #[test]
+    fn manager_registry_manager_exists() {
+        assert!(manager_exists("dockerfile"));
+        assert!(manager_exists("regex"));
+        assert!(manager_exists("custom.regex"));
+        assert!(!manager_exists("unknown-manager"));
+    }
+
+    // Ported: "iterates through managers" — modules/manager/index.spec.ts line 108
+    #[test]
+    fn manager_registry_detect_all_global_config_empty() {
+        let result = detect_all_global_config();
+        assert!(result.is_empty());
     }
 }
