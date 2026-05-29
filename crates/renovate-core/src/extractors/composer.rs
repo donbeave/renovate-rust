@@ -518,6 +518,136 @@ pub fn update_locked_composer_dependency(
     }
 }
 
+// ── Schema parsers (mirrors lib/modules/manager/composer/schema.ts) ──────────
+
+/// A parsed Composer repository entry.
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+#[serde(tag = "type")]
+pub enum ComposerRepo {
+    #[serde(rename = "composer")]
+    Composer { url: String, #[serde(skip_serializing_if = "Option::is_none")] name: Option<String> },
+    #[serde(rename = "git")]
+    Git { url: String, name: String },
+    #[serde(rename = "path")]
+    Path { url: String, name: String },
+    #[serde(rename = "disable-packagist")]
+    DisablePackagist,
+}
+
+/// Parsed Repos result.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ParsedComposerRepos {
+    pub registry_urls: Option<Vec<String>>,
+    pub git_repos: std::collections::HashMap<String, serde_json::Value>,
+    pub path_repos: std::collections::HashMap<String, serde_json::Value>,
+}
+
+fn parse_one_repo(key: &str, val: &serde_json::Value) -> Option<ComposerRepo> {
+    if val.as_bool() == Some(false) {
+        if key == "packagist" || key == "packagist.org" {
+            return Some(ComposerRepo::DisablePackagist);
+        }
+        return None;
+    }
+    let obj = val.as_object()?;
+    let repo_type = obj.get("type")?.as_str()?;
+    let url = obj.get("url").and_then(|v| v.as_str()).unwrap_or("").to_owned();
+    match repo_type {
+        "composer" => Some(ComposerRepo::Composer { url, name: None }),
+        "vcs" | "git" => Some(ComposerRepo::Git { url, name: key.to_owned() }),
+        "path" => Some(ComposerRepo::Path { url, name: key.to_owned() }),
+        _ => None,
+    }
+}
+
+/// Parse `ReposRecord` - object mapping names to repo configs or `false`.
+pub fn parse_repos_record(input: &serde_json::Value) -> Vec<ComposerRepo> {
+    let Some(obj) = input.as_object() else { return vec![]; };
+    let mut result = Vec::new();
+    for (key, val) in obj {
+        if let Some(repo) = parse_one_repo(key, val) {
+            result.push(repo);
+        }
+    }
+    result
+}
+
+/// Parse `ReposArray` - array of repo configs or `{packagist: false}` entries.
+pub fn parse_repos_array(input: &serde_json::Value) -> Vec<ComposerRepo> {
+    let Some(arr) = input.as_array() else { return vec![]; };
+    let mut result = Vec::new();
+    for (idx, val) in arr.iter().enumerate() {
+        let Some(obj) = val.as_object() else { continue };
+        // Check disable-packagist pattern
+        if obj.get("packagist").and_then(|v| v.as_bool()) == Some(false)
+           || obj.get("packagist.org").and_then(|v| v.as_bool()) == Some(false) {
+            result.push(ComposerRepo::DisablePackagist);
+            continue;
+        }
+        let repo_type = obj.get("type").and_then(|v| v.as_str()).unwrap_or("");
+        let url = obj.get("url").and_then(|v| v.as_str()).unwrap_or("").to_owned();
+        let name = obj.get("name").and_then(|v| v.as_str())
+            .unwrap_or(&format!("__{idx}"))
+            .to_owned();
+        match repo_type {
+            "composer" => result.push(ComposerRepo::Composer { url, name: None }),
+            "vcs" | "git" => result.push(ComposerRepo::Git { url, name }),
+            "path" => result.push(ComposerRepo::Path { url, name }),
+            _ => { /* silently drop */ }
+        }
+    }
+    result
+}
+
+/// Parse `Repos` - object or array of repositories.
+pub fn parse_repos(input: &serde_json::Value) -> ParsedComposerRepos {
+    let repos: Vec<ComposerRepo> = if input.is_null() {
+        vec![]
+    } else if input.is_array() {
+        parse_repos_array(input)
+    } else if input.is_object() {
+        parse_repos_record(input)
+    } else {
+        vec![]
+    };
+
+    let mut packagist = true;
+    let mut registry_urls: Vec<String> = Vec::new();
+    let mut git_repos: std::collections::HashMap<String, serde_json::Value> = Default::default();
+    let mut path_repos: std::collections::HashMap<String, serde_json::Value> = Default::default();
+
+    for repo in &repos {
+        match repo {
+            ComposerRepo::Composer { url, name } => {
+                let clean_url = url.trim_end_matches("/packages.json").to_owned();
+                registry_urls.push(clean_url.clone());
+                let _ = name;
+            }
+            ComposerRepo::Git { url, name } => {
+                git_repos.insert(name.clone(), serde_json::json!({
+                    "name": name, "type": "git", "url": url
+                }));
+            }
+            ComposerRepo::Path { url, name } => {
+                path_repos.insert(name.clone(), serde_json::json!({
+                    "name": name, "type": "path", "url": url
+                }));
+            }
+            ComposerRepo::DisablePackagist => { packagist = false; }
+        }
+    }
+
+    if packagist && !registry_urls.is_empty() {
+        registry_urls.push("https://repo.packagist.org".to_owned());
+    }
+
+    ParsedComposerRepos {
+        registry_urls: if registry_urls.is_empty() { None } else { Some(registry_urls) },
+        git_repos,
+        path_repos,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1018,4 +1148,97 @@ mod tests {
             "widen"
         );
     }
+}
+
+// Ported: "parses default values" — modules/manager/composer/schema.spec.ts line 5
+#[test]
+fn repos_record_parses_default() {
+    let result = parse_repos_record(&serde_json::json!({}));
+    assert_eq!(result, vec![]);
+}
+
+// Ported: "parses repositories" — modules/manager/composer/schema.spec.ts line 9
+#[test]
+fn repos_record_parses_repositories() {
+    let input = serde_json::json!({
+        "wpackagist": {"type": "composer", "url": "https://wpackagist.org"},
+        "someGit": {"type": "vcs", "url": "https://some-vcs.com"},
+        "somePath": {"type": "path", "url": "/some/path"},
+        "packagist": false,
+        "packagist.org": false,
+        "foo": "bar",
+    });
+    let result = parse_repos_record(&input);
+    // Order is not guaranteed for HashMap iteration, so check membership
+    assert!(result.contains(&ComposerRepo::Composer { url: "https://wpackagist.org".to_owned(), name: None }));
+    assert!(result.contains(&ComposerRepo::Git { url: "https://some-vcs.com".to_owned(), name: "someGit".to_owned() }));
+    assert!(result.contains(&ComposerRepo::Path { url: "/some/path".to_owned(), name: "somePath".to_owned() }));
+    assert_eq!(result.iter().filter(|r| **r == ComposerRepo::DisablePackagist).count(), 2);
+    assert_eq!(result.len(), 5); // foo: 'bar' is filtered
+}
+
+// Ported: "parses default values" — modules/manager/composer/schema.spec.ts line 30
+#[test]
+fn repos_array_parses_default() {
+    let result = parse_repos_array(&serde_json::json!([]));
+    assert_eq!(result, vec![]);
+}
+
+// Ported: "parses repositories" — modules/manager/composer/schema.spec.ts line 34
+#[test]
+fn repos_array_parses_repositories() {
+    let input = serde_json::json!([
+        {"type": "composer", "url": "https://wpackagist.org"},
+        {"name": "someGit", "type": "vcs", "url": "https://some-vcs.com"},
+        {"name": "somePath", "type": "path", "url": "/some/path"},
+        {"packagist": false},
+        {"packagist.org": false},
+        {"foo": "bar"},
+    ]);
+    let result = parse_repos_array(&input);
+    assert_eq!(result[0], ComposerRepo::Composer { url: "https://wpackagist.org".to_owned(), name: None });
+    assert_eq!(result[1], ComposerRepo::Git { url: "https://some-vcs.com".to_owned(), name: "someGit".to_owned() });
+    assert_eq!(result[2], ComposerRepo::Path { url: "/some/path".to_owned(), name: "somePath".to_owned() });
+    assert_eq!(result[3], ComposerRepo::DisablePackagist);
+    assert_eq!(result[4], ComposerRepo::DisablePackagist);
+    assert_eq!(result.len(), 5); // foo:bar filtered
+}
+
+// Ported: "parses default values" — modules/manager/composer/schema.spec.ts line 58
+#[test]
+fn repos_parses_null_default() {
+    let result = parse_repos(&serde_json::Value::Null);
+    assert!(result.registry_urls.is_none());
+    assert!(result.git_repos.is_empty());
+    assert!(result.path_repos.is_empty());
+}
+
+// Ported: "parses repositories" — modules/manager/composer/schema.spec.ts line 66
+#[test]
+fn repos_parses_array_repos() {
+    let input = serde_json::json!([
+        {"name": "wpackagist", "type": "composer", "url": "https://wpackagist.org"},
+        {"name": "someGit", "type": "vcs", "url": "https://some-vcs.com"},
+        {"name": "somePath", "type": "path", "url": "/some/path"},
+    ]);
+    let result = parse_repos(&input);
+    assert_eq!(result.registry_urls.as_deref(), Some(&["https://wpackagist.org".to_owned(), "https://repo.packagist.org".to_owned()][..]));
+    assert!(result.git_repos.contains_key("someGit"));
+    assert!(result.path_repos.contains_key("somePath"));
+}
+
+// Ported: "parses repositories with packagist disabled" — modules/manager/composer/schema.spec.ts line 92
+#[test]
+fn repos_parses_with_packagist_disabled() {
+    let input = serde_json::json!({
+        "wpackagist": {"type": "composer", "url": "https://wpackagist.org"},
+        "someGit": {"type": "vcs", "url": "https://some-vcs.com"},
+        "somePath": {"type": "path", "url": "/some/path"},
+        "packagist": false,
+    });
+    let result = parse_repos(&input);
+    // Only wpackagist.org, no packagist.org
+    let urls = result.registry_urls.as_deref().unwrap();
+    assert!(urls.contains(&"https://wpackagist.org".to_owned()));
+    assert!(!urls.contains(&"https://repo.packagist.org".to_owned()));
 }

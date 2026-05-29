@@ -152,6 +152,133 @@ async fn fetch_update_summary(
     })
 }
 
+// ── Schema parsers (mirrors lib/modules/datasource/rubygems/schema.ts) ───────
+
+/// Parsed release entry.
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct GemRelease {
+    pub version: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub release_timestamp: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub changelog_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub constraints: Option<GemConstraints>,
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct GemConstraints {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub platform: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ruby: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rubygems: Option<Vec<String>>,
+}
+
+/// Parsed `GemMetadata` fields.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ParsedGemMetadata {
+    pub changelog_url: Option<String>,
+    pub homepage: Option<String>,
+    pub source_url: Option<String>,
+}
+
+/// Parse `MarshalledVersionInfo` - array of `{number: string}`.
+/// Mirrors `MarshalledVersionInfo` schema from rubygems/schema.ts.
+pub fn parse_marshalled_version_info(input: &serde_json::Value) -> Result<Vec<GemRelease>, String> {
+    let arr = input.as_array().ok_or("not an array")?;
+    if arr.is_empty() {
+        return Err("Empty response from `/v1/dependencies` endpoint".to_owned());
+    }
+    let releases = arr
+        .iter()
+        .filter_map(|v| v.get("number")?.as_str().map(|n| GemRelease {
+            version: n.to_owned(),
+            release_timestamp: None,
+            changelog_url: None,
+            source_url: None,
+            constraints: None,
+        }))
+        .collect();
+    Ok(releases)
+}
+
+/// Parse `GemMetadata` object.
+pub fn parse_gem_metadata(input: &serde_json::Value) -> ParsedGemMetadata {
+    let get_str = |key: &str| input.get(key).and_then(|v| v.as_str()).map(str::to_owned);
+    ParsedGemMetadata {
+        changelog_url: get_str("changelog_uri"),
+        homepage: get_str("homepage_uri"),
+        source_url: get_str("source_code_uri"),
+    }
+}
+
+/// Parse `GemVersions` - array of version objects from `/api/v1/versions`.
+pub fn parse_gem_versions(input: &serde_json::Value) -> Result<Vec<GemRelease>, String> {
+    let arr = input.as_array().ok_or("not an array")?;
+    let releases: Vec<GemRelease> = arr.iter().filter_map(|v| {
+        let version = v.get("number")?.as_str()?.to_owned();
+        let release_timestamp = v.get("created_at")?.as_str().map(|s| {
+            // Normalize to ISO 8601 with milliseconds
+            if s.contains('T') { s.to_owned() } else { format!("{s}T00:00:00.000Z") }
+        });
+        let platform = v.get("platform").and_then(|p| p.as_str()).map(str::to_owned);
+        let ruby_version = v.get("ruby_version").and_then(|p| p.as_str()).map(str::to_owned);
+        let rubygems_version = v.get("rubygems_version").and_then(|p| p.as_str()).map(str::to_owned);
+        let meta = v.get("metadata").unwrap_or(&serde_json::Value::Null);
+        let changelog_url = meta.get("changelog_uri").and_then(|v| v.as_str()).map(str::to_owned);
+        let source_url = meta.get("source_code_uri").and_then(|v| v.as_str()).map(str::to_owned);
+
+        let constraints = if platform.is_some() || ruby_version.is_some() || rubygems_version.is_some() {
+            Some(GemConstraints {
+                platform: platform.map(|p| vec![p]),
+                ruby: ruby_version.map(|r| vec![r]),
+                rubygems: rubygems_version.map(|r| vec![r]),
+            })
+        } else {
+            None
+        };
+
+        Some(GemRelease { version, release_timestamp, changelog_url, source_url, constraints })
+    }).collect();
+
+    if releases.is_empty() {
+        return Err("Empty response from `/v1/gems` endpoint".to_owned());
+    }
+    Ok(releases)
+}
+
+/// Parse `GemInfo` - newline-separated `version |checksum:...` format.
+pub fn parse_gem_info(input: &str) -> Result<Vec<GemRelease>, String> {
+    let releases: Vec<GemRelease> = input
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            if line.is_empty() || line == "---" { return None; }
+            let space_idx = line.find(' ');
+            let version = match space_idx {
+                Some(i) if i > 0 => &line[..i],
+                None if !line.is_empty() => line,
+                _ => return None,
+            };
+            Some(GemRelease {
+                version: version.to_owned(),
+                release_timestamp: None,
+                changelog_url: None,
+                source_url: None,
+                constraints: None,
+            })
+        })
+        .collect();
+    if releases.is_empty() {
+        return Err("Empty response from `/info` endpoint".to_owned());
+    }
+    Ok(releases)
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{method, path};
@@ -255,4 +382,91 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("7.0.8"));
         assert!(s.update_available);
     }
+}
+
+// Ported: "parses valid input" — modules/datasource/rubygems/schema.spec.ts line 11
+#[test]
+fn marshalled_version_info_parses_valid() {
+    let input = serde_json::json!([
+        {"number": "1.0.0"},
+        {"number": "2.0.0"},
+        {"number": "3.0.0"},
+    ]);
+    let releases = parse_marshalled_version_info(&input).unwrap();
+    assert_eq!(releases.len(), 3);
+    assert_eq!(releases[0].version, "1.0.0");
+    assert_eq!(releases[1].version, "2.0.0");
+    assert_eq!(releases[2].version, "3.0.0");
+}
+
+// Ported: "errors on empty input" — modules/datasource/rubygems/schema.spec.ts line 27
+#[test]
+fn marshalled_version_info_errors_on_empty() {
+    let result = parse_marshalled_version_info(&serde_json::json!([]));
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains("Empty response from `/v1/dependencies`"));
+}
+
+// Ported: "parses empty object into undefined fields" — modules/datasource/rubygems/schema.spec.ts line 35
+#[test]
+fn gem_metadata_parses_empty_object() {
+    let result = parse_gem_metadata(&serde_json::json!({}));
+    assert_eq!(result.changelog_url, None);
+    assert_eq!(result.homepage, None);
+    assert_eq!(result.source_url, None);
+}
+
+// Ported: "parses valid input" — modules/datasource/rubygems/schema.spec.ts line 43
+#[test]
+fn gem_metadata_parses_valid_input() {
+    let input = serde_json::json!({
+        "changelog_uri": "https://example.com",
+        "homepage_uri": "https://example.com",
+        "source_code_uri": "https://example.com",
+    });
+    let result = parse_gem_metadata(&input);
+    assert_eq!(result.changelog_url.as_deref(), Some("https://example.com"));
+    assert_eq!(result.homepage.as_deref(), Some("https://example.com"));
+    assert_eq!(result.source_url.as_deref(), Some("https://example.com"));
+}
+
+// Ported: "parses valid input" — modules/datasource/rubygems/schema.spec.ts line 59
+#[test]
+fn gem_versions_parses_valid_input() {
+    let input = serde_json::json!([
+        {"number": "1.0.0", "created_at": "2021-01-01", "platform": "ruby", "ruby_version": "2.7.0", "rubygems_version": "3.2.0", "metadata": {"changelog_uri": "https://example.com", "source_code_uri": "https://example.com"}},
+        {"number": "2.0.0", "created_at": "2022-01-01", "platform": "ruby", "ruby_version": "2.7.0", "rubygems_version": "3.2.0", "metadata": {"changelog_uri": "https://example.com", "source_code_uri": "https://example.com"}},
+        {"number": "3.0.0", "created_at": "2023-01-01", "platform": "ruby", "ruby_version": "2.7.0", "rubygems_version": "3.2.0", "metadata": {"changelog_uri": "https://example.com", "source_code_uri": "https://example.com"}},
+    ]);
+    let releases = parse_gem_versions(&input).unwrap();
+    assert_eq!(releases.len(), 3);
+    assert_eq!(releases[0].version, "1.0.0");
+    assert_eq!(releases[0].release_timestamp.as_deref(), Some("2021-01-01T00:00:00.000Z"));
+    assert_eq!(releases[0].changelog_url.as_deref(), Some("https://example.com"));
+    assert_eq!(releases[0].source_url.as_deref(), Some("https://example.com"));
+    let c = releases[0].constraints.as_ref().unwrap();
+    assert_eq!(c.platform.as_deref(), Some(&["ruby".to_owned()][..]));
+    assert_eq!(c.ruby.as_deref(), Some(&["2.7.0".to_owned()][..]));
+    assert_eq!(c.rubygems.as_deref(), Some(&["3.2.0".to_owned()][..]));
+}
+
+// Ported: "parses valid input" — modules/datasource/rubygems/schema.spec.ts line 137
+#[test]
+fn gem_info_parses_valid_input() {
+    // codeBlock strips common indent; input matches:
+    // ---\n1.1.1 |checksum:aaa\n2.2.2 |checksum:bbb\n3.3.3 |checksum:ccc
+    let input = "---\n1.1.1 |checksum:aaa\n2.2.2 |checksum:bbb\n3.3.3 |checksum:ccc\n";
+    let releases = parse_gem_info(input).unwrap();
+    assert_eq!(releases.len(), 3);
+    assert_eq!(releases[0].version, "1.1.1");
+    assert_eq!(releases[1].version, "2.2.2");
+    assert_eq!(releases[2].version, "3.3.3");
+}
+
+// Ported: "errors on empty input" — modules/datasource/rubygems/schema.spec.ts line 154
+#[test]
+fn gem_info_errors_on_empty() {
+    let result = parse_gem_info("");
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains("Empty response from `/info`"));
 }

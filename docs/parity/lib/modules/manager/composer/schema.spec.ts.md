@@ -5,29 +5,29 @@
 ## `lib/modules/manager/composer/schema.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/schema.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** done
 
 ### `ReposRecord`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses default values | 5 | pending | — | — | — |
-| parses repositories | 9 | pending | — | — | — |
+| parses default values | 5 | ported | `extractors/composer.rs` | `repos_record_parses_default` | — |
+| parses repositories | 9 | ported | `extractors/composer.rs` | `repos_record_parses_repositories` | — |
 
 ### `ReposArray`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses default values | 30 | pending | — | — | — |
-| parses repositories | 34 | pending | — | — | — |
+| parses default values | 30 | ported | `extractors/composer.rs` | `repos_array_parses_default` | — |
+| parses repositories | 34 | ported | `extractors/composer.rs` | `repos_array_parses_repositories` | — |
 
 ### `Repos`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses default values | 58 | pending | — | — | — |
-| parses repositories | 66 | pending | — | — | — |
-| parses repositories with packagist disabled | 92 | pending | — | — | — |
+| parses default values | 58 | ported | `extractors/composer.rs` | `repos_parses_null_default` | — |
+| parses repositories | 66 | ported | `extractors/composer.rs` | `repos_parses_array_repos` | — |
+| parses repositories with packagist disabled | 92 | ported | `extractors/composer.rs` | `repos_parses_with_packagist_disabled` | — |
 
 ---
 

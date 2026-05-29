@@ -254,7 +254,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/packagist/schema.spec.ts` | Not done | [details](lib/modules/datasource/packagist/schema.spec.ts.md) |
 | `lib/modules/datasource/packagist/index.spec.ts` | Done | [details](lib/modules/datasource/packagist/index.spec.ts.md) |
 | `lib/modules/datasource/conan/index.spec.ts` | Done | [details](lib/modules/datasource/conan/index.spec.ts.md) |
-| `lib/modules/datasource/rubygems/schema.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/schema.spec.ts.md) |
+| `lib/modules/datasource/rubygems/schema.spec.ts` | Done | [details](lib/modules/datasource/rubygems/schema.spec.ts.md) |
 | `lib/modules/datasource/rubygems/index.spec.ts` | Done | [details](lib/modules/datasource/rubygems/index.spec.ts.md) |
 | `lib/modules/datasource/crate/index.spec.ts` | Done | [details](lib/modules/datasource/crate/index.spec.ts.md) |
 | `lib/modules/datasource/maven/schema.spec.ts` | Not done | [details](lib/modules/datasource/maven/schema.spec.ts.md) |
@@ -552,7 +552,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/cocoapods/artifacts.spec.ts` | Done | [details](lib/modules/manager/cocoapods/artifacts.spec.ts.md) |
 | `lib/modules/manager/composer/artifacts.spec.ts` | Done | [details](lib/modules/manager/composer/artifacts.spec.ts.md) |
 | `lib/modules/manager/composer/range.spec.ts` | Done | [details](lib/modules/manager/composer/range.spec.ts.md) |
-| `lib/modules/manager/composer/schema.spec.ts` | Not done | [details](lib/modules/manager/composer/schema.spec.ts.md) |
+| `lib/modules/manager/composer/schema.spec.ts` | Done | [details](lib/modules/manager/composer/schema.spec.ts.md) |
 | `lib/modules/manager/composer/update-locked.spec.ts` | Done | [details](lib/modules/manager/composer/update-locked.spec.ts.md) |
 | `lib/modules/manager/composer/utils.spec.ts` | Done | [details](lib/modules/manager/composer/utils.spec.ts.md) |
 | `lib/modules/manager/conan/artifacts.spec.ts` | Done | [details](lib/modules/manager/conan/artifacts.spec.ts.md) |
