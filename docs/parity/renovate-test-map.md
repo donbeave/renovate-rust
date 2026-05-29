@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,976 / 11,677 total tests ported (43%) · pending 6,526 · not-applicable 175 (1% of total) — updated 2026-05-29
+**Progress:** 4,976 / 11,677 total tests ported (43%) · pending 6,491 · not-applicable 210 (2% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -815,7 +815,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/json-writer/editor-config.spec.ts` | Not done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
 | `lib/util/json-writer/json-writer.spec.ts` | Done | [details](lib/util/json-writer/json-writer.spec.ts.md) |
 | `lib/util/merge-confidence/index.spec.ts` | Not done | [details](lib/util/merge-confidence/index.spec.ts.md) |
-| `lib/util/schema-utils/index.spec.ts` | Not done | [details](lib/util/schema-utils/index.spec.ts.md) |
+| `lib/util/schema-utils/index.spec.ts` | Done | [details](lib/util/schema-utils/index.spec.ts.md) |
 | `lib/util/schema-utils/v4.spec.ts` | Done | [details](lib/util/schema-utils/v4.spec.ts.md) |
 | `lib/util/template/index.spec.ts` | Not done | [details](lib/util/template/index.spec.ts.md) |
 | `lib/util/vulnerability/ecosystem.spec.ts` | Done | [details](lib/util/vulnerability/ecosystem.spec.ts.md) |
