@@ -1298,6 +1298,19 @@ fn glob_to_regex_part(pattern: &str) -> String {
 }
 
 // ---------------------------------------------------------------------------
+// GitHub GraphQL util — lib/util/github/graphql/util.ts
+// ---------------------------------------------------------------------------
+
+/// Wrap a payload query fragment in a full GitHub GraphQL query string.
+///
+/// Mirrors `prepareQuery()` from `lib/util/github/graphql/util.ts`.
+pub fn prepare_graphql_query(payload_query: &str) -> String {
+    format!(
+        "\n    query($owner: String!, $name: String!, $cursor: String, $count: Int!) {{\n      repository(owner: $owner, name: $name) {{\n        isRepoPrivate: isPrivate\n        payload: {payload_query}\n      }}\n    }}\n  "
+    )
+}
+
+// ---------------------------------------------------------------------------
 // GitHub GraphQL releases adapter — lib/util/github/graphql/query-adapters/releases-query-adapter.ts
 // ---------------------------------------------------------------------------
 
@@ -10007,4 +10020,26 @@ dep1 = "^1.0.0"
         let input = "{\n  \"name\": \"test\"\n  \"version\": \"1.0.0\"\n}";
         let r = schema_parse_jsonc(input);
         eprintln!("JSONC missing comma is_err: {}", r.is_err());
+    }
+
+    // ── prepare_graphql_query tests ───────────────────────────────────────
+
+    // Ported: "returns valid query for valid payload query" — util/github/graphql/util.spec.ts line 10
+    #[test]
+    fn test_prepare_graphql_query_valid() {
+        let payload = "items { pageInfo { hasNextPage } }";
+        let result = prepare_graphql_query(payload);
+        assert!(result.contains(payload));
+        assert!(result.contains("query($owner"));
+        assert!(result.contains("repository(owner: $owner"));
+        assert!(result.contains("payload:"));
+    }
+
+    // Ported: "returns invalid query for invalid payload query" — util/github/graphql/util.spec.ts line 28
+    #[test]
+    fn test_prepare_graphql_query_invalid() {
+        let payload = "!@#";
+        let result = prepare_graphql_query(payload);
+        assert!(result.contains(payload));
+        assert!(result.contains("query($owner"));
     }
