@@ -87,6 +87,146 @@ pub struct DatasourceInfo {
     pub default_versioning: &'static str,
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// addMetaData — lib/modules/datasource/metadata.ts
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CHANGELOG_URLS_JSON: &str =
+    include_str!("datasources/changelog-urls.json");
+const SOURCE_URLS_JSON: &str = include_str!("datasources/source-urls.json");
+
+/// A release result entry with optional metadata fields.
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReleaseResult {
+    pub releases: Vec<Release>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub changelog_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_directory: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub homepage: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tags: Option<std::collections::HashMap<String, String>>,
+}
+
+/// A single release entry.
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Release {
+    pub version: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub release_timestamp: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub constraints: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub changelog_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_deprecated: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_stable: Option<bool>,
+}
+
+/// Add metadata (changelog URL, source URL, source directory) to a release result.
+///
+/// Mirrors `addMetaData()` from `lib/modules/datasource/metadata.ts`.
+pub fn add_metadata(dep: &mut ReleaseResult, datasource: &str, package_name: &str) {
+    let package_lower = package_name.to_lowercase();
+
+    // Look up manual changelog URL.
+    if let Ok(changelog_map) = serde_json::from_str::<serde_json::Value>(CHANGELOG_URLS_JSON) {
+        if let Some(url) = changelog_map
+            .get(datasource)
+            .and_then(|v| v.get(&package_lower))
+            .and_then(|v| v.as_str())
+        {
+            dep.changelog_url = Some(url.to_owned());
+        }
+    }
+
+    // Look up manual source URL.
+    if dep.source_url.is_none() {
+        if let Ok(source_map) = serde_json::from_str::<serde_json::Value>(SOURCE_URLS_JSON) {
+            if let Some(url) = source_map
+                .get(datasource)
+                .and_then(|v| v.get(&package_lower))
+                .and_then(|v| v.as_str())
+            {
+                dep.source_url = Some(url.to_owned());
+            }
+        }
+    }
+
+    // Parse source URL to extract source directory (GitHub tree/ URLs).
+    if let Some(ref source_url) = dep.source_url.clone() {
+        if dep.source_directory.is_none() {
+            if let Some((base, dir)) = extract_source_directory(source_url) {
+                dep.source_url = Some(base);
+                dep.source_directory = Some(dir);
+            }
+        }
+    }
+
+    // If no source URL but have changelog URL on GitHub, use changelog URL.
+    if dep.source_url.is_none() {
+        if let Some(ref changelog_url) = dep.changelog_url.clone() {
+            if is_github_url(changelog_url) {
+                dep.source_url = Some(changelog_url.clone());
+            }
+        }
+    }
+
+    // If no source URL but have homepage on GitHub/GitLab, use homepage.
+    if dep.source_url.is_none() {
+        if let Some(ref homepage) = dep.homepage.clone() {
+            if is_github_url(homepage) || is_gitlab_url(homepage) {
+                dep.source_url = Some(homepage.clone());
+            }
+        }
+    }
+
+    // Massage the source URL.
+    if let Some(ref source_url) = dep.source_url.clone() {
+        let massaged = crate::util::massage_url(source_url);
+        if massaged.is_empty() {
+            dep.source_url = None;
+        } else {
+            dep.source_url = Some(massaged);
+        }
+    }
+}
+
+/// Extract source directory from a GitHub tree URL.
+/// E.g. "https://github.com/owner/repo/tree/master/subdir" →
+///   ("https://github.com/owner/repo", "subdir")
+fn extract_source_directory(url: &str) -> Option<(String, String)> {
+    // Parse GitHub tree URLs: .../tree/{ref}/{path}
+    let tree_re = regex::Regex::new(
+        r"^(https://github\.com/[^/]+/[^/]+)/tree/[^/]+/(.+?)/?$",
+    )
+    .ok()?;
+    if let Some(caps) = tree_re.captures(url) {
+        let base = caps.get(1)?.as_str().to_owned();
+        let dir = caps.get(2)?.as_str().to_owned();
+        if !dir.is_empty() {
+            return Some((base, dir));
+        }
+    }
+    None
+}
+
+fn is_github_url(url: &str) -> bool {
+    url.contains("github.com")
+}
+
+fn is_gitlab_url(url: &str) -> bool {
+    url.contains("gitlab.com") || url.contains("gitlab.")
+}
+
 /// The default versioning ID used when no datasource-specific one is set.
 /// Mirrors `defaultVersioning = semverCoerced` from `lib/modules/versioning/index.ts`.
 pub const DATASOURCE_DEFAULT_VERSIONING: &str = "semver-coerced";
@@ -301,5 +441,81 @@ mod registry_tests {
     fn is_get_pkg_releases_config_non_string_datasource() {
         let input = serde_json::json!({"datasource": 123, "packageName": "lodash"});
         assert!(!is_get_pkg_releases_config(&input));
+    }
+
+    // ── add_metadata tests ─────────────────────────────────────────────────
+
+    // Ported: "Should handle manualChangelogUrls" — modules/datasource/metadata.spec.ts line 19
+    #[test]
+    fn add_metadata_manual_changelog_url() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release { version: "2.0.0".into(), ..Default::default() },
+                Release { version: "2.1.0".into(), ..Default::default() },
+            ],
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "pypi", "pycountry");
+        assert_eq!(
+            dep.changelog_url.as_deref(),
+            Some("https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt")
+        );
+    }
+
+    // Ported: "Should handle manualSourceUrls" — modules/datasource/metadata.spec.ts line 51
+    #[test]
+    fn add_metadata_manual_source_url() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release { version: "2.0.0".into(), ..Default::default() },
+            ],
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "pypi", "mkdocs");
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/mkdocs/mkdocs")
+        );
+    }
+
+    // Ported: "Should handle parsing of sourceUrls correctly" — modules/datasource/metadata.spec.ts line 82
+    #[test]
+    fn add_metadata_parses_github_tree_url() {
+        let mut dep = ReleaseResult {
+            releases: vec![Release { version: "2.0.0".into(), ..Default::default() }],
+            source_url: Some("https://github.com/carltongibson/django-filter/tree/master".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "pypi", "django-filter");
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/carltongibson/django-filter")
+        );
+    }
+
+    // Ported: "Should split the sourceDirectory out of sourceUrl for known platforms" — metadata.spec.ts line 113
+    #[test]
+    fn add_metadata_extracts_source_directory() {
+        let mut dep = ReleaseResult {
+            releases: vec![],
+            source_url: Some("https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "helm", "kube-prometheus");
+        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/bitnami/charts"));
+        assert_eq!(dep.source_directory.as_deref(), Some("bitnami/kube-prometheus"));
+    }
+
+    // Ported: "Should not overwrite any existing sourceDirectory" — metadata.spec.ts line 180
+    #[test]
+    fn add_metadata_preserves_existing_source_directory() {
+        let mut dep = ReleaseResult {
+            releases: vec![],
+            source_url: Some("https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus".into()),
+            source_directory: Some("existing-dir".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "helm", "kube-prometheus");
+        assert_eq!(dep.source_directory.as_deref(), Some("existing-dir"));
     }
 }

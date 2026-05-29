@@ -5,19 +5,19 @@
 ## `lib/modules/datasource/metadata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata.spec.ts
-**Total tests:** 32 | **Ported:** 11 | **Actionable:** 32 | **Status:** partial
+**Total tests:** 32 | **Ported:** 16 | **Actionable:** 32 | **Status:** partial
 
 ### `modules/datasource/metadata`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| Should handle manualChangelogUrls | 19 | pending | — | — | — |
-| Should handle manualSourceUrls | 51 | pending | — | — | — |
-| Should handle parsing of sourceUrls correctly | 82 | pending | — | — | — |
-| Should split the sourceDirectory out of sourceUrl for known platforms: $sourceUrl -> ($expectedSourceUrl, $expectedSourceDirectory) | 113 | pending | — | — | — |
+| Should handle manualChangelogUrls | 19 | ported | `datasources.rs` | `add_metadata_manual_changelog_url` | —  | — | — | — |
+| Should handle manualSourceUrls | 51 | ported | `datasources.rs` | `add_metadata_manual_source_url` | —  | — | — | — |
+| Should handle parsing of sourceUrls correctly | 82 | ported | `datasources.rs` | `add_metadata_parses_github_tree_url` | —  | — | — | — |
+| Should split the sourceDirectory out of sourceUrl for known platforms: $sourceUrl -> ($expectedSourceUrl, $expectedSourceDirectory) | 113 | ported | `datasources.rs` | `add_metadata_extracts_source_directory` | Ported bitnami/charts case; GitLab and custom host cases not yet ported  | — | — | — |
 | Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl | 134 | pending | — | — | — |
 | Should not split a sourceDirectory when one cannot be detected $sourceUrl | 158 | pending | — | — | — |
-| Should not overwrite any existing sourceDirectory | 180 | pending | — | — | — |
+| Should not overwrite any existing sourceDirectory | 180 | ported | `datasources.rs` | `add_metadata_preserves_existing_source_directory` | —  | — | — | — |
 | Should massage github sourceUrls | 197 | pending | — | — | — |
 | Should handle parsing of sourceUrls correctly for GitLab also | 228 | pending | — | — | — |
 | Should handle failed parsing of sourceUrls for GitLab | 251 | pending | — | — | — |
