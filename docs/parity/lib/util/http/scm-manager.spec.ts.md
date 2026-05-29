@@ -5,12 +5,12 @@
 ## `lib/util/http/scm-manager.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/scm-manager.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** not-applicable
 
 ### `util/http/scm-manager`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| supports custom accept header | 13 | pending | — | — | —|
+| supports custom accept header | 13 | not-applicable | — | — | mocking framework internals — httpMock; TypeScript SCM Manager HTTP custom accept header|
 
 ---
