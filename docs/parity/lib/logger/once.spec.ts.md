@@ -5,7 +5,7 @@
 ## `lib/logger/once.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/once.spec.ts
-**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
 
 ### `logger/once › core`
 
@@ -19,12 +19,12 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| logs once per function call | 60 | pending | — | — | —|
-| distincts between log levels | 73 | pending | — | — | —|
-| distincts between different log statements | 89 | pending | — | — | —|
-| parameters are taken into account when de-duplicating calls | 106 | pending | — | — | —|
-| allows mixing single-time and regular logging | 124 | pending | — | — | —|
-| supports reset method | 146 | pending | — | — | —|
+| logs once per function call | 60 | not-applicable | — | — | mocking framework internals — tests logger.debug spy called once via once() mechanism |
+| distincts between log levels | 73 | not-applicable | — | — | mocking framework internals — tests logger spy for each log level |
+| distincts between different log statements | 89 | not-applicable | — | — | mocking framework internals — tests logger spy for distinct log calls |
+| parameters are taken into account when de-duplicating calls | 106 | not-applicable | — | — | mocking framework internals — tests logger spy deduplication with different params |
+| allows mixing single-time and regular logging | 124 | not-applicable | — | — | mocking framework internals — tests logger spy behavior mixing once/regular calls |
+| supports reset method | 146 | not-applicable | — | — | mocking framework internals — tests logger spy after reset() |
 
 ---
 

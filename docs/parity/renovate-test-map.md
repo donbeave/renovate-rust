@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,976 / 11,677 total tests ported (43%) · pending 6,538 · not-applicable 163 (1% of total) — updated 2026-05-29
+**Progress:** 4,976 / 11,677 total tests ported (43%) · pending 6,526 · not-applicable 175 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -363,7 +363,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/cmd-serializer.spec.ts` | Done | [details](lib/logger/cmd-serializer.spec.ts.md) |
 | `lib/logger/config-serializer.spec.ts` | Done | [details](lib/logger/config-serializer.spec.ts.md) |
 | `lib/logger/remap.spec.ts` | Done | [details](lib/logger/remap.spec.ts.md) |
-| `lib/logger/renovate-logger.spec.ts` | Not done | [details](lib/logger/renovate-logger.spec.ts.md) |
+| `lib/logger/renovate-logger.spec.ts` | Done | [details](lib/logger/renovate-logger.spec.ts.md) |
 | `lib/logger/pretty-stdout.spec.ts` | Done | [details](lib/logger/pretty-stdout.spec.ts.md) |
 | `lib/logger/err-serializer.spec.ts` | Not done | [details](lib/logger/err-serializer.spec.ts.md) |
 | `lib/logger/once.spec.ts` | Not done | [details](lib/logger/once.spec.ts.md) |

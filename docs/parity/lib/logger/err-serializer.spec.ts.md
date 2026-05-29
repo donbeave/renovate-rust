@@ -5,14 +5,14 @@
 ## `lib/logger/err-serializer.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/err-serializer.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
 
 ### `logger/err-serializer`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| expands errors | 9 | pending | — | — | —|
-| handles missing fields | 40 | pending | — | — | —|
+| expands errors | 9 | not-applicable | — | — | TypeScript error object spreading behavior; dynamic property expansion from Error & Record<string, unknown> has no Rust typed equivalent |
+| handles missing fields | 40 | not-applicable | — | — | TypeScript error object spreading behavior; partial Error objects with optional fields are TypeScript-specific |
 
 ### `logger/err-serializer › got`
 
