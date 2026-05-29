@@ -449,7 +449,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/index.spec.ts` | Done | [details](lib/modules/versioning/index.spec.ts.md) |
 | `lib/modules/versioning/versioning-metadata.spec.ts` | Done | [details](lib/modules/versioning/versioning-metadata.spec.ts.md) |
 | `lib/modules/versioning/generic.spec.ts` | Done | [details](lib/modules/versioning/generic.spec.ts.md) |
-| `lib/modules/versioning/distro.spec.ts` | Not done | [details](lib/modules/versioning/distro.spec.ts.md) |
+| `lib/modules/versioning/distro.spec.ts` | Done | [details](lib/modules/versioning/distro.spec.ts.md) |
 | `lib/modules/versioning/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/versioning/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/versioning/deno/index.spec.ts` | Done | [details](lib/modules/versioning/deno/index.spec.ts.md) |
 | `lib/modules/versioning/docker/index.spec.ts` | Done | [details](lib/modules/versioning/docker/index.spec.ts.md) |
@@ -569,7 +569,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/deno/post.spec.ts` | Done | [details](lib/modules/manager/deno/post.spec.ts.md) |
 | `lib/modules/manager/deno/schema.spec.ts` | Not done | [details](lib/modules/manager/deno/schema.spec.ts.md) |
 | `lib/modules/manager/deno/update.spec.ts` | Not done | [details](lib/modules/manager/deno/update.spec.ts.md) |
-| `lib/modules/manager/deps-edn/parser.spec.ts` | Not done | [details](lib/modules/manager/deps-edn/parser.spec.ts.md) |
+| `lib/modules/manager/deps-edn/parser.spec.ts` | Done | [details](lib/modules/manager/deps-edn/parser.spec.ts.md) |
 | `lib/modules/manager/devbox/artifacts.spec.ts` | Done | [details](lib/modules/manager/devbox/artifacts.spec.ts.md) |
 | `lib/modules/manager/flux/artifacts.spec.ts` | Done | [details](lib/modules/manager/flux/artifacts.spec.ts.md) |
 | `lib/modules/manager/git-submodules/update.spec.ts` | Done | [details](lib/modules/manager/git-submodules/update.spec.ts.md) |

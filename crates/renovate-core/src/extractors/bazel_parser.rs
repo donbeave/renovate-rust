@@ -229,15 +229,15 @@ impl<'a> Parser<'a> {
                         if self.peek() == Some('=') {
                             self.pos += 1;
                             self.skip_whitespace_and_comments();
-                            if self.peek() == Some('"') || self.peek() == Some('\'') {
-                                if let Some(s) = self.parse_string() {
-                                    children.insert(key, Fragment::String(s));
-                                    self.skip_whitespace_and_comments();
-                                    if self.peek() == Some(',') {
-                                        self.pos += 1;
-                                    }
-                                    continue;
+                            if (self.peek() == Some('"') || self.peek() == Some('\''))
+                                && let Some(s) = self.parse_string()
+                            {
+                                children.insert(key, Fragment::String(s));
+                                self.skip_whitespace_and_comments();
+                                if self.peek() == Some(',') {
+                                    self.pos += 1;
                                 }
+                                continue;
                             }
                         }
                     }

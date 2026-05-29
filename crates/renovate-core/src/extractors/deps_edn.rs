@@ -24,6 +24,7 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
+use serde_json::Value;
 
 /// A single extracted deps.edn Maven dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -150,6 +151,233 @@ fn find_last_dep_sym(line: &str) -> Option<String> {
     last
 }
 
+// ── EDN parser (mirrors lib/modules/manager/deps-edn/parser.ts) ──────────────
+
+/// Parsed result of a deps.edn file.
+#[derive(Debug)]
+pub struct ParsedEdnResult {
+    /// The parsed EDN data as a JSON-like value (always an Object at root).
+    pub data: Value,
+    /// Metadata: each entry is (parsed_object_or_array, replace_string).
+    pub metadata: Vec<(Value, String)>,
+}
+
+impl ParsedEdnResult {
+    /// Look up the replace string for a given value (by equality).
+    pub fn get_metadata(&self, value: &Value) -> Option<&str> {
+        self.metadata
+            .iter()
+            .find(|(v, _)| v == value)
+            .map(|(_, s)| s.as_str())
+    }
+}
+
+/// EDN token used by the parser state machine.
+#[derive(Debug)]
+enum EdnToken {
+    LeftBrace(usize),   // { with byte offset
+    RightBrace(usize),  // } with byte offset + len
+    LeftSquare(usize),
+    RightSquare(usize),
+    LeftParen(usize),
+    RightParen(usize),
+    Atom(String),       // keyword/symbol/number/string content
+}
+
+fn tokenize_edn(input: &str) -> Vec<EdnToken> {
+    let bytes = input.as_bytes();
+    let n = bytes.len();
+    let mut tokens = Vec::new();
+    let mut i = 0;
+    while i < n {
+        match bytes[i] {
+            b' ' | b'\t' | b'\r' | b'\n' | b',' => i += 1,
+            b';' => {
+                while i < n && bytes[i] != b'\n' { i += 1; }
+            }
+            b'{' => { tokens.push(EdnToken::LeftBrace(i)); i += 1; }
+            b'}' => { tokens.push(EdnToken::RightBrace(i)); i += 1; }
+            b'[' => { tokens.push(EdnToken::LeftSquare(i)); i += 1; }
+            b']' => { tokens.push(EdnToken::RightSquare(i)); i += 1; }
+            b'(' => { tokens.push(EdnToken::LeftParen(i)); i += 1; }
+            b')' => { tokens.push(EdnToken::RightParen(i)); i += 1; }
+            b'"' => {
+                // Triple-quote string
+                if input[i..].starts_with("\"\"\"") {
+                    i += 3;
+                    let start = i;
+                    while i + 2 < n && &input[i..i+3] != "\"\"\"" { i += 1; }
+                    let content = input[start..i].to_owned();
+                    if i + 2 < n { i += 3; }
+                    tokens.push(EdnToken::Atom(content));
+                } else {
+                    i += 1; // skip opening quote
+                    let mut content = String::new();
+                    while i < n && bytes[i] != b'"' {
+                        if bytes[i] == b'\\' && i + 1 < n {
+                            content.push(bytes[i + 1] as char);
+                            i += 2;
+                        } else {
+                            content.push(bytes[i] as char);
+                            i += 1;
+                        }
+                    }
+                    if i < n { i += 1; } // skip closing quote
+                    tokens.push(EdnToken::Atom(content));
+                }
+            }
+            b':' => {
+                // Keyword: strip leading ':'
+                i += 1;
+                let start = i;
+                while i < n && is_edn_sym_char(bytes[i]) { i += 1; }
+                tokens.push(EdnToken::Atom(input[start..i].to_owned()));
+            }
+            c if c.is_ascii_alphabetic() || c == b'_' || c == b'+' || c == b'!' || c == b'\'' || c == b'?' || c == b'<' || c == b'>' || c == b'=' || c == b'.' || c == b'-' || c == b'*' => {
+                let start = i;
+                while i < n && is_edn_sym_char(bytes[i]) { i += 1; }
+                tokens.push(EdnToken::Atom(input[start..i].to_owned()));
+            }
+            c if c.is_ascii_digit() => {
+                let start = i;
+                // consume number including e/E+- for exponent, . for float
+                while i < n && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'.' || bytes[i] == b'+' || bytes[i] == b'-') {
+                    // Don't let '-' start a new token unless it's part of exponent
+                    if bytes[i] == b'+' || bytes[i] == b'-' {
+                        if i > start && (bytes[i-1] == b'e' || bytes[i-1] == b'E') {
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        i += 1;
+                    }
+                }
+                tokens.push(EdnToken::Atom(input[start..i].to_owned()));
+            }
+            _ => i += 1,
+        }
+    }
+    tokens
+}
+
+fn is_edn_sym_char(b: u8) -> bool {
+    b.is_ascii_alphanumeric() || matches!(b, b'.' | b'-' | b'_' | b'/' | b'*' | b'+' | b'!' | b'\'' | b'?' | b'<' | b'>' | b'=')
+}
+
+/// Parse deps.edn content into a structured value.
+/// Returns `None` if the root is not a map.
+pub fn parse_deps_edn_file(content: &str) -> Option<ParsedEdnResult> {
+    let tokens = tokenize_edn(content);
+    let mut metadata: Vec<(Value, String)> = Vec::new();
+
+    enum State {
+        Root { data: Option<Value> },
+        Record { start: usize, data: serde_json::Map<String, Value>, current_key: Option<String>, skip_key: bool },
+        Array  { start: usize, data: Vec<Value> },
+    }
+
+    let mut stack: Vec<State> = Vec::new();
+    let mut state = State::Root { data: None };
+
+    // Helper: pop state and integrate child value
+    let pop_with = |stack: &mut Vec<State>, state: &mut State, child: Value, start: usize, end: usize, content: &str, metadata: &mut Vec<(Value, String)>| {
+        // Record metadata for container values
+        if child.is_object() || child.is_array() {
+            let replace_string = content[start..end].to_owned();
+            metadata.push((child.clone(), replace_string));
+        }
+        let parent = stack.pop().unwrap();
+        match parent {
+            State::Root { .. } => { *state = State::Root { data: Some(child) }; }
+            State::Record { start: ps, data: mut pdata, current_key, skip_key } => {
+                if skip_key {
+                    *state = State::Record { start: ps, data: pdata, current_key: None, skip_key: false };
+                } else if let Some(key) = current_key {
+                    pdata.insert(key, child);
+                    *state = State::Record { start: ps, data: pdata, current_key: None, skip_key: false };
+                } else {
+                    // child is the key slot but it's not an atom key - skip next value
+                    *state = State::Record { start: ps, data: pdata, current_key: None, skip_key: true };
+                }
+            }
+            State::Array { start: ps, mut data } => {
+                data.push(child);
+                *state = State::Array { start: ps, data };
+            }
+        }
+    };
+
+    let mut tok_idx = 0;
+    while tok_idx < tokens.len() {
+        let token = &tokens[tok_idx];
+        tok_idx += 1;
+
+        match token {
+            EdnToken::LeftBrace(offset) => {
+                let old = std::mem::replace(&mut state, State::Record { start: *offset, data: serde_json::Map::new(), current_key: None, skip_key: false });
+                stack.push(old);
+            }
+            EdnToken::LeftSquare(offset) | EdnToken::LeftParen(offset) => {
+                let old = std::mem::replace(&mut state, State::Array { start: *offset, data: Vec::new() });
+                stack.push(old);
+            }
+            EdnToken::RightBrace(offset) | EdnToken::RightSquare(offset) | EdnToken::RightParen(offset) => {
+                let end = offset + 1;
+                let (child_val, start) = match &state {
+                    State::Record { data, start, .. } => (Value::Object(data.clone()), *start),
+                    State::Array  { data, start, .. } => (Value::Array(data.clone()), *start),
+                    State::Root { data } => {
+                        // Mismatched closer - ignore
+                        let _ = data;
+                        continue;
+                    }
+                };
+                if stack.is_empty() { break; }
+                pop_with(&mut stack, &mut state, child_val, start, end, content, &mut metadata);
+            }
+            EdnToken::Atom(val) => {
+                match &mut state {
+                    State::Root { data } => { *data = Some(Value::String(val.clone())); }
+                    State::Array { data, .. } => { data.push(Value::String(val.clone())); }
+                    State::Record { data, current_key, skip_key, .. } => {
+                        if *skip_key {
+                            *current_key = None;
+                            *skip_key = false;
+                        } else if let Some(key) = current_key.take() {
+                            data.insert(key, Value::String(val.clone()));
+                        } else {
+                            *current_key = Some(val.clone());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Flush unclosed containers
+    while !stack.is_empty() {
+        let (child_val, start, end) = match &state {
+            State::Record { data, start, .. } => (Value::Object(data.clone()), *start, content.len()),
+            State::Array  { data, start, .. } => (Value::Array(data.clone()), *start, content.len()),
+            State::Root { data } => { let _ = data; break; }
+        };
+        pop_with(&mut stack, &mut state, child_val, start, end, content, &mut metadata);
+    }
+
+    match state {
+        State::Root { data: Some(Value::Object(map)) } => Some(ParsedEdnResult {
+            data: Value::Object(map),
+            metadata,
+        }),
+        State::Record { data, .. } => Some(ParsedEdnResult {
+            data: Value::Object(data),
+            metadata,
+        }),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -224,4 +452,60 @@ mod tests {
     fn invalid_edn_returns_empty() {
         assert!(extract("123").is_empty());
     }
+}
+
+// Ported: "'$input' parses to $output" — modules/manager/deps-edn/parser.spec.ts line 7
+#[test]
+fn edn_parse_inputs_to_outputs() {
+    let cases: &[(&str, Option<serde_json::Value>)] = &[
+        ("", None),
+        (":foo", None),
+        ("foo", None),
+        ("1", None),
+        ("1.5", None),
+        ("1e1", None),
+        ("1e-1", None),
+        ("[]", None),
+        ("}", None),
+        ("{}", Some(serde_json::json!({}))),
+        ("{", Some(serde_json::json!({}))),
+        ("{:foo :foo}", Some(serde_json::json!({"foo": "foo"}))),
+        ("{:foo foo}", Some(serde_json::json!({"foo": "foo"}))),
+        ("{:foo 1}", Some(serde_json::json!({"foo": "1"}))),
+        ("{:foo 1.5}", Some(serde_json::json!({"foo": "1.5"}))),
+        ("{:foo 1e1}", Some(serde_json::json!({"foo": "1e1"}))),
+        ("{:foo 1e-1}", Some(serde_json::json!({"foo": "1e-1"}))),
+        ("{:foo {}}", Some(serde_json::json!({"foo": {}}))),
+        ("{{} :foo}", Some(serde_json::json!({}))),
+        ("{{} {}}", Some(serde_json::json!({}))),
+        ("{:foo :bar}", Some(serde_json::json!({"foo": "bar"}))),
+        ("{:foo 1 :bar 2}", Some(serde_json::json!({"foo": "1", "bar": "2"}))),
+        ("{:foo {:bar 2} :baz}", Some(serde_json::json!({"foo": {"bar": "2"}}))),
+        ("{:foo [:bar :baz]}", Some(serde_json::json!({"foo": ["bar", "baz"]}))),
+        ("{:foo {:bar :baz}}", Some(serde_json::json!({"foo": {"bar": "baz"}}))),
+        ("{:foo [{:bar :baz}]}", Some(serde_json::json!({"foo": [{"bar": "baz"}]}))),
+    ];
+    for (input, expected) in cases {
+        let result = parse_deps_edn_file(input);
+        match expected {
+            None => assert!(result.is_none(), "expected None for {input:?}, got Some"),
+            Some(expected_val) => {
+                let r = result.unwrap_or_else(|| panic!("expected Some for {input:?}"));
+                assert_eq!(&r.data, expected_val, "parse({input:?})");
+            }
+        }
+    }
+}
+
+// Ported: "extracts file" — modules/manager/deps-edn/parser.spec.ts line 41
+#[test]
+fn edn_extracts_file() {
+    let content = include_str!("../../../../tests/fixtures/deps_edn/deps.edn");
+    let result = parse_deps_edn_file(content).expect("should parse");
+    // Check the specific dep
+    assert_eq!(result.data["deps"]["persistent-sorted-set"]["mvn/version"], "0.1.2");
+    // Check metadata
+    let dep = &result.data["deps"]["persistent-sorted-set"];
+    let meta = result.get_metadata(dep).expect("should have metadata");
+    assert_eq!(meta, "{:mvn/version,\"0.1.2\"}");
 }

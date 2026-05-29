@@ -426,7 +426,7 @@ fn parse_ruby_range(s: &str) -> RubyRange {
 /// Parse a comma-separated range string into `Vec<RubyRange>`, combining
 /// consecutive `~>` + `>=` pairs into a single range with companion.
 fn parse_ruby_ranges(range: &str) -> Vec<RubyRange> {
-    let raw: Vec<RubyRange> = range.split(',').map(|s| parse_ruby_range(s)).collect();
+    let raw: Vec<RubyRange> = range.split(',').map(parse_ruby_range).collect();
     let mut result: Vec<RubyRange> = Vec::new();
     let mut i = 0;
     while i < raw.len() {
@@ -550,7 +550,7 @@ fn ruby_increment(from: &str, to: &str) -> String {
 fn ruby_decrement(v: &str) -> String {
     let segs: Vec<i64> = v.split('.').map(|s| s.parse().unwrap_or(0)).collect();
     let n = segs.len();
-    let mut result = segs.clone();
+    let mut result = segs;
     let mut i = n;
     while i > 0 {
         i -= 1;
@@ -714,9 +714,7 @@ fn replace_ranges(ranges: &[RubyRange], to: &str) -> Vec<RubyRange> {
             if part_seg_count > to_seg_count {
                 let diff = part_seg_count - to_seg_count;
                 let mut padded_to_segs: Vec<&str> = to.split('.').collect();
-                for _ in 0..diff {
-                    padded_to_segs.push("0");
-                }
+                padded_to_segs.extend(std::iter::repeat_n("0", diff));
                 let padded_to = padded_to_segs.join(".");
                 let replacement = replace_part(part, &padded_to);
                 // Shorten version by removing last `diff` segments
@@ -797,7 +795,7 @@ pub fn get_new_value(
     // Mirrors vtrim() in TypeScript which strips all quote chars from a string.
     let strip_quotes_from = |s: &str| -> String {
         if delimiter.is_some() {
-            s.replace('\'', "").replace('"', "")
+            s.replace(['\'', '"'], "")
         } else {
             s.to_owned()
         }
