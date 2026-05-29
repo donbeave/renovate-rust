@@ -601,6 +601,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |----------------------|-----------|--------|-------|
 | `lib/modules/manager/maven/extract.ts` | `crates/renovate-core/src/extractors/maven.rs` | partial | Core extraction ported |
 | `lib/modules/manager/maven/index.ts` | `crates/renovate-core/src/extractors/maven.rs` | partial | Manager metadata |
+| `lib/modules/manager/maven/update.ts` | `crates/renovate-core/src/extractors/maven.rs` | full | maven_update_dependency (updateAtPosition + updateDependency), maven_bump_package_version with SNAPSHOT/qualifier handling; all 18 tests ported |
 
 ### maven-wrapper
 

@@ -200,6 +200,21 @@ impl LookupStats {
             .map(|(k, v)| (k.clone(), make_timing_report(v)))
             .collect()
     }
+
+    /// Wrap an async function, measuring its duration and recording it.
+    ///
+    /// Mirrors `LookupStats.wrap()` from `lib/util/stats.ts`.
+    pub async fn wrap<F, Fut, T>(&mut self, datasource: &str, f: F) -> T
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = T>,
+    {
+        let start = std::time::Instant::now();
+        let result = f().await;
+        let duration = start.elapsed().as_millis() as i64;
+        self.write(datasource, duration);
+        result
+    }
 }
 
 /// Accumulates get/set timing for the package cache.
@@ -226,6 +241,34 @@ impl PackageCacheStats {
             make_timing_report(&self.gets),
             make_timing_report(&self.sets),
         )
+    }
+
+    /// Wrap an async get function, measuring its duration.
+    ///
+    /// Mirrors `PackageCacheStats.wrapGet()` from `lib/util/stats.ts`.
+    pub async fn wrap_get<F, Fut, T>(&mut self, f: F) -> T
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = T>,
+    {
+        let start = std::time::Instant::now();
+        let result = f().await;
+        self.write_get(start.elapsed().as_millis() as i64);
+        result
+    }
+
+    /// Wrap an async set function, measuring its duration.
+    ///
+    /// Mirrors `PackageCacheStats.wrapSet()` from `lib/util/stats.ts`.
+    pub async fn wrap_set<F, Fut, T>(&mut self, f: F) -> T
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = T>,
+    {
+        let start = std::time::Instant::now();
+        let result = f().await;
+        self.write_set(start.elapsed().as_millis() as i64);
+        result
     }
 }
 
@@ -341,6 +384,27 @@ impl GetDatasourceReleasesStats {
                 .map(|(k, v)| (k.clone(), make_timing_report(v)))
                 .collect(),
         )
+    }
+
+    /// Wrap an async function, measuring its duration.
+    ///
+    /// Mirrors `GetDatasourceReleasesStats.wrap()` from `lib/util/stats.ts`.
+    pub async fn wrap<F, Fut, T>(
+        &mut self,
+        datasource: &str,
+        registry_url: &str,
+        package_name: &str,
+        f: F,
+    ) -> T
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = T>,
+    {
+        let start = std::time::Instant::now();
+        let result = f().await;
+        let duration = start.elapsed().as_millis() as i64;
+        self.write(datasource, registry_url, package_name, duration);
+        result
     }
 }
 
@@ -5247,6 +5311,60 @@ mod tests {
         assert_eq!(npm.max_ms, 400);
         assert_eq!(npm.median_ms, 200);
         assert_eq!(npm.total_ms, 700);
+    }
+
+    // Ported: "wraps a function" — util/stats.spec.ts line 95 (LookupStats)
+    #[tokio::test]
+    async fn test_lookup_stats_wraps_function() {
+        let mut stats = LookupStats::new();
+        // wrap() passes through the return value
+        let result = stats.wrap("npm", || async { "foo" }).await;
+        assert_eq!(result, "foo");
+        // one data point recorded for 'npm'
+        let report = stats.get_report();
+        let npm = report.get("npm").unwrap();
+        assert_eq!(npm.count, 1);
+        assert!(npm.total_ms >= 0, "duration must be non-negative");
+    }
+
+    // Ported: "wraps a function" — util/stats.spec.ts line 308 (GetDatasourceReleasesStats)
+    #[tokio::test]
+    async fn test_get_datasource_releases_stats_wraps_function() {
+        let mut stats = GetDatasourceReleasesStats::new();
+        let result = stats
+            .wrap(
+                "npm",
+                "https://registry.npmjs.org",
+                "lodash",
+                || async { 42u64 },
+            )
+            .await;
+        assert_eq!(result, 42);
+        // one data point recorded
+        let (overall, by_ds) = stats.get_report();
+        assert_eq!(overall.count, 1);
+        let npm = by_ds.get("npm").unwrap();
+        assert_eq!(npm.count, 1);
+    }
+
+    // Ported: "wraps get function" — util/stats.spec.ts line 612 (PackageCacheStats)
+    #[tokio::test]
+    async fn test_package_cache_stats_wraps_get_function() {
+        let mut stats = PackageCacheStats::new();
+        let result = stats.wrap_get(|| async { "cached-value" }).await;
+        assert_eq!(result, "cached-value");
+        let (gets, _sets) = stats.get_report();
+        assert_eq!(gets.count, 1);
+    }
+
+    // Ported: "wraps set function" — util/stats.spec.ts line 625 (PackageCacheStats)
+    #[tokio::test]
+    async fn test_package_cache_stats_wraps_set_function() {
+        let mut stats = PackageCacheStats::new();
+        let result = stats.wrap_set(|| async { true }).await;
+        assert!(result);
+        let (_gets, sets) = stats.get_report();
+        assert_eq!(sets.count, 1);
     }
 
     // -----------------------------------------------------------------------

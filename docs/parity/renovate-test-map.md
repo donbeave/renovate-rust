@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,916 / 11,677 total tests ported (42%) · pending 6,618 · not-applicable 143 (1% of total) — updated 2026-05-29
+**Progress:** 4,938 / 11,677 total tests ported (42%) · pending 6,587 · not-applicable 152 (1% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -428,7 +428,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/memoize.spec.ts` | Done | [details](lib/util/memoize.spec.ts.md) |
 | `lib/util/mask.spec.ts` | Done | [details](lib/util/mask.spec.ts.md) |
 | `lib/util/host-rules.spec.ts` | Done | [details](lib/util/host-rules.spec.ts.md) |
-| `lib/util/stats.spec.ts` | Not done | [details](lib/util/stats.spec.ts.md) |
+| `lib/util/stats.spec.ts` | Done | [details](lib/util/stats.spec.ts.md) |
 | `lib/util/s3.spec.ts` | Not done | [details](lib/util/s3.spec.ts.md) |
 | `lib/util/jsonata.spec.ts` | Not done | [details](lib/util/jsonata.spec.ts.md) |
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
@@ -609,7 +609,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/kustomize/artifacts.spec.ts` | Not done | [details](lib/modules/manager/kustomize/artifacts.spec.ts.md) |
 | `lib/modules/manager/kustomize/common.spec.ts` | Done | [details](lib/modules/manager/kustomize/common.spec.ts.md) |
 | `lib/modules/manager/maven/index.spec.ts` | Not done | [details](lib/modules/manager/maven/index.spec.ts.md) |
-| `lib/modules/manager/maven/update.spec.ts` | Not done | [details](lib/modules/manager/maven/update.spec.ts.md) |
+| `lib/modules/manager/maven/update.spec.ts` | Done | [details](lib/modules/manager/maven/update.spec.ts.md) |
 | `lib/modules/manager/maven-wrapper/artifacts.spec.ts` | Not done | [details](lib/modules/manager/maven-wrapper/artifacts.spec.ts.md) |
 | `lib/modules/manager/mise/backends.spec.ts` | Done | [details](lib/modules/manager/mise/backends.spec.ts.md) |
 | `lib/modules/manager/rust-toolchain/extract.spec.ts` | Done | [details](lib/modules/manager/rust-toolchain/extract.spec.ts.md) |
