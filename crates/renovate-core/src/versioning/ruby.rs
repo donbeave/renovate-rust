@@ -8,13 +8,11 @@ use regex::Regex;
 use std::cmp::Ordering;
 use std::sync::LazyLock;
 
-static VERSION_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:[.-](.+))?$").unwrap());
 
 /// A parsed Ruby gem version.
 #[derive(Debug, Clone)]
 struct RubyVersion {
-    segs: Vec<u64>, // numeric segments (up to 3)
+    segs: Vec<u64>, // numeric segments (arbitrary count)
     pre: Option<String>,
 }
 
@@ -25,16 +23,50 @@ impl RubyVersion {
             return None;
         }
 
-        let caps = VERSION_RE.captures(s)?;
-        let seg1: u64 = caps.get(1)?.as_str().parse().ok()?;
-        let mut segs = vec![seg1];
-        if let Some(m) = caps.get(2) {
-            segs.push(m.as_str().parse().ok()?);
-            if let Some(m) = caps.get(3) {
-                segs.push(m.as_str().parse().ok()?);
+        // Split on '.' or '-' to tokenize
+        // Rule: consume leading all-digit tokens as numeric segments;
+        // once we hit a non-numeric token (or a '-' separator), the rest is prerelease.
+        // This matches ruby gem semantics where "4.2.5.1" is 4 numeric segs
+        // and "1.0.0.alpha" is [1,0,0] + pre("alpha").
+        let mut segs: Vec<u64> = Vec::new();
+        let mut pre_parts: Vec<&str> = Vec::new();
+        let mut in_pre = false;
+
+        // First split by '-' to separate the dash-prerelease portion
+        let (numeric_part, dash_pre) = if let Some(pos) = s.find('-') {
+            (&s[..pos], Some(&s[pos + 1..]))
+        } else {
+            (s, None)
+        };
+
+        // Now split numeric_part by '.'
+        for token in numeric_part.split('.') {
+            if in_pre {
+                pre_parts.push(token);
+            } else if let Ok(n) = token.parse::<u64>() {
+                segs.push(n);
+            } else {
+                // Non-numeric dot-segment → prerelease starts here
+                in_pre = true;
+                pre_parts.push(token);
             }
         }
-        let pre = caps.get(4).map(|m| m.as_str().to_owned());
+
+        let pre = if !pre_parts.is_empty() {
+            let mut p = pre_parts.join(".");
+            if let Some(d) = dash_pre {
+                p.push('-');
+                p.push_str(d);
+            }
+            Some(p)
+        } else {
+            dash_pre.map(|d| d.to_owned())
+        };
+
+        if segs.is_empty() {
+            return None;
+        }
+
         Some(RubyVersion { segs, pre })
     }
 
@@ -210,21 +242,28 @@ fn satisfies_constraint(v: &RubyVersion, c: &Constraint) -> bool {
         "<" => *v < c.ver,
         "<=" => *v <= c.ver,
         "~>" => {
-            // Pessimistic:
-            // ~> X → >= X, < X+1
-            // ~> X.Y → >= X.Y, < X+1
-            // ~> X.Y.Z → >= X.Y.Z, < X.Y+1
+            // Pessimistic constraint `~> X.Y...Z`:
+            // - Lower bound: v >= X.Y...Z
+            // - Upper bound: all segments up to second-to-last are fixed equal,
+            //   and the second-to-last segment < c.ver.second-to-last + 1.
+            // ~> X → >= X, < X+1 (only 1 seg: bump seg 0)
+            // ~> X.Y → >= X.Y, < X+1 (2 segs: bump seg 0)
+            // ~> X.Y.Z → >= X.Y.Z, < X.Y+1 (3+ segs: fix segs 0..n-2, bump seg n-2)
             if *v < c.ver {
                 return false;
             }
-            if c.ver_segs == 1 {
-                v.seg(0) < c.ver.seg(0) + 1
-            } else if c.ver_segs == 2 {
-                // ~> X.Y → < X+1
+            if c.ver_segs <= 2 {
+                // Upper bound: v.seg(0) < c.ver.seg(0) + 1
                 v.seg(0) < c.ver.seg(0) + 1
             } else {
-                // ~> X.Y.Z → < X.Y+1
-                v.seg(0) == c.ver.seg(0) && v.seg(1) < c.ver.seg(1) + 1
+                // Fix segments 0..n-2, bump segment n-2
+                let bump_idx = c.ver_segs - 2;
+                for i in 0..bump_idx {
+                    if v.seg(i) != c.ver.seg(i) {
+                        return false;
+                    }
+                }
+                v.seg(bump_idx) < c.ver.seg(bump_idx) + 1
             }
         }
         _ => false,
@@ -346,6 +385,480 @@ pub fn is_single_version(input: &str) -> bool {
 
 pub fn get_pinned_value(input: &str) -> String {
     input.trim_start_matches('v').to_owned()
+}
+
+// ---------------------------------------------------------------------------
+// get_new_value — Ruby range strategy helpers
+// ---------------------------------------------------------------------------
+
+/// A parsed single range part (operator + delimiter + version), with an
+/// optional companion (the `>=` part of a `~> X, >= Y` pair).
+#[derive(Debug, Clone)]
+struct RubyRange {
+    operator: String,
+    delimiter: String,
+    version: String,
+    companion: Option<Box<RubyRange>>,
+}
+
+static RANGE_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?P<operator>[^\d\s]*)(?P<delimiter>\s*)(?P<version>[0-9a-zA-Z.\-]+)$").unwrap()
+});
+
+/// Parse a single range string into a `RubyRange`.
+fn parse_ruby_range(s: &str) -> RubyRange {
+    let value = s.trim();
+    if let Some(caps) = RANGE_RE.captures(value) {
+        let operator = caps.name("operator").map(|m| m.as_str()).unwrap_or("").to_owned();
+        let delimiter = caps.name("delimiter").map(|m| m.as_str()).unwrap_or(" ").to_owned();
+        let version = caps.name("version").map(|m| m.as_str()).unwrap_or("").to_owned();
+        RubyRange { operator, delimiter, version, companion: None }
+    } else {
+        RubyRange {
+            operator: String::new(),
+            delimiter: " ".to_owned(),
+            version: String::new(),
+            companion: None,
+        }
+    }
+}
+
+/// Parse a comma-separated range string into `Vec<RubyRange>`, combining
+/// consecutive `~>` + `>=` pairs into a single range with companion.
+fn parse_ruby_ranges(range: &str) -> Vec<RubyRange> {
+    let raw: Vec<RubyRange> = range.split(',').map(|s| parse_ruby_range(s)).collect();
+    let mut result: Vec<RubyRange> = Vec::new();
+    let mut i = 0;
+    while i < raw.len() {
+        if i + 1 < raw.len() && raw[i].operator == "~>" && raw[i + 1].operator == ">=" {
+            let mut combined = raw[i].clone();
+            combined.companion = Some(Box::new(raw[i + 1].clone()));
+            result.push(combined);
+            i += 2;
+        } else {
+            result.push(raw[i].clone());
+            i += 1;
+        }
+    }
+    result
+}
+
+/// Stringify a list of `RubyRange` back to a comma-separated string.
+fn stringify_ruby_ranges(ranges: &[RubyRange]) -> String {
+    ranges
+        .iter()
+        .map(|r| {
+            if let Some(comp) = &r.companion {
+                format!(
+                    "{}{}{}, {}{}{}",
+                    r.operator, r.delimiter, r.version,
+                    comp.operator, comp.delimiter, comp.version
+                )
+            } else {
+                format!("{}{}{}", r.operator, r.delimiter, r.version)
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+// ---------------------------------------------------------------------------
+// Version arithmetic helpers
+// ---------------------------------------------------------------------------
+
+/// `adapt(left, right)`: truncate `left` to the same number of dot-segments as `right`.
+fn ruby_adapt(left: &str, right: &str) -> String {
+    let count = right.split('.').count();
+    left.split('.').take(count).collect::<Vec<_>>().join(".")
+}
+
+/// `floor(v)`: set the last segment to "0" (for >= 2 segments).
+fn ruby_floor(v: &str) -> String {
+    let segs: Vec<&str> = v.split('.').collect();
+    if segs.len() <= 1 {
+        return v.to_owned();
+    }
+    let mut s: Vec<&str> = segs[..segs.len() - 1].to_vec();
+    s.push("0");
+    s.join(".")
+}
+
+/// `trim_zeroes(v)`: remove trailing ".0" segments.
+fn ruby_trim_zeroes(v: &str) -> String {
+    let mut segs: Vec<&str> = v.split('.').collect();
+    while segs.len() > 1 && segs.last() == Some(&"0") {
+        segs.pop();
+    }
+    segs.join(".")
+}
+
+/// `increment_last_segment(v)`: increment the last numeric segment.
+fn ruby_increment_last_segment(v: &str) -> String {
+    let mut segs: Vec<String> = v.split('.').map(|s| s.to_owned()).collect();
+    if let Some(last) = segs.last_mut() {
+        let n: u64 = last.parse().unwrap_or(0);
+        *last = (n + 1).to_string();
+    }
+    segs.join(".")
+}
+
+/// `pgte_upper_bound(v)`: upper bound of the `~>` operator.
+/// If more than 1 segment, pop the last then increment the new last.
+fn ruby_pgte_upper_bound(v: &str) -> String {
+    let segs: Vec<&str> = v.split('.').collect();
+    if segs.len() > 1 {
+        let without_last = segs[..segs.len() - 1].join(".");
+        ruby_increment_last_segment(&without_last)
+    } else {
+        ruby_increment_last_segment(v)
+    }
+}
+
+/// `increment(from, to)`: find the smallest version > `from` that still
+/// reaches `to` when adapted.  Mirrors the TypeScript `increment` function.
+fn ruby_increment(from: &str, to: &str) -> String {
+    let adapted = ruby_adapt(to, from);
+    if from == adapted {
+        return ruby_increment_last_segment(from);
+    }
+    // TypeScript always uses 3 segments (major.minor.patch) for the next candidate.
+    // We use max(from.len(), 3) to match that behavior.
+    let from_segs: Vec<i64> = from.split('.').map(|s| s.parse().unwrap_or(0)).collect();
+    let adapted_segs: Vec<i64> = adapted.split('.').map(|s| s.parse().unwrap_or(0)).collect();
+    let n = from_segs.len().max(3);
+
+    for i in 0..from_segs.len() {
+        let from_seg = from_segs.get(i).copied().unwrap_or(0);
+        let adapted_seg = adapted_segs.get(i).copied().unwrap_or(0);
+        if from_seg != adapted_seg {
+            // Increment from's value at this level (matches TypeScript incrementMajor/Minor/Patch),
+            // set everything below to 0, pad to n segments.
+            let mut next: Vec<i64> = from_segs[..i].to_vec();
+            next.push(from_seg + 1);
+            while next.len() < n {
+                next.push(0);
+            }
+            let next_str = next.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(".");
+            return ruby_increment(&next_str, to);
+        }
+    }
+    ruby_increment_last_segment(from)
+}
+
+/// `decrement(v)`: decrement the last segment, borrowing from higher segments
+/// as needed.
+fn ruby_decrement(v: &str) -> String {
+    let segs: Vec<i64> = v.split('.').map(|s| s.parse().unwrap_or(0)).collect();
+    let n = segs.len();
+    let mut result = segs.clone();
+    let mut i = n;
+    while i > 0 {
+        i -= 1;
+        result[i] -= 1;
+        if result[i] >= 0 {
+            break;
+        }
+        result[i] = 0;
+        // borrow: continue to next higher segment
+    }
+    result.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(".")
+}
+
+// ---------------------------------------------------------------------------
+// Range satisfaction
+// ---------------------------------------------------------------------------
+
+/// Check whether `ver` satisfies a single `RubyRange` (including its companion).
+fn satisfies_ruby_range(ver: &str, r: &RubyRange) -> bool {
+    let constraint_str = format!("{}{}{}", r.operator, r.delimiter, r.version);
+    if !matches(ver, &constraint_str) {
+        return false;
+    }
+    if let Some(comp) = &r.companion {
+        satisfies_ruby_range(ver, comp)
+    } else {
+        true
+    }
+}
+
+// ---------------------------------------------------------------------------
+// replacePart — mirrors TypeScript replacePart
+// ---------------------------------------------------------------------------
+
+fn replace_part(part: &RubyRange, to: &str) -> RubyRange {
+    match part.operator.as_str() {
+        "<" => RubyRange {
+            operator: part.operator.clone(),
+            delimiter: part.delimiter.clone(),
+            version: ruby_increment(&part.version, to),
+            companion: None,
+        },
+        "<=" => RubyRange {
+            operator: part.operator.clone(),
+            delimiter: part.delimiter.clone(),
+            version: to.to_owned(),
+            companion: None,
+        },
+        "~>" => {
+            let new_ver = ruby_floor(ruby_adapt(to, &part.version).as_str());
+            if let Some(comp) = &part.companion {
+                RubyRange {
+                    operator: part.operator.clone(),
+                    delimiter: part.delimiter.clone(),
+                    version: new_ver,
+                    companion: Some(Box::new(RubyRange {
+                        operator: comp.operator.clone(),
+                        delimiter: comp.delimiter.clone(),
+                        version: to.to_owned(),
+                        companion: None,
+                    })),
+                }
+            } else {
+                RubyRange {
+                    operator: part.operator.clone(),
+                    delimiter: part.delimiter.clone(),
+                    version: new_ver,
+                    companion: None,
+                }
+            }
+        }
+        ">" => RubyRange {
+            operator: part.operator.clone(),
+            delimiter: part.delimiter.clone(),
+            version: ruby_decrement(to),
+            companion: None,
+        },
+        ">=" | "=" | "" => RubyRange {
+            operator: part.operator.clone(),
+            delimiter: part.delimiter.clone(),
+            version: to.to_owned(),
+            companion: None,
+        },
+        _ => part.clone(), // "!=" and unknown: no change
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Strategy implementations
+// ---------------------------------------------------------------------------
+
+fn bump_ranges(ranges: &[RubyRange], to: &str) -> Vec<RubyRange> {
+    ranges
+        .iter()
+        .map(|part| {
+            match part.operator.as_str() {
+                "<" => {
+                    if is_greater_than(to, &part.version) || equals(to, &part.version) {
+                        replace_part(part, to)
+                    } else {
+                        part.clone()
+                    }
+                }
+                "<=" => {
+                    if is_greater_than(to, &part.version) {
+                        replace_part(part, to)
+                    } else {
+                        part.clone()
+                    }
+                }
+                "~>" => {
+                    let trimmed = ruby_adapt(to, &part.version);
+                    if ruby_trim_zeroes(&trimmed) == ruby_trim_zeroes(to) {
+                        RubyRange {
+                            operator: part.operator.clone(),
+                            delimiter: part.delimiter.clone(),
+                            version: trimmed,
+                            companion: None,
+                        }
+                    } else {
+                        RubyRange {
+                            operator: part.operator.clone(),
+                            delimiter: part.delimiter.clone(),
+                            version: trimmed,
+                            companion: Some(Box::new(RubyRange {
+                                operator: ">=".to_owned(),
+                                delimiter: " ".to_owned(),
+                                version: to.to_owned(),
+                                companion: None,
+                            })),
+                        }
+                    }
+                }
+                "!=" => {
+                    if is_greater_than(to, &part.version) {
+                        RubyRange {
+                            operator: ">=".to_owned(),
+                            delimiter: part.delimiter.clone(),
+                            version: to.to_owned(),
+                            companion: None,
+                        }
+                    } else {
+                        part.clone()
+                    }
+                }
+                _ => replace_part(part, to),
+            }
+        })
+        .collect()
+}
+
+fn replace_ranges(ranges: &[RubyRange], to: &str) -> Vec<RubyRange> {
+    ranges
+        .iter()
+        .map(|part| {
+            if satisfies_ruby_range(to, part) {
+                return part.clone();
+            }
+            let part_seg_count = part.version.split('.').count();
+            let to_seg_count = to.split('.').count();
+            if part_seg_count > to_seg_count {
+                let diff = part_seg_count - to_seg_count;
+                let mut padded_to_segs: Vec<&str> = to.split('.').collect();
+                for _ in 0..diff {
+                    padded_to_segs.push("0");
+                }
+                let padded_to = padded_to_segs.join(".");
+                let replacement = replace_part(part, &padded_to);
+                // Shorten version by removing last `diff` segments
+                let ver_segs: Vec<&str> = replacement.version.split('.').collect();
+                let shortened = if ver_segs.len() > diff {
+                    ver_segs[..ver_segs.len() - diff].join(".")
+                } else {
+                    replacement.version.clone()
+                };
+                RubyRange {
+                    operator: replacement.operator,
+                    delimiter: replacement.delimiter,
+                    version: shortened,
+                    companion: replacement.companion,
+                }
+            } else {
+                replace_part(part, to)
+            }
+        })
+        .collect()
+}
+
+fn widen_ranges(ranges: &[RubyRange], to: &str) -> Vec<RubyRange> {
+    ranges
+        .iter()
+        .flat_map(|part| {
+            if satisfies_ruby_range(to, part) {
+                return vec![part.clone()];
+            }
+            match part.operator.as_str() {
+                "~>" => {
+                    let base_version = if let Some(comp) = &part.companion {
+                        comp.version.clone()
+                    } else {
+                        part.version.clone()
+                    };
+                    let upper = ruby_pgte_upper_bound(&part.version);
+                    let limit = ruby_increment(&upper, to);
+                    vec![
+                        RubyRange {
+                            operator: ">=".to_owned(),
+                            delimiter: " ".to_owned(),
+                            version: base_version,
+                            companion: None,
+                        },
+                        RubyRange {
+                            operator: "<".to_owned(),
+                            delimiter: " ".to_owned(),
+                            version: limit,
+                            companion: None,
+                        },
+                    ]
+                }
+                _ => vec![replace_part(part, to)],
+            }
+        })
+        .collect()
+}
+
+// ---------------------------------------------------------------------------
+// Public get_new_value entry point
+// ---------------------------------------------------------------------------
+
+pub fn get_new_value(
+    current_value: &str,
+    range_strategy: &str,
+    current_version: &str,
+    new_version: &str,
+) -> Option<String> {
+    // Detect quote delimiter (single or double quote wrapping each part)
+    let first_char = current_value.chars().next();
+    let delimiter: Option<char> = match first_char {
+        Some('\'') | Some('"') => first_char,
+        _ => None,
+    };
+
+    // Strip quotes from content: strip leading/trailing quote from each comma-part.
+    // Mirrors vtrim() in TypeScript which strips all quote chars from a string.
+    let strip_quotes_from = |s: &str| -> String {
+        if delimiter.is_some() {
+            s.replace('\'', "").replace('"', "")
+        } else {
+            s.to_owned()
+        }
+    };
+
+    // `content` is the unquoted version of `current_value`
+    let content = strip_quotes_from(current_value);
+    let cv: &str = content.trim_start_matches('v');
+    let nv: &str = new_version.trim_start_matches('v');
+
+    // Compute new_value (unquoted)
+    let new_value: Option<String> = if is_version(cv) {
+        // Case 1: currentValue is a plain version
+        let new_val = if content.starts_with('v') && !new_version.starts_with('v') {
+            format!("v{}", nv)
+        } else {
+            new_version.to_owned()
+        };
+        Some(new_val)
+    } else {
+        let cv_stripped = cv.trim_start_matches('=').trim();
+        let cur_vtrim = current_version.trim_start_matches('v');
+        if cv_stripped == cur_vtrim {
+            // Case 2: currentValue stripped of `= ` equals currentVersion
+            Some(content.replace(current_version, new_version))
+        } else {
+            // Case 3: range strategies
+            match range_strategy {
+                "update-lockfile" => {
+                    if matches(nv, cv) {
+                        Some(cv.to_owned())
+                    } else {
+                        // Recurse with replace strategy
+                        return get_new_value(current_value, "replace", current_version, new_version);
+                    }
+                }
+                "bump" => Some(stringify_ruby_ranges(&bump_ranges(&parse_ruby_ranges(cv), nv))),
+                "auto" | "replace" => Some(stringify_ruby_ranges(&replace_ranges(&parse_ruby_ranges(cv), nv))),
+                "widen" => Some(stringify_ruby_ranges(&widen_ranges(&parse_ruby_ranges(cv), nv))),
+                _ => None,
+            }
+        }
+    };
+
+    // Re-apply quotes if needed (mirrors TypeScript's end-of-function quote wrapping)
+    if let (Some(result), Some(q)) = (&new_value, delimiter) {
+        // TypeScript splits on ',' and adds delimiter around each part
+        // For multi-part ranges like ">= 3.0.5, < 3.3" it wraps each part
+        let quoted = result
+            .split(',')
+            .map(|part| {
+                // Preserve leading whitespace, add quote, then trailing quote
+                let trimmed = part.trim();
+                format!("{}{}{}", q, trimmed, q)
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+        return Some(quoted);
+    }
+
+    new_value
 }
 
 #[cfg(test)]
@@ -639,5 +1152,145 @@ mod tests {
     fn ruby_get_pinned_value() {
         assert_eq!(get_pinned_value("1.2.3"), "1.2.3");
         assert_eq!(get_pinned_value("v1.2.3"), "1.2.3");
+    }
+
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — modules/versioning/ruby/index.spec.ts line 281
+    #[test]
+    fn ruby_get_new_value_cases() {
+        // (currentValue, rangeStrategy, currentVersion, newVersion, expected)
+        let cases: &[(&str, &str, &str, &str, &str)] = &[
+            ("1.0.3", "pin", "1.0.3", "1.2.3", "1.2.3"),
+            ("v1.0.3", "auto", "v1.0.3", "v1.2.3", "v1.2.3"),
+            ("'>= 3.0.5', '< 3.2'", "replace", "3.1.5", "3.2.1", "'>= 3.0.5', '< 3.3'"),
+            ("'0.0.10'", "auto", "0.0.10", "0.0.11", "'0.0.11'"),
+            ("'0.0.10'", "replace", "0.0.10", "0.0.11", "'0.0.11'"),
+            (">= 3.2, < 5.0", "bump", "4.0.2", "6.0.1", ">= 6.0.1, < 6.0.2"),
+            ("~> 5.2, >= 5.2.5", "bump", "5.3.0", "6.0.0", "~> 6.0"),
+            ("~> 5.2, >= 5.2.5", "bump", "5.3.0", "6.0.1", "~> 6.0, >= 6.0.1"),
+            ("~> 5.2.0, >= 5.2.5", "bump", "5.2.5", "5.3.1", "~> 5.3.1"),
+            ("4.2.0", "bump", "4.2.0", "4.2.5.1", "4.2.5.1"),
+            ("4.2.5.1", "bump", "0.1", "4.3.0", "4.3.0"),
+            ("~> 1", "bump", "1.2.0", "2.0.3", "~> 2, >= 2.0.3"),
+            ("'~> 1'", "bump", "1.2.0", "2.0.3", "'~> 2', '>= 2.0.3'"),
+            ("= 5.2.2", "bump", "5.2.2", "5.2.2.1", "= 5.2.2.1"),
+            ("1.0.3", "bump", "1.0.3", "1.2.3", "1.2.3"),
+            ("v1.0.3", "bump", "1.0.3", "1.2.3", "v1.2.3"),
+            ("= 1.0.3", "bump", "1.0.3", "1.2.3", "= 1.2.3"),
+            ("!= 1.0.3", "bump", "1.0.0", "1.2.3", ">= 1.2.3"),
+            ("!= 1.0.3", "bump", "1.0.0", "1.0.2", "!= 1.0.3"),
+            ("!= 1.0.3", "bump", "1.0.0", "1.0.3", "!= 1.0.3"),
+            ("> 1.0.3", "bump", "1.0.4", "1.2.3", "> 1.2.2"),
+            ("> 1.2.3", "bump", "1.0.0", "1.0.3", "> 1.0.2"),
+            ("< 1.0.3", "bump", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2.3", "bump", "1.0.0", "1.0.3", "< 1.2.3"),
+            ("< 1.2.2", "bump", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2.3", "bump", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2", "bump", "1.0.0", "1.2.3", "< 1.3"),
+            ("< 1", "bump", "0.9.0", "1.2.3", "< 2"),
+            ("< 1.2.3", "bump", "1.0.0", "1.2.2", "< 1.2.3"),
+            (">= 1.0.3", "bump", "1.0.3", "1.2.3", ">= 1.2.3"),
+            (">= 1.0.3", "bump", "1.0.3", "1.0.2", ">= 1.0.2"),
+            ("<= 1.0.3", "bump", "1.0.3", "1.2.3", "<= 1.2.3"),
+            ("<= 1.0.3", "bump", "1.0.0", "1.0.2", "<= 1.0.3"),
+            ("~> 1.0.3", "bump", "1.0.3", "1.2.3", "~> 1.2.3"),
+            ("~> 1.0.3", "bump", "1.0.3", "1.0.4", "~> 1.0.4"),
+            ("~> 4.7, >= 4.7.4", "bump", "4.7.5", "4.7.9", "~> 4.7, >= 4.7.9"),
+            ("~> 4.7, >= 4.7.4", "bump", "4.7.5", "4.8.0", "~> 4.8"),
+            (">= 2.0.0, <= 2.15", "bump", "2.15.0", "2.20.1", ">= 2.20.1, <= 2.20.1"),
+            ("~> 5.2.0", "bump", "5.2.4.1", "6.0.2.1", "~> 6.0.2, >= 6.0.2.1"),
+            ("~> 4.0, < 5", "bump", "4.7.5", "5.0.0", "~> 5.0, < 6"),
+            ("~> 4.0, < 5", "bump", "4.7.5", "5.0.1", "~> 5.0, >= 5.0.1, < 6"),
+            ("~> 4.0, < 5", "bump", "4.7.5", "5.1.0", "~> 5.1, < 6"),
+            (">= 3.2, < 5.0", "replace", "4.0.2", "6.0.1", ">= 3.2, < 6.0.2"),
+            ("~> 5.2, >= 5.2.5", "replace", "5.3.0", "6.0.0", "~> 6.0, >= 6.0.0"),
+            ("~> 5.2, >= 5.2.5", "replace", "5.3.0", "6.0.1", "~> 6.0, >= 6.0.1"),
+            ("~> 5.2.0, >= 5.2.5", "replace", "5.2.5", "5.3.1", "~> 5.3.0, >= 5.3.1"),
+            ("4.2.0", "replace", "4.2.0", "4.2.5.1", "4.2.5.1"),
+            ("4.2.5.1", "replace", "0.1", "4.3.0", "4.3.0"),
+            ("4.2.5.1", "replace", "0.1", "4.2.6", "4.2.6"),
+            ("~> 4.2", "replace", "0.1", "4.2.5.1", "~> 4.2"),
+            ("~> 4.2", "replace", "4.2.5.2", "4.2.5.1", "~> 4.2"),
+            ("~> 4.2.5", "replace", "0.1", "4.2.5.1", "~> 4.2.5"),
+            ("~> 4.2.5", "replace", "0.1", "4.3.0.1", "~> 4.3.0"),
+            ("~> 4.2.5.1", "replace", "0.1", "4.2.6", "~> 4.2.6"),
+            ("~> 4.2.5.1", "replace", "4.2.5.2", "4.2.6", "~> 4.2.6"),
+            ("~> 1", "replace", "1.2.0", "2.0.3", "~> 2"),
+            ("= 5.2.2", "replace", "5.2.2", "5.2.2.1", "= 5.2.2.1"),
+            ("1.0.3", "replace", "1.0.3", "1.2.3", "1.2.3"),
+            ("v1.0.3", "replace", "1.0.3", "1.2.3", "v1.2.3"),
+            ("= 1.0.3", "replace", "1.0.3", "1.2.3", "= 1.2.3"),
+            ("!= 1.0.3", "replace", "1.0.0", "1.2.3", "!= 1.0.3"),
+            ("!= 1.0.3", "replace", "1.0.0", "1.0.2", "!= 1.0.3"),
+            ("!= 1.0.3", "replace", "1.0.0", "1.0.3", "!= 1.0.3"),
+            ("> 1.0.3", "replace", "1.0.4", "1.2.3", "> 1.0.3"),
+            ("> 1.2.3", "replace", "1.0.0", "1.0.3", "> 1.0.2"),
+            ("< 1.0.3", "replace", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2.3", "replace", "1.0.0", "1.0.3", "< 1.2.3"),
+            ("< 1.2.2", "replace", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2.3", "replace", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2", "replace", "1.0.0", "1.2.3", "< 1.3"),
+            ("< 1", "replace", "0.9.0", "1.2.3", "< 2"),
+            ("< 1.2.3", "replace", "1.0.0", "1.2.2", "< 1.2.3"),
+            (">= 1.0.3", "replace", "1.0.3", "1.2.3", ">= 1.0.3"),
+            (">= 1.0.3", "replace", "1.0.3", "1.0.2", ">= 1.0.2"),
+            ("<= 1.0.3", "replace", "1.0.0", "1.2.3", "<= 1.2.3"),
+            ("<= 1.0.3", "replace", "1.0.0", "1.0.2", "<= 1.0.3"),
+            ("~> 1.0.3", "replace", "1.0.0", "1.2.3", "~> 1.2.0"),
+            ("~> 1.0.3", "replace", "1.0.0", "1.0.4", "~> 1.0.3"),
+            ("~> 4.7, >= 4.7.4", "replace", "1.0.0", "4.7.9", "~> 4.7, >= 4.7.4"),
+            ("~> 4.7, >= 4.7.4", "replace", "4.7.5", "4.8.0", "~> 4.7, >= 4.7.4"),
+            (">= 2.0.0, <= 2.15", "replace", "2.15.0", "2.20.1", ">= 2.0.0, <= 2.20.1"),
+            ("~> 5.2.0", "replace", "5.2.4.1", "6.0.2.1", "~> 6.0.0"),
+            ("~> 4.0, < 5", "replace", "4.7.5", "5.0.0", "~> 5.0, < 6"),
+            ("~> 4.0, < 5", "replace", "4.7.5", "5.0.1", "~> 5.0, < 6"),
+            ("~> 4.0, < 5", "replace", "4.7.5", "5.1.0", "~> 5.0, < 6"),
+            (">= 3.2, < 5.0", "widen", "4.0.2", "6.0.1", ">= 3.2, < 6.0.2"),
+            ("~> 5.2, >= 5.2.5", "widen", "5.3.0", "6.0.0", ">= 5.2.5, < 7"),
+            ("~> 5.2, >= 5.2.5", "widen", "5.3.0", "6.0.1", ">= 5.2.5, < 7"),
+            ("~> 5.2.0, >= 5.2.5", "widen", "5.2.5", "5.3.1", ">= 5.2.5, < 5.4"),
+            ("4.2.0", "widen", "4.2.0", "4.2.5.1", "4.2.5.1"),
+            ("4.2.5.1", "widen", "0.1", "4.3.0", "4.3.0"),
+            ("~> 1", "widen", "1.2.0", "2.0.3", ">= 1, < 3"),
+            ("= 5.2.2", "widen", "5.2.2", "5.2.2.1", "= 5.2.2.1"),
+            ("1.0.3", "widen", "1.0.3", "1.2.3", "1.2.3"),
+            ("v1.0.3", "widen", "1.0.3", "1.2.3", "v1.2.3"),
+            ("= 1.0.3", "widen", "1.0.3", "1.2.3", "= 1.2.3"),
+            ("!= 1.0.3", "widen", "1.0.0", "1.2.3", "!= 1.0.3"),
+            ("!= 1.0.3", "widen", "1.0.0", "1.0.2", "!= 1.0.3"),
+            ("!= 1.0.3", "widen", "1.0.0", "1.0.3", "!= 1.0.3"),
+            ("> 1.0.3", "widen", "1.0.4", "1.2.3", "> 1.0.3"),
+            ("> 1.2.3", "widen", "1.0.0", "1.0.3", "> 1.0.2"),
+            ("< 1.0.3", "widen", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2.3", "widen", "1.0.0", "1.0.3", "< 1.2.3"),
+            ("< 1.2.2", "widen", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2.3", "widen", "1.0.0", "1.2.3", "< 1.2.4"),
+            ("< 1.2", "widen", "1.0.0", "1.2.3", "< 1.3"),
+            ("< 1", "widen", "0.9.0", "1.2.3", "< 2"),
+            ("< 1.2.3", "widen", "1.0.0", "1.2.2", "< 1.2.3"),
+            (">= 1.0.3", "widen", "1.0.3", "1.2.3", ">= 1.0.3"),
+            (">= 1.0.3", "widen", "1.0.3", "1.0.2", ">= 1.0.2"),
+            ("<= 1.0.3", "widen", "1.0.0", "1.2.3", "<= 1.2.3"),
+            ("<= 1.0.3", "widen", "1.0.0", "1.0.2", "<= 1.0.3"),
+            ("~> 1.0.3", "widen", "1.0.0", "1.2.3", ">= 1.0.3, < 1.2.4"),
+            ("~> 1.0.3", "widen", "1.0.0", "1.0.4", "~> 1.0.3"),
+            ("~> 4.7, >= 4.7.4", "widen", "1.0.0", "4.7.9", "~> 4.7, >= 4.7.4"),
+            ("~> 4.7, >= 4.7.4", "widen", "4.7.5", "4.8.0", "~> 4.7, >= 4.7.4"),
+            (">= 2.0.0, <= 2.15", "widen", "2.15.0", "2.20.1", ">= 2.0.0, <= 2.20.1"),
+            ("~> 5.2.0", "widen", "5.2.4.1", "6.0.2.1", ">= 5.2.0, < 6.0.3"),
+            ("~> 4.0, < 5", "widen", "4.7.5", "5.0.0", ">= 4.0, < 6, < 6"),
+            ("~> 4.0, < 5", "widen", "4.7.5", "5.0.1", ">= 4.0, < 6, < 6"),
+            ("~> 4.0, < 5", "widen", "4.7.5", "5.1.0", ">= 4.0, < 6, < 6"),
+            ("< 1.0.3", "auto", "1.0.3", "1.2.4", "< 1.2.5"),
+            ("< 1.0.3", "replace", "1.0.3", "1.2.4", "< 1.2.5"),
+            ("< 1.0.3", "widen", "1.0.3", "1.2.4", "< 1.2.5"),
+            ("< 1.0.3", "replace", "1.0.3", "1.2.4", "< 1.2.5"),
+            ("~> 6.0.0", "update-lockfile", "6.0.2", "6.0.3", "~> 6.0.0"),
+            ("~> 6.0.0", "update-lockfile", "6.0.2", "7.0.0", "~> 7.0.0"),
+            ("\"~> 6.0.0\"", "update-lockfile", "6.0.2", "7.0.0", "\"~> 7.0.0\""),
+        ];
+        for &(cv, strat, cur, nv, expected) in cases {
+            let got = get_new_value(cv, strat, cur, nv).unwrap_or_default();
+            assert_eq!(got, expected, "get_new_value({cv:?}, {strat:?}, {cur:?}, {nv:?})");
+        }
     }
 }

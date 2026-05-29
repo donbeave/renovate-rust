@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/ruby/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/ruby/index.spec.ts
-**Total tests:** 15 | **Ported:** 14 | **Actionable:** 15 | **Status:** partial
+**Total tests:** 15 | **Ported:** 15 | **Actionable:** 15 | **Status:** complete
 
 ### `modules/versioning/ruby/index`
 
@@ -25,6 +25,6 @@
 | isValid("$version") === $expected | 224 | ported | `ruby.rs` | `ruby_is_valid_range_form` | — |
 | isSingleVersion("$version") === $expected | 247 | ported | `ruby.rs` | `ruby_is_single_version` | — |
 | returns a pinned value | 276 | ported | `ruby.rs` | `ruby_get_pinned_value` | — |
-| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 281 | pending | — | — | — |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 281 | ported | `ruby.rs` | `ruby_get_new_value_cases` | — |
 
 ---

@@ -512,14 +512,14 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/github-actions/index.spec.ts` | Done | [details](lib/modules/versioning/github-actions/index.spec.ts.md) |
 | `lib/modules/versioning/helm/index.spec.ts` | Done | [details](lib/modules/versioning/helm/index.spec.ts.md) |
 | `lib/modules/versioning/npm/index.spec.ts` | Done | [details](lib/modules/versioning/npm/index.spec.ts.md) |
-| `lib/modules/versioning/ruby/index.spec.ts` | Not done | [details](lib/modules/versioning/ruby/index.spec.ts.md) |
+| `lib/modules/versioning/ruby/index.spec.ts` | Done | [details](lib/modules/versioning/ruby/index.spec.ts.md) |
 | `lib/modules/versioning/git/index.spec.ts` | Done | [details](lib/modules/versioning/git/index.spec.ts.md) |
 | `lib/config/presets/index.spec.ts` | Done | [details](lib/config/presets/index.spec.ts.md) |
 | `lib/config/presets/internal/custom-managers.spec.ts` | Not done | [details](lib/config/presets/internal/custom-managers.spec.ts.md) |
 | `lib/config/presets/parse.spec.ts` | Done | [details](lib/config/presets/parse.spec.ts.md) |
 | `lib/modules/manager/bazel/artifacts.spec.ts` | Done | [details](lib/modules/manager/bazel/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazel/common.spec.ts` | Done | [details](lib/modules/manager/bazel/common.spec.ts.md) |
-| `lib/modules/manager/bazel/parser.spec.ts` | Not done | [details](lib/modules/manager/bazel/parser.spec.ts.md) |
+| `lib/modules/manager/bazel/parser.spec.ts` | Done | [details](lib/modules/manager/bazel/parser.spec.ts.md) |
 | `lib/modules/manager/bazel/rules/index.spec.ts` | Not done | [details](lib/modules/manager/bazel/rules/index.spec.ts.md) |
 | `lib/modules/manager/bazel-module/artifacts.spec.ts` | Done | [details](lib/modules/manager/bazel-module/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazel-module/parser/index.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/parser/index.spec.ts.md) |
