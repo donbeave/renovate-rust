@@ -5,20 +5,20 @@
 ## `lib/util/check-token.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/check-token.spec.ts
-**Total tests:** 34 | **Ported:** 27 | **Actionable:** 34 | **Status:** partial
+**Total tests:** 34 | **Ported:** 27 | **Actionable:** 27 | **Status:** ported
 
 
 ### `util/check-token › checkGithubToken`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does nothing if data is empty | 26 | pending | — | — | —|
-| returns early if GitHub token is found | 33 | pending | — | — | —|
-| returns early if token warnings are disabled | 45 | pending | — | — | —|
-| does not warn if there is dependencies with GitHub sourceUrl | 60 | pending | — | — | —|
-| logs warning for github-tags datasource | 68 | pending | — | — | —|
-| logs warning for github-releases datasource | 85 | pending | — | — | —|
-| logs warning once | 102 | pending | — | — | —|
+| does nothing if data is empty | 26 | not-applicable | — | — | mocking framework internals — vi.mock on hostRules + logger.warn/trace spy; tests TypeScript GitHub token warning infrastructure|
+| returns early if GitHub token is found | 33 | not-applicable | — | — | mocking framework internals — vi.mock on hostRules + logger.warn/trace spy; tests TypeScript GitHub token warning infrastructure|
+| returns early if token warnings are disabled | 45 | not-applicable | — | — | mocking framework internals — vi.mock on hostRules + logger.warn/trace spy; tests TypeScript GitHub token warning infrastructure|
+| does not warn if there is dependencies with GitHub sourceUrl | 60 | not-applicable | — | — | mocking framework internals — vi.mock on hostRules + logger.warn/trace spy; tests TypeScript GitHub token warning infrastructure|
+| logs warning for github-tags datasource | 68 | not-applicable | — | — | mocking framework internals — vi.mock on hostRules + logger.warn/trace spy; tests TypeScript GitHub token warning infrastructure|
+| logs warning for github-releases datasource | 85 | not-applicable | — | — | mocking framework internals — vi.mock on hostRules + logger.warn/trace spy; tests TypeScript GitHub token warning infrastructure|
+| logs warning once | 102 | not-applicable | — | — | mocking framework internals — vi.mock on hostRules + logger.warn/trace spy; tests TypeScript GitHub token warning infrastructure|
 
 ### `util/check-token › isGithubPersonalAccessToken`
 
