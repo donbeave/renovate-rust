@@ -3579,6 +3579,50 @@ chalk@^2.4.1:
         assert_eq!(res.get("npmrcMerge").and_then(|v| v.as_bool()), Some(true));
     }
 
+    // Ported: "uses rules without host type" — manager/npm/post-update/rules.spec.ts line 146
+    #[test]
+    fn process_host_rules_no_host_type() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            match_host: Some("registry.company.com".to_owned()),
+            token: Some("sometoken".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        let res = process_host_rules();
+        assert!(res
+            .additional_npmrc_content
+            .contains(&"//registry.company.com/:_authToken=sometoken".to_owned()));
+        let yarn = res.additional_yarn_rc_yml.as_ref().unwrap();
+        assert_eq!(yarn["npmRegistries"]["//registry.company.com/"]["npmAuthToken"], "sometoken");
+    }
+
+    // Ported: "deduplicates host rules while prefering npm type ones" — manager/npm/post-update/rules.spec.ts line 167
+    #[test]
+    fn process_host_rules_deduplicates_preferring_npm_type() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            match_host: Some("registry.company.com".to_owned()),
+            token: Some("donotuseme".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            host_type: Some("npm".to_owned()),
+            match_host: Some("registry.company.com".to_owned()),
+            token: Some("useme".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        let res = process_host_rules();
+        assert!(res
+            .additional_npmrc_content
+            .contains(&"//registry.company.com/:_authToken=useme".to_owned()));
+        assert!(!res
+            .additional_npmrc_content
+            .contains(&"//registry.company.com/:_authToken=donotuseme".to_owned()));
+    }
+
     // Ported: "handles no .npmrc" — manager/npm/detect.spec.ts line 24
     #[test]
     fn detect_global_config_no_npmrc() {
