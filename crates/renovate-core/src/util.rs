@@ -2104,6 +2104,22 @@ pub fn filter_valid_versions(
         .collect()
 }
 
+/// Filter valid versions using the default (semver-coerced) versioning.
+/// Mirrors `filterValidVersions()` when datasource or versioning is unknown.
+pub fn filter_valid_versions_default(releases: Vec<DatasourceRelease>) -> Vec<DatasourceRelease> {
+    filter_valid_versions(releases, crate::versioning::semver_coerced::is_version)
+}
+
+/// Sort and remove duplicates using semver-coerced versioning.
+/// Mirrors `sortAndRemoveDuplicates()` when datasource/versioning is unknown.
+pub fn sort_and_remove_duplicates_default(
+    releases: Vec<DatasourceRelease>,
+) -> Vec<DatasourceRelease> {
+    sort_and_remove_duplicates(releases, |a, b| {
+        crate::versioning::semver_coerced::sort_versions(a, b)
+    })
+}
+
 /// Sort releases and remove consecutive duplicates.
 ///
 /// Mirrors `sortAndRemoveDuplicates()` from `lib/modules/datasource/common.ts`.
