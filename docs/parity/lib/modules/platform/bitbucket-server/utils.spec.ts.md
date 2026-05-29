@@ -5,13 +5,13 @@
 ## `lib/modules/platform/bitbucket-server/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket-server/utils.spec.ts
-**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
+**Total tests:** 17 | **Ported:** 3 | **Actionable:** 17 | **Status:** partial
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| getInvalidReviewers | 94 | pending | — | — | — |
+| getInvalidReviewers | 94 | ported | `util.rs` | `test_get_invalid_reviewers` | — |
 
 ### `getRepoGitUrl › endpoint with path`
 
@@ -40,9 +40,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should not configure bearer token | 334 | pending | — | — | — |
-| should configure bearer token | 339 | pending | — | — | — |
+| throws on invalid endpoint URL | 333 | not-applicable | — | — | Requires git.getUrl() mock; URL generation depends on git module |
+| should not configure bearer token | 334 | ported | `util.rs` | `test_get_extra_clone_opts_no_token` | — |
+| should configure bearer token | 339 | ported | `util.rs` | `test_get_extra_clone_opts_with_token` | — |
 
-| throws on invalid endpoint URL | 333 | pending | — | — | — |
 ---
-

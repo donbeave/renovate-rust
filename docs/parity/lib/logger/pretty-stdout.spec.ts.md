@@ -5,7 +5,7 @@
 ## `lib/logger/pretty-stdout.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/pretty-stdout.spec.ts
-**Total tests:** 15 | **Ported:** 4 | **Actionable:** 15 | **Status:** partial
+**Total tests:** 15 | **Ported:** 12 | **Actionable:** 15 | **Status:** done
 
 ### `logger/pretty-stdout › getMeta(rec)`
 
@@ -22,19 +22,19 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty string if null rec | 57 | pending | — | — | — |
-| returns empty string if empty rec | 61 | pending | — | — | — |
-| returns empty string if all are meta fields | 67 | pending | — | — | — |
-| supports a config | 75 | pending | — | — | — |
-| formats err.stack as readable multi-line output | 88 | pending | — | — | — |
-| formats err.stack without other err fields | 108 | pending | — | — | — |
+| returns empty string if null rec | 57 | ported | `util.rs` | `test_get_details_null_rec` | — |
+| returns empty string if empty rec | 61 | ported | `util.rs` | `test_get_details_empty_rec` | — |
+| returns empty string if all are meta fields | 67 | ported | `util.rs` | `test_get_details_all_meta_fields` | — |
+| supports a config | 75 | ported | `util.rs` | `test_get_details_config` | — |
+| formats err.stack as readable multi-line output | 88 | ported | `util.rs` | `test_get_details_err_with_stack` | — |
+| formats err.stack without other err fields | 108 | ported | `util.rs` | `test_get_details_err_stack_only` | — |
 
 ### `logger/pretty-stdout › formatRecord(rec)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| formats record | 136 | pending | — | — | — |
-| formats record without colors | 155 | pending | — | — | — |
+| formats record | 136 | ported | `util.rs` | `test_format_record` | — |
+| formats record without colors | 155 | ported | `util.rs` | `test_format_record_no_colors` | — |
 
 ### `logger/pretty-stdout › PrettyStdoutStream`
 
