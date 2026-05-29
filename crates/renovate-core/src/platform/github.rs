@@ -330,6 +330,55 @@ pub fn is_date_expired(
     current_time >= expiry
 }
 
+// ── Schema parsers (mirrors lib/modules/platform/github/schema.ts) ───────────
+
+const SUPPORTED_ECOSYSTEMS: &[&str] = &[
+    "actions", "composer", "go", "maven", "npm", "nuget", "pip", "rubygems", "rust",
+];
+
+/// Validate a GitHub content response (directory or single file).
+/// Returns `Ok(())` if valid, `Err(reason)` if not.
+pub fn validate_github_content_response(input: &serde_json::Value) -> Result<(), String> {
+    let validate_element = |v: &serde_json::Value| -> Result<(), String> {
+        let obj = v.as_object().ok_or("not an object")?;
+        let type_ = obj.get("type").and_then(|t| t.as_str()).ok_or("missing type")?;
+        let _name = obj.get("name").and_then(|n| n.as_str()).ok_or("missing name")?;
+        let _path = obj.get("path").and_then(|p| p.as_str()).ok_or("missing path")?;
+        match type_ {
+            "file" | "dir" | "symlink" | "submodule" => Ok(()),
+            other => Err(format!("unknown type: {other}")),
+        }
+    };
+
+    match input {
+        serde_json::Value::Array(arr) => {
+            for item in arr {
+                validate_element(item)?;
+            }
+            Ok(())
+        }
+        obj @ serde_json::Value::Object(_) => validate_element(obj),
+        _ => Err("not an array or object".to_owned()),
+    }
+}
+
+/// Parse and filter GitHub vulnerability alerts.
+/// Filters out alerts with unsupported ecosystems and missing security_vulnerability.
+pub fn parse_github_vulnerability_alerts(input: &serde_json::Value) -> Vec<serde_json::Value> {
+    let Some(arr) = input.as_array() else { return vec![]; };
+    arr.iter().filter(|alert| {
+        let Some(sv) = alert.get("security_vulnerability") else { return false; };
+        if sv.is_null() { return false; }
+        let ecosystem = sv.get("package")
+            .and_then(|p| p.get("ecosystem"))
+            .and_then(|e| e.as_str());
+        match ecosystem {
+            Some(eco) => SUPPORTED_ECOSYSTEMS.contains(&eco),
+            None => false,
+        }
+    }).cloned().collect()
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{header, header_exists, method, path};
@@ -636,4 +685,89 @@ mod tests {
         assert_eq!(transform_github_branch("main", "Tag", "abc123", ""), None);
         assert_eq!(transform_github_branch("main", "Tree", "abc123", ""), None);
     }
+}
+
+// Ported: "should be parse directory response" — modules/platform/github/schema.spec.ts line 5
+#[test]
+fn github_content_response_directory() {
+    let input = serde_json::json!([
+        {"type": "file", "size": 625, "name": "octokit.rb", "path": "lib/octokit.rb", "sha": "fff", "url": "u", "git_url": "g", "html_url": "h", "download_url": "d", "_links": {}},
+        {"type": "dir",  "size": 0,   "name": "octokit",    "path": "lib/octokit",    "sha": "aaa", "url": "u", "git_url": "g", "html_url": "h", "download_url": null, "_links": {}},
+        {"type": "symlink", "size": 23, "name": "some-symlink", "path": "bin/some-symlink", "sha": "bbb", "url": "u", "git_url": "g", "html_url": "h", "download_url": "d", "_links": {}},
+    ]);
+    assert!(validate_github_content_response(&input).is_ok());
+}
+
+// Ported: "should parse response for single file" — modules/platform/github/schema.spec.ts line 87
+#[test]
+fn github_content_response_single_file() {
+    let input = serde_json::json!({
+        "type": "file",
+        "encoding": "base64",
+        "size": 5362,
+        "name": "README.md",
+        "path": "README.md",
+        "content": "aaaaaaaaaa",
+        "sha": "3d21ec53a331a6f037a91c368710b99387d012c1",
+        "url": "https://api.github.com/repos/octokit/octokit.rb/contents/README.md",
+        "git_url": "https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21",
+        "html_url": "https://github.com/octokit/octokit.rb/blob/master/README.md",
+        "download_url": "https://raw.githubusercontent.com/...",
+        "_links": {}
+    });
+    assert!(validate_github_content_response(&input).is_ok());
+}
+
+// Ported: "should skip vulnerability alerts with unsupported ecosystems" — modules/platform/github/schema.spec.ts line 111
+#[test]
+fn github_vulnerability_alerts_filter_unsupported_ecosystem() {
+    let input = serde_json::json!([
+        {
+            "dismissed_reason": null,
+            "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
+            "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "dotnet", "name": "test-package"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
+            "dependency": {"manifest_path": "package.json"},
+        },
+        {
+            "dismissed_reason": null,
+            "security_advisory": {"ghsa_id": "GHSA-4444-5555-6666", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-5678"}], "severity": "medium"},
+            "security_vulnerability": {"first_patched_version": {"identifier": "2.0.0"}, "package": {"ecosystem": "npm", "name": "valid-package"}, "severity": "medium", "vulnerable_version_range": "< 2.0.0"},
+            "dependency": {"manifest_path": "package.json"},
+        },
+    ]);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0]["security_vulnerability"]["package"]["ecosystem"], "npm");
+}
+
+// Ported: "should parse severity and cvss_severities fields" — modules/platform/github/schema.spec.ts line 206
+#[test]
+fn github_vulnerability_alerts_parse_severity_fields() {
+    let input = serde_json::json!([{
+        "dismissed_reason": null,
+        "security_advisory": {
+            "ghsa_id": "GHSA-1111-2222-3333",
+            "summary": "Test advisory",
+            "description": "Test advisory",
+            "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}],
+            "severity": "high",
+            "cvss_severities": {
+                "cvss_v3": {"vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", "score": 9.8},
+                "cvss_v4": null,
+            },
+        },
+        "security_vulnerability": {
+            "first_patched_version": {"identifier": "2.0.0"},
+            "package": {"ecosystem": "npm", "name": "test-package"},
+            "severity": "critical",
+            "vulnerable_version_range": "< 2.0.0",
+        },
+        "dependency": {"manifest_path": "package.json"},
+    }]);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0]["security_advisory"]["severity"], "high");
+    assert_eq!(result[0]["security_vulnerability"]["severity"], "critical");
+    assert_eq!(result[0]["security_advisory"]["cvss_severities"]["cvss_v3"]["score"], 9.8);
+    assert!(result[0]["security_advisory"]["cvss_severities"]["cvss_v4"].is_null());
 }
