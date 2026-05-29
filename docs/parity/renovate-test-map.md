@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,003 / 11,677 total tests ported (43%) · pending 5,406 · not-applicable 1,268 (11% of total) — updated 2026-05-29
+**Progress:** 5,007 / 11,677 total tests ported (43%) · pending 5,317 · not-applicable 1,353 (12% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -219,7 +219,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/pod/index.spec.ts` | Not done | [details](lib/modules/datasource/pod/index.spec.ts.md) |
 | `lib/modules/datasource/go/common.spec.ts` | Done | [details](lib/modules/datasource/go/common.spec.ts.md) |
 | `lib/modules/datasource/pypi/index.spec.ts` | Not done | [details](lib/modules/datasource/pypi/index.spec.ts.md) |
-| `lib/modules/datasource/docker/schema.spec.ts` | Not done | [details](lib/modules/datasource/docker/schema.spec.ts.md) |
+| `lib/modules/datasource/docker/schema.spec.ts` | Done | [details](lib/modules/datasource/docker/schema.spec.ts.md) |
 | `lib/modules/datasource/docker/index.spec.ts` | Not done | [details](lib/modules/datasource/docker/index.spec.ts.md) |
 | `lib/modules/datasource/docker/common.spec.ts` | Not done | [details](lib/modules/datasource/docker/common.spec.ts.md) |
 | `lib/modules/datasource/common.spec.ts` | Not done | [details](lib/modules/datasource/common.spec.ts.md) |
@@ -251,13 +251,13 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/terraform-module/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/index.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/utils.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/utils.spec.ts.md) |
 | `lib/modules/datasource/terraform-provider/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-provider/index.spec.ts.md) |
-| `lib/modules/datasource/packagist/schema.spec.ts` | Not done | [details](lib/modules/datasource/packagist/schema.spec.ts.md) |
+| `lib/modules/datasource/packagist/schema.spec.ts` | Done | [details](lib/modules/datasource/packagist/schema.spec.ts.md) |
 | `lib/modules/datasource/packagist/index.spec.ts` | Not done | [details](lib/modules/datasource/packagist/index.spec.ts.md) |
 | `lib/modules/datasource/conan/index.spec.ts` | Not done | [details](lib/modules/datasource/conan/index.spec.ts.md) |
 | `lib/modules/datasource/rubygems/schema.spec.ts` | Done | [details](lib/modules/datasource/rubygems/schema.spec.ts.md) |
 | `lib/modules/datasource/rubygems/index.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/index.spec.ts.md) |
 | `lib/modules/datasource/crate/index.spec.ts` | Not done | [details](lib/modules/datasource/crate/index.spec.ts.md) |
-| `lib/modules/datasource/maven/schema.spec.ts` | Not done | [details](lib/modules/datasource/maven/schema.spec.ts.md) |
+| `lib/modules/datasource/maven/schema.spec.ts` | Done | [details](lib/modules/datasource/maven/schema.spec.ts.md) |
 | `lib/modules/datasource/maven/util.spec.ts` | Not done | [details](lib/modules/datasource/maven/util.spec.ts.md) |
 | `lib/modules/datasource/maven/s3.spec.ts` | Not done | [details](lib/modules/datasource/maven/s3.spec.ts.md) |
 | `lib/modules/datasource/maven/index.spec.ts` | Not done | [details](lib/modules/datasource/maven/index.spec.ts.md) |
@@ -567,7 +567,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/deno/compat.spec.ts` | Not done | [details](lib/modules/manager/deno/compat.spec.ts.md) |
 | `lib/modules/manager/deno/extract.spec.ts` | Not done | [details](lib/modules/manager/deno/extract.spec.ts.md) |
 | `lib/modules/manager/deno/post.spec.ts` | Not done | [details](lib/modules/manager/deno/post.spec.ts.md) |
-| `lib/modules/manager/deno/schema.spec.ts` | Not done | [details](lib/modules/manager/deno/schema.spec.ts.md) |
+| `lib/modules/manager/deno/schema.spec.ts` | Done | [details](lib/modules/manager/deno/schema.spec.ts.md) |
 | `lib/modules/manager/deno/update.spec.ts` | Not done | [details](lib/modules/manager/deno/update.spec.ts.md) |
 | `lib/modules/manager/deps-edn/parser.spec.ts` | Done | [details](lib/modules/manager/deps-edn/parser.spec.ts.md) |
 | `lib/modules/manager/devbox/artifacts.spec.ts` | Not done | [details](lib/modules/manager/devbox/artifacts.spec.ts.md) |
@@ -667,7 +667,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/pipenv/artifacts.spec.ts` | Not done | [details](lib/modules/manager/pipenv/artifacts.spec.ts.md) |
 | `lib/modules/manager/pixi/artifacts.spec.ts` | Not done | [details](lib/modules/manager/pixi/artifacts.spec.ts.md) |
 | `lib/modules/manager/poetry/artifacts.spec.ts` | Not done | [details](lib/modules/manager/poetry/artifacts.spec.ts.md) |
-| `lib/modules/manager/poetry/schema.spec.ts` | Not done | [details](lib/modules/manager/poetry/schema.spec.ts.md) |
+| `lib/modules/manager/poetry/schema.spec.ts` | Done | [details](lib/modules/manager/poetry/schema.spec.ts.md) |
 | `lib/modules/manager/poetry/update-locked.spec.ts` | Done | [details](lib/modules/manager/poetry/update-locked.spec.ts.md) |
 | `lib/modules/manager/proto/extract.spec.ts` | Done | [details](lib/modules/manager/proto/extract.spec.ts.md) |
 | `lib/modules/manager/proto/index.spec.ts` | Done | [details](lib/modules/manager/proto/index.spec.ts.md) |
