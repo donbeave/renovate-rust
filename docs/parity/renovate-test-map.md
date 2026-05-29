@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,987 / 11,677 total tests ported (43%) · pending 6,439 · not-applicable 251 (2% of total) — updated 2026-05-29
+**Progress:** 4,993 / 11,677 total tests ported (43%) · pending 6,403 · not-applicable 281 (2% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -353,10 +353,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/validation-helpers/utils.spec.ts` | Done | [details](lib/config/validation-helpers/utils.spec.ts.md) |
 | `lib/config/validation.spec.ts` | Done | [details](lib/config/validation.spec.ts.md) |
 | `lib/constants/platform.spec.ts` | Done | [details](lib/constants/platform.spec.ts.md) |
-| `lib/instrumentation/detectors.spec.ts` | Not done | [details](lib/instrumentation/detectors.spec.ts.md) |
-| `lib/instrumentation/index.spec.ts` | Not done | [details](lib/instrumentation/index.spec.ts.md) |
-| `lib/instrumentation/reporting.spec.ts` | Not done | [details](lib/instrumentation/reporting.spec.ts.md) |
-| `lib/instrumentation/with-instrumenting.spec.ts` | Not done | [details](lib/instrumentation/with-instrumenting.spec.ts.md) |
+| `lib/instrumentation/detectors.spec.ts` | Done | [details](lib/instrumentation/detectors.spec.ts.md) |
+| `lib/instrumentation/index.spec.ts` | Done | [details](lib/instrumentation/index.spec.ts.md) |
+| `lib/instrumentation/reporting.spec.ts` | Done | [details](lib/instrumentation/reporting.spec.ts.md) |
+| `lib/instrumentation/with-instrumenting.spec.ts` | Done | [details](lib/instrumentation/with-instrumenting.spec.ts.md) |
 | `lib/instrumentation/utils.spec.ts` | Done | [details](lib/instrumentation/utils.spec.ts.md) |
 | `lib/data/index.spec.ts` | Done | [details](lib/data/index.spec.ts.md) |
 | `lib/logger/bunyan.spec.ts` | Done | [details](lib/logger/bunyan.spec.ts.md) |
@@ -640,7 +640,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/index.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/index.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts.md) |
-| `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts` | Not done | [details](lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts.md) |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts.md) |
 | `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts.md) |
