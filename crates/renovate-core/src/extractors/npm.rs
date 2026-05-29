@@ -3590,11 +3590,15 @@ chalk@^2.4.1:
         })
         .unwrap();
         let res = process_host_rules();
-        assert!(res
-            .additional_npmrc_content
-            .contains(&"//registry.company.com/:_authToken=sometoken".to_owned()));
+        assert!(
+            res.additional_npmrc_content
+                .contains(&"//registry.company.com/:_authToken=sometoken".to_owned())
+        );
         let yarn = res.additional_yarn_rc_yml.as_ref().unwrap();
-        assert_eq!(yarn["npmRegistries"]["//registry.company.com/"]["npmAuthToken"], "sometoken");
+        assert_eq!(
+            yarn["npmRegistries"]["//registry.company.com/"]["npmAuthToken"],
+            "sometoken"
+        );
     }
 
     // Ported: "deduplicates host rules while prefering npm type ones" — manager/npm/post-update/rules.spec.ts line 167
@@ -3615,12 +3619,14 @@ chalk@^2.4.1:
         })
         .unwrap();
         let res = process_host_rules();
-        assert!(res
-            .additional_npmrc_content
-            .contains(&"//registry.company.com/:_authToken=useme".to_owned()));
-        assert!(!res
-            .additional_npmrc_content
-            .contains(&"//registry.company.com/:_authToken=donotuseme".to_owned()));
+        assert!(
+            res.additional_npmrc_content
+                .contains(&"//registry.company.com/:_authToken=useme".to_owned())
+        );
+        assert!(
+            !res.additional_npmrc_content
+                .contains(&"//registry.company.com/:_authToken=donotuseme".to_owned())
+        );
     }
 
     // Ported: "handles no .npmrc" — manager/npm/detect.spec.ts line 24
