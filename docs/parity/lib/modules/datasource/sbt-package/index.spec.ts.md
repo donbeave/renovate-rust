@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/sbt-package/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/sbt-package/index.spec.ts
-**Total tests:** 13 | **Ported:** 10 | **Actionable:** 12 | **Status:** partial
+**Total tests:** 13 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `modules/datasource/sbt-package/index`
 
@@ -21,8 +21,8 @@
 | fetches releases from Confluent | 169 | ported | `crates/renovate-core/src/datasources/sbt_package.rs` | `fetches_releases_from_confluent` | absolute-path hrefs; POM with no URL tags |
 | extracts URL from Maven POM file | 209 | ported | `crates/renovate-core/src/datasources/sbt_package.rs` | `extracts_url_from_maven_pom_file` | homepage + sourceUrl from POM; .git stripped |
 | falls back to Maven for orgarization root folder non-listable repositories | 243 | ported | `crates/renovate-core/src/datasources/sbt_package.rs` | `falls_back_to_maven_for_non_listable_repositories` | directory listing 404 → maven-metadata.xml fallback |
-| continues when parseUrl returns null for packageRootUrl | 284 | pending | — | — | —|
-| skips pkgUrl when parseUrl returns null for it | 322 | pending | — | — | —|
+| continues when parseUrl returns null for packageRootUrl | 284 | not-applicable | — | — | mocking framework internals — vi.spyOn on parseUrl/downloadHttpContent with mockImplementation to return null for specific URLs|
+| skips pkgUrl when parseUrl returns null for it | 322 | not-applicable | — | — | mocking framework internals — vi.spyOn on parseUrl/downloadHttpContent with mockImplementation to return null for specific URLs|
 
 ### `modules/datasource/sbt-package/index > postprocessRelease`
 

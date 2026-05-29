@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,074 / 11,666 total tests ported (43%) · pending 3,812 · not-applicable 2,780 (24% of total) — updated 2026-05-29
+**Progress:** 5,074 / 11,666 total tests ported (43%) · pending 3,810 · not-applicable 2,782 (24% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -155,7 +155,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/gitlab-packages/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-packages/index.spec.ts.md) |
 | `lib/modules/datasource/hexpm-bob/index.spec.ts` | Done | [details](lib/modules/datasource/hexpm-bob/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-plugin/index.spec.ts` | Done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
-| `lib/modules/datasource/sbt-package/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/index.spec.ts.md) |
+| `lib/modules/datasource/sbt-package/index.spec.ts` | Done | [details](lib/modules/datasource/sbt-package/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/util.spec.ts` | Done | [details](lib/modules/datasource/sbt-package/util.spec.ts.md) |
 | `lib/modules/datasource/node-version/index.spec.ts` | Done | [details](lib/modules/datasource/node-version/index.spec.ts.md) |
 | `lib/modules/datasource/dart-version/index.spec.ts` | Done | [details](lib/modules/datasource/dart-version/index.spec.ts.md) |
@@ -931,6 +931,6 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `test/docs/documentation.spec.ts` | Done | [details](test/docs/documentation.spec.ts.md) |
 | `test/other/sync-module-labels.spec.ts` | Done | [details](test/other/sync-module-labels.spec.ts.md) |
 | `test/other/validate-config-files.spec.ts` | Done | [details](test/other/validate-config-files.spec.ts.md) |
-| `test/other/validate-docker.spec.ts` | Done | [details](test/other/validate-docker.spec.ts.md) |
-| `test/other/validate-schemas.spec.ts` | Done | [details](test/other/validate-schemas.spec.ts.md) |
+| `test/other/validate-docker.spec.ts` | Not done | [details](test/other/validate-docker.spec.ts.md) |
+| `test/other/validate-schemas.spec.ts` | Not done | [details](test/other/validate-schemas.spec.ts.md) |
 | `tools/docs/test/utils.spec.ts` | Done | [details](tools/docs/test/utils.spec.ts.md) |
