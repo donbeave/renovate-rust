@@ -3651,6 +3651,33 @@ pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
 }
 
 // ---------------------------------------------------------------------------
+// Repository path utilities — lib/workers/global/index.ts
+// ---------------------------------------------------------------------------
+
+/// Parse a repository path into (top_level_org, parent_org) components.
+///
+/// - `top_level_org`: first path segment before the first `/`
+/// - `parent_org`: everything except the final segment (the repo itself)
+///
+/// Examples:
+/// - `"a/b/c/d"` → `(Some("a"), "a/b/c")`
+/// - `"a/b"` → `(Some("a"), "a")`
+/// - `"a"` → `(None, "")`
+///
+/// Mirrors the `topLevelOrg`/`parentOrg` derivation in
+/// `getRepositoryConfig()` from `lib/workers/global/index.ts`.
+pub fn parse_repo_org(repo: &str) -> (Option<&str>, &str) {
+    match repo.rfind('/') {
+        None => (None, ""),
+        Some(last_slash) => {
+            let parent_org = &repo[..last_slash];
+            let top_level_org = parent_org.split('/').next();
+            (top_level_org, parent_org)
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Timing splits utility — lib/util/split.ts
 // ---------------------------------------------------------------------------
 
@@ -7797,6 +7824,26 @@ dep1 = "^1.0.0"
         let found = find_hidden_unicode_chars(content);
         assert!(found.is_empty());
         assert!(!is_binary_content(content.as_bytes()));
+    }
+
+    // ── parse_repo_org ────────────────────────────────────────────────────────
+
+    // Ported: "should generate correct topLevelOrg/parentOrg with multiple levels"
+    //         — workers/global/index.spec.ts line 56
+    #[test]
+    fn parse_repo_org_multiple_levels() {
+        let (top, parent) = parse_repo_org("a/b/c/d");
+        assert_eq!(top, Some("a"));
+        assert_eq!(parent, "a/b/c");
+    }
+
+    // Ported: "should generate correct topLevelOrg/parentOrg with two levels"
+    //         — workers/global/index.spec.ts line 67
+    #[test]
+    fn parse_repo_org_two_levels() {
+        let (top, parent) = parse_repo_org("a/b");
+        assert_eq!(top, Some("a"));
+        assert_eq!(parent, "a");
     }
 
     // ── SplitTracker ──────────────────────────────────────────────────────────
