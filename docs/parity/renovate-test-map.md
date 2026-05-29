@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 4,985 / 11,677 total tests ported (43%) · pending 6,471 · not-applicable 221 (2% of total) — updated 2026-05-29
+**Progress:** 4,985 / 11,677 total tests ported (43%) · pending 6,467 · not-applicable 225 (2% of total) — updated 2026-05-29
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -443,8 +443,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/range.spec.ts` | Done | [details](lib/modules/manager/range.spec.ts.md) |
 | `lib/modules/manager/index.spec.ts` | Not done | [details](lib/modules/manager/index.spec.ts.md) |
 | `lib/modules/manager/util.spec.ts` | Done | [details](lib/modules/manager/util.spec.ts.md) |
-| `lib/modules/manager/fingerprint.spec.ts` | Not done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
-| `lib/modules/manager/metadata.spec.ts` | Not done | [details](lib/modules/manager/metadata.spec.ts.md) |
+| `lib/modules/manager/fingerprint.spec.ts` | Done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
+| `lib/modules/manager/metadata.spec.ts` | Done | [details](lib/modules/manager/metadata.spec.ts.md) |
 | `lib/modules/versioning/schema.spec.ts` | Done | [details](lib/modules/versioning/schema.spec.ts.md) |
 | `lib/modules/versioning/index.spec.ts` | Not done | [details](lib/modules/versioning/index.spec.ts.md) |
 | `lib/modules/versioning/versioning-metadata.spec.ts` | Done | [details](lib/modules/versioning/versioning-metadata.spec.ts.md) |
@@ -540,7 +540,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bundler/host-rules.spec.ts` | Done | [details](lib/modules/manager/bundler/host-rules.spec.ts.md) |
 | `lib/modules/manager/bundler/locked-version.spec.ts` | Done | [details](lib/modules/manager/bundler/locked-version.spec.ts.md) |
 | `lib/modules/manager/bundler/update-locked.spec.ts` | Done | [details](lib/modules/manager/bundler/update-locked.spec.ts.md) |
-| `lib/modules/manager/cake/index.spec.ts` | Not done | [details](lib/modules/manager/cake/index.spec.ts.md) |
+| `lib/modules/manager/cake/index.spec.ts` | Done | [details](lib/modules/manager/cake/index.spec.ts.md) |
 | `lib/modules/manager/cargo/artifacts.spec.ts` | Not done | [details](lib/modules/manager/cargo/artifacts.spec.ts.md) |
 | `lib/modules/manager/cargo/locked-version.spec.ts` | Done | [details](lib/modules/manager/cargo/locked-version.spec.ts.md) |
 | `lib/modules/manager/cargo/range.spec.ts` | Done | [details](lib/modules/manager/cargo/range.spec.ts.md) |
