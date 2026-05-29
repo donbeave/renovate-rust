@@ -272,6 +272,110 @@ where
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
+// ---------------------------------------------------------------------------
+// processHostRules — lib/modules/manager/npm/post-update/rules.ts
+// ---------------------------------------------------------------------------
+
+/// Result of processing host rules for npm/yarn authentication.
+#[derive(Debug, Clone, Default)]
+pub struct HostRulesResult {
+    pub additional_npmrc_content: Vec<String>,
+    pub additional_yarn_rc_yml: Option<serde_json::Value>,
+}
+
+/// Process host rules and generate npmrc + yarnrc content.
+///
+/// Mirrors `processHostRules()` from
+/// `lib/modules/manager/npm/post-update/rules.ts`.
+pub fn process_host_rules() -> HostRulesResult {
+    use crate::util::host_rules;
+    use base64::Engine as _;
+    use std::collections::HashMap;
+
+    let npm_rules = host_rules::find_all("npm");
+    let all_rules = host_rules::get_all();
+    // Include rules with no hostType, deduplicating against npm-specific rules
+    let no_type_rules: Vec<_> = all_rules
+        .iter()
+        .filter(|r| r.host_type.is_none())
+        .filter(|r| {
+            !npm_rules
+                .iter()
+                .any(|n| n.match_host == r.match_host)
+        })
+        .collect();
+    let effective_rules: Vec<_> = npm_rules.iter().chain(no_type_rules).collect();
+
+    let mut npmrc: Vec<String> = Vec::new();
+    let mut yarn_registries: HashMap<String, serde_json::Value> = HashMap::new();
+
+    for rule in effective_rules {
+        let Some(ref resolved_host) = rule.resolved_host else {
+            continue;
+        };
+        let Some(ref match_host) = rule.match_host else {
+            continue;
+        };
+        let _ = resolved_host; // used for existence check
+
+        let uri = format!("//{match_host}/");
+        let cleaned_uri = if match_host.starts_with("http://")
+            || match_host.starts_with("https://")
+        {
+            let without_scheme = match_host
+                .trim_start_matches("https:")
+                .trim_start_matches("http:");
+            without_scheme.to_owned()
+        } else {
+            uri.clone()
+        };
+
+        if let Some(ref token) = rule.token {
+            let key = if rule.auth_type.as_deref() == Some("Basic") {
+                "_auth"
+            } else {
+                "_authToken"
+            };
+            npmrc.push(format!("{cleaned_uri}:{key}={token}"));
+
+            if rule.auth_type.as_deref() == Some("Basic") {
+                let registry = serde_json::json!({ "npmAuthIdent": token });
+                yarn_registries.insert(cleaned_uri.clone(), registry.clone());
+                yarn_registries.insert(uri.clone(), registry);
+            } else {
+                let registry = serde_json::json!({ "npmAuthToken": token });
+                yarn_registries.insert(cleaned_uri.clone(), registry.clone());
+                yarn_registries.insert(uri.clone(), registry);
+            }
+            continue;
+        }
+
+        if let (Some(ref username), Some(ref password)) =
+            (rule.username.as_ref(), rule.password.as_ref())
+        {
+            let password_b64 =
+                base64::engine::general_purpose::STANDARD.encode(password.as_bytes());
+            npmrc.push(format!("{cleaned_uri}:username={username}"));
+            npmrc.push(format!("{cleaned_uri}:_password={password_b64}"));
+            let registry =
+                serde_json::json!({ "npmAuthIdent": format!("{username}:{password}") });
+            yarn_registries.insert(cleaned_uri.clone(), registry.clone());
+            yarn_registries.insert(uri.clone(), registry);
+        }
+    }
+
+    let yarn_yml = if yarn_registries.is_empty() {
+        None
+    } else {
+        Some(serde_json::json!({ "npmRegistries": yarn_registries }))
+    };
+
+    HostRulesResult {
+        additional_npmrc_content: npmrc,
+        additional_yarn_rc_yml: yarn_yml,
+    }
+}
+
 /// Read global npm config from a `.npmrc` file path.
 ///
 /// Mirrors `detectGlobalConfig` from `lib/modules/manager/npm/detect.ts`.
@@ -3486,5 +3590,58 @@ chalk@^2.4.1:
     fn detect_global_config_no_npmrc() {
         let res = detect_global_config_from("/nonexistent/path/.npmrc");
         assert!(res.get("npmrc").is_none());
+    }
+
+    // ── processHostRules ─────────────────────────────────────────────────────
+
+    // Ported: "returns empty if no rules" — manager/npm/post-update/rules.spec.ts line 12
+    #[test]
+    fn process_host_rules_empty() {
+        crate::util::host_rules::clear();
+        let res = process_host_rules();
+        assert!(res.additional_npmrc_content.is_empty());
+        assert!(res.additional_yarn_rc_yml.is_none());
+    }
+
+    // Ported: "returns empty if no resolvedHost" — manager/npm/post-update/rules.spec.ts line 19
+    #[test]
+    fn process_host_rules_no_resolved_host() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            host_type: Some("npm".to_owned()),
+            token: Some("123test".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        let res = process_host_rules();
+        assert!(res.additional_npmrc_content.is_empty());
+        assert!(res.additional_yarn_rc_yml.is_none());
+    }
+
+    // Ported: "returns rules content" — manager/npm/post-update/rules.spec.ts line 31
+    #[test]
+    fn process_host_rules_username_password() {
+        crate::util::host_rules::clear();
+        crate::util::host_rules::add(crate::util::host_rules::HostRule {
+            host_type: Some("npm".to_owned()),
+            match_host: Some("registry.company.com".to_owned()),
+            username: Some("user123".to_owned()),
+            password: Some("pass123".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        let res = process_host_rules();
+        // base64("pass123") = "cGFzczEyMw=="
+        assert!(
+            res.additional_npmrc_content
+                .contains(&"//registry.company.com/:username=user123".to_owned())
+        );
+        assert!(
+            res.additional_npmrc_content
+                .contains(&"//registry.company.com/:_password=cGFzczEyMw==".to_owned())
+        );
+        let yarn = res.additional_yarn_rc_yml.as_ref().unwrap();
+        let reg = &yarn["npmRegistries"]["//registry.company.com/"];
+        assert_eq!(reg["npmAuthIdent"], "user123:pass123");
     }
 }
