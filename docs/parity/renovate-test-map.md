@@ -675,7 +675,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/pub/extract.spec.ts` | Done | [details](lib/modules/manager/pub/extract.spec.ts.md) |
 | `lib/modules/manager/pub/utils.spec.ts` | Done | [details](lib/modules/manager/pub/utils.spec.ts.md) |
 | `lib/modules/manager/puppet/common.spec.ts` | Done | [details](lib/modules/manager/puppet/common.spec.ts.md) |
-| `lib/modules/manager/puppet/puppetfile-parser.spec.ts` | Not done | [details](lib/modules/manager/puppet/puppetfile-parser.spec.ts.md) |
+| `lib/modules/manager/puppet/puppetfile-parser.spec.ts` | Done | [details](lib/modules/manager/puppet/puppetfile-parser.spec.ts.md) |
 | `lib/modules/manager/renovate-config/extract.spec.ts` | Done | [details](lib/modules/manager/renovate-config/extract.spec.ts.md) |
 | `lib/modules/manager/sbt/update.spec.ts` | Done | [details](lib/modules/manager/sbt/update.spec.ts.md) |
 | `lib/modules/manager/sbt/util.spec.ts` | Done | [details](lib/modules/manager/sbt/util.spec.ts.md) |
