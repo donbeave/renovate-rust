@@ -20,6 +20,9 @@ pub mod pr_body;
 pub mod scm_manager;
 pub mod util;
 
+// Re-export commonly-used platform types
+pub use github::{BranchState, CombinedBranchState, GhBranchStatus, CombinedBranchStatus, GhRestPr};
+
 use thiserror::Error;
 
 use crate::config::{GlobalConfig, Platform};
@@ -94,6 +97,42 @@ pub trait PlatformClient: Send + Sync {
         owner: &str,
         repo: &str,
     ) -> impl std::future::Future<Output = Result<Vec<String>, PlatformError>> + Send;
+
+    /// Create a pull request.
+    ///
+    /// Returns the created PR or `None` if creation failed.
+    fn create_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        source_branch: &str,
+        target_branch: &str,
+        title: &str,
+        body: &str,
+    ) -> impl std::future::Future<Output = Result<Option<i64>, PlatformError>> + Send;
+
+    /// Update an existing pull request.
+    ///
+    /// Returns `Ok(())` if successful, `Err` otherwise.
+    fn update_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+        title: Option<&str>,
+        body: Option<&str>,
+        state: Option<&str>,
+    ) -> impl std::future::Future<Output = Result<(), PlatformError>> + Send;
+
+    /// Get the combined status for a branch.
+    ///
+    /// Returns the combined status and individual status checks.
+    fn get_branch_status(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch: &str,
+    ) -> impl std::future::Future<Output = Result<CombinedBranchStatus, PlatformError>> + Send;
 }
 
 /// Enum dispatch wrapper covering all supported platform clients.
@@ -174,6 +213,69 @@ impl AnyPlatformClient {
             Self::Github(c) => c.get_file_list(owner, repo).await,
             Self::Gitlab(c) => c.get_file_list(owner, repo).await,
             Self::Local(c) => c.get_file_list(owner, repo).await,
+        }
+    }
+
+    /// Create a pull request.
+    pub async fn create_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        source_branch: &str,
+        target_branch: &str,
+        title: &str,
+        body: &str,
+    ) -> Result<Option<i64>, PlatformError> {
+        match self {
+            Self::Github(c) => {
+                c.create_pr(owner, repo, source_branch, target_branch, title, body)
+                    .await
+            }
+            Self::Gitlab(c) => {
+                c.create_pr(owner, repo, source_branch, target_branch, title, body)
+                    .await
+            }
+            Self::Local(c) => {
+                c.create_pr(owner, repo, source_branch, target_branch, title, body)
+                    .await
+            }
+        }
+    }
+
+    /// Update an existing pull request.
+    pub async fn update_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+        title: Option<&str>,
+        body: Option<&str>,
+        state: Option<&str>,
+    ) -> Result<(), PlatformError> {
+        match self {
+            Self::Github(c) => {
+                c.update_pr(owner, repo, pr_number, title, body, state).await
+            }
+            Self::Gitlab(c) => {
+                c.update_pr(owner, repo, pr_number, title, body, state).await
+            }
+            Self::Local(c) => {
+                c.update_pr(owner, repo, pr_number, title, body, state).await
+            }
+        }
+    }
+
+    /// Get the combined status for a branch.
+    pub async fn get_branch_status(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch: &str,
+    ) -> Result<CombinedBranchStatus, PlatformError> {
+        match self {
+            Self::Github(c) => c.get_branch_status(owner, repo, branch).await,
+            Self::Gitlab(c) => c.get_branch_status(owner, repo, branch).await,
+            Self::Local(c) => c.get_branch_status(owner, repo, branch).await,
         }
     }
 }

@@ -10,7 +10,7 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::platform::{CurrentUser, PlatformError, RawFile};
+use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 
 /// Platform client that reads from the local filesystem.
 #[derive(Debug, Clone)]
@@ -127,5 +127,79 @@ fn walk_dir_inner(base: &Path, current: &Path, files: &mut Vec<String>) {
         {
             files.push(s.to_owned());
         }
+    }
+}
+
+impl PlatformClient for LocalClient {
+    async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
+        Ok(CurrentUser {
+            login: "local".to_owned(),
+        })
+    }
+
+    async fn get_raw_file(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        path: &str,
+    ) -> Result<Option<RawFile>, PlatformError> {
+        let full = self.base_dir.join(path);
+        match std::fs::read_to_string(&full) {
+            Ok(content) => Ok(Some(RawFile {
+                path: path.to_owned(),
+                content,
+            })),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(e) => Err(PlatformError::Unexpected(format!(
+                "reading {}: {e}",
+                full.display()
+            ))),
+        }
+    }
+
+    async fn get_file_list(
+        &self,
+        _owner: &str,
+        _repo: &str,
+    ) -> Result<Vec<String>, PlatformError> {
+        // Try git ls-files first; it respects .gitignore automatically.
+        if let Some(files) = git_ls_files(&self.base_dir) {
+            return Ok(files);
+        }
+        // Fall back to a simple recursive walk when not in a git repo.
+        Ok(walk_dir(&self.base_dir))
+    }
+
+    async fn create_pr(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _source_branch: &str,
+        _target_branch: &str,
+        _title: &str,
+        _body: &str,
+    ) -> Result<Option<i64>, PlatformError> {
+        Err(PlatformError::NotSupported("Local platform PR creation".to_string()))
+    }
+
+    async fn update_pr(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _pr_number: i64,
+        _title: Option<&str>,
+        _body: Option<&str>,
+        _state: Option<&str>,
+    ) -> Result<(), PlatformError> {
+        Err(PlatformError::NotSupported("Local platform PR updates".to_string()))
+    }
+
+    async fn get_branch_status(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _branch: &str,
+    ) -> Result<CombinedBranchStatus, PlatformError> {
+        Err(PlatformError::NotSupported("Local platform branch status".to_string()))
     }
 }

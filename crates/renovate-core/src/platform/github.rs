@@ -9,7 +9,7 @@ use std::sync::LazyLock;
 use base64::Engine as _;
 use chrono::{DateTime, Utc};
 use regex::Regex;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};
 use crate::platform::{CurrentUser, PlatformClient, PlatformError, RawFile};
@@ -138,7 +138,7 @@ impl GithubClient {
 }
 
 /// Minimal GitHub user response.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct GithubUser {
     login: String,
 }
@@ -162,6 +162,120 @@ struct GithubTreeEntry {
     path: Option<String>,
     #[serde(rename = "type")]
     entry_type: Option<String>,
+}
+
+/// Branch state for a single status check.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum BranchState {
+    Failure,
+    Pending,
+    Success,
+    Error,
+}
+
+/// Combined state for all status checks.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CombinedBranchState {
+    Failure,
+    Pending,
+    Success,
+}
+
+/// Individual GitHub branch status.
+#[derive(Debug, Clone, Deserialize)]
+pub struct GhBranchStatus {
+    pub context: String,
+    pub state: BranchState,
+}
+
+/// Combined branch status with all individual statuses.
+#[derive(Debug, Clone, Deserialize)]
+pub struct CombinedBranchStatus {
+    pub state: CombinedBranchState,
+    pub statuses: Vec<GhBranchStatus>,
+}
+
+/// GitHub REST API PR representation.
+#[derive(Debug, Clone, Deserialize)]
+pub struct GhRestPr {
+    pub number: i64,
+    pub title: String,
+    pub body: Option<String>,
+    pub state: String,
+    pub head: HeadRef,
+    pub base: BaseRef,
+    pub mergeable_state: Option<String>,
+    pub created_at: String,
+    pub updated_at: String,
+    pub closed_at: Option<String>,
+    pub merged_at: Option<String>,
+    pub node_id: String,
+    pub user: Option<GithubUser>,
+    pub assignee: Option<GithubUser>,
+    pub assignees: Option<Vec<GithubUser>>,
+    pub requested_reviewers: Option<Vec<GithubUser>>,
+    pub labels: Option<Vec<GithubLabel>>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct HeadRef {
+    #[serde(rename = "ref")]
+    pub ref_name: String,
+    pub sha: String,
+    pub repo: Option<RepoInfo>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct BaseRef {
+    #[serde(rename = "ref")]
+    pub ref_name: String,
+    pub repo: Option<RepoInfo>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RepoInfo {
+    pub full_name: String,
+    pub pushed_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct GithubLabel {
+    pub name: String,
+}
+
+/// Request body for creating a GitHub PR.
+#[derive(Debug, Serialize)]
+struct CreatePrRequest {
+    title: String,
+    head: String,
+    base: String,
+    body: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    draft: Option<bool>,
+}
+
+/// Request body for updating a GitHub PR.
+#[derive(Debug, Serialize)]
+struct UpdatePrRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    body: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    state: Option<String>,
+}
+
+/// Request body for setting branch status.
+#[derive(Debug, Serialize)]
+struct SetStatusRequest {
+    state: String,
+    context: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    target_url: Option<String>,
 }
 
 impl PlatformClient for GithubClient {
@@ -226,6 +340,133 @@ impl PlatformClient for GithubClient {
             .filter_map(|e| e.path)
             .collect();
         Ok(files)
+    }
+
+    async fn create_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        source_branch: &str,
+        target_branch: &str,
+        title: &str,
+        body: &str,
+    ) -> Result<Option<i64>, PlatformError> {
+        let url = format!("{}/repos/{}/{}/pulls", self.api_base, owner, repo);
+        let head = format!("{}:{}", owner, source_branch);
+        let request = CreatePrRequest {
+            title: title.to_owned(),
+            head,
+            base: target_branch.to_owned(),
+            body: body.to_owned(),
+            draft: Some(false),
+        };
+
+        let request_json = serde_json::to_string(&request)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+
+        match self.http.post_json::<GhRestPr>(&url, &request_json).await {
+            Ok(pr) => {
+                tracing::debug!(
+                    pr = pr.number,
+                    branch = source_branch,
+                    "PR created successfully"
+                );
+                Ok(Some(pr.number))
+            }
+            Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY => {
+                // PR already exists or validation failed
+                tracing::debug!(
+                    repo = %format!("{owner}/{repo}"),
+                    branch = source_branch,
+                    "PR creation failed — validation error or PR already exists"
+                );
+                Ok(None)
+            }
+            Err(e) => Err(PlatformError::Http(e)),
+        }
+    }
+
+    async fn update_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+        title: Option<&str>,
+        body: Option<&str>,
+        state: Option<&str>,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/pulls/{}",
+            self.api_base, owner, repo, pr_number
+        );
+
+        // Only send the request if there's something to update
+        if title.is_none() && body.is_none() && state.is_none() {
+            return Ok(());
+        }
+
+        let request = UpdatePrRequest {
+            title: title.map(|s| s.to_owned()),
+            body: body.map(|s| s.to_owned()),
+            state: state.map(|s| s.to_owned()),
+        };
+
+        let request_json = serde_json::to_string(&request)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+
+        let response = self.http.patch_json(&url, &request_json).await?;
+
+        if !response.status().is_success() {
+            return Err(PlatformError::Http(HttpError::Status {
+                status: response.status(),
+                url: url.to_string(),
+            }));
+        }
+
+        tracing::debug!(pr = pr_number, "PR updated successfully");
+        Ok(())
+    }
+
+    async fn get_branch_status(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch: &str,
+    ) -> Result<CombinedBranchStatus, PlatformError> {
+        // First, get the SHA for the branch
+        let branch_url = format!(
+            "{}/repos/{}/{}/git/refs/heads/{}",
+            self.api_base, owner, repo, branch
+        );
+
+        #[derive(Deserialize)]
+        struct BranchRef {
+            object: BranchObject,
+        }
+
+        #[derive(Deserialize)]
+        struct BranchObject {
+            sha: String,
+        }
+
+        let branch_ref: BranchRef = self
+            .http
+            .get_json(&branch_url)
+            .await
+            .map_err(PlatformError::Http)?;
+
+        let sha = branch_ref.object.sha;
+
+        // Get combined status for the commit
+        let status_url = format!(
+            "{}/repos/{}/{}/commits/{}/status",
+            self.api_base, owner, repo, sha
+        );
+
+        self.http
+            .get_json::<CombinedBranchStatus>(&status_url)
+            .await
+            .map_err(PlatformError::Http)
     }
 }
 

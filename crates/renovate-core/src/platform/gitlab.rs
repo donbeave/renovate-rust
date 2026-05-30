@@ -21,7 +21,7 @@ use base64::Engine as _;
 use serde::Deserialize;
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CurrentUser, PlatformClient, PlatformError, RawFile};
+use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 
 /// Default GitLab API base URL.
 pub const GITLAB_API_BASE: &str = "https://gitlab.com/api/v4";
@@ -294,6 +294,39 @@ impl PlatformClient for GitlabClient {
         }
 
         Ok(files)
+    }
+
+    async fn create_pr(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _source_branch: &str,
+        _target_branch: &str,
+        _title: &str,
+        _body: &str,
+    ) -> Result<Option<i64>, PlatformError> {
+        Err(PlatformError::NotSupported("GitLab PR creation".to_string()))
+    }
+
+    async fn update_pr(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _pr_number: i64,
+        _title: Option<&str>,
+        _body: Option<&str>,
+        _state: Option<&str>,
+    ) -> Result<(), PlatformError> {
+        Err(PlatformError::NotSupported("GitLab PR updates".to_string()))
+    }
+
+    async fn get_branch_status(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _branch: &str,
+    ) -> Result<CombinedBranchStatus, PlatformError> {
+        Err(PlatformError::NotSupported("GitLab branch status".to_string()))
     }
 }
 

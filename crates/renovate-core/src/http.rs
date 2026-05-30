@@ -222,6 +222,26 @@ impl HttpClient {
         let result = resp.json::<T>().await?;
         Ok(result)
     }
+
+    /// Send a PATCH request with a JSON body.
+    ///
+    /// Returns the raw response; callers must check the status code.
+    pub async fn patch_json(&self, url: &str, body: &str) -> Result<reqwest::Response, HttpError> {
+        let rb = self
+            .inner
+            .patch(url)
+            .header("Content-Type", "application/json");
+        let rb = match &self.token {
+            Some(t) => rb.bearer_auth(t),
+            None => rb,
+        };
+        let resp = rb
+            .body(body.to_owned())
+            .send()
+            .await
+            .map_err(HttpError::Request)?;
+        Ok(resp)
+    }
 }
 
 impl Default for HttpClient {
