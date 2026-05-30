@@ -1129,7 +1129,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/versioning/aws-machine-image/index.ts` | `crates/renovate-core/src/versioning/aws_machine_image.rs` | partial | Core version comparison ported |
 | `lib/modules/versioning/cargo/index.ts` | `crates/renovate-core/src/versioning/cargo.rs` | full | Full VersioningApi: matches, isValid, isVersion, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, isSingleVersion, getPinnedValue, getNewValue, isBreaking |
-| `lib/modules/versioning/composer/index.ts` | `crates/renovate-core/src/versioning/composer.rs` | partial | getMajor/Minor/Patch, equals, isGreaterThan, isSingleVersion, isStable, isValid, isVersion, isLessThanRange, get/minSatisfyingVersion, sortVersions, isCompatible ported; Full implementation complete |
+| `lib/modules/versioning/composer/index.ts` | `crates/renovate-core/src/versioning/composer.rs` | full | getMajor/Minor/Patch, equals, isGreaterThan, isSingleVersion, isStable, isValid, isVersion, isLessThanRange, get/minSatisfyingVersion, sortVersions, isCompatible, matches, getNewValue ported |
 | `lib/modules/versioning/deno/index.ts` | `crates/renovate-core/src/versioning/deno.rs` | done | isValid, getSatisfyingVersion, isSingleVersion, subset, getNewValue |
 | `lib/modules/versioning/devbox/index.ts` | `crates/renovate-core/src/versioning/devbox.rs` | done | isValid, isVersion, isCompatible, getNewValue |
 | `lib/modules/versioning/exact/index.ts` | `crates/renovate-core/src/versioning/exact.rs` | partial | Exact version matching ported |
@@ -1178,3 +1178,4 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/util/git/auth.ts` | `crates/renovate-core/src/util.rs` | full | Git authenticated environment variable generation, host-rule aggregation, GitHub API host-rule rewrites, additional datasource host types, GitLab token username, username/password encoding, invalid host filtering, and Bitbucket Server `/scm/` rewrite ported |
 | `lib/util/git/url.ts` | `crates/renovate-core/src/util.rs` | full | Git URL parsing, HTTP URL coercion, platform credential injection, Bitbucket Server SSH URL rewriting, and host-rule credential lookup ported |
 | `lib/util/markdown.ts` | `crates/renovate-core/src/util.rs` | full | Markdown release-note sanitizing and GitHub-style linkification ported, including commit, issue, mention, and angle-bracket URL rendering |
+| `lib/modules/datasource/postprocess-release.ts` | `crates/renovate-core/src/datasources.rs` | full | postprocessRelease: dispatches release postprocessing through datasource-specific hooks; default passthrough when no override exists |
