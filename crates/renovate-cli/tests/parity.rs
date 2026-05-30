@@ -632,3 +632,155 @@ fn parity_pip_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for pip-skipped fixture");
 }
+
+#[test]
+fn parity_circleci_scratch() {
+    let actual = run_fixture("circleci-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".circleci/config.yml",
+                    "manager": "circleci",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for circleci-scratch fixture");
+}
+
+#[test]
+fn parity_droneci_scratch() {
+    let actual = run_fixture("droneci-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".drone.yml",
+                    "manager": "droneci",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for droneci-scratch fixture");
+}
+
+#[test]
+fn parity_gitlabci_scratch() {
+    let actual = run_fixture("gitlabci-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".gitlab-ci.yml",
+                    "manager": "gitlabci",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for gitlabci-scratch fixture");
+}
+
+#[test]
+fn parity_woodpecker_scratch() {
+    let actual = run_fixture("woodpecker-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".woodpecker.yml",
+                    "manager": "woodpecker",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for woodpecker-scratch fixture");
+}

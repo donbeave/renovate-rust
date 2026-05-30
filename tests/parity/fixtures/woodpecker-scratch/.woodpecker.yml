@@ -1,0 +1,5 @@
+pipeline:
+  build:
+    image: scratch
+    commands:
+      - echo "build"

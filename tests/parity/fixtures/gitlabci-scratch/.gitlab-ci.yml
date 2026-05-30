@@ -1,0 +1,4 @@
+build:
+  image: scratch
+  script:
+    - echo "build"

@@ -5,7 +5,7 @@
 ## `lib/util/exec/hermit.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/hermit.spec.ts
-**Total tests:** 6 | **Ported:** 2 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 6 | **Ported:** 5 | **Actionable:** 4 | **Status:** partial
 
 ### `util/exec/hermit › isHermit`
 
@@ -17,14 +17,14 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| ("$dir") === $expected (hermit: $hermitLocation) | 30 | pending | — | — | TS uses `find-up` library; Rust uses manual parent traversal — different impl |
-| should throw error when hermit cwd is not found | 49 | pending | — | — | Rust returns `None` from `find_hermit_cwd`; error thrown by `get_hermit_envs` instead |
+| ("$dir") === $expected (hermit: $hermitLocation) | 30 | ported | `exec/hermit.rs` | `find_hermit_cwd_in_same_dir`, `find_hermit_cwd_in_parent_dir`, `find_hermit_cwd_in_nested_dir` | 3 of 4 parameterized cases ported; Rust uses manual parent traversal instead of `find-up` |
+| should throw error when hermit cwd is not found | 49 | ported | `exec/hermit.rs` | `find_hermit_cwd_nonexistent` | Rust returns `None` instead of throwing |
 
 ### `util/exec/hermit › getHermitEnvs`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return hermit environment variables when hermit env returns successfully | 62 | pending | — | — | Requires running `hermit` binary in test environment |
+| should return hermit environment variables when hermit env returns successfully | 62 | ported | `exec/hermit.rs` | `parse_hermit_env_output_parses_valid_lines`, `parse_hermit_env_output_skips_comments_and_empty_lines`, `parse_hermit_env_output_empty` | Parsing logic tested; actual `hermit env` execution not tested |
 
 ---
 
