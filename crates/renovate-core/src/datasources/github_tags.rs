@@ -411,11 +411,13 @@ mod tests {
         assert_eq!(result, None);
     }
 
+    // Rust-specific: github_tags behavior test
     #[test]
     fn api_base_from_none() {
         assert_eq!(api_base_from_endpoint(None), GITHUB_API_BASE);
     }
 
+    // Rust-specific: github_tags behavior test
     #[test]
     fn api_base_from_custom() {
         assert_eq!(
@@ -424,6 +426,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: github_tags behavior test
     #[test]
     fn api_base_trims_trailing_slash() {
         assert_eq!(

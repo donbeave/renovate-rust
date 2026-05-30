@@ -156,6 +156,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_number_millis() {
         // 1609459200000 ms = 2021-01-01T00:00:00.000Z
@@ -165,6 +166,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_number_seconds() {
         // 1609459200 s = 2021-01-01T00:00:00.000Z
@@ -174,6 +176,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_number_too_small() {
         assert_eq!(ts(json!(-1i64)), None);
@@ -181,6 +184,7 @@ mod tests {
         assert_eq!(ts(json!(123i64)), None); // both ms and s before 2000
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_null_and_invalid() {
         assert_eq!(ts(json!(null)), None);
@@ -190,12 +194,14 @@ mod tests {
         assert_eq!(ts(json!("202x0101000000")), None);
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_date_1999() {
         // Before millennium → null
         assert_eq!(ts(json!("1999-01-01T00:00:00.000Z")), None);
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_iso_with_offset() {
         assert_eq!(
@@ -208,6 +214,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_date_only() {
         assert_eq!(
@@ -216,6 +223,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_compact_format() {
         assert_eq!(
@@ -228,6 +236,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_compact_with_tz() {
         assert_eq!(
@@ -240,6 +249,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_sql_with_tz() {
         assert_eq!(
@@ -248,6 +258,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_http_format() {
         assert_eq!(
@@ -256,6 +267,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_slash_date() {
         assert_eq!(
@@ -264,6 +276,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: timestamp behavior test
     #[test]
     fn timestamp_month_name() {
         assert_eq!(

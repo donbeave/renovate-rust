@@ -253,6 +253,7 @@ mod tests {
         assert!(digest.is_none());
     }
 
+    // Rust-specific: github_digest behavior test
     #[test]
     fn datasource_id_is_correct() {
         assert_eq!(DATASOURCE_ID, "github-digest");

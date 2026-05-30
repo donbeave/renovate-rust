@@ -547,6 +547,7 @@ mod tests {
         BitbucketClient::with_endpoint("testuser", "testpass", server_uri).unwrap()
     }
 
+    // Rust-specific: bitbucket behavior test
     #[test]
     fn auth_header_uses_basic_encoding() {
         let client = BitbucketClient::new("user", "pass").unwrap();
@@ -559,6 +560,7 @@ mod tests {
         assert_eq!(String::from_utf8(decoded).unwrap(), "user:pass");
     }
 
+    // Rust-specific: bitbucket behavior test
     #[test]
     fn repo_slug_formats_owner_and_repo() {
         assert_eq!(BitbucketClient::repo_slug("owner", "repo"), "owner/repo");

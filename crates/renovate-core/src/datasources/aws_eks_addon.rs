@@ -235,6 +235,7 @@ mod tests {
         assert_eq!(releases.len(), 1);
     }
 
+    // Rust-specific: aws_eks_addon behavior test
     #[test]
     fn datasource_id_is_correct() {
         assert_eq!(DATASOURCE_ID, "aws-eks-addon");

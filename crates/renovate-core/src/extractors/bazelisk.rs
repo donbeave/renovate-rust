@@ -38,6 +38,7 @@ pub fn extract(content: &str) -> Option<Vec<BazeliskDep>> {
 mod tests {
     use super::*;
 
+    // Rust-specific: bazelisk behavior test
     #[test]
     fn extracts_version_from_first_line() {
         let deps = extract("6.4.0\n").unwrap();
@@ -49,17 +50,20 @@ mod tests {
         assert_eq!(deps[0].versioning, "semver");
     }
 
+    // Rust-specific: bazelisk behavior test
     #[test]
     fn trims_whitespace() {
         let deps = extract("  7.0.0  \n").unwrap();
         assert_eq!(deps[0].current_value, "7.0.0");
     }
 
+    // Rust-specific: bazelisk behavior test
     #[test]
     fn returns_none_for_empty() {
         assert!(extract("").is_none());
     }
 
+    // Rust-specific: bazelisk behavior test
     #[test]
     fn returns_none_for_whitespace_only() {
         assert!(extract("   \n  \n").is_none());

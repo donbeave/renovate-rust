@@ -363,6 +363,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
+    // Rust-specific: terraform behavior test
     #[test]
     fn lower_bound_tilde_gt() {
         use crate::versioning::hashicorp::lower_bound;
@@ -371,12 +372,14 @@ mod tests {
         assert_eq!(lower_bound("= 3.1.4").as_deref(), Some("3.1.4"));
     }
 
+    // Rust-specific: terraform behavior test
     #[test]
     fn split_name_slash() {
         let (ns, t) = split_provider_name("hashicorp/aws").unwrap();
         assert_eq!((ns, t), ("hashicorp", "aws"));
     }
 
+    // Rust-specific: terraform behavior test
     #[test]
     fn split_name_bare_defaults_hashicorp() {
         let (ns, t) = split_provider_name("random").unwrap();

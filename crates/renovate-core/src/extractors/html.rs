@@ -75,6 +75,7 @@ pub fn extract(content: &str) -> Vec<HtmlCdnjsDep> {
 mod tests {
     use super::*;
 
+    // Rust-specific: html behavior test
     #[test]
     fn extracts_script_tag() {
         let html = r#"<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>"#;
@@ -85,6 +86,7 @@ mod tests {
         assert_eq!(deps[0].asset, "jquery.min.js");
     }
 
+    // Rust-specific: html behavior test
     #[test]
     fn extracts_link_tag() {
         let html = r#"<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">"#;
@@ -95,6 +97,7 @@ mod tests {
         assert_eq!(deps[0].asset, "css/all.min.css");
     }
 
+    // Rust-specific: html behavior test
     #[test]
     fn extracts_multiple_tags() {
         let html = r#"
@@ -108,18 +111,21 @@ mod tests {
         assert_eq!(deps[1].current_value, "5.1.3");
     }
 
+    // Rust-specific: html behavior test
     #[test]
     fn no_cdnjs_tags_returns_empty() {
         let html = r#"<script src="/local/script.js"></script>"#;
         assert!(extract(html).is_empty());
     }
 
+    // Rust-specific: html behavior test
     #[test]
     fn non_cdnjs_script_ignored() {
         let html = r#"<script src="https://cdn.example.com/libs/foo/1.0/foo.js"></script>"#;
         assert!(extract(html).is_empty());
     }
 
+    // Rust-specific: html behavior test
     #[test]
     fn https_cdnjs_url() {
         let html = r#"<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>"#;

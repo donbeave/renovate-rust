@@ -1340,6 +1340,7 @@ readme = "README.md"
         assert!(parse_pep508_str("").is_none());
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_blinker() {
         let r = parse_pep508_str("blinker").unwrap();
@@ -1349,6 +1350,7 @@ readme = "README.md"
         assert!(r.marker.is_none());
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_packaging_exact() {
         let r = parse_pep508_str("packaging==20.0.0").unwrap();
@@ -1358,6 +1360,7 @@ readme = "README.md"
         assert!(r.marker.is_none());
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_packaging_parens() {
         let r = parse_pep508_str("packaging (==20.0.0)").unwrap();
@@ -1367,6 +1370,7 @@ readme = "README.md"
         assert!(r.marker.is_none());
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_packaging_parens_with_marker() {
         let r = parse_pep508_str("packaging (==20.0.0); python_version < \"3.8\"").unwrap();
@@ -1376,6 +1380,7 @@ readme = "README.md"
         assert_eq!(r.marker.as_deref(), Some("python_version < \"3.8\""));
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_packaging_range() {
         let r = parse_pep508_str("packaging>=20.9,!=22.0").unwrap();
@@ -1385,6 +1390,7 @@ readme = "README.md"
         assert!(r.marker.is_none());
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_with_extras_one() {
         let r = parse_pep508_str("cachecontrol[filecache]>=0.12.11").unwrap();
@@ -1394,6 +1400,7 @@ readme = "README.md"
         assert!(r.marker.is_none());
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_with_extras_multiple() {
         let r = parse_pep508_str("private-depB[extra1, extra2]~=2.4").unwrap();
@@ -1406,6 +1413,7 @@ readme = "README.md"
         assert!(r.marker.is_none());
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_with_version_and_marker() {
         let r = parse_pep508_str("tomli>=1.1.0; python_version < \"3.11\"").unwrap();
@@ -1415,6 +1423,7 @@ readme = "README.md"
         assert_eq!(r.marker.as_deref(), Some("python_version < \"3.11\""));
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_no_version_with_marker() {
         let r = parse_pep508_str("typing-extensions; python_version < \"3.8\"").unwrap();
@@ -1424,6 +1433,7 @@ readme = "README.md"
         assert_eq!(r.marker.as_deref(), Some("python_version < \"3.8\""));
     }
 
+    // Rust-specific: pep621 behavior test
     #[test]
     fn parse_pep508_extras_no_version_with_marker() {
         let r =

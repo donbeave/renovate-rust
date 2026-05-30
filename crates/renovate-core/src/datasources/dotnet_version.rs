@@ -214,6 +214,7 @@ mod tests {
         assert!(pkg != "dotnet-sdk" && pkg != "dotnet-runtime");
     }
 
+    // Rust-specific: dotnet_version behavior test
     #[test]
     fn parse_releases_index() {
         let json = r#"{"releases-index":[{"channel-version":"7.0","releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/7.0/releases.json"}]}"#;
@@ -309,6 +310,7 @@ mod tests {
         assert_eq!(ts("7.0.0-rc.1.22426.10"), Some("2022-09-14T00:00:00.000Z"));
     }
 
+    // Rust-specific: dotnet_version behavior test
     #[test]
     fn release_timestamp_format() {
         let date = "2022-09-14";

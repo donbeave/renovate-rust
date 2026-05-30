@@ -168,6 +168,7 @@ include:
         assert_eq!(deps.len(), 2);
     }
 
+    // Rust-specific: gitlabci_include behavior test
     #[test]
     fn include_without_ref_skipped() {
         let content = "include:\n  - project: org/templates\n    file: /f.yml\n";
@@ -175,6 +176,7 @@ include:
         assert!(deps.is_empty());
     }
 
+    // Rust-specific: gitlabci_include behavior test
     #[test]
     fn non_include_blocks_ignored() {
         let content = r#"

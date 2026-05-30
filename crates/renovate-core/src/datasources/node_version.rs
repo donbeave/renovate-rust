@@ -137,6 +137,7 @@ mod tests {
         assert!(!entries[0].lts);
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn parse_lts_release() {
         // LTS releases use a string label instead of `false`.
@@ -146,12 +147,14 @@ mod tests {
         assert!(entries[0].lts);
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn version_prefix_stripped() {
         // The leading "v" is stripped to produce a clean semver string.
         assert_eq!("v16.9.0".trim_start_matches('v'), "16.9.0");
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn release_timestamp_format() {
         let date = "2021-09-07";

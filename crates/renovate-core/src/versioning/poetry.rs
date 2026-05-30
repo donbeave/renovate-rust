@@ -883,6 +883,7 @@ mod tests {
 
     // ── poetry2semver ────────────────────────────────────────────────────────
 
+    // Rust-specific: poetry behavior test
     #[test]
     fn poetry2semver_basic_versions() {
         assert_eq!(poetry2semver("1", true).as_deref(), Some("1.0.0"));
@@ -893,6 +894,7 @@ mod tests {
         assert_eq!(poetry2semver("!@#", true), None);
     }
 
+    // Rust-specific: poetry behavior test
     #[test]
     fn poetry2semver_pre_release() {
         // Always pads to 3 components (matching node-semver normalization)
@@ -911,6 +913,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: poetry behavior test
     #[test]
     fn poetry2semver_post_release() {
         // Always pads to 3 components
@@ -924,6 +927,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: poetry behavior test
     #[test]
     fn poetry2semver_dev_release() {
         assert_eq!(

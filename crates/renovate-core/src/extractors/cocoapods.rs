@@ -333,6 +333,7 @@ end
         assert_eq!(quick.current_value, "~> 5.0");
     }
 
+    // Rust-specific: cocoapods behavior test
     #[test]
     fn empty_podfile_returns_empty() {
         assert!(extract("source 'https://cdn.cocoapods.org/'\n").is_empty());

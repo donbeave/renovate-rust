@@ -616,12 +616,14 @@ mod tests {
 </metadata>"#
     }
 
+    // Rust-specific: maven behavior test
     #[test]
     fn parse_release_tag() {
         let latest = parse_latest_version(spring_metadata()).unwrap();
         assert_eq!(latest, Some("6.0.11".to_owned()));
     }
 
+    // Rust-specific: maven behavior test
     #[test]
     fn parse_latest_fallback_when_no_release() {
         let xml = r#"<metadata>
@@ -637,6 +639,7 @@ mod tests {
         assert_eq!(latest, Some("2.0.0".to_owned()));
     }
 
+    // Rust-specific: maven behavior test
     #[test]
     fn parse_last_version_fallback() {
         let xml = r#"<metadata>
@@ -651,6 +654,7 @@ mod tests {
         assert_eq!(latest, Some("1.1.0".to_owned()));
     }
 
+    // Rust-specific: maven behavior test
     #[test]
     fn parse_empty_metadata() {
         let xml = "<metadata></metadata>";
@@ -684,6 +688,7 @@ mod tests {
         assert_eq!(latest, Some("6.0.11".to_owned()));
     }
 
+    // Rust-specific: maven behavior test
     #[test]
     fn dep_name_without_colon_returns_none() {
         // fetch_latest splits on ':'; no colon → None, checked via sync helper.

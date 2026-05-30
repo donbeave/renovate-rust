@@ -363,6 +363,7 @@ executable my-exe
   main-is: Main.hs
 "#;
 
+    // Rust-specific: cabal behavior test
     #[test]
     fn extracts_library_deps() {
         let deps = extract(SAMPLE);
@@ -372,6 +373,7 @@ executable my-exe
         assert_eq!(text.current_value, "== 2.0.0");
     }
 
+    // Rust-specific: cabal behavior test
     #[test]
     fn extracts_unconstrained_dep() {
         let deps = extract(SAMPLE);
@@ -382,6 +384,7 @@ executable my-exe
         assert_eq!(containers.current_value, "");
     }
 
+    // Rust-specific: cabal behavior test
     #[test]
     fn extracts_from_multiple_sections() {
         let deps = extract(SAMPLE);
@@ -396,6 +399,7 @@ executable my-exe
         assert!(extract("").is_empty());
     }
 
+    // Rust-specific: cabal behavior test
     #[test]
     fn no_build_depends_returns_empty() {
         let content = "cabal-version: 2.4\nname: foo\nversion: 1.0.0\n";

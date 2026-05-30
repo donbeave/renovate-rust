@@ -228,11 +228,13 @@ fn host_matches(url: &str, pattern: &str) -> bool {
 mod tests {
     use super::*;
 
+    // Rust-specific: host_rules behavior test
     #[test]
     fn host_matches_exact() {
         assert!(host_matches("https://api.github.com/repos", "api.github.com"));
     }
 
+    // Rust-specific: host_rules behavior test
     #[test]
     fn host_matches_url_prefix() {
         assert!(host_matches(
@@ -241,6 +243,7 @@ mod tests {
         ));
     }
 
+    // Rust-specific: host_rules behavior test
     #[test]
     fn host_matches_wildcard() {
         assert!(host_matches(
@@ -249,11 +252,13 @@ mod tests {
         ));
     }
 
+    // Rust-specific: host_rules behavior test
     #[test]
     fn host_no_match() {
         assert!(!host_matches("https://gitlab.com/api", "api.github.com"));
     }
 
+    // Rust-specific: host_rules behavior test
     #[test]
     fn find_matching_rule_by_host_type() {
         let rules = vec![HostRule {
@@ -271,6 +276,7 @@ mod tests {
         assert_eq!(result.token.as_deref(), Some("gh_token"));
     }
 
+    // Rust-specific: host_rules behavior test
     #[test]
     fn find_matching_rule_fallback() {
         let rules = vec![HostRule {
@@ -288,6 +294,7 @@ mod tests {
         assert_eq!(result.token.as_deref(), Some("fallback_token"));
     }
 
+    // Rust-specific: host_rules behavior test
     #[test]
     fn find_matching_rule_no_match() {
         let rules = vec![];
@@ -301,6 +308,7 @@ mod tests {
         assert!(result.token.is_none());
     }
 
+    // Rust-specific: host_rules behavior test
     #[test]
     fn merge_rule_priority() {
         let rules = vec![

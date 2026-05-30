@@ -222,6 +222,7 @@ services:
         assert!(deps.iter().any(|d| d.image == "redis"));
     }
 
+    // Rust-specific: droneci behavior test
     #[test]
     fn variable_ref_skipped() {
         let content = "steps:\n- name: ci\n  image: $DRONE_IMAGE\n";

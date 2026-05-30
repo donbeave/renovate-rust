@@ -571,6 +571,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn ignore_deps_skips_matching_dep() {
         let cfg = RepoConfig::parse(r#"{"ignoreDeps": ["lodash"]}"#);
@@ -596,6 +597,7 @@ mod tests {
         assert!(matches!(&deps[1].status, DepStatus::UpdateAvailable { .. }));
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn ignore_deps_skips_up_to_date_dep_too() {
         let cfg = RepoConfig::parse(r#"{"ignoreDeps": ["express"]}"#);
@@ -610,6 +612,7 @@ mod tests {
         assert!(matches!(&deps[0].status, DepStatus::Skipped { reason } if reason == "ignoreDeps"));
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn ignore_deps_empty_list_is_noop() {
         let cfg = RepoConfig::parse(r#"{}"#);
@@ -627,6 +630,7 @@ mod tests {
         ));
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn ignore_unstable_skips_prerelease_when_current_stable() {
         let cfg = RepoConfig::parse(r#"{"ignoreUnstable": true}"#);
@@ -658,6 +662,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn ignore_unstable_allows_prerelease_when_current_is_prerelease() {
         let cfg = RepoConfig::parse(r#"{"ignoreUnstable": true}"#);
@@ -678,6 +683,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn match_registry_urls_fires_via_pipeline_context() {
         // matchRegistryUrls: ["https://registry.npmjs.org"] should match npm deps
@@ -699,6 +705,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn max_major_increment_skips_oversized_jump() {
         let cfg = RepoConfig::parse(r#"{"maxMajorIncrement": 1}"#);
@@ -730,6 +737,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn max_major_increment_default_allows_all() {
         let cfg = RepoConfig::parse(r#"{}"#);
@@ -750,6 +758,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn ignore_unstable_false_allows_prerelease() {
         let cfg = RepoConfig::parse(r#"{"ignoreUnstable": false}"#);
@@ -772,6 +781,7 @@ mod tests {
 
     // ── updateNotScheduled + global schedule gate tests ───────────────────────
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn update_not_scheduled_false_blocks_outside_schedule() {
         // schedule: ["on monday"] with updateNotScheduled: false blocks all updates
@@ -796,6 +806,7 @@ mod tests {
         let _ = &report.files[0].deps[0].status;
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn update_not_scheduled_true_default_does_not_block_outside_schedule() {
         // With updateNotScheduled: true (default), schedule only gates automerge,
@@ -819,6 +830,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn empty_global_schedule_does_not_block() {
         // No schedule set → no global blocking regardless of updateNotScheduled.
@@ -842,6 +854,7 @@ mod tests {
 
     // ── automergeSchedule gate tests ──────────────────────────────────────────
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn no_automerge_schedule_preserves_automerge_flag() {
         // Without automergeSchedule, automerge: true from packageRules should pass through.
@@ -863,6 +876,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn automerge_false_is_never_gated_by_schedule() {
         // automerge: false should stay false regardless of automergeSchedule.
@@ -884,6 +898,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn replacement_name_sets_update_type_to_replacement() {
         let cfg = RepoConfig::parse(
@@ -909,6 +924,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pipeline_utils behavior test
     #[test]
     fn versioning_override_emitted_in_output() {
         let cfg = RepoConfig::parse(

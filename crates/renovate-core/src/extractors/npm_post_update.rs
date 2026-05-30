@@ -174,6 +174,7 @@ pub fn determine_lock_file_dirs(
 mod tests {
     use super::*;
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn parse_package_json_basic() {
         let pj = PackageJson::parse(
@@ -183,6 +184,7 @@ mod tests {
         assert_eq!(pj.engines.unwrap().node.unwrap(), ">=18");
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn parse_package_json_volta() {
         let pj = PackageJson::parse(
@@ -195,6 +197,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn parse_package_json_corepack() {
         let pj = PackageJson::parse(
@@ -207,6 +210,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn parse_package_json_pnpm_corepack() {
         let pj = PackageJson::parse(
@@ -219,6 +223,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn parse_corepack_version_yarn() {
         assert_eq!(
@@ -227,6 +232,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn parse_corepack_version_npm() {
         assert_eq!(
@@ -235,11 +241,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn parse_corepack_version_mismatch() {
         assert_eq!(parse_corepack_version("yarn@4.1.0", "npm"), None);
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn determine_lock_file_dirs_from_upgrades() {
         let upgrades = vec![Upgrade {
@@ -250,6 +258,7 @@ mod tests {
         assert_eq!(dirs, vec![PathBuf::from("packages/foo")]);
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn determine_lock_file_dirs_from_root() {
         let upgrades = vec![Upgrade {
@@ -260,6 +269,7 @@ mod tests {
         assert_eq!(dirs, vec![PathBuf::from("")]);
     }
 
+    // Rust-specific: npm_post_update behavior test
     #[test]
     fn determine_lock_file_dirs_dedupes() {
         let upgrades = vec![

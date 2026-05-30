@@ -721,6 +721,7 @@ mod tests {
 
     // ── Legacy extract() tests ─────────────────────────────────────────────────
 
+    // Rust-specific: renovate_config_presets behavior test
     #[test]
     fn extracts_github_preset_with_tag() {
         let content = r#"{"extends": ["github>owner/renovate-config#v1.2.3", "config:base"]}"#;
@@ -733,6 +734,7 @@ mod tests {
         assert!(d.skip_reason.is_none());
     }
 
+    // Rust-specific: renovate_config_presets behavior test
     #[test]
     fn skips_preset_without_tag() {
         let content = r#"{"extends": ["github>owner/renovate-config"]}"#;
@@ -744,6 +746,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: renovate_config_presets behavior test
     #[test]
     fn extracts_gitlab_preset() {
         let content = r#"{"extends": ["gitlab>company/configs#2.0"]}"#;
@@ -753,6 +756,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "2.0");
     }
 
+    // Rust-specific: renovate_config_presets behavior test
     #[test]
     fn ignores_internal_presets() {
         let content = r#"{"extends": ["config:base", ":automergeMinor"]}"#;

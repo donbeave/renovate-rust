@@ -212,6 +212,7 @@ mod tests {
         assert_eq!(second.dep_name, "github.com/grafana/jsonnet-libs");
     }
 
+    // Rust-specific: jsonnet_bundler behavior test
     #[test]
     fn dep_name_includes_subdir() {
         assert_eq!(
@@ -223,6 +224,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: jsonnet_bundler behavior test
     #[test]
     fn dep_name_without_subdir() {
         assert_eq!(

@@ -213,6 +213,7 @@ providers:
         assert_eq!(exporter.dep_type, "exporters");
     }
 
+    // Rust-specific: ocb behavior test
     #[test]
     fn extracts_module_sections() {
         let deps = extract(FULL_EXAMPLE);
@@ -291,6 +292,7 @@ providers:
         assert!(extract(content).is_empty());
     }
 
+    // Rust-specific: ocb behavior test
     #[test]
     fn handles_missing_version() {
         let content = "receivers:\n  - gomod: go.opentelemetry.io/collector/receiver/foo\n";

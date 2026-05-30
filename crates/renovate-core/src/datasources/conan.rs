@@ -110,6 +110,7 @@ fn cmp_semver(a: &str, b: &str) -> std::cmp::Ordering {
 mod tests {
     use super::*;
 
+    // Rust-specific: conan behavior test
     #[test]
     fn parses_config_yml() {
         let yaml = "versions:\n  \"1.2.11\":\n    folder: all\n  \"1.3.0\":\n    folder: all\n";
@@ -120,6 +121,7 @@ mod tests {
         assert_eq!(versions, vec!["1.2.11", "1.3.0"]);
     }
 
+    // Rust-specific: conan behavior test
     #[test]
     fn cmp_semver_basic() {
         use std::cmp::Ordering::*;

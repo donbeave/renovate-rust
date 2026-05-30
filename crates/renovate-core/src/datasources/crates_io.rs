@@ -600,31 +600,37 @@ mod tests {
 
     // ── index_path ────────────────────────────────────────────────────────────
 
+    // Rust-specific: crates_io behavior test
     #[test]
     fn index_path_len_1() {
         assert_eq!(index_path("a"), "1/a");
     }
 
+    // Rust-specific: crates_io behavior test
     #[test]
     fn index_path_len_2() {
         assert_eq!(index_path("ab"), "2/ab");
     }
 
+    // Rust-specific: crates_io behavior test
     #[test]
     fn index_path_len_3() {
         assert_eq!(index_path("foo"), "3/f/foo");
     }
 
+    // Rust-specific: crates_io behavior test
     #[test]
     fn index_path_len_4() {
         assert_eq!(index_path("serde"), "se/rd/serde");
     }
 
+    // Rust-specific: crates_io behavior test
     #[test]
     fn index_path_long_name() {
         assert_eq!(index_path("tokio"), "to/ki/tokio");
     }
 
+    // Rust-specific: crates_io behavior test
     #[test]
     fn index_path_is_lowercase() {
         assert_eq!(index_path("Serde"), "se/rd/serde");
@@ -644,6 +650,7 @@ mod tests {
 
     // ── parse_index_body ─────────────────────────────────────────────────────
 
+    // Rust-specific: crates_io behavior test
     #[test]
     fn parses_newline_delimited_records() {
         let body = r#"{"name":"serde","vers":"1.0.0","deps":[],"cksum":"abc","features":{},"yanked":false}
@@ -657,6 +664,7 @@ mod tests {
         assert!(records[2].yanked);
     }
 
+    // Rust-specific: crates_io behavior test
     #[test]
     fn ignores_blank_lines() {
         let body = "\n{\"name\":\"x\",\"vers\":\"0.1.0\",\"deps\":[],\"cksum\":\"\",\"features\":{},\"yanked\":false}\n\n";

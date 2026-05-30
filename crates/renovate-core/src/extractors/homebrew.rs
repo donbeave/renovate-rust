@@ -729,6 +729,7 @@ end"#;
         assert!(extract(content).is_none());
     }
 
+    // Rust-specific: homebrew behavior test
     #[test]
     fn empty_content_returns_none() {
         assert!(extract("").is_none());

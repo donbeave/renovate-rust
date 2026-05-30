@@ -306,6 +306,7 @@ mod tests {
 
     // ── normalize_name ────────────────────────────────────────────────────────
 
+    // Rust-specific: pypi behavior test
     #[test]
     fn normalize_underscores() {
         assert_eq!(normalize_name("my_package"), "my-package");
@@ -313,6 +314,7 @@ mod tests {
         assert_eq!(normalize_name("Pillow"), "pillow");
     }
 
+    // Rust-specific: pypi behavior test
     #[test]
     fn normalize_consecutive_separators() {
         assert_eq!(normalize_name("some--double"), "some-double");

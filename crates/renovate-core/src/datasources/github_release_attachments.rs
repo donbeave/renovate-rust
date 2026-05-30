@@ -326,6 +326,7 @@ mod tests {
         assert!(results.is_empty());
     }
 
+    // Rust-specific: github_release_attachments behavior test
     #[test]
     fn datasource_id_is_correct() {
         assert_eq!(DATASOURCE_ID, "github-release-attachments");

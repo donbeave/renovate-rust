@@ -130,6 +130,7 @@ pub fn clear() {
 mod tests {
     use super::*;
 
+    // Rust-specific: throttle behavior test
     #[test]
     fn set_and_get_concurrency_rules() {
         let rules = vec![ConcurrencyLimitRule {

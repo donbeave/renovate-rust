@@ -92,6 +92,7 @@ pub fn detect_pnpm_workspace(has_workspace_yaml: bool) -> bool {
 mod tests {
     use super::*;
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn get_constraint_from_lock_file_v9() {
         assert_eq!(
@@ -100,6 +101,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn get_constraint_from_lock_file_v6() {
         assert_eq!(
@@ -108,11 +110,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn get_constraint_from_lock_file_old() {
         assert_eq!(get_constraint_from_lock_file(4.0), None);
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn get_pnpm_constraint_from_upgrades_found() {
         let upgrades = vec![Upgrade {
@@ -126,6 +130,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn get_pnpm_constraint_from_upgrades_not_found() {
         assert_eq!(
@@ -134,6 +139,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn pnpm_constraint_from_pkg_json() {
         let pj = PackageJson::parse(
@@ -146,6 +152,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn build_pnpm_install_cmd_basic() {
         assert_eq!(
@@ -154,6 +161,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn build_pnpm_install_cmd_all_flags() {
         assert_eq!(
@@ -169,11 +177,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn detect_pnpm_workspace_true() {
         assert!(detect_pnpm_workspace(true));
     }
 
+    // Rust-specific: pnpm behavior test
     #[test]
     fn detect_pnpm_workspace_false() {
         assert!(!detect_pnpm_workspace(false));

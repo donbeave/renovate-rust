@@ -138,6 +138,7 @@ mod tests {
         assert!(!is_fatal_status(StatusCode::NOT_FOUND));
     }
 
+    // Rust-specific: gitlab_releases behavior test
     #[test]
     fn rfc3339_utc_conversion() {
         assert_eq!(

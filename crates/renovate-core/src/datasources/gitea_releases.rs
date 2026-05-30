@@ -312,6 +312,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: gitea_releases behavior test
     #[test]
     fn get_api_url_strips_api_v1_suffix() {
         assert_eq!(

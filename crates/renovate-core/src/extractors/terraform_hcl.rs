@@ -195,11 +195,13 @@ fn hcl_value_to_json(v: &hcl::Value) -> serde_json::Value {
 mod tests {
     use super::*;
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_hcl_returns_none_for_invalid() {
         assert!(parse_hcl("{{{invalid").is_none());
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_hcl_extracts_required_provider() {
         let hcl = r#"
@@ -219,6 +221,7 @@ mod tests {
         assert!(rp.contains_key("aws"));
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_hcl_extracts_module() {
         let hcl = r#"
@@ -235,6 +238,7 @@ mod tests {
         assert_eq!(vpc.version.as_deref(), Some("~> 5.0"));
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_hcl_extracts_provider() {
         let hcl = r#"
@@ -251,6 +255,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_json_extracts_module() {
         let json = r#"{
@@ -266,11 +271,13 @@ mod tests {
         assert!(modules.contains_key("vpc"));
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_json_returns_none_for_invalid() {
         assert!(parse_json("not json").is_none());
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_hcl_empty_file() {
         let def = parse_hcl("").unwrap();
@@ -278,6 +285,7 @@ mod tests {
         assert!(def.module.is_none());
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_hcl_required_version() {
         let hcl = r#"
@@ -293,6 +301,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_hcl_helm_release_resource() {
         let hcl = r#"
@@ -311,6 +320,7 @@ mod tests {
         assert_eq!(helm["nginx"].chart.as_deref(), Some("ingress-nginx"));
     }
 
+    // Rust-specific: terraform_hcl behavior test
     #[test]
     fn parse_hcl_tfe_workspace_resource() {
         let hcl = r#"

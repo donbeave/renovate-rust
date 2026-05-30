@@ -2119,6 +2119,7 @@ usage = "2.1.1"
         assert_eq!(deps[0].skip_reason, Some(AsdfSkipReason::UnsupportedTool));
     }
 
+    // Rust-specific: mise behavior test
     #[test]
     fn ignores_non_tools_sections() {
         let content = "[settings]\nsomething = \"value\"\n[tools]\nnode = \"18\"\n";

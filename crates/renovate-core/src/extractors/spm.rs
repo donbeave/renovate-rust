@@ -1087,6 +1087,7 @@ mod tests {
 
     // ── Legacy non-ported tests ───────────────────────────────────────────────
 
+    // Rust-specific: spm behavior test
     #[test]
     fn from_version_legacy() {
         let content = r#"
@@ -1103,6 +1104,7 @@ let package = Package(
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: spm behavior test
     #[test]
     fn non_github_url_returns_git_tags_legacy() {
         let content = r#"
@@ -1117,6 +1119,7 @@ let package = Package(
         assert_eq!(deps[0].skip_reason, Some(SpmSkipReason::NonGitHost));
     }
 
+    // Rust-specific: spm behavior test
     #[test]
     fn gitlab_url_legacy() {
         let content = r#"
@@ -1133,6 +1136,7 @@ let package = Package(
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: spm behavior test
     #[test]
     fn no_packages_returns_empty_legacy() {
         let content = "// just a comment\nlet x = 1\n";

@@ -221,6 +221,7 @@ pub async fn generate_install_commands(
 mod tests {
     use super::*;
 
+    // Rust-specific: containerbase behavior test
     #[test]
     fn get_tool_config_node() {
         let config = get_tool_config("node").unwrap();
@@ -228,11 +229,13 @@ mod tests {
         assert_eq!(config.package_name, "containerbase/node-prebuild");
     }
 
+    // Rust-specific: containerbase behavior test
     #[test]
     fn get_tool_config_unknown() {
         assert!(get_tool_config("unknown-tool").is_none());
     }
 
+    // Rust-specific: containerbase behavior test
     #[test]
     fn supports_dynamic_install_known() {
         assert!(supports_dynamic_install("node"));
@@ -241,6 +244,7 @@ mod tests {
         assert!(supports_dynamic_install("rust"));
     }
 
+    // Rust-specific: containerbase behavior test
     #[test]
     fn supports_dynamic_install_unknown() {
         assert!(!supports_dynamic_install("foobar"));

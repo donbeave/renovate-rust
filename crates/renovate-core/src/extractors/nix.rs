@@ -440,6 +440,7 @@ mod tests {
   "version": 7
 }"#;
 
+    // Rust-specific: nix behavior test
     #[test]
     fn extracts_root_inputs() {
         let deps = extract(SAMPLE_LOCK);
@@ -491,6 +492,7 @@ mod tests {
         assert!(extract_package_file(Some(""), Some(EMPTY_ROOT_LOCK)).is_none());
     }
 
+    // Rust-specific: nix behavior test
     #[test]
     fn skips_transitive() {
         let deps = extract(SAMPLE_LOCK);

@@ -408,6 +408,7 @@ numpy = ">=1.26"
         assert!(extract_from_pyproject(content).is_empty());
     }
 
+    // Rust-specific: pixi behavior test
     #[test]
     fn git_dep_has_unspecified_skip() {
         let content = r#"

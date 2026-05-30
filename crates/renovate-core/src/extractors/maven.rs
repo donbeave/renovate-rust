@@ -2425,6 +2425,7 @@ mod tests {
         assert!(cnb_deps(&deps).is_empty());
     }
 
+    // Rust-specific: maven behavior test
     #[test]
     fn dep_type_as_renovate_str() {
         // Renovate uses scope-based dep types for Maven (compile, test, etc.)
@@ -2442,6 +2443,7 @@ mod tests {
         assert_eq!(MavenDepType::Profile.as_renovate_str(), "compile");
     }
 
+    // Rust-specific: maven behavior test
     #[test]
     fn renovate_dep_type_uses_scope() {
         let dep = MavenExtractedDep {
@@ -2461,6 +2463,7 @@ mod tests {
         assert_eq!(dep.renovate_dep_type(), "test");
     }
 
+    // Rust-specific: maven behavior test
     #[test]
     fn renovate_dep_type_defaults_to_compile_without_scope() {
         let dep = MavenExtractedDep {
@@ -2899,6 +2902,8 @@ mod tests {
     }
 
     // Verify file_replace_position tracking matches known fixture positions.
+
+    // Rust-specific: maven behavior test
     #[test]
     fn extract_tracks_file_replace_position() {
         let deps = extract(SIMPLE_POM_FULL).unwrap();

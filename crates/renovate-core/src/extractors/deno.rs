@@ -754,6 +754,7 @@ mod tests {
 
     // --- post-processing tests ---
 
+    // Rust-specific: deno behavior test
     #[test]
     fn parse_deno_lock_valid() {
         let content = r#"{"version":5,"packages":{"jsr:@scope/dep1@1.0.0":"hash1","npm:express@4.18.2":"hash2"}}"#;
@@ -762,22 +763,26 @@ mod tests {
         assert!(!lock.locked_versions.is_empty());
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn parse_deno_lock_old_version_rejected() {
         let content = r#"{"version":3}"#;
         assert!(parse_deno_lock(content).is_none());
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn parse_deno_lock_invalid_json_rejected() {
         assert!(parse_deno_lock("not json").is_none());
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn parse_deno_lock_no_version_rejected() {
         assert!(parse_deno_lock(r#"{"packages":{}}"#).is_none());
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn parse_deno_lock_with_remote() {
         let content = r#"{"version":5,"remote":{"https://deno.land/std@0.223.0/fs/mod.ts":"hash1"}}"#;
@@ -785,6 +790,7 @@ mod tests {
         assert!(lock.remote_versions.contains("https://deno.land/std@0.223.0/fs/mod.ts"));
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn parse_deno_lock_with_redirects() {
         let content = r#"{"version":5,"redirects":{"https://deno.land/std":"https://deno.land/std@0.224.0"}}"#;
@@ -795,6 +801,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn get_locked_version_npm() {
         let lock = DenoLockFile {
@@ -815,6 +822,7 @@ mod tests {
         assert_eq!(get_locked_version(&dep, &lock), Some("hash1".to_owned()));
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn get_locked_version_not_found() {
         let lock = DenoLockFile::default();
@@ -828,6 +836,7 @@ mod tests {
         assert!(get_locked_version(&dep, &lock).is_none());
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn normalize_workspace_distributes_lock_files() {
         let mut pkgs = vec![
@@ -851,6 +860,7 @@ mod tests {
         assert!(pkgs[1].lock_files.contains(&"deno.lock".to_owned()));
     }
 
+    // Rust-specific: deno behavior test
     #[test]
     fn apply_locked_versions_basic() {
         let lock_content = r#"{"version":5,"packages":{"npm:express@4.18.2":"4.18.2"}}"#;

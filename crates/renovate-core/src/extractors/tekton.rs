@@ -139,6 +139,7 @@ spec:
         ));
     }
 
+    // Rust-specific: tekton behavior test
     #[test]
     fn returns_empty_for_non_tekton() {
         let content = "apiVersion: apps/v1\nkind: Deployment\n";

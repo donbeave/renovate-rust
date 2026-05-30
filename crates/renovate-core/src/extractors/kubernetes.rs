@@ -303,6 +303,7 @@ spec:
         assert_eq!(gcr.current_value, "1.0");
     }
 
+    // Rust-specific: kubernetes behavior test
     #[test]
     fn skips_digest_pinned() {
         let deps = extract(DEPLOYMENT);
@@ -312,6 +313,7 @@ spec:
         assert!(has_pinned);
     }
 
+    // Rust-specific: kubernetes behavior test
     #[test]
     fn skips_latest_tag() {
         let deps = extract(DEPLOYMENT);

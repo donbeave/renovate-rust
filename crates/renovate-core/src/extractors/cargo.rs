@@ -1593,6 +1593,7 @@ pub fn bump_package_version(
 mod range_update_tests {
     use super::*;
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn get_range_strategy_auto_default() {
         assert_eq!(
@@ -1601,6 +1602,7 @@ mod range_update_tests {
         );
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn get_range_strategy_auto_with_lt() {
         assert_eq!(
@@ -1609,6 +1611,7 @@ mod range_update_tests {
         );
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn get_range_strategy_non_auto_passthrough() {
         assert_eq!(
@@ -1617,6 +1620,7 @@ mod range_update_tests {
         );
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn update_locked_already_updated() {
         let config = UpdateLockedConfig {
@@ -1629,6 +1633,7 @@ mod range_update_tests {
         assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::AlreadyUpdated);
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn update_locked_unsupported() {
         let config = UpdateLockedConfig {
@@ -1641,6 +1646,7 @@ mod range_update_tests {
         assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::Unsupported);
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn update_locked_no_content() {
         let config = UpdateLockedConfig {
@@ -1653,6 +1659,7 @@ mod range_update_tests {
         assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::UpdateFailed);
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn bump_package_version_patch() {
         let content = "[package]\nname = \"foo\"\nversion = \"1.2.3\"\n";
@@ -1660,6 +1667,7 @@ mod range_update_tests {
         assert!(result.bumped_content.contains("version = \"1.2.4\""));
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn bump_package_version_minor() {
         let content = "[package]\nname = \"foo\"\nversion = \"1.2.3\"\n";
@@ -1667,6 +1675,7 @@ mod range_update_tests {
         assert!(result.bumped_content.contains("version = \"1.3.0\""));
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn bump_package_version_major() {
         let content = "[package]\nname = \"foo\"\nversion = \"1.2.3\"\n";
@@ -1674,6 +1683,7 @@ mod range_update_tests {
         assert!(result.bumped_content.contains("version = \"2.0.0\""));
     }
 
+    // Rust-specific: cargo behavior test
     #[test]
     fn bump_package_version_invalid_semver_noop() {
         let content = "[package]\nname = \"foo\"\nversion = \"not-semver\"\n";

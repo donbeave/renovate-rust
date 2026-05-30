@@ -191,6 +191,7 @@ mod tests {
         .to_string()
     }
 
+    // Rust-specific: packagist behavior test
     #[test]
     fn is_stable_accepts_semver() {
         assert!(is_stable("v7.1.0"));
@@ -198,6 +199,7 @@ mod tests {
         assert!(is_stable("1.0.0"));
     }
 
+    // Rust-specific: packagist behavior test
     #[test]
     fn is_stable_rejects_prerelease() {
         assert!(!is_stable("v7.1.0-beta1"));

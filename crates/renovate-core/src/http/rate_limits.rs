@@ -112,6 +112,7 @@ fn host_matches(host: &str, pattern: &str) -> bool {
 mod tests {
     use super::*;
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn extract_host_from_url() {
         assert_eq!(
@@ -125,6 +126,7 @@ mod tests {
         assert_eq!(extract_host("not-a-url"), None);
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn concurrency_npmjs() {
         let limit =
@@ -132,6 +134,7 @@ mod tests {
         assert_eq!(limit, Some(999));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn concurrency_repology() {
         let limit =
@@ -139,6 +142,7 @@ mod tests {
         assert_eq!(limit, Some(1));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn concurrency_default() {
         let limit =
@@ -146,6 +150,7 @@ mod tests {
         assert_eq!(limit, Some(16));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn throttle_rubygems() {
         let interval =
@@ -153,6 +158,7 @@ mod tests {
         assert_eq!(interval, Some(125));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn throttle_crates_io() {
         let interval =
@@ -160,6 +166,7 @@ mod tests {
         assert_eq!(interval, Some(1000));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn throttle_none_for_unknown() {
         let interval =
@@ -167,24 +174,28 @@ mod tests {
         assert!(interval.is_none());
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn host_matches_exact() {
         assert!(host_matches("api.github.com", "api.github.com"));
         assert!(!host_matches("api.github.com", "github.com"));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn host_matches_wildcard() {
         assert!(host_matches("api.github.com", "*.github.com"));
         assert!(!host_matches("github.com", "*.github.com"));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn host_matches_dot_prefix() {
         assert!(host_matches("api.github.com", ".github.com"));
         assert!(host_matches("github.com", ".github.com"));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn concurrency_rule_limits_min_with_default() {
         let rules = vec![ConcurrencyLimitRule {
@@ -196,6 +207,7 @@ mod tests {
         assert_eq!(limit, Some(5));
     }
 
+    // Rust-specific: rate_limits behavior test
     #[test]
     fn throttle_rule_limits_max_with_default() {
         let rules = vec![ThrottleLimitRule {

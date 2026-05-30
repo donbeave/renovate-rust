@@ -172,6 +172,7 @@ impl std::fmt::Debug for ArtifactRegistry {
 mod tests {
     use super::*;
 
+    // Rust-specific: artifacts behavior test
     #[test]
     fn file_change_addition() {
         let fc = FileChange::addition("Cargo.lock", "contents here");
@@ -180,6 +181,7 @@ mod tests {
         assert_eq!(fc.contents.as_deref(), Some("contents here"));
     }
 
+    // Rust-specific: artifacts behavior test
     #[test]
     fn file_change_deletion() {
         let fc = FileChange::deletion("Cargo.lock");
@@ -187,6 +189,7 @@ mod tests {
         assert!(fc.contents.is_none());
     }
 
+    // Rust-specific: artifacts behavior test
     #[test]
     fn artifact_result_file_change() {
         let r = ArtifactResult::file_change("Cargo.lock", "new contents");
@@ -194,6 +197,7 @@ mod tests {
         assert!(r.artifact_error.is_none());
     }
 
+    // Rust-specific: artifacts behavior test
     #[test]
     fn artifact_result_error() {
         let r = ArtifactResult::error("Cargo.lock", "build failed");
@@ -214,6 +218,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
+    // Rust-specific: artifacts behavior test
     #[test]
     fn registry_register_and_get() {
         let mut reg = ArtifactRegistry::new();
@@ -222,6 +227,7 @@ mod tests {
         assert!(reg.get("npm").is_none());
     }
 
+    // Rust-specific: artifacts behavior test
     #[test]
     fn updated_dep_serialization() {
         let dep = UpdatedDep {

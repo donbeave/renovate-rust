@@ -139,6 +139,7 @@ pub fn rules_for_preset(preset_name: &str) -> Vec<PackageRule> {
 mod tests {
     use super::*;
 
+    // Rust-specific: replacements behavior test
     #[test]
     fn replacements_all_names_returns_non_empty_list() {
         let names = replacements_all_names();
@@ -152,6 +153,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: replacements behavior test
     #[test]
     fn babel_eslint_replacement_parsed() {
         let rules = rules_for_preset("babel-eslint-to-eslint-parser");
@@ -172,12 +174,14 @@ mod tests {
         );
     }
 
+    // Rust-specific: replacements behavior test
     #[test]
     fn unknown_replacement_returns_empty() {
         let rules = rules_for_preset("nonexistent-replacement");
         assert!(rules.is_empty(), "unknown preset must return empty vec");
     }
 
+    // Rust-specific: replacements behavior test
     #[test]
     fn replacements_all_count_is_reasonable() {
         let names = replacements_all_names();

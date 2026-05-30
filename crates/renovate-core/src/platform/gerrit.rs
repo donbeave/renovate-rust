@@ -391,6 +391,7 @@ mod tests {
         GerritClient::new(server_uri, "testuser", "testpass").unwrap()
     }
 
+    // Rust-specific: gerrit behavior test
     #[test]
     fn auth_header_uses_basic_encoding() {
         let client = GerritClient::new("http://gerrit.example.com", "user", "pass").unwrap();
@@ -403,6 +404,7 @@ mod tests {
         assert_eq!(String::from_utf8(decoded).unwrap(), "user:pass");
     }
 
+    // Rust-specific: gerrit behavior test
     #[test]
     fn strip_gerrit_json_prefix_removes_magic() {
         let body = ")]}'\n{\"id\": \"test\"}";
@@ -410,6 +412,7 @@ mod tests {
         assert_eq!(result.id, Some("test".to_owned()));
     }
 
+    // Rust-specific: gerrit behavior test
     #[test]
     fn strip_gerrit_json_prefix_handles_no_prefix() {
         let body = "{\"id\": \"test\"}";

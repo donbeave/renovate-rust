@@ -140,6 +140,7 @@ setup(
         assert!(deps.iter().any(|d| d.name == "flask"));
     }
 
+    // Rust-specific: pip_setup behavior test
     #[test]
     fn extracts_tests_require() {
         let content = r#"
@@ -152,6 +153,7 @@ setup(
         assert!(deps.iter().any(|d| d.name == "pytest"));
     }
 
+    // Rust-specific: pip_setup behavior test
     #[test]
     fn extracts_extras_require() {
         let content = r#"
@@ -176,11 +178,13 @@ setup(
         assert!(extract("setup(name='foo')").is_empty());
     }
 
+    // Rust-specific: pip_setup behavior test
     #[test]
     fn empty_list_returns_empty() {
         assert!(extract("setup(install_requires=[])").is_empty());
     }
 
+    // Rust-specific: pip_setup behavior test
     #[test]
     fn double_quoted_strings() {
         let content = r#"setup(install_requires=["requests>=2.25"])"#;

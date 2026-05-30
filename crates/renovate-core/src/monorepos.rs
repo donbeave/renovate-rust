@@ -242,6 +242,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: monorepos behavior test
     #[test]
     fn all_monorepo_group_names_returns_non_empty() {
         let names = all_monorepo_group_names();
@@ -252,6 +253,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: monorepos behavior test
     #[test]
     fn pattern_group_angularmaterial_resolved() {
         let rules = rules_for_monorepo("angularmaterial");
@@ -269,6 +271,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: monorepos behavior test
     #[test]
     fn org_group_lodash_resolved_with_source_url() {
         let rules = rules_for_monorepo("lodash");
@@ -280,6 +283,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: monorepos behavior test
     #[test]
     fn group_name_monorepo_suffix_strips_correctly() {
         // group:angularmaterialMonorepo → key "angularmaterial"
@@ -291,12 +295,14 @@ mod tests {
         );
     }
 
+    // Rust-specific: monorepos behavior test
     #[test]
     fn unknown_monorepo_returns_empty() {
         let rules = rules_for_monorepo("nonexistent-repo");
         assert!(rules.is_empty(), "unknown monorepo must return empty vec");
     }
 
+    // Rust-specific: monorepos behavior test
     #[test]
     fn monorepo_count_is_reasonable() {
         let names = all_monorepo_group_names();

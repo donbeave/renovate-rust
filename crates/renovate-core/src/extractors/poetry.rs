@@ -833,6 +833,7 @@ locallib = {path = "../locallib", develop = true}
         assert_eq!(deps[0].skip_reason, Some(PoetrySkipReason::LocalPath));
     }
 
+    // Rust-specific: poetry behavior test
     #[test]
     fn url_source_skipped() {
         let content = r#"

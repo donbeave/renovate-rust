@@ -988,12 +988,14 @@ mod tests {
         }
     }
 
+    // Rust-specific: config behavior test
     #[test]
     fn binary_source_deserializes_global_values() {
         let config: GlobalConfig = serde_json::from_str(r#"{"binarySource":"hermit"}"#).unwrap();
         assert_eq!(config.binary_source, Some(BinarySource::Hermit));
     }
 
+    // Rust-specific: config behavior test
     #[test]
     fn binary_source_auto_deserializes_to_global() {
         let config: GlobalConfig = serde_json::from_str(r#"{"binarySource":"auto"}"#).unwrap();

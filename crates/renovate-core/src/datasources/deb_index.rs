@@ -151,6 +151,7 @@ Filename: pool/main/c/curl/curl_7.81.0-1ubuntu1_amd64.deb
 Size: 345678
 ";
 
+    // Rust-specific: deb_index behavior test
     #[test]
     fn parse_packages_file_extracts_packages() {
         let packages = parse_packages_file(PACKAGES_CONTENT);
@@ -167,12 +168,14 @@ Size: 345678
         );
     }
 
+    // Rust-specific: deb_index behavior test
     #[test]
     fn parse_packages_file_empty_input() {
         let packages = parse_packages_file("");
         assert!(packages.is_empty());
     }
 
+    // Rust-specific: deb_index behavior test
     #[test]
     fn parse_packages_file_single_entry() {
         let content = "Package: vim\nVersion: 9.0.1000\nArchitecture: amd64\n";
@@ -183,6 +186,7 @@ Size: 345678
         assert_eq!(vim[0].version, "9.0.1000");
     }
 
+    // Rust-specific: deb_index behavior test
     #[test]
     fn parse_packages_file_skips_incomplete_entries() {
         let content = "Package: incomplete\n\nPackage: complete\nVersion: 1.0\n";
@@ -257,6 +261,7 @@ Size: 345678
         assert!(result.is_err());
     }
 
+    // Rust-specific: deb_index behavior test
     #[test]
     fn datasource_id_is_correct() {
         assert_eq!(DATASOURCE_ID, "deb");

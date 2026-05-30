@@ -205,6 +205,7 @@ mod tests {
 
     use super::*;
 
+    // Rust-specific: gradle_version behavior test
     #[test]
     fn version_sort_correctness() {
         let mut versions = vec!["8.4".to_owned(), "8.10".to_owned(), "7.6.1".to_owned()];
@@ -212,6 +213,7 @@ mod tests {
         assert_eq!(versions, vec!["8.10", "8.4", "7.6.1"]);
     }
 
+    // Rust-specific: gradle_version behavior test
     #[test]
     fn git_ref_calculation() {
         assert_eq!(get_git_ref("8.1.2"), "v8.1.2");

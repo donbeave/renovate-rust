@@ -254,6 +254,7 @@ mod tests {
         assert!(extract("").is_empty());
     }
 
+    // Rust-specific: maven_wrapper behavior test
     #[test]
     fn extracts_maven_and_wrapper_versions() {
         let content = r#"
@@ -272,6 +273,7 @@ wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-w
         );
     }
 
+    // Rust-specific: maven_wrapper behavior test
     #[test]
     fn no_version_key_skipped() {
         let content = "distributionUrl=https://example.com/no-version-here\n";

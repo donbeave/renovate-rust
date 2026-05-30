@@ -235,12 +235,14 @@ var Releases = []*Release{
         assert_eq!(releases[1].version, "1.17.5");
     }
 
+    // Rust-specific: golang_version behavior test
     #[test]
     fn parse_date_field_works() {
         let result = parse_date_field("Date: Date{2022, 4, 7},");
         assert_eq!(result, Some("2022-04-07T00:00:00.000Z".into()));
     }
 
+    // Rust-specific: golang_version behavior test
     #[test]
     fn parse_version_field_works() {
         let result = parse_version_field("Version: Version{1, 18, 1},");
@@ -266,6 +268,7 @@ var Releases = []*Release{
         assert!(err.to_string().contains("no version"), "unexpected: {err}");
     }
 
+    // Rust-specific: golang_version behavior test
     #[test]
     fn error_on_zero_releases_extracted() {
         let input = r#"var Releases = []*Release{

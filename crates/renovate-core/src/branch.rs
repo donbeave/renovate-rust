@@ -1155,18 +1155,21 @@ mod tests {
 
     // ── sanitize_dep_name ────────────────────────────────────────────────────
 
+    // Rust-specific: branch behavior test
     #[test]
     fn sanitize_plain_name() {
         assert_eq!(sanitize_dep_name("lodash"), "lodash");
         assert_eq!(sanitize_dep_name("react"), "react");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn sanitize_scoped_npm_package() {
         assert_eq!(sanitize_dep_name("@angular/core"), "angular-core");
         assert_eq!(sanitize_dep_name("@aws-sdk/client-s3"), "aws-sdk-client-s3");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn sanitize_types_prefix_stripped() {
         assert_eq!(sanitize_dep_name("@types/lodash"), "lodash");
@@ -1184,6 +1187,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn sanitize_go_module() {
         assert_eq!(
@@ -1192,17 +1196,20 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn sanitize_colon_replaced() {
         assert_eq!(sanitize_dep_name("foo:bar"), "foo-bar");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn sanitize_consecutive_dashes_collapsed() {
         // Multiple special chars in sequence should collapse to one dash.
         assert_eq!(sanitize_dep_name("@org/foo/bar"), "org-foo-bar");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn sanitize_lowercased() {
         assert_eq!(sanitize_dep_name("ReactJS"), "reactjs");
@@ -1211,6 +1218,7 @@ mod tests {
 
     // ── branch_topic ─────────────────────────────────────────────────────────
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_topic_default_no_minor_component() {
         // Default: patch/minor updates share {dep}-{major}.x branch.
@@ -1224,6 +1232,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_topic_separate_minor_patch_for_patch_update() {
         assert_eq!(
@@ -1242,6 +1251,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_topic_separate_minor_patch_for_minor_not_applied() {
         // separateMinorPatch only adds minor component for patch updates.
@@ -1258,6 +1268,7 @@ mod tests {
         assert_eq!(branch_name("renovate/", "", &topic), "renovate/lodash-4.x");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_topic_separate_multiple_minor_for_minor_update() {
         // separateMultipleMinor adds minor component for minor updates.
@@ -1267,6 +1278,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_topic_separate_multiple_minor_not_applied_to_patch() {
         // separateMultipleMinor does not affect patch updates.
@@ -1276,6 +1288,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_topic_scoped_package() {
         assert_eq!(
@@ -1284,6 +1297,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_topic_major_update() {
         assert_eq!(
@@ -1294,21 +1308,25 @@ mod tests {
 
     // ── group_branch_topic ────────────────────────────────────────────────────
 
+    // Rust-specific: branch behavior test
     #[test]
     fn group_branch_topic_spaces_to_hyphens() {
         assert_eq!(group_branch_topic("All Dependencies"), "all-dependencies");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn group_branch_topic_special_chars_stripped() {
         assert_eq!(group_branch_topic("@angular/**"), "angular");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn group_branch_topic_no_trailing_hyphen() {
         assert_eq!(group_branch_topic("Python packages"), "python-packages");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn group_branch_topic_already_clean() {
         assert_eq!(group_branch_topic("lodash"), "lodash");
@@ -1338,6 +1356,7 @@ mod tests {
 
     // ── branch_name ──────────────────────────────────────────────────────────
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_name_default_prefix() {
         assert_eq!(
@@ -1346,11 +1365,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_name_custom_prefix() {
         assert_eq!(branch_name("deps/", "", "react-18.x"), "deps/react-18.x");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_name_with_additional_prefix() {
         assert_eq!(
@@ -1359,6 +1380,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn branch_name_roundtrip() {
         let topic = branch_topic("@angular/core", 17, 0, false, false, false, false);
@@ -1489,6 +1511,7 @@ mod tests {
 
     // ── pr_title ─────────────────────────────────────────────────────────────
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_plain_minor() {
         assert_eq!(
@@ -1497,6 +1520,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_plain_major() {
         assert_eq!(
@@ -1505,6 +1529,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_semantic_minor() {
         let cfg = PrTitleConfig {
@@ -1517,6 +1542,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_semantic_major_breaking() {
         let cfg = PrTitleConfig {
@@ -1529,6 +1555,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_semantic_disabled() {
         // "disabled" semantic_commits → no prefix
@@ -1542,6 +1569,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_scoped_package() {
         let cfg = PrTitleConfig {
@@ -1554,6 +1582,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_custom_action() {
         // commitMessageAction: "Bump" → custom action verb
@@ -1567,6 +1596,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_full_custom_type_and_scope() {
         // semanticCommitType: "fix", semanticCommitScope: "security"
@@ -1586,6 +1616,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_full_empty_scope() {
         // semanticCommitScope: "" → no parentheses
@@ -1605,6 +1636,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_custom_prefix_overrides_semantic() {
         // commitMessagePrefix: "fix(deps):" overrides chore(deps) even with semantic enabled
@@ -1619,6 +1651,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_custom_prefix_and_action() {
         let cfg = PrTitleConfig {
@@ -1635,6 +1668,7 @@ mod tests {
 
     // ── pr_title commitMessageTopic ──────────────────────────────────────────
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_custom_topic_literal() {
         let cfg = PrTitleConfig {
@@ -1647,6 +1681,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_custom_topic_with_dep_name_template() {
         let cfg = PrTitleConfig {
@@ -1659,6 +1694,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_custom_topic_triple_brace() {
         let cfg = PrTitleConfig {
@@ -1671,6 +1707,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_default_topic_when_none() {
         // None → uses default "dependency {dep_name}"
@@ -1680,6 +1717,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_semantic_with_custom_topic() {
         let cfg = PrTitleConfig {
@@ -1695,6 +1733,7 @@ mod tests {
 
     // ── pr_title commitMessageExtra / commitMessageSuffix ────────────────────
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_custom_extra_with_version_template() {
         let cfg = PrTitleConfig {
@@ -1707,6 +1746,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_empty_extra_omits_version_segment() {
         let cfg = PrTitleConfig {
@@ -1719,6 +1759,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_commit_message_suffix_appended() {
         let cfg = PrTitleConfig {
@@ -1731,6 +1772,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_suffix_with_semantic_commits() {
         let cfg = PrTitleConfig {
@@ -1744,6 +1786,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_current_version_template_in_extra() {
         let cfg = PrTitleConfig {
@@ -1757,6 +1800,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn pr_title_current_version_in_topic_template() {
         let cfg = PrTitleConfig {
@@ -1772,6 +1816,7 @@ mod tests {
 
     // ── hashed_branch_name ───────────────────────────────────────────────────
 
+    // Rust-specific: branch behavior test
     #[test]
     fn hashed_branch_length_produces_exact_length() {
         let name = hashed_branch_name("renovate/", "", "lodash-4.x", 20);
@@ -1779,6 +1824,7 @@ mod tests {
         assert!(name.starts_with("renovate/"));
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn hashed_branch_length_different_topics_differ() {
         let a = hashed_branch_name("renovate/", "", "lodash-4.x", 30);
@@ -1786,6 +1832,7 @@ mod tests {
         assert_ne!(a, b, "different topics must produce different hashes");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn hashed_branch_length_too_small_uses_min() {
         // hashedBranchLength=10 minus prefix "renovate/"(9) = 1, below MIN_HASH_LENGTH(6)
@@ -1833,6 +1880,7 @@ mod tests {
         assert_eq!(hashed_branch_name("dep-", "", &topic, 14), "dep-2e27927800");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn hashed_branch_length_deterministic() {
         let a = hashed_branch_name("renovate/", "", "lodash-4.x", 30);
@@ -1840,6 +1888,7 @@ mod tests {
         assert_eq!(a, b, "same inputs must produce same output");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn hashed_branch_length_with_additional_prefix() {
         let without = hashed_branch_name("renovate/", "", "lodash-4.x", 30);
@@ -1853,6 +1902,7 @@ mod tests {
         assert!(with_prefix.starts_with("renovate/"));
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn hashed_branch_is_hex_only() {
         let name = hashed_branch_name("r/", "", "dep-1.x", 20);
@@ -2447,6 +2497,7 @@ mod tests {
         assert_eq!(get_pr_updates_table(None, &[]), "");
     }
 
+    // Rust-specific: branch behavior test
     #[test]
     fn get_pr_updates_table_builds_default_columns() {
         let deps = vec![PrTableDep {

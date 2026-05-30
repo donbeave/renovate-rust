@@ -174,6 +174,7 @@ mod tests {
         assert!(source_url.is_none());
     }
 
+    // Rust-specific: elm_package behavior test
     #[test]
     fn unix_secs_to_iso_conversion() {
         assert_eq!(

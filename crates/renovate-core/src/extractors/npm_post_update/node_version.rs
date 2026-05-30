@@ -96,6 +96,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn returns_node_update_from_upgrades() {
         let upgrades = vec![make_upgrade("node", "20.11.0")];
@@ -105,6 +106,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn returns_config_constraint() {
         assert_eq!(
@@ -113,6 +115,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn returns_nvmrc_constraint() {
         assert_eq!(
@@ -121,6 +124,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn returns_node_version_file() {
         assert_eq!(
@@ -129,6 +133,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn returns_package_json_engines_node() {
         let pj = PackageJson::parse(
@@ -141,11 +146,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn returns_none_when_no_constraint() {
         assert_eq!(get_node_constraint(&[], None, None, None, None), None);
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn node_update_takes_priority() {
         let upgrades = vec![make_upgrade("node", "22.0.0")];
@@ -155,6 +162,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: node_version behavior test
     #[test]
     fn nvmrc_lts_format() {
         assert_eq!(

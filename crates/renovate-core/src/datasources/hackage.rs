@@ -171,6 +171,7 @@ mod tests {
 
     use super::*;
 
+    // Rust-specific: hackage behavior test
     #[test]
     fn cmp_pvp_ordering() {
         use std::cmp::Ordering::*;

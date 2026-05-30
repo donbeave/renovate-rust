@@ -503,6 +503,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: azure_pipelines_tasks behavior test
     #[test]
     fn cmp_version_basic() {
         use std::cmp::Ordering::*;

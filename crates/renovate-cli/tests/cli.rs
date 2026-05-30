@@ -24,6 +24,7 @@ fn version_long_flag_prints_bare_version() {
         .stdout(predicate::eq(format!("{PKG_VERSION}\n")));
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn version_short_flag_matches_long_flag() {
     renovate()
@@ -33,6 +34,7 @@ fn version_short_flag_matches_long_flag() {
         .stdout(predicate::eq(format!("{PKG_VERSION}\n")));
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn help_flag_succeeds_and_mentions_repositories() {
     renovate()
@@ -42,6 +44,7 @@ fn help_flag_succeeds_and_mentions_repositories() {
         .stdout(predicate::str::contains("repositories"));
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn unknown_flag_exits_with_usage_error() {
     // clap exits with status 2 for usage errors, matching Renovate's
@@ -53,6 +56,7 @@ fn unknown_flag_exits_with_usage_error() {
         .code(2);
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn no_args_succeeds() {
     // No repos means "nothing to do" — must exit 0 with no user-facing stdout.
@@ -67,6 +71,7 @@ fn no_args_succeeds() {
 
 // ── Logging ────────────────────────────────────────────────────────────────
 
+// Rust-specific: cli behavior test
 #[test]
 fn invalid_log_level_exits_1_with_fatal_message() {
     // Mirrors Renovate's validateLogLevel: exits 1 and writes a fatal-level
@@ -80,6 +85,7 @@ fn invalid_log_level_exits_1_with_fatal_message() {
         .stderr(predicate::str::contains("not_a_level"));
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn log_level_debug_does_not_crash() {
     renovate()
@@ -89,6 +95,7 @@ fn log_level_debug_does_not_crash() {
         .success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn log_level_fatal_does_not_crash() {
     // `fatal` is a valid Renovate level name; maps to error in tracing.
@@ -99,6 +106,7 @@ fn log_level_fatal_does_not_crash() {
         .success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn log_format_json_does_not_crash() {
     renovate()
@@ -108,6 +116,7 @@ fn log_format_json_does_not_crash() {
         .success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn no_color_env_does_not_crash() {
     renovate()
@@ -136,11 +145,13 @@ fn dry_run_last_argument_after_repository_is_accepted() {
     renovate().arg("myrepo").arg("--dry-run").assert().success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn dry_run_full_is_accepted_directly() {
     renovate().arg("--dry-run=full").assert().success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn dry_run_false_is_accepted() {
     renovate().arg("--dry-run=false").assert().success();
@@ -152,6 +163,7 @@ fn require_config_bare_is_accepted_via_migrate() {
     renovate().arg("--require-config").assert().success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn require_config_optional_is_accepted_directly() {
     renovate()
@@ -160,6 +172,7 @@ fn require_config_optional_is_accepted_directly() {
         .success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn fork_processing_enabled_is_accepted() {
     // migrateArgs rewrites --include-forks=true → --fork-processing=enabled.
@@ -169,6 +182,7 @@ fn fork_processing_enabled_is_accepted() {
         .success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn platform_automerge_false_is_accepted() {
     // migrateArgs rewrites --azure-auto-complete=false → --platform-automerge=false.
@@ -178,27 +192,32 @@ fn platform_automerge_false_is_accepted() {
         .success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn recreate_when_auto_is_accepted() {
     // migrateArgs rewrites --recreate-closed=false → --recreate-when=auto.
     renovate().arg("--recreate-when=auto").assert().success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn recreate_when_always_is_accepted() {
     renovate().arg("--recreate-when=always").assert().success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn platform_github_is_accepted() {
     renovate().arg("--platform=github").assert().success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn platform_gitlab_is_accepted() {
     renovate().arg("--platform=gitlab").assert().success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn platform_bitbucket_server_is_accepted() {
     renovate()
@@ -207,11 +226,13 @@ fn platform_bitbucket_server_is_accepted() {
         .success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn token_flag_is_accepted() {
     renovate().arg("--token=abc123").assert().success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn env_renovate_token_sets_token() {
     renovate()
@@ -220,6 +241,7 @@ fn env_renovate_token_sets_token() {
         .success();
 }
 
+// Rust-specific: cli behavior test
 #[test]
 fn env_renovate_platform_sets_platform() {
     renovate()
@@ -230,6 +252,7 @@ fn env_renovate_platform_sets_platform() {
 
 // ── Legacy-flag migration ───────────────────────────────────────────────────
 
+// Rust-specific: cli behavior test
 #[test]
 fn git_fs_legacy_flags_are_silently_dropped() {
     // Renovate's `migrateArgs` filters every `--git-fs*` token before the
@@ -247,6 +270,7 @@ fn git_fs_legacy_flags_are_silently_dropped() {
 
 // ── Dry-run branch name output ─────────────────────────────────────────────
 
+// Rust-specific: cli behavior test
 #[test]
 fn dry_run_full_outputs_branch_names_for_outdated_deps() {
     let fixture = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))

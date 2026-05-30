@@ -641,6 +641,7 @@ mod tests {
 
     // ── is_retryable ──────────────────────────────────────────────────────────
 
+    // Rust-specific: http behavior test
     #[test]
     fn retryable_status_codes() {
         assert!(is_retryable(StatusCode::TOO_MANY_REQUESTS));
@@ -648,6 +649,7 @@ mod tests {
         assert!(is_retryable(StatusCode::GATEWAY_TIMEOUT));
     }
 
+    // Rust-specific: http behavior test
     #[test]
     fn non_retryable_status_codes() {
         assert!(!is_retryable(StatusCode::OK));

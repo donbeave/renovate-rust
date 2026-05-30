@@ -549,6 +549,7 @@ mod tests {
         AzureClient::with_endpoint(server_uri, "myorg", "myproject", "test-pat").unwrap()
     }
 
+    // Rust-specific: azure behavior test
     #[test]
     fn auth_header_uses_basic_with_pat() {
         let client = AzureClient::new("org", "proj", "mypat").unwrap();

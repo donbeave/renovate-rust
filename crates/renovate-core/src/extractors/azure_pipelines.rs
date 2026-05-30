@@ -475,6 +475,7 @@ stages:
         assert_eq!(t[0].version, "2");
     }
 
+    // Rust-specific: azure_pipelines behavior test
     #[test]
     fn variable_ref_container_classified_as_skip() {
         let content = r#"

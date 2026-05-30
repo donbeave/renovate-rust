@@ -29,6 +29,7 @@ pub fn parse_html(content: &str) -> CustomReleaseResult {
 mod tests {
     use super::*;
 
+    // Rust-specific: formats behavior test
     #[test]
     fn parse_json_releases() {
         let json = r#"{"releases": [{"version": "1.0.0"}]}"#;
@@ -37,11 +38,13 @@ mod tests {
         assert_eq!(result.releases[0].version, "1.0.0");
     }
 
+    // Rust-specific: formats behavior test
     #[test]
     fn parse_json_invalid() {
         assert!(parse_json("not json").is_none());
     }
 
+    // Rust-specific: formats behavior test
     #[test]
     fn parse_yaml_releases() {
         let yaml = "releases:\n  - version: \"1.0.0\"\n";
@@ -49,6 +52,7 @@ mod tests {
         assert_eq!(result.releases.len(), 1);
     }
 
+    // Rust-specific: formats behavior test
     #[test]
     fn parse_toml_releases() {
         let toml_str = "[[releases]]\nversion = \"1.0.0\"\n";
@@ -56,6 +60,7 @@ mod tests {
         assert_eq!(result.releases.len(), 1);
     }
 
+    // Rust-specific: formats behavior test
     #[test]
     fn parse_plain_versions() {
         let plain = "1.0.0\n2.0.0\n";
@@ -63,6 +68,7 @@ mod tests {
         assert_eq!(result.releases.len(), 2);
     }
 
+    // Rust-specific: formats behavior test
     #[test]
     fn parse_html_versions() {
         let html = r#"<a href="1.0.0">1.0.0</a>"#;

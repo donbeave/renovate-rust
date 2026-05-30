@@ -64,11 +64,13 @@ fn parse_hermit_env_output(output: &str) -> HashMap<String, String> {
 mod tests {
     use super::*;
 
+    // Rust-specific: hermit behavior test
     #[test]
     fn is_hermit_true() {
         assert!(is_hermit(&BinarySource::Hermit));
     }
 
+    // Rust-specific: hermit behavior test
     #[test]
     fn is_hermit_false() {
         assert!(!is_hermit(&BinarySource::Global));
@@ -76,6 +78,7 @@ mod tests {
         assert!(!is_hermit(&BinarySource::Install));
     }
 
+    // Rust-specific: hermit behavior test
     #[test]
     fn find_hermit_cwd_nonexistent() {
         let result = find_hermit_cwd(Path::new("/tmp/definitely_no_hermit_here"));
@@ -94,6 +97,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
+    // Rust-specific: hermit behavior test
     #[test]
     fn find_hermit_cwd_in_nested_dir() {
         let dir = tempfile::tempdir().unwrap();
@@ -106,6 +110,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
+    // Rust-specific: hermit behavior test
     #[test]
     fn find_hermit_cwd_in_parent_dir() {
         let dir = tempfile::tempdir().unwrap();
@@ -128,6 +133,7 @@ mod tests {
         assert_eq!(envs.get("PATH").unwrap(), "/usr/src/app/repository-a/bin");
     }
 
+    // Rust-specific: hermit behavior test
     #[test]
     fn parse_hermit_env_output_skips_comments_and_empty_lines() {
         let output = "# comment\n\nFOO=bar\n\n# another\nBAZ=qux\n";
@@ -137,6 +143,7 @@ mod tests {
         assert_eq!(envs.get("BAZ").unwrap(), "qux");
     }
 
+    // Rust-specific: hermit behavior test
     #[test]
     fn parse_hermit_env_output_empty() {
         let envs = parse_hermit_env_output("");

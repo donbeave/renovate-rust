@@ -1640,6 +1640,7 @@ unknowntool 9.9.9
         assert_eq!(deps[0].tool_name, "python");
     }
 
+    // Rust-specific: asdf behavior test
     #[test]
     fn pyup_ignore_comment_skips_dep() {
         let deps = extract("python 3.11.5 # pyup:ignore\nnodejs 20.9.0\n");
@@ -1875,6 +1876,7 @@ unknowntool 9.9.9
         }
     }
 
+    // Rust-specific: asdf behavior test
     #[test]
     fn tag_strip_derives_correctly() {
         assert_eq!(

@@ -244,6 +244,7 @@ mod tests {
 
     use super::*;
 
+    // Rust-specific: nuget behavior test
     #[test]
     fn is_stable_accepts_release() {
         assert!(is_stable("13.0.3"));
@@ -251,6 +252,7 @@ mod tests {
         assert!(is_stable("4.0.0"));
     }
 
+    // Rust-specific: nuget behavior test
     #[test]
     fn is_stable_rejects_prerelease() {
         assert!(!is_stable("13.0.3-preview1"));

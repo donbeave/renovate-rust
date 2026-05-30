@@ -492,6 +492,7 @@ executors:
         assert_eq!(aws.version, "3.1.4");
     }
 
+    // Rust-specific: circleci behavior test
     #[test]
     fn orbs_without_at_sign_skipped() {
         let content = "orbs:\n  local: {commands: {run: {steps: []}}}\n";

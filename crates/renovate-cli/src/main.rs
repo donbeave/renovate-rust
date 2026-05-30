@@ -702,6 +702,8 @@ mod tests {
 
     /// Smoke-test that the NpmUpdateUpgrade mapping we build in process_repo
     /// actually works with npm_update_dependency.
+
+    // Rust-specific: main behavior test
     #[test]
     fn npm_manifest_update_smoke() {
         let package_json = r#"{"dependencies":{"lodash":"^3.0.0"}}"#;
@@ -719,6 +721,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: main behavior test
     #[test]
     fn build_pr_body_includes_update_table() {
         let deps = vec![report_builders::BranchDep {

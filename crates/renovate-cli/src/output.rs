@@ -819,18 +819,21 @@ mod tests {
         }
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn print_report_plain_text_runs_without_panic() {
         let report = make_report();
         print_report(&report, false, false);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn print_report_quiet_runs_without_panic() {
         let report = make_report();
         print_report(&report, false, true);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn print_report_empty_files() {
         let report = RepoReport {
@@ -842,12 +845,14 @@ mod tests {
         print_report(&report, false, false);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn print_run_summary_empty_run() {
         let stats = RunStats::default();
         print_run_summary(&stats, false);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn run_stats_add_report_accumulates() {
         let mut stats = RunStats::default();
@@ -860,6 +865,7 @@ mod tests {
         assert_eq!(stats.repos_with_updates, 1);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn run_stats_two_repos() {
         let mut stats = RunStats::default();
@@ -906,6 +912,7 @@ mod tests {
         assert_eq!(stats.repos_up_to_date, 1);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn print_run_summary_with_updates() {
         let mut stats = RunStats::default();
@@ -913,6 +920,7 @@ mod tests {
         print_run_summary(&stats, false);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn format_dep_update_available_plain() {
         let dep = DepReport {
@@ -951,6 +959,7 @@ mod tests {
         assert!(s.contains('↑'));
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn format_dep_uses_new_value_when_set() {
         let dep = DepReport {
@@ -991,6 +1000,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn format_dep_up_to_date_with_latest() {
         let dep = DepReport {
@@ -1027,6 +1037,7 @@ mod tests {
         assert!(s.contains("4.18.2"));
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn format_dep_skipped() {
         let dep = DepReport {
@@ -1062,6 +1073,7 @@ mod tests {
         assert!(s.contains("workspace-protocol"));
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn format_dep_error() {
         let dep = DepReport {
@@ -1097,12 +1109,14 @@ mod tests {
         assert!(s.contains("404 Not Found"));
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn format_file_counts_all_up_to_date() {
         let s = format_file_counts(0, 0, 0, false);
         assert_eq!(s, "all up to date");
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn format_file_counts_with_updates() {
         let s = format_file_counts(2, 1, 0, false);
@@ -1110,6 +1124,7 @@ mod tests {
         assert!(s.contains("1 skipped"));
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn ansi_codes_present_when_color_enabled() {
         let s = bold("hello", true);
@@ -1117,6 +1132,7 @@ mod tests {
         assert!(s.contains("\x1b[0m"));
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn no_ansi_codes_when_color_disabled() {
         assert_eq!(bold("hello", false), "hello");
@@ -1125,6 +1141,7 @@ mod tests {
 
     // ── JSON output tests ─────────────────────────────────────────────────────
 
+    // Rust-specific: output behavior test
     #[test]
     fn dep_stats_counts_correctly() {
         let deps = vec![
@@ -1248,6 +1265,7 @@ mod tests {
         assert_eq!(s.errors, 1);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn print_json_reports_produces_valid_json() {
         let report = make_report();
@@ -1350,6 +1368,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn print_file_deps_no_groups_runs_without_panic() {
         let deps = vec![make_dep("express", None), make_dep_up_to_date("lodash")];
@@ -1357,6 +1376,7 @@ mod tests {
         print_file_deps(&deps, false);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn print_file_deps_with_groups_runs_without_panic() {
         let deps = vec![
@@ -1369,6 +1389,7 @@ mod tests {
         print_file_deps(&deps, false);
     }
 
+    // Rust-specific: output behavior test
     #[test]
     fn group_order_preserves_first_seen() {
         // Verify grouped deps produce reproducible output (no panic).

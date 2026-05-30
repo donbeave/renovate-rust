@@ -402,6 +402,7 @@ mod tests {
 
     // ── normalize_name ────────────────────────────────────────────────────────
 
+    // Rust-specific: pip behavior test
     #[test]
     fn normalize_hyphens_and_underscores() {
         assert_eq!(normalize_name("Django"), "django");

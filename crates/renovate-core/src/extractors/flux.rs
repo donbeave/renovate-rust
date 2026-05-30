@@ -852,6 +852,7 @@ mod tests {
         assert!(dep.components.is_none());
     }
 
+    // Rust-specific: flux behavior test
     #[test]
     fn version_in_middle_of_file() {
         let content = "---\napiVersion: v1\n# Flux Version: v2.0.1\nkind: Namespace\n";

@@ -1756,6 +1756,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn dep_meta_major_update() {
         let cfg = test_repo_cfg();
@@ -1765,6 +1766,7 @@ mod tests {
         assert_eq!(utype, Some("major".to_owned()));
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn dep_meta_minor_update() {
         let cfg = test_repo_cfg();
@@ -1774,6 +1776,7 @@ mod tests {
         assert_eq!(utype, Some("minor".to_owned()));
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn dep_meta_patch_update() {
         let mut cfg = test_repo_cfg();
@@ -1784,6 +1787,7 @@ mod tests {
         assert_eq!(utype, Some("patch".to_owned()));
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn dep_meta_scoped_package() {
         let cfg = test_repo_cfg();
@@ -1793,6 +1797,7 @@ mod tests {
         assert_eq!(utype, Some("minor".to_owned()));
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn dep_meta_semantic_commits() {
         let mut cfg = test_repo_cfg();
@@ -1801,6 +1806,7 @@ mod tests {
         assert_eq!(title, Some("chore(deps): Update dependency express to v4.19.0".to_owned()));
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn dep_meta_hashed_branch_length() {
         let mut cfg = test_repo_cfg();
@@ -1858,6 +1864,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn collect_branch_updates_empty() {
         let report = make_report(vec![]);
@@ -1865,6 +1872,7 @@ mod tests {
         assert!(branches.is_empty());
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn collect_branch_updates_single() {
         let report = make_report(vec![dep_report(
@@ -1882,6 +1890,7 @@ mod tests {
         assert_eq!(branches["renovate/lodash-4.x"].len(), 1);
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn collect_branch_updates_deduplicates_same_branch() {
         let report = make_report(vec![
@@ -1909,6 +1918,7 @@ mod tests {
         assert_eq!(branches["renovate/lodash-4.x"].len(), 2);
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn collect_branch_updates_groups_by_branch_name() {
         let report = make_report(vec![
@@ -1937,6 +1947,7 @@ mod tests {
         assert_eq!(branches["renovate/express-4.x"].len(), 1);
     }
 
+    // Rust-specific: report_builders behavior test
     #[test]
     fn collect_branch_updates_ignores_non_update_available() {
         let report = make_report(vec![

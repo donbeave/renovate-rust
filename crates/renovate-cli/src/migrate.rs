@@ -98,48 +98,56 @@ mod tests {
         migrate_args(&owned)
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn passes_through_unrelated_args() {
         let out = migrate(&["renovate", "myrepo", "--token=abc"]);
         assert_eq!(out, vec!["renovate", "myrepo", "--token=abc"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn empty_input_returns_empty() {
         let out = migrate(&[]);
         assert!(out.is_empty());
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_allow_post_upgrade_command_templating() {
         let out = migrate(&["--allow-post-upgrade-command-templating"]);
         assert_eq!(out, vec!["--allow-command-templating"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_allowed_post_upgrade_commands() {
         let out = migrate(&["--allowed-post-upgrade-commands=foo,bar"]);
         assert_eq!(out, vec!["--allowed-commands=foo,bar"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_endpoints_to_host_rules() {
         let out = migrate(&["--endpoints=[]"]);
         assert_eq!(out, vec!["--host-rules=[]"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_expose_env_true_to_trust_level_high() {
         let out = migrate(&["--expose-env=true"]);
         assert_eq!(out, vec!["--trust-level=high"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_bare_expose_env_to_trust_level_high() {
         let out = migrate(&["--expose-env"]);
         assert_eq!(out, vec!["--trust-level=high"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_renovate_fork_through_to_fork_processing_enabled() {
         // --renovate-fork → --include-forks → --fork-processing=enabled
@@ -148,12 +156,14 @@ mod tests {
         assert_eq!(out, vec!["--fork-processing=enabled"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_json_platform_key_to_host_type() {
         let out = migrate(&[r#"--host-rules=[{"platform":"github.com"}]"#]);
         assert_eq!(out, vec![r#"--host-rules=[{"hostType":"github.com"}]"#],);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_json_endpoint_key_to_match_host() {
         let out = migrate(&[r#"--host-rules=[{"endpoint":"https://example.com"}]"#]);
@@ -163,12 +173,14 @@ mod tests {
         );
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_json_host_key_to_match_host() {
         let out = migrate(&[r#"--host-rules=[{"host":"example.com"}]"#]);
         assert_eq!(out, vec![r#"--host-rules=[{"matchHost":"example.com"}]"#],);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn json_key_rewrite_uses_first_occurrence_only() {
         // Faithful to JS String.prototype.replace(string, string), which
@@ -180,6 +192,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_azure_auto_complete_variants_to_platform_automerge() {
         assert_eq!(
@@ -196,6 +209,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_git_lab_automerge_variants_to_platform_automerge() {
         assert_eq!(
@@ -212,6 +226,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn bare_dry_run_becomes_dry_run_true() {
         // Only the exact `--dry-run` token is rewritten; `--dry-run=false`
@@ -221,6 +236,7 @@ mod tests {
         assert_eq!(migrate(&["--dry-run=null"]), vec!["--dry-run=null"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn bare_require_config_becomes_require_config_true() {
         assert_eq!(
@@ -233,48 +249,56 @@ mod tests {
         );
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn rewrites_aliases_to_registry_aliases() {
         let out = migrate(&["--aliases=foo=bar"]);
         assert_eq!(out, vec!["--registry-aliases=foo=bar"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn include_forks_true_rewrites_to_fork_processing_enabled() {
         let out = migrate(&["--include-forks=true"]);
         assert_eq!(out, vec!["--fork-processing=enabled"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn bare_include_forks_rewrites_to_fork_processing_enabled() {
         let out = migrate(&["--include-forks"]);
         assert_eq!(out, vec!["--fork-processing=enabled"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn recreate_closed_false_becomes_recreate_when_auto() {
         let out = migrate(&["--recreate-closed=false"]);
         assert_eq!(out, vec!["--recreate-when=auto"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn recreate_closed_true_becomes_recreate_when_always() {
         let out = migrate(&["--recreate-closed=true"]);
         assert_eq!(out, vec!["--recreate-when=always"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn bare_recreate_closed_becomes_recreate_when_always() {
         let out = migrate(&["--recreate-closed"]);
         assert_eq!(out, vec!["--recreate-when=always"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn drops_git_fs_family_entirely() {
         let out = migrate(&["--git-fs", "--git-fs=foo", "--git-fs-something", "keep-me"]);
         assert_eq!(out, vec!["keep-me"]);
     }
 
+    // Rust-specific: migrate behavior test
     #[test]
     fn migrations_compose_across_an_argv() {
         let out = migrate(&[

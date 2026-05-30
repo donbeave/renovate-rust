@@ -280,12 +280,14 @@ import requests
         );
     }
 
+    // Rust-specific: pep723 behavior test
     #[test]
     fn returns_empty_for_no_block() {
         let content = "import requests\nprint('hello')\n";
         assert!(extract(content).is_empty());
     }
 
+    // Rust-specific: pep723 behavior test
     #[test]
     fn returns_empty_for_non_script_block() {
         let content = r#"# /// readme

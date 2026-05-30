@@ -147,6 +147,7 @@ Gem::Specification.new do |spec|
 end
 "#;
 
+    // Rust-specific: gemspec behavior test
     #[test]
     fn extracts_runtime_deps() {
         let deps = extract(SAMPLE);
@@ -160,6 +161,7 @@ end
         assert!(!sinatra.is_dev);
     }
 
+    // Rust-specific: gemspec behavior test
     #[test]
     fn extracts_dev_deps() {
         let deps = extract(SAMPLE);
@@ -173,6 +175,7 @@ end
         assert!(rubocop.is_dev);
     }
 
+    // Rust-specific: gemspec behavior test
     #[test]
     fn no_version_gets_skip_reason() {
         let deps = extract(SAMPLE);
@@ -197,6 +200,7 @@ end
         assert_eq!(ext.skip_reason, Some(GemspecSkipReason::GitSource));
     }
 
+    // Rust-specific: gemspec behavior test
     #[test]
     fn multi_constraint_joined() {
         let content = "spec.add_dependency 'pg', '>= 0.18', '< 2.0'\n";
@@ -204,6 +208,7 @@ end
         assert_eq!(deps[0].current_value, ">= 0.18, < 2.0");
     }
 
+    // Rust-specific: gemspec behavior test
     #[test]
     fn alternative_prefix_works() {
         let content = "s.add_runtime_dependency 'nokogiri', '~> 1.15'\n";

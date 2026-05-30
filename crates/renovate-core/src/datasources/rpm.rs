@@ -338,6 +338,7 @@ mod tests {
   </package>
 </metadata>"#;
 
+    // Rust-specific: rpm behavior test
     #[test]
     fn parse_repomd_finds_primary_location() {
         let result = parse_repomd_xml(REPOMD_XML).unwrap();
@@ -347,12 +348,14 @@ mod tests {
         );
     }
 
+    // Rust-specific: rpm behavior test
     #[test]
     fn parse_repomd_empty_returns_none() {
         let result = parse_repomd_xml("").unwrap();
         assert!(result.is_none());
     }
 
+    // Rust-specific: rpm behavior test
     #[test]
     fn parse_repomd_no_primary_returns_none() {
         let xml = r#"<?xml version="1.0"?>
@@ -365,6 +368,7 @@ mod tests {
         assert!(result.is_none());
     }
 
+    // Rust-specific: rpm behavior test
     #[test]
     fn parse_primary_xml_extracts_packages() {
         let packages = parse_primary_xml(PRIMARY_XML).unwrap();
@@ -387,12 +391,14 @@ mod tests {
         );
     }
 
+    // Rust-specific: rpm behavior test
     #[test]
     fn parse_primary_xml_empty_returns_empty() {
         let packages = parse_primary_xml("").unwrap();
         assert!(packages.is_empty());
     }
 
+    // Rust-specific: rpm behavior test
     #[test]
     fn parse_primary_xml_no_packages_element() {
         let xml = r#"<?xml version="1.0"?>
@@ -482,6 +488,7 @@ mod tests {
         assert!(result.is_err());
     }
 
+    // Rust-specific: rpm behavior test
     #[test]
     fn decompress_gz_roundtrip() {
         use std::io::Write;
@@ -495,6 +502,7 @@ mod tests {
         assert_eq!(decompressed, original);
     }
 
+    // Rust-specific: rpm behavior test
     #[test]
     fn datasource_id_is_correct() {
         assert_eq!(DATASOURCE_ID, "rpm");

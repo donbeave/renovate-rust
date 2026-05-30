@@ -68,6 +68,7 @@ fn run_fixture(fixture_name: &str) -> Value {
     value
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_npm_empty() {
     let actual = run_fixture("npm-empty");
@@ -100,6 +101,7 @@ fn parity_npm_empty() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for npm-empty fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_npm_skipped() {
     let actual = run_fixture("npm-skipped");
@@ -143,6 +145,7 @@ fn parity_npm_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for npm-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_cargo_workspace() {
     let actual = run_fixture("cargo-workspace");
@@ -181,6 +184,7 @@ fn parity_cargo_workspace() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for cargo-workspace fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_gomod_empty() {
     let actual = run_fixture("gomod-empty");
@@ -219,6 +223,7 @@ fn parity_gomod_empty() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for gomod-empty fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_maven_empty() {
     let actual = run_fixture("maven-empty");
@@ -251,6 +256,7 @@ fn parity_maven_empty() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for maven-empty fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_gomod_replace() {
     let actual = run_fixture("gomod-replace");
@@ -294,6 +300,7 @@ fn parity_gomod_replace() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for gomod-replace fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_dockerfile_scratch() {
     let actual = run_fixture("dockerfile-scratch");
@@ -332,6 +339,7 @@ fn parity_dockerfile_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for dockerfile-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_github_actions_skipped() {
     let actual = run_fixture("github-actions-skipped");
@@ -380,6 +388,7 @@ fn parity_github_actions_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for github-actions-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_docker_compose_scratch() {
     let actual = run_fixture("docker-compose-scratch");
@@ -418,6 +427,7 @@ fn parity_docker_compose_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for docker-compose-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_composer_skipped() {
     let actual = run_fixture("composer-skipped");
@@ -466,6 +476,7 @@ fn parity_composer_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for composer-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_terraform_local() {
     let actual = run_fixture("terraform-local");
@@ -504,6 +515,7 @@ fn parity_terraform_local() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for terraform-local fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_pre_commit_skipped() {
     let actual = run_fixture("pre-commit-skipped");
@@ -547,6 +559,7 @@ fn parity_pre_commit_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for pre-commit-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_asdf_skipped() {
     let actual = run_fixture("asdf-skipped");
@@ -585,6 +598,7 @@ fn parity_asdf_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for asdf-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_pip_skipped() {
     let actual = run_fixture("pip-skipped");
@@ -633,6 +647,7 @@ fn parity_pip_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for pip-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_circleci_scratch() {
     let actual = run_fixture("circleci-scratch");
@@ -671,6 +686,7 @@ fn parity_circleci_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for circleci-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_droneci_scratch() {
     let actual = run_fixture("droneci-scratch");
@@ -709,6 +725,7 @@ fn parity_droneci_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for droneci-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_gitlabci_scratch() {
     let actual = run_fixture("gitlabci-scratch");
@@ -747,6 +764,7 @@ fn parity_gitlabci_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for gitlabci-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_woodpecker_scratch() {
     let actual = run_fixture("woodpecker-scratch");
@@ -785,6 +803,7 @@ fn parity_woodpecker_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for woodpecker-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_kubernetes_scratch() {
     let actual = run_fixture("kubernetes-scratch");
@@ -823,6 +842,7 @@ fn parity_kubernetes_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for kubernetes-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_cloudbuild_scratch() {
     let actual = run_fixture("cloudbuild-scratch");
@@ -861,6 +881,7 @@ fn parity_cloudbuild_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for cloudbuild-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_bitbucket_pipelines_scratch() {
     let actual = run_fixture("bitbucket-pipelines-scratch");
@@ -899,6 +920,7 @@ fn parity_bitbucket_pipelines_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for bitbucket-pipelines-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_devcontainer_scratch() {
     let actual = run_fixture("devcontainer-scratch");
@@ -937,6 +959,7 @@ fn parity_devcontainer_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for devcontainer-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_batect_scratch() {
     let actual = run_fixture("batect-scratch");
@@ -975,6 +998,7 @@ fn parity_batect_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for batect-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_quadlet_scratch() {
     let actual = run_fixture("quadlet-scratch");
@@ -1013,6 +1037,7 @@ fn parity_quadlet_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for quadlet-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_bazel_module_skipped() {
     let actual = run_fixture("bazel-module-skipped");
@@ -1051,6 +1076,7 @@ fn parity_bazel_module_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for bazel-module-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_bazel_skipped() {
     let actual = run_fixture("bazel-skipped");
@@ -1089,6 +1115,7 @@ fn parity_bazel_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for bazel-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_argocd_skipped() {
     let actual = run_fixture("argocd-skipped");
@@ -1127,6 +1154,7 @@ fn parity_argocd_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for argocd-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_ansible_scratch() {
     let actual = run_fixture("ansible-scratch");
@@ -1165,6 +1193,7 @@ fn parity_ansible_scratch() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for ansible-scratch fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_buildpacks_skipped() {
     let actual = run_fixture("buildpacks-skipped");
@@ -1208,6 +1237,7 @@ fn parity_buildpacks_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for buildpacks-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_setup_cfg_skipped() {
     let actual = run_fixture("setup-cfg-skipped");
@@ -1256,6 +1286,7 @@ fn parity_setup_cfg_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for setup-cfg-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_bundler_skipped() {
     let actual = run_fixture("bundler-skipped");
@@ -1299,6 +1330,7 @@ fn parity_bundler_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for bundler-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_pub_skipped() {
     let actual = run_fixture("pub-skipped");
@@ -1342,6 +1374,7 @@ fn parity_pub_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for pub-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_gemspec_skipped() {
     let actual = run_fixture("gemspec-skipped");
@@ -1390,6 +1423,7 @@ fn parity_gemspec_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for gemspec-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_cpanfile_skipped() {
     let actual = run_fixture("cpanfile-skipped");
@@ -1438,6 +1472,7 @@ fn parity_cpanfile_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for cpanfile-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_jsonnet_bundler_skipped() {
     let actual = run_fixture("jsonnet-bundler-skipped");
@@ -1481,6 +1516,7 @@ fn parity_jsonnet_bundler_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for jsonnet-bundler-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_pipenv_skipped() {
     let actual = run_fixture("pipenv-skipped");
@@ -1529,6 +1565,7 @@ fn parity_pipenv_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for pipenv-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_mix_skipped() {
     let actual = run_fixture("mix-skipped");
@@ -1577,6 +1614,7 @@ fn parity_mix_skipped() {
     assert_eq!(actual, expected, "normalized JSON output mismatch for mix-skipped fixture");
 }
 
+// Rust-specific: parity behavior test
 #[test]
 fn parity_cocoapods_skipped() {
     let actual = run_fixture("cocoapods-skipped");
@@ -1623,4 +1661,102 @@ fn parity_cocoapods_skipped() {
         }
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for cocoapods-skipped fixture");
+}
+
+// Rust-specific: parity behavior test
+#[test]
+fn parity_jenkins_skipped() {
+    let actual = run_fixture("jenkins-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "plugins.txt",
+                    "manager": "jenkins",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "git",
+                            "status": "skipped",
+                            "reason": "unsupportedversion"
+                        },
+                        {
+                            "name": "docker",
+                            "status": "skipped",
+                            "reason": "unspecifiedversion"
+                        },
+                        {
+                            "name": "lint",
+                            "status": "skipped",
+                            "reason": "unsupportedversion"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for jenkins-skipped fixture");
+}
+
+// Rust-specific: parity behavior test
+#[test]
+fn parity_poetry_skipped() {
+    let actual = run_fixture("poetry-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "pyproject.toml",
+                    "manager": "poetry",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "local-pkg",
+                            "status": "skipped",
+                            "reason": "localpath"
+                        },
+                        {
+                            "name": "python",
+                            "status": "skipped",
+                            "reason": "pythonversion"
+                        },
+                        {
+                            "name": "requests",
+                            "status": "skipped",
+                            "reason": "gitsource"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for poetry-skipped fixture");
 }

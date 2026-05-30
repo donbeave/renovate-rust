@@ -431,6 +431,7 @@ mod tests {
 
     // ── encode helpers ────────────────────────────────────────────────────────
 
+    // Rust-specific: gitlab behavior test
     #[test]
     fn encode_path_replaces_slashes() {
         assert_eq!(encode_path("src/main.rs"), "src%2Fmain.rs");
@@ -440,6 +441,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: gitlab behavior test
     #[test]
     fn encode_project_formats_correctly() {
         assert_eq!(encode_project("owner", "repo"), "owner%2Frepo");

@@ -185,6 +185,7 @@ pub struct CustomDatasourceDefinition {
 mod tests {
     use super::*;
 
+    // Rust-specific: custom behavior test
     #[test]
     fn compile_template_replaces_package_name() {
         assert_eq!(
@@ -193,6 +194,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn compile_template_replaces_current_value() {
         assert_eq!(
@@ -205,6 +207,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn parse_plain_to_releases_basic() {
         let result = parse_plain_to_releases("1.0.0\n1.1.0\n2.0.0\n");
@@ -212,12 +215,14 @@ mod tests {
         assert_eq!(result.releases[0].version, "1.0.0");
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn parse_plain_to_releases_skips_empty() {
         let result = parse_plain_to_releases("1.0.0\n\n2.0.0\n");
         assert_eq!(result.releases.len(), 2);
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn extract_html_links_basic() {
         let html = r#"<a href="1.0.0/">1.0.0/</a> <a href="2.0.0/">2.0.0/</a>"#;
@@ -226,12 +231,14 @@ mod tests {
         assert_eq!(result.releases[0].version, "1.0.0/");
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn extract_html_links_empty() {
         let result = extract_html_links("no links here");
         assert!(result.releases.is_empty());
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn massage_config_returns_none_for_missing() {
         let ds: BTreeMap<String, CustomDatasourceDefinition> = BTreeMap::new();
@@ -241,6 +248,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn massage_config_compiles_template() {
         let mut ds = BTreeMap::new();
@@ -262,6 +270,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn massage_config_uses_registry_url_override() {
         let mut ds = BTreeMap::new();
@@ -289,6 +298,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: custom behavior test
     #[test]
     fn custom_format_default_is_json() {
         assert_eq!(CustomFormat::default(), CustomFormat::Json);

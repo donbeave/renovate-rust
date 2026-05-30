@@ -293,12 +293,14 @@ mod tests {
 
     // ── encode_package_name ───────────────────────────────────────────────────
 
+    // Rust-specific: npm behavior test
     #[test]
     fn encodes_scoped_package() {
         assert_eq!(encode_package_name("@types/node"), "@types%2Fnode");
         assert_eq!(encode_package_name("@babel/core"), "@babel%2Fcore");
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn plain_package_name_unchanged() {
         assert_eq!(encode_package_name("express"), "express");
@@ -307,6 +309,7 @@ mod tests {
 
     // ── is_deprecated helper ──────────────────────────────────────────────────
 
+    // Rust-specific: npm behavior test
     #[test]
     fn deprecated_string_is_deprecated() {
         assert!(is_deprecated(&NpmVersionEntry {
@@ -314,6 +317,7 @@ mod tests {
         }));
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn empty_string_not_deprecated() {
         assert!(!is_deprecated(&NpmVersionEntry {
@@ -321,6 +325,7 @@ mod tests {
         }));
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn null_not_deprecated() {
         assert!(!is_deprecated(&NpmVersionEntry {
@@ -328,6 +333,7 @@ mod tests {
         }));
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn none_not_deprecated() {
         assert!(!is_deprecated(&NpmVersionEntry { deprecated: None }));

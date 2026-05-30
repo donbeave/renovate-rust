@@ -124,6 +124,7 @@ mod tests {
         assert_eq!(resp.releases[0].version, "3.0.0");
     }
 
+    // Rust-specific: flutter_version behavior test
     #[test]
     fn stable_pattern_filter_on_beta() {
         // A stable-looking version on beta channel should be filtered out.
@@ -153,6 +154,7 @@ mod tests {
         assert_eq!(filtered[0].version, "3.1.0-0.pre");
     }
 
+    // Rust-specific: flutter_version behavior test
     #[test]
     fn is_stable_pattern_works() {
         assert!(is_stable_pattern("3.0.0"));

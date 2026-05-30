@@ -408,6 +408,7 @@ mod tests {
         assert!(extract("").is_empty());
     }
 
+    // Rust-specific: bitrise behavior test
     #[test]
     fn unversioned_step_is_skipped() {
         let content = "workflows:\n  test:\n    steps:\n    - script:\n";
@@ -419,6 +420,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: bitrise behavior test
     #[test]
     fn step_with_empty_map_value() {
         let content = "workflows:\n  deploy:\n    steps:\n    - activate-ssh-key@1.0.0: {}\n";
@@ -437,6 +439,7 @@ mod tests {
         assert_eq!(deps[0].dep_name, "activate-ssh-key");
     }
 
+    // Rust-specific: bitrise behavior test
     #[test]
     fn multiple_steps_extracted() {
         let content = "workflows:\n  test:\n    steps:\n    - script@1.1.5:\n    - restore-cache@1.1.2:\n        foo: bar\n";

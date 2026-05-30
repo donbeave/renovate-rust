@@ -7540,6 +7540,7 @@ mod tests {
 
     // ── RepoConfig::parse_from_package_json ─────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn parse_from_package_json_extracts_renovate_key() {
         let pkg = r#"{"name":"app","version":"1.0.0","renovate":{"ignoreDeps":["lodash"]}}"#;
@@ -7555,17 +7556,20 @@ mod tests {
         assert_eq!(c.extends, vec!["github>renovatebot/renovate"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn parse_from_package_json_returns_none_when_no_key() {
         let pkg = r#"{"name":"app","version":"1.0.0","dependencies":{"react":"^18"}}"#;
         assert!(RepoConfig::parse_from_package_json(pkg).is_none());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn parse_from_package_json_returns_none_for_invalid_json() {
         assert!(RepoConfig::parse_from_package_json("not json").is_none());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn parse_from_package_json_full_config() {
         let pkg = r#"{
@@ -7584,6 +7588,7 @@ mod tests {
 
     // ── RepoConfig::parse ────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn defaults_when_empty() {
         let c = RepoConfig::parse("{}");
@@ -7592,24 +7597,28 @@ mod tests {
         assert!(c.ignore_paths.is_empty());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn enabled_false() {
         let c = RepoConfig::parse(r#"{"enabled": false}"#);
         assert!(!c.enabled);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_deps_parsed() {
         let c = RepoConfig::parse(r#"{"ignoreDeps": ["lodash", "react"]}"#);
         assert_eq!(c.ignore_deps, vec!["lodash", "react"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn update_internal_deps_parsed() {
         let c = RepoConfig::parse(r#"{"updateInternalDeps": true}"#);
         assert!(c.update_internal_deps);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn enabled_managers_parsed() {
         let c = RepoConfig::parse(r#"{"enabledManagers": ["cargo", "npm"]}"#);
@@ -7619,6 +7628,7 @@ mod tests {
         assert!(!c.is_manager_enabled("maven", false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn enabled_managers_empty_means_all_active() {
         let c = RepoConfig::parse("{}");
@@ -7628,6 +7638,7 @@ mod tests {
         assert!(c.is_manager_enabled("anything", false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn git_ignored_authors_parsed() {
         let c = RepoConfig::parse(
@@ -7639,6 +7650,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disabled_by_default_manager_skipped_without_explicit_list() {
         let c = RepoConfig::parse("{}");
@@ -7651,6 +7663,7 @@ mod tests {
         assert!(c.is_manager_enabled("cargo", false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disabled_by_default_manager_enabled_when_explicitly_listed() {
         let c = RepoConfig::parse(r#"{"enabledManagers": ["git-submodules", "cargo"]}"#);
@@ -7661,6 +7674,7 @@ mod tests {
         assert!(!c.is_manager_enabled("npm", false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disabled_by_default_enabled_overrides_default_flag() {
         // When enabledManagers has entries, disabled_by_default is irrelevant.
@@ -7671,18 +7685,21 @@ mod tests {
         assert!(!c.is_manager_enabled("nix", true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_paths_parsed() {
         let c = RepoConfig::parse(r#"{"ignorePaths": ["test/**", "vendor"]}"#);
         assert_eq!(c.ignore_paths, vec!["test/**", "vendor"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn exclude_commit_paths_parsed() {
         let c = RepoConfig::parse(r#"{"excludeCommitPaths": ["docs/**", "generated"]}"#);
         assert_eq!(c.exclude_commit_paths, vec!["docs/**", "generated"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn registry_aliases_parsed() {
         let c = RepoConfig::parse(r#"{"registryAliases": {"stable": "https://example.com"}}"#);
@@ -7692,6 +7709,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn json5_comments_are_accepted() {
         let c = RepoConfig::parse(
@@ -7714,6 +7732,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn malformed_json_returns_defaults() {
         let c = RepoConfig::parse("not valid json at all");
@@ -7721,6 +7740,7 @@ mod tests {
         assert!(c.ignore_deps.is_empty());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_dep_ignored_matches_exactly() {
         let c = RepoConfig::parse(r#"{"ignoreDeps": ["lodash"]}"#);
@@ -7788,6 +7808,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn force_enabled_true_also_overrides_config_level_disabled() {
         // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false)"
@@ -7865,6 +7886,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_path_ignored_prefix_match() {
         let c = RepoConfig::parse(r#"{"ignorePaths": ["vendor"]}"#);
@@ -7872,6 +7894,7 @@ mod tests {
         assert!(!c.is_path_ignored("src/vendor.ts"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn include_paths_empty_allows_all() {
         let c = RepoConfig::parse(r#"{}"#);
@@ -7879,6 +7902,7 @@ mod tests {
         assert!(c.is_path_included("apps/frontend/package.json"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn include_paths_limits_to_matching_files() {
         let c = RepoConfig::parse(r#"{"includePaths": ["apps/**"]}"#);
@@ -7887,6 +7911,7 @@ mod tests {
         assert!(!c.is_path_included("libs/utils/package.json"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn include_paths_prefix_match() {
         let c = RepoConfig::parse(r#"{"includePaths": ["apps"]}"#);
@@ -7896,6 +7921,7 @@ mod tests {
 
     // ── PathMatcher glob tests ────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn glob_double_star_node_modules() {
         let m = PathMatcher::new(&["**/node_modules/**".to_owned()]);
@@ -7904,6 +7930,7 @@ mod tests {
         assert!(!m.is_ignored("src/foo.ts"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn glob_spec_files() {
         let m = PathMatcher::new(&["**/*.spec.ts".to_owned()]);
@@ -7913,6 +7940,7 @@ mod tests {
         assert!(!m.is_ignored("src/foo.spec.js"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn glob_tests_directory() {
         let m = PathMatcher::new(&["**/test/**".to_owned()]);
@@ -7921,6 +7949,7 @@ mod tests {
         assert!(!m.is_ignored("src/testing.ts"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn glob_rooted_path_under_dir() {
         let m = PathMatcher::new(&["test/**".to_owned()]);
@@ -7928,6 +7957,7 @@ mod tests {
         assert!(!m.is_ignored("src/test/foo.ts")); // rooted glob, not deep
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn prefix_with_trailing_slash_stripped() {
         let m = PathMatcher::new(&["vendor/".to_owned()]);
@@ -7935,6 +7965,7 @@ mod tests {
         assert!(!m.is_ignored("src/vendor.ts"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn mixed_glob_and_prefix_patterns() {
         let m = PathMatcher::new(&["**/node_modules/**".to_owned(), "vendor".to_owned()]);
@@ -7943,12 +7974,14 @@ mod tests {
         assert!(!m.is_ignored("src/foo.ts"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn empty_patterns_ignore_nothing() {
         let m = PathMatcher::new(&[]);
         assert!(!m.is_ignored("anything/at/all.ts"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn repo_config_build_path_matcher_uses_globs() {
         let c = RepoConfig::parse(r#"{"ignorePaths": ["**/test/**", "vendor"]}"#);
@@ -7960,6 +7993,7 @@ mod tests {
 
     // ── packageRules tests ────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rules_parsed_from_json() {
         let c = RepoConfig::parse(
@@ -7979,6 +8013,7 @@ mod tests {
         assert_eq!(c.package_rules[0].enabled, Some(false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rules_disable_via_name() {
         let c = RepoConfig::parse(
@@ -7988,6 +8023,7 @@ mod tests {
         assert!(!c.is_dep_ignored("react"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rules_disable_via_pattern() {
         let c = RepoConfig::parse(
@@ -8021,6 +8057,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&scoped).automerge, Some(true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_package_names_glob_negation() {
         // "!@babel/**" excludes the whole @babel scope
@@ -8033,6 +8070,7 @@ mod tests {
 
     // ── Ported from Renovate package-names.spec.ts ───────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_package_names_uses_package_name_when_set() {
         // "should matchPackageName": packageName='def' matches ['def', 'ghi']
@@ -8051,6 +8089,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_package_names_with_dep_name_and_package_name() {
         // "should return false if not matching": depName='abc', packageName='def', rule=['ghi']
@@ -8069,6 +8108,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rules_enabled_true_does_not_ignore() {
         let c = RepoConfig::parse(
@@ -8077,6 +8117,7 @@ mod tests {
         assert!(!c.is_dep_ignored("lodash"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rules_match_managers_respected() {
         let c = RepoConfig::parse(
@@ -8098,6 +8139,7 @@ mod tests {
 
     // ── matchManagers glob/regex/negation (Renovate-compat) ──────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_glob_pattern() {
         let c = RepoConfig::parse(
@@ -8109,6 +8151,7 @@ mod tests {
         assert!(!rule.manager_matches("cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_regex_pattern() {
         let c = RepoConfig::parse(
@@ -8120,6 +8163,7 @@ mod tests {
         assert!(!rule.manager_matches("cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_negation() {
         // ["npm", "!cargo"] means: match npm but exclude cargo
@@ -8131,6 +8175,7 @@ mod tests {
         assert!(!rule.manager_matches("cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_custom_prefix() {
         // Renovate uses "custom.regex" to target the regex custom manager.
@@ -8179,6 +8224,7 @@ mod tests {
 
     // ── Ported from Renovate managers.spec.ts ────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_no_manager_no_rule_fire() {
         // "should return false if no manager": undefined manager + matchManagers set → rule doesn't fire.
@@ -8197,6 +8243,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_undefined_rule_fires_for_any_manager() {
         // "should return null if matchManagers is undefined": no matchManagers → matches any manager.
@@ -8213,6 +8260,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_legacy_regex_matches_custom_regex_rule() {
         // "should match custom managers": manager:'regex' (legacy) matches matchManagers:['custom.regex']
@@ -8231,6 +8279,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_renovate_config_presets_migrated_to_renovate_config() {
         // Ported: "migrates old custom manager syntax to new one" (renovate-config-presets → renovate-config)
@@ -8276,6 +8325,7 @@ mod tests {
         assert!(!c.is_dep_ignored_with_dep_type("lodash", "npm", ""));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_types_empty_matches_all() {
         let c = RepoConfig::parse(
@@ -8286,6 +8336,7 @@ mod tests {
         assert!(c.is_dep_ignored_with_dep_type("lodash", "npm", "devDependencies"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_types_glob_pattern() {
         // "dev*" should match "devDependencies" but not "dependencies" or "peerDependencies"
@@ -8298,6 +8349,7 @@ mod tests {
         assert!(!rule.dep_type_matches("peerDependencies"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_types_negation() {
         // ["dependencies", "!devDependencies"] → matches production but not dev
@@ -8348,6 +8400,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_types_enabled_false_via_ctx_blocks_dev_dep() {
         // Regression: is_update_blocked_ctx must include dep_type in context so
@@ -8379,6 +8432,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_version_restricted_ctx_uses_dep_type() {
         // Regression: is_version_restricted_ctx must use the dep_type in context
@@ -8429,6 +8483,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_types_plural_array_no_match() {
         // dep has dep_types: ['build', 'optional'], rule requires ['test'] → no match
@@ -8609,6 +8664,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_datasources_glob_pattern() {
         let c = RepoConfig::parse(
@@ -8619,6 +8675,7 @@ mod tests {
         assert!(!rule.datasource_matches("pypi"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_datasources_negation() {
         // ["npm", "!docker"] → matches npm but not docker
@@ -8666,6 +8723,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, None);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rules_multiple_names_match_any() {
         let c = RepoConfig::parse(
@@ -8676,6 +8734,7 @@ mod tests {
         assert!(!c.is_dep_ignored("dayjs"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rules_invalid_regex_skipped() {
         let c = RepoConfig::parse(
@@ -8685,6 +8744,7 @@ mod tests {
         assert!(!c.is_dep_ignored("anything"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rules_no_name_constraint_matches_all() {
         let c = RepoConfig::parse(
@@ -8699,6 +8759,7 @@ mod tests {
 
     // ── matchUpdateTypes tests ────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_update_types_parsed() {
         let c = RepoConfig::parse(
@@ -8716,6 +8777,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_update_blocked_major_only() {
         let c = RepoConfig::parse(
@@ -8731,6 +8793,7 @@ mod tests {
         assert!(!c.is_update_blocked("serde", "1.0.0", UpdateType::Patch, "cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_update_blocked_with_package_name_filter() {
         let c = RepoConfig::parse(
@@ -8747,6 +8810,7 @@ mod tests {
         assert!(!c.is_update_blocked("tokio", "1.0.0", UpdateType::Major, "cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_update_types_bump_parses() {
         // "bump" must be recognized as UpdateType::Bump (not filtered out as unknown).
@@ -8759,6 +8823,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_bump_matches_bump_update_type_rule() {
         // Ported from Renovate index.spec.ts "applies" test:
@@ -8797,6 +8862,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx).labels, vec!["patch-or-minor"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_update_blocked_multiple_types() {
         let c = RepoConfig::parse(
@@ -8812,6 +8878,7 @@ mod tests {
         assert!(!c.is_update_blocked("anything", "1.0.0", UpdateType::Patch, "cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_update_blocked_unknown_type_strings_skipped() {
         let c = RepoConfig::parse(
@@ -8827,6 +8894,7 @@ mod tests {
         assert!(!c.is_update_blocked("serde", "1.0.0", UpdateType::Major, "cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn mixed_known_unknown_update_types_still_match_known() {
         let c = RepoConfig::parse(
@@ -8843,6 +8911,7 @@ mod tests {
         assert!(!c.is_update_blocked("serde", "1.0.0", UpdateType::Minor, "cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_update_blocked_ctx_fires_without_update_type() {
         // Regression: enabled:false should block even when update_type is None
@@ -8888,6 +8957,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn is_update_blocked_ctx_non_matching_manager_not_blocked() {
         let c = RepoConfig::parse(
@@ -8906,6 +8976,7 @@ mod tests {
 
     // ── allowedVersions tests ─────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn allowed_versions_restricts_outside_range() {
         let c = RepoConfig::parse(
@@ -8917,12 +8988,14 @@ mod tests {
         assert!(c.is_version_restricted("serde", "cargo", "2.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn allowed_versions_no_rule_means_no_restriction() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(!c.is_version_restricted("serde", "cargo", "99.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn allowed_versions_last_rule_wins() {
         // First rule restricts to < 2.0, second rule (matching serde) allows any >= 1.0.
@@ -8941,6 +9014,7 @@ mod tests {
         assert!(c.is_version_restricted("react", "npm", "2.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn allowed_versions_gte_constraint() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"allowedVersions": ">= 1.0.0"}]}"#);
@@ -8949,6 +9023,7 @@ mod tests {
         assert!(c.is_version_restricted("anything", "cargo", "0.9.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn allowed_versions_regex_allows_matching_version() {
         let c = RepoConfig::parse(
@@ -8960,6 +9035,7 @@ mod tests {
         assert!(c.is_version_restricted("foo", "cargo", "2.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn allowed_versions_regex_non_semver_version() {
         let c = RepoConfig::parse(
@@ -8970,6 +9046,7 @@ mod tests {
         assert!(c.is_version_restricted("img", "docker", "v2.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn allowed_versions_exact_string_match() {
         let c = RepoConfig::parse(
@@ -8979,6 +9056,7 @@ mod tests {
         assert!(c.is_version_restricted("foo", "cargo", "1.2.4"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn allowed_versions_respects_manager_filter() {
         let c = RepoConfig::parse(
@@ -8990,6 +9068,7 @@ mod tests {
 
     // ── matchCurrentVersion tests ─────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_parsed() {
         let c = RepoConfig::parse(
@@ -9001,6 +9080,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_blocks_when_below_range() {
         let c = RepoConfig::parse(
@@ -9012,6 +9092,7 @@ mod tests {
         assert!(!c.is_update_blocked("anything", "2.1.0", UpdateType::Major, "cargo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_range_requires_current_version() {
         // Mirrors Renovate index.spec.ts: "checks if matchCurrentVersion selector is valid
@@ -9070,6 +9151,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_absent_matches_all() {
         let c = RepoConfig::parse(
@@ -9080,6 +9162,7 @@ mod tests {
         assert!(c.is_update_blocked("pkg", "99.0.0", UpdateType::Major, "npm"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_regex_against_current_value() {
         // Regex pattern in matchCurrentVersion is matched against the raw currentValue
@@ -9095,6 +9178,7 @@ mod tests {
         assert!(!rule.current_version_matches("1.0.0", None, None));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_negated_regex() {
         // !/^0/ means: current version does NOT match /^0/
@@ -9111,6 +9195,7 @@ mod tests {
         assert!(rule.current_version_matches("2.5.3", None, None));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_stable_non_major_preset_blocks_zero_deps() {
         // :automergeStableNonMajor uses matchCurrentVersion: "!/^0/"
@@ -9142,6 +9227,7 @@ mod tests {
 
     // ── Ported from Renovate current-version.spec.ts (lockedVersion) ──────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_regex_prefers_locked_version() {
         // Ported: "return true for regex version match" test from current-version.spec.ts.
@@ -9313,6 +9399,7 @@ mod tests {
 
     // ── matchFileNames tests ──────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_file_names_parsed() {
         let c = RepoConfig::parse(
@@ -9321,6 +9408,7 @@ mod tests {
         assert_eq!(c.package_rules[0].match_file_names, vec!["**/test/**"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_file_names_blocks_matching_path() {
         let c = RepoConfig::parse(
@@ -9364,6 +9452,7 @@ mod tests {
         ));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_file_names_absent_matches_all_files() {
         let c = RepoConfig::parse(
@@ -9387,6 +9476,7 @@ mod tests {
 
     // ── matchPackageNames glob / regex / prefix tests ─────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_package_names_glob_pattern() {
         let c = RepoConfig::parse(
@@ -9398,6 +9488,7 @@ mod tests {
         assert!(!c.is_dep_ignored("express"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_package_names_inline_regex() {
         let c = RepoConfig::parse(
@@ -9408,6 +9499,7 @@ mod tests {
         assert!(!c.is_dep_ignored("@gcp/storage"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_package_prefixes_converted_to_glob() {
         // `matchPackagePrefixes` is a deprecated field — converted to `prefix**` globs.
@@ -9419,6 +9511,7 @@ mod tests {
         assert!(!c.is_dep_ignored("@react/core"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_package_prefixes_multiple_prefixes() {
         let c = RepoConfig::parse(
@@ -9431,6 +9524,7 @@ mod tests {
 
     // ── ignoreVersions tests ──────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn global_ignore_versions_exact_match() {
         let c = RepoConfig::parse(r#"{"ignoreVersions": ["1.0.0-beta"]}"#);
@@ -9438,6 +9532,7 @@ mod tests {
         assert!(!c.is_version_ignored("lodash", "npm", "1.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn global_ignore_versions_semver_range() {
         let c = RepoConfig::parse(r#"{"ignoreVersions": ["< 2.0"]}"#);
@@ -9446,6 +9541,7 @@ mod tests {
         assert!(!c.is_version_ignored("any", "npm", "3.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn global_ignore_versions_regex() {
         let c = RepoConfig::parse(r#"{"ignoreVersions": ["/beta/", "/rc/"]}"#);
@@ -9454,6 +9550,7 @@ mod tests {
         assert!(!c.is_version_ignored("pkg", "npm", "2.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_ignore_versions_scoped_to_matched_package() {
         let c = RepoConfig::parse(
@@ -9472,6 +9569,7 @@ mod tests {
         assert!(!c.is_version_ignored("moment", "npm", "2.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn empty_ignore_versions_ignores_nothing() {
         let c = RepoConfig::parse(r#"{}"#);
@@ -9578,6 +9676,7 @@ mod tests {
 
     // ── Ported from Renovate dep-names.spec.ts ────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_undefined_dep_name_does_not_fire() {
         // Ported: "should return false if packageFile is not defined" (depName: undefined).
@@ -9612,6 +9711,7 @@ mod tests {
         assert!(!c.is_dep_ignored("react"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_glob_disables_dep() {
         let c = RepoConfig::parse(
@@ -9626,6 +9726,7 @@ mod tests {
         assert!(!c.is_dep_ignored("lodash"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_and_package_names_both_must_match() {
         // Rule has both matchPackageNames and matchDepNames — both must fire.
@@ -9645,6 +9746,7 @@ mod tests {
         // correctly requires both to fire for "lodash".)
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_no_constraint_matches_all() {
         // No matchDepNames set → dep_name_matches always true → name_matches still governs.
@@ -9660,6 +9762,7 @@ mod tests {
         assert!(!c.is_dep_ignored("express"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_prefixes_converted_to_glob() {
         // Deprecated matchDepPrefixes → "prefix**" globs in matchDepNames.
@@ -9672,6 +9775,7 @@ mod tests {
         assert!(!c.is_update_blocked_ctx(&ctx2));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_patterns_converted_to_regex() {
         // Deprecated matchDepPatterns → "/pattern/" strings in matchDepNames.
@@ -9684,6 +9788,7 @@ mod tests {
         assert!(!c.is_update_blocked_ctx(&ctx2));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_negation_regex() {
         // "!/^@opentelemetry/" excludes the whole @opentelemetry scope.
@@ -9696,6 +9801,7 @@ mod tests {
         assert!(rule.dep_name_matches("lodash"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_negation_glob() {
         // "!@opentelemetry/**" excludes the whole @opentelemetry scope via glob.
@@ -9707,6 +9813,7 @@ mod tests {
         assert!(rule.dep_name_matches("express"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_regex_includes() {
         // "/^@opentelemetry/" positive match
@@ -9720,6 +9827,7 @@ mod tests {
 
     // ── matchDatasources ─────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_datasources_method_matches_listed_datasource() {
         let c = RepoConfig::parse(
@@ -9737,6 +9845,7 @@ mod tests {
         assert!(!rule.datasource_matches("docker"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_datasources_empty_matches_all() {
         let c = RepoConfig::parse(
@@ -9755,6 +9864,7 @@ mod tests {
 
     // ── Metadata config fields ───────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_parsed_into_repo_config() {
         let c = RepoConfig::parse(r#"{"schedule": ["before 5am", "every weekend"]}"#);
@@ -9777,12 +9887,14 @@ mod tests {
         assert_eq!(c.schedule, vec!["every weekday"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_every_monday_migrated() {
         let c = RepoConfig::parse(r#"{"schedule": ["every monday"]}"#);
         assert_eq!(c.schedule, vec!["on monday"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_default_is_empty() {
         let c = RepoConfig::parse(r#"{}"#);
@@ -9811,6 +9923,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_compound_after_before_splits_at_midnight_boundary() {
         // "after 10pm and before 7am" — 10pm (22) > 7am (7) → straddling midnight → split
@@ -9823,6 +9936,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_compound_split_with_day_suffix() {
         // "after 10pm and before 7am on every weekday" → split + "on every weekday" → "every weekday"
@@ -9945,6 +10059,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_every_weekday_not_migrated_by_list() {
         // "every weekday" is left as-is (handled natively by the scheduler)
@@ -9959,18 +10074,21 @@ mod tests {
         assert_eq!(c.schedule, vec!["after 5:00pm on wednesday and thursday"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn timezone_parsed() {
         let c = RepoConfig::parse(r#"{"timezone": "America/New_York"}"#);
         assert_eq!(c.timezone.as_deref(), Some("America/New_York"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_defaults_false() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(!c.automerge);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_parsed_true() {
         let c = RepoConfig::parse(r#"{"automerge": true}"#);
@@ -9991,6 +10109,7 @@ mod tests {
         assert!(c.automerge, "automerge: 'any' must migrate to true");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_commits_bool_true_migrated_to_enabled() {
         let c = RepoConfig::parse(r#"{"semanticCommits": true}"#);
@@ -10001,6 +10120,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_commits_bool_false_migrated_to_disabled() {
         let c = RepoConfig::parse(r#"{"semanticCommits": false}"#);
@@ -10019,6 +10139,7 @@ mod tests {
         assert_eq!(c.semantic_commit_scope, "");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn base_branch_singular_prepended_to_base_branches() {
         let c = RepoConfig::parse(r#"{"baseBranch": "develop"}"#);
@@ -10028,6 +10149,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn default_template_options_parsed() {
         let c = RepoConfig::parse(
@@ -10051,6 +10173,7 @@ mod tests {
         assert_eq!(c.commit_message_lower_case, "never");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn separate_major_releases_alias_for_separate_major_minor() {
         let c = RepoConfig::parse(r#"{"separateMajorReleases": false}"#);
@@ -10060,6 +10183,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_node_modules_true_adds_to_ignore_paths() {
         let c = RepoConfig::parse(r#"{"ignoreNodeModules": true}"#);
@@ -10069,6 +10193,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn enabled_managers_yarn_migrated_to_npm() {
         let c = RepoConfig::parse(r#"{"enabledManagers": ["yarn", "cargo"]}"#);
@@ -10083,12 +10208,14 @@ mod tests {
         assert!(c.enabled_managers.contains(&"cargo".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn labels_parsed() {
         let c = RepoConfig::parse(r#"{"labels": ["dependencies", "renovate"]}"#);
         assert_eq!(c.labels, vec!["dependencies", "renovate"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn branch_prefix_default() {
         let c = RepoConfig::parse(r#"{}"#);
@@ -10096,6 +10223,7 @@ mod tests {
         assert_eq!(c.branch_prefix_old, "renovate/");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn branch_prefix_custom() {
         let c = RepoConfig::parse(r#"{"branchPrefix": "deps/", "branchPrefixOld": "old/"}"#);
@@ -10103,18 +10231,21 @@ mod tests {
         assert_eq!(c.branch_prefix_old, "old/");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn additional_branch_prefix_default_empty() {
         let c = RepoConfig::parse(r#"{}"#);
         assert_eq!(c.additional_branch_prefix, "");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn additional_branch_prefix_parsed() {
         let c = RepoConfig::parse(r#"{"additionalBranchPrefix": "chore-"}"#);
         assert_eq!(c.additional_branch_prefix, "chore-");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn base_branches_parsed() {
         let c = RepoConfig::parse(r#"{"baseBranches": ["main", "develop"]}"#);
@@ -10131,6 +10262,7 @@ mod tests {
         assert_eq!(c.base_branches, vec!["next"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn base_branch_patterns_parsed() {
         // baseBranchPatterns is the new canonical name; old baseBranches still supported.
@@ -10138,6 +10270,7 @@ mod tests {
         assert_eq!(c.base_branches, vec!["main", "dev"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn base_branch_patterns_merged_with_base_branches() {
         // Both fields provided: merge without duplicates.
@@ -10149,30 +10282,35 @@ mod tests {
         assert_eq!(c.base_branches.len(), 2);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn use_base_branch_config_parsed() {
         let c = RepoConfig::parse(r#"{"useBaseBranchConfig": "merge"}"#);
         assert_eq!(c.use_base_branch_config, "merge");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn rebase_when_parsed() {
         let c = RepoConfig::parse(r#"{"rebaseWhen": "behind-base-branch"}"#);
         assert_eq!(c.rebase_when.as_deref(), Some("behind-base-branch"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn rebase_stale_prs_preset_sets_rebase_when() {
         let c = RepoConfig::parse(r#"{"extends": [":rebaseStalePrs"]}"#);
         assert_eq!(c.rebase_when.as_deref(), Some("behind-base-branch"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn rebase_when_default_none() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(c.rebase_when.is_none());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn commit_body_parsed_from_config() {
         let c = RepoConfig::parse(r#"{"commitBody": "Signed-off-by: Bot <bot@example.com>"}"#);
@@ -10182,6 +10320,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_body_metadata_options_parsed() {
         let c = RepoConfig::parse(
@@ -10231,6 +10370,7 @@ mod tests {
         assert_eq!(c.pr_footer, "Goodbye");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_body_table_defaults_match_renovate() {
         let c = RepoConfig::parse(r#"{}"#);
@@ -10261,6 +10401,7 @@ mod tests {
         assert!(c.pr_body_notes.is_empty());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn notification_and_platform_pr_options_parsed() {
         let c = RepoConfig::parse(
@@ -10275,6 +10416,7 @@ mod tests {
         assert!(c.git_lab_ignore_approvals);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn user_strings_log_remap_and_milestone_parsed() {
         let c = RepoConfig::parse(
@@ -10299,6 +10441,7 @@ mod tests {
         assert_eq!(c.milestone, Some(7));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn git_author_parsed_from_config() {
         let c = RepoConfig::parse(r#"{"gitAuthor": "Renovate Bot <bot@renovateapp.com>"}"#);
@@ -10308,6 +10451,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn git_sign_off_preset_sets_commit_body() {
         let c = RepoConfig::parse(r#"{"extends": [":gitSignOff"]}"#);
@@ -10317,30 +10461,35 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn separate_major_minor_default_true() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(c.separate_major_minor);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn separate_minor_patch_default_false() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(!c.separate_minor_patch);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_hourly_limit_default() {
         let c = RepoConfig::parse(r#"{}"#);
         assert_eq!(c.pr_hourly_limit, 2);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn draft_pr_default_false() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(!c.draft_pr);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn enable_pre_commit_preset_adds_to_enabled_managers() {
         let c = RepoConfig::parse(r#"{"extends": [":enablePreCommit"]}"#);
@@ -10354,6 +10503,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pre_commit_disabled_by_default_without_preset() {
         let c = RepoConfig::parse(r#"{}"#);
@@ -10363,36 +10513,42 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn draft_pr_config() {
         let c = RepoConfig::parse(r#"{"draftPR": true}"#);
         assert!(c.draft_pr);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn azure_work_item_id_config() {
         let c = RepoConfig::parse(r#"{"azureWorkItemId": 12345}"#);
         assert_eq!(c.azure_work_item_id, 12345);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn auto_approve_config() {
         let c = RepoConfig::parse(r#"{"autoApprove": true}"#);
         assert!(c.auto_approve);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn assign_automerge_default_false() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(!c.assign_automerge);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn assign_automerge_config() {
         let c = RepoConfig::parse(r#"{"assignAutomerge": true}"#);
         assert!(c.assign_automerge);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_participant_options_parsed() {
         let c = RepoConfig::parse(
@@ -10421,6 +10577,7 @@ mod tests {
         assert_eq!(c.additional_reviewers, vec!["team-a"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_platform_options_parsed() {
         let c = RepoConfig::parse(
@@ -10439,6 +10596,7 @@ mod tests {
         assert!(!c.bb_use_default_reviewers);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn security_cleanup_options_parsed() {
         let c = RepoConfig::parse(
@@ -10455,6 +10613,7 @@ mod tests {
         assert!(!c.prune_branch_after_automerge);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn customize_dashboard_object_is_retained() {
         let c = RepoConfig::parse(
@@ -10474,6 +10633,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn vulnerability_alerts_config_parsed_with_defaults() {
         let c = RepoConfig::parse(
@@ -10510,6 +10670,7 @@ mod tests {
         assert_eq!(c.vulnerability_alerts.vulnerability_fix_strategy, "highest");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn lock_file_maintenance_config_parsed_with_defaults() {
         let c = RepoConfig::parse(
@@ -10551,12 +10712,14 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn platform_automerge_default_true() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(c.platform_automerge, "platformAutomerge defaults to true");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn platform_automerge_explicit() {
         let c = RepoConfig::parse(r#"{"platformAutomerge": false}"#);
@@ -10591,6 +10754,7 @@ mod tests {
         assert!(c.platform_automerge);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn platform_automerge_takes_precedence_over_deprecated_aliases() {
         // Explicit platformAutomerge overrides azureAutoComplete.
@@ -10598,12 +10762,14 @@ mod tests {
         assert!(!c.platform_automerge, "explicit platformAutomerge wins");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn recreate_when_parsed() {
         let c = RepoConfig::parse(r#"{"recreateWhen": "always"}"#);
         assert_eq!(c.recreate_when, "always");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_control_labels_parsed() {
         let c = RepoConfig::parse(
@@ -10614,12 +10780,14 @@ mod tests {
         assert_eq!(c.stop_updating_label, "freeze");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_hourly_limit_custom() {
         let c = RepoConfig::parse(r#"{"prHourlyLimit": 5}"#);
         assert_eq!(c.pr_hourly_limit, 5);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_and_branch_limit_options_parsed() {
         let c = RepoConfig::parse(
@@ -10630,18 +10798,21 @@ mod tests {
         assert_eq!(c.branch_concurrent_limit, Some(2));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn minimum_group_size_parsed() {
         let c = RepoConfig::parse(r#"{"minimumGroupSize": 3}"#);
         assert_eq!(c.minimum_group_size, 3);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_name_parsed_at_repo_level() {
         let c = RepoConfig::parse(r#"{"groupName": "all-deps"}"#);
         assert_eq!(c.group_name.as_deref(), Some("all-deps"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_config_parsed_with_defaults() {
         let c = RepoConfig::parse(r#"{"group": {"commitMessageTopic": "all {{groupName}}"}}"#);
@@ -10649,6 +10820,7 @@ mod tests {
         assert_eq!(c.group.commit_message_topic, "all {{groupName}}");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_group_name_parsed() {
         let c = RepoConfig::parse(
@@ -10660,6 +10832,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_automerge_parsed() {
         let c = RepoConfig::parse(
@@ -10668,6 +10841,7 @@ mod tests {
         assert_eq!(c.package_rules[0].automerge, Some(true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_schedule_parsed() {
         let c = RepoConfig::parse(
@@ -10676,6 +10850,7 @@ mod tests {
         assert_eq!(c.package_rules[0].schedule, vec!["every weekend"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn reviewers_and_assignees_parsed() {
         let c = RepoConfig::parse(r#"{"reviewers": ["user1", "user2"], "assignees": ["user3"]}"#);
@@ -10685,12 +10860,14 @@ mod tests {
 
     // ── extends preset resolution ────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn extends_field_stored() {
         let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
         assert_eq!(c.extends, vec!["config:recommended"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_presets_filters_before_resolution() {
         // :semanticCommits would normally set semantic_commits = "enabled".
@@ -10705,6 +10882,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_presets_partial_suppression() {
         // Suppress :semanticCommits but keep :ignoreModulesAndTests.
@@ -10718,6 +10896,7 @@ mod tests {
         assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_presets_stored_on_config() {
         let c = RepoConfig::parse(
@@ -10726,6 +10905,7 @@ mod tests {
         assert_eq!(c.ignore_presets, vec![":semanticPrefixFixDepsChoreOthers"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_presets_suppresses_separate_minor_patch() {
         // :automergePatch normally sets preset_separate_minor_patch = true.
@@ -10736,6 +10916,7 @@ mod tests {
         assert!(!c.separate_minor_patch);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pin_dependencies_preset_injects_range_strategy_rule() {
         let c = RepoConfig::parse(r#"{"extends": [":pinDependencies"]}"#);
@@ -10751,6 +10932,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pin_dev_dependencies_preset_injects_rule() {
         let c = RepoConfig::parse(r#"{"extends": [":pinDevDependencies"]}"#);
@@ -10766,6 +10948,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preserve_semver_ranges_preset_injects_replace_rule() {
         let c = RepoConfig::parse(r#"{"extends": [":preserveSemverRanges"]}"#);
@@ -10776,6 +10959,7 @@ mod tests {
         assert!(rule.is_some(), "expected a replace rangeStrategy rule");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn range_strategy_in_package_rule_collects_into_effects() {
         let c = RepoConfig::parse(
@@ -10786,6 +10970,7 @@ mod tests {
         assert_eq!(effects.range_strategy.as_deref(), Some("pin"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn range_strategy_last_rule_wins() {
         let c = RepoConfig::parse(
@@ -10799,6 +10984,7 @@ mod tests {
         assert_eq!(effects.range_strategy.as_deref(), Some("replace"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn follow_tag_in_package_rule_collects_into_effects() {
         let c = RepoConfig::parse(
@@ -10809,6 +10995,7 @@ mod tests {
         assert_eq!(effects.follow_tag.as_deref(), Some("next"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn versioning_in_package_rule_collects_into_effects() {
         let c = RepoConfig::parse(
@@ -10819,6 +11006,7 @@ mod tests {
         assert_eq!(effects.versioning.as_deref(), Some("docker"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn versioning_last_rule_wins() {
         let c = RepoConfig::parse(
@@ -10834,6 +11022,7 @@ mod tests {
 
     // ── pinDigests ───────────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pin_digests_in_package_rule_collects_into_effects() {
         let c = RepoConfig::parse(
@@ -10848,6 +11037,7 @@ mod tests {
         assert_eq!(effects.pin_digests, Some(true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn docker_pin_digests_preset_injects_docker_rule() {
         let c = RepoConfig::parse(r#"{"extends": ["docker:pinDigests"]}"#);
@@ -10857,6 +11047,7 @@ mod tests {
         assert!(rule.match_datasources.contains(&"docker".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn helpers_pin_github_action_digests_preset_pins_actions() {
         let c = RepoConfig::parse(r#"{"extends": ["helpers:pinGitHubActionDigests"]}"#);
@@ -10866,6 +11057,7 @@ mod tests {
         assert!(rule.match_dep_types.contains(&"action".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_recommended_adds_ignore_modules_and_tests_paths() {
         let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
@@ -10879,6 +11071,7 @@ mod tests {
         assert!(c.ignore_paths.contains(&"**/__tests__/**".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_recommended_enables_dependency_dashboard() {
         let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
@@ -10888,6 +11081,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_best_practices_includes_config_migration() {
         let c = RepoConfig::parse(r#"{"extends": ["config:best-practices"]}"#);
@@ -10897,6 +11091,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn helpers_pin_github_action_digests_to_semver_injects_rule() {
         let c = RepoConfig::parse(r#"{"extends": ["helpers:pinGitHubActionDigestsToSemver"]}"#);
@@ -10917,6 +11112,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_modules_and_tests_preset_direct() {
         let c = RepoConfig::parse(r#"{"extends": [":ignoreModulesAndTests"]}"#);
@@ -10924,6 +11120,7 @@ mod tests {
         assert!(c.ignore_paths.contains(&"**/__fixtures__/**".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn user_ignore_paths_appended_after_preset_paths() {
         let c = RepoConfig::parse(
@@ -10935,6 +11132,7 @@ mod tests {
         assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn unknown_preset_ignored() {
         let c = RepoConfig::parse(r#"{"extends": ["github>org/repo"]}"#);
@@ -10943,18 +11141,21 @@ mod tests {
         assert!(c.ignore_paths.is_empty()); // no paths added
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_commits_preset_sets_field() {
         let c = RepoConfig::parse(r#"{"extends": [":semanticCommits"]}"#);
         assert_eq!(c.semantic_commits.as_deref(), Some("enabled"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_commits_disabled_preset() {
         let c = RepoConfig::parse(r#"{"extends": [":semanticCommitsDisabled"]}"#);
         assert_eq!(c.semantic_commits.as_deref(), Some("disabled"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn explicit_semantic_commits_overrides_preset() {
         // Explicit field wins over :semanticCommits preset.
@@ -10963,12 +11164,14 @@ mod tests {
         assert_eq!(c.semantic_commits.as_deref(), Some("auto"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_base_adds_ignore_paths() {
         let c = RepoConfig::parse(r#"{"extends": ["config:base"]}"#);
         assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_js_app_expands_to_recommended_plus_pin_all() {
         // config:js-app = config:recommended + :pinAllExceptPeerDependencies
@@ -10986,6 +11189,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_js_lib_expands_to_recommended_plus_pin_dev() {
         // config:js-lib = config:recommended + :pinOnlyDevDependencies
@@ -11001,6 +11205,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_semver_all_monthly_expands_to_group_all_and_schedule() {
         let c = RepoConfig::parse(r#"{"extends": ["config:semverAllMonthly"]}"#);
@@ -11010,6 +11215,7 @@ mod tests {
         assert!(!c.separate_major_minor);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_semver_all_weekly_expands_to_group_all_and_schedule() {
         let c = RepoConfig::parse(r#"{"extends": ["config:semverAllWeekly"]}"#);
@@ -11018,6 +11224,7 @@ mod tests {
         assert!(!c.separate_major_minor);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn duplicate_preset_deduplicated() {
         let c =
@@ -11041,24 +11248,28 @@ mod tests {
 mod schedule_preset_tests {
     use super::*;
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_daily_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:daily"]}"#);
         assert_eq!(c.schedule, vec!["* 0-3 * * *"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_weekly_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:weekly"]}"#);
         assert_eq!(c.schedule, vec!["* 0-3 * * 1"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_monthly_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:monthly"]}"#);
         assert_eq!(c.schedule, vec!["* 0-3 1 * *"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_non_office_hours_preset_has_two_entries() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:nonOfficeHours"]}"#);
@@ -11067,30 +11278,35 @@ mod schedule_preset_tests {
         assert!(c.schedule.contains(&"* * * * 0,6".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_weekdays_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:weekdays"]}"#);
         assert_eq!(c.schedule, vec!["* * * * 1-5"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_weekends_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:weekends"]}"#);
         assert_eq!(c.schedule, vec!["* * * * 0,6"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_quarterly_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:quarterly"]}"#);
         assert_eq!(c.schedule, vec!["* * 1 */3 *"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn schedule_yearly_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:yearly"]}"#);
         assert_eq!(c.schedule, vec!["* * 1 */12 *"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn explicit_schedule_overrides_preset() {
         let c =
@@ -11099,6 +11315,7 @@ mod schedule_preset_tests {
         assert_eq!(c.schedule, vec!["before 5am"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn last_schedule_preset_wins() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:daily", "schedule:monthly"]}"#);
@@ -11106,12 +11323,14 @@ mod schedule_preset_tests {
         assert_eq!(c.schedule, vec!["* 0-3 1 * *"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn no_schedule_preset_leaves_schedule_empty() {
         let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
         assert!(c.schedule.is_empty());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_recommended_injects_group_recommended_rules() {
         // config:recommended transitively includes group:recommended.
@@ -11133,6 +11352,7 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn config_recommended_includes_semantic_prefix_rules() {
         // config:recommended transitively extends :semanticPrefixFixDepsChoreOthers.
@@ -11154,24 +11374,28 @@ mod schedule_preset_tests {
 
     // ── automergeSchedule ────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_schedule_default_is_at_any_time() {
         let c = RepoConfig::parse(r#"{}"#);
         assert_eq!(c.automerge_schedule, vec!["at any time"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_schedule_from_json_config() {
         let c = RepoConfig::parse(r#"{"automergeSchedule": ["before 5am"]}"#);
         assert_eq!(c.automerge_schedule, vec!["before 5am"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_schedule_daily_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:automergeDaily"]}"#);
         assert_eq!(c.automerge_schedule, vec!["* 0-3 * * *"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_schedule_weekly_preset() {
         // schedule:automergeWeekly is an alias for schedule:automergeEarlyMondays
@@ -11179,6 +11403,7 @@ mod schedule_preset_tests {
         assert_eq!(c.automerge_schedule, vec!["* 0-3 * * 1"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_schedule_non_office_hours() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:automergeNonOfficeHours"]}"#);
@@ -11188,6 +11413,7 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn explicit_automerge_schedule_overrides_preset() {
         let c = RepoConfig::parse(
@@ -11196,6 +11422,7 @@ mod schedule_preset_tests {
         assert_eq!(c.automerge_schedule, vec!["before 5am"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_schedule_does_not_affect_schedule() {
         // automergeSchedule and schedule are independent fields.
@@ -11204,12 +11431,14 @@ mod schedule_preset_tests {
         assert_eq!(c.automerge_schedule, vec!["* 0-3 * * *"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_all_preset_sets_automerge_true() {
         let c = RepoConfig::parse(r#"{"extends": [":automergeAll"]}"#);
         assert!(c.automerge);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_minor_preset_injects_packagerules_not_global() {
         // :automergeMinor does NOT set global automerge; instead it injects
@@ -11245,6 +11474,7 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_patch_preset_injects_packagerules_for_patch_only() {
         use crate::versioning::semver_generic::UpdateType;
@@ -11275,6 +11505,7 @@ mod schedule_preset_tests {
         assert!(effects_minor.automerge.is_none() || effects_minor.automerge == Some(false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn explicit_automerge_false_overrides_preset() {
         // explicit automerge: false does NOT get overridden by :automergeAll
@@ -11283,6 +11514,7 @@ mod schedule_preset_tests {
         assert!(c.automerge, "preset should set automerge to true");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_linters_preset_injects_automerge_rule() {
         let c = RepoConfig::parse(r#"{"extends": [":automergeLinters"]}"#);
@@ -11294,6 +11526,7 @@ mod schedule_preset_tests {
         assert!(!rule.name_matches("lodash"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_types_preset_injects_types_rule() {
         let c = RepoConfig::parse(r#"{"extends": [":automergeTypes"]}"#);
@@ -11304,12 +11537,14 @@ mod schedule_preset_tests {
         assert!(!rule.name_matches("lodash"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn unknown_schedule_preset_leaves_empty() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:unknown"]}"#);
         assert!(c.schedule.is_empty());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disable_dev_dependencies_preset_blocks_dev_deps() {
         let c = RepoConfig::parse(r#"{"extends": [":disableDevDependencies"]}"#);
@@ -11333,6 +11568,7 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disable_major_updates_preset_blocks_major() {
         use crate::versioning::semver_generic::UpdateType;
@@ -11351,6 +11587,7 @@ mod schedule_preset_tests {
         assert!(!c.is_update_blocked_ctx(&ctx2));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disable_peer_dependencies_preset() {
         let c = RepoConfig::parse(r#"{"extends": [":disablePeerDependencies"]}"#);
@@ -11370,6 +11607,7 @@ mod schedule_preset_tests {
 
     // ── security presets ─────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn security_minimum_release_age_npm_injects_rule() {
         let c = RepoConfig::parse(r#"{"extends": ["security:minimumReleaseAgeNpm"]}"#);
@@ -11384,6 +11622,7 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn unpublish_safe_preset_injects_npm_minimum_release_age() {
         let c = RepoConfig::parse(r#"{"extends": [":unpublishSafe"]}"#);
@@ -11451,6 +11690,7 @@ mod schedule_preset_tests {
         assert_eq!(c.extends, vec!["local>org/renovate-config"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn extends_js_app_shorthand_normalized() {
         // Ported: extends: ':js-app' → config:js-app (via removedPresets map).
@@ -11518,12 +11758,14 @@ mod schedule_preset_tests {
 
     // ── scalar config presets ─────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn combine_patch_minor_releases_clears_separate_minor_patch() {
         let c = RepoConfig::parse(r#"{"extends": ["combinePatchMinorReleases"]}"#);
         assert!(!c.separate_minor_patch);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn combine_patch_minor_releases_with_colon_prefix() {
         // `:combinePatchMinorReleases` is the canonical form users write in extends arrays.
@@ -11531,6 +11773,7 @@ mod schedule_preset_tests {
         assert!(!c.separate_minor_patch);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disable_rate_limiting_with_colon_prefix() {
         let c = RepoConfig::parse(r#"{"extends": [":disableRateLimiting"]}"#);
@@ -11538,12 +11781,14 @@ mod schedule_preset_tests {
         assert_eq!(c.pr_hourly_limit, 0);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn separate_patch_releases_sets_separate_minor_patch() {
         let c = RepoConfig::parse(r#"{"extends": ["separatePatchReleases"]}"#);
         assert!(c.separate_minor_patch);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn separate_multiple_major_releases_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["separateMultipleMajorReleases"]}"#);
@@ -11551,12 +11796,14 @@ mod schedule_preset_tests {
         assert!(c.separate_multiple_major);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn separate_multiple_minor_releases_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["separateMultipleMinorReleases"]}"#);
         assert!(c.separate_multiple_minor);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn widen_peer_dependencies_preset_injects_rule() {
         let c = RepoConfig::parse(r#"{"extends": [":widenPeerDependencies"]}"#);
@@ -11573,42 +11820,49 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_unstable_preset_sets_field() {
         let c = RepoConfig::parse(r#"{"extends": [":ignoreUnstable"]}"#);
         assert!(c.ignore_unstable);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_unstable_direct_config() {
         let c = RepoConfig::parse(r#"{"ignoreUnstable": true}"#);
         assert!(c.ignore_unstable);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn update_not_scheduled_default_true() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(c.update_not_scheduled);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn no_unscheduled_updates_preset_sets_false() {
         let c = RepoConfig::parse(r#"{"extends": [":noUnscheduledUpdates"]}"#);
         assert!(!c.update_not_scheduled);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn update_not_scheduled_direct_config() {
         let c = RepoConfig::parse(r#"{"updateNotScheduled": false}"#);
         assert!(!c.update_not_scheduled);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn timezone_parameterized_preset_sets_field() {
         let c = RepoConfig::parse(r#"{"extends": [":timezone(America/New_York)"]}"#);
         assert_eq!(c.timezone.as_deref(), Some("America/New_York"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn timezone_preset_does_not_override_explicit() {
         // Explicit timezone in JSON wins over preset.
@@ -11618,24 +11872,28 @@ mod schedule_preset_tests {
         assert_eq!(c.timezone.as_deref(), Some("Europe/London"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disable_renovate_preset_sets_enabled_false() {
         let c = RepoConfig::parse(r#"{"extends": [":disableRenovate"]}"#);
         assert!(!c.enabled);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn enable_renovate_preset_sets_enabled_true() {
         let c = RepoConfig::parse(r#"{"extends": [":enableRenovate"]}"#);
         assert!(c.enabled);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn separate_multiple_minor_direct_config() {
         let c = RepoConfig::parse(r#"{"separateMultipleMinor": true}"#);
         assert!(c.separate_multiple_minor);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn separate_multiple_minor_branch_topic() {
         use crate::branch::branch_topic;
@@ -11651,18 +11909,21 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_hourly_limit_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["prHourlyLimit1"]}"#);
         assert_eq!(c.pr_hourly_limit, 1);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn pr_concurrent_limit_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["prConcurrentLimit10"]}"#);
         assert_eq!(c.pr_concurrent_limit, 10);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disable_rate_limiting_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["disableRateLimiting"]}"#);
@@ -11672,12 +11933,14 @@ mod schedule_preset_tests {
 
     // ── parameterized presets ─────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn label_preset_adds_label() {
         let c = RepoConfig::parse(r#"{"extends": ["label(renovate)"]}"#);
         assert!(c.labels.contains(&"renovate".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn labels_preset_adds_multiple() {
         let c = RepoConfig::parse(r#"{"extends": ["labels(renovate, deps)"]}"#);
@@ -11685,6 +11948,7 @@ mod schedule_preset_tests {
         assert!(c.labels.contains(&"deps".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn label_preset_combined_with_existing_labels() {
         let c = RepoConfig::parse(r#"{"labels": ["existing"], "extends": ["label(renovate)"]}"#);
@@ -11692,18 +11956,21 @@ mod schedule_preset_tests {
         assert!(c.labels.contains(&"renovate".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn assignee_preset_adds_assignee() {
         let c = RepoConfig::parse(r#"{"extends": [":assignee(renovate-bot)"]}"#);
         assert!(c.assignees.contains(&"renovate-bot".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn reviewer_preset_adds_reviewer() {
         let c = RepoConfig::parse(r#"{"extends": [":reviewer(myteam)"]}"#);
         assert!(c.reviewers.contains(&"myteam".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn assign_and_review_compound_preset_expands() {
         // :assignAndReview(user) → :assignee(user) + :reviewer(user)
@@ -11718,6 +11985,7 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_prefix_chore_expands() {
         // :semanticPrefixChore → :semanticCommitType(chore)
@@ -11725,6 +11993,7 @@ mod schedule_preset_tests {
         assert_eq!(c.semantic_commit_type, "chore");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_prefix_fix_expands() {
         // :semanticPrefixFix → :semanticCommitType(fix)
@@ -11732,6 +12001,7 @@ mod schedule_preset_tests {
         assert_eq!(c.semantic_commit_type, "fix");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn do_not_pin_package_preset_injects_rule() {
         // :doNotPinPackage(react) → packageRule with matchPackageNames:["react"] rangeStrategy:replace
@@ -11748,6 +12018,7 @@ mod schedule_preset_tests {
         assert!(rule.match_package_names.contains(&"react".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn path_semantic_commit_type_preset_injects_rule() {
         // :pathSemanticCommitType(src/**,feat) → packageRule with matchFileNames:["src/**"] semanticCommitType:"feat"
@@ -11764,6 +12035,7 @@ mod schedule_preset_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn parse_preset_args_no_parens() {
         let (name, args) = super::parse_preset_args("group:all");
@@ -11771,6 +12043,7 @@ mod schedule_preset_tests {
         assert!(args.is_empty());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn parse_preset_args_single_arg() {
         let (name, args) = super::parse_preset_args("label(renovate)");
@@ -11778,6 +12051,7 @@ mod schedule_preset_tests {
         assert_eq!(args, vec!["renovate"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn parse_preset_args_multiple_args() {
         let (name, args) = super::parse_preset_args("labels(a, b, c)");
@@ -11785,18 +12059,21 @@ mod schedule_preset_tests {
         assert_eq!(args, vec!["a", "b", "c"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_commit_type_preset() {
         let c = RepoConfig::parse(r#"{"extends": [":semanticCommitType(fix)"]}"#);
         assert_eq!(c.semantic_commit_type, "fix");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_commit_scope_preset() {
         let c = RepoConfig::parse(r#"{"extends": [":semanticCommitScope(security)"]}"#);
         assert_eq!(c.semantic_commit_scope, "security");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn semantic_commit_scope_disabled_preset() {
         let c = RepoConfig::parse(r#"{"extends": [":semanticCommitScopeDisabled"]}"#);
@@ -11821,6 +12098,7 @@ mod source_url_tests {
         assert!(!rule.source_url_matches("https://github.com/other/repo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_source_urls_glob() {
         let c = RepoConfig::parse(
@@ -11879,6 +12157,7 @@ mod source_url_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_source_urls_regex() {
         let c = RepoConfig::parse(
@@ -11889,6 +12168,7 @@ mod source_url_tests {
         assert!(!rule.source_url_matches("https://gitlab.com/org/myrepo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_source_urls_empty_matches_all() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -11958,6 +12238,7 @@ mod source_url_tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_value_regex() {
         let c = RepoConfig::parse(
@@ -11969,6 +12250,7 @@ mod source_url_tests {
         assert!(!rule.current_value_matches("1.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_value_exact() {
         let c = RepoConfig::parse(
@@ -11979,6 +12261,7 @@ mod source_url_tests {
         assert!(!rule.current_value_matches("2.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_value_none_matches_all() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -11987,6 +12270,7 @@ mod source_url_tests {
         assert!(rule.current_value_matches("anything"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_new_value_glob() {
         let c =
@@ -11997,6 +12281,7 @@ mod source_url_tests {
         assert!(!rule.new_value_matches("2.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_new_value_none_matches_all() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -12005,6 +12290,7 @@ mod source_url_tests {
         assert!(rule.new_value_matches("99.0.0"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_value_regex_with_flags() {
         // Ported from lib/util/package-rules/current-value.spec.ts
@@ -12021,6 +12307,7 @@ mod source_url_tests {
 
     // ── Ported from current-value.spec.ts ─────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_value_undefined_returns_false() {
         // Ported: "return false for now value" test.
@@ -12056,6 +12343,7 @@ mod source_url_tests {
         assert!(!rule.new_value_matches(""));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_new_value_glob_match() {
         // Ported: "return true for glob match" + "return false for glob non match"
@@ -12151,6 +12439,7 @@ mod source_url_tests {
         assert_eq!(c.collect_rule_effects(&lib_ctx).automerge, Some(true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_file_names_lock_file_pattern_with_glob() {
         // matchFileNames with glob against lockFiles.
@@ -12189,6 +12478,7 @@ mod categories_base_branch_tests {
 
     // ── matchCategories ──────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_categories_exact_hit() {
         let c = RepoConfig::parse(
@@ -12200,6 +12490,7 @@ mod categories_base_branch_tests {
         assert!(!rule.categories_match(&[]));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_categories_any_of_many() {
         let c = RepoConfig::parse(
@@ -12212,6 +12503,7 @@ mod categories_base_branch_tests {
         assert!(!rule.categories_match(&["java"]));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_categories_empty_matches_all() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -12223,6 +12515,7 @@ mod categories_base_branch_tests {
 
     // ── matchBaseBranches ────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_base_branches_exact_hit() {
         let c = RepoConfig::parse(
@@ -12233,6 +12526,7 @@ mod categories_base_branch_tests {
         assert!(!rule.base_branch_matches("develop"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_base_branches_glob() {
         let c = RepoConfig::parse(
@@ -12245,6 +12539,7 @@ mod categories_base_branch_tests {
         assert!(!rule.base_branch_matches("feature/foo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_base_branches_empty_matches_all() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -12380,6 +12675,7 @@ mod categories_base_branch_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_categories_no_manager_dep_provided_categories_match() {
         // matchCategories fires even without a manager when dep has explicit categories.
@@ -12418,6 +12714,7 @@ mod registry_url_repository_tests {
         assert!(!rule.registry_url_matches(&["https://registry.corp.example"]));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_registry_urls_any_of_dep_urls() {
         // Rule has one pattern; dep has two registry URLs — match if ANY URL matches.
@@ -12431,6 +12728,7 @@ mod registry_url_repository_tests {
         ]));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_registry_urls_glob() {
         let c = RepoConfig::parse(
@@ -12441,6 +12739,7 @@ mod registry_url_repository_tests {
         assert!(!rule.registry_url_matches(&["https://registry.npmjs.org"]));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_registry_urls_empty_matches_all() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -12462,6 +12761,7 @@ mod registry_url_repository_tests {
 
     // ── matchRepositories ────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_exact_hit() {
         let c = RepoConfig::parse(
@@ -12472,6 +12772,7 @@ mod registry_url_repository_tests {
         assert!(!rule.repository_matches("owner/other"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_glob() {
         let c = RepoConfig::parse(
@@ -12483,6 +12784,7 @@ mod registry_url_repository_tests {
         assert!(!rule.repository_matches("other/repo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_regex() {
         let c = RepoConfig::parse(
@@ -12493,6 +12795,7 @@ mod registry_url_repository_tests {
         assert!(!rule.repository_matches("other/repo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_empty_matches_all() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -12501,6 +12804,7 @@ mod registry_url_repository_tests {
         assert!(rule.repository_matches("anyone/anything"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_negation() {
         // ["!owner/**"] excludes owner/* repos, permits others.
@@ -12512,6 +12816,7 @@ mod registry_url_repository_tests {
         assert!(rule.repository_matches("other-org/repo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_fires_only_for_matching_repo() {
         // packageRule with matchRepositories and automerge:true — verify rule fires
@@ -12555,6 +12860,7 @@ mod registry_url_repository_tests {
 
     // ── repositories.spec.ts additions ───────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_invalid_regex_returns_false() {
         // Invalid regex pattern: /[/ — Renovate returns false (no match).
@@ -12566,6 +12872,7 @@ mod registry_url_repository_tests {
         assert!(!rule.repository_matches("org/repo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_invalid_negated_regex_returns_true() {
         // Negated invalid regex: !/[/ — Renovate returns true (passes through).
@@ -12578,6 +12885,7 @@ mod registry_url_repository_tests {
         assert!(rule.repository_matches("org/repo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_repositories_any_of_patterns() {
         // Matches at least one pattern: regex OR glob.
@@ -12590,6 +12898,7 @@ mod registry_url_repository_tests {
         assert!(!rule.repository_matches("other/something")); // matches neither
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_source_urls_negation() {
         let c = RepoConfig::parse(
@@ -12600,6 +12909,7 @@ mod registry_url_repository_tests {
         assert!(rule.source_url_matches("https://github.com/good/pkg"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_registry_urls_negation() {
         let c = RepoConfig::parse(
@@ -12616,6 +12926,7 @@ mod dep_context_tests {
     use super::*;
 
     /// `matchManagers: ["npm"]` rule with `DepContext` that knows the manager.
+    // Rust-specific: repo config behavior test
     #[test]
     fn dep_context_with_manager_fires_correct_rule() {
         let c = RepoConfig::parse(
@@ -12632,6 +12943,7 @@ mod dep_context_tests {
     }
 
     /// `matchDatasources` fires correctly via DepContext.
+    // Rust-specific: repo config behavior test
     #[test]
     fn dep_context_datasource_gates_rule() {
         let c = RepoConfig::parse(
@@ -12653,6 +12965,7 @@ mod dep_context_tests {
     }
 
     /// `matchCategories: ["rust"]` fires when manager is cargo.
+    // Rust-specific: repo config behavior test
     #[test]
     fn dep_context_categories_from_manager() {
         let c = RepoConfig::parse(
@@ -12666,6 +12979,7 @@ mod dep_context_tests {
     }
 
     /// `matchRepositories` gates correctly via DepContext.
+    // Rust-specific: repo config behavior test
     #[test]
     fn dep_context_repository_gates_rule() {
         let c = RepoConfig::parse(
@@ -12687,6 +13001,7 @@ mod dep_context_tests {
     }
 
     /// Builder methods produce correct context.
+    // Rust-specific: repo config behavior test
     #[test]
     fn dep_context_builder_methods() {
         let ctx = DepContext::for_dep("react")
@@ -12707,6 +13022,7 @@ mod dep_context_tests {
 mod rule_effects_tests {
     use super::*;
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_name_from_matching_rule() {
         let c = RepoConfig::parse(
@@ -12717,6 +13033,7 @@ mod rule_effects_tests {
         assert_eq!(effects.group_name.as_deref(), Some("web-framework"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_name_last_matching_rule_wins() {
         let c = RepoConfig::parse(
@@ -12731,6 +13048,7 @@ mod rule_effects_tests {
         assert_eq!(effects.group_name.as_deref(), Some("second"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn automerge_last_rule_wins() {
         let c = RepoConfig::parse(
@@ -12745,6 +13063,7 @@ mod rule_effects_tests {
         assert_eq!(effects.automerge, Some(false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn labels_accumulated_from_all_matching_rules() {
         let c = RepoConfig::parse(
@@ -12761,6 +13080,7 @@ mod rule_effects_tests {
         assert_eq!(effects.labels.len(), 2);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn repo_level_labels_seed_effects() {
         // Repo-level labels should appear in effects even without matching rules.
@@ -12771,6 +13091,7 @@ mod rule_effects_tests {
         assert!(effects.labels.contains(&"dependencies".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn add_labels_merged_with_labels() {
         // addLabels union-merges with labels — no duplicates.
@@ -12790,6 +13111,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn rule_labels_replaces_repo_labels() {
         // Per-rule `labels` is NOT mergeable — it replaces the repo-level labels.
@@ -12807,6 +13129,7 @@ mod rule_effects_tests {
         assert!(effects.labels.contains(&"frontend".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn rule_add_labels_appends_to_repo_labels() {
         // `addLabels` IS mergeable — it appends to the repo-level labels.
@@ -12820,6 +13143,7 @@ mod rule_effects_tests {
         assert!(effects.labels.contains(&"frontend".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn no_matching_rule_returns_defaults() {
         let c = RepoConfig::parse(
@@ -12833,6 +13157,7 @@ mod rule_effects_tests {
         assert_eq!(effects.automerge, Some(true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn rule_with_non_matching_manager_doesnt_apply() {
         let c = RepoConfig::parse(
@@ -12845,6 +13170,7 @@ mod rule_effects_tests {
 
     // ── matchCurrentAge ───────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_age_parsed_from_config() {
         let c = RepoConfig::parse(
@@ -12856,6 +13182,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_age_none_unset_matches_all() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -12867,6 +13194,7 @@ mod rule_effects_tests {
     // ── Ported from Renovate current-age.spec.ts ─────────────────────────────
     // Renovate mock time is 2023-07-07. We use 2020 as "old" and 2099 as "future".
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn current_age_returns_false_if_release_older_than_constraint_bound() {
         // Renovate spec: "returns false if release is older"
@@ -12878,6 +13206,7 @@ mod rule_effects_tests {
         assert!(!c.package_rules[0].current_age_matches(Some("2020-01-01T00:00:00Z")));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn current_age_returns_false_if_release_younger_than_constraint_bound() {
         // Renovate spec: "returns false if release is younger"
@@ -12889,6 +13218,7 @@ mod rule_effects_tests {
         assert!(!c.package_rules[0].current_age_matches(Some("2020-01-01T00:00:00Z")));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn current_age_returns_false_for_invalid_timestamp() {
         // Renovate spec: "returns null if release invalid" — Renovate returns null (pass-through).
@@ -12901,6 +13231,7 @@ mod rule_effects_tests {
         assert!(!c.package_rules[0].current_age_matches(Some("abc")));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_age_set_without_timestamp_returns_false() {
         let c = RepoConfig::parse(
@@ -12910,6 +13241,7 @@ mod rule_effects_tests {
         assert!(!c.package_rules[0].current_age_matches(None));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_age_old_dep_matches_gt_constraint() {
         let c = RepoConfig::parse(
@@ -12919,6 +13251,7 @@ mod rule_effects_tests {
         assert!(c.package_rules[0].current_age_matches(Some("2020-01-01T00:00:00Z")));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_age_new_dep_does_not_match_gt_constraint() {
         let c = RepoConfig::parse(
@@ -12928,6 +13261,7 @@ mod rule_effects_tests {
         assert!(!c.package_rules[0].current_age_matches(Some("2099-01-01T00:00:00Z")));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn match_current_age_via_dep_context_disables_dep() {
         let c = RepoConfig::parse(
@@ -12952,6 +13286,7 @@ mod rule_effects_tests {
 
     // ── per-rule schedule in RuleEffects ────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_schedule_collected_into_effects() {
         let c = RepoConfig::parse(
@@ -12965,6 +13300,7 @@ mod rule_effects_tests {
         assert_eq!(effects.schedule, vec!["before 5am"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_schedule_not_set_for_non_matching_dep() {
         let c = RepoConfig::parse(
@@ -13120,6 +13456,7 @@ mod rule_effects_tests {
         assert_eq!(c.package_rules[2].automerge, Some(false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn deprecated_package_names_merged_with_match_package_names() {
         // packageNames: ['foo'] + matchPackageNames: ['bar'] → matchPackageNames: ['bar', 'foo']
@@ -13131,6 +13468,7 @@ mod rule_effects_tests {
         assert!(rule.match_package_names.contains(&"foo".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn deprecated_exclude_repositories_negation() {
         // excludeRepositories: ['abc/def'] → matchRepositories: ['!abc/def']
@@ -13141,6 +13479,7 @@ mod rule_effects_tests {
         assert!(rule.match_repositories.contains(&"!abc/def".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn deprecated_source_url_prefixes_become_glob() {
         // sourceUrlPrefixes: ['https://github.com/lodash'] → matchSourceUrls: ['https://github.com/lodash{/,}**']
@@ -13185,6 +13524,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn deprecated_path_rules_field_merged_into_package_rules() {
         // Ported: "should migrate to packageRules" from path-rules-migration.spec.ts
@@ -13206,6 +13546,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn path_rules_concat_with_existing_package_rules() {
         // Ported: "should concat with existing package rules" from path-rules-migration.spec.ts
@@ -13235,6 +13576,7 @@ mod rule_effects_tests {
 
     // ── deprecated field migrations ───────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn upgrade_in_range_true_sets_range_strategy_bump() {
         let c = RepoConfig::parse(r#"{"upgradeInRange": true}"#);
@@ -13244,6 +13586,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn version_strategy_widen_sets_range_strategy_widen() {
         let c = RepoConfig::parse(r#"{"versionStrategy": "widen"}"#);
@@ -13253,6 +13596,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn explicit_range_strategy_overrides_deprecated_upgrade_in_range() {
         let c = RepoConfig::parse(r#"{"upgradeInRange": true, "rangeStrategy": "replace"}"#);
@@ -13382,6 +13726,7 @@ mod rule_effects_tests {
 
     // ── stabilityDays migration ───────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn stability_days_migrated_to_minimum_release_age() {
         let c = RepoConfig::parse(r#"{"stabilityDays": 3}"#);
@@ -13392,12 +13737,14 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn stability_days_1_migrated_to_1_day() {
         let c = RepoConfig::parse(r#"{"stabilityDays": 1}"#);
         assert_eq!(c.minimum_release_age.as_deref(), Some("1 day"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn stability_days_0_means_no_minimum_release_age() {
         let c = RepoConfig::parse(r#"{"stabilityDays": 0}"#);
@@ -13407,6 +13754,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn minimum_release_age_takes_precedence_over_stability_days() {
         let c = RepoConfig::parse(r#"{"minimumReleaseAge": "7 days", "stabilityDays": 3}"#);
@@ -13417,6 +13765,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn release_age_internal_check_options_parsed() {
         let c = RepoConfig::parse(
@@ -13435,6 +13784,7 @@ mod rule_effects_tests {
         assert_eq!(c.internal_checks_filter, "flexible");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_minimum_release_age_parsed() {
         let c = RepoConfig::parse(
@@ -13446,6 +13796,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_minimum_release_age_collected_into_effects() {
         let c = RepoConfig::parse(
@@ -13459,6 +13810,7 @@ mod rule_effects_tests {
         assert_eq!(effects.minimum_release_age.as_deref(), Some("1 week"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_minimum_release_age_not_set_when_rule_does_not_match() {
         let c = RepoConfig::parse(
@@ -13472,6 +13824,7 @@ mod rule_effects_tests {
         assert!(effects.minimum_release_age.is_none());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn last_matching_rule_minimum_release_age_wins() {
         let c = RepoConfig::parse(
@@ -13494,6 +13847,7 @@ mod rule_effects_tests {
 
     // ── per-rule addLabels ────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_add_labels_parsed() {
         let c = RepoConfig::parse(
@@ -13502,6 +13856,7 @@ mod rule_effects_tests {
         assert_eq!(c.package_rules[0].add_labels, vec!["dep-update", "js"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_add_labels_accumulated_into_effects() {
         let c = RepoConfig::parse(
@@ -13515,6 +13870,7 @@ mod rule_effects_tests {
         assert!(effects.labels.contains(&"dep-update".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_add_labels_accumulate_from_multiple_rules() {
         // Two matching rules each add a different label; both should appear.
@@ -13533,6 +13889,7 @@ mod rule_effects_tests {
         assert!(effects.labels.contains(&"js".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_add_labels_does_not_duplicate() {
         // Same label from addLabels and repo-level labels → only one copy.
@@ -13551,6 +13908,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_add_labels_not_applied_to_non_matching_dep() {
         let c = RepoConfig::parse(
@@ -13569,6 +13927,7 @@ mod rule_effects_tests {
 
     // ── groupSlug ─────────────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_slug_parsed_from_package_rule() {
         let c = RepoConfig::parse(
@@ -13577,6 +13936,7 @@ mod rule_effects_tests {
         assert_eq!(c.package_rules[0].group_slug.as_deref(), Some("js"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_slug_collected_into_effects() {
         let c = RepoConfig::parse(
@@ -13591,6 +13951,7 @@ mod rule_effects_tests {
         assert_eq!(effects.group_slug.as_deref(), Some("js"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_slug_absent_when_not_set() {
         let c = RepoConfig::parse(
@@ -13606,6 +13967,7 @@ mod rule_effects_tests {
         assert!(effects.group_slug.is_none());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_slug_last_matching_rule_wins() {
         let c = RepoConfig::parse(
@@ -13655,6 +14017,7 @@ mod rule_effects_tests {
 
     // ── per-rule commitMessageAction / commitMessagePrefix ────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_commit_message_action_parsed() {
         let c = RepoConfig::parse(
@@ -13666,6 +14029,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_commit_message_prefix_parsed() {
         let c = RepoConfig::parse(
@@ -13677,6 +14041,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_commit_message_action_collected_into_effects() {
         let c = RepoConfig::parse(
@@ -13690,6 +14055,7 @@ mod rule_effects_tests {
         assert_eq!(effects.commit_message_action.as_deref(), Some("Pin"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_commit_message_prefix_collected_into_effects() {
         let c = RepoConfig::parse(
@@ -13703,6 +14069,7 @@ mod rule_effects_tests {
         assert_eq!(effects.commit_message_prefix.as_deref(), Some("fix(deps):"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_commit_message_action_absent_when_not_set() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"matchPackageNames": ["lodash"]}]}"#);
@@ -13717,6 +14084,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_commit_message_action_last_rule_wins() {
         let c = RepoConfig::parse(
@@ -13737,6 +14105,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_commit_message_prefix_last_rule_wins() {
         let c = RepoConfig::parse(
@@ -13759,6 +14128,7 @@ mod rule_effects_tests {
 
     // ── group:* preset tests ────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_all_preset_injects_group_rule() {
         let c = RepoConfig::parse(r#"{"extends": ["group:all"]}"#);
@@ -13777,6 +14147,7 @@ mod rule_effects_tests {
         assert_eq!(effects.group_slug.as_deref(), Some("all"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_all_non_major_preset_injects_group_rule_for_minor() {
         let c = RepoConfig::parse(r#"{"extends": ["group:allNonMajor"]}"#);
@@ -13794,6 +14165,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_all_non_major_does_not_apply_to_major() {
         let c = RepoConfig::parse(r#"{"extends": ["group:allNonMajor"]}"#);
@@ -13809,6 +14181,7 @@ mod rule_effects_tests {
 
     // ── Additional group presets ─────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_all_digest_preset_injects_group_rule() {
         let c = RepoConfig::parse(r#"{"extends": ["group:allDigest"]}"#);
@@ -13821,6 +14194,7 @@ mod rule_effects_tests {
         assert!(rule.match_update_types.is_empty());
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_node_js_preset_matches_node_datasource() {
         let c = RepoConfig::parse(r#"{"extends": ["group:nodeJs"]}"#);
@@ -13835,6 +14209,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("calico/node"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_js_test_preset_matches_jest_packages() {
         let c = RepoConfig::parse(r#"{"extends": ["group:jsTest"]}"#);
@@ -13848,6 +14223,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("lodash"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_js_test_non_major_does_not_group_major() {
         use crate::versioning::semver_generic::UpdateType;
@@ -13860,6 +14236,7 @@ mod rule_effects_tests {
         assert!(!rule.update_type_matches(UpdateType::Major, false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_gradle_preset_injects_rule() {
         let c = RepoConfig::parse(r#"{"extends": ["group:gradle"]}"#);
@@ -13874,6 +14251,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("maven"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_definitely_typed_preset_matches_types_packages() {
         let c = RepoConfig::parse(r#"{"extends": ["group:definitelyTyped"]}"#);
@@ -13885,6 +14263,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("lodash"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_react_preset_matches_react_types() {
         let c = RepoConfig::parse(r#"{"extends": ["group:react"]}"#);
@@ -13896,6 +14275,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("lodash"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_spring_boot_injects_two_rules() {
         let c = RepoConfig::parse(r#"{"extends": ["group:springBoot"]}"#);
@@ -13908,6 +14288,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_spring_core_matches_spring_packages() {
         let c = RepoConfig::parse(r#"{"extends": ["group:springCore"]}"#);
@@ -13917,6 +14298,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("org.springframework.boot:spring-boot"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_linters_matches_eslint_and_prettier() {
         let c = RepoConfig::parse(r#"{"extends": ["group:linters"]}"#);
@@ -13931,6 +14313,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("jest"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_recommended_expands_many_presets() {
         let c = RepoConfig::parse(r#"{"extends": ["group:recommended"]}"#);
@@ -13965,6 +14348,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_symfony_matches_with_exclusions() {
         let c = RepoConfig::parse(r#"{"extends": ["group:symfony"]}"#);
@@ -13979,6 +14363,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("symfony/polyfill-mbstring"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_ruby_on_rails_matches_rails_gems() {
         let c = RepoConfig::parse(r#"{"extends": ["group:rubyOnRails"]}"#);
@@ -13990,6 +14375,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("devise"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_jest_plus_ts_jest_matches_major_only() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14000,6 +14386,7 @@ mod rule_effects_tests {
         assert!(!rule.update_type_matches(UpdateType::Minor, false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_vite_matches_vite_packages() {
         let c = RepoConfig::parse(r#"{"extends": ["group:vite"]}"#);
@@ -14011,6 +14398,7 @@ mod rule_effects_tests {
         assert!(!rule.name_matches("webpack"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_pulumi_injects_five_rules() {
         let c = RepoConfig::parse(r#"{"extends": ["group:pulumi"]}"#);
@@ -14023,6 +14411,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_jwt_framework_matches_packagist() {
         let c = RepoConfig::parse(r#"{"extends": ["group:jwtFramework"]}"#);
@@ -14032,6 +14421,7 @@ mod rule_effects_tests {
         assert!(!rule.datasource_matches("npm"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn per_rule_commit_message_action_not_applied_to_non_matching() {
         let c = RepoConfig::parse(
@@ -14050,6 +14440,7 @@ mod rule_effects_tests {
 
     // ── major/minor/patch config blocks ──────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn major_config_parsed() {
         let c = RepoConfig::parse(r#"{"major": {"automerge": false, "labels": ["breaking"]}}"#);
@@ -14061,6 +14452,7 @@ mod rule_effects_tests {
         assert_eq!(cfg.labels, vec!["breaking".to_owned()]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn minor_config_parsed() {
         let c = RepoConfig::parse(r#"{"minor": {"automerge": true}}"#);
@@ -14071,6 +14463,7 @@ mod rule_effects_tests {
         assert_eq!(cfg.automerge, Some(true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn patch_config_parsed() {
         let c = RepoConfig::parse(r#"{"patch": {"automerge": true, "prPriority": 5}}"#);
@@ -14082,6 +14475,7 @@ mod rule_effects_tests {
         assert_eq!(cfg.pr_priority, Some(5));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn extra_update_type_configs_are_parsed() {
         let c = RepoConfig::parse(
@@ -14126,6 +14520,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn major_config_applied_to_major_update() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14140,6 +14535,7 @@ mod rule_effects_tests {
         assert_eq!(effects.automerge, Some(false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn major_config_not_applied_to_minor_update() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14153,6 +14549,7 @@ mod rule_effects_tests {
         assert!(!effects.labels.contains(&"breaking".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn minor_config_applied_to_minor_update() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14167,6 +14564,7 @@ mod rule_effects_tests {
         assert_eq!(effects.pr_priority, Some(3));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn patch_config_applied_to_patch_update() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14180,6 +14578,7 @@ mod rule_effects_tests {
         assert_eq!(effects.automerge, Some(true));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn major_config_overrides_package_rule() {
         // packageRule sets automerge=true but major config sets automerge=false.
@@ -14200,6 +14599,7 @@ mod rule_effects_tests {
         assert_eq!(effects.automerge, Some(false));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn update_type_config_add_labels_accumulates() {
         // addLabels in major config should append to existing labels.
@@ -14216,6 +14616,7 @@ mod rule_effects_tests {
         assert!(effects.labels.contains(&"breaking".to_owned()));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn major_enabled_false_blocks_major_updates() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14231,6 +14632,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn major_enabled_false_does_not_block_minor() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14246,6 +14648,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn minor_enabled_false_blocks_minor_updates() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14263,6 +14666,7 @@ mod rule_effects_tests {
 
     // ── docker:* presets ─────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn docker_disable_major_blocks_major_docker_updates() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14289,6 +14693,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn docker_disable_major_does_not_affect_npm() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14305,6 +14710,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn docker_enable_major_counteracts_disable_major() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14322,6 +14728,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn docker_disable_disables_docker_managers() {
         // docker:disable mirrors Renovate's docker.preset.ts which sets
@@ -14341,6 +14748,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn docker_disable_does_not_affect_other_managers() {
         let c = RepoConfig::parse(r#"{"extends": ["docker:disable"]}"#);
@@ -14356,6 +14764,7 @@ mod rule_effects_tests {
 
     // ── disabledManagers JSON config field ───────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disabled_managers_from_json_config() {
         let c = RepoConfig::parse(r#"{"disabledManagers": ["dockerfile", "maven"]}"#);
@@ -14375,6 +14784,7 @@ mod rule_effects_tests {
 
     // ── helpers:* presets ────────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn helpers_disable_types_node_major_blocks_major() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14400,6 +14810,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn helpers_disable_types_node_major_does_not_affect_other_packages() {
         use crate::versioning::semver_generic::UpdateType;
@@ -14415,6 +14826,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn disabled_managers_denylist_overrides_enabled_managers_allowlist() {
         // If a manager appears in both disabledManagers and enabledManagers,
@@ -14434,6 +14846,7 @@ mod rule_effects_tests {
 
     // ── workarounds:* preset tests ────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn workarounds_types_node_versioning_sets_node_versioning_for_types_node() {
         let c = RepoConfig::parse(r#"{"extends": ["workarounds:typesNodeVersioning"]}"#);
@@ -14448,6 +14861,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn workarounds_ubuntu_docker_versioning_sets_ubuntu_versioning() {
         let c = RepoConfig::parse(r#"{"extends": ["workarounds:ubuntuDockerVersioning"]}"#);
@@ -14460,6 +14874,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn workarounds_disable_eclipse_lifecycle_mapping_disables_package() {
         let c = RepoConfig::parse(r#"{"extends": ["workarounds:disableEclipseLifecycleMapping"]}"#);
@@ -14470,6 +14885,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn workarounds_maven_commons_ancient_version_sets_allowed_versions() {
         let c = RepoConfig::parse(r#"{"extends": ["workarounds:mavenCommonsAncientVersion"]}"#);
@@ -14733,6 +15149,7 @@ mod rule_effects_tests {
 
     // ── replacements:* preset integration tests ───────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn replacements_all_injects_replacement_rules() {
         let c = RepoConfig::parse(r#"{"extends": ["replacements:all"]}"#);
@@ -14744,6 +15161,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn replacements_babel_eslint_injected_via_all() {
         let c = RepoConfig::parse(r#"{"extends": ["replacements:all"]}"#);
@@ -14758,6 +15176,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn replacements_individual_preset_also_works() {
         let c = RepoConfig::parse(r#"{"extends": ["replacements:babel-eslint-to-eslint-parser"]}"#);
@@ -14771,6 +15190,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn workarounds_all_expands_to_all_sub_presets() {
         let c = RepoConfig::parse(r#"{"extends": ["workarounds:all"]}"#);
@@ -14796,6 +15216,7 @@ mod rule_effects_tests {
 
     // ── :followTag / helpers:followTypescript* tests ──────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn follow_tag_preset_injects_packagerule() {
         let c = RepoConfig::parse(r#"{"extends": [":followTag(typescript, next)"]}"#);
@@ -14810,6 +15231,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn helpers_follow_typescript_next_sets_follow_tag() {
         let c = RepoConfig::parse(r#"{"extends": ["helpers:followTypescriptNext"]}"#);
@@ -14824,6 +15246,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn helpers_follow_typescript_rc_sets_follow_tag() {
         let c = RepoConfig::parse(r#"{"extends": ["helpers:followTypescriptRc"]}"#);
@@ -14836,6 +15259,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn follow_tag_preset_does_not_match_other_packages() {
         let c = RepoConfig::parse(r#"{"extends": [":followTag(typescript, next)"]}"#);
@@ -14849,6 +15273,7 @@ mod rule_effects_tests {
 
     // ── :label / :labels preset tests ────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn label_preset_adds_label_to_repo() {
         let c = RepoConfig::parse(r#"{"extends": [":label(security)"]}"#);
@@ -14860,6 +15285,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn labels_preset_adds_multiple_labels() {
         let c = RepoConfig::parse(r#"{"extends": [":labels(security, dependencies)"]}"#);
@@ -14877,6 +15303,7 @@ mod rule_effects_tests {
 
     // ── changelogUrl per-rule field tests ─────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn changelog_url_parsed_from_package_rules() {
         let c = RepoConfig::parse(
@@ -14890,6 +15317,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_identity_overrides_are_collected() {
         let c = RepoConfig::parse(
@@ -14989,6 +15417,7 @@ mod rule_effects_tests {
         assert_eq!(effects.override_package_name, None);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn workarounds_k3s_kubernetes_versioning_sets_regex_versioning() {
         let c = RepoConfig::parse(r#"{"extends": ["workarounds:k3sKubernetesVersioning"]}"#);
@@ -15005,6 +15434,7 @@ mod rule_effects_tests {
 
     // ── group:monorepos integration tests ─────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_monorepos_angularmaterial_pattern_group() {
         let c = RepoConfig::parse(r#"{"extends": ["group:monorepos"]}"#);
@@ -15025,6 +15455,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn group_monorepos_injects_many_rules() {
         let c = RepoConfig::parse(r#"{"extends": ["group:monorepos"]}"#);
@@ -15038,6 +15469,7 @@ mod rule_effects_tests {
 
     // ── ignorePresets interaction with compound presets ───────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_presets_workarounds_all_suppresses_all_workaround_rules() {
         let c = RepoConfig::parse(
@@ -15053,6 +15485,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_presets_replacements_all_suppresses_replacement_rules() {
         let with_c = RepoConfig::parse(r#"{"extends": ["replacements:all"]}"#);
@@ -15073,6 +15506,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn ignore_presets_individual_workaround_suppresses_just_that_preset() {
         let all_c = RepoConfig::parse(r#"{"extends": ["workarounds:all"]}"#);
@@ -15087,6 +15521,7 @@ mod rule_effects_tests {
 
     // ── customManagers tests ──────────────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn custom_manager_parsed_from_json() {
         // Use r##"..."## to avoid "# in the JSON content terminating the raw string.
@@ -15114,6 +15549,7 @@ mod rule_effects_tests {
         assert_eq!(cm.datasource_template.as_deref(), Some("docker"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn custom_manager_extracts_deps_from_content() {
         let cm = CustomManager {
@@ -15242,6 +15678,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].dep_name, "my-package");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn custom_manager_uses_datasource_template_when_group_missing() {
         let cm = CustomManager {
@@ -15261,6 +15698,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "18.0.0");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn custom_manager_file_match_legacy_field_parsed() {
         let c = RepoConfig::parse(
@@ -15322,6 +15760,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn custom_manager_matches_file_by_pattern() {
         let cm = CustomManager {
@@ -15341,6 +15780,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn custom_manager_combination_strategy_merges_captures() {
         let cm = CustomManager {
@@ -15368,6 +15808,7 @@ mod rule_effects_tests {
         assert_eq!(dep.current_value, "1.2.3");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn custom_manager_combination_incomplete_match_returns_empty() {
         let cm = CustomManager {
@@ -15392,6 +15833,7 @@ mod rule_effects_tests {
 
     // ── custom-managers:* preset tests ───────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_custom_managers_dockerfile_versions_registered() {
         let c = RepoConfig::parse(r#"{"extends": ["custom-managers:dockerfileVersions"]}"#);
@@ -15409,6 +15851,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_custom_managers_makefile_versions_registered() {
         let c = RepoConfig::parse(r#"{"extends": ["custom-managers:makefileVersions"]}"#);
@@ -15421,6 +15864,7 @@ mod rule_effects_tests {
         assert_eq!(cm.match_strings_strategy, "any");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_custom_managers_maven_property_versions_registered() {
         let c = RepoConfig::parse(r#"{"extends": ["custom-managers:mavenPropertyVersions"]}"#);
@@ -15436,6 +15880,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_custom_managers_tsconfig_node_versions_registered() {
         let c = RepoConfig::parse(r#"{"extends": ["custom-managers:tsconfigNodeVersions"]}"#);
@@ -15454,6 +15899,7 @@ mod rule_effects_tests {
         }
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_custom_managers_dockerfile_extracts_standard_annotation() {
         let c = RepoConfig::parse(r#"{"extends": ["custom-managers:dockerfileVersions"]}"#);
@@ -15474,6 +15920,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "2.40.0");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_custom_managers_user_defined_appended_after_preset() {
         // User-defined managers must appear after preset managers so they take
@@ -15505,6 +15952,7 @@ mod rule_effects_tests {
 
     // ── Missing default preset tests ─────────────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_respect_latest_sets_flag() {
         let c = RepoConfig::parse(r#"{"extends": [":respectLatest"]}"#);
@@ -15514,12 +15962,14 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_respect_latest_off_by_default() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(!c.respect_latest, "respectLatest must default to false");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_dependency_dashboard_sets_flag() {
         let c = RepoConfig::parse(r#"{"extends": [":dependencyDashboard"]}"#);
@@ -15529,6 +15979,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_disable_dependency_dashboard_overrides() {
         // disableDependencyDashboard should win over dependencyDashboard
@@ -15541,6 +15992,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn raw_dependency_dashboard_parsed() {
         let c = RepoConfig::parse(
@@ -15569,18 +16021,21 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn raw_rollback_prs_parsed() {
         let c = RepoConfig::parse(r#"{"rollbackPrs": true}"#);
         assert!(c.rollback_prs, "raw rollbackPrs: true must be parsed");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn post_update_options_parsed() {
         let c = RepoConfig::parse(r#"{"postUpdateOptions": ["gomodTidy", "npmDedupe"]}"#);
         assert_eq!(c.post_update_options, vec!["gomodTidy", "npmDedupe"]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn repository_update_controls_parsed() {
         let c = RepoConfig::parse(
@@ -15597,6 +16052,7 @@ mod rule_effects_tests {
         assert_eq!(c.clone_submodules_filter, vec!["libs/**".to_owned()]);
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn constraints_parsed() {
         let c = RepoConfig::parse(r#"{"constraints": {"node": ">=18", "npm": "^10.0.0"}}"#);
@@ -15607,6 +16063,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn host_rules_parsed() {
         let c = RepoConfig::parse(
@@ -15621,6 +16078,7 @@ mod rule_effects_tests {
         assert_eq!(c.host_rules[0]["token"].as_str(), Some("abc"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_config_migration_sets_flag() {
         let c = RepoConfig::parse(r#"{"extends": [":configMigration"]}"#);
@@ -15630,6 +16088,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_dependency_dashboard_approval_sets_flag() {
         let c = RepoConfig::parse(r#"{"extends": [":dependencyDashboardApproval"]}"#);
@@ -15639,6 +16098,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn preset_approve_major_updates_injects_rule() {
         let c = RepoConfig::parse(r#"{"extends": [":approveMajorUpdates"]}"#);
@@ -15656,6 +16116,7 @@ mod rule_effects_tests {
 
     // ── packageRule extends (packages:*) tests ────────────────────────────────
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_extends_packages_react_adds_matchers() {
         let c = RepoConfig::parse(
@@ -15677,6 +16138,7 @@ mod rule_effects_tests {
         assert!(rule.has_name_constraint, "has_name_constraint must be true");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_extends_packages_eslint_adds_matchers() {
         let c = RepoConfig::parse(
@@ -15695,6 +16157,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_extends_combined_with_own_matchers() {
         // User's own matchPackageNames should be merged with preset's.
@@ -15721,6 +16184,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn package_rule_extends_apollographql_adds_source_urls() {
         let c = RepoConfig::parse(
@@ -15735,6 +16199,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn raw_dependency_dashboard_approval_parsed_in_package_rule() {
         let c = RepoConfig::parse(
@@ -15759,6 +16224,7 @@ mod rule_effects_tests {
             .unwrap_or_else(|| panic!("{preset} must register at least one custom manager"))
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn dockerfile_versions_extracts_env_with_double_quotes() {
         // Port of Renovate custom-managers.spec.ts: dockerfileVersions "find dependencies in file"
@@ -15778,6 +16244,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "7.25.1");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn dockerfile_versions_extracts_env_with_single_quotes() {
         let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
@@ -15795,6 +16262,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "3.3.1");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn dockerfile_versions_extracts_env_without_quotes() {
         let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
@@ -15811,6 +16279,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "3.3.1");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn dockerfile_versions_extracts_arg_directive() {
         let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
@@ -15826,6 +16295,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].versioning.as_deref(), Some("docker"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn dockerfile_versions_extracts_with_versioning_and_extract_version() {
         let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
@@ -15846,6 +16316,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn dockerfile_versions_file_pattern_matches() {
         // Port of Renovate custom-managers.spec.ts: "matches regexes patterns"
@@ -15873,6 +16344,7 @@ mod rule_effects_tests {
         );
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn makefile_versions_extracts_simple_assignment() {
         // Port of Renovate custom-managers.spec.ts: makefileVersions "find dependencies in file"
@@ -15887,6 +16359,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "18.13.0");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn makefile_versions_extracts_space_assignment() {
         let cm = get_preset_custom_manager("custom-managers:makefileVersions");
@@ -15903,6 +16376,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "7.25.1");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn makefile_versions_extracts_colon_equal() {
         let cm = get_preset_custom_manager("custom-managers:makefileVersions");
@@ -15919,6 +16393,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "3.3.1");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn makefile_versions_extracts_question_equal() {
         let cm = get_preset_custom_manager("custom-managers:makefileVersions");
@@ -15936,6 +16411,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].datasource, "custom.hashicorp");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn makefile_versions_file_pattern_matches() {
         let cm = get_preset_custom_manager("custom-managers:makefileVersions");
@@ -15948,6 +16424,7 @@ mod rule_effects_tests {
         assert!(!cm.matches_file("MakefileGenerator.ts"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn helm_chart_yaml_extracts_app_version() {
         // Port of Renovate custom-managers.spec.ts: helmChartYamlAppVersions
@@ -15969,6 +16446,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].datasource, "docker");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn helm_chart_yaml_file_pattern_matches() {
         let cm = get_preset_custom_manager("custom-managers:helmChartYamlAppVersions");
@@ -15978,6 +16456,7 @@ mod rule_effects_tests {
         assert!(!cm.matches_file("Chart.yamlo"));
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn azure_pipelines_file_pattern_matches() {
         // Port of Renovate custom-managers.spec.ts: azurePipelinesVersions "matches regexes patterns"
@@ -15991,6 +16470,7 @@ mod rule_effects_tests {
         assert!(!cm.matches_file("foo.yaml"), "generic yaml must NOT match");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn maven_property_versions_extracts_from_pom_xml() {
         // Port of Renovate custom-managers.spec.ts: mavenPropertyVersions
@@ -16008,6 +16488,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "9.3");
     }
 
+    // Rust-specific: repo config behavior test
     #[test]
     fn maven_property_versions_file_pattern_matches() {
         let cm = get_preset_custom_manager("custom-managers:mavenPropertyVersions");

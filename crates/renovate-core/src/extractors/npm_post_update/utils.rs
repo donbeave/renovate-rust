@@ -16,6 +16,7 @@ pub fn get_node_options(max_old_space_size: Option<u64>) -> Option<String> {
 mod tests {
     use super::*;
 
+    // Rust-specific: utils behavior test
     #[test]
     fn get_node_options_returns_flag() {
         assert_eq!(
@@ -24,11 +25,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: utils behavior test
     #[test]
     fn get_node_options_returns_none() {
         assert_eq!(get_node_options(None), None);
     }
 
+    // Rust-specific: utils behavior test
     #[test]
     fn get_package_manager_version_from_volta() {
         let pj = PackageJson::parse(

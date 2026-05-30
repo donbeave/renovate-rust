@@ -405,6 +405,7 @@ mod 'puppetlabs/concat', '7.1.1'
         assert_eq!(deps[1].name, "puppetlabs/concat");
     }
 
+    // Rust-specific: puppet behavior test
     #[test]
     fn module_without_version_skipped() {
         let content = "mod 'puppetlabs/stdlib'\n";
@@ -416,6 +417,7 @@ mod 'puppetlabs/concat', '7.1.1'
         );
     }
 
+    // Rust-specific: puppet behavior test
     #[test]
     fn comment_lines_ignored() {
         let content = "# forge 'https://example.com'\nmod 'puppetlabs/apache', '5.5.0'\n";

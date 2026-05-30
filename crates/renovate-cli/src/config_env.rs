@@ -702,24 +702,28 @@ mod tests {
         assert!(!config.config_migration);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn print_config_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_PRINT_CONFIG", "true")])).unwrap();
         assert_eq!(config.print_config, Some(true));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn enabled_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_ENABLED", "false")])).unwrap();
         assert_eq!(config.enabled, Some(false));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn automerge_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_AUTOMERGE", "true")])).unwrap();
         assert_eq!(config.automerge, Some(true));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn dependency_dashboard_env_options_are_parsed() {
         let config = build_from_env(&env(&[
@@ -759,6 +763,7 @@ mod tests {
         assert_eq!(config.config_warning_reuse_issue, Some(true));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn empty_env_values_are_ignored() {
         let config = build_from_env(&env(&[
@@ -805,12 +810,14 @@ mod tests {
         assert_eq!(config.labels, vec!["a", "b", "c"]);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn repositories_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_REPOSITORIES", "foo, bar,")])).unwrap();
         assert_eq!(config.repositories, vec!["foo", "bar"]);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn repositories_env_json_array_is_parsed() {
         let config =
@@ -832,6 +839,7 @@ mod tests {
         assert_eq!(config.git_private_key.as_deref(), Some("abc\ndef"));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn runtime_global_env_options_are_parsed() {
         let config = build_from_env(&env(&[
@@ -925,6 +933,7 @@ mod tests {
         assert!(config.host_rules.is_empty());
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn host_rules_object_value_is_skipped() {
         let config = build_from_env(&env(&[(
@@ -1108,6 +1117,7 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("a"));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn renovate_config_json5_is_parsed() {
         let config = build_from_env(&env(&[(
@@ -1282,6 +1292,7 @@ mod tests {
         assert_eq!(config.merge_confidence_datasources, vec!["docker", "npm"]);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn allowed_commands_env_json5_array_is_parsed() {
         let config = build_from_env(&env(&[(
@@ -1292,6 +1303,7 @@ mod tests {
         assert_eq!(config.allowed_commands, vec!["npm install", "cargo update"]);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn renamed_allowed_commands_env_json5_array_is_parsed() {
         let config = build_from_env(&env(&[(
@@ -1302,6 +1314,7 @@ mod tests {
         assert_eq!(config.allowed_commands, vec!["npm install", "cargo update"]);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn merge_confidence_datasources_env_comma_list_is_parsed() {
         let config = build_from_env(&env(&[(
@@ -1315,6 +1328,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn command_templating_env_is_parsed() {
         let config =
@@ -1322,6 +1336,7 @@ mod tests {
         assert!(config.allow_command_templating);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn global_security_env_options_are_parsed() {
         let config = build_from_env(&env(&[
@@ -1370,6 +1385,7 @@ mod tests {
         assert_eq!(config.detect_host_rules_from_env, Some(false));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn repository_cache_env_options_are_parsed() {
         let config = build_from_env(&env(&[
@@ -1405,6 +1421,7 @@ mod tests {
         assert_eq!(config.pr_cache_sync_max_pages, Some(5));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn report_env_options_are_parsed() {
         let config = build_from_env(&env(&[
@@ -1421,6 +1438,7 @@ mod tests {
         assert_eq!(config.unicode_emoji, Some(false));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn onboarding_env_options_are_parsed() {
         let config = build_from_env(&env(&[
@@ -1519,6 +1537,7 @@ mod tests {
         assert_eq!(config.pr_commits_per_run_limit, Some(4));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn onboarding_config_env_is_parsed() {
         let config = build_from_env(&env(&[(
@@ -1533,6 +1552,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn invalid_object_env_values_are_rejected() {
         let err =
@@ -1543,6 +1563,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn invalid_registry_alias_env_values_are_rejected() {
         let err = build_from_env(&env(&[(
@@ -1591,12 +1612,14 @@ mod tests {
         assert_eq!(config.require_config, RequireConfig::Optional);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn fork_processing_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_FORK_PROCESSING", "enabled")])).unwrap();
         assert_eq!(config.fork_processing, ForkProcessing::Enabled);
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn fork_mode_env_options_are_parsed() {
         let config = build_from_env(&env(&[
@@ -1610,18 +1633,21 @@ mod tests {
         assert_eq!(config.fork_org.as_deref(), Some("renovate-forks"));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn binary_source_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_BINARY_SOURCE", "hermit")])).unwrap();
         assert_eq!(config.binary_source, Some(BinarySource::Hermit));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn binary_source_auto_env_maps_to_global() {
         let config = build_from_env(&env(&[("RENOVATE_BINARY_SOURCE", "auto")])).unwrap();
         assert_eq!(config.binary_source, Some(BinarySource::Global));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn invalid_binary_source_env_is_rejected() {
         let err = build_from_env(&env(&[("RENOVATE_BINARY_SOURCE", "invalid")])).unwrap_err();
@@ -1645,6 +1671,7 @@ mod tests {
         assert_eq!(config.platform_commit.as_deref(), Some("disabled"));
     }
 
+    // Rust-specific: config_env behavior test
     #[test]
     fn platform_commit_string_values_are_parsed() {
         for (raw, expected) in [

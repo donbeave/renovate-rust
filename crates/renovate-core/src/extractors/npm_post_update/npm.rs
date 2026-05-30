@@ -115,6 +115,7 @@ pub fn build_npm_install_cmd(
 mod tests {
     use super::*;
 
+    // Rust-specific: npm behavior test
     #[test]
     fn get_npm_constraint_from_lock_v1() {
         assert_eq!(
@@ -123,6 +124,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn get_npm_constraint_from_lock_v2() {
         assert_eq!(
@@ -131,6 +133,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn get_npm_constraint_from_lock_v3() {
         assert_eq!(
@@ -139,6 +142,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn get_npm_constraint_from_lock_invalid() {
         assert_eq!(
@@ -147,6 +151,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn npm_constraint_from_pkg_json() {
         let pj = PackageJson::parse(
@@ -159,6 +164,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn generate_package_key_basic() {
         assert_eq!(
@@ -167,6 +173,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn parse_npmrc_cooldown_date_found() {
         let npmrc = "before=2024-01-01\nmin-release-age=7d\n";
@@ -176,11 +183,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn parse_npmrc_cooldown_date_missing() {
         assert_eq!(parse_npmrc_cooldown_date("# no settings\n"), None);
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn build_npm_install_cmd_basic() {
         assert_eq!(
@@ -189,6 +198,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn build_npm_install_cmd_all_flags() {
         assert_eq!(
@@ -204,6 +214,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn divide_workspace_and_root_deps_no_patterns() {
         let upgrades = vec![Upgrade {
@@ -216,6 +227,7 @@ mod tests {
         assert_eq!(root.len(), 1);
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn divide_workspace_and_root_deps_with_patterns() {
         let upgrades = vec![

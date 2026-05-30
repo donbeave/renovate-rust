@@ -176,6 +176,7 @@ foo
 bar
 "#;
 
+    // Rust-specific: cake behavior test
     #[test]
     fn extracts_package_with_version() {
         let deps = extract(SAMPLE);
@@ -184,6 +185,7 @@ bar
         assert_eq!(bim.registry_url, "");
     }
 
+    // Rust-specific: cake behavior test
     #[test]
     fn extracts_package_without_version() {
         let deps = extract(SAMPLE);
@@ -191,6 +193,7 @@ bar
         assert_eq!(foo.current_value, "");
     }
 
+    // Rust-specific: cake behavior test
     #[test]
     fn extracts_custom_registry() {
         let deps = extract(SAMPLE);
@@ -198,18 +201,21 @@ bar
         assert_eq!(bar.registry_url, "https://example.com");
     }
 
+    // Rust-specific: cake behavior test
     #[test]
     fn skips_local_file_registry() {
         let deps = extract(SAMPLE);
         assert!(!deps.iter().any(|d| d.package_name == "Baz.Baz"));
     }
 
+    // Rust-specific: cake behavior test
     #[test]
     fn skips_line_comment() {
         let deps = extract(SAMPLE);
         assert!(!deps.iter().any(|d| d.package_name == "Qux.Qux"));
     }
 
+    // Rust-specific: cake behavior test
     #[test]
     fn skips_block_comment() {
         let deps = extract(SAMPLE);

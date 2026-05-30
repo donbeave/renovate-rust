@@ -113,6 +113,7 @@ pub async fn remove_docker_container(
 mod tests {
     use super::*;
 
+    // Rust-specific: docker behavior test
     #[test]
     fn sidecar_container_name_default() {
         let config = DockerConfig {
@@ -122,6 +123,7 @@ mod tests {
         assert_eq!(config.sidecar_container_name(), "renovate_sidecar");
     }
 
+    // Rust-specific: docker behavior test
     #[test]
     fn sidecar_container_name_custom() {
         let config = DockerConfig {

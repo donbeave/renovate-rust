@@ -410,6 +410,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: java_version behavior test
     #[test]
     fn parse_package_jdk() {
         let c = parse_package("java");
@@ -418,6 +419,7 @@ mod tests {
         assert_eq!(c.os, None);
     }
 
+    // Rust-specific: java_version behavior test
     #[test]
     fn parse_package_jre() {
         let c = parse_package("java-jre");

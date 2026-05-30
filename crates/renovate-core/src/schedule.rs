@@ -888,11 +888,13 @@ mod tests {
 
     // ── cron_matches ─────────────────────────────────────────────────────────
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn wildcard_matches_any_time() {
         assert!(cron_matches("* * * * *", 14, 15, 6, 3));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn hour_range_matches_within() {
         // "* 0-3 * * *" — hours 0 through 3
@@ -901,6 +903,7 @@ mod tests {
         assert!(!cron_matches("* 0-3 * * *", 4, 1, 1, 1));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn weekday_monday_only() {
         // "* * * * 1" — Mondays only
@@ -908,6 +911,7 @@ mod tests {
         assert!(!cron_matches("* * * * 1", 12, 1, 1, 2)); // Tuesday=2
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn weekday_range_mon_to_fri() {
         // "* * * * 1-5" — Mon-Fri
@@ -918,6 +922,7 @@ mod tests {
         assert!(!cron_matches("* * * * 1-5", 10, 1, 1, 6)); // Saturday
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn weekday_weekend() {
         // "* * * * 0,6" — Sat/Sun
@@ -926,6 +931,7 @@ mod tests {
         assert!(!cron_matches("* * * * 0,6", 10, 1, 1, 1)); // Monday
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn non_office_hours() {
         // "* 0-4,22-23 * * 1-5" — early morning OR late evening on weekdays
@@ -934,6 +940,7 @@ mod tests {
         assert!(!cron_matches("* 0-4,22-23 * * 1-5", 10, 1, 1, 3)); // 10am Wednesday
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn first_of_month() {
         // "* 0-3 1 * *" — first of month, hours 0-3
@@ -941,6 +948,7 @@ mod tests {
         assert!(!cron_matches("* 0-3 1 * *", 2, 2, 6, 4));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn quarterly_schedule() {
         // "* * 1 */3 *" — first day of every 3rd month (starting Jan)
@@ -952,6 +960,7 @@ mod tests {
         assert!(!cron_matches("* * 1 */3 *", 12, 2, 1, 2)); // Jan 2
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn sunday_aliased_to_zero() {
         // Cron allows both 0 and 7 for Sunday.
@@ -974,6 +983,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, utc(2024, 4, 15, 10)));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn daily_preset_matches_midnight() {
         // schedule:daily → "* 0-3 * * *"
@@ -1142,6 +1152,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn weekdays_preset_matches_weekday() {
         // schedule:weekdays → "* * * * 1-5"
@@ -1152,6 +1163,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, utc(2024, 4, 20, 12)));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn weekends_preset_matches_weekend() {
         // schedule:weekends → "* * * * 0,6"
@@ -1164,6 +1176,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, utc(2024, 4, 15, 12)));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn multiple_entries_any_match_wins() {
         let sched = vec!["* 0-3 * * *".to_owned(), "* * * * 6".to_owned()];
@@ -1179,6 +1192,7 @@ mod tests {
         utc(2017, 6, 30, 10)
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_before_4pm_true() {
         // "before 4:00pm" at 10am → true
@@ -1186,6 +1200,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, fri_10am()));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_before_4am_false() {
         // "before 4:00am" at 10am → false
@@ -1193,6 +1208,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, fri_10am()));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_after_4pm_false() {
         // "after 4:00pm" at 10am → false
@@ -1200,6 +1216,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, fri_10am()));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_every_weekday_true() {
         // "every weekday" on Friday → true
@@ -1207,6 +1224,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, fri_10am()));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_every_weekend_false() {
         // "every weekend" on Friday → false
@@ -1216,6 +1234,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, utc(2024, 4, 20, 10)));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_on_friday_and_saturday_true() {
         let sched = vec!["on friday and saturday".to_owned()];
@@ -1223,12 +1242,14 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, utc(2024, 4, 15, 10))); // Monday
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_on_monday_and_tuesday_false() {
         let sched = vec!["on monday and tuesday".to_owned()];
         assert!(!is_within_schedule_at(&sched, fri_10am())); // Friday
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_before_11am_every_weekday_true() {
         // "before 11:00am every weekday" at 10am Friday → true
@@ -1240,6 +1261,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, utc(2024, 4, 20, 9)));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_first_day_of_month_true() {
         let sched = vec!["before 11am on the first day of the month".to_owned()];
@@ -1251,6 +1273,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, fri_10am()));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_after_11pm_and_before_6am_overnight() {
         // "after 11pm and before 6am" — overnight window
@@ -1267,36 +1290,42 @@ mod tests {
 
     // ── parse_age_duration ────────────────────────────────────────────────────
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn parse_age_3_days() {
         let d = parse_age_duration("3 days").unwrap();
         assert_eq!(d.num_days(), 3);
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn parse_age_1_week() {
         let d = parse_age_duration("1 week").unwrap();
         assert_eq!(d.num_days(), 7);
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn parse_age_2_hours() {
         let d = parse_age_duration("2 hours").unwrap();
         assert_eq!(d.num_hours(), 2);
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn parse_age_30_minutes() {
         let d = parse_age_duration("30 minutes").unwrap();
         assert_eq!(d.num_minutes(), 30);
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn parse_age_1_month_approximated_as_30_days() {
         let d = parse_age_duration("1 month").unwrap();
         assert_eq!(d.num_days(), 30);
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn parse_age_unknown_returns_none() {
         assert!(parse_age_duration("bogus").is_none());
@@ -1305,11 +1334,13 @@ mod tests {
 
     // ── is_within_release_age ────────────────────────────────────────────────
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn release_age_no_constraint_passes() {
         assert!(is_within_release_age(Some("2020-01-01T00:00:00Z"), None));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn release_age_old_release_passes() {
         // Old release (2020) clearly satisfies "3 days" minimum
@@ -1319,12 +1350,14 @@ mod tests {
         ));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn release_age_missing_timestamp_fails_open() {
         // No timestamp → can't check → fail-open (true)
         assert!(is_within_release_age(None, Some("3 days")));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn release_age_future_release_fails() {
         // Far-future release timestamp doesn't satisfy minimum age
@@ -1336,18 +1369,21 @@ mod tests {
 
     // ── satisfies_date_range ──────────────────────────────────────────────────
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_gt_old_timestamp_is_true() {
         // A timestamp from 2020 is clearly "> 3 days" old
         assert!(satisfies_date_range("2020-01-01T00:00:00Z", "> 3 days"));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_gt_future_timestamp_is_false() {
         // A timestamp from the far future is NOT "> 3 days" old
         assert!(!satisfies_date_range("2099-01-01T00:00:00Z", "> 3 days"));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_lt_recent_timestamp_is_true() {
         // Far-future timestamp is "newer than 5 years" → "< 5 years" is true
@@ -1359,17 +1395,20 @@ mod tests {
         assert!(satisfies_date_range(&just_now, "< 3 days"));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_lt_old_timestamp_is_false() {
         // A 2020 timestamp is NOT "< 3 days" old
         assert!(!satisfies_date_range("2020-01-01T00:00:00Z", "< 3 days"));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_gte_old_is_true() {
         assert!(satisfies_date_range("2020-01-01T00:00:00Z", ">= 1 week"));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_lte_future_is_true() {
         let just_now = (Utc::now() + chrono::Duration::seconds(5))
@@ -1378,16 +1417,19 @@ mod tests {
         assert!(satisfies_date_range(&just_now, "<= 1 week"));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_invalid_operator_returns_false() {
         assert!(!satisfies_date_range("2020-01-01T00:00:00Z", "== 3 days"));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_invalid_timestamp_returns_false() {
         assert!(!satisfies_date_range("not-a-date", "> 3 days"));
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn date_range_naive_timestamp_accepted_with_z_suffix() {
         // PyPI-style naive timestamp gets Z appended internally
@@ -1396,6 +1438,7 @@ mod tests {
 
     // ── is_within_schedule_tz_at ─────────────────────────────────────────────
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn timezone_shifts_hour_correctly() {
         // UTC midnight on a Wednesday (weekday=3 in Unix).
@@ -1414,6 +1457,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn timezone_fires_during_local_business_hours() {
         // UTC 14:00 on a Wednesday = America/New_York 09:00 (EST, UTC-5)
@@ -1431,6 +1475,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn timezone_unknown_tz_falls_back_to_utc() {
         let utc_10am_wed = utc(2026, 1, 7, 10);
@@ -1442,6 +1487,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: schedule behavior test
     #[test]
     fn text_schedule_respects_timezone() {
         // "after 9am" = hour >= 9

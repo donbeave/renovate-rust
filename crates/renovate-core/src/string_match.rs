@@ -183,17 +183,20 @@ mod tests {
 
     // ── match_regex_or_glob ───────────────────────────────────────────────────
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn wildcard_star_always_matches() {
         assert!(match_regex_or_glob("anything", "*"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn exact_match() {
         assert!(match_regex_or_glob("npm", "npm"));
         assert!(!match_regex_or_glob("npm", "cargo"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn exact_match_is_case_insensitive() {
         // Mirrors Renovate's minimatch({nocase:true}) — even bare string patterns are case-insensitive.
@@ -206,6 +209,7 @@ mod tests {
         assert!(match_regex_or_glob("NPM", "npm"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn regex_pattern_match() {
         assert!(match_regex_or_glob("npm", "/^npm/"));
@@ -213,11 +217,13 @@ mod tests {
         assert!(!match_regex_or_glob("cargo", "/^npm/"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn regex_pattern_with_flags_match() {
         assert!(match_regex_or_glob("NPM", "/^npm/i"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn glob_star_prefix() {
         assert!(match_regex_or_glob("npm", "n*"));
@@ -225,6 +231,7 @@ mod tests {
         assert!(!match_regex_or_glob("cargo", "npm*"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn glob_double_star() {
         assert!(match_regex_or_glob("docker/nginx", "docker/**"));
@@ -232,6 +239,7 @@ mod tests {
 
     // ── match_regex_or_glob_list ──────────────────────────────────────────────
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn empty_list_returns_false() {
         assert!(!match_regex_or_glob_list("npm", &[]));
@@ -264,6 +272,7 @@ mod tests {
         assert!(match_regex_or_glob_list("test", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn positive_list_matches() {
         let pats: Vec<String> = vec!["npm".into(), "cargo".into()];
@@ -272,6 +281,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("pip", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn negation_excludes_input() {
         let pats: Vec<String> = vec!["npm".into(), "!cargo".into()];
@@ -279,6 +289,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("cargo", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn all_negative_patterns_allow_non_matching() {
         // Only negative patterns: any input that doesn't match the negation passes.
@@ -301,6 +312,7 @@ mod tests {
         assert!(match_regex_or_glob_list("test", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn glob_in_list() {
         let pats: Vec<String> = vec!["npm*".into()];
@@ -309,6 +321,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("cargo", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn regex_in_list() {
         let pats: Vec<String> = vec!["/^(npm|pip)/".into()];
@@ -317,6 +330,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("cargo", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn negation_glob() {
         let pats: Vec<String> = vec!["!npm*".into()];
@@ -327,6 +341,7 @@ mod tests {
 
     // ── match_regex_or_glob negation support ─────────────────────────────────
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn single_negated_regex_inverts_match() {
         // !/^0/ should match strings NOT starting with "0"
@@ -334,12 +349,14 @@ mod tests {
         assert!(!match_regex_or_glob("0.5.0", "!/^0/"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn single_negated_exact_inverts_match() {
         assert!(match_regex_or_glob("cargo", "!npm"));
         assert!(!match_regex_or_glob("npm", "!npm"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn single_negated_glob_inverts_match() {
         assert!(match_regex_or_glob("cargo", "!npm*"));
@@ -349,6 +366,7 @@ mod tests {
     // ── Ported from Renovate dep-names.spec.ts ────────────────────────────────
     // These verify our glob/regex semantics match Renovate's behavior.
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn dep_names_exact_match() {
         // Exact string match
@@ -357,6 +375,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("@opentelemetry/trace", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn dep_names_regex_prefix() {
         // Regex: /^@opentelemetry/ should match @opentelemetry/<anything>
@@ -366,6 +385,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("@other/http", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn dep_names_negated_regex_prefix() {
         // Negated regex: !/^@opentelemetry/ should exclude @opentelemetry scope
@@ -374,6 +394,7 @@ mod tests {
         assert!(match_regex_or_glob_list("@other/http", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn dep_names_scoped_package_glob() {
         // @typescript-eslint/** should match all packages under the scope
@@ -386,6 +407,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("typescript-eslint", &pats));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn brace_expansion_in_glob() {
         // globset supports brace expansion: {/,} matches '/' or ','
@@ -540,6 +562,7 @@ mod tests {
 
     // ── Ported from Renovate dep-names.spec.ts (additional) ──────────────────
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn dep_names_no_slash_double_star_does_not_cross_slash() {
         // "@opentelemetry**" (without path separator) should NOT match "@opentelemetry/http"
@@ -559,6 +582,7 @@ mod tests {
         assert!(is_skip_comment("renovate:ignore"));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn skip_comment_pyup_ignore_returns_true() {
         assert!(is_skip_comment("pyup:ignore"));
@@ -582,6 +606,7 @@ mod tests {
         assert!(!is_skip_comment(""));
     }
 
+    // Rust-specific: string_match behavior test
     #[test]
     fn skip_comment_with_leading_whitespace() {
         // Inline comment: "  renovate:ignore  " (with spaces)

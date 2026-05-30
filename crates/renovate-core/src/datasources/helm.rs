@@ -685,6 +685,7 @@ mod tests {
         assert!(result.releases[0].new_digest.is_none());
     }
 
+    // Rust-specific: helm behavior test
     #[test]
     fn parse_finds_first_version() {
         let yaml = make_index_yaml(&[("redis", &["17.0.0", "16.0.0", "15.0.0"])]);
@@ -694,6 +695,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: helm behavior test
     #[test]
     fn parse_handles_multiple_charts() {
         let yaml = make_index_yaml(&[
@@ -705,6 +707,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "12.0.0");
     }
 
+    // Rust-specific: helm behavior test
     #[test]
     fn parse_extracts_created_timestamp() {
         let yaml = "apiVersion: v1\nentries:\n  redis:\n  - name: redis\n    version: 17.0.0\n    created: \"2024-01-15T10:30:00.000Z\"\n";
@@ -716,6 +719,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: helm behavior test
     #[test]
     fn strip_tilde_gt() {
         assert_eq!(strip_constraint_operators("~> 17.0.0"), "17.0.0");
@@ -819,6 +823,7 @@ mod tests {
         assert!(nginx.summary.as_ref().unwrap().update_available);
     }
 
+    // Rust-specific: helm behavior test
     #[test]
     fn normalize_timestamp_trims_nanoseconds() {
         assert_eq!(

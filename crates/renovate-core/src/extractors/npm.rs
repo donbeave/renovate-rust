@@ -3878,6 +3878,7 @@ chalk@^2.4.1:
         assert!(deps.is_empty());
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn extracts_all_four_sections() {
         let json = r#"{
@@ -3906,6 +3907,7 @@ chalk@^2.4.1:
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn plain_semver_has_no_skip_reason() {
         let json =
@@ -3914,6 +3916,7 @@ chalk@^2.4.1:
         assert!(deps.iter().all(|d| d.skip_reason.is_none()));
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn workspace_protocol_is_skipped() {
         let json = r#"{ "dependencies": { "my-lib": "workspace:*", "other": "workspace:^1.0" } }"#;
@@ -3924,6 +3927,7 @@ chalk@^2.4.1:
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn file_reference_is_skipped() {
         let json =
@@ -3935,6 +3939,7 @@ chalk@^2.4.1:
         );
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn git_source_forms_are_skipped() {
         let json = r#"{ "dependencies": {
@@ -4025,6 +4030,7 @@ chalk@^2.4.1:
         }));
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn scoped_package_name_is_not_confused_with_git_shorthand() {
         // "@scope/pkg" contains a slash but starts with "@" — must NOT be treated
@@ -4428,6 +4434,7 @@ chalk@^2.4.1:
         assert_eq!(yarn.skip_reason, None);
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn missing_sections_are_ignored() {
         let json = r#"{ "dependencies": { "lodash": "^4" } }"#;
@@ -4435,6 +4442,7 @@ chalk@^2.4.1:
         assert_eq!(deps.len(), 1);
     }
 
+    // Rust-specific: npm behavior test
     #[test]
     fn extracts_yarn_resolutions() {
         let json = r#"{

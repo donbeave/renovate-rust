@@ -544,6 +544,7 @@ mod tests {
 
     // --- updateDependency tests ---
 
+    // Rust-specific: git_submodules behavior test
     #[test]
     fn git_submodule_update_branch_value() {
         let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n\tbranch = v0.0.1\n";
@@ -564,6 +565,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: git_submodules behavior test
     #[test]
     fn git_submodule_update_same_value_unchanged() {
         let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n\tbranch = v0.0.1\n";
@@ -577,6 +579,7 @@ mod tests {
         assert_eq!(update_dependency(content, &config), GitSubmoduleUpdateResult::Unchanged);
     }
 
+    // Rust-specific: git_submodules behavior test
     #[test]
     fn git_submodule_update_no_new_value_unchanged() {
         let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n";
@@ -590,6 +593,7 @@ mod tests {
         assert_eq!(update_dependency(content, &config), GitSubmoduleUpdateResult::Unchanged);
     }
 
+    // Rust-specific: git_submodules behavior test
     #[test]
     fn git_submodule_update_adds_branch_when_missing() {
         let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n";

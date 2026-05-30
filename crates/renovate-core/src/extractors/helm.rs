@@ -666,6 +666,7 @@ dependencies:
         assert_eq!(deps.len(), 2);
     }
 
+    // Rust-specific: helm behavior test
     #[test]
     fn multiple_sections_only_dependencies_extracted() {
         let content = r#"
@@ -698,6 +699,7 @@ version: 1.0.0
         assert!(extract(content).is_empty());
     }
 
+    // Rust-specific: helm behavior test
     #[test]
     fn real_world_chart_yaml() {
         let content = r#"

@@ -221,6 +221,7 @@ pub async fn exec(
 mod tests {
     use super::*;
 
+    // Rust-specific: orchestrator behavior test
     #[test]
     fn resolve_cwd_from_opts() {
         let opts = ExecOptions {
@@ -231,6 +232,7 @@ mod tests {
         assert_eq!(resolve_cwd(&opts, &config), Some("/custom/dir".to_owned()));
     }
 
+    // Rust-specific: orchestrator behavior test
     #[test]
     fn resolve_cwd_from_cwd_file() {
         let opts = ExecOptions {
@@ -241,6 +243,7 @@ mod tests {
         assert_eq!(resolve_cwd(&opts, &config), Some("/repo".to_owned()));
     }
 
+    // Rust-specific: orchestrator behavior test
     #[test]
     fn resolve_cwd_from_config_local_dir() {
         let opts = ExecOptions::default();
@@ -251,6 +254,7 @@ mod tests {
         assert_eq!(resolve_cwd(&opts, &config), Some("/default/dir".to_owned()));
     }
 
+    // Rust-specific: orchestrator behavior test
     #[test]
     fn resolve_cwd_none() {
         let opts = ExecOptions::default();

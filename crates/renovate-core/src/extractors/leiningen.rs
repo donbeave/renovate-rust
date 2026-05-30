@@ -395,6 +395,7 @@ mod tests {
         assert_eq!(mock.unwrap().current_value, "0.4.0");
     }
 
+    // Rust-specific: leiningen behavior test
     #[test]
     fn expand_dep_name_slash_form() {
         assert_eq!(
@@ -403,6 +404,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: leiningen behavior test
     #[test]
     fn expand_dep_name_bare_form() {
         assert_eq!(expand_dep_name("ring"), "ring:ring");
@@ -485,11 +487,13 @@ mod tests {
         assert_eq!(res.get("bar"), Some(&"4".to_owned()));
     }
 
+    // Rust-specific: leiningen behavior test
     #[test]
     fn empty_project_returns_no_deps() {
         assert!(extract("(defproject foo \"1.0\")").is_empty());
     }
 
+    // Rust-specific: leiningen behavior test
     #[test]
     fn comments_stripped_before_parsing() {
         let content = "(defproject x \"1.0\"\n  :dependencies [[org.clojure/clojure \"1.11.1\"] ; keep\n                  [ring \"1.9.6\"]])";

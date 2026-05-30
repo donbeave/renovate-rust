@@ -472,6 +472,7 @@ pub fn get_url(
 mod tests {
     use super::*;
 
+    // Rust-specific: storage behavior test
     #[test]
     fn parse_git_author_name_and_email() {
         let author = parse_git_author_storage("John Doe <john@example.com>").unwrap();
@@ -479,6 +480,7 @@ mod tests {
         assert_eq!(author.address.as_deref(), Some("john@example.com"));
     }
 
+    // Rust-specific: storage behavior test
     #[test]
     fn parse_git_author_email_only() {
         let author = parse_git_author_storage("<john@example.com>").unwrap();
@@ -486,23 +488,27 @@ mod tests {
         assert_eq!(author.address.as_deref(), Some("john@example.com"));
     }
 
+    // Rust-specific: storage behavior test
     #[test]
     fn parse_git_author_empty() {
         assert!(parse_git_author_storage("").is_none());
     }
 
+    // Rust-specific: storage behavior test
     #[test]
     fn get_url_default() {
         let url = get_url(None, None, None, None, "owner/repo");
         assert_eq!(url, "https://github.com/owner/repo.git");
     }
 
+    // Rust-specific: storage behavior test
     #[test]
     fn get_url_with_auth() {
         let url = get_url(Some("https"), Some("token"), Some("gitlab.com"), None, "owner/repo");
         assert_eq!(url, "https://token@gitlab.com/owner/repo.git");
     }
 
+    // Rust-specific: storage behavior test
     #[test]
     fn storage_config_default() {
         let config = StorageConfig::default();
@@ -515,6 +521,7 @@ mod tests {
         assert!(!config.full_clone);
     }
 
+    // Rust-specific: storage behavior test
     #[test]
     fn git_storage_new() {
         let dir = tempfile::tempdir().unwrap();
@@ -524,6 +531,7 @@ mod tests {
         assert!(storage.get_no_verify().is_empty());
     }
 
+    // Rust-specific: storage behavior test
     #[test]
     fn git_storage_set_no_verify() {
         let dir = tempfile::tempdir().unwrap();

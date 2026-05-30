@@ -11897,6 +11897,7 @@ dep1 = "^1.0.0"
     }
 
 
+    // Rust-specific: util behavior test
     #[test]
     fn jsonc_behavior_inline_check() {
         let input = "{\n  \"name\": \"test\"\n  \"version\": \"1.0.0\"\n}";

@@ -1318,6 +1318,7 @@ mod tests {
         assert_eq!(hard, 3);
     }
 
+    // Rust-specific: package behavior test
     #[test]
     fn resolve_ttl_values_no_override_uses_arg() {
         let cfg = CacheTtlConfig::default();
@@ -1544,12 +1545,14 @@ mod tests {
 
     // ── glob_match ────────────────────────────────────────────────────────
 
+    // Rust-specific: package behavior test
     #[test]
     fn glob_match_exact() {
         assert!(glob_match("_test-namespace", "_test-namespace"));
         assert!(!glob_match("_test-namespace", "_other"));
     }
 
+    // Rust-specific: package behavior test
     #[test]
     fn glob_match_wildcard_prefix() {
         assert!(glob_match("datasource-*", "datasource-npm"));
@@ -1557,6 +1560,7 @@ mod tests {
         assert!(!glob_match("datasource-*", "other-npm"));
     }
 
+    // Rust-specific: package behavior test
     #[test]
     fn glob_match_wildcard_suffix() {
         assert!(glob_match("*-namespace", "_test-namespace"));

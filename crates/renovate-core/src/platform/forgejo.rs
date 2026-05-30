@@ -439,6 +439,7 @@ mod tests {
         ForgejoClient::new(server_uri, "test-token").unwrap()
     }
 
+    // Rust-specific: forgejo behavior test
     #[test]
     fn trim_trailing_api_path_strips_api_v1() {
         assert_eq!(

@@ -357,6 +357,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(black.skip_reason, Some(PipfileSkipReason::Wildcard));
     }
 
+    // Rust-specific: pipfile behavior test
     #[test]
     fn normalizes_package_names() {
         let content = "[packages]\nMy_Package = \">=1.0\"\n";

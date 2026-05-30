@@ -76,6 +76,7 @@ mod tests {
         pairs.iter().cloned().map(|(k, v)| (k.to_owned(), v.to_owned())).collect()
     }
 
+    // Rust-specific: env behavior test
     #[test]
     fn get_child_process_env_basic() {
         let env = make_env(&[("HOME", "/home/user"), ("PATH", "/usr/bin"), ("SECRET", "123")]);
@@ -85,6 +86,7 @@ mod tests {
         assert!(!result.contains_key("SECRET"));
     }
 
+    // Rust-specific: env behavior test
     #[test]
     fn get_child_process_env_custom_vars() {
         let env = make_env(&[("HOME", "/home"), ("MY_TOKEN", "abc")]);
@@ -92,6 +94,7 @@ mod tests {
         assert_eq!(result.get("MY_TOKEN").unwrap(), "abc");
     }
 
+    // Rust-specific: env behavior test
     #[test]
     fn get_child_process_env_expose_all() {
         let env = make_env(&[("HOME", "/home"), ("SECRET", "123")]);
@@ -99,6 +102,7 @@ mod tests {
         assert_eq!(result.get("SECRET").unwrap(), "123");
     }
 
+    // Rust-specific: env behavior test
     #[test]
     fn get_child_env_merges_custom_and_extra() {
         let process_env = make_env(&[("HOME", "/home"), ("PATH", "/usr/bin")]);

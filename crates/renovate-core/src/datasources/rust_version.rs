@@ -393,6 +393,8 @@ mod tests {
     }
 
     // Verify stable/beta are filtered in the pipeline (index.ts behaviour).
+
+    // Rust-specific: rust_version behavior test
     #[test]
     fn fetch_pipeline_filters_channel_aliases() {
         // stable/beta are excluded from the final release list.

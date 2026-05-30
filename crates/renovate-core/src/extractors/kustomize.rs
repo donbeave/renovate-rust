@@ -1307,6 +1307,7 @@ helmCharts:
         assert!(matches!(deps[1], KustomizeDep::Helm(_)));
     }
 
+    // Rust-specific: kustomize behavior test
     #[test]
     fn image_without_tag_skipped() {
         let content = "images:\n  - name: nginx\n";
@@ -1314,6 +1315,7 @@ helmCharts:
         assert!(deps.is_empty());
     }
 
+    // Rust-specific: kustomize behavior test
     #[test]
     fn helm_without_version_skipped() {
         let content = "helmCharts:\n  - name: podinfo\n    repo: https://example.com\n";

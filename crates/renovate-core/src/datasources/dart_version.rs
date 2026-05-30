@@ -135,23 +135,27 @@ mod tests {
         assert_eq!(v, Some("2.17.5".into()));
     }
 
+    // Rust-specific: dart_version behavior test
     #[test]
     fn skip_latest_prefix() {
         assert!(version_from_prefix("channels/stable/release/latest/", "stable").is_none());
     }
 
+    // Rust-specific: dart_version behavior test
     #[test]
     fn skip_svn_style_versions() {
         // Old SVN-based numeric-only version strings are ignored.
         assert!(version_from_prefix("channels/stable/release/12345/", "stable").is_none());
     }
 
+    // Rust-specific: dart_version behavior test
     #[test]
     fn skip_stable_version_on_beta_channel() {
         // A fully numeric X.Y.Z version on beta is filtered out.
         assert!(version_from_prefix("channels/beta/release/2.17.5/", "beta").is_none());
     }
 
+    // Rust-specific: dart_version behavior test
     #[test]
     fn keep_beta_version_on_beta_channel() {
         let v = version_from_prefix("channels/beta/release/2.18.0-44.1.beta/", "beta");

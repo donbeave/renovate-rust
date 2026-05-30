@@ -2668,6 +2668,7 @@ jobs:
         );
     }
 
+    // Rust-specific: github_actions behavior test
     #[test]
     fn docker_var_refs_skipped() {
         let content = r#"

@@ -187,6 +187,7 @@ pub fn get_optimize_command() -> Vec<String> {
 mod tests {
     use super::*;
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn detect_yarn_v1() {
         assert_eq!(
@@ -195,6 +196,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn detect_yarn_v2() {
         assert_eq!(
@@ -203,6 +205,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn detect_yarn_v4() {
         assert_eq!(
@@ -211,11 +214,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn detect_yarn_none() {
         assert_eq!(detect_yarn_version(None), YarnMajorVersion::V1);
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn detect_yarn_caret4() {
         assert_eq!(
@@ -224,12 +229,14 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn check_yarnrc_offline_mirror() {
         let info = check_yarnrc("--install.offline-mirror true\n");
         assert_eq!(info.offline_mirror.as_deref(), Some("true"));
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn check_yarnrc_yarn_path() {
         let info = check_yarnrc("--yarn-path .yarn/releases/yarn-4.1.0.cjs\n");
@@ -239,6 +246,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn check_yarnrc_empty() {
         let info = check_yarnrc("");
@@ -246,6 +254,7 @@ mod tests {
         assert!(info.yarn_path.is_none());
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_update_true() {
         let u = Upgrade {
@@ -255,6 +264,7 @@ mod tests {
         assert!(is_yarn_update(&u));
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_update_false() {
         let u = Upgrade {
@@ -264,6 +274,7 @@ mod tests {
         assert!(!is_yarn_update(&u));
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_constraint_from_upgrades_found() {
         let upgrades = vec![Upgrade {
@@ -277,11 +288,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_constraint_from_upgrades_not_found() {
         assert_eq!(get_yarn_constraint_from_upgrades(&[]), None);
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_constraint_from_pkg_json() {
         let pj = PackageJson::parse(r#"{"packageManager": "yarn@4.1.0"}"#).unwrap();
@@ -291,6 +304,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_install_v1_frozen() {
         assert_eq!(
@@ -299,6 +313,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_install_v2_mode() {
         assert_eq!(
@@ -307,6 +322,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_upgrade_v1_cmd() {
         assert_eq!(
@@ -315,6 +331,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn yarn_upgrade_v2_cmd() {
         assert_eq!(
@@ -323,6 +340,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: yarn behavior test
     #[test]
     fn optimize_command() {
         let cmd = get_optimize_command();

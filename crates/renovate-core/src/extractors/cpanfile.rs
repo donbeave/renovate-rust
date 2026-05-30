@@ -418,6 +418,7 @@ on 'test' => sub {
         }
     }
 
+    // Rust-specific: cpanfile behavior test
     #[test]
     fn multiple_deps() {
         let content = r#"
@@ -431,6 +432,7 @@ recommends 'JSON::XS', '4.03';
         assert_eq!(deps[2].dep_name, "JSON::XS");
     }
 
+    // Rust-specific: cpanfile behavior test
     #[test]
     fn comment_lines_stripped() {
         let content = "# requires 'Foo', '1.0';\nrequires 'Bar', '2.0';\n";

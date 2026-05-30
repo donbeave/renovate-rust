@@ -129,11 +129,13 @@ pub fn as_raw_commands(cmds: &[String]) -> Vec<String> {
 mod tests {
     use super::*;
 
+    // Rust-specific: raw behavior test
     #[test]
     fn as_raw_command_returns_input() {
         assert_eq!(as_raw_command("echo hello"), "echo hello");
     }
 
+    // Rust-specific: raw behavior test
     #[test]
     fn as_raw_commands_maps_all() {
         let cmds = vec!["echo a".to_owned(), "echo b".to_owned()];
