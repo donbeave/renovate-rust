@@ -60,6 +60,12 @@ Trailers by agent:
   Co-authored-by: Amp <amp@ampcode.com>
   ```
 
+- Opencode:
+
+  ```text
+  Co-authored-by: opencode-agent[bot] <opencode-agent[bot]@users.noreply.github.com>
+  ```
+
 Do not stack multiple agent trailers on one commit. If you are uncertain which
 agent is creating the commit, ask.
 
