@@ -32,8 +32,11 @@ pub struct DetectedManager {
 struct ManagerDef {
     name: &'static str,
     patterns: &'static [&'static str],
+    #[allow(dead_code)]
     supported_datasources: &'static [&'static str],
+    #[allow(dead_code)]
     categories: &'static [&'static str],
+    #[allow(dead_code)]
     url: Option<&'static str>,
 }
 
