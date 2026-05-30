@@ -8,13 +8,12 @@
 //!
 //! Forgejo uses Bearer token authentication.
 
-use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};
 use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 use crate::platform::gitea_forgejo_utils::{
-    ContentsListResponse, ContentsResponse, get_merge_method, trim_trailing_api_path,
+    ContentsListResponse, ContentsResponse, get_merge_method,
 };
 
 pub const FORGEJO_API_VERSION: &str = "api/v1";
@@ -23,6 +22,7 @@ pub const FORGEJO_API_VERSION: &str = "api/v1";
 pub struct ForgejoClient {
     http: HttpClient,
     api_base: String,
+    #[allow(dead_code)]
     server_url: String,
 }
 
@@ -428,10 +428,12 @@ impl PlatformClient for ForgejoClient {
 
 #[cfg(test)]
 mod tests {
+    use base64::Engine as _;
     use wiremock::matchers::{header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use super::*;
+    use crate::platform::gitea_forgejo_utils::trim_trailing_api_path;
 
     fn make_client(server_uri: &str) -> ForgejoClient {
         ForgejoClient::new(server_uri, "test-token").unwrap()
