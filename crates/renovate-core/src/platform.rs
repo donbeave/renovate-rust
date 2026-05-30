@@ -133,6 +133,19 @@ pub trait PlatformClient: Send + Sync {
         repo: &str,
         branch: &str,
     ) -> impl std::future::Future<Output = Result<CombinedBranchStatus, PlatformError>> + Send;
+
+    /// Write (or overwrite) a file in the repository.
+    ///
+    /// For remote platforms this may commit the file to a branch;
+    /// for local platforms it writes directly to disk.
+    /// Returns `Ok(())` on success, `Err` otherwise.
+    fn write_file(
+        &self,
+        owner: &str,
+        repo: &str,
+        path: &str,
+        content: &str,
+    ) -> impl std::future::Future<Output = Result<(), PlatformError>> + Send;
 }
 
 /// Enum dispatch wrapper covering all supported platform clients.
@@ -276,6 +289,21 @@ impl AnyPlatformClient {
             Self::Github(c) => c.get_branch_status(owner, repo, branch).await,
             Self::Gitlab(c) => c.get_branch_status(owner, repo, branch).await,
             Self::Local(c) => c.get_branch_status(owner, repo, branch).await,
+        }
+    }
+
+    /// Write (or overwrite) a file in the repository.
+    pub async fn write_file(
+        &self,
+        owner: &str,
+        repo: &str,
+        path: &str,
+        content: &str,
+    ) -> Result<(), PlatformError> {
+        match self {
+            Self::Github(c) => c.write_file(owner, repo, path, content).await,
+            Self::Gitlab(c) => c.write_file(owner, repo, path, content).await,
+            Self::Local(c) => c.write_file(owner, repo, path, content).await,
         }
     }
 }

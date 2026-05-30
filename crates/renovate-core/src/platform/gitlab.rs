@@ -328,6 +328,19 @@ impl PlatformClient for GitlabClient {
     ) -> Result<CombinedBranchStatus, PlatformError> {
         Err(PlatformError::NotSupported("GitLab branch status".to_string()))
     }
+
+    async fn write_file(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _path: &str,
+        _content: &str,
+    ) -> Result<(), PlatformError> {
+        tracing::debug!("gitlab platform: write_file is not yet implemented");
+        Err(PlatformError::NotSupported(
+            "write_file not yet implemented for GitLab".to_owned(),
+        ))
+    }
 }
 
 // ── URL encoding helpers ──────────────────────────────────────────────────────

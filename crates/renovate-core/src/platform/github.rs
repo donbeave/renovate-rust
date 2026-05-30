@@ -468,6 +468,19 @@ impl PlatformClient for GithubClient {
             .await
             .map_err(PlatformError::Http)
     }
+
+    async fn write_file(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _path: &str,
+        _content: &str,
+    ) -> Result<(), PlatformError> {
+        tracing::debug!("github platform: write_file is not yet implemented");
+        Err(PlatformError::NotSupported(
+            "write_file not yet implemented for GitHub".to_owned(),
+        ))
+    }
 }
 
 fn decode_github_content(c: GithubContent) -> Result<String, PlatformError> {

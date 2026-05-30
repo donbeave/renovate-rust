@@ -64,6 +64,35 @@ pub enum GradleDepKind {
     Plugin,
 }
 
+/// A version variable extracted from the `[versions]` section of a TOML catalog.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GradleCatalogVar {
+    pub key: String,
+    pub value: String,
+    pub file_replace_position: usize,
+    pub package_file: String,
+}
+
+/// A dependency extracted from the `[libraries]` or `[plugins]` section of a TOML catalog.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GradleCatalogDep {
+    pub dep_name: String,
+    pub current_value: Option<String>,
+    pub dep_type: Option<String>,
+    pub package_name: Option<String>,
+    pub shared_variable_name: Option<String>,
+    pub skip_reason: Option<String>,
+    pub file_replace_position: Option<usize>,
+    pub package_file: String,
+}
+
+/// Result of parsing a Gradle version catalog TOML file.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GradleCatalogResult {
+    pub vars: HashMap<String, GradleCatalogVar>,
+    pub deps: Vec<GradleCatalogDep>,
+}
+
 // ── Compiled regexes ──────────────────────────────────────────────────────────
 
 /// Matches any Gradle configuration keyword followed by a quoted dep string.
@@ -153,6 +182,440 @@ pub fn extract_version_catalog(content: &str) -> Vec<GradleExtractedDep> {
     }
 
     deps
+}
+
+/// Parse a Gradle version catalog TOML file with full position tracking.
+///
+/// Mirrors `lib/modules/manager/gradle/extract/catalog.ts` `parseCatalog()`.
+/// Returns `{ vars, deps }` where `vars` tracks version variables and `deps`
+/// tracks library and plugin dependencies with `fileReplacePosition` offsets.
+pub fn parse_catalog(package_file: &str, content: &str) -> GradleCatalogResult {
+    let massaged = massage_toml(content);
+    let Ok(table) = toml::from_str::<toml::Value>(&massaged) else {
+        return GradleCatalogResult {
+            vars: HashMap::new(),
+            deps: Vec::new(),
+        };
+    };
+
+    let versions_section = table
+        .get("versions")
+        .and_then(|v| v.as_table())
+        .cloned()
+        .unwrap_or_default();
+
+    let version_start_index = content.find("versions").unwrap_or(0);
+    let version_sub_content = &content[version_start_index..];
+
+    let mut vars = HashMap::new();
+
+    for (key, ver_val) in &versions_section {
+        let (current_value, file_replace_position) =
+            match extract_literal_version_for_catalog(
+                ver_val,
+                version_start_index,
+                version_sub_content,
+                key,
+            ) {
+                Some(v) => v,
+                None => continue,
+            };
+        let normalized = normalize_alias(key);
+        vars.insert(
+            normalized.clone(),
+            GradleCatalogVar {
+                key: normalized,
+                value: current_value,
+                file_replace_position,
+                package_file: package_file.to_owned(),
+            },
+        );
+    }
+
+    let libs = table.get("libraries").and_then(|v| v.as_table());
+    let lib_start_index = content.find("libraries").unwrap_or(0);
+    let lib_sub_content = &content[lib_start_index..];
+
+    let mut deps = Vec::new();
+
+    if let Some(libs) = libs {
+        for (lib_name, descriptor) in libs {
+            let dep = extract_catalog_dependency(
+                descriptor,
+                &versions_section,
+                lib_start_index,
+                lib_sub_content,
+                lib_name,
+                version_start_index,
+                version_sub_content,
+                package_file,
+            );
+            deps.push(dep);
+        }
+    }
+
+    let plugins = table.get("plugins").and_then(|v| v.as_table());
+    let plugins_start_index = content.find("[plugins]").unwrap_or(0);
+    let plugins_sub_content = &content[plugins_start_index..];
+
+    if let Some(plugins) = plugins {
+        for (plugin_name, descriptor) in plugins {
+            let (dep_name_str, version_val, is_ref) = match descriptor {
+                toml::Value::String(s) => {
+                    let parts: Vec<&str> = s.splitn(2, ':').collect();
+                    if parts.len() == 2 {
+                        (parts[0].to_owned(), None, false)
+                    } else {
+                        continue;
+                    }
+                }
+                toml::Value::Table(t) => {
+                    let id = match t.get("id").and_then(|v| v.as_str()) {
+                        Some(id) => id.to_owned(),
+                        None => continue,
+                    };
+                    let ver = t.get("version").cloned();
+                    let is_ref = t
+                        .get("version")
+                        .and_then(|v| v.as_table())
+                        .and_then(|vt| vt.get("ref"))
+                        .and_then(|r| r.as_str())
+                        .is_some();
+                    (id, ver, is_ref)
+                }
+                _ => continue,
+            };
+
+            let (current_value, file_replace_position, skip_reason) = match &version_val {
+                Some(vv) => extract_version_for_catalog(
+                    vv,
+                    &versions_section,
+                    plugins_start_index,
+                    plugins_sub_content,
+                    &dep_name_str,
+                    version_start_index,
+                    version_sub_content,
+                ),
+                None => {
+                    let string_ver = match descriptor {
+                        toml::Value::String(s) => {
+                            let parts: Vec<&str> = s.splitn(2, ':').collect();
+                            parts.get(1).map(|p| (*p).to_owned())
+                        }
+                        _ => None,
+                    };
+                    match string_ver {
+                        Some(v) => {
+                            let pos = plugins_start_index
+                                + find_index_after(plugins_sub_content, &dep_name_str, &v);
+                            (Some(v), Some(pos), None)
+                        }
+                        None => (None, None, Some("unspecified-version".to_owned())),
+                    }
+                }
+            };
+
+            let shared_var = if is_ref {
+                version_val.as_ref().and_then(|v| {
+                    v.as_table()
+                        .and_then(|t| t.get("ref"))
+                        .and_then(|r| r.as_str())
+                        .map(|r| normalize_alias(r))
+                })
+            } else {
+                None
+            };
+
+            deps.push(GradleCatalogDep {
+                dep_name: dep_name_str.clone(),
+                current_value,
+                dep_type: Some("plugin".to_owned()),
+                package_name: Some(format!(
+                    "{dep_name_str}:{dep_name_str}.gradle.plugin"
+                )),
+                shared_variable_name: shared_var,
+                skip_reason,
+                file_replace_position,
+                package_file: package_file.to_owned(),
+            });
+        }
+    }
+
+    GradleCatalogResult { vars, deps }
+}
+
+fn normalize_alias(alias: &str) -> String {
+    alias.replace('-', ".").replace('_', ".")
+}
+
+fn strip_jinja_templates(content: &str) -> String {
+    let mut result = String::with_capacity(content.len());
+    let bytes = content.as_bytes();
+    let len = bytes.len();
+    let mut idx = 0;
+    let mut last_pos = 0;
+    while idx < len {
+        if bytes[idx] == b'{' && idx + 1 < len {
+            let (closing, skip): (&str, usize) = match bytes[idx + 1] {
+                b'%' => {
+                    if idx + 2 < len && bytes[idx + 2] == b'`' {
+                        ("`%}", 3)
+                    } else {
+                        ("%}", 2)
+                    }
+                }
+                b'{' => {
+                    if idx + 2 < len && bytes[idx + 2] == b'`' {
+                        ("`}}", 3)
+                    } else {
+                        ("}}", 2)
+                    }
+                }
+                b'#' => ("#}", 2),
+                _ => {
+                    idx += 1;
+                    continue;
+                }
+            };
+            if let Some(end) = content[idx + skip..].find(closing) {
+                result.push_str(&content[last_pos..idx]);
+                idx = idx + skip + end + closing.len();
+                last_pos = idx;
+                continue;
+            }
+        }
+        idx += 1;
+    }
+    if last_pos < len {
+        result.push_str(&content[last_pos..]);
+    }
+    result
+}
+
+fn massage_toml(content: &str) -> String {
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#"^\s*\{\{.+?\}\}\s*=.*$"#).unwrap());
+    let stripped = RE.replace_all(content, "").to_string();
+    strip_jinja_templates(&stripped)
+}
+
+fn find_version_index(content: &str, dep_name: &str, version: &str) -> Option<usize> {
+    let escaped_dn = regex::escape(dep_name);
+    let escaped_ver = regex::escape(version);
+    let pattern = format!(
+        r#"(?:id\s*=\s*)?['"]?{}["']?(?:(?:\s*=\s*)|:|,\s*)(?:.*version(?:\.ref)?(?:\s*=\s*))?['"]?{}['"]?"#,
+        escaped_dn, escaped_ver
+    );
+    let re = Regex::new(&pattern).ok()?;
+    if let Some(m) = re.find(content) {
+        let offset = content[m.start()..].find(version)?;
+        Some(m.start() + offset)
+    } else {
+        None
+    }
+}
+
+fn find_index_after(content: &str, after: &str, find: &str) -> usize {
+    let slice_point = content.find(after).unwrap_or(0) + after.len();
+    slice_point + content[slice_point..].find(find).unwrap_or(0)
+}
+
+fn extract_literal_version_for_catalog(
+    version: &toml::Value,
+    dep_start_index: usize,
+    dep_sub_content: &str,
+    section_key: &str,
+) -> Option<(String, usize)> {
+    match version {
+        toml::Value::String(s) => {
+            let pos = find_version_index(dep_sub_content, section_key, s)
+                .unwrap_or_else(|| find_index_after(dep_sub_content, section_key, s));
+            Some((s.clone(), dep_start_index + pos))
+        }
+        toml::Value::Table(t) => {
+            if t.contains_key("reject") || t.contains_key("rejectAll") {
+                return None;
+            }
+            for key in &["require", "prefer", "strictly"] {
+                if let Some(v) = t.get(*key).and_then(|v| v.as_str()) {
+                    let pos = find_index_after(dep_sub_content, section_key, v);
+                    return Some((v.to_owned(), dep_start_index + pos));
+                }
+            }
+            None
+        }
+        _ => None,
+    }
+}
+
+fn extract_version_for_catalog(
+    version: &toml::Value,
+    versions: &toml::map::Map<String, toml::Value>,
+    dep_start_index: usize,
+    dep_sub_content: &str,
+    dep_name: &str,
+    version_start_index: usize,
+    version_sub_content: &str,
+) -> (Option<String>, Option<usize>, Option<String>) {
+    let ref_key = version
+        .as_table()
+        .and_then(|t| t.get("ref"))
+        .and_then(|r| r.as_str());
+
+    if let Some(ref_key) = ref_key {
+        let original_alias = find_original_alias(versions, ref_key);
+        let ver = versions.get(&original_alias);
+        match ver {
+            Some(v) => {
+                let result =
+                    extract_literal_version_for_catalog(v, version_start_index, version_sub_content, &original_alias);
+                match result {
+                    Some((val, pos)) => (Some(val), Some(pos), None),
+                    None => (None, None, Some("unspecified-version".to_owned())),
+                }
+            }
+            None => (None, None, Some("unspecified-version".to_owned())),
+        }
+    } else {
+        let result = extract_literal_version_for_catalog(
+            version,
+            dep_start_index,
+            dep_sub_content,
+            dep_name,
+        );
+        match result {
+            Some((val, pos)) => (Some(val), Some(pos), None),
+            None => (None, None, Some("unspecified-version".to_owned())),
+        }
+    }
+}
+
+fn find_original_alias(
+    versions: &toml::map::Map<String, toml::Value>,
+    alias: &str,
+) -> String {
+    let normalized = normalize_alias(alias);
+    for key in versions.keys() {
+        if normalize_alias(key) == normalized {
+            return key.clone();
+        }
+    }
+    alias.to_owned()
+}
+
+fn extract_catalog_dependency(
+    descriptor: &toml::Value,
+    versions: &toml::map::Map<String, toml::Value>,
+    dep_start_index: usize,
+    dep_sub_content: &str,
+    dep_name: &str,
+    version_start_index: usize,
+    version_sub_content: &str,
+    package_file: &str,
+) -> GradleCatalogDep {
+    if let toml::Value::String(s) = descriptor {
+        let parts: Vec<&str> = s.splitn(3, ':').collect();
+        if parts.len() >= 3 {
+            let group = parts[0];
+            let name = parts[1];
+            let current_value = parts[2];
+            let pos =
+                dep_start_index + find_index_after(dep_sub_content, dep_name, current_value);
+            return GradleCatalogDep {
+                dep_name: format!("{group}:{name}"),
+                current_value: Some(current_value.to_owned()),
+                dep_type: None,
+                package_name: None,
+                shared_variable_name: None,
+                skip_reason: None,
+                file_replace_position: Some(pos),
+                package_file: package_file.to_owned(),
+            };
+        }
+        if parts.len() == 2 {
+            return GradleCatalogDep {
+                dep_name: dep_name.to_owned(),
+                current_value: None,
+                dep_type: None,
+                package_name: None,
+                shared_variable_name: None,
+                skip_reason: Some("unspecified-version".to_owned()),
+                file_replace_position: None,
+                package_file: package_file.to_owned(),
+            };
+        }
+    }
+
+    if let toml::Value::Table(t) = descriptor {
+        let dep_name_str = if let Some(module) = t.get("module").and_then(|v| v.as_str()) {
+            let mp: Vec<&str> = module.splitn(2, ':').collect();
+            if mp.len() == 2 {
+                format!("{}:{}", mp[0], mp[1])
+            } else {
+                dep_name.to_owned()
+            }
+        } else if let (Some(group), Some(name)) = (
+            t.get("group").and_then(|v| v.as_str()),
+            t.get("name").and_then(|v| v.as_str()),
+        ) {
+            format!("{group}:{name}")
+        } else {
+            dep_name.to_owned()
+        };
+
+        let version_val = t.get("version");
+        let is_ref = version_val
+            .and_then(|v| v.as_table())
+            .and_then(|vt| vt.get("ref"))
+            .and_then(|r| r.as_str())
+            .is_some();
+
+        let (current_value, file_replace_position, skip_reason) = match version_val {
+            Some(vv) => extract_version_for_catalog(
+                vv,
+                versions,
+                dep_start_index,
+                dep_sub_content,
+                dep_name,
+                version_start_index,
+                version_sub_content,
+            ),
+            None => (None, None, Some("unspecified-version".to_owned())),
+        };
+
+        let shared_var = if is_ref {
+            version_val.and_then(|v| {
+                v.as_table()
+                    .and_then(|t| t.get("ref"))
+                    .and_then(|r| r.as_str())
+                    .map(|r| normalize_alias(r))
+            })
+        } else {
+            None
+        };
+
+        return GradleCatalogDep {
+            dep_name: dep_name_str,
+            current_value,
+            dep_type: None,
+            package_name: None,
+            shared_variable_name: shared_var,
+            skip_reason,
+            file_replace_position,
+            package_file: package_file.to_owned(),
+        };
+    }
+
+    GradleCatalogDep {
+        dep_name: dep_name.to_owned(),
+        current_value: None,
+        dep_type: None,
+        package_name: None,
+        shared_variable_name: None,
+        skip_reason: Some("unspecified-version".to_owned()),
+        file_replace_position: None,
+        package_file: package_file.to_owned(),
+    }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -1490,6 +1953,161 @@ bad = { reject = "1.0.0" }
         let deps = extract_version_catalog(content);
         // Neither kotlin nor bad produces a dep (only libraries/plugins do)
         assert!(deps.is_empty());
+    }
+
+    // Ported: "deletes commit message for plugins with version reference" — gradle/extract/catalog.spec.ts line 134
+    #[test]
+    fn catalog_plugin_version_ref_deletes_commit_message() {
+        let content = r#"[versions]
+detekt = "1.18.1"
+
+[plugins]
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+
+[libraries]
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+"#;
+        let result = parse_catalog("gradle/libs.versions.toml", content);
+
+        assert_eq!(result.vars.len(), 1);
+        let detekt_var = result.vars.get("detekt").unwrap();
+        assert_eq!(detekt_var.key, "detekt");
+        assert_eq!(detekt_var.value, "1.18.1");
+        assert_eq!(detekt_var.file_replace_position, 21);
+        assert_eq!(detekt_var.package_file, "gradle/libs.versions.toml");
+
+        assert_eq!(result.deps.len(), 2);
+
+        let lib = result
+            .deps
+            .iter()
+            .find(|d| d.dep_name == "io.gitlab.arturbosch.detekt:detekt-formatting")
+            .unwrap();
+        assert_eq!(lib.shared_variable_name.as_deref(), Some("detekt"));
+        assert_eq!(lib.current_value.as_deref(), Some("1.18.1"));
+        assert_eq!(lib.file_replace_position, Some(21));
+        assert_eq!(lib.package_file, "gradle/libs.versions.toml");
+
+        let plugin = result
+            .deps
+            .iter()
+            .find(|d| d.dep_type.as_deref() == Some("plugin"))
+            .unwrap();
+        assert_eq!(plugin.dep_name, "io.gitlab.arturbosch.detekt");
+        assert_eq!(
+            plugin.package_name.as_deref(),
+            Some("io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin")
+        );
+        assert_eq!(plugin.current_value.as_deref(), Some("1.18.1"));
+        assert_eq!(plugin.file_replace_position, Some(21));
+        assert_eq!(plugin.shared_variable_name.as_deref(), Some("detekt"));
+    }
+
+    // Ported: "changes the dependency version, not the comment version" — gradle/extract/catalog.spec.ts line 203
+    #[test]
+    fn catalog_version_position_ignores_comments() {
+        let content = r#"[versions]
+# Releases: http://someWebsite.com/junit/1.4.9
+mocha-junit-reporter = "2.0.2"
+# JUnit 1.4.9 is awesome!
+junit = "1.4.9"
+
+
+[libraries]
+junit-legacy = { module = "junit:junit", version.ref = "junit" }
+mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.reporter" }
+"#;
+        let result = parse_catalog("gradle/libs.versions.toml", content);
+
+        assert_eq!(result.vars.len(), 2);
+
+        let mocha_var = result.vars.get("mocha.junit.reporter").unwrap();
+        assert_eq!(mocha_var.key, "mocha.junit.reporter");
+        assert_eq!(mocha_var.value, "2.0.2");
+        assert_eq!(mocha_var.file_replace_position, 82);
+
+        let junit_var = result.vars.get("junit").unwrap();
+        assert_eq!(junit_var.key, "junit");
+        assert_eq!(junit_var.value, "1.4.9");
+        assert_eq!(junit_var.file_replace_position, 124);
+
+        assert_eq!(result.deps.len(), 2);
+
+        let junit_dep = result
+            .deps
+            .iter()
+            .find(|d| d.dep_name == "junit:junit")
+            .unwrap();
+        assert_eq!(junit_dep.shared_variable_name.as_deref(), Some("junit"));
+        assert_eq!(junit_dep.current_value.as_deref(), Some("1.4.9"));
+        assert_eq!(junit_dep.file_replace_position, Some(124));
+
+        let mocha_dep = result
+            .deps
+            .iter()
+            .find(|d| d.dep_name == "mocha-junit:mocha-junit")
+            .unwrap();
+        assert_eq!(
+            mocha_dep.shared_variable_name.as_deref(),
+            Some("mocha.junit.reporter")
+        );
+        assert_eq!(mocha_dep.current_value.as_deref(), Some("2.0.2"));
+        assert_eq!(mocha_dep.file_replace_position, Some(82));
+    }
+
+    // Ported: "supports templated toml" — gradle/extract/catalog.spec.ts line 254
+    #[test]
+    fn catalog_templated_toml() {
+        let content = r#"[versions]
+# Releases: http://someWebsite.com/junit/1.4.9
+mocha-junit-reporter = "2.0.2"
+{%- if cookiecutter.service_uses_junit %}
+# JUnit 1.4.9 is awesome!
+junit = "1.4.9"
+{%- endif %}
+
+[libraries]
+{%- if cookiecutter.service_uses_junit %}
+junit-legacy = { module = "junit:junit", version.ref = "junit" }
+{%- endif %}
+mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.reporter" }
+"#;
+        let result = parse_catalog("gradle/libs.versions.toml", content);
+
+        assert_eq!(result.vars.len(), 2);
+
+        let mocha_var = result.vars.get("mocha.junit.reporter").unwrap();
+        assert_eq!(mocha_var.key, "mocha.junit.reporter");
+        assert_eq!(mocha_var.value, "2.0.2");
+        assert_eq!(mocha_var.file_replace_position, 82);
+
+        let junit_var = result.vars.get("junit").unwrap();
+        assert_eq!(junit_var.key, "junit");
+        assert_eq!(junit_var.value, "1.4.9");
+        assert_eq!(junit_var.file_replace_position, 166);
+
+        assert_eq!(result.deps.len(), 2);
+
+        let junit_dep = result
+            .deps
+            .iter()
+            .find(|d| d.dep_name == "junit:junit")
+            .unwrap();
+        assert_eq!(junit_dep.shared_variable_name.as_deref(), Some("junit"));
+        assert_eq!(junit_dep.current_value.as_deref(), Some("1.4.9"));
+        assert_eq!(junit_dep.file_replace_position, Some(166));
+
+        let mocha_dep = result
+            .deps
+            .iter()
+            .find(|d| d.dep_name == "mocha-junit:mocha-junit")
+            .unwrap();
+        assert_eq!(
+            mocha_dep.shared_variable_name.as_deref(),
+            Some("mocha.junit.reporter")
+        );
+        assert_eq!(mocha_dep.current_value.as_deref(), Some("2.0.2"));
+        assert_eq!(mocha_dep.file_replace_position, Some(82));
     }
 
     // Ported: "returns null" — gradle/extract.spec.ts line 37

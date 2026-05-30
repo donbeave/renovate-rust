@@ -83,24 +83,32 @@ fn dep_meta(
     (Some(branch_name), Some(pr_title), update_type_str)
 }
 
+/// A dep belonging to a specific branch, together with its source file metadata.
+pub(crate) struct BranchDep {
+    pub file_path: String,
+    pub manager: String,
+    pub dep: output::DepReport,
+}
+
 /// Collect all `UpdateAvailable` dependencies grouped by their `branch_name`.
 ///
-/// Returns a map from branch name to a list of `DepReport` clones for that
+/// Returns a map from branch name to a list of `BranchDep` entries for that
 /// branch.  This mirrors Renovate's `branchifyUpgrades` step where deps
 /// sharing the same branch are coalesced into a single PR.
 pub(crate) fn collect_branch_updates(
     report: &output::RepoReport,
-) -> std::collections::BTreeMap<String, Vec<output::DepReport>> {
-    let mut branches: std::collections::BTreeMap<String, Vec<output::DepReport>> =
+) -> std::collections::BTreeMap<String, Vec<BranchDep>> {
+    let mut branches: std::collections::BTreeMap<String, Vec<BranchDep>> =
         std::collections::BTreeMap::new();
     for file in &report.files {
         for dep in &file.deps {
             if let output::DepStatus::UpdateAvailable { .. } = &dep.status {
                 if let Some(branch) = dep.branch_name.as_ref() {
-                    branches
-                        .entry(branch.clone())
-                        .or_default()
-                        .push(dep.clone());
+                    branches.entry(branch.clone()).or_default().push(BranchDep {
+                        file_path: file.path.clone(),
+                        manager: file.manager.clone(),
+                        dep: dep.clone(),
+                    });
                 }
             }
         }

@@ -105,6 +105,7 @@ impl LocalClient {
             }],
         })
     }
+
 }
 
 /// Run `git ls-files` in `dir` and return the file list, or `None` on failure.
@@ -243,5 +244,23 @@ impl PlatformClient for LocalClient {
         _branch: &str,
     ) -> Result<CombinedBranchStatus, PlatformError> {
         Err(PlatformError::NotSupported("Local platform branch status".to_string()))
+    }
+
+    async fn write_file(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        path: &str,
+        content: &str,
+    ) -> Result<(), PlatformError> {
+        let full = self.base_dir.join(path);
+        if let Some(parent) = full.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| {
+                PlatformError::Unexpected(format!("creating dir {}: {e}", parent.display()))
+            })?;
+        }
+        std::fs::write(&full, content).map_err(|e| {
+            PlatformError::Unexpected(format!("writing {}: {e}", full.display()))
+        })
     }
 }

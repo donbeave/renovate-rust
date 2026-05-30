@@ -5,7 +5,7 @@
 ## `lib/util/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/common.spec.ts
-**Total tests:** 22 | **Ported:** 17 | **Actionable:** 17 | **Status:** partial
+**Total tests:** 22 | **Ported:** 17 | **Actionable:** 20 | **Status:** partial
 
 ### `util/common › detectPlatform`
 
@@ -41,8 +41,8 @@
 | returns inherited value if only inherited value is set | 202 | ported | `util.rs` | `get_inherited_or_global_returns_inherited_when_only_inherited` | — |
 | returns global value if only global value is set | 209 | ported | `util.rs` | `get_inherited_or_global_returns_global_when_only_global` | — |
 | returns inherited value - when both global + inherited are set | 216 | ported | `util.rs` | `get_inherited_or_global_inherited_wins_when_both_set` | — |
-| handles null inherited values | 227 | pending | — | — | — |
-| handles undefined inherited values | 238 | pending | — | — | — |
+| handles null inherited values | 227 | not-applicable | — | — | TypeScript type-system test; upstream comment says "only for coverage" — config validation prevents null values, and Rust's type system makes this impossible at compile time |
+| handles undefined inherited values | 238 | not-applicable | — | — | TypeScript type-system test; upstream comment says "only for coverage" — config validation prevents undefined values, and Rust's type system makes this impossible at compile time |
 
 ### `util/common › getInheritedOrGlobal › when requesting onboardingAutoCloseAge, do not allow inherit config to override global config`
 
