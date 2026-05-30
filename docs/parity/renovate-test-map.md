@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,259 / 11,666 total tests ported (45.1%) · pending 5,611 · not-applicable 796 (6.8%) — updated 2026-05-30
+**Progress:** 5,259 / 11,666 total tests ported (45.1%) · pending 5,518 · not-applicable 889 (7.6%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -289,7 +289,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/index.spec.ts` | Done | [details](lib/config/index.spec.ts.md) |
 | `lib/config/migration.spec.ts` | Done | [details](lib/config/migration.spec.ts.md) |
 | `lib/config/options/index.spec.ts` | Not done | [details](lib/config/options/index.spec.ts.md) |
-| `lib/config/options/env-options.spec.ts` | Not done | [details](lib/config/options/env-options.spec.ts.md) |
+| `lib/config/options/env-options.spec.ts` | Done | [details](lib/config/options/env-options.spec.ts.md) |
 | `lib/config/migrations/migrations-service.spec.ts` | Done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
 | `lib/config/migrations/base/abstract-migration.spec.ts` | Done | [details](lib/config/migrations/base/abstract-migration.spec.ts.md) |
 | `lib/config/migrations/custom/binary-source-migration.spec.ts` | Done | [details](lib/config/migrations/custom/binary-source-migration.spec.ts.md) |
@@ -525,7 +525,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bazel-module/parser/index.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/parser/index.spec.ts.md) |
 | `lib/modules/manager/bazel-module/parser/starlark.spec.ts` | Done | [details](lib/modules/manager/bazel-module/parser/starlark.spec.ts.md) |
 | `lib/modules/manager/bazel-module/rules-img.spec.ts` | Done | [details](lib/modules/manager/bazel-module/rules-img.spec.ts.md) |
-| `lib/modules/manager/bazel-module/rules.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/rules.spec.ts.md) |
+| `lib/modules/manager/bazel-module/rules.spec.ts` | Done | [details](lib/modules/manager/bazel-module/rules.spec.ts.md) |
 | `lib/modules/manager/bazelisk/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bazelisk/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazelisk/extract.spec.ts` | Done | [details](lib/modules/manager/bazelisk/extract.spec.ts.md) |
 | `lib/modules/manager/bitrise/utils.spec.ts` | Done | [details](lib/modules/manager/bitrise/utils.spec.ts.md) |

@@ -1631,6 +1631,6 @@ mod tests {
         // '' → [zeroToken = Number(0)/none/not-transition]
         let t = tokenize("");
         assert_eq!(t.len(), 1);
-        assert_eq!(t[0], Token { prefix: none_prefix.clone(), value: TokenValue::Number(0), is_transition: false });
+        assert_eq!(t[0], Token { prefix: none_prefix, value: TokenValue::Number(0), is_transition: false });
     }
 }
