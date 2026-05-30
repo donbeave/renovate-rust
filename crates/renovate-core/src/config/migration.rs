@@ -23,12 +23,29 @@ pub trait Migration: Send + Sync {
         original_config: &Map<String, Value>,
         migrated_config: &mut Map<String, Value>,
     );
+    fn box_clone(&self) -> Box<dyn Migration>;
 }
 
 pub struct MigrationService {
     removed_properties: BTreeSet<&'static str>,
     renamed_properties: BTreeMap<&'static str, &'static str>,
     custom_migrations: Vec<Box<dyn Migration>>,
+}
+
+impl std::fmt::Debug for MigrationService {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MigrationService")
+            .field("removed_properties", &self.removed_properties)
+            .field("renamed_properties", &self.renamed_properties)
+            .field("custom_migrations", &self.custom_migrations.len())
+            .finish()
+    }
+}
+
+impl Default for MigrationService {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MigrationService {
@@ -41,8 +58,7 @@ impl MigrationService {
     }
 
     fn default_removed_properties() -> BTreeSet<&'static str> {
-        let mut set = BTreeSet::new();
-        let props: &[&str] = &[
+        [
             "allowCommandTemplating",
             "allowPostUpgradeCommandTemplating",
             "deepExtract",
@@ -62,15 +78,13 @@ impl MigrationService {
             "yarnMaintenanceCommitMessage",
             "yarnMaintenancePrBody",
             "yarnMaintenancePrTitle",
-        ];
-        for p in props {
-            set.insert(p);
-        }
-        set
+        ]
+        .into_iter()
+        .collect()
     }
 
     fn default_renamed_properties() -> BTreeMap<&'static str, &'static str> {
-        let pairs: &[(&str, &str)] = &[
+        [
             ("adoptium-java", "java-version"),
             ("allowedPostUpgradeCommands", "allowedCommands"),
             ("azureAutoApprove", "autoApprove"),
@@ -94,8 +108,9 @@ impl MigrationService {
             ("masterIssueLabels", "dependencyDashboardLabels"),
             ("regexManagers", "customManagers"),
             ("baseBranches", "baseBranchPatterns"),
-        ];
-        pairs.iter().cloned().collect()
+        ]
+        .into_iter()
+        .collect()
     }
 
     fn default_custom_migrations() -> Vec<Box<dyn Migration>> {
@@ -135,7 +150,7 @@ impl MigrationService {
         }
 
         for m in &self.custom_migrations {
-            migrations.push(m.boxed_clone());
+            migrations.push(m.box_clone());
         }
 
         migrations
@@ -145,8 +160,8 @@ impl MigrationService {
         &self,
         migrations: &'a [Box<dyn Migration>],
         key: &str,
-    ) -> Option<&'a Box<dyn Migration>> {
-        migrations.iter().find(|m| m.property_name() == key)
+    ) -> Option<&'a dyn Migration> {
+        migrations.iter().find(|m| m.property_name() == key).map(|b| b.as_ref())
     }
 
     pub fn is_migrated(
@@ -164,6 +179,12 @@ struct RemovePropertyMigration {
 impl RemovePropertyMigration {
     fn new(property: &'static str) -> Self {
         Self { property }
+    }
+}
+
+impl Clone for RemovePropertyMigration {
+    fn clone(&self) -> Self {
+        Self { property: self.property }
     }
 }
 
@@ -185,14 +206,8 @@ impl Migration for RemovePropertyMigration {
     ) {
         migrated_config.remove(self.property);
     }
-}
 
-trait BoxedClone: Send + Sync {
-    fn boxed_clone(&self) -> Box<dyn Migration>;
-}
-
-impl<T: Migration + Clone + 'static> BoxedClone for T {
-    fn boxed_clone(&self) -> Box<dyn Migration> {
+    fn box_clone(&self) -> Box<dyn Migration> {
         Box::new(self.clone())
     }
 }
@@ -205,7 +220,7 @@ impl Clone for MigrationService {
             custom_migrations: self
                 .custom_migrations
                 .iter()
-                .map(|m| m.boxed_clone())
+                .map(|m| m.box_clone())
                 .collect(),
         }
     }

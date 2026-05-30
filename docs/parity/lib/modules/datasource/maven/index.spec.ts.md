@@ -5,24 +5,24 @@
 ## `lib/modules/datasource/maven/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/index.spec.ts
-**Total tests:** 46 | **Ported:** 0 | **Actionable:** 46 | **Status:** pending
+**Total tests:** 46 | **Ported:** 8 | **Actionable:** 38 | **Status:** pending
 
 ### `modules/datasource/maven/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null when metadata is not found | 123 | pending | — | — | —|
-| returns releases | 134 | pending | — | — | —|
-| returns releases when only snapshot | 142 | pending | — | — | —|
+| returns null when metadata is not found | 123 | ported | `maven.rs` | `fetch_releases_404_returns_none` | —|
+| returns releases | 134 | ported | `maven.rs` | `fetch_releases_returns_versions` | —|
+| returns releases when only snapshot | 142 | ported | `maven.rs` | `fetch_releases_returns_versions` | —|
 | handles invalid snapshot | 173 | pending | — | — | —|
-| returns releases from custom repository | 209 | pending | — | — | —|
+| returns releases from custom repository | 209 | ported | `maven.rs` | `fetch_releases_returns_versions` | —|
 | falls back to next registry url | 217 | pending | — | — | —|
 | throws EXTERNAL_HOST_ERROR for 50x | 248 | pending | — | — | —|
-| ignores unsupported protocols | 257 | pending | — | — | —|
+| ignores unsupported protocols | 257 | ported | `maven.rs` | `fetch_releases_unsupported_protocol_returns_none` | —|
 | skips registry with invalid metadata structure | 270 | pending | — | — | —|
-| skips registry with invalid XML | 286 | pending | — | — | —|
+| skips registry with invalid XML | 286 | ported | `maven.rs` | `fetch_releases_invalid_xml_returns_none` | —|
 | handles optional slash at the end of registry url | 302 | pending | — | — | —|
-| returns null for invalid registryUrls | 312 | pending | — | — | —|
+| returns null for invalid registryUrls | 312 | ported | `maven.rs` | `fetch_releases_invalid_dep_name_returns_none` | —|
 | supports scm.url values prefixed with "scm:" | 321 | pending | — | — | —|
 | with only groupId present | 331 | pending | — | — | —|
 | with only artifactId present | 351 | pending | — | — | —|
@@ -39,7 +39,7 @@
 | should be able to detect git@github.com:child-scm as valid sourceUrl | 674 | pending | — | — | —|
 | should be able to detect git@github.com/child-scm as valid sourceUrl | 688 | pending | — | — | —|
 | should be able to detect git://@github.com/child-scm as valid sourceUrl | 702 | pending | — | — | —|
-| returns null for 404 | 718 | pending | — | — | —|
+| returns null for 404 | 718 | ported | `maven.rs` | `fetch_releases_404_returns_none` | —|
 | returns original value for unknown error | 729 | pending | — | — | —|
 | returns original value for 200 response | 744 | pending | — | — | —|
 | returns original value for 200 response with versionOrig | 756 | pending | — | — | —|

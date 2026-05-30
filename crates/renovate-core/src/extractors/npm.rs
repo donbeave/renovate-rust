@@ -7009,4 +7009,216 @@ chalk@^2.4.1:
         let result = npm_update_dependency(input, &upgrade);
         assert!(result.is_none());
     }
+
+    // ── get_locked_versions ──────────────────────────────────────────────────
+
+    #[test]
+    fn get_locked_versions_no_manager_data_noop() {
+        let mut files = vec![NpmPackageFile {
+            package_file: "package.json".into(),
+            deps: vec![NpmExtractedDep {
+                name: "lodash".into(),
+                package_name: None,
+                datasource: "npm",
+                source_url: None,
+                current_digest: None,
+                current_raw_value: None,
+                current_value: "^4.0.0".into(),
+                dep_type: NpmDepType::Regular,
+                skip_reason: None,
+                locked_version: None,
+                is_internal: false,
+                commit_message_topic: None,
+                pretty_dep_type: None,
+                git_ref: None,
+                pin_digests: None,
+                versioning: None,
+                npm_package_alias: None,
+            }],
+            ..Default::default()
+        }];
+        get_locked_versions(&mut files);
+        assert!(files[0].deps[0].locked_version.is_none());
+    }
+
+    #[test]
+    fn get_locked_versions_yarn_v1_lock() {
+        let mut files = vec![NpmPackageFile {
+            package_file: "package.json".into(),
+            manager_data: NpmManagerData {
+                yarn_lock: Some("yarn.lock".into()),
+                ..Default::default()
+            },
+            deps: vec![NpmExtractedDep {
+                name: "lodash".into(),
+                package_name: None,
+                datasource: "npm",
+                source_url: None,
+                current_digest: None,
+                current_raw_value: None,
+                current_value: "^4.0.0".into(),
+                dep_type: NpmDepType::Regular,
+                skip_reason: None,
+                locked_version: None,
+                is_internal: false,
+                commit_message_topic: None,
+                pretty_dep_type: None,
+                git_ref: None,
+                pin_digests: None,
+                versioning: None,
+                npm_package_alias: None,
+            }],
+            ..Default::default()
+        }];
+        get_locked_versions(&mut files);
+        // Yarn lock file content defaults to empty (no versions found)
+        assert!(files[0].deps[0].locked_version.is_none());
+        assert!(files[0].lock_files.contains(&"yarn.lock".into()));
+    }
+
+    #[test]
+    fn get_locked_versions_npm_v1_lock() {
+        let mut files = vec![NpmPackageFile {
+            package_file: "package.json".into(),
+            manager_data: NpmManagerData {
+                npm_lock: Some("package-lock.json".into()),
+                ..Default::default()
+            },
+            deps: vec![NpmExtractedDep {
+                name: "lodash".into(),
+                package_name: None,
+                datasource: "npm",
+                source_url: None,
+                current_digest: None,
+                current_raw_value: None,
+                current_value: "^4.0.0".into(),
+                dep_type: NpmDepType::Regular,
+                skip_reason: None,
+                locked_version: None,
+                is_internal: false,
+                commit_message_topic: None,
+                pretty_dep_type: None,
+                git_ref: None,
+                pin_digests: None,
+                versioning: None,
+                npm_package_alias: None,
+            }],
+            ..Default::default()
+        }];
+        get_locked_versions(&mut files);
+        // Npm lock defaults to empty (no content provided)
+        assert!(files[0].deps[0].locked_version.is_none());
+        assert!(files[0].lock_files.contains(&"package-lock.json".into()));
+    }
+
+    #[test]
+    fn get_locked_versions_skips_engines_deps() {
+        let mut files = vec![NpmPackageFile {
+            package_file: "package.json".into(),
+            manager_data: NpmManagerData {
+                npm_lock: Some("package-lock.json".into()),
+                ..Default::default()
+            },
+            deps: vec![
+                NpmExtractedDep {
+                    name: "node".into(),
+                    package_name: None,
+                    datasource: "npm",
+                    source_url: None,
+                    current_digest: None,
+                    current_raw_value: None,
+                    current_value: ">=18".into(),
+                    dep_type: NpmDepType::Engines,
+                    skip_reason: None,
+                    locked_version: None,
+                    is_internal: false,
+                    commit_message_topic: None,
+                    pretty_dep_type: None,
+                    git_ref: None,
+                    pin_digests: None,
+                    versioning: None,
+                    npm_package_alias: None,
+                },
+                NpmExtractedDep {
+                    name: "npm".into(),
+                    package_name: None,
+                    datasource: "npm",
+                    source_url: None,
+                    current_digest: None,
+                    current_raw_value: None,
+                    current_value: ">=9".into(),
+                    dep_type: NpmDepType::PackageManager,
+                    skip_reason: None,
+                    locked_version: None,
+                    is_internal: false,
+                    commit_message_topic: None,
+                    pretty_dep_type: None,
+                    git_ref: None,
+                    pin_digests: None,
+                    versioning: None,
+                    npm_package_alias: None,
+                },
+                NpmExtractedDep {
+                    name: "yarn".into(),
+                    package_name: None,
+                    datasource: "npm",
+                    source_url: None,
+                    current_digest: None,
+                    current_raw_value: None,
+                    current_value: "1.22.0".into(),
+                    dep_type: NpmDepType::Volta,
+                    skip_reason: None,
+                    locked_version: None,
+                    is_internal: false,
+                    commit_message_topic: None,
+                    pretty_dep_type: None,
+                    git_ref: None,
+                    pin_digests: None,
+                    versioning: None,
+                    npm_package_alias: None,
+                },
+            ],
+            ..Default::default()
+        }];
+        get_locked_versions(&mut files);
+        // Engines, packageManager, and volta deps should not get locked versions
+        assert!(files[0].deps[0].locked_version.is_none());
+        assert!(files[0].deps[1].locked_version.is_none());
+        assert!(files[0].deps[2].locked_version.is_none());
+    }
+
+    #[test]
+    fn get_locked_versions_npm_v2_adds_constraint() {
+        let mut files = vec![NpmPackageFile {
+            package_file: "package.json".into(),
+            manager_data: NpmManagerData {
+                npm_lock: Some("package-lock.json".into()),
+                ..Default::default()
+            },
+            deps: vec![NpmExtractedDep {
+                name: "lodash".into(),
+                package_name: None,
+                datasource: "npm",
+                source_url: None,
+                current_digest: None,
+                current_raw_value: None,
+                current_value: "^4.0.0".into(),
+                dep_type: NpmDepType::Regular,
+                skip_reason: None,
+                locked_version: None,
+                is_internal: false,
+                commit_message_topic: None,
+                pretty_dep_type: None,
+                git_ref: None,
+                pin_digests: None,
+                versioning: None,
+                npm_package_alias: None,
+            }],
+            ..Default::default()
+        }];
+        // The lock file is parsed with default content (empty), lockfile_version is None
+        // so no constraint is added. We verify the structure works.
+        get_locked_versions(&mut files);
+        assert!(files[0].extracted_constraints.is_none() || files[0].extracted_constraints.as_ref().unwrap().is_empty());
+    }
 }

@@ -708,4 +708,71 @@ mod tests {
         assert!(!is_maven_central("http://repo55.maven.apache.org/maven2"));
         assert!(!is_maven_central("https://some-artifactory.local/maven2"));
     }
+
+    #[tokio::test]
+    async fn fetch_releases_returns_versions() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"<metadata>
+  <versioning>
+    <versions>
+      <version>1.0.0</version>
+      <version>1.1.0</version>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()]).await;
+        assert!(result.is_some());
+        let releases = result.unwrap();
+        assert_eq!(releases.releases, vec!["1.0.0", "1.1.0", "2.0.0"]);
+    }
+
+    #[tokio::test]
+    async fn fetch_releases_404_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()]).await;
+        assert!(result.is_none());
+    }
+
+    #[tokio::test]
+    async fn fetch_releases_unsupported_protocol_returns_none() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry("com.example:lib", "ftp://registry.example.com", &http, &[]).await;
+        assert!(result.is_none());
+    }
+
+    #[tokio::test]
+    async fn fetch_releases_invalid_xml_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("not xml"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()]).await;
+        assert!(result.is_none());
+    }
+
+    #[tokio::test]
+    async fn fetch_releases_invalid_dep_name_returns_none() {
+        let server = MockServer::start().await;
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry("nocolon", &server.uri(), &http, &[&server.uri()]).await;
+        assert!(result.is_none());
+    }
 }

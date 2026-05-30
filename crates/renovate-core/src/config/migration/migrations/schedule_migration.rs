@@ -1,10 +1,22 @@
 use serde_json::Map;
 use serde_json::Value;
+use std::sync::LazyLock;
 
 use crate::config::migration::Migration;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ScheduleMigration;
+
+static EVERY_WEEKDAY_RE: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"every (mon|tues|wednes|thurs|fri|satur|sun)day$").unwrap());
+static EVERY_DAY_RE: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"every ([a-z]*day)$").unwrap());
+
+impl Default for ScheduleMigration {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl ScheduleMigration {
     pub fn new() -> Self {
@@ -30,11 +42,11 @@ impl Migration for ScheduleMigration {
 
         let mut schedules: Vec<String> = Vec::new();
         if let Some(s) = value.as_str() {
-            schedules.push(s.to_string());
+            schedules.push(s.to_owned());
         } else if let Some(arr) = value.as_array() {
             for item in arr {
                 if let Some(s) = item.as_str() {
-                    schedules.push(s.to_string());
+                    schedules.push(s.to_owned());
                 }
             }
         }
@@ -57,10 +69,8 @@ impl Migration for ScheduleMigration {
                 *s = s.replace("days", "day");
             }
 
-            let re = regex::Regex::new(r"every (mon|tues|wednes|thurs|fri|satur|sun)day$").unwrap();
-            if re.is_match(s) {
-                let re2 = regex::Regex::new(r"every ([a-z]*day)$").unwrap();
-                *s = re2.replace(s, "on $1").to_string();
+            if EVERY_WEEKDAY_RE.is_match(s) {
+                *s = EVERY_DAY_RE.replace(s, "on $1").to_string();
             }
         }
 

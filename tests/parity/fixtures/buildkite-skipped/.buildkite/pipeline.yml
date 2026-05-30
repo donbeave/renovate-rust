@@ -1,0 +1,4 @@
+steps:
+  - plugins:
+      - docker-compose#invalid:
+          run: app

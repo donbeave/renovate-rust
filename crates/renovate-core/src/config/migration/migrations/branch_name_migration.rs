@@ -3,8 +3,14 @@ use serde_json::Value;
 
 use crate::config::migration::Migration;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BranchNameMigration;
+
+impl Default for BranchNameMigration {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl BranchNameMigration {
     pub fn new() -> Self {
@@ -24,15 +30,14 @@ impl Migration for BranchNameMigration {
         _original_config: &Map<String, Value>,
         migrated_config: &mut Map<String, Value>,
     ) {
-        if let Some(s) = value.as_str() {
-            if s.contains("{{managerBranchPrefix}}") {
+        if let Some(s) = value.as_str()
+            && s.contains("{{managerBranchPrefix}}") {
                 let replaced = s.replace(
                     "{{managerBranchPrefix}}",
                     "{{additionalBranchPrefix}}",
                 );
                 migrated_config.insert("branchName".into(), Value::String(replaced));
             }
-        }
     }
 
     fn box_clone(&self) -> Box<dyn Migration> {

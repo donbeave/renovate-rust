@@ -168,10 +168,11 @@ pub struct ValidationMessage {
     pub message: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BranchResult {
     AlreadyExisted,
     Automerged,
+    #[default]
     Done,
     Error,
     NeedsApproval,
@@ -188,12 +189,6 @@ pub enum BranchResult {
     Rebase,
     UpdateNotScheduled,
     MinimumGroupSizeNotMet,
-}
-
-impl Default for BranchResult {
-    fn default() -> Self {
-        Self::Done
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

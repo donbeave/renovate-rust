@@ -405,4 +405,35 @@ mod tests {
         assert!(s.update_available);
         assert_eq!(s.latest.as_deref(), Some("2.31.0"));
     }
+
+    #[tokio::test]
+    async fn fetch_versions_empty_releases_returns_empty() {
+        let server = MockServer::start().await;
+        let body = r#"{"info":{"name":"empty","version":"0.0.0"},"releases":{}}"#;
+        Mock::given(method("GET"))
+            .and(path("/empty/json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let entry = fetch_versions(&http, "empty", &server.uri()).await.unwrap();
+        assert!(entry.versions.is_empty());
+        assert_eq!(entry.latest, "0.0.0");
+    }
+
+    #[tokio::test]
+    async fn fetch_versions_filters_yanked() {
+        let server = MockServer::start().await;
+        let body = r#"{"info":{"name":"pkg","version":"2.0.0"},"releases":{"1.0.0":[{"yanked":true}],"2.0.0":[{"yanked":false}]}}"#;
+        Mock::given(method("GET"))
+            .and(path("/pkg/json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let entry = fetch_versions(&http, "pkg", &server.uri()).await.unwrap();
+        assert_eq!(entry.versions, vec!["2.0.0"]);
+    }
 }

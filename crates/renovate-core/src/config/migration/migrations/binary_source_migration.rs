@@ -3,8 +3,14 @@ use serde_json::Value;
 
 use crate::config::migration::Migration;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BinarySourceMigration;
+
+impl Default for BinarySourceMigration {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl BinarySourceMigration {
     pub fn new() -> Self {

@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::config::migration::Migration;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RenamePropertyMigration {
     old_name: &'static str,
     new_name: &'static str,
@@ -32,7 +32,7 @@ impl Migration for RenamePropertyMigration {
         migrated_config: &mut Map<String, Value>,
     ) {
         if !migrated_config.contains_key(self.new_name) {
-            migrated_config.insert(self.new_name.to_string(), value.clone());
+            migrated_config.insert(self.new_name.to_owned(), value.clone());
         }
     }
 

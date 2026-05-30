@@ -3,8 +3,14 @@ use serde_json::Value;
 
 use crate::config::migration::Migration;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AutomergeMigration;
+
+impl Default for AutomergeMigration {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl AutomergeMigration {
     pub fn new() -> Self {
@@ -24,13 +30,12 @@ impl Migration for AutomergeMigration {
         _original_config: &Map<String, Value>,
         migrated_config: &mut Map<String, Value>,
     ) {
-        let s = match value.as_str() {
-            Some(s) => s,
-            None => return,
+        let Some(s) = value.as_str() else {
+            return;
         };
 
         fn ensure_object(map: &mut Map<String, Value>, key: &str) {
-            map.entry(key.to_string())
+            map.entry(key.to_owned())
                 .or_insert_with(|| Value::Object(Map::new()));
         }
 

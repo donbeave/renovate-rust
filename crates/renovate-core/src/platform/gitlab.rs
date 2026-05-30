@@ -605,6 +605,47 @@ mod tests {
         assert!(files.contains(&"README.md".to_owned()));
     }
 
+    #[tokio::test]
+    async fn create_pr_returns_not_supported() {
+        let server = MockServer::start().await;
+        let client = make_client(&server.uri());
+        let err = client
+            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::NotSupported(_)));
+    }
+
+    #[tokio::test]
+    async fn update_pr_returns_not_supported() {
+        let server = MockServer::start().await;
+        let client = make_client(&server.uri());
+        let err = client
+            .update_pr("owner", "repo", 42, Some("New title"), None, None)
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::NotSupported(_)));
+    }
+
+    #[tokio::test]
+    async fn get_branch_status_returns_not_supported() {
+        let server = MockServer::start().await;
+        let client = make_client(&server.uri());
+        let err = client.get_branch_status("owner", "repo", "main").await.unwrap_err();
+        assert!(matches!(err, PlatformError::NotSupported(_)));
+    }
+
+    #[tokio::test]
+    async fn write_file_returns_not_supported() {
+        let server = MockServer::start().await;
+        let client = make_client(&server.uri());
+        let err = client
+            .write_file("owner", "repo", "path", "content")
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::NotSupported(_)));
+    }
+
     // ── code-owners ───────────────────────────────────────────────────────────
 
     // Ported: "should extract an owner rule from a line" — modules/platform/gitlab/code-owners.spec.ts line 5
