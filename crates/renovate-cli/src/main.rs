@@ -424,7 +424,7 @@ async fn process_repo(
     for (branch, deps) in branch_updates {
         let title = deps
             .first()
-            .and_then(|d| d.pr_title.as_deref())
+            .and_then(|d| d.dep.pr_title.as_deref())
             .unwrap_or("<no title>");
         match config.dry_run {
             Some(DryRun::Full) | Some(DryRun::Lookup) => {
