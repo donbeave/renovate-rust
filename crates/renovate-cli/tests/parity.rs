@@ -379,3 +379,89 @@ fn parity_github_actions_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for github-actions-skipped fixture");
 }
+
+#[test]
+fn parity_docker_compose_scratch() {
+    let actual = run_fixture("docker-compose-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "docker-compose.yml",
+                    "manager": "docker-compose",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "dockerfile(scratch)"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for docker-compose-scratch fixture");
+}
+
+#[test]
+fn parity_composer_skipped() {
+    let actual = run_fixture("composer-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "composer.json",
+                    "manager": "composer",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "ext-json",
+                            "status": "skipped",
+                            "reason": "platformpackage"
+                        },
+                        {
+                            "name": "php",
+                            "status": "skipped",
+                            "reason": "platformpackage"
+                        },
+                        {
+                            "name": "phpunit/phpunit",
+                            "status": "skipped",
+                            "reason": "devbranch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for composer-skipped fixture");
+}

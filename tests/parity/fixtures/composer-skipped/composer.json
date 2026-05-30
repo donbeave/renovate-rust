@@ -1,0 +1,10 @@
+{
+  "name": "test/project",
+  "require": {
+    "php": "^8.1",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "dev-master"
+  }
+}
