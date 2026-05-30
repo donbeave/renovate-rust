@@ -41,6 +41,7 @@ gate #4 in `prompts/claude-loop-renovate-rust.md`.
 | `gomod-empty` | gomod extraction — `go` directive only | blocked | green | blocked |
 | `gomod-replace` | gomod extraction — local replace skipped | blocked | green | blocked |
 | `maven-empty` | maven extraction — empty pom.xml | blocked | green | blocked |
+| `dockerfile-scratch` | dockerfile extraction — `scratch` image skipped | blocked | green | blocked |
 
 ## Blockers
 

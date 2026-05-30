@@ -293,3 +293,41 @@ fn parity_gomod_replace() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for gomod-replace fixture");
 }
+
+#[test]
+fn parity_dockerfile_scratch() {
+    let actual = run_fixture("dockerfile-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Dockerfile",
+                    "manager": "dockerfile",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for dockerfile-scratch fixture");
+}
