@@ -39,6 +39,7 @@ gate #4 in `prompts/claude-loop-renovate-rust.md`.
 | `npm-skipped` | npm extraction — `file:` and URL installs skipped | blocked | green | blocked |
 | `cargo-workspace` | cargo extraction — workspace-inherited dep skipped | blocked | green | blocked |
 | `gomod-empty` | gomod extraction — `go` directive only | blocked | green | blocked |
+| `gomod-replace` | gomod extraction — local replace skipped | blocked | green | blocked |
 | `maven-empty` | maven extraction — empty pom.xml | blocked | green | blocked |
 
 ## Blockers

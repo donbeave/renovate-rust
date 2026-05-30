@@ -250,3 +250,46 @@ fn parity_maven_empty() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for maven-empty fixture");
 }
+
+#[test]
+fn parity_gomod_replace() {
+    let actual = run_fixture("gomod-replace");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 2,
+                "updateAvailable": 0,
+                "upToDate": 1,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "go.mod",
+                    "manager": "gomod",
+                    "stats": {
+                        "total": 2,
+                        "updateAvailable": 0,
+                        "upToDate": 1,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "github.com/pkg/errors",
+                            "status": "skipped",
+                            "reason": "localreplace"
+                        },
+                        {
+                            "name": "go",
+                            "status": "upToDate",
+                            "latest": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for gomod-replace fixture");
+}
