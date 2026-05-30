@@ -349,26 +349,22 @@ pub fn get_locked_version(dep: &DenoDepPost, lock: &DenoLockFile) -> Option<Stri
     let dep_name = dep.dep_name.as_deref()?;
 
     if datasource == "deno" {
-        if let Some(raw) = dep.current_raw_value.as_deref() {
-            if lock.remote_versions.contains(raw) {
-                if let Some(caps) = DENO_LAND_RE.captures(raw) {
+        if let Some(raw) = dep.current_raw_value.as_deref()
+            && lock.remote_versions.contains(raw)
+                && let Some(caps) = DENO_LAND_RE.captures(raw) {
                     return Some(caps["currentValue"].to_owned());
                 }
-            }
-        }
 
         if let Some(cv) = dep.current_value.as_deref() {
             let key = format!("{dep_name}@{cv}");
-            if let Some(redirect) = lock.redirect_versions.get(&key) {
-                if let Some(caps) = DENO_LAND_RE.captures(redirect) {
+            if let Some(redirect) = lock.redirect_versions.get(&key)
+                && let Some(caps) = DENO_LAND_RE.captures(redirect) {
                     return Some(caps["currentValue"].to_owned());
                 }
-            }
-            if let Some(redirect) = lock.redirect_versions.get(dep_name) {
-                if let Some(caps) = DENO_LAND_RE.captures(redirect) {
+            if let Some(redirect) = lock.redirect_versions.get(dep_name)
+                && let Some(caps) = DENO_LAND_RE.captures(redirect) {
                     return Some(caps["currentValue"].to_owned());
                 }
-            }
         }
 
         return None;
@@ -387,13 +383,12 @@ pub fn get_locked_version(dep: &DenoDepPost, lock: &DenoLockFile) -> Option<Stri
 
         if dep.current_value.is_some() {
             for (key, value) in &lock.locked_versions {
-                if let Some(caps) = DEP_VALUE_RE.captures(key) {
-                    if &caps["depName"] == dep_name
+                if let Some(caps) = DEP_VALUE_RE.captures(key)
+                    && &caps["depName"] == dep_name
                         && &caps["datasource"] == datasource
                     {
                         return Some(value.clone());
                     }
-                }
             }
         }
     }
@@ -466,7 +461,7 @@ pub fn apply_locked_versions(
 
         let Some(lock) = lock else { continue };
 
-        for dep in pkg.deps.iter_mut() {
+        for dep in &mut pkg.deps {
             if dep.locked_version.is_some() {
                 continue;
             }

@@ -28,13 +28,11 @@ pub enum YarnMajorVersion {
 
 pub fn detect_yarn_version(yarn_constraint: Option<&str>) -> YarnMajorVersion {
     if let Some(constraint) = yarn_constraint {
-        if let Some(major_str) = constraint.split('.').next() {
-            if let Ok(major) = major_str.parse::<u32>() {
-                if major >= 2 {
+        if let Some(major_str) = constraint.split('.').next()
+            && let Ok(major) = major_str.parse::<u32>()
+                && major >= 2 {
                     return YarnMajorVersion::V2Plus;
                 }
-            }
-        }
         if constraint.starts_with(">=2")
             || constraint.starts_with("^2")
             || constraint.starts_with("^3")
@@ -56,10 +54,10 @@ pub fn check_yarnrc(yarnrc_content: &str) -> YarnRcInfo {
         if let Some((key, value)) = trimmed.split_once(' ') {
             match key {
                 "--install.offline-mirror" | "install.offline-mirror" => {
-                    info.offline_mirror = Some(value.trim().to_string());
+                    info.offline_mirror = Some(value.trim().to_owned());
                 }
                 "--yarn-path" | "yarn-path" => {
-                    info.yarn_path = Some(value.trim().to_string());
+                    info.yarn_path = Some(value.trim().to_owned());
                 }
                 _ => {}
             }
@@ -87,7 +85,7 @@ pub fn get_yarn_constraint_from_upgrades(upgrades: &[Upgrade]) -> Option<String>
         .iter()
         .find(|u| u.dep_name == "yarn")
         .and_then(|u| u.new_value.as_deref())
-        .map(|v| v.to_string())
+        .map(|v| v.to_owned())
 }
 
 pub fn build_yarn_install_cmd(
@@ -96,25 +94,25 @@ pub fn build_yarn_install_cmd(
     ignore_scripts: bool,
     mode_flag: bool,
 ) -> Vec<String> {
-    let mut cmd = vec!["yarn".to_string()];
+    let mut cmd = vec!["yarn".to_owned()];
     match version {
         YarnMajorVersion::V1 => {
-            cmd.push("install".to_string());
+            cmd.push("install".to_owned());
             if lock_file_only {
-                cmd.push("--frozen-lockfile".to_string());
+                cmd.push("--frozen-lockfile".to_owned());
             }
             if ignore_scripts {
-                cmd.push("--ignore-scripts".to_string());
+                cmd.push("--ignore-scripts".to_owned());
             }
         }
         YarnMajorVersion::V2Plus => {
-            cmd.push("install".to_string());
+            cmd.push("install".to_owned());
             if mode_flag && lock_file_only {
-                cmd.push("--mode".to_string());
-                cmd.push("update-lockfile".to_string());
+                cmd.push("--mode".to_owned());
+                cmd.push("update-lockfile".to_owned());
             }
             if ignore_scripts {
-                cmd.push("--immutable".to_string());
+                cmd.push("--immutable".to_owned());
             }
         }
     }
@@ -124,14 +122,14 @@ pub fn build_yarn_install_cmd(
 pub fn build_yarn_upgrade_cmd(version: YarnMajorVersion, dep_name: &str) -> Vec<String> {
     match version {
         YarnMajorVersion::V1 => {
-            vec!["yarn".to_string(), "upgrade".to_string(), dep_name.to_string()]
+            vec!["yarn".to_owned(), "upgrade".to_owned(), dep_name.to_owned()]
         }
         YarnMajorVersion::V2Plus => {
             vec![
-                "yarn".to_string(),
-                "up".to_string(),
-                "-R".to_string(),
-                dep_name.to_string(),
+                "yarn".to_owned(),
+                "up".to_owned(),
+                "-R".to_owned(),
+                dep_name.to_owned(),
             ]
         }
     }
@@ -160,7 +158,7 @@ pub fn fuzzy_match_additional_yarnrc_yml(additional: &str, existing: &str) -> St
         })
         .collect();
 
-    let mut result = additional.to_string();
+    let mut result = additional.to_owned();
     for (old_key, new_key) in keys_to_replace {
         result = result.replace(&old_key, &new_key);
     }
@@ -168,22 +166,20 @@ pub fn fuzzy_match_additional_yarnrc_yml(additional: &str, existing: &str) -> St
 }
 
 fn normalize_registry_url(url: &str) -> String {
-    let normalized = url.trim_end_matches('/').to_string();
-    if !normalized.starts_with("http://") && !normalized.starts_with("https://") {
-        if let Some(rest) = normalized.split_once("://").map(|(_, r)| r) {
+    let normalized = url.trim_end_matches('/').to_owned();
+    if !normalized.starts_with("http://") && !normalized.starts_with("https://")
+        && let Some(rest) = normalized.split_once("://").map(|(_, r)| r) {
             return format!("https://{}", rest);
         }
-    }
     normalized
 }
 
 pub fn get_optimize_command() -> Vec<String> {
     vec![
-        "sed".to_string(),
-        "-i".to_string(),
-        "s/stepTimer(&timer)/stepTimer(&timer); if (timer.skip === true) return/g"
-            .to_string(),
-        "yarn.js".to_string(),
+        "sed".to_owned(),
+        "-i".to_owned(),
+        "s/stepTimer(&timer)/stepTimer(&timer); if (timer.skip === true) return/g".to_owned(),
+        "yarn.js".to_owned(),
     ]
 }
 
@@ -253,7 +249,7 @@ mod tests {
     #[test]
     fn yarn_update_true() {
         let u = Upgrade {
-            dep_name: "yarn".to_string(),
+            dep_name: "yarn".to_owned(),
             ..Default::default()
         };
         assert!(is_yarn_update(&u));
@@ -262,7 +258,7 @@ mod tests {
     #[test]
     fn yarn_update_false() {
         let u = Upgrade {
-            dep_name: "npm".to_string(),
+            dep_name: "npm".to_owned(),
             ..Default::default()
         };
         assert!(!is_yarn_update(&u));
@@ -271,13 +267,13 @@ mod tests {
     #[test]
     fn yarn_constraint_from_upgrades_found() {
         let upgrades = vec![Upgrade {
-            dep_name: "yarn".to_string(),
-            new_value: Some("4.1.0".to_string()),
+            dep_name: "yarn".to_owned(),
+            new_value: Some("4.1.0".to_owned()),
             ..Default::default()
         }];
         assert_eq!(
             get_yarn_constraint_from_upgrades(&upgrades),
-            Some("4.1.0".to_string())
+            Some("4.1.0".to_owned())
         );
     }
 
@@ -291,7 +287,7 @@ mod tests {
         let pj = PackageJson::parse(r#"{"packageManager": "yarn@4.1.0"}"#).unwrap();
         assert_eq!(
             get_yarn_constraint_from_package_json(&pj),
-            Some("4.1.0".to_string())
+            Some("4.1.0".to_owned())
         );
     }
 

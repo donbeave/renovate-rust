@@ -167,7 +167,7 @@ pub async fn submit_change(
     }
     let body = resp.text().await.map_err(HttpError::Request)?;
     let info: GerritChangeInfo = strip_gerrit_json_prefix(&body)
-        .map_err(|e| PlatformError::Unexpected(e))?;
+        .map_err(PlatformError::Unexpected)?;
     Ok(info)
 }
 
@@ -195,7 +195,7 @@ pub async fn list_changes(
     }
     let body = resp.text().await.map_err(HttpError::Request)?;
     let changes: Vec<GerritChangeInfo> = strip_gerrit_json_prefix_list(&body)
-        .map_err(|e| PlatformError::Unexpected(e))?;
+        .map_err(PlatformError::Unexpected)?;
     Ok(changes)
 }
 
@@ -231,7 +231,7 @@ pub async fn add_reviewer(
     }
     let body = resp.text().await.map_err(HttpError::Request)?;
     let info: GerritReviewerInfo = strip_gerrit_json_prefix_value(&body)
-        .map_err(|e| PlatformError::Unexpected(e))?;
+        .map_err(PlatformError::Unexpected)?;
     Ok(info)
 }
 
@@ -257,7 +257,7 @@ pub async fn get_change(
     }
     let body = resp.text().await.map_err(HttpError::Request)?;
     let info: GerritChangeInfo = strip_gerrit_json_prefix(&body)
-        .map_err(|e| PlatformError::Unexpected(e))?;
+        .map_err(PlatformError::Unexpected)?;
     Ok(info)
 }
 
@@ -298,7 +298,7 @@ impl PlatformClient for GerritClient {
         }
         let body = resp.text().await.map_err(HttpError::Request)?;
         let account: GerritAccountInfo = strip_gerrit_json_prefix_value(&body)
-            .map_err(|e| PlatformError::Unexpected(e))?;
+            .map_err(PlatformError::Unexpected)?;
         Ok(CurrentUser {
             login: account
                 .username
@@ -407,14 +407,14 @@ mod tests {
     fn strip_gerrit_json_prefix_removes_magic() {
         let body = ")]}'\n{\"id\": \"test\"}";
         let result: GerritChangeInfo = strip_gerrit_json_prefix_value(body).unwrap();
-        assert_eq!(result.id, Some("test".to_string()));
+        assert_eq!(result.id, Some("test".to_owned()));
     }
 
     #[test]
     fn strip_gerrit_json_prefix_handles_no_prefix() {
         let body = "{\"id\": \"test\"}";
         let result: GerritChangeInfo = strip_gerrit_json_prefix_value(body).unwrap();
-        assert_eq!(result.id, Some("test".to_string()));
+        assert_eq!(result.id, Some("test".to_owned()));
     }
 
     #[tokio::test]
@@ -461,7 +461,7 @@ mod tests {
 
         let client = make_client(&server.uri());
         let result = submit_change(&client, "123").await.unwrap();
-        assert_eq!(result.status, Some("MERGED".to_string()));
+        assert_eq!(result.status, Some("MERGED".to_owned()));
     }
 
     #[tokio::test]
@@ -494,7 +494,7 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(changes.len(), 2);
-        assert_eq!(changes[0].id, Some("1".to_string()));
+        assert_eq!(changes[0].id, Some("1".to_owned()));
     }
 
     #[tokio::test]
@@ -528,8 +528,8 @@ mod tests {
 
         let client = make_client(&server.uri());
         let change = get_change(&client, "123").await.unwrap();
-        assert_eq!(change.id, Some("123".to_string()));
-        assert_eq!(change.subject, Some("My change".to_string()));
+        assert_eq!(change.id, Some("123".to_owned()));
+        assert_eq!(change.subject, Some("My change".to_owned()));
     }
 
     #[tokio::test]

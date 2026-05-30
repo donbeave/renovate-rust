@@ -45,7 +45,7 @@ pub struct FileChange {
 impl FileChange {
     pub fn addition(path: impl Into<String>, contents: impl Into<String>) -> Self {
         Self {
-            change_type: "addition".to_string(),
+            change_type: "addition".to_owned(),
             path: path.into(),
             contents: Some(contents.into()),
         }
@@ -53,7 +53,7 @@ impl FileChange {
 
     pub fn deletion(path: impl Into<String>) -> Self {
         Self {
-            change_type: "deletion".to_string(),
+            change_type: "deletion".to_owned(),
             path: path.into(),
             contents: None,
         }
@@ -136,6 +136,12 @@ pub struct ArtifactRegistry {
     runners: BTreeMap<String, Box<dyn ArtifactRunner>>,
 }
 
+impl Default for ArtifactRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ArtifactRegistry {
     pub fn new() -> Self {
         Self {
@@ -197,7 +203,7 @@ mod tests {
     async fn no_op_runner_returns_none() {
         let runner = NoOpArtifactRunner;
         let input = UpdateArtifact {
-            package_file_name: "Cargo.toml".to_string(),
+            package_file_name: "Cargo.toml".to_owned(),
             updated_deps: vec![],
             new_package_file_content: String::new(),
             config: ArtifactConfig::default(),
@@ -217,12 +223,12 @@ mod tests {
     #[test]
     fn updated_dep_serialization() {
         let dep = UpdatedDep {
-            dep_name: "serde".to_string(),
-            current_value: Some("1.0.0".to_string()),
-            new_value: Some("1.0.100".to_string()),
-            package_file: "Cargo.toml".to_string(),
-            manager: "cargo".to_string(),
-            datasource: Some("crate".to_string()),
+            dep_name: "serde".to_owned(),
+            current_value: Some("1.0.0".to_owned()),
+            new_value: Some("1.0.100".to_owned()),
+            package_file: "Cargo.toml".to_owned(),
+            manager: "cargo".to_owned(),
+            datasource: Some("crate".to_owned()),
         };
         let json = serde_json::to_string(&dep).unwrap();
         assert!(json.contains("serde"));

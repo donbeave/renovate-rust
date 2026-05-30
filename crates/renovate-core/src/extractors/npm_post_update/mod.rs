@@ -108,11 +108,10 @@ impl PackageJson {
             }
         }
 
-        if let Some(ref pm) = self.package_manager {
-            if let Some(ver) = parse_corepack_version(pm, name) {
+        if let Some(ref pm) = self.package_manager
+            && let Some(ver) = parse_corepack_version(pm, name) {
                 return Some(ver);
             }
-        }
 
         if let Some(ref engines) = self.engines {
             let v = match name {
@@ -136,14 +135,14 @@ fn parse_corepack_version(pm: &str, name: &str) -> Option<String> {
         let rest = &pm[prefix.len()..];
         let version = rest.split('@').next().unwrap_or(rest);
         if !version.is_empty() {
-            return Some(version.to_string());
+            return Some(version.to_owned());
         }
     }
     if let Some(at_pos) = pm.find('@') {
         let pkg_name = &pm[..at_pos];
         let version = &pm[at_pos + 1..];
         if pkg_name == name || pkg_name.ends_with(&format!("/{}", name)) {
-            return Some(version.to_string());
+            return Some(version.to_owned());
         }
     }
     None
@@ -192,7 +191,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             pj.get_package_manager_version("yarn"),
-            Some("4.1.0".to_string())
+            Some("4.1.0".to_owned())
         );
     }
 
@@ -204,7 +203,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             pj.get_package_manager_version("yarn"),
-            Some("4.1.0".to_string())
+            Some("4.1.0".to_owned())
         );
     }
 
@@ -216,7 +215,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             pj.get_package_manager_version("pnpm"),
-            Some("9.0.0".to_string())
+            Some("9.0.0".to_owned())
         );
     }
 
@@ -224,7 +223,7 @@ mod tests {
     fn parse_corepack_version_yarn() {
         assert_eq!(
             parse_corepack_version("yarn@4.1.0", "yarn"),
-            Some("4.1.0".to_string())
+            Some("4.1.0".to_owned())
         );
     }
 
@@ -232,7 +231,7 @@ mod tests {
     fn parse_corepack_version_npm() {
         assert_eq!(
             parse_corepack_version("npm@10.2.3", "npm"),
-            Some("10.2.3".to_string())
+            Some("10.2.3".to_owned())
         );
     }
 
@@ -244,7 +243,7 @@ mod tests {
     #[test]
     fn determine_lock_file_dirs_from_upgrades() {
         let upgrades = vec![Upgrade {
-            package_file: "packages/foo/package.json".to_string(),
+            package_file: "packages/foo/package.json".to_owned(),
             ..Default::default()
         }];
         let dirs = determine_lock_file_dirs(&upgrades, &[]);
@@ -254,7 +253,7 @@ mod tests {
     #[test]
     fn determine_lock_file_dirs_from_root() {
         let upgrades = vec![Upgrade {
-            package_file: "package.json".to_string(),
+            package_file: "package.json".to_owned(),
             ..Default::default()
         }];
         let dirs = determine_lock_file_dirs(&upgrades, &[]);
@@ -265,11 +264,11 @@ mod tests {
     fn determine_lock_file_dirs_dedupes() {
         let upgrades = vec![
             Upgrade {
-                package_file: "a/package.json".to_string(),
+                package_file: "a/package.json".to_owned(),
                 ..Default::default()
             },
             Upgrade {
-                package_file: "a/package.json".to_string(),
+                package_file: "a/package.json".to_owned(),
                 ..Default::default()
             },
         ];

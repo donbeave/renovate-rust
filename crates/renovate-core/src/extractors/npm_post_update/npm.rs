@@ -27,9 +27,9 @@ pub fn get_npm_constraint_from_package_lock(
     let v: serde_json::Value = serde_json::from_str(lock_file_content).ok()?;
     let lockfile_version = v.get("lockfileVersion").and_then(|v| v.as_u64())?;
     match lockfile_version {
-        1 => Some("<7".to_string()),
-        2 => Some("<9".to_string()),
-        3 => Some(">=7".to_string()),
+        1 => Some("<7".to_owned()),
+        2 => Some("<9".to_owned()),
+        3 => Some(">=7".to_owned()),
         _ => None,
     }
 }
@@ -77,8 +77,8 @@ pub fn parse_npmrc_cooldown_date(npmrc: &str) -> Option<(String, String)> {
         }
         if let Some((key, value)) = line.split_once('=') {
             match key.trim() {
-                "before" => before = Some(value.trim().to_string()),
-                "min-release-age" => min_release_age = Some(value.trim().to_string()),
+                "before" => before = Some(value.trim().to_owned()),
+                "min-release-age" => min_release_age = Some(value.trim().to_owned()),
                 _ => {}
             }
         }
@@ -95,15 +95,15 @@ pub fn build_npm_install_cmd(
     ignore_scripts: bool,
     before: Option<&str>,
 ) -> Vec<String> {
-    let mut cmd = vec!["npm".to_string(), "install".to_string()];
+    let mut cmd = vec!["npm".to_owned(), "install".to_owned()];
     if package_lock_only {
-        cmd.push("--package-lock-only".to_string());
+        cmd.push("--package-lock-only".to_owned());
     }
     if prefer_dedupe {
-        cmd.push("--prefer-dedupe".to_string());
+        cmd.push("--prefer-dedupe".to_owned());
     }
     if ignore_scripts {
-        cmd.push("--ignore-scripts".to_string());
+        cmd.push("--ignore-scripts".to_owned());
     }
     if let Some(b) = before {
         cmd.push(format!("--before={}", b));
@@ -119,7 +119,7 @@ mod tests {
     fn get_npm_constraint_from_lock_v1() {
         assert_eq!(
             get_npm_constraint_from_package_lock(r#"{"lockfileVersion":1}"#),
-            Some("<7".to_string())
+            Some("<7".to_owned())
         );
     }
 
@@ -127,7 +127,7 @@ mod tests {
     fn get_npm_constraint_from_lock_v2() {
         assert_eq!(
             get_npm_constraint_from_package_lock(r#"{"lockfileVersion":2}"#),
-            Some("<9".to_string())
+            Some("<9".to_owned())
         );
     }
 
@@ -135,7 +135,7 @@ mod tests {
     fn get_npm_constraint_from_lock_v3() {
         assert_eq!(
             get_npm_constraint_from_package_lock(r#"{"lockfileVersion":3}"#),
-            Some(">=7".to_string())
+            Some(">=7".to_owned())
         );
     }
 
@@ -155,7 +155,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             get_npm_constraint_from_package_json(&pj),
-            Some(">=9".to_string())
+            Some(">=9".to_owned())
         );
     }
 
@@ -172,7 +172,7 @@ mod tests {
         let npmrc = "before=2024-01-01\nmin-release-age=7d\n";
         assert_eq!(
             parse_npmrc_cooldown_date(npmrc),
-            Some(("2024-01-01".to_string(), "7d".to_string()))
+            Some(("2024-01-01".to_owned(), "7d".to_owned()))
         );
     }
 
@@ -207,8 +207,8 @@ mod tests {
     #[test]
     fn divide_workspace_and_root_deps_no_patterns() {
         let upgrades = vec![Upgrade {
-            dep_name: "lodash".to_string(),
-            package_file: "package.json".to_string(),
+            dep_name: "lodash".to_owned(),
+            package_file: "package.json".to_owned(),
             ..Default::default()
         }];
         let (ws, root) = divide_workspace_and_root_deps(&upgrades, &[]);
@@ -220,17 +220,17 @@ mod tests {
     fn divide_workspace_and_root_deps_with_patterns() {
         let upgrades = vec![
             Upgrade {
-                dep_name: "lodash".to_string(),
-                package_file: "packages/a/package.json".to_string(),
+                dep_name: "lodash".to_owned(),
+                package_file: "packages/a/package.json".to_owned(),
                 ..Default::default()
             },
             Upgrade {
-                dep_name: "express".to_string(),
-                package_file: "package.json".to_string(),
+                dep_name: "express".to_owned(),
+                package_file: "package.json".to_owned(),
                 ..Default::default()
             },
         ];
-        let patterns = vec!["packages/".to_string()];
+        let patterns = vec!["packages/".to_owned()];
         let (ws, root) = divide_workspace_and_root_deps(&upgrades, &patterns);
         assert_eq!(ws.len(), 1);
         assert_eq!(root.len(), 1);

@@ -119,17 +119,16 @@ fn normalize_hcl_json(val: &mut serde_json::Value) {
         "terraform",
     ];
     for key in block_keys {
-        if let Some(v) = obj.get_mut(key) {
-            if v.is_object() {
+        if let Some(v) = obj.get_mut(key)
+            && v.is_object() {
                 *v = serde_json::Value::Array(vec![v.clone()]);
             }
-        }
     }
 
     let labeled_block_keys = ["module", "provider"];
     for key in labeled_block_keys {
-        if let Some(v) = obj.get_mut(key) {
-            if v.is_object() {
+        if let Some(v) = obj.get_mut(key)
+            && v.is_object() {
                 let map = std::mem::take(v).as_object_mut().unwrap().clone();
                 let new_map: serde_json::Map<String, serde_json::Value> = map
                     .into_iter()
@@ -144,11 +143,10 @@ fn normalize_hcl_json(val: &mut serde_json::Value) {
                     .collect();
                 *v = serde_json::Value::Object(new_map);
             }
-        }
     }
 
-    if let Some(v) = obj.get_mut("resource") {
-        if v.is_object() {
+    if let Some(v) = obj.get_mut("resource")
+        && v.is_object() {
             let resource_types = std::mem::take(v).as_object_mut().unwrap().clone();
             let mut result = serde_json::Map::new();
             for (type_name, instances) in resource_types {
@@ -158,7 +156,6 @@ fn normalize_hcl_json(val: &mut serde_json::Value) {
             }
             *v = serde_json::Value::Object(result);
         }
-    }
 }
 
 pub fn parse_json(content: &str) -> Option<TerraformDefinitionFile> {

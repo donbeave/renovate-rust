@@ -80,11 +80,10 @@ pub fn parse_repomd_xml(content: &str) -> Result<Option<String>, RpmError> {
                     _ => {}
                 }
             }
-            Ok(Event::End(ref e)) if e.local_name().as_ref() == b"data" => {
-                if in_data {
+            Ok(Event::End(ref e)) if e.local_name().as_ref() == b"data"
+                && in_data => {
                     break;
                 }
-            }
             Ok(Event::Eof) => break,
             Err(e) => return Err(RpmError::Xml(e.to_string())),
             _ => {}
@@ -148,8 +147,8 @@ pub fn parse_primary_xml(content: &str) -> Result<Vec<RpmPackage>, RpmError> {
                     }
                 }
             }
-            Ok(Event::Empty(ref e)) => {
-                if in_package && e.local_name().as_ref() == b"version" {
+            Ok(Event::Empty(ref e))
+                if in_package && e.local_name().as_ref() == b"version" => {
                     for attr in e.attributes().flatten() {
                         match attr.key.local_name().as_ref() {
                             b"ver" => {
@@ -162,13 +161,12 @@ pub fn parse_primary_xml(content: &str) -> Result<Vec<RpmPackage>, RpmError> {
                         }
                     }
                 }
-            }
             Ok(Event::Text(ref e)) if in_package => {
                 let text = e.decode().map(|s| s.trim().to_owned()).map_err(|e| RpmError::Xml(e.to_string()))?;
                 match current_tag.as_str() {
-                    "name" => current_name = text.to_string(),
-                    "arch" => current_arch = text.to_string(),
-                    "summary" => current_summary = text.to_string(),
+                    "name" => current_name = text.clone(),
+                    "arch" => current_arch = text.clone(),
+                    "summary" => current_summary = text.clone(),
                     _ => {}
                 }
             }

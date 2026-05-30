@@ -1149,6 +1149,7 @@ mod tests {
         paths.iter().map(|s| (*s).to_owned()).collect()
     }
 
+    // Rust-specific: unit test for cargo manager detection
     #[test]
     fn detects_cargo() {
         let f = files(&["Cargo.toml", "src/main.rs", "crates/foo/Cargo.toml"]);
@@ -1160,6 +1161,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for npm manager detection
     #[test]
     fn detects_npm_package_json() {
         let f = files(&["package.json", "frontend/package.json", "README.md"]);
@@ -1172,6 +1174,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for pip_requirements manager detection
     #[test]
     fn detects_pip_requirements() {
         let f = files(&["requirements.txt", "requirements-dev.txt", "src/setup.py"]);
@@ -1401,6 +1404,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: unit test for github-actions manager detection
     #[test]
     fn detects_github_actions_workflow() {
         let f = files(&[
@@ -1413,6 +1417,7 @@ mod tests {
         assert_eq!(ga.matched_files.len(), 2);
     }
 
+    // Rust-specific: unit test for dockerfile manager detection
     #[test]
     fn detects_dockerfile() {
         let f = files(&["Dockerfile", "docker/Dockerfile.prod", "src/main.rs"]);
@@ -1421,6 +1426,7 @@ mod tests {
         assert!(df.matched_files.contains(&"Dockerfile".to_owned()));
     }
 
+    // Rust-specific: unit test for docker-compose manager detection
     #[test]
     fn detects_docker_compose() {
         let f = files(&["docker-compose.yml", "compose.yaml"]);
@@ -1429,6 +1435,7 @@ mod tests {
         assert_eq!(dc.matched_files.len(), 2);
     }
 
+    // Rust-specific: unit test for maven manager detection
     #[test]
     fn detects_maven_pom() {
         let f = files(&["pom.xml", "module/pom.xml", "parent.pom.xml"]);
@@ -1439,11 +1446,13 @@ mod tests {
         assert!(maven.matched_files.contains(&"parent.pom.xml".to_owned()));
     }
 
+    // Rust-specific: unit test for empty file list handling
     #[test]
     fn empty_file_list_returns_no_managers() {
         assert!(detect(&[]).is_empty());
     }
 
+    // Rust-specific: unit test for unrelated files handling
     #[test]
     fn unrelated_files_return_no_managers() {
         let f = files(&["README.md", "LICENSE", "src/lib.rs"]);
@@ -1452,6 +1461,7 @@ mod tests {
         assert!(!result.iter().any(|m| m.name == "cargo"));
     }
 
+    // Rust-specific: unit test for multi-manager detection
     #[test]
     fn detects_multiple_managers_in_same_repo() {
         let f = files(&["Cargo.toml", "package.json", ".github/workflows/ci.yml"]);
@@ -1461,6 +1471,7 @@ mod tests {
         assert!(result.iter().any(|m| m.name == "github-actions"));
     }
 
+    // Rust-specific: unit test for manager_default_datasource helper
     #[test]
     fn manager_default_datasource_known_managers() {
         assert_eq!(manager_default_datasource("cargo"), Some("crate"));
@@ -1478,6 +1489,7 @@ mod tests {
         assert_eq!(manager_default_datasource("nuget"), Some("nuget"));
     }
 
+    // Rust-specific: unit test for manager_default_datasource helper
     #[test]
     fn manager_default_datasource_unknown_returns_none() {
         assert_eq!(manager_default_datasource("unknown-manager"), None);

@@ -43,7 +43,7 @@ pub fn get_pnpm_constraint_from_upgrades(upgrades: &[Upgrade]) -> Option<String>
         .iter()
         .find(|u| u.dep_name == "pnpm")
         .and_then(|u| u.new_value.as_deref())
-        .map(|v| v.to_string())
+        .map(|v| v.to_owned())
 }
 
 pub fn get_pnpm_constraint_from_package_json(pj: &PackageJson) -> Option<String> {
@@ -56,18 +56,18 @@ pub fn build_pnpm_install_cmd(
     recursive: bool,
     dedupe: bool,
 ) -> Vec<String> {
-    let mut cmd = vec!["pnpm".to_string(), "install".to_string()];
+    let mut cmd = vec!["pnpm".to_owned(), "install".to_owned()];
     if lock_file_only {
-        cmd.push("--lockfile-only".to_string());
+        cmd.push("--lockfile-only".to_owned());
     }
     if ignore_scripts {
-        cmd.push("--ignore-scripts".to_string());
+        cmd.push("--ignore-scripts".to_owned());
     }
     if recursive {
-        cmd.push("--recursive".to_string());
+        cmd.push("--recursive".to_owned());
     }
     if dedupe {
-        cmd.push("--dedupe".to_string());
+        cmd.push("--dedupe".to_owned());
     }
     cmd
 }
@@ -76,11 +76,10 @@ pub fn build_pnpm_store_env(pnpm_version: Option<&str>) -> std::collections::BTr
     let mut env = std::collections::BTreeMap::new();
     if let Some(ver) = pnpm_version {
         let major: Option<u32> = ver.split('.').next().and_then(|v| v.parse().ok());
-        if let Some(m) = major {
-            if m >= 5 && m <= 11 {
-                env.insert("PNPM_HOME".to_string(), format!("/home/user/.local/share/pnpm/pnpm-v{}", m));
+        if let Some(m) = major
+            && (5..=11).contains(&m) {
+                env.insert("PNPM_HOME".to_owned(), format!("/home/user/.local/share/pnpm/pnpm-v{}", m));
             }
-        }
     }
     env
 }
@@ -97,7 +96,7 @@ mod tests {
     fn get_constraint_from_lock_file_v9() {
         assert_eq!(
             get_constraint_from_lock_file(9.0),
-            Some(">=9".to_string())
+            Some(">=9".to_owned())
         );
     }
 
@@ -105,7 +104,7 @@ mod tests {
     fn get_constraint_from_lock_file_v6() {
         assert_eq!(
             get_constraint_from_lock_file(6.0),
-            Some(">=8.6".to_string())
+            Some(">=8.6".to_owned())
         );
     }
 
@@ -117,13 +116,13 @@ mod tests {
     #[test]
     fn get_pnpm_constraint_from_upgrades_found() {
         let upgrades = vec![Upgrade {
-            dep_name: "pnpm".to_string(),
-            new_value: Some("9.0.0".to_string()),
+            dep_name: "pnpm".to_owned(),
+            new_value: Some("9.0.0".to_owned()),
             ..Default::default()
         }];
         assert_eq!(
             get_pnpm_constraint_from_upgrades(&upgrades),
-            Some("9.0.0".to_string())
+            Some("9.0.0".to_owned())
         );
     }
 
@@ -143,7 +142,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             get_pnpm_constraint_from_package_json(&pj),
-            Some("9.0.0".to_string())
+            Some("9.0.0".to_owned())
         );
     }
 

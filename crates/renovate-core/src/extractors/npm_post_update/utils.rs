@@ -20,7 +20,7 @@ mod tests {
     fn get_node_options_returns_flag() {
         assert_eq!(
             get_node_options(Some(4096)),
-            Some("--max-old-space-size=4096".to_string())
+            Some("--max-old-space-size=4096".to_owned())
         );
     }
 
@@ -37,7 +37,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             get_package_manager_version(&pj, "npm"),
-            Some("10.2.3".to_string())
+            Some("10.2.3".to_owned())
         );
     }
 }

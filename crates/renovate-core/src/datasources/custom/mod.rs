@@ -55,7 +55,9 @@ pub struct CustomReleaseResult {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
+#[derive(Default)]
 pub enum CustomFormat {
+    #[default]
     Json,
     Yaml,
     Toml,
@@ -63,11 +65,6 @@ pub enum CustomFormat {
     Html,
 }
 
-impl Default for CustomFormat {
-    fn default() -> Self {
-        Self::Json
-    }
-}
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct CustomDatasourceConfig {
@@ -77,7 +74,7 @@ pub struct CustomDatasourceConfig {
 }
 
 pub fn compile_template(template: &str, package_name: &str, current_value: Option<&str>) -> String {
-    let mut result = template.to_string();
+    let mut result = template.to_owned();
     result = result.replace("{{packageName}}", package_name);
     if let Some(cv) = current_value {
         result = result.replace("{{currentValue}}", cv);
@@ -93,7 +90,7 @@ pub fn parse_plain_to_releases(content: &str) -> CustomReleaseResult {
         .map(|line| line.trim())
         .filter(|line| !line.is_empty())
         .map(|version| CustomRelease {
-            version: version.to_string(),
+            version: version.to_owned(),
             is_deprecated: None,
             release_timestamp: None,
             source_url: None,
@@ -120,7 +117,7 @@ pub fn extract_html_links(content: &str) -> CustomReleaseResult {
         .captures_iter(content)
         .filter_map(|cap| cap.get(1))
         .map(|m| CustomRelease {
-            version: m.as_str().to_string(),
+            version: m.as_str().to_owned(),
             is_deprecated: None,
             release_timestamp: None,
             source_url: None,
@@ -150,7 +147,7 @@ pub fn massage_custom_datasource_config(
 ) -> Option<CustomDatasourceConfig> {
     let ds_def = custom_datasources.get(custom_datasource_name)?;
     let url_template = registry_url
-        .map(|s| s.to_string())
+        .map(|s| s.to_owned())
         .or_else(|| ds_def.default_registry_url_template.clone())?;
 
     let compiled_url = compile_template(&url_template, package_name, current_value);
@@ -248,11 +245,11 @@ mod tests {
     fn massage_config_compiles_template() {
         let mut ds = BTreeMap::new();
         ds.insert(
-            "myds".to_string(),
+            "myds".to_owned(),
             CustomDatasourceDefinition {
                 format: CustomFormat::Json,
                 default_registry_url_template: Some(
-                    "https://example.com/{{packageName}}".to_string(),
+                    "https://example.com/{{packageName}}".to_owned(),
                 ),
                 transform_templates: vec![],
             },
@@ -269,11 +266,11 @@ mod tests {
     fn massage_config_uses_registry_url_override() {
         let mut ds = BTreeMap::new();
         ds.insert(
-            "myds".to_string(),
+            "myds".to_owned(),
             CustomDatasourceDefinition {
                 format: CustomFormat::Json,
                 default_registry_url_template: Some(
-                    "https://default.com/{{packageName}}".to_string(),
+                    "https://default.com/{{packageName}}".to_owned(),
                 ),
                 transform_templates: vec![],
             },
