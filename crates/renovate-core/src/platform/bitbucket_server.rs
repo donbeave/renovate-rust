@@ -440,7 +440,7 @@ impl PlatformClient for BitbucketServerClient {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::{header, method, path};
+    use wiremock::matchers::{method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use super::*;
@@ -485,7 +485,7 @@ mod tests {
     async fn create_pr_returns_id() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/pull-requests"))
+            .and(path("/rest/api/1.0/projects/PROJ/repos/repo/pull-requests"))
             .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
                 "id": 7,
                 "title": "Test",

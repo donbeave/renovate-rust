@@ -538,6 +538,7 @@ impl PlatformClient for BitbucketClient {
 
 #[cfg(test)]
 mod tests {
+    use base64::Engine as _;
     use wiremock::matchers::{header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 

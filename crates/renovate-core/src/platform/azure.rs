@@ -22,6 +22,7 @@ pub struct AzureClient {
     #[allow(dead_code)]
     project: String,
     pat: String,
+    endpoint_base: String,
 }
 
 impl AzureClient {
@@ -40,6 +41,7 @@ impl AzureClient {
             org,
             project,
             pat,
+            endpoint_base: format!("https://dev.azure.com/{org}"),
         })
     }
 
@@ -60,6 +62,7 @@ impl AzureClient {
             org,
             project,
             pat,
+            endpoint_base: format!("{endpoint}/{org}"),
         })
     }
 
@@ -330,14 +333,24 @@ pub async fn get_pr(
 
 impl PlatformClient for AzureClient {
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
-        let url = format!(
-            "https://dev.azure.com/{}/_apis/connectionData?api-version=7.0",
-            self.org
+        // api_base = "{endpoint}/{org}/{project}/_apis/git"
+        // We need: "{endpoint}/{org}/_apis/connectionData"
+        let git_suffix = "/_apis/git";
+        let base_without_git = self
+            .api_base
+            .strip_suffix(git_suffix)
+            .unwrap_or(&self.api_base);
+        let connection_url = format!(
+            "{}/connectionData?api-version=7.0",
+            base_without_git
+                .rsplit_once('/')
+                .map(|(prefix, _)| prefix)
+                .unwrap_or(base_without_git)
         );
         let rb = self
             .http
             .inner
-            .get(&url)
+            .get(&connection_url)
             .header("Authorization", self.auth_header());
         let resp = rb.send().await.map_err(HttpError::Request)?;
         if resp.status() == reqwest::StatusCode::UNAUTHORIZED {
@@ -534,7 +547,7 @@ impl PlatformClient for AzureClient {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::{header, method, path};
+    use wiremock::matchers::{method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use super::*;

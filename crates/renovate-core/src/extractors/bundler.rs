@@ -664,6 +664,7 @@ mod tests {
 
     // ── Baseline unit tests ────────────────────────────────────────────────────
 
+    // Rust-specific: unit test for simple gem extraction
     #[test]
     fn simple_gem_with_version() {
         let pkg = extract("gem 'rails', '~> 7.0.0'\n").unwrap();
@@ -673,6 +674,7 @@ mod tests {
         assert!(deps(&pkg)[0].skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for gem without version
     #[test]
     fn gem_no_version() {
         let pkg = extract("gem 'devise'\n").unwrap();
@@ -681,6 +683,7 @@ mod tests {
         assert!(deps(&pkg)[0].current_value.is_empty());
     }
 
+    // Rust-specific: unit test for multi-constraint gem
     #[test]
     fn multi_version_constraint() {
         let pkg = extract("gem 'pg', '>= 0.18', '< 2.0'\n").unwrap();
@@ -688,6 +691,7 @@ mod tests {
         assert_eq!(deps(&pkg)[0].current_value, "'>= 0.18', '< 2.0'");
     }
 
+    // Rust-specific: unit test for git gem datasource
     #[test]
     fn git_gem_uses_git_refs_datasource() {
         let content = "gem 'nokogiri', git: 'https://github.com/sparklemotion/nokogiri.git'\n";
@@ -705,6 +709,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for github shorthand gem
     #[test]
     fn github_gem_uses_git_refs_datasource() {
         let content = "gem 'rails', github: 'rails/rails'\n";
@@ -716,6 +721,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for path gem skip reason
     #[test]
     fn path_gem_has_internal_package_skip_reason() {
         let content = "gem 'myapp', path: '../myapp'\n";
@@ -726,6 +732,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for group block dev dep extraction
     #[test]
     fn group_block_dev_deps() {
         let content = r#"
@@ -746,6 +753,7 @@ end
         assert!(devs.iter().any(|d| d.name == "byebug"));
     }
 
+    // Rust-specific: unit test for development-only group extraction
     #[test]
     fn development_only_group() {
         let content = r#"
@@ -761,6 +769,7 @@ end
         assert_eq!(rubocop.current_value, "'~> 1.0'");
     }
 
+    // Rust-specific: unit test for source line and registry URLs
     #[test]
     fn source_line_goes_to_registry_urls_not_deps() {
         let content = r#"
@@ -776,6 +785,7 @@ gem 'rails', '~> 7.0'
         assert_eq!(pkg.registry_urls, vec!["https://rubygems.org"]);
     }
 
+    // Rust-specific: unit test for comment skipping
     #[test]
     fn comments_skipped() {
         let content = r#"
@@ -787,6 +797,7 @@ gem 'rails' # inline comment
         assert_eq!(deps(&pkg)[0].name, "rails");
     }
 
+    // Rust-specific: unit test for double-quoted gem names
     #[test]
     fn double_quoted_gems() {
         let pkg = extract(r#"gem "rails", "~> 7.0""#).unwrap();
@@ -795,6 +806,7 @@ gem 'rails' # inline comment
         assert_eq!(deps(&pkg)[0].current_value, r#""~> 7.0""#);
     }
 
+    // Rust-specific: unit test for real-world Gemfile extraction
     #[test]
     fn real_world_gemfile() {
         let content = r#"
@@ -839,6 +851,7 @@ end
         assert_eq!(local_gem.skip_reason, Some(BundlerSkipReason::InternalPackage));
     }
 
+    // Rust-specific: unit test for empty Gemfile handling
     #[test]
     fn empty_gemfile_returns_none() {
         // No recognizable Bundler content → None

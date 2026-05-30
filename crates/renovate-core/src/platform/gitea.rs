@@ -15,7 +15,6 @@ use crate::http::{HttpClient, HttpError};
 use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 use crate::platform::gitea_forgejo_utils::{
     ContentsListResponse, ContentsResponse, ContentsType, get_merge_method,
-    trim_trailing_api_path,
 };
 
 pub const GITEA_API_VERSION: &str = "api/v1";
@@ -433,6 +432,7 @@ mod tests {
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use super::*;
+    use crate::platform::gitea_forgejo_utils::trim_trailing_api_path;
 
     fn make_client(server_uri: &str) -> GiteaClient {
         GiteaClient::new(server_uri, "test-token").unwrap()
