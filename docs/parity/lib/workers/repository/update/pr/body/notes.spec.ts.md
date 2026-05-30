@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/body/notes.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/notes.spec.ts
-**Total tests:** 3 | **Ported:** 1 | **Actionable:** 1 | **Status:** done
+**Total tests:** 3 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `workers/repository/update/pr/body/notes`
 

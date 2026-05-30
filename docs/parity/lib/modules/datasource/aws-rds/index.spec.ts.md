@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/aws-rds/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/aws-rds/index.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** not-applicable-applicable-applicable
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable-applicable
 
 ### `modules/datasource/aws-rds/index › getPkgReleases()`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/azure-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/azure-tags/index.spec.ts
-**Total tests:** 5 | **Ported:** 2 | **Actionable:** 2 | **Status:** partial
+**Total tests:** 5 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `modules/datasource/azure-tags/index › getReleases`
 

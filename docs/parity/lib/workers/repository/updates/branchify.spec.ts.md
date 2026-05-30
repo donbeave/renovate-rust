@@ -5,7 +5,7 @@
 ## `lib/workers/repository/updates/branchify.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/branchify.spec.ts
-**Total tests:** 6 | **Ported:** 5 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 6 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `workers/repository/updates/branchify › branchifyUpgrades()`
 

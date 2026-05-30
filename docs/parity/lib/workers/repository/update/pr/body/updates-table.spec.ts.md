@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/body/updates-table.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/updates-table.spec.ts
-**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** ported-applicable
+**Total tests:** 5 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported-applicable
 
 ### `workers/repository/update/pr/body/updates-table`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/deno/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/update.spec.ts
-**Total tests:** 38 | **Ported:** 27 | **Actionable:** 38 | **Status:** ported
+**Total tests:** 27 | **Ported:** 27 | **Actionable:** 27 | **Status:** ported
 
 ### `updateDependency › deno.json/jsonc`
 

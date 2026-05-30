@@ -4279,6 +4279,19 @@ pub fn classify_repo_error(message: &str) -> &str {
     "unknown-error"
 }
 
+/// Determine the log level for a config validation error.
+///
+/// Returns `"warn"` by default or when `config_validation_error` is `false`,
+/// returns `"error"` when `config_validation_error` is `true`.
+///
+/// Mirrors `handleError()` behavior in `lib/workers/repository/error.ts`.
+pub fn config_validation_log_level(config_validation_error: Option<bool>) -> &'static str {
+    match config_validation_error {
+        Some(true) => "error",
+        _ => "warn",
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Repository path utilities — lib/workers/global/index.ts
 // ---------------------------------------------------------------------------

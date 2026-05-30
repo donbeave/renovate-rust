@@ -5,7 +5,7 @@
 ## `lib/workers/repository/error-config.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/error-config.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** pending-applicable
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending-applicable
 
 ### `workers/repository/error-config › raiseConfigWarningIssue()`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/schema.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/schema.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable-applicable
 
 ### `modules/versioning/schema`
 

@@ -5,7 +5,7 @@
 ## `lib/instrumentation/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/instrumentation/index.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable-applicable
 
 ### `instrumentation/index`
 

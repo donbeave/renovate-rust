@@ -5,7 +5,7 @@
 ## `lib/workers/global/initialize.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/initialize.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** pending-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending-applicable
 
 ### `workers/global/initialize › checkVersions()`
 
