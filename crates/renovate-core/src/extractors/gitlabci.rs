@@ -1015,6 +1015,7 @@ services:
         );
     }
 
+    // Rust-specific: unit test for GitLab dependency proxy group prefix
     #[test]
     fn get_gitlab_dep_official_image_group_proxy() {
         let image = "$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/mariadb:10.4.11";
@@ -1028,6 +1029,7 @@ services:
         );
     }
 
+    // Rust-specific: unit test for GitLab dependency proxy with brackets
     #[test]
     fn get_gitlab_dep_official_image_group_proxy_brackets() {
         let image = "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mariadb:10.4.11";
@@ -1040,6 +1042,7 @@ services:
         );
     }
 
+    // Rust-specific: unit test for GitLab direct group proxy prefix
     #[test]
     fn get_gitlab_dep_official_image_direct_group_proxy() {
         let image = "$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11";
@@ -1066,6 +1069,7 @@ services:
         );
     }
 
+    // Rust-specific: unit test for org image with group proxy
     #[test]
     fn get_gitlab_dep_image_with_org_group_proxy() {
         let image = "$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/renovate/renovate:19.70.8-slim";
@@ -1095,6 +1099,7 @@ services:
         );
     }
 
+    // Rust-specific: unit test for registry alias with variable
     #[test]
     fn get_gitlab_dep_registry_alias_variable() {
         let dep = get_gitlab_dep(
@@ -1110,6 +1115,7 @@ services:
         );
     }
 
+    // Rust-specific: unit test for registry alias with bracket variable
     #[test]
     fn get_gitlab_dep_registry_alias_variable_brackets() {
         let dep = get_gitlab_dep(
@@ -1124,6 +1130,7 @@ services:
         );
     }
 
+    // Rust-specific: unit test for unaliased variable handling
     #[test]
     fn get_gitlab_dep_registry_alias_not_aliased_variable() {
         // $CI_REGISTRY/image:1.0 with empty alias list → treated as plain image
@@ -1134,6 +1141,7 @@ services:
         );
     }
 
+    // Rust-specific: unit test for plain image without alias
     #[test]
     fn get_gitlab_dep_registry_alias_plain_image() {
         let dep = get_gitlab_dep("registry.com/image:1.0", &[]);

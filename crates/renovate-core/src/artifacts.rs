@@ -109,6 +109,7 @@ pub trait ArtifactRunner: Send + Sync {
     /// Run artifact update for the given package file and deps.
     ///
     /// Returns `None` if no changes were made, or a list of results.
+    #[allow(clippy::type_complexity)]
     fn update_artifacts(
         &self,
         input: &UpdateArtifact,
@@ -118,6 +119,7 @@ pub trait ArtifactRunner: Send + Sync {
 }
 
 /// A no-op artifact runner for managers that don't support artifacts.
+#[derive(Debug)]
 pub struct NoOpArtifactRunner;
 
 impl ArtifactRunner for NoOpArtifactRunner {

@@ -38,6 +38,7 @@ pub struct RpmPackage {
     release: String,
     #[allow(dead_code)]
     arch: String,
+    #[allow(dead_code)]
     summary: Option<String>,
 }
 
