@@ -1201,7 +1201,25 @@ fn create_git_auth_url_from_host_or_url(input: &str) -> Option<String> {
 }
 
 fn percent_encode(value: &str) -> String {
-    url::form_urlencoded::byte_serialize(value.as_bytes()).collect()
+    let mut encoded = String::new();
+    for byte in value.bytes() {
+        match byte {
+            b'A'..=b'Z'
+            | b'a'..=b'z'
+            | b'0'..=b'9'
+            | b'-'
+            | b'_'
+            | b'.'
+            | b'!'
+            | b'~'
+            | b'*'
+            | b'\''
+            | b'('
+            | b')' => encoded.push(char::from(byte)),
+            _ => encoded.push_str(&format!("%{byte:02X}")),
+        }
+    }
+    encoded
 }
 
 // ---------------------------------------------------------------------------
@@ -6327,6 +6345,68 @@ mod tests {
         );
     }
 
+    // Ported: "prefers token over username and password" — util/git/auth.spec.ts line 53
+    #[test]
+    fn git_authenticated_env_prefers_token_over_username_and_password() {
+        let rule = host_rules::HostRule {
+            username: Some("username".to_owned()),
+            password: Some("password".to_owned()),
+            token: Some("token1234".to_owned()),
+            host_type: Some("github".to_owned()),
+            match_host: Some("github.com".to_owned()),
+            ..Default::default()
+        };
+        let env =
+            get_git_authenticated_environment_variables("https://github.com/", &rule, None, &git_env(&[]));
+        assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("3"));
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_2").map(String::as_str),
+            Some("url.https://token1234@github.com/.insteadOf")
+        );
+    }
+
+    // Ported: "returns url with token for different protocols" — util/git/auth.spec.ts line 73
+    #[test]
+    fn git_authenticated_env_returns_url_with_token_for_different_protocols() {
+        let env = get_git_authenticated_environment_variables(
+            "foobar://github.com/",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            None,
+            &git_env(&[]),
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://ssh:token1234@github.com/.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_VALUE_2").map(String::as_str),
+            Some("https://github.com/")
+        );
+    }
+
+    // Ported: "returns correct url if token already contains GitHub App username" — util/git/auth.spec.ts line 91
+    #[test]
+    fn git_authenticated_env_keeps_github_app_username() {
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com/",
+            &git_host_rule(
+                Some("github"),
+                Some("github.com"),
+                Some("x-access-token:token1234"),
+            ),
+            None,
+            &git_env(&[]),
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://x-access-token:token1234@github.com/.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_2").map(String::as_str),
+            Some("url.https://x-access-token:token1234@github.com/.insteadOf")
+        );
+    }
+
     // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from parameter" — util/git/auth.spec.ts line 112
     #[test]
     fn git_authenticated_env_honors_existing_count_parameter() {
@@ -6349,6 +6429,86 @@ mod tests {
         );
     }
 
+    // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from parameter over environment" — util/git/auth.spec.ts line 134
+    #[test]
+    fn git_authenticated_env_prefers_parameter_count_over_process_env() {
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com/",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            Some(&git_env(&[("GIT_CONFIG_COUNT", "1")])),
+            &git_env(&[("GIT_CONFIG_COUNT", "54")]),
+        );
+        assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("4"));
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_1").map(String::as_str),
+            Some("url.https://ssh:token1234@github.com/.insteadOf")
+        );
+    }
+
+    // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from environment" — util/git/auth.spec.ts line 157
+    #[test]
+    fn git_authenticated_env_uses_process_env_count() {
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com/",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            None,
+            &git_env(&[("GIT_CONFIG_COUNT", "1")]),
+        );
+        assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("4"));
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_1").map(String::as_str),
+            Some("url.https://ssh:token1234@github.com/.insteadOf")
+        );
+    }
+
+    // Ported: "returns url with token and passthrough existing variables" — util/git/auth.spec.ts line 176
+    #[test]
+    fn git_authenticated_env_passthrough_existing_variables() {
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com/",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            Some(&git_env(&[("RANDOM_VARIABLE", "random")])),
+            &git_env(&[]),
+        );
+        assert_eq!(env.get("RANDOM_VARIABLE").map(String::as_str), Some("random"));
+        assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("3"));
+    }
+
+    // Ported: "return url with token with invalid GIT_CONFIG_COUNT from environment" — util/git/auth.spec.ts line 199
+    #[test]
+    fn git_authenticated_env_ignores_invalid_process_env_count() {
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com/",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            None,
+            &git_env(&[("GIT_CONFIG_COUNT", "notvalid")]),
+        );
+        assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("3"));
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://ssh:token1234@github.com/.insteadOf")
+        );
+    }
+
+    // Ported: "returns url with token containing username for GitLab token" — util/git/auth.spec.ts line 218
+    #[test]
+    fn git_authenticated_env_uses_gitlab_token_username() {
+        let env = get_git_authenticated_environment_variables(
+            "https://gitlab.com/",
+            &git_host_rule(Some("gitlab"), Some("github.com"), Some("token1234")),
+            None,
+            &git_env(&[]),
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_VALUE_1").map(String::as_str),
+            Some("git@gitlab.com:")
+        );
+    }
+
     // Ported: "returns url with token containing username for GitLab token without hostType" — util/git/auth.spec.ts line 239
     #[test]
     fn git_authenticated_env_detects_gitlab_token_without_host_type() {
@@ -6368,6 +6528,94 @@ mod tests {
                 ("GIT_CONFIG_VALUE_1", "git@gitlab.com:"),
                 ("GIT_CONFIG_VALUE_2", "https://gitlab.com/"),
             ])
+        );
+    }
+
+    // Ported: "returns original environment variables when no token is set" — util/git/auth.spec.ts line 259
+    #[test]
+    fn git_authenticated_env_returns_original_env_without_credentials() {
+        let env = get_git_authenticated_environment_variables(
+            "https://gitlab.com/",
+            &git_host_rule(Some("gitlab"), Some("gitlab.com"), None),
+            Some(&git_env(&[("env", "value")])),
+            &git_env(&[]),
+        );
+        assert_eq!(env, git_env(&[("env", "value")]));
+    }
+
+    // Ported: "returns url with token for http hosts" — util/git/auth.spec.ts line 274
+    #[test]
+    fn git_authenticated_env_returns_url_with_token_for_http_hosts() {
+        let env = get_git_authenticated_environment_variables(
+            "http://github.com/",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            None,
+            &git_env(&[]),
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.http://ssh:token1234@github.com/.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_VALUE_2").map(String::as_str),
+            Some("http://github.com/")
+        );
+    }
+
+    // Ported: "returns url with token for orgs" — util/git/auth.spec.ts line 292
+    #[test]
+    fn git_authenticated_env_returns_url_with_token_for_orgs() {
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com/org",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            None,
+            &git_env(&[]),
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://ssh:token1234@github.com/org.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_VALUE_1").map(String::as_str),
+            Some("git@github.com:org")
+        );
+    }
+
+    // Ported: "returns url with token for orgs and projects" — util/git/auth.spec.ts line 310
+    #[test]
+    fn git_authenticated_env_returns_url_with_token_for_orgs_and_projects() {
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com/org/repo",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            None,
+            &git_env(&[]),
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_2").map(String::as_str),
+            Some("url.https://token1234@github.com/org/repo.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_VALUE_1").map(String::as_str),
+            Some("git@github.com:org/repo")
+        );
+    }
+
+    // Ported: "returns url with token for orgs and projects and ports" — util/git/auth.spec.ts line 330
+    #[test]
+    fn git_authenticated_env_returns_url_with_token_for_orgs_projects_and_ports() {
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com:89/org/repo.git",
+            &git_host_rule(Some("github"), Some("github.com"), Some("token1234")),
+            None,
+            &git_env(&[]),
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://ssh:token1234@github.com:89/org/repo.git.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_VALUE_1").map(String::as_str),
+            Some("ssh://git@github.com:89/org/repo.git")
         );
     }
 
@@ -6439,6 +6687,152 @@ mod tests {
         host_rules::clear();
     }
 
+    // Ported: "returns environment variables with token if hostRule for multiple hostsRules" — util/git/auth.spec.ts line 402
+    #[test]
+    fn git_environment_variables_multiple_host_rules() {
+        host_rules::clear();
+        host_rules::add(git_host_rule(
+            Some("github"),
+            Some("api.github.com"),
+            Some("token123"),
+        ))
+        .unwrap();
+        host_rules::add(git_host_rule(
+            Some("gitlab"),
+            Some("https://gitlab.example.com"),
+            Some("token234"),
+        ))
+        .unwrap();
+        host_rules::add(git_host_rule(
+            Some("github"),
+            Some("https://github.example.com"),
+            Some("token345"),
+        ))
+        .unwrap();
+
+        let env = get_git_environment_variables(&[]);
+        assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("9"));
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_3").map(String::as_str),
+            Some("url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_8").map(String::as_str),
+            Some("url.https://token345@github.example.com/.insteadOf")
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns environment variables with token if hostRule is for Gitlab" — util/git/auth.spec.ts line 446
+    #[test]
+    fn git_environment_variables_gitlab_token() {
+        host_rules::clear();
+        host_rules::add(git_host_rule(
+            Some("gitlab"),
+            Some("https://gitlab.example.com"),
+            Some("token123"),
+        ))
+        .unwrap();
+
+        let env = get_git_environment_variables(&[]);
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_VALUE_1").map(String::as_str),
+            Some("git@gitlab.example.com:")
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns environment variables with username and password" — util/git/auth.spec.ts line 466
+    #[test]
+    fn git_environment_variables_username_password() {
+        host_rules::clear();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("gitlab".to_owned()),
+            match_host: Some("https://gitlab.example.com".to_owned()),
+            username: Some("user1234".to_owned()),
+            password: Some("pass1234".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+
+        let env = get_git_environment_variables(&[]);
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://user1234:pass1234@gitlab.example.com/.insteadOf")
+        );
+        assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("3"));
+        host_rules::clear();
+    }
+
+    // Ported: "returns environment variables with URL encoded username and password" — util/git/auth.spec.ts line 487
+    #[test]
+    fn git_environment_variables_url_encoded_username_password() {
+        host_rules::clear();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("gitlab".to_owned()),
+            match_host: Some("https://gitlab.example.com".to_owned()),
+            username: Some("user @ :$ abc".to_owned()),
+            password: Some("abc @ blub pass0:".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+
+        let env = get_git_environment_variables(&[]);
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf")
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns no environment variables when hostType is not supported" — util/git/auth.spec.ts line 508
+    #[test]
+    fn git_environment_variables_ignores_unsupported_host_type() {
+        host_rules::clear();
+        host_rules::add(git_host_rule(
+            Some("custom"),
+            Some("https://custom.example.com"),
+            Some("token123"),
+        ))
+        .unwrap();
+        assert_eq!(get_git_environment_variables(&[]), git_env(&[]));
+        host_rules::clear();
+    }
+
+    // Ported: "returns no environment variables when only username is set" — util/git/auth.spec.ts line 517
+    #[test]
+    fn git_environment_variables_ignores_username_without_password() {
+        host_rules::clear();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("custom".to_owned()),
+            match_host: Some("https://custom.example.com".to_owned()),
+            username: Some("user123".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        assert_eq!(get_git_environment_variables(&["custom"]), git_env(&[]));
+        host_rules::clear();
+    }
+
+    // Ported: "returns no environment variables when only password is set" — util/git/auth.spec.ts line 526
+    #[test]
+    fn git_environment_variables_ignores_password_without_username() {
+        host_rules::clear();
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("custom".to_owned()),
+            match_host: Some("https://custom.example.com".to_owned()),
+            password: Some("pass123".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        assert_eq!(get_git_environment_variables(&["custom"]), git_env(&[]));
+        host_rules::clear();
+    }
+
     // Ported: "returns environment variables when hostType is explicitly set" — util/git/auth.spec.ts line 535
     #[test]
     fn git_environment_variables_allows_explicit_datasource_host_type() {
@@ -6461,6 +6855,43 @@ mod tests {
                 ("GIT_CONFIG_VALUE_1", "git@git.example.com:"),
                 ("GIT_CONFIG_VALUE_2", "https://git.example.com/"),
             ])
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns empty environment variables when matchHost contains invalid protocol" — util/git/auth.spec.ts line 554
+    #[test]
+    fn git_environment_variables_ignores_invalid_protocol_match_host() {
+        host_rules::clear();
+        host_rules::add(git_host_rule(
+            Some("github"),
+            Some("invalid://*.github.example.com"),
+            Some("token123"),
+        ))
+        .unwrap();
+        assert_eq!(get_git_environment_variables(&["custom"]), git_env(&[]));
+        host_rules::clear();
+    }
+
+    // Ported: "returns environment variables for bitbucket-server" — util/git/auth.spec.ts line 563
+    #[test]
+    fn git_environment_variables_bitbucket_server() {
+        host_rules::clear();
+        host_rules::add(git_host_rule(
+            Some("bitbucket-server"),
+            Some("git.mycompany.com"),
+            Some("token123"),
+        ))
+        .unwrap();
+
+        let env = get_git_environment_variables(&[]);
+        assert_eq!(
+            env.get("GIT_CONFIG_KEY_0").map(String::as_str),
+            Some("url.https://ssh:token123@git.mycompany.com/scm/.insteadOf")
+        );
+        assert_eq!(
+            env.get("GIT_CONFIG_VALUE_0").map(String::as_str),
+            Some("ssh://git@git.mycompany.com:7999/")
         );
         host_rules::clear();
     }
