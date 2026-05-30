@@ -1468,7 +1468,7 @@ pub fn get_range_strategy(
     if range_strategy != &RangeStrategy::Auto {
         return range_strategy.clone();
     }
-    if current_value.map_or(false, |v| v.contains('<')) {
+    if current_value.is_some_and(|v| v.contains('<')) {
         RangeStrategy::Widen
     } else {
         RangeStrategy::UpdateLockfile
@@ -1485,6 +1485,7 @@ pub enum UpdateLockedStatus {
     UpdateFailed,
 }
 
+#[derive(Debug)]
 pub struct UpdateLockedConfig<'a> {
     pub dep_name: &'a str,
     pub current_version: &'a str,
@@ -1494,9 +1495,8 @@ pub struct UpdateLockedConfig<'a> {
 }
 
 pub fn update_locked_dependency(config: &UpdateLockedConfig<'_>) -> UpdateLockedStatus {
-    let lock_content = match config.lock_file_content {
-        Some(c) => c,
-        None => return UpdateLockedStatus::UpdateFailed,
+    let Some(lock_content) = config.lock_file_content else {
+        return UpdateLockedStatus::UpdateFailed;
     };
 
     let locked = extract_lock_versions(lock_content);
@@ -1522,13 +1522,11 @@ fn extract_lock_versions(content: &str) -> std::collections::HashMap<String, Vec
             if let Some(name) = trimmed.trim_start_matches("name = \"").strip_suffix('"') {
                 current_name = Some(name.to_owned());
             }
-        } else if trimmed.starts_with("version = \"") {
-            if let Some(version) = trimmed.trim_start_matches("version = \"").strip_suffix('"') {
-                if let Some(name) = &current_name {
-                    result.entry(name.clone()).or_default().push(version.to_owned());
-                }
+        } else if let Some(version) = trimmed.trim_start_matches("version = \"").strip_suffix('"') {
+            if let Some(name) = &current_name {
+                result.entry(name.clone()).or_default().push(version.to_owned());
             }
-        } else if trimmed == "[[package]]" || trimmed == "" {
+        } else if trimmed == "[[package]]" || trimmed.is_empty() {
             current_name = None;
         }
     }
@@ -1546,6 +1544,7 @@ pub enum BumpVersion {
     Patch,
 }
 
+#[derive(Debug)]
 pub struct BumpResult {
     pub bumped_content: String,
 }
