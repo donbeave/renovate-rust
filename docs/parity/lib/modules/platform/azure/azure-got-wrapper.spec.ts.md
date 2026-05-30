@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/azure-got-wrapper.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/azure-got-wrapper.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** not-applicable-applicable
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** not-applicable-applicable-applicable
 
 ### `gitApi`
 

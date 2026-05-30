@@ -5,7 +5,7 @@
 ## `lib/instrumentation/with-instrumenting.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/instrumentation/with-instrumenting.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `instrumentation/with-instrumenting`
 

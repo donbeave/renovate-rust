@@ -5,7 +5,7 @@
 ## `lib/util/streams.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/streams.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `util/streams › streamToString`
 

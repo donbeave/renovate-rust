@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/git-refs/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-refs/index.spec.ts
-**Total tests:** 11 | **Ported:** 8 | **Actionable:** 8 | **Status:** done
+**Total tests:** 11 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `modules/datasource/git-refs/index`
 
