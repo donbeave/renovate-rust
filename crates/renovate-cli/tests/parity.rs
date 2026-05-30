@@ -1298,3 +1298,46 @@ fn parity_bundler_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for bundler-skipped fixture");
 }
+
+#[test]
+fn parity_pub_skipped() {
+    let actual = run_fixture("pub-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 2,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 2,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "pubspec.yaml",
+                    "manager": "pub",
+                    "stats": {
+                        "total": 2,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 2,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "flutter",
+                            "status": "skipped",
+                            "reason": "sdkdep"
+                        },
+                        {
+                            "name": "cupertino_icons",
+                            "status": "skipped",
+                            "reason": "sdkdep"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for pub-skipped fixture");
+}

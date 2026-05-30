@@ -1,0 +1,6 @@
+name: example
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons:
+    sdk: flutter
