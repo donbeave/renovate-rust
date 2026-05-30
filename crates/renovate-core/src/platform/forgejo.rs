@@ -8,6 +8,7 @@
 //!
 //! Forgejo uses Bearer token authentication.
 
+use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};
