@@ -48,10 +48,11 @@ continue working.
    every fixture repository and reports an empty observable diff — or every
    remaining diff is recorded as an intentional divergence in
    `docs/parity/compatibility-decisions.md`.
-5. **Quality gates pass.** `cargo build --workspace --all-features`,
+5. **Quality gates pass at terminal audit.** `cargo build --workspace --all-features`,
    `cargo fmt --all --check`, `cargo clippy --workspace --all-targets
    --all-features -- -D warnings`, and `cargo nextest run --workspace
-   --all-features` all pass (see Verification).
+   --all-features` all pass (see Verification). These are final hardening gates,
+   not routine work while source/test parity is still open.
 
 When all five hold, report the terminal state with the supporting counts and
 the harness result, then stop. If the operator has not said to stop and any
@@ -176,11 +177,9 @@ Rust project standards:
   scaffolding. Prefer stable releases over prereleases unless the project
   intentionally needs a prerelease and documents why.
 - Use `clap` derive APIs for the CLI, including subcommands, help, version output, shell completions when useful, env-backed options where appropriate, and Renovate-compatible aliases.
-- Set up formatting, linting, and test infrastructure at the beginning of the project, before feature work grows:
-  - `rustfmt` policy, committed through `rustfmt.toml` when project defaults are not enough
-  - strict Clippy policy, committed through crate lints and/or `clippy.toml` when useful
-  - `cargo-nextest` configuration in `.config/nextest.toml` when profiles, retries, slow timeouts, or CI behavior are needed
-  - documented local quality commands in `README.md` or `CONTRIBUTING.md`
+- Set up only the infrastructure needed to keep implementation parity moving.
+  Rustfmt, Clippy, nextest profile tuning, and CI polish are terminal hardening
+  work unless the operator explicitly asks for them before parity is closed.
 - Favor a workspace layout suitable for a serious CLI project:
   - CLI crate for argument parsing, output, and process exit behavior
   - Core crates/modules for config, managers, datasources, versioning, update planning, repository/platform integrations, and execution
@@ -195,7 +194,8 @@ Rust project standards:
   - `schemars` or equivalent when generating or validating schemas is useful
 - Keep code safe and maintainable:
   - `#![forbid(unsafe_code)]`
-  - strict Clippy and rustdoc expectations
+  - behavior-compatible APIs and deterministic tests first
+  - strict Clippy and rustdoc expectations during the terminal hardening pass
   - no broad `allow` attributes without a short justification
   - logical, reasonable module structure with clear responsibilities
   - small modules with clear ownership
@@ -245,7 +245,14 @@ Rust best-practice rules:
   that can be explained and measured.
 - Public examples should work as doctests where practical and should use `?` rather than `unwrap` unless demonstrating panic behavior.
 - Comments should explain invariants, compatibility, platform behavior, safety, performance tradeoffs, or external constraints; do not restate obvious code.
-- Fix Clippy warnings before suppressing them. If suppression is justified, prefer `#[expect(clippy::lint_name, reason = "...")]` or the local equivalent so stale suppressions are caught later.
+- During the implementation-parity phase, do not spend iteration time on Rustfmt
+  or Clippy cleanup unless the operator explicitly asks. Prioritize behavioral
+  parity and test coverage first. Clippy cleanup belongs to the terminal quality
+  pass after the source map and test map are closed.
+- When the terminal quality pass begins, fix Clippy warnings before suppressing
+  them. If suppression is justified, prefer `#[expect(clippy::lint_name,
+  reason = "...")]` or the local equivalent so stale suppressions are caught
+  later.
 - Do not enable broad Clippy `restriction`, `pedantic`, or `nursery` groups wholesale. Select strict lints intentionally.
 - Do not claim performance wins without measurement unless the change removes an obvious allocation, clone, or blocking operation from ordinary execution.
 
@@ -253,13 +260,19 @@ Verification:
 - Do not run verification commands automatically before or after every commit.
   Run checks only when the operator explicitly asks for them, or when a task
   instruction names a specific command.
+- For ordinary implementation slices, keep the changed code compiling and
+  testable. Run focused `cargo test` or crate-level build/test commands that
+  prove the current parity change when useful. Do not run Rustfmt or Clippy as
+  routine iteration hygiene; formatting and lint cleanup are separate terminal
+  quality work after implementation/test parity is reached.
 - **Exception — completion check.** Terminal-state gate #5 requires the quality
-  gates to actually pass. Before reporting the terminal state as reached (and
-  whenever you believe the loop is finished), run the full gate set below and the
-  differential harness. You may not declare done on unverified code, even though
-  routine per-slice verification stays operator-gated.
-- When the operator requests Rust verification, use the strongest applicable
-  local checks that fit the iteration:
+  gates to actually pass, but only after the implementation parity gates are
+  otherwise closed. Before reporting the terminal state as reached, run the full
+  gate set below and the differential harness. You may not declare done on
+  unverified code, even though routine per-slice verification stays
+  operator-gated.
+- When the operator explicitly requests full Rust verification, use the strongest
+  applicable local checks that fit the request:
   - `cargo build --workspace --all-features`
   - `cargo fmt --all --check`
   - `cargo clippy --workspace --all-targets --all-features -- -D warnings`
@@ -270,7 +283,10 @@ Verification:
   tests. If `cargo nextest` is missing during a requested check, document the
   blocker instead of installing tools unless the operator asked you to install
   them.
-- If the project does not yet have the required Rust scaffolding, create it first, including `Cargo.toml`, a latest-stable Rust toolchain policy, rustfmt/clippy/nextest configuration where useful, and CI-ready commands.
+- If the project does not yet have the required Rust scaffolding, create the
+  minimum needed to continue implementation and tests. Do not block ordinary
+  parity work on rustfmt/clippy/nextest configuration polish; that belongs to
+  the terminal quality pass unless the operator asks for it now.
 - Never claim formatting, Clippy, build, or tests passed unless you ran the
   relevant command in this turn.
 
@@ -429,8 +445,14 @@ Progress procedure:
 
 Iteration sizing:
 - Each iteration should leave the repository better than it started.
-- Each iteration must build something concrete and add or update tests for that behavior when appropriate. Run formatting, Clippy, build, or test commands only when the operator explicitly asks for them.
-- Prefer a complete vertical slice over broad partial scaffolding, except for the initial iteration where creating the Rust workspace, formatting, Clippy, and nextest foundation is the highest-value slice.
+- Each iteration must build something concrete and add or update tests for that
+  behavior when appropriate. Keep the changed code compiling and run focused
+  tests/builds for the behavior when useful. Run formatting, Clippy, or broad
+  workspace verification only when the operator explicitly asks or during the
+  terminal quality pass.
+- Prefer a complete vertical slice over broad partial scaffolding. Do not choose
+  formatting, Clippy, or other style-only work while implementation or test
+  parity gaps remain.
 - Good slices include:
   - CLI flag or config compatibility
   - config discovery and merge behavior

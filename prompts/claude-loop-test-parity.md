@@ -607,31 +607,46 @@ file documents the gap so Phase 3 can implement it later.
 
 ---
 
-## Verification before every commit
+## Verification during implementation parity
 
 Do not run verification commands automatically before or after every commit.
 Run checks only when the operator explicitly asks for them, or when a task
 instruction names a specific command.
 
-When the operator requests Rust verification, use the strongest applicable
-checks for the change:
+During the implementation/test-parity phase, focus on porting runtime behavior
+and covering Renovate `.spec.ts` rows. Keep changed code compiling and run
+focused Rust tests or crate-level compile/test commands for the current slice
+when useful. Do not run Rustfmt or Clippy as routine hygiene, and do not include
+formatting-only churn in parity commits. Formatting and lint cleanup are
+deferred until the terminal quality pass after source and test parity are
+otherwise closed.
+
+For ordinary parity work, prefer targeted compile/test checks such as:
+
+```sh
+cargo test -p <crate> <ported_test_filter> -- --nocapture
+cargo test -p <crate> <ported_test_filter> --lib
+```
+
+Only when the operator explicitly requests full Rust verification, or when the
+terminal quality pass is reached, use the full gate set:
 
 ```sh
 cargo build --workspace --all-features
-cargo fmt --all                                                         # fix first
-cargo fmt --all --check                                                 # then verify
+cargo fmt --all --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo nextest run --workspace --all-features
 ```
 
-Also run doctests when public documentation was changed:
+Run doctests only when explicitly requested or during the terminal quality pass:
 
 ```sh
 cargo test --doc --workspace --all-features
 ```
 
-If requested checks fail, fix failures before committing. If a failure predates
-your changes, note it in the commit message or final progress notes.
+If requested checks fail, fix failures that block the current parity slice. If a
+formatting or Clippy failure predates the parity work, record it for the final
+hardening pass instead of diverting the implementation loop.
 
 ---
 
