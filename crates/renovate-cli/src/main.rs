@@ -651,4 +651,51 @@ mod tests {
             "updated package.json should contain new version; got: {updated}"
         );
     }
+
+    #[test]
+    fn build_pr_body_includes_update_table() {
+        let deps = vec![report_builders::BranchDep {
+            file_path: "package.json".to_owned(),
+            manager: "npm".to_owned(),
+            dep: output::DepReport {
+                name: "lodash".to_owned(),
+                dep_type: Some("dependencies".to_owned()),
+                update_type: Some("minor".to_owned()),
+                status: output::DepStatus::UpdateAvailable {
+                    current: "^3.0.0".to_owned(),
+                    latest: "4.17.21".to_owned(),
+                },
+                ..output::DepReport {
+                    name: String::new(),
+                    branch_name: None,
+                    group_name: None,
+                    automerge: None,
+                    labels: Vec::new(),
+                    assignees: Vec::new(),
+                    reviewers: Vec::new(),
+                    update_type: None,
+                    pr_priority: None,
+                    pr_title: None,
+                    release_timestamp: None,
+                    current_version_timestamp: None,
+                    dep_type: None,
+                    package_name: None,
+                    range_strategy: None,
+                    follow_tag: None,
+                    pin_digests: None,
+                    versioning: None,
+                    dependency_dashboard_approval: None,
+                    replacement_name: None,
+                    replacement_version: None,
+                    new_value: None,
+                    status: output::DepStatus::UpToDate { latest: None },
+                }
+            },
+        }];
+        let cfg = renovate_core::repo_config::RepoConfig::default();
+        let body = build_pr_body(&deps, &cfg);
+        assert!(body.contains("lodash"), "body should mention dep name; got: {body}");
+        assert!(body.contains("^3.0.0"), "body should mention current version; got: {body}");
+        assert!(body.contains("4.17.21"), "body should mention latest version; got: {body}");
+    }
 }
