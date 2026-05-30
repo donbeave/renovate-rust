@@ -35,13 +35,14 @@ impl AzureClient {
         let project = project.into();
         let pat = pat.into();
         let api_base = format!("https://dev.azure.com/{org}/{project}/_apis/git");
+        let endpoint_base = format!("https://dev.azure.com/{org}");
         Ok(Self {
             http: HttpClient::new()?,
             api_base,
             org,
             project,
             pat,
-            endpoint_base: format!("https://dev.azure.com/{org}"),
+            endpoint_base,
         })
     }
 
@@ -56,13 +57,14 @@ impl AzureClient {
         let project = project.into();
         let pat = pat.into();
         let api_base = format!("{endpoint}/{org}/{project}/_apis/git");
+        let endpoint_base = format!("{endpoint}/{org}");
         Ok(Self {
             http: HttpClient::new()?,
             api_base,
             org,
             project,
             pat,
-            endpoint_base: format!("{endpoint}/{org}"),
+            endpoint_base,
         })
     }
 
@@ -333,19 +335,9 @@ pub async fn get_pr(
 
 impl PlatformClient for AzureClient {
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
-        // api_base = "{endpoint}/{org}/{project}/_apis/git"
-        // We need: "{endpoint}/{org}/_apis/connectionData"
-        let git_suffix = "/_apis/git";
-        let base_without_git = self
-            .api_base
-            .strip_suffix(git_suffix)
-            .unwrap_or(&self.api_base);
         let connection_url = format!(
-            "{}/connectionData?api-version=7.0",
-            base_without_git
-                .rsplit_once('/')
-                .map(|(prefix, _)| prefix)
-                .unwrap_or(base_without_git)
+            "{}/_apis/connectionData?api-version=7.0",
+            self.endpoint_base
         );
         let rb = self
             .http

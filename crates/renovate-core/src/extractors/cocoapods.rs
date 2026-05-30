@@ -203,6 +203,7 @@ fn strip_comment(line: &str) -> &str {
 mod tests {
     use super::*;
 
+    // Rust-specific: unit test for pod with version extraction
     #[test]
     fn pod_with_version() {
         let content = "pod 'Alamofire', '~> 5.6'\n";
@@ -213,6 +214,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for pod without version
     #[test]
     fn pod_without_version() {
         let content = "pod 'Firebase/Analytics'\n";
@@ -223,6 +225,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for exact version pod
     #[test]
     fn pod_exact_version() {
         let content = "pod 'SDWebImage', '5.13.2'\n";
@@ -230,6 +233,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "5.13.2");
     }
 
+    // Rust-specific: unit test for path pod skip reason
     #[test]
     fn path_pod_skipped() {
         let content = "pod 'MyLocalPod', :path => '../MyLocalPod'\n";
@@ -237,6 +241,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(CocoapodsSkipReason::LocalPath));
     }
 
+    // Rust-specific: unit test for git pod skip reason
     #[test]
     fn git_pod_skipped() {
         let content = "pod 'MyGitPod', :git => 'https://github.com/org/repo.git'\n";
@@ -244,6 +249,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(CocoapodsSkipReason::GitSource));
     }
 
+    // Rust-specific: unit test for podspec pod skip reason
     #[test]
     fn podspec_pod_skipped() {
         let content = "pod 'MyPod', :podspec => 'https://example.com/MyPod.podspec'\n";
@@ -254,6 +260,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for double-quoted pod names
     #[test]
     fn double_quoted_pod() {
         let content = r#"pod "RxSwift", "~> 6.0""#;
@@ -262,6 +269,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "~> 6.0");
     }
 
+    // Rust-specific: unit test for comment ignoring
     #[test]
     fn comments_ignored() {
         let content = "# pod 'Commented', '1.0'\npod 'Real', '2.0'\n";
@@ -270,6 +278,7 @@ mod tests {
         assert_eq!(deps[0].name, "Real");
     }
 
+    // Rust-specific: unit test for real-world Podfile extraction
     #[test]
     fn real_world_podfile() {
         let content = r#"
