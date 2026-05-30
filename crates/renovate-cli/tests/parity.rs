@@ -1437,3 +1437,46 @@ fn parity_cpanfile_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for cpanfile-skipped fixture");
 }
+
+#[test]
+fn parity_jsonnet_bundler_skipped() {
+    let actual = run_fixture("jsonnet-bundler-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 2,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 2,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "jsonnetfile.json",
+                    "manager": "jsonnet-bundler",
+                    "stats": {
+                        "total": 2,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 2,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "https://gitlab.com/example/lib.git",
+                            "status": "skipped",
+                            "reason": "non-github remote"
+                        },
+                        {
+                            "name": "https://bitbucket.org/example/other.git",
+                            "status": "skipped",
+                            "reason": "non-github remote"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for jsonnet-bundler-skipped fixture");
+}

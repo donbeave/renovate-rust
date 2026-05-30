@@ -53,6 +53,10 @@ pub enum HttpError {
     /// The server returned an unexpected status code.
     #[error("HTTP {status}: {url}")]
     Status { status: StatusCode, url: String },
+
+    /// Failed to parse the response body.
+    #[error("Parse error: {0}")]
+    Parse(String),
 }
 
 /// Thin wrapper around `reqwest::Client` that adds a shared `User-Agent`,
@@ -308,6 +312,40 @@ impl HttpClient {
         };
         let resp = rb.send().await.map_err(HttpError::Request)?;
         Ok(resp)
+    }
+
+    /// Send a GET request and deserialize the YAML response.
+    pub async fn get_yaml<T: serde::de::DeserializeOwned>(
+        &self,
+        url: &str,
+    ) -> Result<T, HttpError> {
+        let resp = self.get_retrying(url).await?;
+        if !resp.status().is_success() {
+            return Err(HttpError::Status {
+                status: resp.status(),
+                url: url.to_owned(),
+            });
+        }
+        let body = resp.text().await.map_err(HttpError::Request)?;
+        let result = serde_yaml::from_str(&body).map_err(|e| HttpError::Parse(e.to_string()))?;
+        Ok(result)
+    }
+
+    /// Send a GET request and deserialize the TOML response.
+    pub async fn get_toml<T: serde::de::DeserializeOwned>(
+        &self,
+        url: &str,
+    ) -> Result<T, HttpError> {
+        let resp = self.get_retrying(url).await?;
+        if !resp.status().is_success() {
+            return Err(HttpError::Status {
+                status: resp.status(),
+                url: url.to_owned(),
+            });
+        }
+        let body = resp.text().await.map_err(HttpError::Request)?;
+        let result = toml::from_str(&body).map_err(|e| HttpError::Parse(e.to_string()))?;
+        Ok(result)
     }
 }
 
@@ -976,6 +1014,98 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    // Ported: "parses yaml response without schema" — util/http/index.spec.ts line 427
+    #[tokio::test]
+    async fn get_yaml_parses_response_body() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("name: test\nversion: 1\n"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let val: serde_json::Value = http.get_yaml(&server.uri()).await.unwrap();
+        assert_eq!(val["name"], "test");
+        assert_eq!(val["version"], 1);
+    }
+
+    // Ported: "throws on invalid yaml" — util/http/index.spec.ts line 447
+    #[tokio::test]
+    async fn get_yaml_throws_on_invalid_yaml() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("not: valid: yaml: :"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = http.get_yaml::<serde_json::Value>(&server.uri()).await;
+        assert!(result.is_err());
+    }
+
+    // Ported: "returns error result for invalid yaml" — util/http/index.spec.ts line 522
+    #[tokio::test]
+    async fn get_yaml_returns_error_for_invalid_yaml() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("{invalid"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result: Result<serde_json::Value, _> = http.get_yaml(&server.uri()).await;
+        assert!(result.is_err());
+    }
+
+    // Ported: "returns error result for network errors" — util/http/index.spec.ts line 533
+    #[tokio::test]
+    async fn get_yaml_returns_error_for_network_errors() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result: Result<serde_json::Value, _> = http.get_yaml(&server.uri()).await;
+        assert!(result.is_err());
+    }
+
+    // Ported: "throws on invalid toml" — util/http/index.spec.ts line 752
+    #[tokio::test]
+    async fn get_toml_throws_on_invalid_toml() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("not valid toml =="))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = http.get_toml::<serde_json::Value>(&server.uri()).await;
+        assert!(result.is_err());
+    }
+
+    // Ported: "parses toml with schema validation" — util/http/index.spec.ts line 711
+    #[tokio::test]
+    async fn get_toml_parses_valid_toml_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("name = \"test\"\nversion = \"1.0.0\"\n"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let val: serde_json::Value = http.get_toml(&server.uri()).await.unwrap();
+        assert_eq!(val["name"], "test");
+        assert_eq!(val["version"], "1.0.0");
     }
 }
 
