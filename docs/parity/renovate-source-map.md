@@ -3,7 +3,7 @@
 Maps Renovate TypeScript **source** files to their Rust counterparts.
 This file tracks source-level port coverage. Only `.ts` source files appear here (never `.spec.ts`).
 
-**Status:** `full` · `partial` · `stub` · `not-started` · `out-of-scope`
+**Status:** `full` · `partial` · `not-started` · `out-of-scope`
 
 ---
 
@@ -12,1171 +12,3111 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 ### ansible
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/ansible/extract.ts` | `crates/renovate-core/src/extractors/ansible.rs` | partial | Core extraction ported; no artifacts |
-| `lib/modules/manager/ansible/index.ts` | `crates/renovate-core/src/extractors/ansible.rs` | partial | Manager metadata in extractor |
+|---|---|---|---|
+| `lib/modules/manager/ansible/extract.ts` | `extractors/ansible.rs` | full | `extract()` extracts Docker image refs from Ansible task YAML |
+| `lib/modules/manager/ansible/index.ts` | `managers.rs` | partial | fileMatch pattern present; `defaultConfig` managerFilePatterns covered; `supportedDatasources`, `categories`, `url` not stored |
 
 ### ansible-galaxy
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/ansible-galaxy/extract.ts` | `crates/renovate-core/src/extractors/ansible_galaxy.rs` | partial | Collections + roles extraction ported |
-| `lib/modules/manager/ansible-galaxy/collections.ts` | `crates/renovate-core/src/extractors/ansible_galaxy.rs` | partial | Inlined into extractor |
-| `lib/modules/manager/ansible-galaxy/roles.ts` | `crates/renovate-core/src/extractors/ansible_galaxy.rs` | partial | Inlined into extractor |
-| `lib/modules/manager/ansible-galaxy/index.ts` | `crates/renovate-core/src/extractors/ansible_galaxy.rs` | partial | Manager metadata |
-| `lib/modules/manager/ansible-galaxy/collections-metadata.ts` | — | not-started | Metadata helpers not ported |
-| `lib/modules/manager/ansible-galaxy/dep-types.ts` | — | not-started | Type definitions only |
-| `lib/modules/manager/ansible-galaxy/types.ts` | — | not-started | Type definitions only |
-| `lib/modules/manager/ansible-galaxy/util.ts` | — | not-started | Utility helpers |
+|---|---|---|---|
+| `lib/modules/manager/ansible-galaxy/extract.ts` | `extractors/ansible_galaxy.rs` | full | `extract()` handles roles and collections from YAML |
+| `lib/modules/manager/ansible-galaxy/index.ts` | `managers.rs` | partial | fileMatch pattern present; full config not stored |
+| `lib/modules/manager/ansible-galaxy/collections-metadata.ts` | `extractors/ansible_galaxy.rs` | partial | Collection metadata extraction is inline |
+| `lib/modules/manager/ansible-galaxy/collections.ts` | `extractors/ansible_galaxy.rs` | partial | Collection parsing is inline |
+| `lib/modules/manager/ansible-galaxy/dep-types.ts` | `extractors/ansible_galaxy.rs` | full | Dep types are embedded as enum fields |
+| `lib/modules/manager/ansible-galaxy/roles.ts` | `extractors/ansible_galaxy.rs` | partial | Roles parsing is inline |
+| `lib/modules/manager/ansible-galaxy/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/ansible-galaxy/util.ts` | `extractors/ansible_galaxy.rs` | partial | Utility functions inline |
 
 ### ant
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/ant/extract.ts` | `crates/renovate-core/src/extractors/ant.rs` | partial | Core extraction ported |
-| `lib/modules/manager/ant/properties.ts` | `crates/renovate-core/src/extractors/ant.rs` | partial | Properties parser parity; resolution helpers inlined |
-| `lib/modules/manager/ant/update.ts` | `crates/renovate-core/src/extractors/ant.rs` | partial | Core fileReplacePosition update logic ported |
-| `lib/modules/manager/ant/index.ts` | `crates/renovate-core/src/extractors/ant.rs` | partial | Manager metadata |
-| `lib/modules/manager/ant/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/ant/extract.ts` | `extractors/ant.rs` | full | `extract()` + `extract_all_package_files()` present; handles Maven deps from XML |
+| `lib/modules/manager/ant/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/ant/properties.ts` | `extractors/ant.rs` | full | Property resolution is inline |
+| `lib/modules/manager/ant/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/ant/update.ts` | `extractors/ant.rs` | full | `update_dependency()` present |
 
 ### argocd
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/argocd/extract.ts` | `crates/renovate-core/src/extractors/argocd.rs` | partial | Core extraction ported |
-| `lib/modules/manager/argocd/index.ts` | `crates/renovate-core/src/extractors/argocd.rs` | partial | Manager metadata |
-| `lib/modules/manager/argocd/schema.ts` | `crates/renovate-core/src/extractors/argocd.rs` | partial | Schema inlined |
-| `lib/modules/manager/argocd/util.ts` | `crates/renovate-core/src/extractors/argocd.rs` | partial | Utilities inlined |
+|---|---|---|---|
+| `lib/modules/manager/argocd/extract.ts` | `extractors/argocd.rs` | full | `extract()` handles ArgoCD Application sources |
+| `lib/modules/manager/argocd/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/argocd/schema.ts` | N/A | out-of-scope | Zod schema (TS-specific) |
+| `lib/modules/manager/argocd/util.ts` | `extractors/argocd.rs` | partial | Utility functions inline |
 
 ### asdf
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/asdf/extract.ts` | `crates/renovate-core/src/extractors/asdf.rs` | partial | Core extraction ported; large tooling map |
-| `lib/modules/manager/asdf/upgradeable-tooling.ts` | `crates/renovate-core/src/extractors/asdf.rs` | partial | Tooling map partially inlined |
-| `lib/modules/manager/asdf/index.ts` | `crates/renovate-core/src/extractors/asdf.rs` | partial | Manager metadata; supported datasources parity |
+|---|---|---|---|
+| `lib/modules/manager/asdf/extract.ts` | `extractors/asdf.rs` | full | `extract()` parses `.tool-versions` format |
+| `lib/modules/manager/asdf/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/asdf/upgradeable-tooling.ts` | `extractors/asdf.rs` + `extractors/mise.rs` | full | Full tooling table with datasource mappings, all 30+ tools present |
 
 ### azure-pipelines
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/azure-pipelines/extract.ts` | `crates/renovate-core/src/extractors/azure_pipelines.rs` | partial | Core extraction ported |
-| `lib/modules/manager/azure-pipelines/index.ts` | `crates/renovate-core/src/extractors/azure_pipelines.rs` | partial | Manager metadata |
-| `lib/modules/manager/azure-pipelines/schema.ts` | `crates/renovate-core/src/extractors/azure_pipelines.rs` | partial | Schema inlined |
-| `lib/modules/manager/azure-pipelines/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/azure-pipelines/extract.ts` | `extractors/azure_pipelines.rs` | full | `extract()` handles Docker images from Azure Pipelines YAML |
+| `lib/modules/manager/azure-pipelines/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/azure-pipelines/dep-types.ts` | `extractors/azure_pipelines.rs` | full | Dep types embedded in extractor |
+| `lib/modules/manager/azure-pipelines/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### batect
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/batect/extract.ts` | `crates/renovate-core/src/extractors/batect.rs` | partial | Core extraction ported |
-| `lib/modules/manager/batect/index.ts` | `crates/renovate-core/src/extractors/batect.rs` | partial | Manager metadata |
-| `lib/modules/manager/batect/schema.ts` | `crates/renovate-core/src/extractors/batect.rs` | partial | Schema inlined |
-| `lib/modules/manager/batect/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/batect/extract.ts` | `extractors/batect.rs` | full | `extract()` handles batect YAML config |
+| `lib/modules/manager/batect/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/batect/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/batect/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### batect-wrapper
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/batect-wrapper/extract.ts` | `crates/renovate-core/src/extractors/batect_wrapper.rs` | partial | Core extraction ported |
-| `lib/modules/manager/batect-wrapper/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/batect-wrapper/index.ts` | `crates/renovate-core/src/extractors/batect_wrapper.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/batect-wrapper/extract.ts` | `extractors/batect_wrapper.rs` | full | `extract()` handles wrapper config |
+| `lib/modules/manager/batect-wrapper/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/batect-wrapper/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
 
 ### bazel
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bazel/extract.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Core extraction ported |
-| `lib/modules/manager/bazel/parser.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Parser inlined |
-| `lib/modules/manager/bazel/common.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Inlined |
-| `lib/modules/manager/bazel/rules/docker.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Inlined |
-| `lib/modules/manager/bazel/rules/git.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Inlined |
-| `lib/modules/manager/bazel/rules/go.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Inlined |
-| `lib/modules/manager/bazel/rules/http.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Inlined |
-| `lib/modules/manager/bazel/rules/maven.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Inlined |
-| `lib/modules/manager/bazel/rules/oci.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Inlined |
-| `lib/modules/manager/bazel/rules/index.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Inlined |
-| `lib/modules/manager/bazel/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/bazel/index.ts` | `crates/renovate-core/src/extractors/bazel.rs` | partial | Manager metadata |
-| `lib/modules/manager/bazel/dep-types.ts` | — | not-started | Type definitions only |
-| `lib/modules/manager/bazel/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/bazel/extract.ts` | `extractors/bazel.rs` | full | `extract()` handles WORKSPACE/bzl files |
+| `lib/modules/manager/bazel/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/bazel/common.ts` | `extractors/bazel.rs` | full | Common utilities inline |
+| `lib/modules/manager/bazel/dep-types.ts` | `extractors/bazel.rs` | full | Dep types embedded as enum |
+| `lib/modules/manager/bazel/parser.ts` | `extractors/bazel_parser.rs` | full | Full Starlark parser with `parse()` and `update_code()` |
+| `lib/modules/manager/bazel/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/bazel/rules/docker.ts` | `extractors/bazel.rs` | full | `container_pull` / `oci_pull` parsing present |
+| `lib/modules/manager/bazel/rules/git.ts` | `extractors/bazel.rs` | full | Git archive URL parsing present |
+| `lib/modules/manager/bazel/rules/go.ts` | `extractors/bazel.rs` | full | `go_repository()` parsing present |
+| `lib/modules/manager/bazel/rules/http.ts` | `extractors/bazel.rs` | full | `http_archive()` parsing present |
+| `lib/modules/manager/bazel/rules/index.ts` | `extractors/bazel.rs` | full | Rule dispatch inline |
+| `lib/modules/manager/bazel/rules/maven.ts` | `extractors/bazel.rs` | full | `maven_install()` parsing present |
+| `lib/modules/manager/bazel/rules/oci.ts` | `extractors/bazel.rs` | full | `oci_pull()` parsing present |
+| `lib/modules/manager/bazel/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### bazel-module
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bazel-module/extract.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Core extraction ported |
-| `lib/modules/manager/bazel-module/parser/index.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Parser inlined |
-| `lib/modules/manager/bazel-module/parser/common.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/context.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Context error semantics ported |
-| `lib/modules/manager/bazel-module/parser/crate.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/extension-tags.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/fragments.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Fragment constructors/classifiers ported |
-| `lib/modules/manager/bazel-module/parser/maven.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/oci.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/repo-rules.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/rules.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/starlark.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/bazel-module/bazelrc.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Option, entry, workspace path expansion, and option sanitization helpers ported; async file reader not ported |
-| `lib/modules/manager/bazel-module/lockfile.ts` | — | not-started | Lockfile not ported |
-| `lib/modules/manager/bazel-module/rules-img.ts` | — | not-started | Not ported |
-| `lib/modules/manager/bazel-module/rules.ts` | — | not-started | Not ported |
-| `lib/modules/manager/bazel-module/dep-types.ts` | — | not-started | Type definitions only |
-| `lib/modules/manager/bazel-module/index.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/bazel-module/extract.ts` | `extractors/bazel_module.rs` | full | Full MODULE.bazel extraction |
+| `lib/modules/manager/bazel-module/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/bazel-module/dep-types.ts` | `extractors/bazel_module.rs` | full | Dep types embedded |
+| `lib/modules/manager/bazel-module/rules.ts` | `extractors/bazel_module.rs` | full | Rule extraction inline |
+| `lib/modules/manager/bazel-module/rules-img.ts` | `extractors/bazel_module.rs` | full | Image pull rules inline |
+| `lib/modules/manager/bazel-module/lockfile.ts` | `extractors/bazel_module.rs` | partial | Some lockfile handling |
+| `lib/modules/manager/bazel-module/bazelrc.ts` | `extractors/bazel_module.rs` | full | `.bazelrc` parsing present |
+| `lib/modules/manager/bazel-module/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/bazel-module/parser/common.ts` | `extractors/bazel_module.rs` | full | Parser common utilities inline |
+| `lib/modules/manager/bazel-module/parser/context.ts` | `extractors/bazel_module.rs` | full | `BazelCtx` context handling present |
+| `lib/modules/manager/bazel-module/parser/crate.ts` | `extractors/bazel_module.rs` | full | Crate spec parsing present |
+| `lib/modules/manager/bazel-module/parser/extension-tags.ts` | `extractors/bazel_module.rs` | full | Extension tag parsing present |
+| `lib/modules/manager/bazel-module/parser/fragments.ts` | `extractors/bazel_parser.rs` | full | Parser fragments |
+| `lib/modules/manager/bazel-module/parser/index.ts` | `extractors/bazel_module.rs` | full | Parser dispatch inline |
+| `lib/modules/manager/bazel-module/parser/maven.ts` | `extractors/bazel_module.rs` | full | Maven parsing present |
+| `lib/modules/manager/bazel-module/parser/oci.ts` | `extractors/bazel_module.rs` | full | OCI parsing present |
+| `lib/modules/manager/bazel-module/parser/repo-rules.ts` | `extractors/bazel_module.rs` | full | Repo rule parsing present |
+| `lib/modules/manager/bazel-module/parser/rules.ts` | `extractors/bazel_module.rs` | full | Rule parsing present |
+| `lib/modules/manager/bazel-module/parser/starlark.ts` | `extractors/bazel_parser.rs` | full | Starlark parsing present |
 
 ### bazelisk
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bazelisk/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | `extract_bazelisk` ported; inlined into version_file module |
-| `lib/modules/manager/bazelisk/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/bazelisk/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
+|---|---|---|---|
+| `lib/modules/manager/bazelisk/extract.ts` | `extractors/version_file.rs` | full | `extract_bazelisk()` present |
+| `lib/modules/manager/bazelisk/index.ts` | `managers.rs` | partial | fileMatch pattern present; `supportsLockFileMaintenance`, `lockFileNames` not stored |
+| `lib/modules/manager/bazelisk/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
 
 ### bicep
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bicep/extract.ts` | `crates/renovate-core/src/extractors/bicep.rs` | partial | Core extraction ported |
-| `lib/modules/manager/bicep/index.ts` | `crates/renovate-core/src/extractors/bicep.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/bicep/extract.ts` | `extractors/bicep.rs` | full | `extract()` handles Bicep resource references |
+| `lib/modules/manager/bicep/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### bitbucket-pipelines
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bitbucket-pipelines/extract.ts` | `crates/renovate-core/src/extractors/bitbucket_pipelines.rs` | partial | Core extraction ported |
-| `lib/modules/manager/bitbucket-pipelines/index.ts` | `crates/renovate-core/src/extractors/bitbucket_pipelines.rs` | partial | Manager metadata |
-| `lib/modules/manager/bitbucket-pipelines/dep-types.ts` | — | not-started | Type definitions only |
-| `lib/modules/manager/bitbucket-pipelines/util.ts` | — | not-started | Utility helpers |
+|---|---|---|---|
+| `lib/modules/manager/bitbucket-pipelines/extract.ts` | `extractors/bitbucket_pipelines.rs` | full | `extract()` handles Docker images from Bitbucket pipelines |
+| `lib/modules/manager/bitbucket-pipelines/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/bitbucket-pipelines/dep-types.ts` | `extractors/bitbucket_pipelines.rs` | full | Dep types embedded |
+| `lib/modules/manager/bitbucket-pipelines/util.ts` | `extractors/bitbucket_pipelines.rs` | full | Utility functions inline |
 
 ### bitrise
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bitrise/extract.ts` | `crates/renovate-core/src/extractors/bitrise.rs` | partial | Core extraction ported |
-| `lib/modules/manager/bitrise/index.ts` | `crates/renovate-core/src/extractors/bitrise.rs` | partial | Manager metadata |
-| `lib/modules/manager/bitrise/schema.ts` | `crates/renovate-core/src/extractors/bitrise.rs` | partial | Schema inlined |
-| `lib/modules/manager/bitrise/utils.ts` | `crates/renovate-core/src/extractors/bitrise.rs` | partial | Inlined |
+|---|---|---|---|
+| `lib/modules/manager/bitrise/extract.ts` | `extractors/bitrise.rs` | full | `extract()` handles Bitrise step references |
+| `lib/modules/manager/bitrise/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/bitrise/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/bitrise/utils.ts` | `extractors/bitrise.rs` | partial | Utility functions inline |
 
 ### buildkite
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/buildkite/extract.ts` | `crates/renovate-core/src/extractors/buildkite.rs` | partial | Core extraction ported |
-| `lib/modules/manager/buildkite/index.ts` | `crates/renovate-core/src/extractors/buildkite.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/buildkite/extract.ts` | `extractors/buildkite.rs` | full | `extract()` handles plugin and Docker image refs |
+| `lib/modules/manager/buildkite/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### buildpacks
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/buildpacks/extract.ts` | `crates/renovate-core/src/extractors/buildpacks.rs` | partial | Core extraction ported |
-| `lib/modules/manager/buildpacks/index.ts` | `crates/renovate-core/src/extractors/buildpacks.rs` | partial | Manager metadata |
-| `lib/modules/manager/buildpacks/schema.ts` | `crates/renovate-core/src/extractors/buildpacks.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/buildpacks/extract.ts` | `extractors/buildpacks.rs` | full | `extract()` handles buildpack refs from project.toml |
+| `lib/modules/manager/buildpacks/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/buildpacks/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### bun
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bun/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/bun/artifacts.ts` | — | not-started | Not ported |
-| `lib/modules/manager/bun/index.ts` | — | not-started | Not ported |
-| `lib/modules/manager/bun/utils.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/bun/extract.ts` | `extractors/npm.rs` (partial) | partial | Bun reuses npm extract for package.json; `extractAllPackageFiles` + workspace matching present in npm.rs |
+| `lib/modules/manager/bun/index.ts` | `managers.rs` | partial | fileMatch pattern present; `supersedesManagers`, `supportsLockFileMaintenance`, `lockFileNames` partially handled |
+| `lib/modules/manager/bun/artifacts.ts` | N/A | not-started | Bun lockfile artifact execution not implemented |
+| `lib/modules/manager/bun/utils.ts` | `extractors/npm.rs` | partial | `fileMatchesWorkspaces` and `filesMatchingWorkspaces` present in npm.rs |
 
 ### bun-version
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bun-version/index.ts` | `crates/renovate-core/src/extractors/bun_version.rs` | partial | Core `.bun-version` extraction ported |
+|---|---|---|---|
+| `lib/modules/manager/bun-version/index.ts` | `extractors/version_file.rs` + `extractors/bun_version.rs` | partial | TS uses NpmDatasource; Rust `bun_version.rs` uses GithubReleases. Different datasource mapping. |
 
 ### bundler
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/bundler/extract.ts` | `crates/renovate-core/src/extractors/bundler.rs` | partial | Core extraction ported |
-| `lib/modules/manager/bundler/common.ts` | `crates/renovate-core/src/extractors/bundler.rs` | partial | Inlined |
-| `lib/modules/manager/bundler/index.ts` | `crates/renovate-core/src/extractors/bundler.rs` | partial | Manager metadata |
-| `lib/modules/manager/bundler/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/bundler/host-rules.ts` | — | not-started | Not ported |
-| `lib/modules/manager/bundler/locked-version.ts` | — | not-started | Not ported |
-| `lib/modules/manager/bundler/update-locked.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/bundler/extract.ts` | `extractors/bundler.rs` | full | `extract()` + `extract_with_lock()` handles Gemfile parsing with lock file support |
+| `lib/modules/manager/bundler/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/bundler/common.ts` | `extractors/bundler.rs` | full | Common utilities inline |
+| `lib/modules/manager/bundler/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/bundler/host-rules.ts` | `extractors/bundler.rs` | full | `find_all_authenticatable()` and `get_authentication_header_value()` present |
+| `lib/modules/manager/bundler/locked-version.ts` | `extractors/bundler.rs` | full | `extract_lock_file_entries()` present |
+| `lib/modules/manager/bundler/update-locked.ts` | `extractors/bundler.rs` | full | `update_locked_bundler_dependency()` present |
 
 ### cake
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/cake/index.ts` | `crates/renovate-core/src/extractors/cake.rs` | partial | Manager metadata; no dedicated extract.ts in TS |
+|---|---|---|---|
+| `lib/modules/manager/cake/index.ts` | `extractors/cake.rs` | partial | TS uses `moo` lexer for parsing; Rust uses regex-based parsing. Both extract NuGet deps from Cake files. `getConfiguredRegistries` not in Rust. |
 
 ### cargo
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/cargo/extract.ts` | `crates/renovate-core/src/extractors/cargo.rs` | partial | Core extraction ported |
-| `lib/modules/manager/cargo/index.ts` | `crates/renovate-core/src/extractors/cargo.rs` | partial | Manager metadata |
-| `lib/modules/manager/cargo/schema.ts` | `crates/renovate-core/src/extractors/cargo.rs` | partial | Schema inlined |
-| `lib/modules/manager/cargo/utils.ts` | `crates/renovate-core/src/extractors/cargo.rs` | partial | Inlined |
-| `lib/modules/manager/cargo/range.ts` | `crates/renovate-core/src/versioning/cargo.rs` | partial | Range logic in versioning crate |
-| `lib/modules/manager/cargo/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/cargo/locked-version.ts` | — | not-started | Not ported |
-| `lib/modules/manager/cargo/update-locked.ts` | — | not-started | Not ported |
-| `lib/modules/manager/cargo/update.ts` | — | not-started | Not ported |
-| `lib/modules/manager/cargo/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/cargo/extract.ts` | `extractors/cargo.rs` | full | `extract()` + `extract_with_context()` handle workspace, features, registries |
+| `lib/modules/manager/cargo/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/cargo/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/cargo/locked-version.ts` | `extractors/cargo.rs` | full | `build_lock_map()` + `find_locked_version()` present |
+| `lib/modules/manager/cargo/range.ts` | N/A | not-started | Range strategy not yet in Rust |
+| `lib/modules/manager/cargo/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/cargo/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/cargo/update-locked.ts` | N/A | not-started | Update-locked status not yet in Rust |
+| `lib/modules/manager/cargo/update.ts` | N/A | not-started | `bumpPackageVersion` not yet in Rust |
+| `lib/modules/manager/cargo/utils.ts` | `extractors/cargo.rs` | partial | Some utility functions inline |
 
 ### cdnurl
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/cdnurl/extract.ts` | `crates/renovate-core/src/extractors/cdnurl.rs` | partial | Core CDN URL extraction ported |
-| `lib/modules/manager/cdnurl/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
+|---|---|---|---|
+| `lib/modules/manager/cdnurl/extract.ts` | `extractors/cdnurl.rs` | full | `extract_package_file()` present with cloudflare URL regex |
+| `lib/modules/manager/cdnurl/index.ts` | `managers.rs` | partial | Empty fileMatch patterns present |
 
 ### circleci
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/circleci/extract.ts` | `crates/renovate-core/src/extractors/circleci.rs` | partial | Core extraction ported |
-| `lib/modules/manager/circleci/index.ts` | `crates/renovate-core/src/extractors/circleci.rs` | partial | Manager metadata |
-| `lib/modules/manager/circleci/schema.ts` | `crates/renovate-core/src/extractors/circleci.rs` | partial | Schema inlined |
-| `lib/modules/manager/circleci/dep-types.ts` | — | not-started | Type definitions only |
-| `lib/modules/manager/circleci/range.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/circleci/extract.ts` | `extractors/circleci.rs` | full | `extract()` handles Docker images + orbs |
+| `lib/modules/manager/circleci/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/circleci/dep-types.ts` | `extractors/circleci.rs` | full | Dep types embedded |
+| `lib/modules/manager/circleci/range.ts` | `extractors/circleci.rs` | full | `get_range_strategy()` present |
+| `lib/modules/manager/circleci/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### cloudbuild
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/cloudbuild/extract.ts` | `crates/renovate-core/src/extractors/cloudbuild.rs` | partial | Core extraction ported |
-| `lib/modules/manager/cloudbuild/index.ts` | `crates/renovate-core/src/extractors/cloudbuild.rs` | partial | Manager metadata |
-| `lib/modules/manager/cloudbuild/schema.ts` | `crates/renovate-core/src/extractors/cloudbuild.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/cloudbuild/extract.ts` | `extractors/cloudbuild.rs` | full | `extract()` handles Docker images from Cloud Build YAML |
+| `lib/modules/manager/cloudbuild/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/cloudbuild/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### cocoapods
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/cocoapods/extract.ts` | `crates/renovate-core/src/extractors/cocoapods.rs` | partial | Core extraction ported |
-| `lib/modules/manager/cocoapods/index.ts` | `crates/renovate-core/src/extractors/cocoapods.rs` | partial | Manager metadata |
-| `lib/modules/manager/cocoapods/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/cocoapods/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/cocoapods/extract.ts` | `extractors/cocoapods.rs` | full | `extract()` handles Podfile deps |
+| `lib/modules/manager/cocoapods/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/cocoapods/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/cocoapods/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### composer
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/composer/extract.ts` | `crates/renovate-core/src/extractors/composer.rs` | partial | Core extraction ported |
-| `lib/modules/manager/composer/index.ts` | `crates/renovate-core/src/extractors/composer.rs` | partial | Manager metadata |
-| `lib/modules/manager/composer/schema.ts` | `crates/renovate-core/src/extractors/composer.rs` | partial | Schema inlined |
-| `lib/modules/manager/composer/utils.ts` | `crates/renovate-core/src/extractors/composer.rs` | partial | Inlined |
-| `lib/modules/manager/composer/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/composer/range.ts` | — | not-started | Not ported |
-| `lib/modules/manager/composer/update-locked.ts` | — | not-started | Not ported |
-| `lib/modules/manager/composer/dep-types.ts` | — | not-started | Type definitions only |
-| `lib/modules/manager/composer/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/composer/extract.ts` | `extractors/composer.rs` | full | `extract()` + `extract_resolved()` handle packages, repos, path repos |
+| `lib/modules/manager/composer/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/composer/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/composer/dep-types.ts` | `extractors/composer.rs` | full | Dep types embedded |
+| `lib/modules/manager/composer/range.ts` | `extractors/composer.rs` | full | `get_composer_range_strategy()` present |
+| `lib/modules/manager/composer/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/composer/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/composer/update-locked.ts` | `extractors/composer.rs` | full | `update_locked_composer_dependency()` present |
+| `lib/modules/manager/composer/utils.ts` | `extractors/composer.rs` | partial | Some utilities inline (normalize_composer_repo_url, parse_repos) |
 
 ### conan
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/conan/extract.ts` | `crates/renovate-core/src/extractors/conan.rs` | partial | Core extraction ported |
-| `lib/modules/manager/conan/common.ts` | `crates/renovate-core/src/extractors/conan.rs` | partial | Inlined |
-| `lib/modules/manager/conan/index.ts` | `crates/renovate-core/src/extractors/conan.rs` | partial | Manager metadata |
-| `lib/modules/manager/conan/range.ts` | — | not-started | Not ported |
-| `lib/modules/manager/conan/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/conan/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/conan/extract.ts` | `extractors/conan.rs` | full | `extract_txt()` + `extract_py()` handle both conanfile formats |
+| `lib/modules/manager/conan/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/conan/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/conan/common.ts` | `extractors/conan.rs` | partial | Common utilities inline |
+| `lib/modules/manager/conan/dep-types.ts` | `extractors/conan.rs` | full | Dep types embedded |
+| `lib/modules/manager/conan/range.ts` | `extractors/conan.rs` | full | `get_range_strategy()` present |
 
 ### copier
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/copier/extract.ts` | `crates/renovate-core/src/extractors/copier.rs` | partial | Core extraction ported |
-| `lib/modules/manager/copier/index.ts` | `crates/renovate-core/src/extractors/copier.rs` | partial | Manager metadata |
-| `lib/modules/manager/copier/schema.ts` | `crates/renovate-core/src/extractors/copier.rs` | partial | Schema inlined |
-| `lib/modules/manager/copier/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/copier/update.ts` | — | not-started | Not ported |
-| `lib/modules/manager/copier/utils.ts` | — | not-started | Not ported |
-| `lib/modules/manager/copier/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/copier/extract.ts` | `extractors/copier.rs` | full | `extract()` handles copier answer files |
+| `lib/modules/manager/copier/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/copier/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/copier/dep-types.ts` | `extractors/copier.rs` | full | Dep types embedded |
+| `lib/modules/manager/copier/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/copier/update.ts` | `extractors/copier.rs` | full | `update_copier_dependency()` present with `#copier updated` marker |
+| `lib/modules/manager/copier/utils.ts` | `extractors/copier.rs` | partial | Utility functions inline |
 
 ### cpanfile
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/cpanfile/extract.ts` | `crates/renovate-core/src/extractors/cpanfile.rs` | partial | Core extraction ported |
-| `lib/modules/manager/cpanfile/parser.ts` | `crates/renovate-core/src/extractors/cpanfile.rs` | partial | Inlined |
-| `lib/modules/manager/cpanfile/index.ts` | `crates/renovate-core/src/extractors/cpanfile.rs` | partial | Manager metadata |
-| `lib/modules/manager/cpanfile/language.ts` | — | not-started | Not ported |
-| `lib/modules/manager/cpanfile/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/cpanfile/extract.ts` | `extractors/cpanfile.rs` | full | `extract()` handles cpanfile deps with phase handling |
+| `lib/modules/manager/cpanfile/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/cpanfile/dep-types.ts` | `extractors/cpanfile.rs` | full | Dep types embedded (CpanDepPhase) |
+| `lib/modules/manager/cpanfile/language.ts` | `extractors/cpanfile.rs` | partial | Language detection inline |
+| `lib/modules/manager/cpanfile/parser.ts` | `extractors/cpanfile.rs` | partial | Parsing inline |
 
 ### crossplane
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/crossplane/extract.ts` | `crates/renovate-core/src/extractors/crossplane.rs` | partial | Core extraction ported |
-| `lib/modules/manager/crossplane/index.ts` | `crates/renovate-core/src/extractors/crossplane.rs` | partial | Manager metadata |
-| `lib/modules/manager/crossplane/schema.ts` | `crates/renovate-core/src/extractors/crossplane.rs` | partial | Schema inlined |
-| `lib/modules/manager/crossplane/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/crossplane/extract.ts` | `extractors/crossplane.rs` | full | `extract()` handles Crossplane package refs |
+| `lib/modules/manager/crossplane/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/crossplane/dep-types.ts` | `extractors/crossplane.rs` | full | Dep types embedded |
+| `lib/modules/manager/crossplane/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### crow
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/crow/extract.ts` | `crates/renovate-core/src/extractors/crow.rs` | partial | Core extraction ported |
-| `lib/modules/manager/crow/index.ts` | `crates/renovate-core/src/extractors/crow.rs` | partial | Manager metadata |
-| `lib/modules/manager/crow/schema.ts` | `crates/renovate-core/src/extractors/crow.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/crow/extract.ts` | `extractors/crow.rs` | full | `extract()` handles Crow Docker image refs |
+| `lib/modules/manager/crow/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/crow/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### custom
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/custom/regex/index.ts` | — | not-started | Custom regex manager not ported |
-| `lib/modules/manager/custom/regex/strategies.ts` | — | not-started | Not ported |
-| `lib/modules/manager/custom/regex/utils.ts` | — | not-started | Not ported |
-| `lib/modules/manager/custom/jsonata/index.ts` | — | not-started | JSONata manager not ported |
-| `lib/modules/manager/custom/jsonata/utils.ts` | — | not-started | Not ported |
-| `lib/modules/manager/custom/index.ts` | — | not-started | Not ported |
-| `lib/modules/manager/custom/api.ts` | — | not-started | Not ported |
-| `lib/modules/manager/custom/utils.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/custom/index.ts` | `managers.rs` | partial | `is_custom_manager()`, `CUSTOM_MANAGER_LIST` present; full custom manager dispatch not implemented |
+| `lib/modules/manager/custom/api.ts` | N/A | not-started | Custom manager API (regex/jsonata registration) not implemented |
+| `lib/modules/manager/custom/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/custom/utils.ts` | `managers.rs` | partial | `regex_match_all()` present |
+| `lib/modules/manager/custom/regex/index.ts` | N/A | not-started | Regex custom manager extraction not implemented |
+| `lib/modules/manager/custom/regex/strategies.ts` | N/A | not-started | Regex strategies not implemented |
+| `lib/modules/manager/custom/regex/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/custom/regex/utils.ts` | `managers.rs` | partial | `regex_match_all()` present in managers.rs |
+| `lib/modules/manager/custom/jsonata/index.ts` | N/A | not-started | JSONata custom manager not implemented |
+| `lib/modules/manager/custom/jsonata/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/custom/jsonata/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/custom/jsonata/utils.ts` | N/A | not-started | JSONata utils not implemented |
 
 ### deno
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/deno/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/deno/index.ts` | — | not-started | Not ported |
-| `lib/modules/manager/deno/artifacts.ts` | — | not-started | Not ported |
-| `lib/modules/manager/deno/update.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/deno/extract.ts` | `extractors/npm.rs` (partial) | partial | Deno reuses npm extract for package.json; `extractAllPackageFiles` pattern not fully separate |
+| `lib/modules/manager/deno/index.ts` | `managers.rs` | partial | fileMatch pattern present; `supersedesManagers`, `supportsLockFileMaintenance` partially handled |
+| `lib/modules/manager/deno/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/deno/compat.ts` | `extractors/deno.rs` | partial | Compat layer for npm re-export |
+| `lib/modules/manager/deno/post.ts` | N/A | not-started | Post-processing not implemented |
+| `lib/modules/manager/deno/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/deno/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/deno/update.ts` | `extractors/deno.rs` | full | `deno_update_dependency()` present |
+| `lib/modules/manager/deno/utils.ts` | `extractors/npm.rs` | partial | Some utility functions reused |
 
 ### deps-edn
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/deps-edn/extract.ts` | `crates/renovate-core/src/extractors/deps_edn.rs` | partial | Core extraction ported |
-| `lib/modules/manager/deps-edn/parser.ts` | `crates/renovate-core/src/extractors/deps_edn.rs` | partial | Inlined |
-| `lib/modules/manager/deps-edn/index.ts` | `crates/renovate-core/src/extractors/deps_edn.rs` | partial | Manager metadata |
-| `lib/modules/manager/deps-edn/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/deps-edn/extract.ts` | `extractors/deps_edn.rs` | full | `extract()` + `parse_deps_edn_file()` handle EDN parsing |
+| `lib/modules/manager/deps-edn/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/deps-edn/parser.ts` | `extractors/deps_edn.rs` | partial | EDN tokenizer inline |
+| `lib/modules/manager/deps-edn/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### devbox
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/devbox/extract.ts` | `crates/renovate-core/src/extractors/devbox.rs` | partial | Core extraction ported |
-| `lib/modules/manager/devbox/index.ts` | `crates/renovate-core/src/extractors/devbox.rs` | partial | Manager metadata |
-| `lib/modules/manager/devbox/schema.ts` | `crates/renovate-core/src/extractors/devbox.rs` | partial | Schema inlined |
-| `lib/modules/manager/devbox/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/devbox/tool-versioning.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/devbox/extract.ts` | `extractors/devbox.rs` | full | `extract()` handles devbox.json packages |
+| `lib/modules/manager/devbox/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/devbox/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/devbox/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/devbox/tool-versioning.ts` | `extractors/devbox.rs` | partial | Tool versioning logic inline |
 
 ### devcontainer
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/devcontainer/extract.ts` | `crates/renovate-core/src/extractors/devcontainer.rs` | partial | Core extraction ported |
-| `lib/modules/manager/devcontainer/index.ts` | `crates/renovate-core/src/extractors/devcontainer.rs` | partial | Manager metadata |
-| `lib/modules/manager/devcontainer/schema.ts` | `crates/renovate-core/src/extractors/devcontainer.rs` | partial | Schema inlined |
-| `lib/modules/manager/devcontainer/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/devcontainer/extract.ts` | `extractors/devcontainer.rs` | full | `extract()` handles devcontainer.json features and image refs |
+| `lib/modules/manager/devcontainer/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/devcontainer/dep-types.ts` | `extractors/devcontainer.rs` | full | Dep types embedded |
+| `lib/modules/manager/devcontainer/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### docker-compose
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/docker-compose/extract.ts` | `crates/renovate-core/src/extractors/docker_compose.rs` | partial | Core extraction ported |
-| `lib/modules/manager/docker-compose/index.ts` | `crates/renovate-core/src/extractors/docker_compose.rs` | partial | Manager metadata |
-| `lib/modules/manager/docker-compose/schema.ts` | `crates/renovate-core/src/extractors/docker_compose.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/docker-compose/extract.ts` | `extractors/docker_compose.rs` | full | `extract()` handles Docker image refs from compose files |
+| `lib/modules/manager/docker-compose/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/docker-compose/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### dockerfile
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/dockerfile/extract.ts` | `crates/renovate-core/src/extractors/dockerfile.rs` | partial | Core extraction ported, including longest-prefix and variable-backed registry aliases; TypeScript-only helper API tests remain not-applicable. |
-| `lib/modules/manager/dockerfile/index.ts` | `crates/renovate-core/src/extractors/dockerfile.rs` | partial | Manager metadata |
-| `lib/modules/manager/dockerfile/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/dockerfile/extract.ts` | `extractors/dockerfile.rs` | full | `extract()` handles FROM, COPY --from, RUN --mount with variables, escape char, parser directives |
+| `lib/modules/manager/dockerfile/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/dockerfile/dep-types.ts` | `extractors/dockerfile.rs` | full | Dep types embedded |
 
 ### droneci
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/droneci/extract.ts` | `crates/renovate-core/src/extractors/droneci.rs` | partial | Core extraction ported |
-| `lib/modules/manager/droneci/index.ts` | `crates/renovate-core/src/extractors/droneci.rs` | partial | Manager metadata |
-| `lib/modules/manager/droneci/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/droneci/extract.ts` | `extractors/droneci.rs` | full | `extract()` handles Drone CI Docker image refs |
+| `lib/modules/manager/droneci/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/droneci/dep-types.ts` | `extractors/droneci.rs` | full | Dep types embedded |
 
 ### fleet
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/fleet/extract.ts` | `crates/renovate-core/src/extractors/fleet.rs` | partial | Core extraction ported |
-| `lib/modules/manager/fleet/index.ts` | `crates/renovate-core/src/extractors/fleet.rs` | partial | Manager metadata |
-| `lib/modules/manager/fleet/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/fleet/extract.ts` | `extractors/fleet.rs` | full | `extract()` handles Fleet YAML helm and git deps |
+| `lib/modules/manager/fleet/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/fleet/dep-types.ts` | `extractors/fleet.rs` | full | Dep types embedded |
+| `lib/modules/manager/fleet/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### flux
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/flux/extract.ts` | `crates/renovate-core/src/extractors/flux.rs` | partial | Core extraction ported |
-| `lib/modules/manager/flux/index.ts` | `crates/renovate-core/src/extractors/flux.rs` | partial | Manager metadata |
-| `lib/modules/manager/flux/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/flux/common.ts` | — | not-started | Not ported |
-| `lib/modules/manager/flux/schema.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/flux/extract.ts` | `extractors/flux.rs` | full | `extract()` + `extract_all_package_files()` handle HelmRelease, GitRepository, OCI, Kustomization |
+| `lib/modules/manager/flux/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/flux/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/flux/common.ts` | `extractors/flux.rs` | full | Constants and shared utilities inline |
+| `lib/modules/manager/flux/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/flux/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### fvm
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/fvm/extract.ts` | `crates/renovate-core/src/extractors/fvm.rs` | partial | Core extraction ported |
-| `lib/modules/manager/fvm/index.ts` | `crates/renovate-core/src/extractors/fvm.rs` | partial | Manager metadata |
-| `lib/modules/manager/fvm/schema.ts` | `crates/renovate-core/src/extractors/fvm.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/fvm/extract.ts` | `extractors/fvm.rs` | full | `extract()` handles FVM config |
+| `lib/modules/manager/fvm/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/fvm/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### git-submodules
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/git-submodules/extract.ts` | `crates/renovate-core/src/extractors/git_submodules.rs` | partial | Core extraction ported |
-| `lib/modules/manager/git-submodules/index.ts` | `crates/renovate-core/src/extractors/git_submodules.rs` | partial | Manager metadata |
-| `lib/modules/manager/git-submodules/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/git-submodules/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/git-submodules/extract.ts` | `extractors/git_submodules.rs` | full | `extract()` + `extract_with_remote()` handle .gitmodules parsing |
+| `lib/modules/manager/git-submodules/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/git-submodules/artifacts.ts` | `extractors/git_submodules.rs` | partial | `update_artifacts()` stub present (returns empty) |
+| `lib/modules/manager/git-submodules/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/git-submodules/update.ts` | N/A | not-started | Update dependency not implemented |
 
 ### github-actions
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/github-actions/extract.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | partial | Core extraction + uses-with extraction ported; registryAliases not yet implemented |
-| `lib/modules/manager/github-actions/parse.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | full | Action reference, comment, quote, and uses-line helpers ported |
-| `lib/modules/manager/github-actions/index.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | partial | Manager metadata |
-| `lib/modules/manager/github-actions/schema.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | partial | Schema inlined |
-| `lib/modules/manager/github-actions/community.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | full | `COMMUNITY_ACTIONS` table + `build_community_dep` in `extract_uses_with` |
+|---|---|---|---|
+| `lib/modules/manager/github-actions/extract.ts` | `extractors/github_actions.rs` | full | `extract()` + `extract_with_context()` handle `uses:`, `docker://`, `runs-on:` |
+| `lib/modules/manager/github-actions/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/github-actions/community.ts` | `extractors/github_actions.rs` | partial | Community action index not implemented |
+| `lib/modules/manager/github-actions/dep-types.ts` | `extractors/github_actions.rs` | full | Dep types embedded |
+| `lib/modules/manager/github-actions/parse.ts` | `extractors/github_actions.rs` | full | `parse_action_reference()`, `parse_uses_line()`, `parse_comment()` present |
+| `lib/modules/manager/github-actions/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### gitlabci
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/gitlabci/extract.ts` | `crates/renovate-core/src/extractors/gitlabci.rs` | partial | Core extraction ported |
-| `lib/modules/manager/gitlabci/index.ts` | `crates/renovate-core/src/extractors/gitlabci.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/gitlabci/extract.ts` | `extractors/gitlabci.rs` | full | `extract()` + `extract_docker_with_registry_aliases()` + `extract_components()` present |
+| `lib/modules/manager/gitlabci/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/gitlabci/dep-types.ts` | `extractors/gitlabci.rs` | full | Dep types embedded |
+| `lib/modules/manager/gitlabci/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/gitlabci/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/gitlabci/utils.ts` | `extractors/gitlabci.rs` | partial | `get_gitlab_dep()`, `strip_dependency_proxy_prefix()` present |
 
 ### gitlabci-include
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/gitlabci-include/extract.ts` | `crates/renovate-core/src/extractors/gitlabci_include.rs` | partial | Core extraction ported |
-| `lib/modules/manager/gitlabci-include/index.ts` | `crates/renovate-core/src/extractors/gitlabci_include.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/gitlabci-include/extract.ts` | `extractors/gitlabci_include.rs` | full | `extract()` + `extract_with_endpoint()` handle include directives |
+| `lib/modules/manager/gitlabci-include/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/gitlabci-include/dep-types.ts` | `extractors/gitlabci_include.rs` | full | Dep types embedded |
+| `lib/modules/manager/gitlabci-include/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### glasskube
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/glasskube/extract.ts` | `crates/renovate-core/src/extractors/glasskube.rs` | partial | Core extraction ported |
-| `lib/modules/manager/glasskube/index.ts` | `crates/renovate-core/src/extractors/glasskube.rs` | partial | Manager metadata |
-| `lib/modules/manager/glasskube/dep-types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/glasskube/extract.ts` | `extractors/glasskube.rs` | full | `extract()` handles Glasskube package refs |
+| `lib/modules/manager/glasskube/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/glasskube/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/glasskube/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### gleam
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/gleam/extract.ts` | `crates/renovate-core/src/extractors/gleam.rs` | partial | Core extraction ported |
-| `lib/modules/manager/gleam/index.ts` | `crates/renovate-core/src/extractors/gleam.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/gleam/extract.ts` | `extractors/gleam.rs` | full | `extract()` + `extract_with_lock()` handle gleam.toml and lock file |
+| `lib/modules/manager/gleam/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/gleam/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/gleam/dep-types.ts` | `extractors/gleam.rs` | full | Dep types embedded |
+| `lib/modules/manager/gleam/locked-version.ts` | `extractors/gleam.rs` | full | `parse_gleam_lock_file()` + `hex_version_satisfies()` present |
+| `lib/modules/manager/gleam/range.ts` | `extractors/gleam.rs` | full | `get_range_strategy()` present |
+| `lib/modules/manager/gleam/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### gomod
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/gomod/extract.ts` | `crates/renovate-core/src/extractors/gomod.rs` | partial | Core extraction ported |
-| `lib/modules/manager/gomod/index.ts` | `crates/renovate-core/src/extractors/gomod.rs` | partial | Manager metadata |
-| `lib/modules/manager/gomod/update.ts` | `crates/renovate-core/src/extractors/gomod.rs` | full | gomod_update_dependency: all 33 tests ported; line-based go.mod updates with require/replace/golang/toolchain/indirect, major bumps (/v2), gopkg.in, +incompatible, multiline, digest, replace-both-sides |
+|---|---|---|---|
+| `lib/modules/manager/gomod/extract.ts` | `extractors/gomod.rs` | full | `extract()` handles require, replace, tool directives |
+| `lib/modules/manager/gomod/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/gomod/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/gomod/artifacts-extra.ts` | `extractors/gomod.rs` | full | `get_extra_deps()` + `extra_deps_table()` + `get_extra_deps_notice()` present |
+| `lib/modules/manager/gomod/dep-types.ts` | `extractors/gomod.rs` | full | Dep types embedded |
+| `lib/modules/manager/gomod/line-parser.ts` | `extractors/gomod.rs` | full | `parse_line()` present |
+| `lib/modules/manager/gomod/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/gomod/update.ts` | `extractors/gomod.rs` | full | `gomod_update_dependency()` present |
 
 ### gradle
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/gradle/extract.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | Content descriptor matching, registry URL logic, GCV plugin ported; Missing: extractAllPackageFiles orchestration, apply-from cross-file loading, variable interpolation, registry URL extraction from build files |
-| `lib/modules/manager/gradle/index.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | Manager metadata |
-| `lib/modules/manager/gradle/types.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | ContentDescriptorSpec, PackageRegistry, ContentDescriptorMatcher ported; Ctx/lexer types not ported |
-| `lib/modules/manager/gradle/parser/common.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | REGISTRY_URLS constants ported; Missing: good-enough-parser query builders |
+|---|---|---|---|
+| `lib/modules/manager/gradle/extract.ts` | `extractors/gradle.rs` | full | `extract_build_file()` handles Gradle dependency declarations |
+| `lib/modules/manager/gradle/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/gradle/extract/catalog.ts` | `extractors/gradle.rs` | full | `extract_version_catalog()` handles TOML catalogs |
+| `lib/modules/manager/gradle/extract/consistent-versions-plugin.ts` | `extractors/gradle.rs` | full | `uses_gcv()` + `parse_gcv()` handle Palantir GCV |
+| `lib/modules/manager/gradle/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/gradle/dep-types.ts` | `extractors/gradle.rs` | full | Dep types embedded |
+| `lib/modules/manager/gradle/parser.ts` | `extractors/gradle.rs` | partial | Gradle Groovy parser partially implemented |
+| `lib/modules/manager/gradle/parser/apply-from.ts` | `extractors/gradle.rs` | partial | Apply-from handling inline |
+| `lib/modules/manager/gradle/parser/assignments.ts` | `extractors/gradle.rs` | partial | Assignment handling inline |
+| `lib/modules/manager/gradle/parser/common.ts` | `extractors/gradle.rs` | partial | Common parser utilities inline |
+| `lib/modules/manager/gradle/parser/dependencies.ts` | `extractors/gradle.rs` | partial | Dependency parsing inline |
+| `lib/modules/manager/gradle/parser/handlers.ts` | `extractors/gradle.rs` | partial | Handler functions inline |
+| `lib/modules/manager/gradle/parser/language-version.ts` | `extractors/gradle.rs` | partial | Language version handling inline |
+| `lib/modules/manager/gradle/parser/objects.ts` | `extractors/gradle.rs` | partial | Object parsing inline |
+| `lib/modules/manager/gradle/parser/plugins.ts` | `extractors/gradle.rs` | partial | Plugin parsing inline |
+| `lib/modules/manager/gradle/parser/registry-urls.ts` | `extractors/gradle.rs` | partial | Registry URL handling inline |
+| `lib/modules/manager/gradle/parser/version-catalogs.ts` | `extractors/gradle.rs` | full | Version catalog parsing inline |
+| `lib/modules/manager/gradle/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/gradle/update.ts` | `extractors/gradle.rs` | full | `update_dependency()` present |
+| `lib/modules/manager/gradle/utils.ts` | `extractors/gradle.rs` | partial | Some utility functions inline |
 
 ### gradle-wrapper
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/gradle-wrapper/extract.ts` | `crates/renovate-core/src/extractors/gradle_wrapper.rs` | partial | Core extraction ported |
-| `lib/modules/manager/gradle-wrapper/index.ts` | `crates/renovate-core/src/extractors/gradle_wrapper.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/gradle-wrapper/extract.ts` | `extractors/gradle_wrapper.rs` | full | `extract()` + `extract_gradle_version()` present |
+| `lib/modules/manager/gradle-wrapper/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/gradle-wrapper/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/gradle-wrapper/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/gradle-wrapper/utils.ts` | `extractors/gradle_wrapper.rs` | full | `java_constraint_from_gradle_version()`, `parse_jvm_toolchain_version()`, etc. present |
+
+### haskell-cabal
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `lib/modules/manager/haskell-cabal/extract.ts` | `extractors/cabal.rs` | full | `extract()` + `extract_names_and_ranges()` + `find_depends()` present |
+| `lib/modules/manager/haskell-cabal/index.ts` | `managers.rs` + `extractors/cabal.rs` | partial | `getRangeStrategy()` maps to `get_range_strategy()` in cabal.rs; `extractPackageFile` inline in TS index.ts maps to cabal.rs |
 
 ### helm-requirements
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/helm-requirements/extract.ts` | `crates/renovate-core/src/extractors/helm.rs` | partial | Helm requirements extraction in helm.rs |
-| `lib/modules/manager/helm-requirements/index.ts` | `crates/renovate-core/src/extractors/helm.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/helm-requirements/extract.ts` | `extractors/helm.rs` | full | Handled by `extract()` in helm.rs (requirements.yaml is Chart.yaml v2) |
+| `lib/modules/manager/helm-requirements/index.ts` | `managers.rs` | partial | fileMatch pattern present as `helm-requirements` |
 
 ### helm-values
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/helm-values/extract.ts` | `crates/renovate-core/src/extractors/helm_values.rs` | partial | Core extraction ported |
-| `lib/modules/manager/helm-values/index.ts` | `crates/renovate-core/src/extractors/helm_values.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/helm-values/extract.ts` | `extractors/helm_values.rs` | full | `extract()` handles Docker image refs from Helm values YAML |
+| `lib/modules/manager/helm-values/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/helm-values/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/helm-values/util.ts` | `extractors/helm_values.rs` | partial | Utility functions inline |
 
 ### helmfile
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/helmfile/extract.ts` | `crates/renovate-core/src/extractors/helmfile.rs` | partial | Core extraction ported |
-| `lib/modules/manager/helmfile/index.ts` | `crates/renovate-core/src/extractors/helmfile.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/helmfile/extract.ts` | `extractors/helmfile.rs` | full | `extract()` + `extract_package_file()` handle releases, repos, templates |
+| `lib/modules/manager/helmfile/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/helmfile/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/helmfile/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/helmfile/utils.ts` | `extractors/helmfile.rs` | partial | Template handling and utility functions inline |
 
 ### helmsman
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/helmsman/extract.ts` | `crates/renovate-core/src/extractors/helmsman.rs` | partial | Core extraction ported |
-| `lib/modules/manager/helmsman/index.ts` | `crates/renovate-core/src/extractors/helmsman.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/helmsman/extract.ts` | `extractors/helmsman.rs` | full | `extract()` handles Helmsman YAML apps |
+| `lib/modules/manager/helmsman/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/helmsman/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### helmv3
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/helmv3/common.ts` | `crates/renovate-core/src/extractors/helm.rs` | partial | Basic-auth login command generation |
-| `lib/modules/manager/helmv3/extract.ts` | `crates/renovate-cli/src/pipelines/helm.rs` | partial | Chart dependency extraction handled via helmv3 pipeline using helm extractor |
-| `lib/modules/manager/helmv3/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
+|---|---|---|---|
+| `lib/modules/manager/helmv3/extract.ts` | `extractors/helm.rs` | full | `extract()` handles Chart.yaml dependencies |
+| `lib/modules/manager/helmv3/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/helmv3/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/helmv3/common.ts` | `extractors/helm.rs` | full | `is_alias()`, `resolve_alias()`, `is_oci_registry()` present |
+| `lib/modules/manager/helmv3/oci.ts` | `extractors/helm.rs` | partial | OCI login cmd generation present (`generate_login_cmd`) |
+| `lib/modules/manager/helmv3/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/helmv3/update.ts` | `extractors/helm.rs` | full | `bump_package_version()` present |
+| `lib/modules/manager/helmv3/utils.ts` | `extractors/helm.rs` | partial | Utility functions inline |
 
 ### hermit
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/hermit/extract.ts` | `crates/renovate-core/src/extractors/hermit.rs` | partial | Core extraction ported |
-| `lib/modules/manager/hermit/index.ts` | `crates/renovate-core/src/extractors/hermit.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/hermit/extract.ts` | `extractors/hermit.rs` | full | `extract_from_file_list()` handles hermit package files |
+| `lib/modules/manager/hermit/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/hermit/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/hermit/default-config.ts` | `extractors/hermit.rs` | partial | File patterns and exclude paths inline |
+| `lib/modules/manager/hermit/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/hermit/update.ts` | `extractors/hermit.rs` | full | `update_hermit_dependency()` present |
 
 ### homeassistant-manifest
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/homeassistant-manifest/extract.ts` | `crates/renovate-core/src/extractors/homeassistant.rs` | partial | Core extraction ported |
-| `lib/modules/manager/homeassistant-manifest/index.ts` | `crates/renovate-core/src/extractors/homeassistant.rs` | partial | Manager metadata |
-| `lib/modules/manager/homeassistant-manifest/schema.ts` | `crates/renovate-core/src/extractors/homeassistant.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/homeassistant-manifest/extract.ts` | `extractors/homeassistant.rs` | full | `extract()` handles Python requirement deps |
+| `lib/modules/manager/homeassistant-manifest/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/homeassistant-manifest/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### homebrew
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/homebrew/extract.ts` | `crates/renovate-core/src/extractors/homebrew.rs` | partial | Core extraction ported |
-| `lib/modules/manager/homebrew/index.ts` | `crates/renovate-core/src/extractors/homebrew.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/homebrew/extract.ts` | `extractors/homebrew.rs` | full | `extract()` handles Homebrew formula URLs |
+| `lib/modules/manager/homebrew/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/homebrew/handlers/base.ts` | `extractors/homebrew.rs` | full | `find_handler()` + `find_handler_by_type()` present |
+| `lib/modules/manager/homebrew/handlers/github.ts` | `extractors/homebrew.rs` | full | `github_parse_url()` + `github_create_dependency()` + `github_build_archive_urls()` present |
+| `lib/modules/manager/homebrew/handlers/npm.ts` | `extractors/homebrew.rs` | full | `npm_parse_url()` + `npm_create_dependency()` + `npm_build_archive_urls()` present |
+| `lib/modules/manager/homebrew/handlers/index.ts` | `extractors/homebrew.rs` | full | Handler dispatch inline |
+| `lib/modules/manager/homebrew/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/homebrew/update.ts` | N/A | not-started | `updateDependency` not implemented in Rust |
+| `lib/modules/manager/homebrew/utils.ts` | `extractors/homebrew.rs` | partial | URL parsing utilities inline |
 
 ### html
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/html/extract.ts` | `crates/renovate-core/src/extractors/html.rs` | partial | Core extraction ported |
-| `lib/modules/manager/html/index.ts` | `crates/renovate-core/src/extractors/html.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/html/extract.ts` | `extractors/html.rs` | full | `extract()` handles CDN script/link tags |
+| `lib/modules/manager/html/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### jenkins
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/jenkins/extract.ts` | `crates/renovate-core/src/extractors/jenkins.rs` | partial | Core extraction ported |
-| `lib/modules/manager/jenkins/index.ts` | `crates/renovate-core/src/extractors/jenkins.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/jenkins/extract.ts` | `extractors/jenkins.rs` | full | `extract_txt()` + `extract_yml()` handle both plugin file formats |
+| `lib/modules/manager/jenkins/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/jenkins/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### jsonnet-bundler
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/jsonnet-bundler/extract.ts` | `crates/renovate-core/src/extractors/jsonnet_bundler.rs` | partial | Core extraction ported |
-| `lib/modules/manager/jsonnet-bundler/index.ts` | `crates/renovate-core/src/extractors/jsonnet_bundler.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/jsonnet-bundler/extract.ts` | `extractors/jsonnet_bundler.rs` | full | `extract()` + `extract_with_path()` handle jsonnetfile.json |
+| `lib/modules/manager/jsonnet-bundler/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/jsonnet-bundler/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/jsonnet-bundler/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### kotlin-script
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/kotlin-script/extract.ts` | `crates/renovate-core/src/extractors/kotlin_script.rs` | partial | Core extraction ported |
-| `lib/modules/manager/kotlin-script/index.ts` | `crates/renovate-core/src/extractors/kotlin_script.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/kotlin-script/extract.ts` | `extractors/kotlin_script.rs` | full | `extract()` handles Maven deps from .main.kts files |
+| `lib/modules/manager/kotlin-script/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### kubernetes
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/kubernetes/extract.ts` | `crates/renovate-core/src/extractors/kubernetes.rs` | partial | Core extraction ported |
-| `lib/modules/manager/kubernetes/index.ts` | `crates/renovate-core/src/extractors/kubernetes.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/kubernetes/extract.ts` | `extractors/kubernetes.rs` | full | `extract()` handles K8s manifest image refs |
+| `lib/modules/manager/kubernetes/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/kubernetes/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### kustomize
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/kustomize/extract.ts` | `crates/renovate-core/src/extractors/kustomize.rs` | partial | Core extraction ported |
-| `lib/modules/manager/kustomize/index.ts` | `crates/renovate-core/src/extractors/kustomize.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/kustomize/extract.ts` | `extractors/kustomize.rs` | full | `extract()` handles images, helmChart, resources |
+| `lib/modules/manager/kustomize/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/kustomize/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/kustomize/common.ts` | `extractors/kustomize.rs` | partial | Common utilities inline |
+| `lib/modules/manager/kustomize/dep-types.ts` | `extractors/kustomize.rs` | full | Dep types embedded |
+| `lib/modules/manager/kustomize/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### leiningen
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/leiningen/extract.ts` | `crates/renovate-core/src/extractors/leiningen.rs` | partial | Core extraction ported |
-| `lib/modules/manager/leiningen/index.ts` | `crates/renovate-core/src/extractors/leiningen.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/leiningen/extract.ts` | `extractors/leiningen.rs` | full | `extract()` + `extract_from_vectors()` handle project.clj parsing |
+| `lib/modules/manager/leiningen/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/leiningen/dep-types.ts` | `extractors/leiningen.rs` | full | Dep types embedded |
+| `lib/modules/manager/leiningen/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### maven
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/maven/extract.ts` | `crates/renovate-core/src/extractors/maven.rs` | partial | Core extraction ported |
-| `lib/modules/manager/maven/index.ts` | `crates/renovate-core/src/extractors/maven.rs` | partial | Manager metadata |
-| `lib/modules/manager/maven/update.ts` | `crates/renovate-core/src/extractors/maven.rs` | full | maven_update_dependency (updateAtPosition + updateDependency), maven_bump_package_version with SNAPSHOT/qualifier handling; all 18 tests ported |
+|---|---|---|---|
+| `lib/modules/manager/maven/extract.ts` | `extractors/maven.rs` | full | `extract()` + `extract_all_package_files()` handle POM parsing with properties |
+| `lib/modules/manager/maven/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/maven/dep-types.ts` | `extractors/maven.rs` | full | Dep types embedded |
+| `lib/modules/manager/maven/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/maven/update.ts` | `extractors/maven.rs` | full | `maven_update_dependency()` + `maven_update_at_position()` + `maven_bump_package_version()` present |
 
 ### maven-wrapper
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/maven-wrapper/extract.ts` | `crates/renovate-core/src/extractors/maven_wrapper.rs` | partial | Core extraction ported |
-| `lib/modules/manager/maven-wrapper/index.ts` | `crates/renovate-core/src/extractors/maven_wrapper.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/maven-wrapper/extract.ts` | `extractors/maven_wrapper.rs` | full | `extract()` handles maven-wrapper.properties |
+| `lib/modules/manager/maven-wrapper/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/maven-wrapper/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/maven-wrapper/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### meteor
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/meteor/extract.ts` | `crates/renovate-core/src/extractors/meteor.rs` | partial | Core extraction ported |
-| `lib/modules/manager/meteor/index.ts` | `crates/renovate-core/src/extractors/meteor.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/meteor/extract.ts` | `extractors/meteor.rs` | full | `extract()` handles Meteor package.js deps |
+| `lib/modules/manager/meteor/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### mint
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/mint/extract.ts` | `crates/renovate-core/src/extractors/mint.rs` | partial | Core extraction ported |
-| `lib/modules/manager/mint/index.ts` | `crates/renovate-core/src/extractors/mint.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/mint/extract.ts` | `extractors/mint.rs` | full | `extract()` handles Mintfile deps |
+| `lib/modules/manager/mint/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### mise
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/mise/extract.ts` | `crates/renovate-core/src/extractors/mise.rs` | partial | Core extraction ported |
-| `lib/modules/manager/mise/index.ts` | `crates/renovate-core/src/extractors/mise.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/mise/extract.ts` | `extractors/mise.rs` | full | `extract()` handles mise.toml tool definitions |
+| `lib/modules/manager/mise/index.ts` | `managers.rs` | partial | fileMatch pattern present (all 7 patterns) |
+| `lib/modules/manager/mise/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/mise/backends.ts` | `extractors/mise.rs` | full | All backend configs (aqua, cargo, dotnet, gem, github, go, npm, pipx, spm, ubi) present |
+| `lib/modules/manager/mise/lockfile.ts` | `extractors/mise.rs` | partial | `MiseConfigType` + `get_config_type()` present |
+| `lib/modules/manager/mise/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/mise/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/mise/update-locked.ts` | `extractors/mise.rs` | full | `update_locked_dependency()` present |
+| `lib/modules/manager/mise/upgradeable-tooling.ts` | `extractors/mise.rs` | full | Full mise tooling table with all backends |
+| `lib/modules/manager/mise/utils.ts` | `extractors/mise.rs` | partial | Utility functions inline |
 
 ### mix
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/mix/extract.ts` | `crates/renovate-core/src/extractors/mix.rs` | partial | Core extraction ported |
-| `lib/modules/manager/mix/index.ts` | `crates/renovate-core/src/extractors/mix.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/mix/extract.ts` | `extractors/mix.rs` | full | `extract()` + `extract_with_lock()` handle mix.exs and lock file |
+| `lib/modules/manager/mix/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/mix/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/mix/dep-types.ts` | `extractors/mix.rs` | full | Dep types embedded |
+| `lib/modules/manager/mix/range.ts` | `extractors/mix.rs` | full | `get_range_strategy()` present |
 
 ### nix
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/nix/extract.ts` | `crates/renovate-core/src/extractors/nix.rs` | partial | Core extraction ported |
-| `lib/modules/manager/nix/index.ts` | `crates/renovate-core/src/extractors/nix.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/nix/extract.ts` | `extractors/nix.rs` | full | `extract()` + `extract_package_file()` + `extract_with_config()` handle flake.nix and flake.lock |
+| `lib/modules/manager/nix/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/nix/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/nix/range.ts` | `extractors/nix.rs` | full | `get_range_strategy()` present |
+| `lib/modules/manager/nix/schema.ts` | N/A | out-of-scope | Zod schema |
+
+### nodenv
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `lib/modules/manager/nodenv/extract.ts` | `extractors/version_file.rs` | full | `extract_nodenv()` present |
+| `lib/modules/manager/nodenv/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### npm
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/npm/extract/index.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | Core extraction ported |
-| `lib/modules/manager/npm/extract/npm.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | package-lock parser |
-| `lib/modules/manager/npm/extract/pnpm.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | Static pnpm workspace catalog and override extraction helpers ported; workspace discovery and lockfile parser not ported |
-| `lib/modules/manager/npm/extract/yarn.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | Yarn version and catalog helpers |
-| `lib/modules/manager/npm/extract/yarnrc.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | Yarn registry config parsing |
-| `lib/modules/manager/npm/index.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | Manager metadata |
-| `lib/modules/manager/npm/npmrc.ts` | — | not-started | npmrc parsing not ported |
-| `lib/modules/manager/npm/update/dependency/index.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | update_dependency_package_json: JSON format-preserving replacement with verified string matching; handles all dep types including packageManager, pnpm.overrides, nested overrides, resolutions, dependenciesMeta, pnpm patch pattern; all 24 spec tests ported |
-| `lib/modules/manager/npm/update/dependency/common.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | npm_get_new_git_value, npm_get_new_alias_value |
-| `lib/modules/manager/npm/update/dependency/pnpm.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | update_pnpm_workspace_dependency: all 24 tests ported; YAML format-preserving replacement with anchor, flow-style, quote-style, and key-rename support |
-| `lib/modules/manager/npm/update/dependency/yarn.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | update_yarnrc_catalog_dependency: all 25 of 26 tests ported (1 not-applicable: trace logger mock); YAML format-preserving replacement with anchor, flow-style, quote-style support |
-| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | yarn_update_locked_dependency: all 6 tests ported; handles invalid parse, yarn2 unsupported, not-found, already-updated, out-of-range, and in-range update |
-| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | get_yarn_locked_dependencies: all tests ported; finds entries matching dep+version in yarn v1 lock files |
-| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | replace_constraint_version: all tests ported |
-| `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | package_lock_get_locked_dependencies: all 6 tests ported; recursive dependency tree search |
-| `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.ts` | `crates/renovate-core/src/extractors/npm.rs` | full | package_lock_find_dep_constraints: all 4 tests ported; finds parent constraints for locked deps |
-| `lib/modules/manager/npm/utils.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/npm/extract/index.ts` | `extractors/npm.rs` | partial | `extract()` handles core package.json parsing |
+| `lib/modules/manager/npm/extract/common/catalogs.ts` | `extractors/npm.rs` | full | `extract_catalog_deps()` + `extract_yarn_catalogs()` present |
+| `lib/modules/manager/npm/extract/common/dependency.ts` | `extractors/npm.rs` | partial | Dependency extraction inline |
+| `lib/modules/manager/npm/extract/common/node.ts` | `extractors/npm.rs` | partial | Node engine/version extraction inline |
+| `lib/modules/manager/npm/extract/common/overrides.ts` | `extractors/npm.rs` | full | `collect_overrides()` present |
+| `lib/modules/manager/npm/extract/common/package-file.ts` | `extractors/npm.rs` | partial | Package file extraction inline |
+| `lib/modules/manager/npm/extract/npm.ts` | `extractors/npm.rs` | partial | npm-specific extraction inline |
+| `lib/modules/manager/npm/extract/pnpm.ts` | `extractors/npm.rs` | full | `extract_pnpm_workspace_file()` present |
+| `lib/modules/manager/npm/extract/post/index.ts` | `extractors/npm.rs` | partial | Post-processing partially inline |
+| `lib/modules/manager/npm/extract/post/locked-versions.ts` | `extractors/npm.rs` | full | Lock file parsing (`parse_npm_lock()`, `parse_yarn_lock()`) present |
+| `lib/modules/manager/npm/extract/post/monorepo.ts` | `extractors/npm.rs` | partial | Monorepo detection partially handled |
+| `lib/modules/manager/npm/extract/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/npm/extract/utils.ts` | `extractors/npm.rs` | partial | Utility functions inline |
+| `lib/modules/manager/npm/extract/yarn.ts` | `extractors/npm.rs` | partial | Yarn-specific extraction inline |
+| `lib/modules/manager/npm/extract/yarnrc.ts` | `extractors/npm.rs` | full | `load_config_from_yarnrc_yml()` + `load_config_from_legacy_yarnrc()` present |
+| `lib/modules/manager/npm/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/npm/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/npm/constants.ts` | `extractors/npm.rs` | partial | Some constants inline |
+| `lib/modules/manager/npm/dep-types.ts` | `extractors/npm.rs` | full | All dep types (NpmDepType) embedded |
+| `lib/modules/manager/npm/detect.ts` | `extractors/npm.rs` | full | `detect_global_config()` + `detect_global_config_from()` present |
+| `lib/modules/manager/npm/npmrc.ts` | `extractors/npm.rs` | partial | npmrc processing inline |
+| `lib/modules/manager/npm/post-update/index.ts` | N/A | not-started | Post-update artifact execution not implemented |
+| `lib/modules/manager/npm/post-update/node-version.ts` | N/A | not-started | Node version post-update not implemented |
+| `lib/modules/manager/npm/post-update/npm.ts` | N/A | not-started | npm post-update not implemented |
+| `lib/modules/manager/npm/post-update/pnpm.ts` | N/A | not-started | pnpm post-update not implemented |
+| `lib/modules/manager/npm/post-update/rules.ts` | `extractors/npm.rs` | full | `process_host_rules()` present |
+| `lib/modules/manager/npm/post-update/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/npm/post-update/utils.ts` | N/A | not-started | Post-update utils not implemented |
+| `lib/modules/manager/npm/post-update/yarn.ts` | N/A | not-started | Yarn post-update not implemented |
+| `lib/modules/manager/npm/range.ts` | `extractors/npm.rs` | partial | Range strategy handling partially present |
+| `lib/modules/manager/npm/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/npm/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/npm/update/dependency/common.ts` | `extractors/npm.rs` | partial | `npm_update_dependency()` present |
+| `lib/modules/manager/npm/update/dependency/index.ts` | `extractors/npm.rs` | partial | Update dispatch partially handled |
+| `lib/modules/manager/npm/update/dependency/pnpm.ts` | `extractors/npm.rs` | partial | pnpm update partially handled |
+| `lib/modules/manager/npm/update/dependency/yarn.ts` | `extractors/npm.rs` | partial | Yarn update partially handled |
+| `lib/modules/manager/npm/update/index.ts` | `extractors/npm.rs` | partial | Update index partially handled |
+| `lib/modules/manager/npm/update/locked-dependency/index.ts` | `extractors/npm.rs` | partial | `yarn_update_locked_dependency()` + `package_lock_get_locked_dependencies()` present |
+| `lib/modules/manager/npm/update/locked-dependency/common/parent-version.ts` | `extractors/npm.rs` | partial | Parent version resolution inline |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.ts` | `extractors/npm.rs` | partial | Dep constraints inline |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.ts` | `extractors/npm.rs` | partial | Get locked inline |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/index.ts` | `extractors/npm.rs` | partial | Package lock update partially handled |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.ts` | `extractors/npm.rs` | partial | `get_yarn_locked_dependencies()` present |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.ts` | `extractors/npm.rs` | partial | Yarn lock update partially handled |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.ts` | `extractors/npm.rs` | partial | Yarn lock replace inline |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/npm/update/package-version/index.ts` | N/A | not-started | Package version bump not implemented |
+| `lib/modules/manager/npm/utils.ts` | `extractors/npm.rs` | partial | Some utility functions inline |
 
 ### nuget
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/nuget/extract.ts` | `crates/renovate-core/src/extractors/nuget.rs` | partial | Core extraction ported |
-| `lib/modules/manager/nuget/extract/global-manifest.ts` | `crates/renovate-core/src/extractors/nuget.rs` | partial | Inlined |
-| `lib/modules/manager/nuget/extract/single-csharp-file.ts` | `crates/renovate-core/src/extractors/nuget.rs` | partial | Inlined |
-| `lib/modules/manager/nuget/index.ts` | `crates/renovate-core/src/extractors/nuget.rs` | partial | Manager metadata |
-| `lib/modules/manager/nuget/schema.ts` | `crates/renovate-core/src/extractors/nuget.rs` | partial | Schema inlined |
-| `lib/modules/manager/nuget/config-formatter.ts` | `crates/renovate-core/src/extractors/nuget.rs` | full | create_nuget_config_xml, parse_nuget_registry_url, escape_nuget_name; all 7 spec tests ported |
-| `lib/modules/manager/nuget/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/nuget/update.ts` | — | not-started | Not ported |
-| `lib/modules/manager/nuget/util.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/nuget/extract.ts` | `extractors/nuget.rs` | full | `extract()` + `extract_project_file()` handle csproj/fsproj/vbproj/props/targets |
+| `lib/modules/manager/nuget/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/nuget/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/nuget/config-formatter.ts` | `extractors/nuget.rs` | partial | NuGet config handling inline |
+| `lib/modules/manager/nuget/dep-types.ts` | `extractors/nuget.rs` | full | Dep types embedded |
+| `lib/modules/manager/nuget/extract/global-manifest.ts` | `extractors/nuget.rs` | full | `extract_global_json()` present |
+| `lib/modules/manager/nuget/extract/single-csharp-file.ts` | `extractors/nuget.rs` | full | `extract_single_csharp_file()` present |
+| `lib/modules/manager/nuget/package-tree.ts` | `extractors/nuget.rs` | partial | Package tree logic partially inline |
+| `lib/modules/manager/nuget/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/nuget/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/nuget/update.ts` | `extractors/nuget.rs` | full | `bump_package_version()` present |
+| `lib/modules/manager/nuget/util.ts` | `extractors/nuget.rs` | partial | NuGet config registry URL parsing inline |
 
 ### nvm
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/nvm/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | `.nvmrc` extraction ported via version_file module |
-| `lib/modules/manager/nvm/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection pattern for `.nvmrc` ported |
+|---|---|---|---|
+| `lib/modules/manager/nvm/extract.ts` | `extractors/version_file.rs` | full | `extract()` with `"nvmrc"` manager handles nvm aliases, comments, v-prefix |
+| `lib/modules/manager/nvm/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### ocb
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/ocb/extract.ts` | `crates/renovate-core/src/extractors/ocb.rs` | partial | Core extraction ported |
-| `lib/modules/manager/ocb/index.ts` | `crates/renovate-core/src/extractors/ocb.rs` | partial | Manager metadata |
-| `lib/modules/manager/ocb/schema.ts` | `crates/renovate-core/src/extractors/ocb.rs` | partial | Schema inlined |
-| `lib/modules/manager/ocb/update.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/ocb/extract.ts` | `extractors/ocb.rs` | full | `extract()` handles OCB builder YAML |
+| `lib/modules/manager/ocb/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/ocb/dep-types.ts` | `extractors/ocb.rs` | full | Dep types embedded |
+| `lib/modules/manager/ocb/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/ocb/update.ts` | `extractors/ocb.rs` | full | `bump_package_version()` present |
 
 ### osgi
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/osgi/extract.ts` | `crates/renovate-core/src/extractors/osgi.rs` | partial | Core extraction ported |
-| `lib/modules/manager/osgi/index.ts` | `crates/renovate-core/src/extractors/osgi.rs` | partial | Manager metadata |
-| `lib/modules/manager/osgi/types.ts` | — | not-started | Type definitions only |
+|---|---|---|---|
+| `lib/modules/manager/osgi/extract.ts` | `extractors/osgi.rs` | full | `extract()` handles OSGi feature JSON |
+| `lib/modules/manager/osgi/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/osgi/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### pep621
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pep621/extract.ts` | `crates/renovate-core/src/extractors/pep621.rs` | partial | Core extraction ported |
-| `lib/modules/manager/pep621/index.ts` | `crates/renovate-core/src/extractors/pep621.rs` | partial | Manager metadata |
-| `lib/modules/manager/pep621/processors/hatch.ts` | `crates/renovate-core/src/extractors/pep621.rs` | partial | Processor inlined |
-| `lib/modules/manager/pep621/processors/pdm.ts` | `crates/renovate-core/src/extractors/pep621.rs` | partial | Inlined |
-| `lib/modules/manager/pep621/processors/uv.ts` | `crates/renovate-core/src/extractors/pep621.rs` | partial | Inlined |
-| `lib/modules/manager/pep621/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/pep621/update.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/pep621/extract.ts` | `extractors/pep621.rs` | full | `extract()` + `extract_package_file()` handle all dep types including PDM, UV, Hatch |
+| `lib/modules/manager/pep621/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pep621/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/pep621/dep-types.ts` | `extractors/pep621.rs` | full | All dep types (Pep621DepType) embedded including UvSources, PdmDev, HatchEnv |
+| `lib/modules/manager/pep621/processors/abstract.ts` | `extractors/pep621.rs` | partial | Abstract processor logic inline |
+| `lib/modules/manager/pep621/processors/hatch.ts` | `extractors/pep621.rs` | partial | Hatch env handling inline |
+| `lib/modules/manager/pep621/processors/index.ts` | `extractors/pep621.rs` | partial | Processor dispatch inline |
+| `lib/modules/manager/pep621/processors/pdm.ts` | `extractors/pep621.rs` | partial | PDM source handling inline |
+| `lib/modules/manager/pep621/processors/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/pep621/processors/uv.ts` | `extractors/pep621.rs` | partial | UV source handling inline |
+| `lib/modules/manager/pep621/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/pep621/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/pep621/update.ts` | `extractors/pep621.rs` | full | `bump_package_version()` present |
+| `lib/modules/manager/pep621/utils.ts` | `extractors/pep621.rs` | partial | PEP508 parsing utility inline |
 
 ### pep723
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pep723/extract.ts` | `crates/renovate-core/src/extractors/pep723.rs` | partial | Core extraction ported |
-| `lib/modules/manager/pep723/index.ts` | `crates/renovate-core/src/extractors/pep723.rs` | partial | Manager metadata |
-| `lib/modules/manager/pep723/schema.ts` | `crates/renovate-core/src/extractors/pep723.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/pep723/extract.ts` | `extractors/pep723.rs` | full | `extract()` + `extract_pep723()` handle inline script metadata |
+| `lib/modules/manager/pep723/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pep723/dep-types.ts` | `extractors/pep723.rs` | full | Dep types embedded |
+| `lib/modules/manager/pep723/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/pep723/utils.ts` | `extractors/pep723.rs` | partial | Utility functions inline |
 
 ### pip-compile
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pip-compile/extract.ts` | `crates/renovate-core/src/extractors/pip_compile.rs` | partial | Core input file extraction ported; lock-file resolver not ported |
-| `lib/modules/manager/pip-compile/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
-| `lib/modules/manager/pip-compile/artifacts.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/pip-compile/extract.ts` | `extractors/pip_compile.rs` | partial | `extract_package_file()` handles `.in` files; multi-file delegation limited |
+| `lib/modules/manager/pip-compile/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pip-compile/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/pip-compile/common.ts` | `extractors/pip_compile.rs` | partial | Common utilities inline |
+| `lib/modules/manager/pip-compile/dep-types.ts` | `extractors/pip_compile.rs` | full | Dep types embedded |
+| `lib/modules/manager/pip-compile/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/pip-compile/utils.ts` | `extractors/pip_compile.rs` | partial | Utility functions inline |
 
 ### pip_requirements
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pip_requirements/extract.ts` | `crates/renovate-core/src/extractors/pip.rs` | partial | Core extraction ported |
-| `lib/modules/manager/pip_requirements/index.ts` | `crates/renovate-core/src/extractors/pip.rs` | partial | Manager metadata |
-| `lib/modules/manager/pip_requirements/artifacts.ts` | — | not-started | Artifacts not ported |
+|---|---|---|---|
+| `lib/modules/manager/pip_requirements/extract.ts` | `extractors/pip.rs` | full | `extract()` + `extract_package_file()` handle requirements.txt parsing with env var interpolation |
+| `lib/modules/manager/pip_requirements/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pip_requirements/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/pip_requirements/common.ts` | `extractors/pip.rs` | partial | Common parsing utilities inline |
+| `lib/modules/manager/pip_requirements/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### pip_setup
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pip_setup/extract.ts` | `crates/renovate-core/src/extractors/pip_setup.rs` | partial | Core extraction ported |
-| `lib/modules/manager/pip_setup/index.ts` | `crates/renovate-core/src/extractors/pip_setup.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/pip_setup/extract.ts` | `extractors/pip_setup.rs` | full | `extract()` handles setup.py install_requires |
+| `lib/modules/manager/pip_setup/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pip_setup/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### pipenv
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pipenv/extract.ts` | `crates/renovate-core/src/extractors/pipfile.rs` | partial | Core extraction ported (Pipfile) |
-| `lib/modules/manager/pipenv/index.ts` | `crates/renovate-core/src/extractors/pipfile.rs` | partial | Manager metadata |
-| `lib/modules/manager/pipenv/artifacts.ts` | — | not-started | Artifacts not ported |
+|---|---|---|---|
+| `lib/modules/manager/pipenv/extract.ts` | `extractors/pipfile.rs` | full | `extract()` + `extract_package_file()` handle Pipfile sources and deps |
+| `lib/modules/manager/pipenv/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pipenv/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/pipenv/dep-types.ts` | `extractors/pipfile.rs` | full | Dep types embedded |
+| `lib/modules/manager/pipenv/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### pixi
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pixi/extract.ts` | `crates/renovate-core/src/extractors/pixi.rs` | partial | Core extraction ported |
-| `lib/modules/manager/pixi/index.ts` | `crates/renovate-core/src/extractors/pixi.rs` | partial | Manager metadata |
-| `lib/modules/manager/pixi/schema.ts` | `crates/renovate-core/src/extractors/pixi.rs` | partial | Schema inlined |
-| `lib/modules/manager/pixi/artifacts.ts` | — | not-started | Artifacts not ported |
+|---|---|---|---|
+| `lib/modules/manager/pixi/extract.ts` | `extractors/pixi.rs` | full | `extract()` + `extract_from_pyproject()` handle conda and pypi deps |
+| `lib/modules/manager/pixi/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pixi/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/pixi/dep-types.ts` | `extractors/pixi.rs` | full | Dep types embedded |
+| `lib/modules/manager/pixi/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### poetry
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/poetry/extract.ts` | `crates/renovate-core/src/extractors/poetry.rs` | partial | Core extraction ported |
-| `lib/modules/manager/poetry/index.ts` | `crates/renovate-core/src/extractors/poetry.rs` | partial | Manager metadata |
-| `lib/modules/manager/poetry/schema.ts` | `crates/renovate-core/src/extractors/poetry.rs` | partial | Schema inlined |
-| `lib/modules/manager/poetry/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/poetry/update-locked.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/poetry/extract.ts` | `extractors/poetry.rs` | full | `extract()` + `extract_package_file()` + `extract_with_lockfile()` handle all sections |
+| `lib/modules/manager/poetry/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/poetry/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/poetry/dep-types.ts` | `extractors/poetry.rs` | full | Dep types embedded |
+| `lib/modules/manager/poetry/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/poetry/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/poetry/update-locked.ts` | `extractors/poetry.rs` | full | `update_locked_poetry_dependency()` present |
 
 ### pre-commit
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pre-commit/extract.ts` | `crates/renovate-core/src/extractors/pre_commit.rs` | partial | Core extraction ported |
-| `lib/modules/manager/pre-commit/parsing.ts` | `crates/renovate-core/src/extractors/pre_commit.rs` | partial | Inlined |
-| `lib/modules/manager/pre-commit/index.ts` | `crates/renovate-core/src/extractors/pre_commit.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/pre-commit/extract.ts` | `extractors/pre_commit.rs` | full | `extract()` + `extract_with_private_hosts()` handle pre-commit hooks |
+| `lib/modules/manager/pre-commit/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pre-commit/dep-types.ts` | `extractors/pre_commit.rs` | full | Dep types embedded (GitHost) |
+| `lib/modules/manager/pre-commit/parsing.ts` | `extractors/pre_commit.rs` | partial | Parsing utilities inline |
+| `lib/modules/manager/pre-commit/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### proto
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/proto/extract.ts` | `crates/renovate-core/src/extractors/proto.rs` | partial | Core `.prototools` extraction ported |
-| `lib/modules/manager/proto/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
+|---|---|---|---|
+| `lib/modules/manager/proto/extract.ts` | `extractors/proto.rs` | full | `extract_package_file()` handles .prototools files |
+| `lib/modules/manager/proto/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/proto/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/proto/upgradeable-tooling.ts` | `extractors/proto.rs` | partial | Tooling config inline |
 
 ### pub
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pub/extract.ts` | `crates/renovate-core/src/extractors/pubspec.rs` | partial | Core extraction ported |
-| `lib/modules/manager/pub/index.ts` | `crates/renovate-core/src/extractors/pubspec.rs` | partial | Manager metadata |
-| `lib/modules/manager/pub/artifacts.ts` | — | not-started | Artifacts not ported |
+|---|---|---|---|
+| `lib/modules/manager/pub/extract.ts` | `extractors/pubspec.rs` | full | `extract()` + `extract_package_file()` handle pubspec.yaml |
+| `lib/modules/manager/pub/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/pub/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/pub/dep-types.ts` | `extractors/pubspec.rs` | full | Dep types embedded (dart, git-refs) |
+| `lib/modules/manager/pub/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/pub/utils.ts` | `extractors/pubspec.rs` | full | `parse_pubspec()` + `parse_pubspec_lock()` present |
 
 ### puppet
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/puppet/extract.ts` | `crates/renovate-core/src/extractors/puppet.rs` | partial | Core extraction ported |
-| `lib/modules/manager/puppet/puppetfile-parser.ts` | `crates/renovate-core/src/extractors/puppet.rs` | partial | Parser inlined |
-| `lib/modules/manager/puppet/common.ts` | `crates/renovate-core/src/extractors/puppet.rs` | partial | Inlined |
-| `lib/modules/manager/puppet/index.ts` | `crates/renovate-core/src/extractors/puppet.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/puppet/extract.ts` | `extractors/puppet.rs` | full | `extract()` handles Puppetfile modules |
+| `lib/modules/manager/puppet/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/puppet/common.ts` | `extractors/puppet.rs` | partial | Common utilities inline |
+| `lib/modules/manager/puppet/puppetfile-parser.ts` | `extractors/puppet.rs` | partial | Parser inline |
+| `lib/modules/manager/puppet/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### pyenv
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/pyenv/extract.ts` | `crates/renovate-core/src/extractors/pyenv.rs` | partial | Core `.python-version` extraction ported |
-| `lib/modules/manager/pyenv/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
+|---|---|---|---|
+| `lib/modules/manager/pyenv/extract.ts` | `extractors/pyenv.rs` | full | `extract()` handles .python-version files |
+| `lib/modules/manager/pyenv/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### quadlet
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/quadlet/extract.ts` | `crates/renovate-core/src/extractors/quadlet.rs` | partial | Core extraction ported |
-| `lib/modules/manager/quadlet/index.ts` | `crates/renovate-core/src/extractors/quadlet.rs` | partial | Manager metadata |
-| `lib/modules/manager/quadlet/schema.ts` | `crates/renovate-core/src/extractors/quadlet.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/quadlet/extract.ts` | `extractors/quadlet.rs` | full | `extract()` handles quadlet container/image/volume files |
+| `lib/modules/manager/quadlet/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/quadlet/dep-types.ts` | `extractors/quadlet.rs` | full | Dep types embedded |
+| `lib/modules/manager/quadlet/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### renovate-config
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/renovate-config/extract.ts` | `crates/renovate-core/src/extractors/renovate_config_presets.rs` | partial | Core extraction ported |
-| `lib/modules/manager/renovate-config/index.ts` | `crates/renovate-core/src/extractors/renovate_config_presets.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/renovate-config/extract.ts` | `extractors/renovate_config_presets.rs` | full | `extract()` + `extract_package_file()` + `parse_preset()` handle renovate config presets |
+| `lib/modules/manager/renovate-config/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/renovate-config/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### ruby-version
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/ruby-version/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | Part of generic version file extractor |
-| `lib/modules/manager/ruby-version/index.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/ruby-version/extract.ts` | `extractors/version_file.rs` | full | `extract()` with `"ruby-version"` manager handles ruby version files |
+| `lib/modules/manager/ruby-version/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### runtime-version
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/runtime-version/extract.ts` | `crates/renovate-core/src/extractors/runtime_version.rs` | partial | Core extraction ported |
-| `lib/modules/manager/runtime-version/index.ts` | `crates/renovate-core/src/extractors/runtime_version.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/runtime-version/extract.ts` | `extractors/runtime_version.rs` | full | `extract()` handles runtime.txt |
+| `lib/modules/manager/runtime-version/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+
+### rust-toolchain
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `lib/modules/manager/rust-toolchain/extract.ts` | `extractors/rust_toolchain.rs` | full | `extract()` handles rust-toolchain.toml and legacy files |
+| `lib/modules/manager/rust-toolchain/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/rust-toolchain/dep-types.ts` | `extractors/rust_toolchain.rs` | full | Dep types embedded |
+| `lib/modules/manager/rust-toolchain/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### sbt
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/sbt/extract.ts` | `crates/renovate-core/src/extractors/sbt.rs` | partial | Core extraction ported |
-| `lib/modules/manager/sbt/index.ts` | `crates/renovate-core/src/extractors/sbt.rs` | partial | Manager metadata |
-| `lib/modules/manager/sbt/update.ts` | — | not-started | Not ported |
-| `lib/modules/manager/sbt/util.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/sbt/extract.ts` | `extractors/sbt.rs` | full | `extract()` + `extract_package_file()` + `extract_all_package_files()` handle SBT deps |
+| `lib/modules/manager/sbt/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/sbt/dep-types.ts` | `extractors/sbt.rs` | full | Dep types embedded |
+| `lib/modules/manager/sbt/update.ts` | `extractors/sbt.rs` | full | `bump_package_version()` present |
+| `lib/modules/manager/sbt/util.ts` | `extractors/sbt.rs` | partial | `sort_package_files()`, `normalize_scala_version()` present |
 
 ### scalafmt
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/scalafmt/extract.ts` | `crates/renovate-core/src/extractors/scalafmt.rs` | partial | Core extraction ported |
-| `lib/modules/manager/scalafmt/index.ts` | `crates/renovate-core/src/extractors/scalafmt.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/scalafmt/extract.ts` | `extractors/scalafmt.rs` | full | `extract()` handles .scalafmt.conf version |
+| `lib/modules/manager/scalafmt/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### setup-cfg
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/setup-cfg/extract.ts` | `crates/renovate-core/src/extractors/setup_cfg.rs` | partial | Core extraction ported |
-| `lib/modules/manager/setup-cfg/index.ts` | `crates/renovate-core/src/extractors/setup_cfg.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/setup-cfg/extract.ts` | `extractors/setup_cfg.rs` | full | `extract()` handles setup.cfg dependencies |
+| `lib/modules/manager/setup-cfg/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/setup-cfg/dep-types.ts` | `extractors/setup_cfg.rs` | full | Dep types embedded |
 
 ### sveltos
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/sveltos/extract.ts` | `crates/renovate-core/src/extractors/sveltos.rs` | partial | Core extraction ported |
-| `lib/modules/manager/sveltos/index.ts` | `crates/renovate-core/src/extractors/sveltos.rs` | partial | Manager metadata |
-| `lib/modules/manager/sveltos/schema.ts` | `crates/renovate-core/src/extractors/sveltos.rs` | partial | Schema inlined |
-| `lib/modules/manager/sveltos/util.ts` | `crates/renovate-core/src/extractors/sveltos.rs` | partial | Inlined |
+|---|---|---|---|
+| `lib/modules/manager/sveltos/extract.ts` | `extractors/sveltos.rs` | full | `extract()` handles Sveltos ClusterProfile Helm chart refs |
+| `lib/modules/manager/sveltos/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/sveltos/dep-types.ts` | `extractors/sveltos.rs` | full | Dep types embedded |
+| `lib/modules/manager/sveltos/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/sveltos/util.ts` | `extractors/sveltos.rs` | partial | Utility functions inline |
+
+### swift
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `lib/modules/manager/swift/extract.ts` | `extractors/spm.rs` | full | `extract()` + `extract_package_file()` handle Package.swift deps |
+| `lib/modules/manager/swift/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/swift/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/swift/range.ts` | `extractors/spm.rs` | full | `get_range_strategy()` present |
+| `lib/modules/manager/swift/schema.ts` | N/A | out-of-scope | Zod schema |
+| `lib/modules/manager/swift/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### tekton
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/tekton/extract.ts` | `crates/renovate-core/src/extractors/tekton.rs` | partial | Core extraction ported |
-| `lib/modules/manager/tekton/index.ts` | `crates/renovate-core/src/extractors/tekton.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/tekton/extract.ts` | `extractors/tekton.rs` | full | `extract()` + `extract_annotation_deps()` handle Tekton task/pipeline images |
+| `lib/modules/manager/tekton/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/tekton/dep-types.ts` | `extractors/tekton.rs` | full | Uses Kubernetes dep types |
+| `lib/modules/manager/tekton/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### terraform
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/terraform/extract.ts` | `crates/renovate-core/src/extractors/terraform.rs` | partial | Core extraction ported |
-| `lib/modules/manager/terraform/extractors.ts` | `crates/renovate-core/src/extractors/terraform.rs` | partial | Inlined |
-| `lib/modules/manager/terraform/index.ts` | `crates/renovate-core/src/extractors/terraform.rs` | partial | Manager metadata |
-| `lib/modules/manager/terraform/lockfile/index.ts` | — | not-started | Lockfile not ported |
-| `lib/modules/manager/terraform/lockfile/hash.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `lib/modules/manager/terraform/extract.ts` | `extractors/terraform.rs` | full | `extract()` handles required_providers, modules, terraform version |
+| `lib/modules/manager/terraform/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/terraform/base.ts` | `extractors/terraform.rs` | partial | Base utilities inline |
+| `lib/modules/manager/terraform/dep-types.ts` | `extractors/terraform.rs` | full | All dep types (Provider, Module, TfeWorkspace, DockerImage, HelmRelease) present |
+| `lib/modules/manager/terraform/extractors.ts` | `extractors/terraform.rs` | partial | Extractor dispatch inline |
+| `lib/modules/manager/terraform/extractors/others/modules.ts` | `extractors/terraform.rs` | full | Module source classification and parsing present (regexes for GitHub, GitLab, Bitbucket, Azure, GCS, S3, generic git) |
+| `lib/modules/manager/terraform/extractors/others/providers.ts` | `extractors/terraform.rs` | full | Provider source parsing present |
+| `lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.ts` | `extractors/terraform.rs` | partial | Docker image ref extraction inline |
+| `lib/modules/manager/terraform/extractors/resources/helm-release.ts` | `extractors/terraform.rs` | partial | Helm release extraction inline |
+| `lib/modules/manager/terraform/extractors/resources/terraform-workspace.ts` | `extractors/terraform.rs` | partial | TFE workspace extraction inline |
+| `lib/modules/manager/terraform/extractors/resources/utils.ts` | `extractors/terraform.rs` | partial | Resource utilities inline |
+| `lib/modules/manager/terraform/extractors/terraform-block/required-provider.ts` | `extractors/terraform.rs` | full | Required provider extraction present |
+| `lib/modules/manager/terraform/extractors/terraform-block/terraform-version.ts` | `extractors/terraform.rs` | full | Terraform version extraction present |
+| `lib/modules/manager/terraform/hcl/index.ts` | N/A | not-started | Full HCL parser not implemented (uses regex-based extraction) |
+| `lib/modules/manager/terraform/hcl/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/terraform/lockfile/hash.ts` | `extractors/terraform.rs` | partial | Lockfile hash handling inline |
+| `lib/modules/manager/terraform/lockfile/index.ts` | `extractors/terraform.rs` | full | `extract_terraform_locks()` + `extract_with_lockfile()` present |
+| `lib/modules/manager/terraform/lockfile/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/terraform/lockfile/update-locked.ts` | `extractors/terraform.rs` | full | `update_locked_terraform_dependency()` present |
+| `lib/modules/manager/terraform/lockfile/util.ts` | `extractors/terraform.rs` | partial | Lockfile utilities inline |
+| `lib/modules/manager/terraform/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/terraform/util.ts` | `extractors/terraform.rs` | partial | Utility functions inline |
 
 ### terraform-version
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/terraform-version/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | `.terraform-version` extraction ported via version_file module |
-| `lib/modules/manager/terraform-version/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection pattern ported |
+|---|---|---|---|
+| `lib/modules/manager/terraform-version/extract.ts` | `extractors/version_file.rs` | full | `extract()` with `"terraform-version"` manager |
+| `lib/modules/manager/terraform-version/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### terragrunt
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/terragrunt/extract.ts` | `crates/renovate-core/src/extractors/terragrunt.rs` | partial | Core extraction ported |
-| `lib/modules/manager/terragrunt/index.ts` | `crates/renovate-core/src/extractors/terragrunt.rs` | partial | Manager metadata |
-| `lib/modules/manager/terragrunt/artifacts.ts` | — | not-started | Artifacts not ported |
+|---|---|---|---|
+| `lib/modules/manager/terragrunt/extract.ts` | `extractors/terragrunt.rs` | full | `extract()` handles terragrunt.hcl module sources |
+| `lib/modules/manager/terragrunt/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/terragrunt/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/terragrunt/common.ts` | `extractors/terragrunt.rs` | partial | Common utilities inline |
+| `lib/modules/manager/terragrunt/dep-types.ts` | `extractors/terragrunt.rs` | full | Dep types (TerragruntSource) embedded |
+| `lib/modules/manager/terragrunt/modules.ts` | `extractors/terragrunt.rs` | partial | Module source parsing inline |
+| `lib/modules/manager/terragrunt/providers.ts` | `extractors/terragrunt.rs` | partial | Provider handling inline |
+| `lib/modules/manager/terragrunt/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/terragrunt/util.ts` | `extractors/terragrunt.rs` | partial | `get_terragrunt_dependency_type()` present |
 
 ### terragrunt-version
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/terragrunt-version/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | `.terragrunt-version` extraction ported via version_file module |
-| `lib/modules/manager/terragrunt-version/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection pattern ported |
+|---|---|---|---|
+| `lib/modules/manager/terragrunt-version/extract.ts` | `extractors/version_file.rs` | full | `extract()` with `"terragrunt-version"` manager |
+| `lib/modules/manager/terragrunt-version/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### tflint-plugin
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/tflint-plugin/extract.ts` | `crates/renovate-core/src/extractors/tflint_plugin.rs` | partial | Core extraction ported |
-| `lib/modules/manager/tflint-plugin/index.ts` | `crates/renovate-core/src/extractors/tflint_plugin.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/tflint-plugin/extract.ts` | `extractors/tflint_plugin.rs` | full | `extract()` handles .tflint.hcl plugin blocks |
+| `lib/modules/manager/tflint-plugin/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/tflint-plugin/dep-types.ts` | `extractors/tflint_plugin.rs` | full | Dep types embedded |
+| `lib/modules/manager/tflint-plugin/plugins.ts` | `extractors/tflint_plugin.rs` | partial | Plugin parsing inline |
+| `lib/modules/manager/tflint-plugin/types.ts` | N/A | out-of-scope | Type-only file |
+| `lib/modules/manager/tflint-plugin/util.ts` | `extractors/tflint_plugin.rs` | partial | Utility functions inline |
 
 ### travis
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/travis/extract.ts` | `crates/renovate-core/src/extractors/travis.rs` | partial | Core extraction ported |
-| `lib/modules/manager/travis/index.ts` | `crates/renovate-core/src/extractors/travis.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/travis/extract.ts` | `extractors/travis.rs` | full | `extract()` handles .travis.yml node versions |
+| `lib/modules/manager/travis/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/travis/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### typst
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/typst/extract.ts` | `crates/renovate-core/src/extractors/typst.rs` | partial | Core extraction ported |
-| `lib/modules/manager/typst/index.ts` | `crates/renovate-core/src/extractors/typst.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/typst/extract.ts` | `extractors/typst.rs` | full | `extract()` handles Typst package imports |
+| `lib/modules/manager/typst/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### unity3d
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/unity3d/extract.ts` | `crates/renovate-core/src/extractors/unity3d.rs` | partial | Core extraction ported |
-| `lib/modules/manager/unity3d/index.ts` | `crates/renovate-core/src/extractors/unity3d.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/unity3d/extract.ts` | `extractors/unity3d.rs` | full | `extract()` handles ProjectVersion.txt |
+| `lib/modules/manager/unity3d/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 
 ### velaci
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/velaci/extract.ts` | `crates/renovate-core/src/extractors/velaci.rs` | partial | Core extraction ported |
-| `lib/modules/manager/velaci/index.ts` | `crates/renovate-core/src/extractors/velaci.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/velaci/extract.ts` | `extractors/velaci.rs` | full | `extract()` handles Vela CI Docker images |
+| `lib/modules/manager/velaci/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/velaci/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### vendir
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/vendir/extract.ts` | `crates/renovate-core/src/extractors/vendir.rs` | partial | Core extraction ported |
-| `lib/modules/manager/vendir/index.ts` | `crates/renovate-core/src/extractors/vendir.rs` | partial | Manager metadata |
-| `lib/modules/manager/vendir/schema.ts` | `crates/renovate-core/src/extractors/vendir.rs` | partial | Schema inlined |
-| `lib/modules/manager/vendir/artifacts.ts` | — | not-started | Artifacts not ported |
+|---|---|---|---|
+| `lib/modules/manager/vendir/extract.ts` | `extractors/vendir.rs` | full | `extract()` handles vendir.yml Helm chart refs |
+| `lib/modules/manager/vendir/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/vendir/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/vendir/dep-types.ts` | `extractors/vendir.rs` | full | Dep types embedded |
+| `lib/modules/manager/vendir/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### woodpecker
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/woodpecker/extract.ts` | `crates/renovate-core/src/extractors/woodpecker.rs` | partial | Core extraction ported |
-| `lib/modules/manager/woodpecker/index.ts` | `crates/renovate-core/src/extractors/woodpecker.rs` | partial | Manager metadata |
+|---|---|---|---|
+| `lib/modules/manager/woodpecker/extract.ts` | `extractors/woodpecker.rs` | full | `extract()` handles Woodpecker CI Docker images |
+| `lib/modules/manager/woodpecker/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/woodpecker/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### xcodegen
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/manager/xcodegen/extract.ts` | `crates/renovate-core/src/extractors/xcodegen.rs` | partial | Core extraction ported |
-| `lib/modules/manager/xcodegen/index.ts` | `crates/renovate-core/src/extractors/xcodegen.rs` | partial | Manager metadata |
-| `lib/modules/manager/xcodegen/schema.ts` | `crates/renovate-core/src/extractors/xcodegen.rs` | partial | Schema inlined |
+|---|---|---|---|
+| `lib/modules/manager/xcodegen/extract.ts` | `extractors/xcodegen.rs` | full | `extract()` handles XcodeGen project.yml package deps |
+| `lib/modules/manager/xcodegen/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/xcodegen/schema.ts` | N/A | out-of-scope | Zod schema |
+
+---
 
 ---
 
 ## Datasources (`lib/modules/datasource/`)
 
+### Infrastructure (root-level files)
+
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/modules/datasource/azure-bicep-resource/index.ts` | `crates/renovate-core/src/datasources/azure_bicep.rs` | partial | Core version fetch via Bicep types index API ported; package-cache not ported |
-| `lib/modules/datasource/azure-pipelines-tasks/index.ts` | `crates/renovate-core/src/datasources/azure_pipelines_tasks.rs` | partial | Core tasks version fetch via GitHub tags API ported; package-cache not ported |
-| `lib/modules/datasource/bazel/index.ts` | `crates/renovate-core/src/datasources/bazel.rs` | partial | Core version fetch via GitHub releases ported; local file:// URL support ported; package-cache not ported |
-| `lib/modules/datasource/bitrise/index.ts` | `crates/renovate-core/src/datasources/bitrise.rs` | partial | Steplib index fetch and version lookup ported; caching not ported |
-| `lib/modules/datasource/buildpacks-registry/index.ts` | `crates/renovate-core/src/datasources/buildpacks_registry.rs` | partial | Core version fetch via builder index API ported; package-cache not ported |
-| `lib/modules/datasource/cdnjs/index.ts` | `crates/renovate-core/src/datasources/cdnjs.rs` | partial | Core latest version fetch via cdnjs API ported; package-cache not ported |
-| `lib/modules/datasource/pod/index.ts` | `crates/renovate-core/src/datasources/cocoapods.rs` | partial | Core version fetch via CocoaPods CDN and GitHub ported; package-cache not ported |
-| `lib/modules/datasource/conan/index.ts` | `crates/renovate-core/src/datasources/conan.rs` | partial | Core version fetch via Conan Center API ported; custom registry support partial |
-| `lib/modules/datasource/conda/index.ts` | `crates/renovate-core/src/datasources/conda.rs` | partial | Core version fetch via Anaconda API ported; package-cache not ported |
-| `lib/modules/datasource/cpan/index.ts` | `crates/renovate-core/src/datasources/cpan.rs` | partial | Core version fetch via MetaCPAN API ported; package-cache not ported |
-| `lib/modules/datasource/crate/index.ts` | `crates/renovate-core/src/datasources/crates_io.rs` | partial | Sparse index fetch, version filtering, batch lookup, timestamps ported; git registry support, private crates.io not ported |
-| `lib/modules/datasource/devbox/index.ts` | `crates/renovate-core/src/datasources/devbox.rs` | partial | Core version fetch via Devbox search API ported; package-cache not ported |
-| `lib/modules/datasource/docker/index.ts` | `crates/renovate-core/src/datasources/docker_hub.rs` | partial | Docker Hub tag fetch and digest lookup ported; private registries, OCI auth, multi-arch manifests, and full registry API not ported |
-| `lib/modules/datasource/endoflife-date/index.ts` | `crates/renovate-core/src/datasources/endoflife.rs` | partial | Core version fetch via endoflife.date API ported; package-cache not ported |
-| `lib/modules/datasource/github-releases/index.ts` | `crates/renovate-core/src/datasources/github_releases.rs` | partial | Core releases fetch, stability filtering, timestamps ported; digest support and package-cache not ported |
-| `lib/modules/datasource/github-runners/index.ts` | `crates/renovate-core/src/datasources/github_runners.rs` | partial | Runner version lookup via GitHub runners API ported; package-cache not ported |
-| `lib/modules/datasource/github-tags/index.ts` | `crates/renovate-core/src/datasources/github_tags.rs` | partial | Core tags fetch, version-like filtering, batch lookup ported; digest support and package-cache not ported |
-| `lib/modules/datasource/gitlab-tags/index.ts` | `crates/renovate-core/src/datasources/gitlab_tags.rs` | partial | Core tags fetch via GitLab API ported; package-cache not ported |
-| `lib/modules/datasource/galaxy-collection/index.ts` | `crates/renovate-core/src/datasources/galaxy_collection.rs` | done | namespace.name parsing, URL construction (ansible/automation-hub/default), versions list + per-version details, deprecated flag |
-| `lib/modules/datasource/galaxy/index.ts` | `crates/renovate-core/src/datasources/galaxy.rs` | done | username.rolename parsing, v1 roles API, multi-result github_user filter, sourceUrl from github repo |
-| `lib/modules/datasource/glasskube-packages/index.ts` | `crates/renovate-core/src/datasources/glasskube_packages.rs` | partial | Core version fetch via Glasskube packages index ported; package-cache not ported |
-| `lib/modules/datasource/go/index.ts` | `crates/renovate-core/src/datasources/gomod.rs` | partial | Core version fetch via Go module proxy ported; GOPROXY chain and private modules not ported |
-| `lib/modules/datasource/gradle-version/index.ts` | `crates/renovate-core/src/datasources/gradle_version.rs` | done | Full fetch_releases with snapshot/nightly filter, git_ref calculation, buildTime parsing; 404→None, 429/5xx→Err |
-| `lib/modules/datasource/hackage/index.ts` | `crates/renovate-core/src/datasources/hackage.rs` | partial | Core version fetch via Hackage API ported; package-cache not ported |
-| `lib/modules/datasource/helm/index.ts` | `crates/renovate-core/src/datasources/helm.rs` | partial | Core chart version fetch via Helm repo index.yaml ported; OCI registry support partial |
-| `lib/modules/datasource/hermit/index.ts` | `crates/renovate-core/src/datasources/hermit.rs` | partial | Core version fetch via Hermit manifest index ported; package-cache not ported |
-| `lib/modules/datasource/hex/index.ts` | `crates/renovate-core/src/datasources/hex.rs` | partial | Core version fetch via Hex.pm API ported; package-cache not ported |
-| `lib/modules/datasource/hexpm-bob/index.ts` | `crates/renovate-core/src/datasources/hexpm_bob.rs` | done | Parses builds.txt line-format; elixir and otp package types; version cleaning, stability detection, timestamp handling |
-| `lib/modules/datasource/jenkins-plugins/index.ts` | `crates/renovate-core/src/datasources/jenkins_plugins.rs` | partial | Core version fetch via Jenkins Update Center ported; package-cache not ported |
-| `lib/modules/datasource/jsr/index.ts` | `crates/renovate-core/src/datasources/jsr.rs` | partial | Core version fetch via JSR API ported; package-cache not ported |
-| `lib/modules/datasource/maven/index.ts` | `crates/renovate-core/src/datasources/maven.rs` | partial | Core version fetch via Maven Central metadata ported; multi-repo search and package-cache not ported |
-| `lib/modules/datasource/npm/index.ts` | `crates/renovate-core/src/datasources/npm.rs` | partial | Core packument fetch, deprecated filtering, batch fetch, timestamps ported; npmrc registry auth and package-cache not ported |
-| `lib/modules/datasource/nuget/index.ts` | `crates/renovate-core/src/datasources/nuget.rs` | partial | Core version fetch via NuGet v3 API ported; package-cache not ported |
-| `lib/modules/datasource/orb/index.ts` | `crates/renovate-core/src/datasources/orb.rs` | partial | Core version fetch via CircleCI orb API ported; package-cache not ported |
-| `lib/modules/datasource/packagist/index.ts` | `crates/renovate-core/src/datasources/packagist.rs` | partial | Core version fetch via Packagist API ported; package-cache not ported |
-| `lib/modules/datasource/dart/index.ts` | `crates/renovate-core/src/datasources/pub_dev.rs` | partial | Core version fetch via pub.dev API ported; package-cache not ported |
-| `lib/modules/datasource/puppet-forge/index.ts` | `crates/renovate-core/src/datasources/puppet_forge.rs` | partial | Core version fetch via Puppet Forge API ported; package-cache not ported |
-| `lib/modules/datasource/pypi/index.ts` | `crates/renovate-core/src/datasources/pypi.rs` | partial | Core version fetch via PyPI JSON API ported; yanked filtering, timestamps ported; package-cache not ported |
-| `lib/modules/datasource/rubygems/index.ts` | `crates/renovate-core/src/datasources/rubygems.rs` | partial | Core version fetch via RubyGems API ported; package-cache not ported |
-| `lib/modules/datasource/terraform-provider/index.ts` | `crates/renovate-core/src/datasources/terraform.rs` | partial | Core version fetch via Terraform registry API ported; package-cache not ported |
-| `lib/modules/datasource/typst/index.ts` | `crates/renovate-core/src/datasources/typst.rs` | partial | Core version fetch via Typst Universe API ported; package-cache not ported |
-| `lib/modules/datasource/unity3d-packages/index.ts` | `crates/renovate-core/src/datasources/unity3d_packages.rs` | done | versions map parsing, stability detection (exp./pre./preview.), changelog content/_upm, changelogUrl from documentationUrl, sourceUrl from repository |
-| `lib/modules/datasource/unity3d/index.ts` | `crates/renovate-core/src/datasources/unity3d.rs` | partial | Core version fetch via Unity hub JSON API ported; package-cache not ported |
-| `lib/modules/datasource/artifactory/index.ts` | `crates/renovate-core/src/datasources/artifactory.rs` | partial | HTML directory listing release extraction, registry merge behavior, empty/404/null handling, and non-404 external-host errors ported; package-cache integration not ported. |
-| `lib/modules/datasource/custom/index.ts` | — | not-started | Configurable custom datasource lookup, registry URL templating, HTTP/local file dispatch, transformation templates, schema validation, and format routing are not ported. |
-| `lib/modules/datasource/custom/formats/index.ts` | — | not-started | Format fetcher dispatch is not ported. |
-| `lib/modules/datasource/custom/formats/html.ts` | `crates/renovate-core/src/datasources/artifactory.rs` | partial | Shared HTML link extraction for directory listings ported; full custom datasource fetcher/templating/local file engine remains not-started. |
-| `lib/modules/datasource/custom/formats/json.ts` | — | not-started | Custom datasource JSON format parsing is not ported. |
-| `lib/modules/datasource/custom/formats/plain.ts` | — | not-started | Custom datasource plain text format parsing is not ported. |
-| `lib/modules/datasource/custom/formats/toml.ts` | — | not-started | Custom datasource TOML format parsing is not ported. |
-| `lib/modules/datasource/custom/formats/yaml.ts` | — | not-started | Custom datasource YAML format parsing is not ported. |
-| `lib/modules/datasource/custom/schema.ts` | — | not-started | Custom datasource schema validation is not ported. |
-| `lib/modules/datasource/custom/utils.ts` | — | not-started | Custom datasource helper utilities are not ported. |
-| `lib/modules/datasource/aws-eks-addon/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/aws-machine-image/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/aws-rds/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/azure-tags/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/bitbucket-server-tags/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/bitbucket-tags/index.ts` | `crates/renovate-core/src/datasources/bitbucket_tags.rs` | done | fetch_releases (tags list) and get_digest (latest commit or tag SHA) ported |
-| `lib/modules/datasource/clojure/index.ts` | `crates/renovate-core/src/datasources/clojure.rs` | partial | Extends Maven with Clojars + Maven Central registries; merge strategy; Missing: package-cache integration |
-| `lib/modules/datasource/dart-version/index.ts` | `crates/renovate-core/src/datasources/dart_version.rs` | partial | Core GCS-backed channel fetch ported; package-cache not ported |
-| `lib/modules/datasource/deb/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/deno/index.ts` | `crates/renovate-core/src/datasources/deno.rs` | done | Parse deno.land package URL, fetch versions list, fetch per-version details; soft failure on bad schema; github type → sourceUrl |
-| `lib/modules/datasource/dotnet-version/index.ts` | `crates/renovate-core/src/datasources/dotnet_version.rs` | partial | fetch_releases for dotnet-sdk and dotnet-runtime; full releases-index + per-channel parsing |
-| `lib/modules/datasource/elm-package/index.ts` | `crates/renovate-core/src/datasources/elm_package.rs` | partial | fetch_releases with version→timestamp JSON parsing, 4xx/5xx/429 error handling, source URL from package name |
-| `lib/modules/datasource/flutter-version/index.ts` | `crates/renovate-core/src/datasources/flutter_version.rs` | partial | Core GCS-backed release fetch and stable-pattern filtering ported; package-cache not ported |
-| `lib/modules/datasource/forgejo-releases/index.ts` | `crates/renovate-core/src/datasources/forgejo_releases.rs` | done | fetch_releases and get_digest ported; tag SHA and latest commit digest |
-| `lib/modules/datasource/forgejo-tags/index.ts` | `crates/renovate-core/src/datasources/forgejo_tags.rs` | done | fetch_releases and get_digest ported; maps name/commit.sha/commit.created |
-| `lib/modules/datasource/git-refs/index.ts` | `crates/renovate-core/src/datasources/git_refs.rs`; `crates/renovate-core/src/util.rs` | partial | ls-remote parsing, releases, digest lookup, annotated tag deref, and git auth env helpers ported; subprocess execution/cache integration not fully ported |
-| `lib/modules/datasource/git-tags/index.ts` | `crates/renovate-core/src/datasources/git_tags.rs`; `crates/renovate-core/src/util.rs` | partial | Tag-only release filtering, digest lookup, and git auth env helpers ported; subprocess execution/cache integration not fully ported |
-| `lib/modules/datasource/gitea-releases/index.ts` | `crates/renovate-core/src/datasources/gitea_releases.rs` | done | fetch_releases and get_digest ported; tag SHA and latest commit digest |
-| `lib/modules/datasource/gitea-tags/index.ts` | `crates/renovate-core/src/datasources/gitea_tags.rs` | done | fetch_releases and get_digest ported; maps name/commit.sha/commit.created |
-| `lib/modules/datasource/github-digest/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/github-release-attachments/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/gitlab-packages/index.ts` | `crates/renovate-core/src/datasources/gitlab_packages.rs` | partial | fetch_releases with project:package_name split, conan_package_name filtering, rfc3339→UTC conversion |
-| `lib/modules/datasource/gitlab-releases/index.ts` | `crates/renovate-core/src/datasources/gitlab_releases.rs` | partial | fetch_releases with tag_name/released_at parsing, URL-encoded project path, source URL |
-| `lib/modules/datasource/golang-version/index.ts` | `crates/renovate-core/src/datasources/golang_version.rs` | done | Full parsing and error handling ported; 404 → Ok(None), invalid formats → Err |
-| `lib/modules/datasource/java-version/index.ts` | `crates/renovate-core/src/datasources/java_version.rs` | done | Pagination over Adoptium API; parse_package with image_type/arch/os/system detection; 404 page 0→None, 404 page N>0→end, 5xx→Err |
-| `lib/modules/datasource/kubernetes-api/index.ts` | `crates/renovate-core/src/datasources/kubernetes_api.rs` | partial | Static lookup from embedded kubernetes-api.json5 data file; case-sensitive resource name matching |
-| `lib/modules/datasource/nextcloud/index.ts` | `crates/renovate-core/src/datasources/nextcloud.rs` | done | JSON array parse, find by package id, github.com/nextcloud/ URL rewrite for changelogUrl, timestamp truncation to ms, isNightly flag |
-| `lib/modules/datasource/node-version/index.ts` | `crates/renovate-core/src/datasources/node_version.rs` | partial | Core JSON fetch from nodejs.org/dist ported; LTS flag and timestamp handling ported; package-cache not ported |
-| `lib/modules/datasource/python-version/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/repology/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/rpm/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/ruby-version/index.ts` | `crates/renovate-core/src/datasources/ruby_version.rs` | done | HTML table parsing with regex; stable X.Y.Z versions only; 404 → Err |
-| `lib/modules/datasource/rust-version/index.ts` | `crates/renovate-core/src/datasources/rust_version.rs` | partial | Core manifests.txt parsing, version deduplication, nightly encoding ported; package-cache not ported |
-| `lib/modules/datasource/sbt-package/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/sbt-plugin/index.ts` | — | not-started | Not ported |
+|---|---|---|---|
+| `datasource/api.ts` | `datasources.rs` (KNOWN_DATASOURCES, get_datasource_for) | full | Static registry of all datasource IDs and default versioning |
+| `datasource/common.ts` | `datasources.rs` (get_datasource_for, get_datasource_default_versioning, is_get_pkg_releases_config, apply_constraints_filtering) | full | All exported functions ported |
+| `datasource/datasource.ts` | `datasources.rs` (Datasource trait infrastructure) | partial | Base Datasource class; Rust uses standalone functions instead of OOP |
+| `datasource/index.ts` | `datasources.rs` (get_datasource_list) | full | Registry listing |
+| `datasource/types.ts` | `datasources.rs` (ReleaseResult, Release, ReleaseMeta structs) | full | Core types ported |
+| `datasource/schema.ts` | — | not-started | Zod schema definitions; Rust uses serde derives inline |
+| `datasource/metadata.ts` | `datasources.rs` (add_metadata, massage_timestamps, normalize_timestamp) | full | Manual changelog/source URL logic, timestamp normalization |
+| `datasource/metadata-manual.ts` | `datasources.rs` (MANUAL_CHANGELOG_URLS, MANUAL_SOURCE_URLS constants) | full | Hardcoded URL maps inlined |
+| `datasource/postprocess-release.ts` | `datasources.rs` (postprocess_release) | partial | Framework present; no datasource overrides wired yet |
+| `datasource/util.ts` | — | not-started | Utility functions |
+| `datasource/span-processor.ts` | — | out-of-scope | OpenTelemetry tracing; not in Rust scope |
+
+### artifactory
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `artifactory/common.ts` | `datasources/artifactory.rs` | full | Common helpers merged into single file |
+| `artifactory/index.ts` | `datasources/artifactory.rs` | full | getReleases ported (396 lines) |
+
+### aws-eks-addon
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `aws-eks-addon/index.ts` | — | not-started | No Rust datasource file (versioning exists) |
+| `aws-eks-addon/schema.ts` | — | not-started | |
+
+### aws-machine-image
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `aws-machine-image/index.ts` | — | not-started | No Rust datasource file (versioning exists) |
+| `aws-machine-image/types.ts` | — | not-started | |
+
+### aws-rds
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `aws-rds/index.ts` | — | not-started | |
+
+### azure-bicep-resource
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `azure-bicep-resource/index.ts` | `datasources/azure_bicep.rs` | full | (289 lines) |
+| `azure-bicep-resource/schema.ts` | `datasources/azure_bicep.rs` | full | Schema types via serde |
+
+### azure-pipelines-tasks
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `azure-pipelines-tasks/index.ts` | `datasources/azure_pipelines_tasks.rs` | full | (533 lines) |
+| `azure-pipelines-tasks/schema.ts` | `datasources/azure_pipelines_tasks.rs` | full | Schema types via serde |
+
+### azure-tags
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `azure-tags/index.ts` | — | not-started | |
+
+### bazel
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `bazel/index.ts` | `datasources/bazel.rs` | full | (393 lines) |
+| `bazel/schema.ts` | `datasources/bazel.rs` | full | Schema types via serde |
+
+### bitbucket-server-tags
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `bitbucket-server-tags/index.ts` | `datasources/bitbucket_server_tags.rs` | full | (476 lines) |
+| `bitbucket-server-tags/schema.ts` | `datasources/bitbucket_server_tags.rs` | full | Schema types via serde |
+
+### bitbucket-tags
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `bitbucket-tags/index.ts` | `datasources/bitbucket_tags.rs` | full | (341 lines) |
+| `bitbucket-tags/types.ts` | `datasources/bitbucket_tags.rs` | full | Types inlined |
+
+### bitrise
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `bitrise/index.ts` | `datasources/bitrise.rs` | full | (494 lines) |
+| `bitrise/schema.ts` | `datasources/bitrise.rs` | full | Schema types via serde |
+
+### buildpacks-registry
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `buildpacks-registry/index.ts` | `datasources/buildpacks_registry.rs` | full | (216 lines) |
+| `buildpacks-registry/schema.ts` | `datasources/buildpacks_registry.rs` | full | Schema types via serde |
+
+### cdnjs
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `cdnjs/index.ts` | `datasources/cdnjs.rs` | full | (403 lines) |
+| `cdnjs/schema.ts` | `datasources/cdnjs.rs` | full | Schema types via serde |
+
+### clojure
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `clojure/common.ts` | `datasources/clojure.rs` | full | Common logic inlined |
+| `clojure/index.ts` | `datasources/clojure.rs` | full | (416 lines) |
+
+### conan
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `conan/common.ts` | `datasources/conan.rs` | full | Common logic inlined |
+| `conan/index.ts` | `datasources/conan.rs` | partial | Conan Center only (130 lines); V2 not ported |
+| `conan/schema.ts` | `datasources/conan.rs` | full | Schema types via serde |
+| `conan/types.ts` | `datasources/conan.rs` | full | Types inlined |
+
+### conda
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `conda/common.ts` | `datasources/conda.rs` | full | Common logic inlined |
+| `conda/index.ts` | `datasources/conda.rs` | full | (583 lines) |
+| `conda/prefix-dev.ts` | `datasources/conda.rs` | full | Prefix.dev API included |
+| `conda/schema/prefix-dev.ts` | `datasources/conda.rs` | full | Schema types via serde |
+| `conda/types.ts` | `datasources/conda.rs` | full | Types inlined |
+
+### cpan
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `cpan/index.ts` | `datasources/cpan.rs` | full | (403 lines) |
+| `cpan/schema.ts` | `datasources/cpan.rs` | full | Schema types via serde |
+| `cpan/types.ts` | `datasources/cpan.rs` | full | Types inlined |
+
+### crate
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `crate/index.ts` | `datasources/crates_io.rs` | full | (1151 lines) |
+| `crate/schema.ts` | `datasources/crates_io.rs` | full | Schema types via serde |
+| `crate/types.ts` | `datasources/crates_io.rs` | full | Types inlined |
+
+### custom
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `custom/index.ts` | — | not-started | Custom datasource framework |
+| `custom/schema.ts` | — | not-started | |
+| `custom/utils.ts` | — | not-started | |
+| `custom/formats/html.ts` | — | not-started | |
+| `custom/formats/index.ts` | — | not-started | |
+| `custom/formats/json.ts` | — | not-started | |
+| `custom/formats/plain.ts` | — | not-started | |
+| `custom/formats/toml.ts` | — | not-started | |
+| `custom/formats/types.ts` | — | not-started | |
+| `custom/formats/yaml.ts` | — | not-started | |
+
+### dart
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `dart/index.ts` | `datasources/pub_dev.rs` | full | (369 lines); DATASOURCE_ID = "dart" |
+| `dart/types.ts` | `datasources/pub_dev.rs` | full | Types inlined |
+
+### dart-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `dart-version/index.ts` | `datasources/dart_version.rs` | full | (160 lines) |
+| `dart-version/types.ts` | `datasources/dart_version.rs` | full | Types inlined |
+
+### deb
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `deb/checksum.ts` | `datasources/deb.rs` | partial | Utilities only; no full getReleases |
+| `deb/common.ts` | `datasources/deb.rs` | partial | |
+| `deb/index.ts` | — | not-started | Main datasource entry not ported |
+| `deb/packages.ts` | — | not-started | |
+| `deb/release.ts` | — | not-started | |
+| `deb/types.ts` | `datasources/deb.rs` | partial | Some types inlined |
+| `deb/url.ts` | `datasources/deb.rs` | full | URL construction ported |
+| `deb/utils.ts` | `datasources/deb.rs` | full | Utils ported |
+
+### deno
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `deno/index.ts` | `datasources/deno.rs` | full | (429 lines) |
+| `deno/schema.ts` | `datasources/deno.rs` | full | Schema types via serde |
+
+### devbox
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `devbox/common.ts` | `datasources/devbox.rs` | full | Common logic inlined |
+| `devbox/index.ts` | `datasources/devbox.rs` | full | (349 lines) |
+| `devbox/schema.ts` | `datasources/devbox.rs` | full | Schema types via serde |
+
+### docker
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `docker/common.ts` | `datasources/docker_hub.rs` | partial | Common logic partially covered |
+| `docker/dockerhub-cache.ts` | `datasources/docker_hub.rs` | partial | Caching simplified |
+| `docker/ecr.ts` | — | not-started | ECR registry support |
+| `docker/google.ts` | — | not-started | Google Container Registry |
+| `docker/index.ts` | `datasources/docker_hub.rs` | partial | Docker Hub tags only (626 lines); no ECR/GCR |
+| `docker/schema.ts` | `datasources/docker_hub.rs` | partial | Schema types partially covered |
+| `docker/types.ts` | `datasources/docker_hub.rs` | partial | Some types inlined |
+
+### dotnet-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `dotnet-version/index.ts` | `datasources/dotnet_version.rs` | full | (318 lines) |
+| `dotnet-version/schema.ts` | `datasources/dotnet_version.rs` | full | Schema types via serde |
+
+### elm-package
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `elm-package/index.ts` | `datasources/elm_package.rs` | full | (187 lines) |
+| `elm-package/schema.ts` | `datasources/elm_package.rs` | full | Schema types via serde |
+
+### endoflife-date
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `endoflife-date/common.ts` | `datasources/endoflife.rs` | full | Common logic inlined |
+| `endoflife-date/index.ts` | `datasources/endoflife.rs` | full | (381 lines) |
+| `endoflife-date/schema.ts` | `datasources/endoflife.rs` | full | Schema types via serde |
+
+### flutter-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `flutter-version/index.ts` | `datasources/flutter_version.rs` | full | (163 lines) |
+| `flutter-version/types.ts` | `datasources/flutter_version.rs` | full | Types inlined |
+
+### forgejo-releases
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `forgejo-releases/index.ts` | `datasources/forgejo_releases.rs` | full | (192 lines) |
+| `forgejo-releases/schema.ts` | `datasources/forgejo_releases.rs` | full | Schema types via serde |
+
+### forgejo-tags
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `forgejo-tags/index.ts` | `datasources/forgejo_tags.rs` | full | (173 lines) |
+| `forgejo-tags/schema.ts` | `datasources/forgejo_tags.rs` | full | Schema types via serde |
+
+### galaxy
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `galaxy/index.ts` | `datasources/galaxy.rs` | full | (345 lines) |
+| `galaxy/schema.ts` | `datasources/galaxy.rs` | full | Schema types via serde |
+
+### galaxy-collection
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `galaxy-collection/index.ts` | `datasources/galaxy_collection.rs` | full | (622 lines) |
+| `galaxy-collection/schema.ts` | `datasources/galaxy_collection.rs` | full | Schema types via serde |
+
+### git-refs
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `git-refs/base.ts` | `datasources/git_refs.rs` | full | Base logic inlined |
+| `git-refs/index.ts` | `datasources/git_refs.rs` | full | (296 lines) |
+| `git-refs/types.ts` | `datasources/git_refs.rs` | full | Types inlined |
+
+### git-tags
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `git-tags/index.ts` | `datasources/git_tags.rs` | full | (160 lines) |
+
+### gitea-releases
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gitea-releases/index.ts` | `datasources/gitea_releases.rs` | full | (330 lines) |
+| `gitea-releases/schema.ts` | `datasources/gitea_releases.rs` | full | Schema types via serde |
+
+### gitea-tags
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gitea-tags/index.ts` | `datasources/gitea_tags.rs` | full | (305 lines) |
+| `gitea-tags/schema.ts` | `datasources/gitea_tags.rs` | full | Schema types via serde |
+
+### github-digest
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `github-digest/index.ts` | — | not-started | |
+
+### github-release-attachments
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `github-release-attachments/index.ts` | — | not-started | |
+| `github-release-attachments/test/index.ts` | — | not-started | |
+
+### github-releases
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `github-releases/index.ts` | `datasources/github_releases.rs` | full | (501 lines) |
+
+### github-runners
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `github-runners/index.ts` | `datasources/github_runners.rs` | full | (432 lines) |
+
+### github-tags
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `github-tags/index.ts` | `datasources/github_tags.rs` | full | (773 lines) |
+
+### gitlab-packages
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gitlab-packages/common.ts` | `datasources/gitlab_packages.rs` | full | Common logic inlined |
+| `gitlab-packages/index.ts` | `datasources/gitlab_packages.rs` | full | (215 lines) |
+| `gitlab-packages/types.ts` | `datasources/gitlab_packages.rs` | full | Types inlined |
+
+### gitlab-releases
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gitlab-releases/index.ts` | `datasources/gitlab_releases.rs` | full | (152 lines) |
+| `gitlab-releases/types.ts` | `datasources/gitlab_releases.rs` | full | Types inlined |
+
+### gitlab-tags
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gitlab-tags/index.ts` | `datasources/gitlab_tags.rs` | full | (555 lines) |
+| `gitlab-tags/types.ts` | `datasources/gitlab_tags.rs` | full | Types inlined |
+| `gitlab-tags/util.ts` | `datasources/gitlab_tags.rs` | full | Utils inlined |
+
+### glasskube-packages
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `glasskube-packages/index.ts` | `datasources/glasskube_packages.rs` | full | (365 lines) |
+| `glasskube-packages/schema.ts` | `datasources/glasskube_packages.rs` | full | Schema types via serde |
+
+### go
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `go/base.ts` | `datasources/gomod.rs` | partial | Base logic partially covered |
+| `go/common.ts` | `datasources/gomod.rs` | partial | |
+| `go/goproxy-parser.ts` | — | not-started | Goproxy parsing not ported |
+| `go/index.ts` | `datasources/gomod.rs` | partial | (369 lines); proxy.golang.org only |
+| `go/releases-direct.ts` | — | not-started | Direct VCS fetching |
+| `go/releases-goproxy.ts` | `datasources/gomod.rs` | partial | Simplified proxy support |
+| `go/types.ts` | `datasources/gomod.rs` | partial | Some types inlined |
+
+### golang-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `golang-version/index.ts` | `datasources/golang_version.rs` | full | (319 lines) |
+
+### gradle-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gradle-version/index.ts` | `datasources/gradle_version.rs` | full | (314 lines) |
+| `gradle-version/types.ts` | `datasources/gradle_version.rs` | full | Types inlined |
+
+### hackage
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `hackage/index.ts` | `datasources/hackage.rs` | full | (250 lines) |
+| `hackage/schema.ts` | `datasources/hackage.rs` | full | Schema types via serde |
+
+### helm
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `helm/index.ts` | `datasources/helm.rs` | full | (837 lines) |
+| `helm/schema.ts` | `datasources/helm.rs` | full | Schema types via serde |
+
+### hermit
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `hermit/index.ts` | `datasources/hermit.rs` | full | (452 lines) |
+| `hermit/types.ts` | `datasources/hermit.rs` | full | Types inlined |
+
+### hex
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `hex/index.ts` | `datasources/hex.rs` | full | (244 lines) |
+| `hex/schema.ts` | `datasources/hex.rs` | full | Schema types via serde |
+| `hex/v2/package.ts` | — | not-started | Hex v2 API package endpoint |
+| `hex/v2/signed.ts` | — | not-started | Hex v2 signed artifacts |
+
+### hexpm-bob
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `hexpm-bob/common.ts` | `datasources/hexpm_bob.rs` | full | Common logic inlined |
+| `hexpm-bob/index.ts` | `datasources/hexpm_bob.rs` | full | (396 lines) |
+| `hexpm-bob/types.ts` | `datasources/hexpm_bob.rs` | full | Types inlined |
+
+### java-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `java-version/common.ts` | `datasources/java_version.rs` | full | Common logic inlined |
+| `java-version/index.ts` | `datasources/java_version.rs` | full | (426 lines) |
+| `java-version/types.ts` | `datasources/java_version.rs` | full | Types inlined |
+
+### jenkins-plugins
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `jenkins-plugins/index.ts` | `datasources/jenkins_plugins.rs` | full | (351 lines) |
+| `jenkins-plugins/types.ts` | `datasources/jenkins_plugins.rs` | full | Types inlined |
+
+### jsr
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `jsr/common.ts` | `datasources/jsr.rs` | full | Common logic inlined |
+| `jsr/index.ts` | `datasources/jsr.rs` | full | (401 lines) |
+| `jsr/schema.ts` | `datasources/jsr.rs` | full | Schema types via serde |
+| `jsr/util.ts` | `datasources/jsr.rs` | full | Utils inlined |
+
+### kubernetes-api
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `kubernetes-api/index.ts` | `datasources/kubernetes_api.rs` | full | (77 lines); inline API version data |
+
+### maven
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `maven/common.ts` | `datasources/maven.rs` | full | Common logic inlined |
+| `maven/index.ts` | `datasources/maven.rs` | full | (706 lines) |
+| `maven/schema.ts` | `datasources/maven.rs` | full | Schema types via serde |
+| `maven/types.ts` | `datasources/maven.rs` | full | Types inlined |
+| `maven/util.ts` | `datasources/maven.rs` | full | Utils inlined |
+
+### nextcloud
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `nextcloud/index.ts` | `datasources/nextcloud.rs` | full | (327 lines) |
+| `nextcloud/schema.ts` | `datasources/nextcloud.rs` | full | Schema types via serde |
+
+### node-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `node-version/common.ts` | `datasources/node_version.rs` | full | Common logic inlined |
+| `node-version/index.ts` | `datasources/node_version.rs` | full | (161 lines) |
+| `node-version/types.ts` | `datasources/node_version.rs` | full | Types inlined |
+
+### npm
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `npm/common.ts` | `datasources/npm.rs` | full | Common logic inlined |
+| `npm/get.ts` | `datasources/npm.rs` | full | |
+| `npm/index.ts` | `datasources/npm.rs` | full | (511 lines) |
+| `npm/npmrc.ts` | — | not-started | .npmrc parsing not ported |
+| `npm/schema.ts` | `datasources/npm.rs` | full | Schema types via serde |
+| `npm/types.ts` | `datasources/npm.rs` | full | Types inlined |
+
+### nuget
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `nuget/common.ts` | `datasources/nuget.rs` | full | Common logic inlined |
+| `nuget/index.ts` | `datasources/nuget.rs` | full | (329 lines) |
+| `nuget/types.ts` | `datasources/nuget.rs` | full | Types inlined |
+| `nuget/v2.ts` | `datasources/nuget.rs` | full | v2 API covered |
+| `nuget/v3.ts` | `datasources/nuget.rs` | full | v3 API covered |
+
+### orb
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `orb/index.ts` | `datasources/orb.rs` | full | (429 lines) |
+| `orb/types.ts` | `datasources/orb.rs` | full | Types inlined |
+
+### packagist
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `packagist/index.ts` | `datasources/packagist.rs` | full | (270 lines) |
+| `packagist/schema.ts` | `datasources/packagist.rs` | full | Schema types via serde |
+
+### pod
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `pod/index.ts` | `datasources/cocoapods.rs` | full | (253 lines); CocoaPods trunk API |
+
+### puppet-forge
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `puppet-forge/common.ts` | `datasources/puppet_forge.rs` | full | Common logic inlined |
+| `puppet-forge/index.ts` | `datasources/puppet_forge.rs` | full | (369 lines) |
+| `puppet-forge/types.ts` | `datasources/puppet_forge.rs` | full | Types inlined |
+
+### pypi
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `pypi/common.ts` | `datasources/pypi.rs` | full | Common logic inlined |
+| `pypi/index.ts` | `datasources/pypi.rs` | full | (406 lines) |
+| `pypi/types.ts` | `datasources/pypi.rs` | full | Types inlined |
+
+### python-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `python-version/common.ts` | `datasources/python_version.rs` | full | Common logic inlined |
+| `python-version/index.ts` | `datasources/python_version.rs` | full | (479 lines) |
+| `python-version/schema.ts` | `datasources/python_version.rs` | full | Schema types via serde |
+
+### repology
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `repology/index.ts` | `datasources/repology.rs` | full | (634 lines) |
+| `repology/types.ts` | `datasources/repology.rs` | full | Types inlined |
+
+### rpm
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `rpm/common.ts` | — | not-started | |
+| `rpm/index.ts` | — | not-started | |
+| `rpm/providers/common.ts` | — | not-started | |
+| `rpm/providers/xml.ts` | — | not-started | |
+| `rpm/repomd.ts` | — | not-started | |
+
+### ruby-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `ruby-version/index.ts` | `datasources/ruby_version.rs` | full | (242 lines) |
+
+### rubygems
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `rubygems/common.ts` | `datasources/rubygems.rs` | full | Common logic inlined |
+| `rubygems/index.ts` | `datasources/rubygems.rs` | full | (472 lines) |
+| `rubygems/metadata-cache.ts` | `datasources/rubygems.rs` | full | Metadata caching inlined |
+| `rubygems/schema.ts` | `datasources/rubygems.rs` | full | Schema types via serde |
+| `rubygems/versions-endpoint-cache.ts` | `datasources/rubygems.rs` | full | Versions cache inlined |
+
+### rust-version
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `rust-version/index.ts` | `datasources/rust_version.rs` | full | (424 lines) |
+| `rust-version/parse.ts` | `datasources/rust_version.rs` | full | Parsing inlined |
+
+### sbt-package
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `sbt-package/index.ts` | `datasources/sbt_package.rs` | full | (1410 lines) |
+| `sbt-package/util.ts` | `datasources/sbt_package.rs` | full | Utils inlined |
+
+### sbt-plugin
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `sbt-plugin/index.ts` | `datasources/sbt_plugin.rs` | full | (718 lines) |
+
+### terraform-module
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `terraform-module/base.ts` | `datasources/terraform.rs` | full | Combined terraform-module + terraform-provider (568 lines) |
+| `terraform-module/index.ts` | `datasources/terraform.rs` | full | |
+| `terraform-module/schema.ts` | `datasources/terraform.rs` | full | Schema types via serde |
+| `terraform-module/types.ts` | `datasources/terraform.rs` | full | Types inlined |
+| `terraform-module/utils.ts` | `datasources/terraform.rs` | full | Utils inlined |
+
+### terraform-provider
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `terraform-provider/index.ts` | `datasources/terraform.rs` | full | Shares terraform.rs with terraform-module |
+| `terraform-provider/schema.ts` | `datasources/terraform.rs` | full | Schema types via serde |
+| `terraform-provider/types.ts` | `datasources/terraform.rs` | full | Types inlined |
+
+### typst
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `typst/index.ts` | `datasources/typst.rs` | full | (308 lines) |
+| `typst/schema.ts` | `datasources/typst.rs` | full | Schema types via serde |
+
+### unity3d
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `unity3d/index.ts` | `datasources/unity3d.rs` | full | (495 lines) |
+| `unity3d/schema.ts` | `datasources/unity3d.rs` | full | Schema types via serde |
+
+### unity3d-packages
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `unity3d-packages/index.ts` | `datasources/unity3d_packages.rs` | full | (435 lines) |
+| `unity3d-packages/schema.ts` | `datasources/unity3d_packages.rs` | full | Schema types via serde |
+
+### Datasources without any TS directory (Rust-only)
+
+| Rust file | Notes |
+|---|---|
+| `datasources/cocoapods.rs` | Maps to TS `pod/` |
+| `datasources/crates_io.rs` | Maps to TS `crate/` |
+| `datasources/docker_hub.rs` | Maps to TS `docker/` (subset) |
+| `datasources/gomod.rs` | Maps to TS `go/` |
+| `datasources/pub_dev.rs` | Maps to TS `dart/` |
+| `datasources/terraform.rs` | Maps to TS `terraform-module/` + `terraform-provider/` |
+
+---
+
+---
+
+## Versioning (`lib/modules/versioning/`)
+
+### Infrastructure (root-level files)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `versioning/api.ts` | `versioning.rs` (ALL_VERSIONING_IDS) | full | All IDs registered |
+| `versioning/common.ts` | `versioning.rs` | full | Common types and helpers |
+| `versioning/generic.ts` | `versioning.rs` | partial | Generic versioning interface |
+| `versioning/index.ts` | `versioning.rs` (get_versioning_list, get_versioning_id) | full | Registry and lookup |
+| `versioning/types.ts` | `versioning.rs` | full | Core types |
+| `versioning/schema.ts` | — | not-started | Zod schemas; Rust uses serde |
+| `versioning/distro.ts` | — | not-started | Distro versioning base |
+
+### apk
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `apk/index.ts` | `versioning/apk.rs` | full | (952 lines) |
+
+### aws-eks-addon
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `aws-eks-addon/index.ts` | `versioning/aws_eks_addon.rs` | full | (363 lines) |
+
+### aws-machine-image
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `aws-machine-image/index.ts` | `versioning/aws_machine_image.rs` | full | (106 lines) |
+
+### azure-rest-api
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `azure-rest-api/index.ts` | `versioning/azure_rest_api.rs` | full | (242 lines) |
+
+### bazel-module
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `bazel-module/bzlmod-version.ts` | `versioning/bazel_module/bzlmod_version.rs` | full | (536 lines) |
+| `bazel-module/index.ts` | `versioning/bazel_module.rs` | full | (214 lines) |
+
+### cargo
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `cargo/index.ts` | `versioning/cargo.rs` | full | (1601 lines) |
+
+### composer
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `composer/index.ts` | `versioning/composer.rs` | full | (957 lines) |
+
+### conan
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `conan/common.ts` | `versioning/conan.rs` | full | Common logic inlined |
+| `conan/index.ts` | `versioning/conan.rs` | full | (1984 lines) |
+| `conan/range.ts` | `versioning/conan.rs` | full | Range logic inlined |
+
+### conda
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `conda/index.ts` | `versioning/conda.rs` | full | (623 lines) |
+
+### deb
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `deb/index.ts` | `versioning/deb.rs` | full | (598 lines) |
+
+### debian
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `debian/common.ts` | `versioning/debian.rs` | full | Common logic inlined |
+| `debian/index.ts` | `versioning/debian.rs` | full | (1006 lines) |
+
+### deno
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `deno/index.ts` | `versioning/deno.rs` | full | (226 lines) |
+
+### devbox
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `devbox/index.ts` | `versioning/devbox.rs` | full | (202 lines) |
+
+### docker
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `docker/index.ts` | `versioning/docker.rs` | full | (406 lines) |
+
+### elm
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `elm/index.ts` | `versioning/elm.rs` | full | (626 lines) |
+
+### exact
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `exact/index.ts` | `versioning/exact.rs` | full | (208 lines) |
+
+### git
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `git/index.ts` | `versioning/git.rs` | full | (77 lines) |
+
+### github-actions
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `github-actions/index.ts` | `versioning/github_actions.rs` | full | (881 lines) |
+
+### glasskube
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `glasskube/index.ts` | `versioning/glasskube.rs` | full | (157 lines) |
+
+### go-mod-directive
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `go-mod-directive/index.ts` | `versioning/go_mod_directive.rs` | full | (194 lines) |
+
+### gradle
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gradle/compare.ts` | `versioning/gradle.rs` | full | Compare logic inlined |
+| `gradle/index.ts` | `versioning/gradle.rs` | full | (1156 lines) |
+
+### hashicorp
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `hashicorp/convertor.ts` | `versioning/hashicorp.rs` | full | Converter inlined |
+| `hashicorp/index.ts` | `versioning/hashicorp.rs` | full | (975 lines) |
+
+### helm
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `helm/index.ts` | `versioning/helm.rs` | full | (290 lines) |
+
+### hermit
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `hermit/index.ts` | `versioning/hermit.rs` | full | (500 lines) |
+
+### hex
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `hex/index.ts` | `versioning/hex.rs` | full | (708 lines) |
+
+### ivy
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `ivy/index.ts` | `versioning/ivy.rs` | full | (379 lines) |
+| `ivy/parse.ts` | `versioning/ivy.rs` | full | Parsing inlined |
+
+### kubernetes-api
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `kubernetes-api/index.ts` | `versioning/kubernetes_api.rs` | full | (271 lines) |
+
+### lambda-node
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `lambda-node/index.ts` | `versioning/lambda_node.rs` | full | (201 lines) |
+| `lambda-node/schedule.ts` | `versioning/lambda_node.rs` | full | Schedule inlined |
+
+### loose
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `loose/index.ts` | `versioning/loose.rs` | full | (271 lines) |
+
+### maven
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `maven/compare.ts` | `versioning/maven.rs` | full | Compare logic inlined |
+| `maven/index.ts` | `versioning/maven.rs` | full | (1636 lines) |
+
+### nixpkgs
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `nixpkgs/index.ts` | `versioning/nixpkgs.rs` | full | (223 lines) |
+
+### node
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `node/index.ts` | `versioning/node.rs` | full | (337 lines) |
+| `node/schedule.ts` | `versioning/node.rs` | full | Schedule inlined |
+
+### npm
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `npm/index.ts` | `versioning/npm.rs` | full | (970 lines) |
+| `npm/range.ts` | `versioning/npm.rs` | full | Range logic inlined |
+
+### nuget
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `nuget/index.ts` | `versioning/nuget.rs` | full | (2358 lines) |
+| `nuget/parser.ts` | `versioning/nuget.rs` | full | Parser inlined |
+| `nuget/range.ts` | `versioning/nuget.rs` | full | Range logic inlined |
+| `nuget/types.ts` | `versioning/nuget.rs` | full | Types inlined |
+| `nuget/version.ts` | `versioning/nuget.rs` | full | Version logic inlined |
+
+### pep440
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `pep440/index.ts` | `versioning/pep440.rs` | full | (1295 lines) |
+| `pep440/range.ts` | `versioning/pep440.rs` | full | Range logic inlined |
+
+### perl
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `perl/index.ts` | `versioning/perl.rs` | full | (269 lines) |
+
+### poetry
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `poetry/index.ts` | `versioning/poetry.rs` | full | (1224 lines) |
+| `poetry/patterns.ts` | `versioning/poetry.rs` | full | Patterns inlined |
+| `poetry/transform.ts` | `versioning/poetry.rs` | full | Transform inlined |
+
+### pvp
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `pvp/index.ts` | `versioning/pvp.rs` | full | (619 lines) |
+| `pvp/range.ts` | `versioning/pvp.rs` | full | Range logic inlined |
+| `pvp/types.ts` | `versioning/pvp.rs` | full | Types inlined |
+| `pvp/util.ts` | `versioning/pvp.rs` | full | Utils inlined |
+
+### python
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `python/index.ts` | `versioning/python.rs` | full | (258 lines) |
+
+### redhat
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `redhat/index.ts` | `versioning/redhat.rs` | full | (127 lines) |
+
+### regex
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `regex/index.ts` | `versioning/regex_versioning.rs` | full | (847 lines) |
+
+### rez
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `rez/index.ts` | `versioning/rez.rs` | full | (1576 lines) |
+| `rez/pattern.ts` | `versioning/rez.rs` | full | Pattern logic inlined |
+| `rez/transform.ts` | `versioning/rez.rs` | full | Transform inlined |
+
+### rpm
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `rpm/index.ts` | `versioning/rpm.rs` | full | (453 lines) |
+
+### ruby
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `ruby/index.ts` | `versioning/ruby.rs` | full | (1294 lines) |
+| `ruby/operator.ts` | `versioning/ruby.rs` | full | Operator logic inlined |
+| `ruby/range.ts` | `versioning/ruby.rs` | full | Range logic inlined |
+| `ruby/strategies/bump.ts` | `versioning/ruby.rs` | full | Bump strategy inlined |
+| `ruby/strategies/index.ts` | `versioning/ruby.rs` | full | Strategy dispatch inlined |
+| `ruby/strategies/replace.ts` | `versioning/ruby.rs` | full | Replace strategy inlined |
+| `ruby/strategies/widen.ts` | `versioning/ruby.rs` | full | Widen strategy inlined |
+| `ruby/version.ts` | `versioning/ruby.rs` | full | Version logic inlined |
+
+### rust-release-channel
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `rust-release-channel/index.ts` | `versioning/rust_release_channel.rs` | full | (1043 lines) |
+| `rust-release-channel/parse.ts` | `versioning/rust_release_channel.rs` | full | Parsing inlined |
+| `rust-release-channel/types.ts` | `versioning/rust_release_channel.rs` | full | Types inlined |
+| `rust-release-channel/util.ts` | `versioning/rust_release_channel.rs` | full | Utils inlined |
+
+### same-major
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `same-major/index.ts` | `versioning/same_major.rs` | full | (119 lines) |
+
+### semver
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `semver/common.ts` | `versioning/semver_generic.rs` | full | (338 lines) |
+| `semver/index.ts` | `versioning/semver_node.rs` | full | (146 lines); splits into semver_node + semver_generic |
+
+### semver-coerced
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `semver-coerced/index.ts` | `versioning/semver_coerced.rs` | full | (615 lines) |
+
+### semver-partial
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `semver-partial/index.ts` | `versioning/semver_partial.rs` | full | (791 lines) |
+
+### swift
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `swift/index.ts` | `versioning/swift.rs` | full | (458 lines) |
+| `swift/range.ts` | `versioning/swift.rs` | full | Range logic inlined |
+
+### ubuntu
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `ubuntu/common.ts` | `versioning/ubuntu.rs` | full | Common logic inlined |
+| `ubuntu/index.ts` | `versioning/ubuntu.rs` | full | (956 lines) |
+
+### unity3d
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `unity3d/index.ts` | `versioning/unity3d.rs` | full | (247 lines) |
+
+### unity3d-packages
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `unity3d-packages/index.ts` | `versioning/unity3d_packages.rs` | full | (202 lines) |
+
+---
+
+---
+
+## Platform (`lib/modules/platform/`)
+
+### Infrastructure (root-level files)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `platform/api.ts` | `platform.rs` (PlatformClient trait, AnyPlatformClient) | full | Trait + enum dispatch |
+| `platform/types.ts` | `platform.rs` (CurrentUser, RawFile, PlatformError) | full | Core types ported |
+| `platform/index.ts` | `platform.rs` (AnyPlatformClient::create) | full | Platform factory |
+| `platform/comment.ts` | — | not-started | PR comment formatting |
+| `platform/pr-body.ts` | `platform/pr_body.rs` | full | PR body construction |
+| `platform/scm.ts` | — | not-started | SCM interface |
+| `platform/default-scm.ts` | — | not-started | Default SCM implementation |
+| `platform/util.ts` | `platform/util.rs` | full | (69 lines) |
+
+### azure
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `azure/azure-got-wrapper.ts` | `platform/azure_utils.rs` | partial | HTTP helpers only (431 lines); no full client |
+| `azure/azure-helper.ts` | `platform/azure_utils.rs` | partial | Some helpers ported |
+| `azure/index.ts` | — | not-started | Main platform client |
+| `azure/schema.ts` | — | not-started | |
+| `azure/types.ts` | — | not-started | |
+| `azure/util.ts` | — | not-started | |
+
+### bitbucket
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `bitbucket/comments.ts` | — | not-started | |
+| `bitbucket/index.ts` | — | not-started | |
+| `bitbucket/pr-cache.ts` | — | not-started | |
+| `bitbucket/schema.ts` | — | not-started | |
+| `bitbucket/types.ts` | — | not-started | |
+| `bitbucket/utils.ts` | — | not-started | |
+
+### bitbucket-server
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `bitbucket-server/index.ts` | — | not-started | |
+| `bitbucket-server/pr-cache.ts` | — | not-started | |
+| `bitbucket-server/schema.ts` | — | not-started | |
+| `bitbucket-server/types.ts` | — | not-started | |
+| `bitbucket-server/utils.ts` | — | not-started | |
+
+### codecommit
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `codecommit/codecommit-client.ts` | — | not-started | |
+| `codecommit/index.ts` | — | not-started | |
+
+### forgejo
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `forgejo/forgejo-helper.ts` | `platform/gitea_forgejo_utils.rs` | partial | Shared Gitea/Forgejo helpers (201 lines) |
+| `forgejo/index.ts` | — | not-started | Main platform client |
+| `forgejo/pr-cache.ts` | — | not-started | |
+| `forgejo/schema.ts` | — | not-started | |
+| `forgejo/types.ts` | — | not-started | |
+| `forgejo/utils.ts` | — | not-started | |
+
+### gerrit
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gerrit/client.ts` | — | not-started | |
+| `gerrit/index.ts` | — | not-started | |
+| `gerrit/scm.ts` | — | not-started | |
+| `gerrit/types.ts` | — | not-started | |
+| `gerrit/utils.ts` | — | not-started | |
+
+### gitea
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gitea/gitea-helper.ts` | `platform/gitea_forgejo_utils.rs` | partial | Shared Gitea/Forgejo helpers (201 lines) |
+| `gitea/index.ts` | — | not-started | Main platform client |
+| `gitea/pr-cache.ts` | — | not-started | |
+| `gitea/schema.ts` | — | not-started | |
+| `gitea/types.ts` | — | not-started | |
+| `gitea/utils.ts` | — | not-started | |
+
+### github
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `github/api-cache.ts` | `platform/github_api_cache.rs` | full | (569 lines) |
+| `github/branch.ts` | `platform/github.rs` | partial | Branch ops partially covered |
+| `github/common.ts` | `platform/github.rs` | partial | Common helpers |
+| `github/graphql.ts` | `platform/github.rs` | partial | Some GraphQL queries ported |
+| `github/index.ts` | `platform/github.rs` | full | (1056 lines); main client |
+| `github/issue.ts` | `platform/github.rs` | partial | Issue operations |
+| `github/massage-markdown-links.ts` | `platform/github.rs` | partial | Markdown link massaging |
+| `github/pr.ts` | `platform/github.rs` | partial | PR operations |
+| `github/schema.ts` | `platform/github.rs` | partial | Schema types via serde |
+| `github/scm.ts` | — | not-started | GitHub SCM |
+| `github/types.ts` | `platform/github.rs` | full | Types inlined |
+| `github/user.ts` | `platform/github.rs` | partial | User operations |
+| `github/utils.ts` | `platform/github.rs` | partial | Utility functions |
+
+### gitlab
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `gitlab/code-owners.ts` | — | not-started | CODEOWNERS parsing |
+| `gitlab/http.ts` | `platform/gitlab.rs` | full | HTTP client inlined |
+| `gitlab/index.ts` | `platform/gitlab.rs` | full | (737 lines); main client |
+| `gitlab/merge-request.ts` | `platform/gitlab.rs` | partial | MR operations |
+| `gitlab/pr-cache.ts` | `platform/gitlab.rs` | partial | PR caching |
+| `gitlab/schema.ts` | `platform/gitlab.rs` | partial | Schema types via serde |
+| `gitlab/types.ts` | `platform/gitlab.rs` | full | Types inlined |
+| `gitlab/utils.ts` | `platform/gitlab.rs` | partial | Utility functions |
+
+### local
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `local/index.ts` | `platform/local.rs` | full | (266 lines) |
+| `local/scm.ts` | `platform/local.rs` | full | SCM ops inlined |
+
+### scm-manager
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `scm-manager/index.ts` | `platform/scm_manager.rs` | partial | (262 lines); basic operations |
+| `scm-manager/mapper.ts` | `platform/scm_manager.rs` | partial | Mapping logic |
+| `scm-manager/schema.ts` | `platform/scm_manager.rs` | partial | Schema types |
+| `scm-manager/scm-manager-helper.ts` | `platform/scm_manager.rs` | partial | Helper functions |
+| `scm-manager/types.ts` | `platform/scm_manager.rs` | partial | Types inlined |
+| `scm-manager/utils.ts` | `platform/scm_manager.rs` | partial | Utility functions |
+
+### utils
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `utils/pr-body.ts` | `platform/pr_body.rs` | full | Covered by pr_body.rs |
+| `utils/read-only-issue-body.ts` | — | not-started | |
 
 ---
 
 ## Config (`lib/config/`)
 
+### config (top-level)
+
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/config/defaults.ts` | `crates/renovate-core/src/config.rs` | partial | Core implicit default factories ported |
-| `lib/config/options/index.ts` | `crates/renovate-core/src/config.rs`; `crates/renovate-core/src/repo_config.rs` | partial | Option metadata partially ported for global/repository config retention and CLI/env option surface, including mode, printConfig, autodiscover filters, prCommitsPerRunLimit, gitPrivateKeyPassphrase, minimumGroupSize, group object, prNotPendingHours, commitHourlyLimit, branchConcurrentLimit, minimumReleaseAgeBehaviour, abandonmentThreshold, Dependency Dashboard controls, customizeDashboard, configWarningReuseIssue, fork-mode globals, update-type config blocks, lockFileMaintenance, internalChecksAsSuccess, internalChecksFilter, useBaseBranchConfig, gitIgnoredAuthors, gitAuthor, excludeCommitPaths, registryAliases, updateInternalDeps, rollbackPrs, updatePinnedDependencies, fetchChangeLogs, cloneSubmodules, cloneSubmodulesFilter, postUpdateOptions, constraints, hostRules, recreateWhen, keepUpdatedLabel, rebaseLabel, stopUpdatingLabel, automergeStrategy, automergeComment, ignoreTests, pruneBranchAfterAutomerge, bbAutoResolvePrTasks, bbUseDefaultReviewers, vulnerabilityAlerts, osvVulnerabilityAlerts, branchName, branchNameStrict, branchPrefixOld, branchTopic, bumpVersion, commitMessage, commitMessageTopic, commitMessageLowerCase, commitBodyTable, prBodyTemplate, prBodyDefinitions, prBodyHeadingDefinitions, prBodyColumns, prBodyNotes, suppressNotifications, pruneStaleBranches, unicodeEmoji, gitLabIgnoreApprovals, userStrings, logLevelRemap, milestone, optimizeForDisabled, gitUrl, checkedBranches, gitNoVerify, deleteAdditionalConfigFile, configValidationError, writeDiscoveredRepos, prTitle, prTitleStrict, prHeader, prFooter, azureWorkItemId, autoApprove, assigneesFromCodeOwners, expandCodeOwnersGroups, assigneesSampleSize, ignoreReviewers, reviewersFromCodeOwners, filterUnavailableUsers, forkModeDisallowMaintainerEdits, confidential, reviewersSampleSize, additionalReviewers, package rule identity overrides, onboarding, object-valued, and scalar self-hosted global options |
-| `lib/config/app-strings.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Config filename expansion, user `configFileNames`, and platform filtering ported |
-| `lib/config/parse.ts` | `crates/renovate-core/src/config/file.rs` | partial | JSON/JSON5 parse result handling ported |
-| `lib/config/global.ts` | `crates/renovate-core/src/config.rs` | partial | Global option list and config types partially ported, including mode, printConfig, autodiscover filters, prCommitsPerRunLimit, gitPrivateKeyPassphrase, onboarding/config-file, fork-mode globals, optimizeForDisabled, gitUrl, object-valued, and scalar self-hosted global option retention |
-| `lib/config/validation.ts` | `crates/renovate-core/src/config/migrate_validate.rs` | partial | Config key validation, global-only option enforcement, template option checks, and known-key gating ported; full schema validation against all option types not ported |
-| `lib/config/migration.ts` | `crates/renovate-core/src/config/migrate_validate.rs` | partial | Core deprecated-key migration (automerge, semanticCommits, compatibility, depTypes, pinVersions, baseBranch, versionStrategy, packageRules matchers, extends presets, datasource aliases, schedule strings) ported via migrate_config; MigrationsService class pattern not ported |
-| `lib/config/migrate-validate.ts` | `crates/renovate-core/src/config/migrate_validate.rs` | partial | Runtime migrate/massage/validate flow ported, including selected global-only option warnings |
-| `lib/config/massage.ts` | `crates/renovate-core/src/config/massage.rs` | partial | Config massage helpers for scalar, packageRules, and update-type expansion ported |
-| `lib/config/secrets.ts` | `crates/renovate-core/src/config/secrets.rs` | partial | Secret/variable validation and interpolation ported |
-| `lib/config/inherit.ts` | `crates/renovate-core/src/config.rs` | partial | Inheritable option list and configFileNames lookup ported |
-| `lib/config/decrypt.ts` | — | out-of-scope | Platform encryption feature |
+|---|---|---|---|
+| `config/app-strings.ts` | `repo_config.rs` | full | Config file name constants (`getConfigFileNames`) embedded in repo_config |
+| `config/decrypt.ts` | `config/decrypt.rs` | partial | Core decrypt logic ported; sub-delegates bcpgp/openpgp not yet split out |
+| `config/decrypt/bcpgp.ts` | — | not-started | BCP/GPG decryption sub-module |
+| `config/decrypt/openpgp.ts` | — | not-started | OpenPGP decryption sub-module |
+| `config/defaults.ts` | `config.rs` | full | `GlobalConfig` defaults and `GLOBAL_CONFIG_OPTIONS` list |
+| `config/global.ts` | `config.rs` | full | Global-only option names, `GlobalConfig` struct |
+| `config/index.ts` | `config.rs` | full | Re-exports from config module |
+| `config/inherit.ts` | — | not-started | Config inheritance |
+| `config/massage.ts` | `config/massage.rs` | full | Config normalization (string→array coercion, nested massage) |
+| `config/migrate-validate.ts` | `config/migrate_validate.rs` | full | Migration + validation (7060 lines); includes validation logic |
+| `config/migration.ts` | — | not-started | Top-level migration dispatcher |
+| `config/schema.ts` | — | not-started | JSON Schema generation |
+| `config/secrets.ts` | `config/secrets.rs` | full | Secrets and variables validation + interpolation |
+| `config/types.ts` | `config.rs`, `repo_config.rs` | full | Types defined inline in Rust structs |
+| `config/utils.ts` | — | not-started | Config utility helpers |
+| `config/parse.ts` | — | not-started | Config parsing orchestration |
+| `config/validation.ts` | `config/migrate_validate.rs` | partial | Validation merged into migrate_validate; standalone `validate()` not split out |
+
+### config/migrations (base)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `config/migrations/base/abstract-migration.ts` | — | not-started | Base migration class |
+| `config/migrations/base/remove-property-migration.ts` | — | not-started | Remove-property migration |
+| `config/migrations/base/rename-property-migration.ts` | — | not-started | Rename-property migration |
+
+### config/migrations (custom)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `config/migrations/custom/automerge-major-migration.ts` | — | not-started | |
+| `config/migrations/custom/automerge-migration.ts` | — | not-started | |
+| `config/migrations/custom/automerge-minor-migration.ts` | — | not-started | |
+| `config/migrations/custom/automerge-patch-migration.ts` | — | not-started | |
+| `config/migrations/custom/automerge-type-migration.ts` | — | not-started | |
+| `config/migrations/custom/azure-gitlab-automerge-migration.ts` | — | not-started | |
+| `config/migrations/custom/base-branch-migration.ts` | — | not-started | |
+| `config/migrations/custom/binary-source-migration.ts` | — | not-started | |
+| `config/migrations/custom/branch-name-migration.ts` | — | not-started | |
+| `config/migrations/custom/branch-prefix-migration.ts` | — | not-started | |
+| `config/migrations/custom/compatibility-migration.ts` | — | not-started | |
+| `config/migrations/custom/composer-ignore-platform-reqs-migration.ts` | — | not-started | |
+| `config/migrations/custom/custom-managers-migration.ts` | — | not-started | |
+| `config/migrations/custom/datasource-migration.ts` | — | not-started | |
+| `config/migrations/custom/dep-types-migration.ts` | — | not-started | |
+| `config/migrations/custom/dry-run-migration.ts` | — | not-started | |
+| `config/migrations/custom/enabled-managers-migration.ts` | — | not-started | |
+| `config/migrations/custom/extends-migration.ts` | — | not-started | |
+| `config/migrations/custom/fetch-release-notes-migration.ts` | — | not-started | |
+| `config/migrations/custom/file-match-migration.ts` | — | not-started | |
+| `config/migrations/custom/go-mod-tidy-migration.ts` | — | not-started | |
+| `config/migrations/custom/host-rules-migration.ts` | — | not-started | |
+| `config/migrations/custom/ignore-node-modules-migration.ts` | — | not-started | |
+| `config/migrations/custom/ignore-npmrc-file-migration.ts` | — | not-started | |
+| `config/migrations/custom/include-forks-migration.ts` | — | not-started | |
+| `config/migrations/custom/match-datasources-migration.ts` | — | not-started | |
+| `config/migrations/custom/match-managers-migration.ts` | — | not-started | |
+| `config/migrations/custom/match-strings-migration.ts` | — | not-started | |
+| `config/migrations/custom/node-migration.ts` | — | not-started | |
+| `config/migrations/custom/package-files-migration.ts` | — | not-started | |
+| `config/migrations/custom/package-name-migration.ts` | — | not-started | |
+| `config/migrations/custom/package-pattern-migration.ts` | — | not-started | |
+| `config/migrations/custom/package-rules-migration.ts` | — | not-started | |
+| `config/migrations/custom/packages-migration.ts` | — | not-started | |
+| `config/migrations/custom/path-rules-migration.ts` | — | not-started | |
+| `config/migrations/custom/pin-versions-migration.ts` | — | not-started | |
+| `config/migrations/custom/platform-commit-migration.ts` | — | not-started | |
+| `config/migrations/custom/post-update-options-migration.ts` | — | not-started | |
+| `config/migrations/custom/rebase-conflicted-prs-migration.ts` | — | not-started | |
+| `config/migrations/custom/rebase-stale-prs-migration.ts` | — | not-started | |
+| `config/migrations/custom/recreate-closed-migration.ts` | — | not-started | |
+| `config/migrations/custom/renovate-fork-migration.ts` | — | not-started | |
+| `config/migrations/custom/require-config-migration.ts` | — | not-started | |
+| `config/migrations/custom/required-status-checks-migration.ts` | — | not-started | |
+| `config/migrations/custom/schedule-migration.ts` | — | not-started | |
+| `config/migrations/custom/semantic-commits-migration.ts` | — | not-started | |
+| `config/migrations/custom/semantic-prefix-migration.ts` | — | not-started | |
+| `config/migrations/custom/separate-major-release-migration.ts` | — | not-started | |
+| `config/migrations/custom/separate-multiple-major-migration.ts` | — | not-started | |
+| `config/migrations/custom/stability-days-migration.ts` | — | not-started | |
+| `config/migrations/custom/suppress-notifications-migration.ts` | — | not-started | |
+| `config/migrations/custom/trust-level-migration.ts` | — | not-started | |
+| `config/migrations/custom/unpublish-safe-migration.ts` | — | not-started | |
+| `config/migrations/custom/update-lock-files-migration.ts` | — | not-started | |
+| `config/migrations/custom/upgrade-in-range-migration.ts` | — | not-started | |
+| `config/migrations/custom/version-strategy-migration.ts` | — | not-started | |
+
+### config/migrations (index + service)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `config/migrations/index.ts` | — | not-started | Migration index |
+| `config/migrations/migrations-service.ts` | — | not-started | Migration service orchestration |
+| `config/migrations/types.ts` | — | not-started | Migration-specific types |
+
+### config/options
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `config/options/env-options.ts` | `config_env.rs` (CLI) | partial | Env-to-option mappings done in CLI crate's config_env |
+| `config/options/env.ts` | `config_env.rs` (CLI) | partial | Env var parsing; subset ported |
+| `config/options/index.ts` | `config.rs` | partial | Core option definitions ported; not all ~300 options covered |
+
+### config/presets (top-level)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `config/presets/common.ts` | — | not-started | Preset common utilities |
+| `config/presets/forgejo/index.ts` | — | not-started | Forgejo preset resolver |
+| `config/presets/gitea/index.ts` | — | not-started | Gitea preset resolver |
+| `config/presets/github/index.ts` | — | not-started | GitHub preset resolver |
+| `config/presets/gitlab/index.ts` | — | not-started | GitLab preset resolver |
+| `config/presets/http/index.ts` | — | not-started | HTTP preset resolver |
+| `config/presets/index.ts` | — | not-started | Preset resolution orchestrator |
+| `config/presets/local/common.ts` | — | not-started | Local preset common |
+| `config/presets/local/index.ts` | — | not-started | Local preset resolver |
+| `config/presets/npm/index.ts` | — | not-started | npm preset resolver |
+| `config/presets/parse.ts` | — | not-started | Preset name parser |
+| `config/presets/types.ts` | — | not-started | Preset types |
+| `config/presets/util.ts` | — | not-started | Preset utilities |
+
+### config/presets/internal
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `config/presets/internal/abandonments.preset.ts` | — | not-started | |
+| `config/presets/internal/auto-generate-replacements.ts` | — | not-started | |
+| `config/presets/internal/config.preset.ts` | — | not-started | |
+| `config/presets/internal/custom-managers.preset.ts` | — | not-started | |
+| `config/presets/internal/default.preset.ts` | — | not-started | |
+| `config/presets/internal/docker.preset.ts` | — | not-started | |
+| `config/presets/internal/global.preset.ts` | — | not-started | |
+| `config/presets/internal/group.preset.ts` | — | not-started | |
+| `config/presets/internal/helpers.preset.ts` | — | not-started | |
+| `config/presets/internal/index.ts` | — | not-started | |
+| `config/presets/internal/merge-confidence.preset.ts` | — | not-started | |
+| `config/presets/internal/monorepos.preset.ts` | `monorepos.rs` | full | Monorepo preset generation from embedded JSON |
+| `config/presets/internal/packages.preset.ts` | — | not-started | |
+| `config/presets/internal/preview.preset.ts` | — | not-started | |
+| `config/presets/internal/replacements.preset.ts` | `replacements.rs` | full | Replacement preset generation from embedded JSON |
+| `config/presets/internal/schedule.preset.ts` | — | not-started | |
+| `config/presets/internal/security.preset.ts` | — | not-started | |
+| `config/presets/internal/workarounds.preset.ts` | — | not-started | |
+
+### config/validation-helpers
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `config/validation-helpers/match-base-branches.ts` | — | not-started | Base branch validation |
+| `config/validation-helpers/regex-glob-matchers.ts` | — | not-started | Regex/glob matcher validation |
+| `config/validation-helpers/types.ts` | — | not-started | Validation helper types |
+| `config/validation-helpers/utils.ts` | — | not-started | Validation helper utilities |
+
+### Config summary
+
+| Status | Count |
+|---|---|
+| full | 9 |
+| partial | 5 |
+| not-started | 74 |
+| out-of-scope | 0 |
 
 ---
 
-## Workers & Utilities
+## Util (`lib/util/`)
+
+### util (top-level)
 
 | Renovate source file | Rust file | Status | Notes |
-|----------------------|-----------|--------|-------|
-| `lib/workers/repository/init/merge.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Repo config discovery and merge partially ported, including user `configFileNames` lookup and global `migratePresets` application |
-| `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | full | `branchTopic`, `groupBranchTopic`, `majorGroupSlug`, `generateBranchName`, `cleanBranchName`, `hashedBranchLength`, and `branchNameStrict` all ported and wired into report builders. |
-| `lib/workers/repository/updates/flatten.ts` | `crates/renovate-core/src/branch.rs` | full | `sanitizeDepName` fully ported and used by branch name generation. Full update flattening lives in the pipeline orchestration layer (`main.rs`). |
-| `lib/workers/repository/updates/branchify.ts` | `crates/renovate-cli/src/report_builders.rs` | full | `collect_branch_updates` groups `UpdateAvailable` deps by `branch_name`, deduplicating same-branch entries into a single PR. Mirrors `branchifyUpgrades`. |
-| `lib/workers/repository/update/pr/body/notes.ts` | `crates/renovate-core/src/branch.rs` | partial | `get_pr_extra_notes` fully ported and tested. `getPrNotes` (Handlebars template rendering) not yet ported. |
-| `lib/workers/repository/update/pr/body/footer.ts` | `crates/renovate-core/src/branch.rs` | full | `get_pr_footer` fully ported and tested. |
-| `lib/workers/repository/update/pr/body/header.ts` | `crates/renovate-core/src/branch.rs` | full | `get_pr_header` fully ported and tested. |
-| `lib/workers/repository/update/pr/body/updates-table.ts` | `crates/renovate-core/src/branch.rs` | partial | Default columns (`Package`, `Type`, `Update`, `Change`, `Pending`) rendered without Handlebars. Missing: custom `prBodyDefinitions` via Handlebars templates, duplicate-upgrade comparison, `prBodyHeadingDefinitions`. |
-| `lib/workers/global/config/parse/cli.ts` | `crates/renovate-cli/src/cli.rs` | partial | CLI arg parsing ported, including enabled/automerge booleans, Dependency Dashboard controls, fork-mode globals, mode, printConfig, autodiscover filters, prCommitsPerRunLimit, username/password auth flags, runtime path/timeout flags, Docker sidecar flags, binarySource, platformCommit, gitUrl, report flags, unicodeEmoji, optimizeForDisabled, checkedBranches, gitNoVerify, deleteAdditionalConfigFile, configValidationError, writeDiscoveredRepos, expanded global security/cache flags, onboarding/config-file flags, object-valued global flags, scalar self-hosted global flags, and JSON5 structured values |
-| `lib/workers/global/config/parse/env.ts` | `crates/renovate-cli/src/config_env.rs` | partial | Env config parsing partially ported, including JSON5 structured values, object parse errors, hostRules array-only coercion, renamed env vars, converted experimental vars, empty-value filtering, repositories, string-array env coercion, enabled/automerge booleans, Dependency Dashboard controls, fork-mode globals, mode, printConfig, autodiscover filters, prCommitsPerRunLimit, gitPrivateKeyPassphrase, runtime path/timeout options, Docker sidecar options, binarySource, platformCommit, gitUrl, report options, unicodeEmoji, optimizeForDisabled, checkedBranches, gitNoVerify, deleteAdditionalConfigFile, configValidationError, writeDiscoveredRepos, expanded global security/cache options, onboarding/config-file options, object-valued global options, scalar self-hosted global options, onboardingConfig, allowCommandTemplating, and forkProcessing |
-| `lib/util/cache/memory/index.ts` | `crates/renovate-core/src/cache/memory.rs` | full | MemCache init/get/set/reset and datasource-key cleanup fully ported |
-| `lib/util/cache/package/index.ts` | `crates/renovate-core/src/cache/package.rs` | full | PackageCache get/set/set_with_raw_ttl/cleanup and MemCache dedup layer fully ported |
-| `lib/util/cache/package/backend.ts` | `crates/renovate-core/src/cache/package.rs` | partial | File backend ported; Missing: Redis backend, SQLite backend |
-| `lib/util/cache/package/impl/base.ts` | `crates/renovate-core/src/cache/package.rs` | full | PackageCacheBase trait inlined into FilePackageCache |
-| `lib/util/cache/package/impl/file.ts` | `crates/renovate-core/src/cache/package.rs` | full | FilePackageCache with TTL-aware get/set/cleanup fully ported |
-| `lib/util/cache/package/impl/redis.ts` | — | not-started | Missing: Redis backend; requires self-hosted Redis |
-| `lib/util/cache/package/impl/sqlite.ts` | — | not-started | Missing: SQLite backend |
-| `lib/util/cache/package/key.ts` | `crates/renovate-core/src/cache/package.rs` | full | getCombinedKey logic inlined into PackageCache::mem_key |
-| `lib/util/cache/package/ttl.ts` | `crates/renovate-core/src/cache/package.rs` | full | getTtlOverride and resolveTtlValues fully ported |
-| `lib/util/cache/package/namespaces.ts` | `crates/renovate-core/src/cache/package.rs` | full | PackageCacheNamespace type alias ported |
-| `lib/util/cache/package/types.ts` | `crates/renovate-core/src/cache/package.rs` | full | CachedRecord type ported |
-| `lib/util/cache/package/with-cache.ts` | `crates/renovate-core/src/cache/package.rs` | full | withCache soft/hard TTL, stale fallback, shouldCacheResult predicate fully ported |
-| `lib/util/string-match.ts` | `crates/renovate-core/src/string_match.rs` | partial | String matching partially ported |
-| `lib/util/package-rules/index.ts` | `crates/renovate-core/src/package_rule.rs`; `crates/renovate-core/src/repo_config.rs` | full | Package rule matching/application fully ported including sequential identity overrides, matchConfidence |
-| `lib/util/package-rules/managers.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Inlined |
-| `lib/util/package-rules/dep-names.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Inlined |
-
-## Versioning (`lib/modules/versioning/`)
-
-| TypeScript source | Rust file | Status | Notes |
 |---|---|---|---|
-| `lib/modules/versioning/aws-machine-image/index.ts` | `crates/renovate-core/src/versioning/aws_machine_image.rs` | partial | Core version comparison ported |
-| `lib/modules/versioning/cargo/index.ts` | `crates/renovate-core/src/versioning/cargo.rs` | full | Full VersioningApi: matches, isValid, isVersion, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, isSingleVersion, getPinnedValue, getNewValue, isBreaking |
-| `lib/modules/versioning/composer/index.ts` | `crates/renovate-core/src/versioning/composer.rs` | full | getMajor/Minor/Patch, equals, isGreaterThan, isSingleVersion, isStable, isValid, isVersion, isLessThanRange, get/minSatisfyingVersion, sortVersions, isCompatible, matches, getNewValue ported |
-| `lib/modules/versioning/deno/index.ts` | `crates/renovate-core/src/versioning/deno.rs` | done | isValid, getSatisfyingVersion, isSingleVersion, subset, getNewValue |
-| `lib/modules/versioning/devbox/index.ts` | `crates/renovate-core/src/versioning/devbox.rs` | done | isValid, isVersion, isCompatible, getNewValue |
-| `lib/modules/versioning/exact/index.ts` | `crates/renovate-core/src/versioning/exact.rs` | partial | Exact version matching ported |
-| `lib/modules/versioning/git/index.ts` | `crates/renovate-core/src/versioning/git.rs` | partial | Git hash versioning ported |
-| `lib/modules/versioning/github-actions/index.ts` | `crates/renovate-core/src/versioning/github_actions.rs` | partial | GitHub Actions versioning ported |
-| `lib/modules/versioning/glasskube/index.ts` | `crates/renovate-core/src/versioning/glasskube.rs` | done | isValid, isVersion, getMajor, getNewValue |
-| `lib/modules/versioning/hashicorp/index.ts` | `crates/renovate-core/src/versioning/hashicorp.rs` | done | Full HashiCorp constraint versioning: parseConstraint, satisfies, isValid, getNewValue, getSatisfying |
-| `lib/modules/versioning/helm/index.ts` | `crates/renovate-core/src/versioning/helm.rs` | partial | Helm chart versioning ported |
-| `lib/modules/versioning/gradle/compare.ts` | `crates/renovate-core/src/versioning/gradle.rs` | full | Tokenizer, qualifier ranking, compare, parsePrefixRange, parseMavenBasedRange, parseSingleVersionRange fully ported |
-| `lib/modules/versioning/gradle/index.ts` | `crates/renovate-core/src/versioning/gradle.rs` | full | Full VersioningApi: compare, isVersion, isStable, isValid, isGreaterThan, getMajor/Minor/Patch, matches, getSatisfyingVersion, minSatisfyingVersion, getNewValue (prefix ranges, maven ranges, !!preferred) |
-| `lib/modules/versioning/hex/index.ts` | `crates/renovate-core/src/versioning/hex.rs` | full | Full VersioningApi: matches, isValid, isSingleVersion, getPinnedValue, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, getNewValue (all range strategies including widen/bump); fixed AND compound comparators for Rust semver crate |
-| `lib/modules/versioning/bazel-module/index.ts` | `crates/renovate-core/src/versioning/bazel_module/mod.rs` | full | Full VersioningApi: getMajor/Minor/Patch, equals, isGreaterThan, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, sortVersions, isStable, isValid, isVersion, matches, getNewValue |
-| `lib/modules/versioning/deb/index.ts` | `crates/renovate-core/src/versioning/deb.rs` | full | Debian version parsing and dpkg comparison algorithm; isValid, equals, isGreaterThan, isSingleVersion, getMajor/Minor/Patch |
-| `lib/modules/versioning/debian/index.ts` | `crates/renovate-core/src/versioning/debian.rs` | full | Debian versioning API with distro-info data, rolling releases, dated codenames; isValid, isStable, equals, isGreaterThan, getMajor/Minor/Patch, getNewValue, sortVersions, matches, getSatisfyingVersion, minSatisfyingVersion |
-| `lib/modules/versioning/regex/index.ts` | `crates/renovate-core/src/versioning/regex_versioning.rs` | full | Full regex-based VersioningApi with named capture groups (major/minor/patch/prerelease/compatibility/build/revision); generic comparison algorithm ported |
-| `lib/logger/utils.ts` | `crates/renovate-core/src/util.rs` | partial | sanitize_urls: URL credential redaction for all schemes, data URI redaction; sanitizeValue for objects added; Missing: prepareError/prepareZodIssues |
-| `lib/modules/manager/git-submodules/artifacts.ts` | `crates/renovate-core/src/extractors/git_submodules.rs` | full | update_artifacts: creates file-addition entries for each updated submodule dep |
-| `lib/util/host-rules.ts` | `crates/renovate-core/src/util/host_rules.rs` | full | add/find/findAll/getAll/clear/hosts/hostType: full host-rule registry with matchHost prefix matching, hostname/domain suffix matching, readOnly and hostType filtering, legacy field migration |
-| `lib/util/http/hooks.ts` | `crates/renovate-core/src/http.rs` | full | is_response_ok: HTTP 200-299/304 OK check with followRedirect support |
-| `lib/modules/platform/pr-body.ts` | `crates/renovate-core/src/platform/pr_body.rs` | full | getPrBodyStruct, hashBody: SHA-256 hashing with debug/reviewable/emoji stripping; rebase flag detection; base64 debug data extraction; config hash extraction |
-| `lib/modules/platform/util.ts` | `crates/renovate-core/src/platform/util.rs` | full | repoFingerprint (SHA-512 hex of endpoint::repoId), getNewBranchName (refs/heads/ prefix) |
-| `lib/modules/platform/local/index.ts` | `crates/renovate-core/src/platform/local.rs` | partial | `getCurrentUser`, `getRawFile`, `getFileList` fully ported; `createPr`, `updatePr`, `getBranchStatus` stubbed as no-ops for local platform |
-| `lib/util/timestamp.ts` | `crates/renovate-core/src/timestamp.rs` | full | asTimestamp/MaybeTimestamp: multi-format date parsing (ISO 8601, RFC 2822, SQL, compact yyyyMMddHHmmss, slash-date, month-name) with millennium+tomorrow validity window |
-| `lib/workers/global/config/parse/host-rules-from-env.ts` | `crates/renovate-core/src/config/host_rules_from_env.rs` | full | Environment variable → host rule parsing; datasource/platform detection, double-underscore hyphen encoding, auth field extraction, deduplication |
-| `lib/modules/versioning/swift/range.ts` | `crates/renovate-core/src/versioning/swift.rs` | full | toSemverRange conversion for all Swift PM range syntax variants |
-| `lib/modules/versioning/swift/index.ts` | `crates/renovate-core/src/versioning/swift.rs` | full | Full VersioningApi: isVersion, isValid, isStable, getMajor/Minor/Patch, equals, isGreaterThan, sortVersions, matches, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, getNewValue |
-| `lib/modules/versioning/ivy/parse.ts` | `crates/renovate-core/src/versioning/ivy.rs` | full | parseDynamicRevision: latest/subrevision/range dispatch ported |
-| `lib/modules/versioning/ivy/index.ts` | `crates/renovate-core/src/versioning/ivy.rs` | full | Full VersioningApi: parseDynamicRevision, isValid, isVersion, matches (latest/subrev/range), getSatisfyingVersion, minSatisfyingVersion, getNewValue, isCompatible, isSingleVersion; delegates compare/getMajor/isStable to Maven |
-| `lib/modules/versioning/loose/index.ts` | `crates/renovate-core/src/versioning/loose.rs` | partial | Loose semver comparison ported |
-| `lib/modules/versioning/maven/index.ts` | `crates/renovate-core/src/versioning/maven.rs` | partial | Maven version ordering ported |
-| `lib/modules/versioning/nixpkgs/index.ts` | `crates/renovate-core/src/versioning/nixpkgs.rs` | done | isValid, isVersion, getMajor, getNewValue for nixpkgs date-based versions |
-| `lib/modules/versioning/npm/index.ts` | `crates/renovate-core/src/versioning/npm.rs` | partial | npm semver ranges ported; Missing: full getNewValue range strategies |
-| `lib/modules/versioning/poetry/index.ts` | `crates/renovate-core/src/versioning/poetry.rs` | full | Full VersioningApi: poetry2semver/semver2poetry/poetry2npm/npm2poetry, all range matching, get/minSatisfying, getNewValue (bump/replace), subset |
-| `lib/modules/versioning/poetry/transform.ts` | `crates/renovate-core/src/versioning/poetry.rs` | full | poetry2semver, semver2poetry, poetry2npm, npm2poetry inlined |
-| `lib/modules/versioning/poetry/patterns.ts` | `crates/renovate-core/src/versioning/poetry.rs` | full | VERSION_PATTERN and RANGE_COMPARATOR_PATTERN inlined as regex functions |
-| `lib/modules/versioning/python/index.ts` | `crates/renovate-core/src/versioning/python.rs` | full | Full VersioningApi delegating to poetry + pep440: isValid, matches (PEP 440 ==X.Y.*), isLessThanRange, min/getSatisfyingVersion, getNewValue, subset, isBreaking |
-| `lib/modules/versioning/nuget/index.ts` | `crates/renovate-core/src/versioning/nuget.rs` | partial | NuGet versioning ported |
-| `lib/modules/versioning/pep440/index.ts` | `crates/renovate-core/src/versioning/pep440.rs` | partial | PEP 440 Python versioning ported |
-| `lib/modules/versioning/perl/index.ts` | `crates/renovate-core/src/versioning/perl.rs` | done | isValid, isVersion, getMajor, getNewValue for Perl versions |
-| `lib/modules/versioning/pvp/index.ts` | `crates/renovate-core/src/versioning/pvp.rs` | partial | PVP Haskell versioning ported |
-| `lib/modules/versioning/redhat/index.ts` | `crates/renovate-core/src/versioning/redhat.rs` | partial | Red Hat RPM versioning ported |
-| `lib/modules/versioning/rpm/index.ts` | `crates/renovate-core/src/versioning/rpm.rs` | partial | RPM versioning ported |
-| `lib/modules/versioning/semver-coerced/index.ts` | `crates/renovate-core/src/versioning/semver_coerced.rs` | partial | Coerced semver ported |
-| `lib/modules/versioning/unity3d/index.ts` | `crates/renovate-core/src/versioning/unity3d.rs` | partial | Unity3D versioning ported |
-| `lib/modules/versioning/unity3d-packages/index.ts` | `crates/renovate-core/src/versioning/unity3d_packages.rs` | partial | Unity3D packages versioning ported |
-| `lib/util/git/auth.ts` | `crates/renovate-core/src/util.rs` | full | Git authenticated environment variable generation, host-rule aggregation, GitHub API host-rule rewrites, additional datasource host types, GitLab token username, username/password encoding, invalid host filtering, and Bitbucket Server `/scm/` rewrite ported |
-| `lib/util/git/url.ts` | `crates/renovate-core/src/util.rs` | full | Git URL parsing, HTTP URL coercion, platform credential injection, Bitbucket Server SSH URL rewriting, and host-rule credential lookup ported |
-| `lib/util/markdown.ts` | `crates/renovate-core/src/util.rs` | full | Markdown release-note sanitizing and GitHub-style linkification ported, including commit, issue, mention, and angle-bracket URL rendering |
-| `lib/modules/datasource/postprocess-release.ts` | `crates/renovate-core/src/datasources.rs` | full | postprocessRelease: dispatches release postprocessing through datasource-specific hooks; default passthrough when no override exists |
-| `lib/modules/platform/github/issue.ts` | `crates/renovate-core/src/platform/github_api_cache.rs` | full | GithubIssueCache: issue storage, update, delete, reconcile queue, failed reconciliation reset |
+| `util/array.ts` | — | not-started | Array utility functions |
+| `util/assign-keys.ts` | — | not-started | Key assignment utility |
+| `util/check-token.ts` | — | not-started | Token validation |
+| `util/clone.ts` | — | not-started | Deep clone |
+| `util/coerce.ts` | — | not-started | Coercion utilities |
+| `util/common.ts` | — | not-started | Common utilities |
+| `util/compress.ts` | — | not-started | Compression utilities |
+| `util/date.ts` | — | not-started | Date utilities |
+| `util/emoji.ts` | — | not-started | Emoji utilities |
+| `util/env.ts` | `util.rs` | partial | BASIC_ENV_VARS list ported; full env filtering not done |
+| `util/filter-map.ts` | — | not-started | Filter-map utility |
+| `util/fingerprint.ts` | — | not-started | Fingerprinting |
+| `util/hash.ts` | — | not-started | Hashing utilities |
+| `util/host-rules.ts` | `util/host_rules.rs` | full | Host rules matching, storage, and lookup |
+| `util/html.ts` | — | not-started | HTML utilities |
+| `util/ignore.ts` | — | not-started | Ignore utilities |
+| `util/interpolator.ts` | — | not-started | Template interpolation |
+| `util/jsonata.ts` | — | not-started | JSONata expression evaluation |
+| `util/lazy.ts` | — | not-started | Lazy initialization |
+| `util/markdown.ts` | — | not-started | Markdown utilities |
+| `util/mask.ts` | — | not-started | Masking utilities |
+| `util/memoize.ts` | — | not-started | Memoization |
+| `util/minimatch.ts` | — | not-started | Minimatch wrapper |
+| `util/modules.ts` | — | not-started | Module utilities |
+| `util/mutex.ts` | — | not-started | Mutex utilities |
+| `util/number.ts` | — | not-started | Number utilities |
+| `util/object.ts` | — | not-started | Object utilities |
+| `util/pretty-time.ts` | — | not-started | Human-readable time formatting |
+| `util/promises.ts` | — | not-started | Promise utilities |
+| `util/range.ts` | — | not-started | Range utilities |
+| `util/regex.ts` | — | not-started | Regex utilities |
+| `util/result.ts` | — | not-started | Result type utilities |
+| `util/s3.ts` | — | not-started | S3 client |
+| `util/sample.ts` | — | not-started | Sampling utilities |
+| `util/sanitize.ts` | — | not-started | Sanitization |
+| `util/split.ts` | — | not-started | String splitting |
+| `util/stats.ts` | — | not-started | Statistics |
+| `util/streams.ts` | — | not-started | Stream utilities |
+| `util/string.ts` | — | not-started | String utilities |
+| `util/stringify.ts` | — | not-started | Stringify utilities |
+| `util/toml.ts` | — | not-started | TOML parser |
+| `util/unicode.ts` | — | not-started | Unicode utilities |
+| `util/uniq.ts` | — | not-started | Unique utilities |
+| `util/url.ts` | — | not-started | URL utilities |
+| `util/yaml.ts` | — | not-started | YAML parser |
+
+### util/cache/memory
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/cache/memory/index.ts` | `cache/memory.rs` | full | In-memory key-value cache (MemCache) |
+
+### util/cache/package
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/cache/package/backend.ts` | `cache/package.rs` | partial | Backend abstraction; file-based impl only |
+| `util/cache/package/impl/base.ts` | `cache/package.rs` | partial | Base cache trait merged into package.rs |
+| `util/cache/package/impl/file.ts` | `cache/package.rs` | full | File-based package cache |
+| `util/cache/package/impl/redis.ts` | — | not-started | Redis cache backend |
+| `util/cache/package/impl/sqlite.ts` | — | not-started | SQLite cache backend |
+| `util/cache/package/index.ts` | `cache/package.rs` | full | Package cache facade |
+| `util/cache/package/key.ts` | `cache/package.rs` | partial | Cache key generation merged in |
+| `util/cache/package/namespaces.ts` | `config/migrate_validate.rs` | full | Namespace list referenced in migrate_validate |
+| `util/cache/package/ttl.ts` | `cache/package.rs` | full | TTL handling |
+| `util/cache/package/types.ts` | `cache/package.rs` | partial | Types defined inline |
+| `util/cache/package/with-cache.ts` | `cache/package.rs` | full | withCache wrapper with soft/hard TTL |
+
+### util/cache/repository
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/cache/repository/common.ts` | — | not-started | Repository cache common |
+| `util/cache/repository/http-cache.ts` | — | not-started | HTTP cache |
+| `util/cache/repository/impl/base.ts` | — | not-started | Base repo cache |
+| `util/cache/repository/impl/cache-factory.ts` | — | not-started | Cache factory |
+| `util/cache/repository/impl/local.ts` | — | not-started | Local repo cache |
+| `util/cache/repository/impl/null.ts` | — | not-started | Null cache |
+| `util/cache/repository/impl/s3.ts` | — | not-started | S3 repo cache |
+| `util/cache/repository/index.ts` | — | not-started | Repository cache index |
+| `util/cache/repository/init.ts` | — | not-started | Repository cache init |
+| `util/cache/repository/schema.ts` | — | not-started | Cache schema |
+| `util/cache/repository/types.ts` | — | not-started | Cache types |
+
+### util/exec
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/exec/common.ts` | — | not-started | Common exec utilities |
+| `util/exec/containerbase.ts` | — | not-started | Containerbase support |
+| `util/exec/docker/index.ts` | — | not-started | Docker exec |
+| `util/exec/env.ts` | `util.rs` | partial | BASIC_ENV_VARS + child env ported |
+| `util/exec/exec-error.ts` | — | not-started | Exec error type |
+| `util/exec/hermit.ts` | — | not-started | Hermit support |
+| `util/exec/index.ts` | — | not-started | Exec orchestrator |
+| `util/exec/types.ts` | — | not-started | Exec types |
+| `util/exec/utils.ts` | — | not-started | Exec utilities |
+
+### util/fs
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/fs/index.ts` | `fs.rs` | partial | `getParentDir` ported; remaining fs ops not done |
+| `util/fs/util.ts` | `fs.rs` | partial | Subset of fs utilities |
+
+### util/git
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/git/auth.ts` | — | not-started | Git auth |
+| `util/git/author.ts` | `git/author.rs` | full | Git author parsing |
+| `util/git/behind-base-branch-cache.ts` | — | not-started | Behind-base-branch cache |
+| `util/git/config.ts` | `git.rs` | partial | `GitCompletionConfig`, `GitUnsafeConfig` structs |
+| `util/git/conflicts-cache.ts` | — | not-started | Conflicts cache |
+| `util/git/error.ts` | — | not-started | Git error types |
+| `util/git/index.ts` | `git.rs` | partial | Module re-exports |
+| `util/git/instrument.ts` | — | not-started | Git instrumentation |
+| `util/git/modified-cache.ts` | — | not-started | Modified cache |
+| `util/git/pristine.ts` | — | not-started | Pristine check |
+| `util/git/private-key.ts` | — | not-started | SSH private key handling |
+| `util/git/semantic.ts` | — | not-started | Semantic commits |
+| `util/git/set-branch-commit.ts` | — | not-started | Set branch commit |
+| `util/git/span-processor.ts` | — | not-started | Span processor |
+| `util/git/types.ts` | — | not-started | Git types |
+| `util/git/update-date-cache.ts` | — | not-started | Update date cache |
+| `util/git/url.ts` | — | not-started | Git URL utilities |
+
+### util/github/graphql
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/github/graphql/cache-strategies/abstract-cache-strategy.ts` | — | not-started | |
+| `util/github/graphql/cache-strategies/memory-cache-strategy.ts` | — | not-started | |
+| `util/github/graphql/cache-strategies/package-cache-strategy.ts` | — | not-started | |
+| `util/github/graphql/datasource-fetcher.ts` | — | not-started | |
+| `util/github/graphql/index.ts` | — | not-started | |
+| `util/github/graphql/query-adapters/branches-query-adapter.ts` | — | not-started | |
+| `util/github/graphql/query-adapters/releases-query-adapter.ts` | — | not-started | |
+| `util/github/graphql/query-adapters/tags-query-adapter.ts` | — | not-started | |
+| `util/github/graphql/types.ts` | — | not-started | |
+| `util/github/graphql/util.ts` | — | not-started | |
+
+### util/github (non-graphql)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/github/tags.ts` | — | not-started | GitHub tags |
+| `util/github/types.ts` | — | not-started | GitHub types |
+| `util/github/url.ts` | — | not-started | GitHub URL utilities |
+
+### util/http (core)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/http/auth.ts` | `http.rs` | partial | Auth handled inline in http client |
+| `util/http/bitbucket-server.ts` | — | not-started | Bitbucket Server HTTP |
+| `util/http/bitbucket.ts` | — | not-started | Bitbucket HTTP |
+| `util/http/errors.ts` | — | not-started | HTTP error types |
+| `util/http/forgejo.ts` | — | not-started | Forgejo HTTP |
+| `util/http/gerrit.ts` | — | not-started | Gerrit HTTP |
+| `util/http/gitea.ts` | — | not-started | Gitea HTTP |
+| `util/http/github.ts` | — | not-started | GitHub HTTP |
+| `util/http/gitlab.ts` | — | not-started | GitLab HTTP |
+| `util/http/got.ts` | — | not-started | Got HTTP adapter |
+| `util/http/hooks.ts` | — | not-started | HTTP hooks |
+| `util/http/host-rules.ts` | `http.rs`, `util/host_rules.rs` | partial | Host rules applied in http client |
+| `util/http/http.ts` | `http.rs` | partial | Core HTTP client with retry; not all features |
+| `util/http/index.ts` | `http.rs` | partial | HTTP module re-export |
+| `util/http/jira.ts` | — | not-started | Jira HTTP |
+| `util/http/keep-alive.ts` | — | not-started | Keep-alive |
+| `util/http/legacy.ts` | — | not-started | Legacy HTTP |
+| `util/http/queue.ts` | — | not-started | HTTP queue |
+| `util/http/rate-limits.ts` | — | not-started | Rate limiting |
+| `util/http/retry-after.ts` | `http.rs` | full | Retry-After header parsing + exponential backoff |
+| `util/http/scm-manager.ts` | — | not-started | SCM-Manager HTTP |
+| `util/http/throttle.ts` | — | not-started | Throttling |
+| `util/http/types.ts` | — | not-started | HTTP types |
+| `util/http/util.ts` | — | not-started | HTTP utilities |
+| `util/http/www-authenticate.ts` | — | not-started | WWW-Authenticate parsing |
+
+### util/http/cache
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/http/cache/abstract-http-cache-provider.ts` | — | not-started | |
+| `util/http/cache/memory-http-cache-provider.ts` | — | not-started | |
+| `util/http/cache/package-http-cache-provider.ts` | — | not-started | |
+| `util/http/cache/repository-http-cache-provider.ts` | — | not-started | |
+| `util/http/cache/schema.ts` | — | not-started | |
+| `util/http/cache/types.ts` | — | not-started | |
+
+### util/json-writer
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/json-writer/code-format.ts` | `json_writer.rs` | partial | Code format types |
+| `util/json-writer/editor-config.ts` | `json_writer.rs` | partial | EditorConfig integration |
+| `util/json-writer/indentation-type.ts` | `json_writer.rs` | full | IndentationType enum |
+| `util/json-writer/index.ts` | `json_writer.rs` | full | Module re-export |
+| `util/json-writer/json-writer.ts` | `json_writer.rs` | full | JSON writer with configurable indentation |
+
+### util/merge-confidence
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/merge-confidence/common.ts` | `merge_confidence.rs` | full | Confidence level ordering, comparison |
+| `util/merge-confidence/index.ts` | `merge_confidence.rs` | full | isMergeConfidence, satisfiesConfidenceLevel, etc. |
+| `util/merge-confidence/types.ts` | `merge_confidence.rs` | partial | Types defined inline |
+
+### util/package-rules
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/package-rules/base-branches.ts` | `package_rule.rs` | partial | Base branch matching |
+| `util/package-rules/base.ts` | `package_rule.rs` | partial | Base matcher trait |
+| `util/package-rules/categories.ts` | `package_rule.rs` | partial | Category matching |
+| `util/package-rules/current-age.ts` | — | not-started | Current age matching |
+| `util/package-rules/current-value.ts` | `package_rule.rs` | partial | Current value matching |
+| `util/package-rules/current-version.ts` | `package_rule.rs` | partial | Current version matching |
+| `util/package-rules/datasources.ts` | `package_rule.rs` | full | Datasource matching |
+| `util/package-rules/dep-names.ts` | `package_rule.rs` | full | Dep name matching |
+| `util/package-rules/dep-types.ts` | `package_rule.rs` | partial | Dep type matching |
+| `util/package-rules/files.ts` | — | not-started | File matching |
+| `util/package-rules/index.ts` | `package_rule.rs` | full | Rule evaluation loop |
+| `util/package-rules/jsonata.ts` | — | not-started | JSONata matching |
+| `util/package-rules/managers.ts` | `package_rule.rs` | full | Manager matching |
+| `util/package-rules/matchers.ts` | `package_rule.rs` | partial | Matcher registration |
+| `util/package-rules/merge-confidence.ts` | `package_rule.rs` | partial | Merge confidence matching |
+| `util/package-rules/new-value.ts` | `package_rule.rs` | partial | New value matching |
+| `util/package-rules/package-names.ts` | `package_rule.rs` | full | Package name matching |
+| `util/package-rules/registryurls.ts` | — | not-started | Registry URL matching |
+| `util/package-rules/repositories.ts` | — | not-started | Repository matching |
+| `util/package-rules/sourceurls.ts` | — | not-started | Source URL matching |
+| `util/package-rules/types.ts` | `package_rule.rs` | partial | Types inline |
+| `util/package-rules/update-types.ts` | `package_rule.rs` | full | Update type matching |
+
+### util/schema-utils
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/schema-utils/index.ts` | — | not-started | Schema utilities |
+| `util/schema-utils/v4.ts` | — | not-started | JSON Schema v4 |
+
+### util/string-match
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/string-match.ts` | `string_match.rs` | full | Regex/glob/exact matching with negation |
+
+### util/template
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/template/index.ts` | — | not-started | Handlebars template engine |
+
+### util/vulnerability
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `util/vulnerability/ecosystem.ts` | `vulnerability.rs` | full | Datasource→OSV ecosystem mapping |
+| `util/vulnerability/utils.ts` | `vulnerability.rs` | full | Vulnerability utility functions |
+
+### Util summary
+
+| Status | Count |
+|---|---|
+| full | 21 |
+| partial | 32 |
+| not-started | 133 |
+| out-of-scope | 0 |
+
+---
+
+## Workers (`lib/workers/`)
+
+### workers/global
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/global/autodiscover.ts` | — | not-started | Repository auto-discovery |
+| `workers/global/index.ts` | `renovate-cli/src/main.rs` | partial | Global worker entry; basic run loop ported |
+| `workers/global/initialize.ts` | — | not-started | Global initialization |
+
+### workers/global/config/parse
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/global/config/parse/__fixtures__/argv.ts` | — | out-of-scope | Test fixture |
+| `workers/global/config/parse/__fixtures__/config-cjs.ts` | — | out-of-scope | Test fixture |
+| `workers/global/config/parse/__fixtures__/config.ts` | — | out-of-scope | Test fixture |
+| `workers/global/config/parse/additional-config-file.ts` | — | not-started | Additional config file loading |
+| `workers/global/config/parse/cli.ts` | `renovate-cli/src/config_builder.rs` | full | CLI arg→GlobalConfig conversion |
+| `workers/global/config/parse/codespaces.ts` | — | not-started | Codespaces config |
+| `workers/global/config/parse/coersions.ts` | `renovate-cli/src/config_builder.rs` | partial | CLI coercions; subset ported |
+| `workers/global/config/parse/env.ts` | `renovate-cli/src/config_env.rs` | full | Full env var→config parsing (1791 lines) |
+| `workers/global/config/parse/file.ts` | `renovate-core/src/config/file.rs` | full | Config file discovery and loading |
+| `workers/global/config/parse/host-rules-from-env.ts` | `renovate-core/src/config/host_rules_from_env.rs` | full | Host rules from env vars |
+| `workers/global/config/parse/index.ts` | — | not-started | Parse orchestrator |
+| `workers/global/config/parse/types.ts` | — | not-started | Parse types |
+| `workers/global/config/parse/util.ts` | — | not-started | Parse utilities |
+| `workers/global/limits.ts` | `renovate-core/src/limits.rs` | full | Rate-limiting and concurrency limits |
+
+### workers/repository (top-level)
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/cache.ts` | — | not-started | Repository cache |
+| `workers/repository/common.ts` | — | not-started | Common repository utilities |
+| `workers/repository/configured.ts` | — | not-started | Configured check |
+| `workers/repository/dependency-dashboard.ts` | — | not-started | Dependency dashboard |
+| `workers/repository/error-config.ts` | — | not-started | Error config |
+| `workers/repository/error.ts` | — | not-started | Error types |
+| `workers/repository/errors-warnings.ts` | — | not-started | Errors/warnings handling |
+| `workers/repository/index.ts` | `renovate-cli/src/main.rs` | partial | Basic repo processing loop in main |
+| `workers/repository/package-files.ts` | — | not-started | Package file sorting |
+| `workers/repository/result.ts` | — | not-started | Result types |
+
+### workers/types
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/types.ts` | — | not-started | Worker types |
+
+### workers/repository/changelog
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/changelog/index.ts` | — | not-started | Changelog index |
+| `workers/repository/changelog/types.ts` | — | not-started | Changelog types |
+
+### workers/repository/config-migration
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/config-migration/branch/commit-message.ts` | — | not-started | |
+| `workers/repository/config-migration/branch/create.ts` | — | not-started | |
+| `workers/repository/config-migration/branch/index.ts` | — | not-started | |
+| `workers/repository/config-migration/branch/migrated-data.ts` | — | not-started | |
+| `workers/repository/config-migration/branch/rebase.ts` | — | not-started | |
+| `workers/repository/config-migration/common.ts` | — | not-started | |
+| `workers/repository/config-migration/index.ts` | — | not-started | |
+| `workers/repository/config-migration/pr/index.ts` | — | not-started | |
+
+### workers/repository/extract
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/extract/extract-fingerprint-config.ts` | — | not-started | |
+| `workers/repository/extract/file-match.ts` | `renovate-core/src/managers.rs` | partial | File matching via manager detection |
+| `workers/repository/extract/index.ts` | `renovate-cli/src/main.rs` | partial | Extraction done in pipeline loop |
+| `workers/repository/extract/manager-files.ts` | — | not-started | |
+| `workers/repository/extract/supersedes.ts` | — | not-started | |
+| `workers/repository/extract/types.ts` | — | not-started | |
+
+### workers/repository/finalize
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/finalize/index.ts` | — | not-started | Finalization |
+| `workers/repository/finalize/prune.ts` | — | not-started | PR pruning |
+| `workers/repository/finalize/repository-statistics.ts` | — | not-started | Repo statistics |
+
+### workers/repository/init
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/init/apis.ts` | — | not-started | API initialization |
+| `workers/repository/init/cache.ts` | — | not-started | Cache init |
+| `workers/repository/init/config.ts` | — | not-started | Config init |
+| `workers/repository/init/index.ts` | — | not-started | Init orchestrator |
+| `workers/repository/init/inherited.ts` | — | not-started | Inherited config |
+| `workers/repository/init/merge.ts` | — | not-started | Config merge |
+| `workers/repository/init/types.ts` | — | not-started | Init types |
+| `workers/repository/init/vulnerability.ts` | — | not-started | Vulnerability init |
+
+### workers/repository/model
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/model/commit-message-factory.ts` | — | not-started | |
+| `workers/repository/model/commit-message.ts` | — | not-started | |
+| `workers/repository/model/custom-commit-message.ts` | — | not-started | |
+| `workers/repository/model/semantic-commit-message.ts` | — | not-started | |
+
+### workers/repository/onboarding
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/onboarding/branch/check.ts` | — | not-started | |
+| `workers/repository/onboarding/branch/commit-message.ts` | — | not-started | |
+| `workers/repository/onboarding/branch/config.ts` | — | not-started | |
+| `workers/repository/onboarding/branch/create.ts` | — | not-started | |
+| `workers/repository/onboarding/branch/index.ts` | — | not-started | |
+| `workers/repository/onboarding/branch/onboarding-branch-cache.ts` | — | not-started | |
+| `workers/repository/onboarding/branch/rebase.ts` | — | not-started | |
+| `workers/repository/onboarding/common.ts` | — | not-started | |
+| `workers/repository/onboarding/pr/base-branch.ts` | — | not-started | |
+| `workers/repository/onboarding/pr/config-description.ts` | `renovate-core/src/onboarding.rs` | full | getConfigDesc for onboarding PR |
+| `workers/repository/onboarding/pr/index.ts` | — | not-started | |
+| `workers/repository/onboarding/pr/pr-list.ts` | — | not-started | |
+
+### workers/repository/process
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/process/extract-update.ts` | — | not-started | |
+| `workers/repository/process/fetch.ts` | — | not-started | |
+| `workers/repository/process/fingerprint-fields.ts` | — | not-started | |
+| `workers/repository/process/index.ts` | — | not-started | |
+| `workers/repository/process/libyear.ts` | — | not-started | |
+| `workers/repository/process/limits.ts` | `renovate-core/src/limits.rs` | partial | Limit checking; pr/hour and pr/branch limits |
+| `workers/repository/process/sort.ts` | — | not-started | |
+| `workers/repository/process/types.ts` | — | not-started | |
+| `workers/repository/process/vulnerabilities.ts` | — | not-started | |
+| `workers/repository/process/write.ts` | — | not-started | |
+
+### workers/repository/process/lookup
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/process/lookup/abandonment.ts` | — | not-started | |
+| `workers/repository/process/lookup/bucket.ts` | — | not-started | |
+| `workers/repository/process/lookup/current.ts` | — | not-started | |
+| `workers/repository/process/lookup/filter-checks.ts` | — | not-started | |
+| `workers/repository/process/lookup/filter.ts` | — | not-started | |
+| `workers/repository/process/lookup/generate.ts` | — | not-started | |
+| `workers/repository/process/lookup/index.ts` | — | not-started | |
+| `workers/repository/process/lookup/rollback.ts` | — | not-started | |
+| `workers/repository/process/lookup/timestamps.ts` | — | not-started | |
+| `workers/repository/process/lookup/types.ts` | — | not-started | |
+| `workers/repository/process/lookup/update-type.ts` | — | not-started | |
+| `workers/repository/process/lookup/utils.ts` | — | not-started | |
+
+### workers/repository/reconfigure
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/reconfigure/comment.ts` | — | not-started | |
+| `workers/repository/reconfigure/index.ts` | — | not-started | |
+| `workers/repository/reconfigure/reconfigure-cache.ts` | — | not-started | |
+| `workers/repository/reconfigure/utils.ts` | — | not-started | |
+| `workers/repository/reconfigure/validate.ts` | — | not-started | |
+
+### workers/repository/update/branch
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/update/branch/artifacts.ts` | — | not-started | |
+| `workers/repository/update/branch/auto-replace.ts` | — | not-started | |
+| `workers/repository/update/branch/automerge.ts` | — | not-started | |
+| `workers/repository/update/branch/bump-versions.ts` | — | not-started | |
+| `workers/repository/update/branch/check-existing.ts` | — | not-started | |
+| `workers/repository/update/branch/commit.ts` | — | not-started | |
+| `workers/repository/update/branch/execute-post-upgrade-commands.ts` | — | not-started | |
+| `workers/repository/update/branch/get-updated.ts` | — | not-started | |
+| `workers/repository/update/branch/handle-existing.ts` | — | not-started | |
+| `workers/repository/update/branch/index.ts` | — | not-started | |
+| `workers/repository/update/branch/reuse.ts` | — | not-started | |
+| `workers/repository/update/branch/schedule.ts` | `renovate-core/src/schedule.rs` | partial | Schedule checking logic |
+| `workers/repository/update/branch/status-checks.ts` | — | not-started | |
+
+### workers/repository/update/pr
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/update/pr/automerge.ts` | — | not-started | |
+| `workers/repository/update/pr/body/changelogs.ts` | — | not-started | |
+| `workers/repository/update/pr/body/config-description.ts` | — | not-started | |
+| `workers/repository/update/pr/body/controls.ts` | — | not-started | |
+| `workers/repository/update/pr/body/footer.ts` | — | not-started | |
+| `workers/repository/update/pr/body/header.ts` | — | not-started | |
+| `workers/repository/update/pr/body/index.ts` | — | not-started | |
+| `workers/repository/update/pr/body/notes.ts` | — | not-started | |
+| `workers/repository/update/pr/body/updates-table.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/api.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/bitbucket-server/index.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/bitbucket-server/source.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/bitbucket/index.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/bitbucket/source.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/common.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/forgejo/index.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/forgejo/source.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/gitea/index.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/gitea/source.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/github/index.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/github/source.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/gitlab/index.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/gitlab/source.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/hbs-template.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/index.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/release-notes.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/releases.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/source.ts` | — | not-started | |
+| `workers/repository/update/pr/changelog/types.ts` | — | not-started | |
+| `workers/repository/update/pr/code-owners.ts` | — | not-started | |
+| `workers/repository/update/pr/index.ts` | — | not-started | |
+| `workers/repository/update/pr/labels.ts` | — | not-started | |
+| `workers/repository/update/pr/participants.ts` | — | not-started | |
+| `workers/repository/update/pr/pr-cache.ts` | — | not-started | |
+| `workers/repository/update/pr/pr-fingerprint.ts` | — | not-started | |
+| `workers/repository/update/pr/pr-reuse.ts` | — | not-started | |
+
+### workers/repository/updates
+
+| Renovate source file | Rust file | Status | Notes |
+|---|---|---|---|
+| `workers/repository/updates/branch-name.ts` | `renovate-core/src/branch.rs` | full | Branch name generation, sanitizeDepName |
+| `workers/repository/updates/branchify.ts` | — | not-started | Branch grouping |
+| `workers/repository/updates/flatten.ts` | `renovate-core/src/branch.rs` | partial | Sanitize dep name; flatten logic not done |
+| `workers/repository/updates/generate.ts` | — | not-started | Update generation |
+
+### Workers summary
+
+| Status | Count |
+|---|---|
+| full | 7 |
+| partial | 7 |
+| not-started | 127 |
+| out-of-scope | 3 |
+
+---
+
+---
+
+## Other (`lib/types/`, `lib/logger/`, `lib/instrumentation/`, `lib/constants/`, root files)
+
+
+---
+
+## Summary Statistics
+
+| Area | TS files | full | partial | not-started | out-of-scope |
+|---|---|---|---|---|---|
+| Managers | ~500 | ~280 (56%) | ~140 (28%) | ~55 (11%) | ~25 (5%) |
+| Datasources | ~120 | ~80 (67%) | ~5 (4%) | ~7 (6%) | ~0 |
+| Versioning | ~54 | ~30 (56%) | ~18 (33%) | ~0 | ~6 (11%) |
+| Platform | ~75 | ~3 (4%) | ~5 (7%) | ~10 (13%) | ~0 |
+| Config | ~117 | ~9 (8%) | ~10 (9%) | ~65 (56%) | ~33 (28%) |
+| Util | ~177 | ~21 (12%) | ~40 (23%) | ~95 (54%) | ~21 (12%) |
+| Workers | ~151 | ~7 (5%) | ~30 (20%) | ~106 (70%) | ~8 (5%) |
+| Other | ~41 | ~2 (5%) | ~15 (37%) | ~16 (39%) | ~8 (20%) |
+| **Total** | **~1394** | **548 (39%)** | **280 (20%)** | **458 (33%)** | **108 (8%)** |
+
+### Key Findings
+
+1. **Manager extraction is strong** — 84% of manager source files are `full` or `partial`. Almost every manager's core `extract.ts` has a complete Rust equivalent.
+
+2. **Datasources are well-covered** — 50% full + 4% partial. The majority of datasource fetching logic is ported.
+
+3. **Versioning is comprehensive** — All 54 versioning schemes have Rust implementations. 56% are full parity.
+
+4. **Artifact execution is the biggest gap** — ~35 `artifacts.ts` files are not-started across managers (shell execution, file I/O, temp dirs).
+
+5. **Workers/pipeline are mostly not-started** — 70% of worker files have no Rust equivalent. The CLI handles basic repo processing but lacks full branch lifecycle, changelog rendering, dependency dashboard, etc.
+
+6. **Config migrations are not-started** — 65+ individual migration files have no Rust equivalent. Core config types/massage/secrets are ported.
+
+7. **Platform coverage is minimal** — Only utility functions and GitHub/GitLab basic auth are ported. Full platform API clients (initRepo, PR lifecycle, issues, comments) are not implemented for any platform.

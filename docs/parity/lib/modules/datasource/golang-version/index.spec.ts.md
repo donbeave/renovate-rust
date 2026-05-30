@@ -18,7 +18,7 @@
 | throws ExternalHostError for empty result | 82 | ported | `crates/renovate-core/src/datasources/golang_version.rs` | `error_on_zero_releases_extracted` | All-future releases returns zero-releases error |
 | throws ExternalHostError for zero releases extracted | 92 | ported | `crates/renovate-core/src/datasources/golang_version.rs` | `error_on_zero_releases_extracted` | Same as above |
 | throws ExternalHostError for invalid release semver | 102 | ported | `crates/renovate-core/src/datasources/golang_version.rs` | `error_on_overflow_version_number` | Space-indented fixture extracts no releases → error |
-| returns null for error 404 | 112 | ported | `crates/renovate-core/src/datasources/golang_version.rs` | `fetch_releases` | 4xx → Ok(None) in fetch_releases |
+| returns null for error 404 | 112 | pending | `crates/renovate-core/src/datasources/golang_version.rs` | — | HTTP error handling in fetch_releases not unit-tested |
 | throws ExternalHostError for invalid release format beginning | 122 | ported | `crates/renovate-core/src/datasources/golang_version.rs` | `error_on_block_start_inside_block` | Nested \t{ inside open block → error |
 | throws ExternalHostError for invalid release format | 132 | ported | `crates/renovate-core/src/datasources/golang_version.rs` | `error_on_extra_block_terminator` | Extra \t}, outside block → error |
 

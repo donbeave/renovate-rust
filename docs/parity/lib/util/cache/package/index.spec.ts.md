@@ -18,7 +18,7 @@
 | delegates setWithRawTtl to backend | 64 | ported | cache/package.rs | `set_with_raw_ttl_updates_mem_immediately` | — |
 | deduplicates get via memCache | 77 | ported | cache/package.rs | `package_cache_deduplicates_via_mem` | — |
 | setWithRawTtl updates memCache | 89 | ported | cache/package.rs | `set_with_raw_ttl_updates_mem_immediately` | — |
-| delegates cleanup to backend.destroy | 99 | ported | cache/package.rs | `FilePackageCache::cleanup` (method exists) | — |
-| delegates getCacheType to backend | 105 | ported | cache/package.rs | `PackageCache::cache_type` (method exists) | — |
+| delegates cleanup to backend.destroy | 99 | ported | cache/package.rs | `package_cache_cleanup_delegates_to_backend` | — |
+| delegates getCacheType to backend | 105 | ported | cache/package.rs | `package_cache_type_returns_file_when_backend_set` | — |
 
 ---

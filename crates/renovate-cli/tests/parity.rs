@@ -180,3 +180,73 @@ fn parity_cargo_workspace() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for cargo-workspace fixture");
 }
+
+#[test]
+fn parity_gomod_empty() {
+    let actual = run_fixture("gomod-empty");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 1,
+                "skipped": 0,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "go.mod",
+                    "manager": "gomod",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 1,
+                        "skipped": 0,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "go",
+                            "status": "upToDate",
+                            "latest": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for gomod-empty fixture");
+}
+
+#[test]
+fn parity_maven_empty() {
+    let actual = run_fixture("maven-empty");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 0,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 0,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "pom.xml",
+                    "manager": "maven",
+                    "stats": {
+                        "total": 0,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 0,
+                        "errors": 0
+                    },
+                    "deps": []
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for maven-empty fixture");
+}

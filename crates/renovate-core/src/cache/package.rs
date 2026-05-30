@@ -621,6 +621,37 @@ mod tests {
         assert!(result.is_none());
     }
 
+    // Ported: "returns undefined for invalid JSON" — util/cache/package/impl/file.spec.ts line 73
+    #[tokio::test]
+    async fn file_cache_returns_none_for_invalid_json() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+        let path = cache.entry_path("_test-namespace", "bad-json-key");
+        tokio::fs::create_dir_all(path.parent().unwrap())
+            .await
+            .unwrap();
+        tokio::fs::write(&path, "not valid json").await.unwrap();
+
+        let result: Option<String> = cache.get("_test-namespace", "bad-json-key").await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns undefined for corrupted cache payload" — util/cache/package/impl/file.spec.ts line 81
+    #[tokio::test]
+    async fn file_cache_returns_none_for_corrupted_payload() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+        let path = cache.entry_path("_test-namespace", "corrupted-key");
+        tokio::fs::create_dir_all(path.parent().unwrap())
+            .await
+            .unwrap();
+        // Write JSON with wrong shape (missing required fields)
+        tokio::fs::write(&path, r#"{"foo": "bar"}"#).await.unwrap();
+
+        let result: Option<String> = cache.get("_test-namespace", "corrupted-key").await;
+        assert!(result.is_none());
+    }
+
     // Ported: "returns undefined for missing expiry" — util/cache/package/impl/file.spec.ts line 93
     #[tokio::test]
     async fn file_cache_returns_none_for_missing_expiry() {
@@ -774,6 +805,53 @@ mod tests {
         let cache = PackageCache::new(); // no backend
         let result: Option<String> = cache.get("_test-namespace", "key").await;
         assert!(result.is_none());
+    }
+
+    // Ported: "delegates init to backend" — util/cache/package/index.spec.ts line 33
+    #[tokio::test]
+    async fn package_cache_is_initialized_when_backend_set() {
+        let cache = PackageCache::new(); // no backend
+        assert!(!cache.is_initialized());
+
+        let dir = TempDir::new().unwrap();
+        let cache_with_backend = PackageCache::with_backend(FilePackageCache::new(dir.path()));
+        assert!(cache_with_backend.is_initialized());
+    }
+
+    // Ported: "delegates getCacheType to backend" — util/cache/package/index.spec.ts line 105
+    #[test]
+    fn package_cache_type_returns_file_when_backend_set() {
+        let cache = PackageCache::new();
+        assert_eq!(cache.cache_type(), None);
+
+        let dir = std::env::temp_dir();
+        let cache_with_backend = PackageCache::with_backend(FilePackageCache::new(&dir));
+        assert_eq!(cache_with_backend.cache_type(), Some("file"));
+    }
+
+    // Ported: "delegates cleanup to backend.destroy" — util/cache/package/index.spec.ts line 99
+    #[tokio::test]
+    async fn package_cache_cleanup_delegates_to_backend() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+
+        // Write an expired entry directly
+        let file_cache = FilePackageCache::new(dir.path());
+        let path = file_cache.entry_path("_test-namespace", "expired");
+        tokio::fs::create_dir_all(path.parent().unwrap())
+            .await
+            .unwrap();
+        let entry = FileEntry {
+            value: Value::String("stale".into()),
+            expiry: Some((Utc::now() - Duration::minutes(1)).to_rfc3339()),
+        };
+        tokio::fs::write(&path, serde_json::to_string(&entry).unwrap())
+            .await
+            .unwrap();
+
+        // cleanup through PackageCache should delegate and remove expired
+        cache.cleanup().await;
+        assert!(!path.exists());
     }
 
     // Ported: "deduplicates get via memCache" — util/cache/package/index.spec.ts line 73

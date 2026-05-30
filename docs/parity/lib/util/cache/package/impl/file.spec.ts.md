@@ -21,8 +21,8 @@
 | returns undefined on cache miss | 47 | ported | cache/package.rs | `file_cache_get_returns_none_for_missing_key` | — |
 | expires cached entries | 53 | ported | cache/package.rs | `file_cache_returns_none_for_expired_entry` | — |
 | returns undefined for null cached value | 65 | ported | cache/package.rs | `file_cache_returns_none_for_null_value` | — |
-| returns undefined for invalid JSON | 73 | ported | cache/package.rs | file parsing uses `.ok()` — returns None on bad JSON | covered by error handling |
-| returns undefined for corrupted cache payload | 81 | ported | cache/package.rs | file parsing uses `.ok()` — returns None on bad payload | covered by error handling |
+| returns undefined for invalid JSON | 73 | ported | cache/package.rs | `file_cache_returns_none_for_invalid_json` | — |
+| returns undefined for corrupted cache payload | 81 | ported | cache/package.rs | `file_cache_returns_none_for_corrupted_payload` | — |
 | returns undefined for missing expiry | 93 | ported | cache/package.rs | `file_cache_returns_none_for_missing_expiry` | — |
 | returns undefined for invalid expiry | 102 | ported | cache/package.rs | `file_cache_returns_none_for_invalid_expiry` | — |
 | retrieves value from cache payload | 114 | ported | cache/package.rs | `file_cache_set_and_get_roundtrip` | — |
