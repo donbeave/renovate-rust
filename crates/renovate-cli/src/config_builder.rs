@@ -1239,6 +1239,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI allowed-commands parsing tests
     #[test]
     fn allowed_commands_comma_split() {
         let cli = cli_with(|c| c.allowed_commands = Some("foo,bar, baz,".to_owned()));
@@ -1249,6 +1250,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI allowed-commands JSON array parsing tests
     #[test]
     fn allowed_commands_json_array_parsed() {
         let cli = cli_with(|c| c.allowed_commands = Some(r#"["foo","bar baz"]"#.to_owned()));
@@ -1259,6 +1261,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI allowed-commands JSON5 array parsing tests
     #[test]
     fn allowed_commands_json5_array_parsed() {
         let cli = cli_with(|c| c.allowed_commands = Some(r#"['foo','bar baz',]"#.to_owned()));
