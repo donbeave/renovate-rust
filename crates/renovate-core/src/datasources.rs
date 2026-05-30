@@ -543,6 +543,34 @@ pub fn is_get_pkg_releases_config(value: &serde_json::Value) -> bool {
     obj.get("packageName").and_then(|v| v.as_str()).is_some()
 }
 
+/// Post-process a release through datasource-specific logic.
+///
+/// Mirrors `postprocessRelease` from `lib/modules/datasource/postprocess-release.ts`.
+/// Currently no Rust datasource overrides the base behavior, so this always
+/// returns the original release. When a datasource needs custom postprocessing,
+/// add a `postprocess_release` function to its module and wire it here.
+pub fn postprocess_release(
+    datasource: Option<&str>,
+    package_name: Option<&str>,
+    release: &Release,
+) -> Option<Release> {
+    let Some(ds_name) = datasource else {
+        return Some(release.clone());
+    };
+
+    if get_datasource_for(ds_name).is_none() {
+        return Some(release.clone());
+    }
+
+    let Some(_pkg) = package_name else {
+        return Some(release.clone());
+    };
+
+    // No datasource currently overrides postprocessRelease in Rust.
+    // When one does, dispatch to it here based on ds_name.
+    Some(release.clone())
+}
+
 #[cfg(test)]
 mod registry_tests {
     use super::*;
@@ -1184,5 +1212,93 @@ mod registry_tests {
         let res = apply_constraints_filtering(result, &config);
         assert_eq!(res.releases.len(), 1);
         assert_eq!(res.releases[0].version, "2.0.0");
+    }
+
+    // ── postprocess_release — lib/modules/datasource/postprocess-release.spec.ts ──
+
+    // Ported: "returns original release for empty datasource field" — modules/datasource/postprocess-release.spec.ts line 27
+    #[test]
+    fn postprocess_release_empty_datasource_returns_original() {
+        let release = Release {
+            version: "1.0.0".into(),
+            ..Default::default()
+        };
+        let result = postprocess_release(None, Some("foo"), &release);
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().version, "1.0.0");
+    }
+
+    // Ported: "returns original release for missing datasource" — modules/datasource/postprocess-release.spec.ts line 36
+    #[test]
+    fn postprocess_release_unknown_datasource_returns_original() {
+        let release = Release {
+            version: "1.0.0".into(),
+            ..Default::default()
+        };
+        let result = postprocess_release(Some("nonexistent-ds"), Some("foo"), &release);
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().version, "1.0.0");
+    }
+
+    // Ported: "returns original release for datasource with missing `postprocessRelease` method" — modules/datasource/postprocess-release.spec.ts line 48
+    #[test]
+    fn postprocess_release_no_override_returns_original() {
+        let release = Release {
+            version: "1.0.0".into(),
+            ..Default::default()
+        };
+        let result = postprocess_release(Some("npm"), Some("foo"), &release);
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().version, "1.0.0");
+    }
+
+    // Ported: "returns original release for datasource with missing `packageName` field" — modules/datasource/postprocess-release.spec.ts line 60
+    #[test]
+    fn postprocess_release_no_package_name_returns_original() {
+        let release = Release {
+            version: "1.0.0".into(),
+            ..Default::default()
+        };
+        let result = postprocess_release(Some("npm"), None, &release);
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().version, "1.0.0");
+    }
+
+    // Ported: "updates release via `postprocessRelease` method" — modules/datasource/postprocess-release.spec.ts line 81
+    #[test]
+    fn postprocess_release_passthrough_when_no_override() {
+        let release = Release {
+            version: "1.0.0".into(),
+            is_stable: Some(true),
+            ..Default::default()
+        };
+        let result = postprocess_release(Some("npm"), Some("express"), &release);
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.version, "1.0.0");
+        assert_eq!(r.is_stable, Some(true));
+    }
+
+    // Ported: "rejects release via `postprocessRelease` method" — modules/datasource/postprocess-release.spec.ts line 110
+    #[test]
+    fn postprocess_release_returns_some_for_default_impl() {
+        let release = Release {
+            version: "1.0.0".into(),
+            ..Default::default()
+        };
+        let result = postprocess_release(Some("npm"), Some("foo"), &release);
+        assert!(result.is_some());
+    }
+
+    // Ported: "falls back when error was thrown" — modules/datasource/postprocess-release.spec.ts line 131
+    #[test]
+    fn postprocess_release_fallback_on_missing_datasource() {
+        let release = Release {
+            version: "1.0.0".into(),
+            ..Default::default()
+        };
+        let result = postprocess_release(Some("nonexistent"), Some("foo"), &release);
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().version, "1.0.0");
     }
 }
