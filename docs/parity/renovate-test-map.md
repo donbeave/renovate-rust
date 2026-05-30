@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,237 / 11,666 total tests ported (44%) · pending 5,987 · not-applicable 442 (3% of total) — updated 2026-05-30 5,237 / 11,666 total tests ported (44%) · pending 5,987 · not-applicable 442 (3% of total) — updated 2026-05-30 5,227 / 11,666 total tests ported (45%) · pending 6,009 · not-applicable 430 (4% of total) — updated 2026-05-30
+**Progress:** 5,240 / 11,666 total tests ported (44.9%) · pending 5,938 · not-applicable 488 (4.2%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -401,12 +401,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/ignore.spec.ts` | Done | [details](lib/util/ignore.spec.ts.md) |
 | `lib/util/coerce.spec.ts` | Done | [details](lib/util/coerce.spec.ts.md) |
 | `lib/util/sample.spec.ts` | Done | [details](lib/util/sample.spec.ts.md) |
-| `lib/util/promises.spec.ts` | Not done | [details](lib/util/promises.spec.ts.md) |
+| `lib/util/promises.spec.ts` | Done | [details](lib/util/promises.spec.ts.md) |
 | `lib/util/markdown.spec.ts` | Done | [details](lib/util/markdown.spec.ts.md) |
 | `lib/util/html.spec.ts` | Done | [details](lib/util/html.spec.ts.md) |
 | `lib/util/lazy.spec.ts` | Done | [details](lib/util/lazy.spec.ts.md) |
 | `lib/util/mutex.spec.ts` | Done | [details](lib/util/mutex.spec.ts.md) |
-| `lib/util/yaml.spec.ts` | Not done | [details](lib/util/yaml.spec.ts.md) |
+| `lib/util/yaml.spec.ts` | Done | [details](lib/util/yaml.spec.ts.md) |
 | `lib/util/common.spec.ts` | Done | [details](lib/util/common.spec.ts.md) |
 | `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
 | `lib/util/interpolator.spec.ts` | Done | [details](lib/util/interpolator.spec.ts.md) |
@@ -419,7 +419,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/assign-keys.spec.ts` | Done | [details](lib/util/assign-keys.spec.ts.md) |
 | `lib/util/check-token.spec.ts` | Done | [details](lib/util/check-token.spec.ts.md) |
 | `lib/util/minimatch.spec.ts` | Done | [details](lib/util/minimatch.spec.ts.md) |
-| `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
+| `lib/util/emoji.spec.ts` | Done | [details](lib/util/emoji.spec.ts.md) |
 | `lib/util/unicode.spec.ts` | Done | [details](lib/util/unicode.spec.ts.md) |
 | `lib/util/pretty-time.spec.ts` | Done | [details](lib/util/pretty-time.spec.ts.md) |
 | `lib/util/array.spec.ts` | Done | [details](lib/util/array.spec.ts.md) |
@@ -428,9 +428,9 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/memoize.spec.ts` | Done | [details](lib/util/memoize.spec.ts.md) |
 | `lib/util/mask.spec.ts` | Done | [details](lib/util/mask.spec.ts.md) |
 | `lib/util/host-rules.spec.ts` | Done | [details](lib/util/host-rules.spec.ts.md) |
-| `lib/util/stats.spec.ts` | Not done | [details](lib/util/stats.spec.ts.md) |
+| `lib/util/stats.spec.ts` | Done | [details](lib/util/stats.spec.ts.md) |
 | `lib/util/s3.spec.ts` | Done | [details](lib/util/s3.spec.ts.md) |
-| `lib/util/jsonata.spec.ts` | Not done | [details](lib/util/jsonata.spec.ts.md) |
+| `lib/util/jsonata.spec.ts` | Done | [details](lib/util/jsonata.spec.ts.md) |
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
 | `lib/modules/platform/comment.spec.ts` | Not done | [details](lib/modules/platform/comment.spec.ts.md) |
@@ -801,11 +801,11 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/gitea.spec.ts` | Not done | [details](lib/util/http/gitea.spec.ts.md) |
 | `lib/util/http/github.spec.ts` | Not done | [details](lib/util/http/github.spec.ts.md) |
 | `lib/util/http/gitlab.spec.ts` | Not done | [details](lib/util/http/gitlab.spec.ts.md) |
-| `lib/util/http/got.spec.ts` | Not done | [details](lib/util/http/got.spec.ts.md) |
+| `lib/util/http/got.spec.ts` | Done | [details](lib/util/http/got.spec.ts.md) |
 | `lib/util/http/hooks.spec.ts` | Done | [details](lib/util/http/hooks.spec.ts.md) |
 | `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
 | `lib/util/http/index.spec.ts` | Not done | [details](lib/util/http/index.spec.ts.md) |
-| `lib/util/http/jira.spec.ts` | Not done | [details](lib/util/http/jira.spec.ts.md) |
+| `lib/util/http/jira.spec.ts` | Done | [details](lib/util/http/jira.spec.ts.md) |
 | `lib/util/http/queue.spec.ts` | Done | [details](lib/util/http/queue.spec.ts.md) |
 | `lib/util/http/rate-limit.spec.ts` | Not done | [details](lib/util/http/rate-limit.spec.ts.md) |
 | `lib/util/http/retry-after.spec.ts` | Done | [details](lib/util/http/retry-after.spec.ts.md) |
