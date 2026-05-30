@@ -5,6 +5,7 @@
 //! compares against the current constraint.
 
 pub mod artifactory;
+pub mod aws_eks_addon;
 pub mod azure_bicep;
 pub mod azure_pipelines_tasks;
 pub mod bazel;
@@ -22,6 +23,7 @@ pub mod crates_io;
 pub mod custom;
 pub mod dart_version;
 pub mod deb;
+pub mod deb_index;
 pub mod deno;
 pub mod devbox;
 pub mod docker_hub;
@@ -37,6 +39,8 @@ pub mod git_refs;
 pub mod git_tags;
 pub mod gitea_releases;
 pub mod gitea_tags;
+pub mod github_digest;
+pub mod github_release_attachments;
 pub mod github_releases;
 pub mod github_runners;
 pub mod github_tags;
@@ -68,6 +72,7 @@ pub mod puppet_forge;
 pub mod pypi;
 pub mod python_version;
 pub mod repology;
+pub mod rpm;
 pub mod ruby_version;
 pub mod rubygems;
 pub mod rust_version;

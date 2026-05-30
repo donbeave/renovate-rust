@@ -358,6 +358,7 @@ mod tests {
         assert_eq!(r.repo, "ubuntu");
     }
 
+    // Rust-specific: unit tests for parse_image_name helper
     #[test]
     fn user_image_uses_owner_namespace() {
         let r = parse_image_name("tiangolo/fastapi").unwrap();
@@ -365,12 +366,14 @@ mod tests {
         assert_eq!(r.repo, "fastapi");
     }
 
+    // Rust-specific: unit tests for parse_image_name helper
     #[test]
     fn ghcr_image_is_non_docker_hub() {
         let err = parse_image_name("ghcr.io/owner/image").unwrap_err();
         assert!(matches!(err, DockerHubError::NonDockerHub(_)));
     }
 
+    // Rust-specific: unit tests for parse_image_name helper
     #[test]
     fn registry_with_port_is_non_docker_hub() {
         let err = parse_image_name("registry.example.com:5000/myimage").unwrap_err();
@@ -379,18 +382,21 @@ mod tests {
 
     // ── split_version_tag ─────────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for split_version_tag helper
     #[test]
     fn plain_version_splits_correctly() {
         assert_eq!(split_version_tag("22.04"), Some(("22.04", "")));
         assert_eq!(split_version_tag("1.25.3"), Some(("1.25.3", "")));
     }
 
+    // Rust-specific: unit tests for split_version_tag helper
     #[test]
     fn variant_tag_splits_correctly() {
         assert_eq!(split_version_tag("18-alpine"), Some(("18", "-alpine")));
         assert_eq!(split_version_tag("1.25.3-slim"), Some(("1.25.3", "-slim")));
     }
 
+    // Rust-specific: unit tests for split_version_tag helper
     #[test]
     fn non_versioned_tag_returns_none() {
         assert_eq!(split_version_tag("latest"), None);
@@ -400,6 +406,7 @@ mod tests {
 
     // ── cmp_version ───────────────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for cmp_version helper
     #[test]
     fn version_ordering() {
         // Same-length comparisons (the common case after isCompatible filtering).
@@ -422,6 +429,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for docker_update_summary component filtering
     #[test]
     fn component_count_filter_prevents_cross_length_updates() {
         // "22.04" (2-component) should NOT suggest updating to "22" (1-component)
@@ -435,6 +443,7 @@ mod tests {
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for docker_update_summary component filtering
     #[test]
     fn single_component_update_stays_single_component() {
         // "18" (1-component) should update to "20" (1-component), not "20.1" (2-component).
@@ -449,6 +458,7 @@ mod tests {
 
     // ── docker_update_summary ─────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for docker_update_summary edge cases
     #[test]
     fn detects_update_for_plain_version() {
         let tags: Vec<String> = ["22.04", "22.04.1", "22.04.2", "23.10"]
@@ -460,6 +470,7 @@ mod tests {
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for docker_update_summary edge cases
     #[test]
     fn detects_update_for_variant_tag() {
         // "18-alpine" is 1-component; "18.1-alpine" and "20.1-alpine" are 2-component
@@ -480,6 +491,7 @@ mod tests {
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for docker_update_summary edge cases
     #[test]
     fn variant_tags_do_not_cross_contaminate() {
         // "-alpine" and "-slim" should be treated separately.
@@ -494,6 +506,7 @@ mod tests {
         assert_eq!(s_slim.latest.as_deref(), Some("20-slim"));
     }
 
+    // Rust-specific: unit tests for docker_update_summary edge cases
     #[test]
     fn latest_tag_produces_no_update() {
         let tags: Vec<String> = ["latest", "22.04"]
@@ -505,6 +518,7 @@ mod tests {
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for docker_update_summary edge cases
     #[test]
     fn already_latest_produces_no_update() {
         let tags: Vec<String> = ["22.04", "22.04.1"]
@@ -584,6 +598,7 @@ mod tests {
         assert_eq!(tags, vec!["1.0.0"]);
     }
 
+    // Rust-specific: integration test for fetch_updates_concurrent
     #[tokio::test]
     async fn fetch_updates_concurrent_detects_update() {
         let server = MockServer::start().await;
@@ -607,6 +622,7 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("23.10"));
     }
 
+    // Rust-specific: integration test for non-Docker Hub error handling
     #[tokio::test]
     async fn non_docker_hub_image_returns_error() {
         let http = HttpClient::new().unwrap();

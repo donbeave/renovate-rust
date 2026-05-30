@@ -35,6 +35,7 @@ tokio = { version = "1.52.1", features = ["rt-multi-thread", "macros", "fs", "sy
 reqwest = { version = "0.13.3", features = ["json"] }
 url = "2.5.8"
 hcl-rs = "0.18.0"
+flate2 = "1.1"
 
 # Dev / test
 assert_cmd = "2.2.1"
