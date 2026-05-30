@@ -1167,3 +1167,4 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/versioning/unity3d/index.ts` | `crates/renovate-core/src/versioning/unity3d.rs` | partial | Unity3D versioning ported |
 | `lib/modules/versioning/unity3d-packages/index.ts` | `crates/renovate-core/src/versioning/unity3d_packages.rs` | partial | Unity3D packages versioning ported |
 | `lib/util/git/auth.ts` | `crates/renovate-core/src/util.rs` | full | Git authenticated environment variable generation, host-rule aggregation, GitHub API host-rule rewrites, additional datasource host types, GitLab token username, username/password encoding, invalid host filtering, and Bitbucket Server `/scm/` rewrite ported |
+| `lib/util/git/url.ts` | `crates/renovate-core/src/util.rs` | full | Git URL parsing, HTTP URL coercion, platform credential injection, Bitbucket Server SSH URL rewriting, and host-rule credential lookup ported |

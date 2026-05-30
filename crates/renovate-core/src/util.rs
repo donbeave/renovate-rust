@@ -818,6 +818,30 @@ pub fn take_personal_access_token_if_possible<'a>(
 // Git URL conversion — lib/util/git/url.ts
 // ---------------------------------------------------------------------------
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParsedGitUrl {
+    pub host: String,
+    pub pathname: String,
+    pub port: Option<String>,
+    pub protocol: String,
+    pub resource: String,
+}
+
+pub fn parse_git_url(url: &str) -> Option<ParsedGitUrl> {
+    let parsed = url::Url::parse(url).ok()?;
+    let resource = parsed.host_str()?.to_owned();
+    let host = parsed
+        .port()
+        .map_or_else(|| resource.clone(), |port| format!("{resource}:{port}"));
+    Some(ParsedGitUrl {
+        host,
+        pathname: parsed.path().to_owned(),
+        port: parsed.port().map(|port| port.to_string()),
+        protocol: parsed.scheme().to_owned(),
+        resource,
+    })
+}
+
 /// Convert a git URL to an HTTP(S) URL.
 ///
 /// - Non-`http(s)` schemes (git://, ssh://) → `https://`.
@@ -879,6 +903,18 @@ pub fn get_http_url(url: &str, token: Option<&str>) -> String {
         rest_no_at.to_owned()
     };
     let platform = detect_platform(&format!("{scheme}://{host_path}")).unwrap_or("");
+    let host_path = if platform == "bitbucket-server" && was_ssh {
+        let slash_pos = host_path.find('/').unwrap_or(host_path.len());
+        let host = &host_path[..slash_pos];
+        let path = &host_path[slash_pos..];
+        if path.starts_with("/scm/") {
+            host_path
+        } else {
+            format!("{host}/scm{path}")
+        }
+    } else {
+        host_path
+    };
     let creds = token
         .map(|t| build_git_credentials(platform, t))
         .unwrap_or_default();
@@ -886,6 +922,43 @@ pub fn get_http_url(url: &str, token: Option<&str>) -> String {
         format!("{scheme}://{host_path}")
     } else {
         format!("{scheme}://{creds}@{host_path}")
+    }
+}
+
+pub fn get_remote_url_with_token(url: &str, host_type: Option<&str>) -> String {
+    let lookup_url = coerce_git_url_for_host_rules(url).unwrap_or_else(|| url.to_owned());
+    let host_rule = host_rules::find(&host_rules::HostRuleSearch {
+        host_type: host_type.map(str::to_owned),
+        url: Some(lookup_url),
+        read_only: None,
+    });
+
+    if let Some(token) = host_rule.token.as_deref() {
+        let token = percent_encode(token);
+        return get_http_url(url, Some(&token));
+    }
+
+    if let (Some(username), Some(password)) =
+        (host_rule.username.as_deref(), host_rule.password.as_deref())
+    {
+        let credentials = format!("{}:{}", percent_encode(username), percent_encode(password));
+        return get_http_url(url, Some(&credentials));
+    }
+
+    url.to_owned()
+}
+
+fn coerce_git_url_for_host_rules(url: &str) -> Option<String> {
+    let trimmed = url.trim();
+    if trimmed.starts_with("git@")
+        || trimmed.starts_with("ssh://")
+        || trimmed.starts_with("git://")
+        || trimmed.starts_with("http://")
+        || trimmed.starts_with("https://")
+    {
+        Some(get_http_url(trimmed, None))
+    } else {
+        None
     }
 }
 
@@ -6204,6 +6277,21 @@ mod tests {
     // get_http_url
     // -----------------------------------------------------------------------
 
+    // Ported: "supports ports" — util/git/url.spec.ts line 9
+    #[test]
+    fn git_url_parse_supports_ports() {
+        assert_eq!(
+            parse_git_url("https://gitlab.com:8443/"),
+            Some(ParsedGitUrl {
+                host: "gitlab.com:8443".to_owned(),
+                pathname: "/".to_owned(),
+                port: Some("8443".to_owned()),
+                protocol: "https".to_owned(),
+                resource: "gitlab.com".to_owned(),
+            })
+        );
+    }
+
     // Ported: "returns https url for git url" — util/git/url.spec.ts line 40
     #[test]
     fn test_get_http_url_git() {
@@ -6252,6 +6340,27 @@ mod tests {
         );
     }
 
+    // Ported: "returns bitbucket-server url" — util/git/url.spec.ts line 90
+    #[test]
+    fn test_get_http_url_bitbucket_server() {
+        host_rules::clear();
+        assert_eq!(
+            get_http_url("http://git.mycompany.com/scm/proj/repo.git", None),
+            "http://git.mycompany.com/scm/proj/repo.git"
+        );
+        host_rules::add(host_rules::HostRule {
+            host_type: Some("bitbucket-server".to_owned()),
+            match_host: Some("git.mycompany.com".to_owned()),
+            ..Default::default()
+        })
+        .unwrap();
+        assert_eq!(
+            get_http_url("ssh://git@git.mycompany.com:7999/proj/repo.git", None),
+            "https://git.mycompany.com/scm/proj/repo.git"
+        );
+        host_rules::clear();
+    }
+
     // Ported: "removes username/password from URL" — util/git/url.spec.ts line 100
     #[test]
     fn test_get_http_url_removes_credentials() {
@@ -6271,6 +6380,204 @@ mod tests {
             ),
             "https://another-user:a-secret-pwd@foo.bar/someOrg/someRepo"
         );
+    }
+
+    fn git_url_host_rule(
+        host_type: Option<&str>,
+        match_host: Option<&str>,
+        token: Option<&str>,
+        username: Option<&str>,
+        password: Option<&str>,
+    ) -> host_rules::HostRule {
+        host_rules::HostRule {
+            host_type: host_type.map(str::to_owned),
+            match_host: match_host.map(str::to_owned),
+            token: token.map(str::to_owned),
+            username: username.map(str::to_owned),
+            password: password.map(str::to_owned),
+            ..Default::default()
+        }
+    }
+
+    // Ported: "returns original url if no host rule is found" — util/git/url.spec.ts line 117
+    #[test]
+    fn git_remote_url_with_token_returns_original_without_host_rule() {
+        host_rules::clear();
+        assert_eq!(get_remote_url_with_token("https://foo.bar/", None), "https://foo.bar/");
+    }
+
+    // Ported: "transforms an ssh git url to https for the purpose of finding hostRules" — util/git/url.spec.ts line 123
+    #[test]
+    fn git_remote_url_with_token_finds_host_rule_using_coerced_ssh_url() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("https://foo.bar/some/repo"),
+            Some("token"),
+            None,
+            None,
+        ))
+        .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("git@foo.bar:some/repo", None),
+            "https://token@foo.bar/some/repo"
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "does not transform urls that are not parseable as git urls" — util/git/url.spec.ts line 132
+    #[test]
+    fn git_remote_url_with_token_keeps_unparseable_lookup_url() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(None, Some("https://abcdefg"), Some("token"), None, None))
+            .unwrap();
+        assert_eq!(get_remote_url_with_token("abcdefg", None), "abcdefg");
+        host_rules::clear();
+    }
+
+    // Ported: "returns http url with token" — util/git/url.spec.ts line 141
+    #[test]
+    fn git_remote_url_with_token_returns_http_url_with_token() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(None, Some("foo.bar"), Some("token"), None, None))
+            .unwrap();
+        assert_eq!(get_remote_url_with_token("http://foo.bar/", None), "http://token@foo.bar/");
+        host_rules::clear();
+    }
+
+    // Ported: "returns https url with token" — util/git/url.spec.ts line 148
+    #[test]
+    fn git_remote_url_with_token_returns_https_url_with_token() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(None, Some("foo.bar"), Some("token"), None, None))
+            .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("https://foo.bar/", None),
+            "https://token@foo.bar/"
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns https url with token for non-http protocols" — util/git/url.spec.ts line 155
+    #[test]
+    fn git_remote_url_with_token_returns_https_url_for_non_http_protocols() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(None, Some("foo.bar"), Some("token"), None, None))
+            .unwrap();
+        assert_eq!(get_remote_url_with_token("ssh://foo.bar/", None), "https://token@foo.bar/");
+        host_rules::clear();
+    }
+
+    // Ported: "returns https url with encoded token" — util/git/url.spec.ts line 162
+    #[test]
+    fn git_remote_url_with_token_encodes_token() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(None, Some("foo.bar"), Some("t#ken"), None, None))
+            .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("https://foo.bar/", None),
+            "https://t%23ken@foo.bar/"
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns http url with username and password" — util/git/url.spec.ts line 169
+    #[test]
+    fn git_remote_url_with_token_returns_http_url_with_username_password() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("foo.bar"),
+            None,
+            Some("user"),
+            Some("pass"),
+        ))
+        .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("http://foo.bar/", None),
+            "http://user:pass@foo.bar/"
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns https url with username and password" — util/git/url.spec.ts line 179
+    #[test]
+    fn git_remote_url_with_token_returns_https_url_with_username_password() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("foo.bar"),
+            None,
+            Some("user"),
+            Some("pass"),
+        ))
+        .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("https://foo.bar/", None),
+            "https://user:pass@foo.bar/"
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns https url with username and password for non-http protocols" — util/git/url.spec.ts line 189
+    #[test]
+    fn git_remote_url_with_token_returns_https_url_with_username_password_for_non_http() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("foo.bar"),
+            None,
+            Some("user"),
+            Some("pass"),
+        ))
+        .unwrap();
+        assert_eq!(get_remote_url_with_token("ssh://foo.bar/", None), "https://user:pass@foo.bar/");
+        host_rules::clear();
+    }
+
+    // Ported: "returns https url with encoded username and password" — util/git/url.spec.ts line 199
+    #[test]
+    fn git_remote_url_with_token_encodes_username_password() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("foo.bar"),
+            None,
+            Some("u$er"),
+            Some("p@ss"),
+        ))
+        .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("https://foo.bar/", None),
+            "https://u%24er:p%40ss@foo.bar/"
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns https url with encoded gitlab token" — util/git/url.spec.ts line 209
+    #[test]
+    fn git_remote_url_with_token_returns_gitlab_credentials() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(None, Some("gitlab.com"), Some("token"), None, None))
+            .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("ssh://gitlab.com/some/repo.git", None),
+            "https://gitlab-ci-token:token@gitlab.com/some/repo.git"
+        );
+        host_rules::clear();
+    }
+
+    // Ported: "returns https url for ssh url with encoded github token" — util/git/url.spec.ts line 218
+    #[test]
+    fn git_remote_url_with_token_returns_github_credentials() {
+        host_rules::clear();
+        host_rules::add(git_url_host_rule(None, Some("github.com"), Some("token"), None, None))
+            .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("ssh://github.com/some/repo.git", None),
+            "https://x-access-token:token@github.com/some/repo.git"
+        );
+        host_rules::clear();
     }
 
     fn git_env(entries: &[(&str, &str)]) -> std::collections::HashMap<String, String> {
