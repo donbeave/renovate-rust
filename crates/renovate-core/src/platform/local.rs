@@ -63,6 +63,48 @@ impl LocalClient {
         // Fall back to a simple recursive walk when not in a git repo.
         Ok(walk_dir(&self.base_dir))
     }
+
+    pub async fn create_pr(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _source_branch: &str,
+        _target_branch: &str,
+        _title: &str,
+        _body: &str,
+    ) -> Result<Option<i64>, PlatformError> {
+        tracing::debug!("local platform: create_pr is a no-op");
+        Ok(None)
+    }
+
+    pub async fn update_pr(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _pr_number: i64,
+        _title: Option<&str>,
+        _body: Option<&str>,
+        _state: Option<&str>,
+    ) -> Result<(), PlatformError> {
+        tracing::debug!("local platform: update_pr is a no-op");
+        Ok(())
+    }
+
+    pub async fn get_branch_status(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _branch: &str,
+    ) -> Result<CombinedBranchStatus, PlatformError> {
+        use crate::platform::{BranchState, CombinedBranchState, GhBranchStatus};
+        Ok(CombinedBranchStatus {
+            state: CombinedBranchState::Success,
+            statuses: vec![GhBranchStatus {
+                context: "local".to_owned(),
+                state: BranchState::Success,
+            }],
+        })
+    }
 }
 
 /// Run `git ls-files` in `dir` and return the file list, or `None` on failure.
