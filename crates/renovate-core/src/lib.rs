@@ -1,5 +1,6 @@
 //! Core domain types for the Rust reimplementation of Renovate.
 
+pub mod artifacts;
 pub mod branch;
 pub mod cache;
 pub mod config;
