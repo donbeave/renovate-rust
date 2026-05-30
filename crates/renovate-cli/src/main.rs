@@ -30,7 +30,7 @@ use std::sync::Arc;
 use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::Platform;
-use renovate_core::config::{GlobalConfig, file as config_file};
+use renovate_core::config::{DryRun, GlobalConfig, file as config_file};
 use renovate_core::http::HttpClient;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
@@ -408,6 +408,70 @@ async fn process_repo(
     pipeline_utils::apply_update_blocking_to_report(&mut repo_report, &repo_cfg, repo_slug);
     // Apply ignoreVersions (global + per-rule) across all collected file reports.
     pipeline_utils::apply_version_ignore_to_report(&mut repo_report, &repo_cfg, repo_slug);
+
+    // Branch / PR creation for UpdateAvailable deps.
+    let mut had_error = had_error;
+    let target_branch = repo_cfg
+        .base_branches
+        .first()
+        .cloned()
+        .unwrap_or_else(|| "main".to_owned());
+
+    // Collect unique branch names from UpdateAvailable deps.
+    let mut seen_branches: std::collections::HashSet<String> = std::collections::HashSet::new();
+    for file in &repo_report.files {
+        for dep in &file.deps {
+            if let output::DepStatus::UpdateAvailable { .. } = &dep.status {
+                if let Some(branch) = dep.branch_name.clone() {
+                    if seen_branches.insert(branch.clone()) {
+                        match config.dry_run {
+                            Some(DryRun::Full) | Some(DryRun::Lookup) => {
+                                tracing::info!(
+                                    repo = %repo_slug,
+                                    branch = %branch,
+                                    title = %dep.pr_title.as_deref().unwrap_or("<no title>"),
+                                    "dry-run: would create branch and PR"
+                                );
+                            }
+                            _ => {
+                                if let Some(title) = dep.pr_title.as_deref() {
+                                    match client
+                                        .create_pr(owner, repo, &branch, &target_branch, title, "")
+                                        .await
+                                    {
+                                        Ok(Some(pr_number)) => {
+                                            tracing::info!(
+                                                repo = %repo_slug,
+                                                branch = %branch,
+                                                pr_number,
+                                                "created PR"
+                                            );
+                                        }
+                                        Ok(None) => {
+                                            tracing::debug!(
+                                                repo = %repo_slug,
+                                                branch = %branch,
+                                                "PR already exists or skipped"
+                                            );
+                                        }
+                                        Err(err) => {
+                                            tracing::error!(
+                                                repo = %repo_slug,
+                                                branch = %branch,
+                                                %err,
+                                                "failed to create PR"
+                                            );
+                                            had_error = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     (Some(repo_report), had_error)
 }

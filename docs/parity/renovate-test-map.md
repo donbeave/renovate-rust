@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,199 / 11,666 total tests ported (45%) · pending 6,008 · not-applicable 459 (4% of total) — updated 2026-05-30
+**Progress:** 5,199 / 11,666 total tests ported (45%) · pending 6,005 · not-applicable 462 (4% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -579,7 +579,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/gleam/range.spec.ts` | Done | [details](lib/modules/manager/gleam/range.spec.ts.md) |
 | `lib/modules/manager/gomod/artifacts-extra.spec.ts` | Done | [details](lib/modules/manager/gomod/artifacts-extra.spec.ts.md) |
 | `lib/modules/manager/gomod/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gomod/artifacts.spec.ts.md) |
-| `lib/modules/manager/gomod/integration.spec.ts` | Not done | [details](lib/modules/manager/gomod/integration.spec.ts.md) |
+| `lib/modules/manager/gomod/integration.spec.ts` | Done | [details](lib/modules/manager/gomod/integration.spec.ts.md) |
 | `lib/modules/manager/gomod/line-parser.spec.ts` | Done | [details](lib/modules/manager/gomod/line-parser.spec.ts.md) |
 | `lib/modules/manager/gomod/update.spec.ts` | Done | [details](lib/modules/manager/gomod/update.spec.ts.md) |
 | `lib/modules/manager/gradle/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gradle/artifacts.spec.ts.md) |
@@ -931,6 +931,6 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `test/docs/documentation.spec.ts` | Done | [details](test/docs/documentation.spec.ts.md) |
 | `test/other/sync-module-labels.spec.ts` | Done | [details](test/other/sync-module-labels.spec.ts.md) |
 | `test/other/validate-config-files.spec.ts` | Done | [details](test/other/validate-config-files.spec.ts.md) |
-| `test/other/validate-docker.spec.ts` | Not done | [details](test/other/validate-docker.spec.ts.md) |
-| `test/other/validate-schemas.spec.ts` | Not done | [details](test/other/validate-schemas.spec.ts.md) |
+| `test/other/validate-docker.spec.ts` | Done | [details](test/other/validate-docker.spec.ts.md) |
+| `test/other/validate-schemas.spec.ts` | Done | [details](test/other/validate-schemas.spec.ts.md) |
 | `tools/docs/test/utils.spec.ts` | Done | [details](tools/docs/test/utils.spec.ts.md) |
