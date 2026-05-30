@@ -5,7 +5,7 @@
 ## `lib/workers/repository/process/fetch.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/fetch.spec.ts
-**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** not-applicable
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending-applicable
 
 ### `workers/repository/process/fetch › fetchUpdates()`
 

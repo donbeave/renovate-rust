@@ -5,7 +5,7 @@
 ## `lib/workers/global/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/index.spec.ts
-**Total tests:** 15 | **Ported:** 2 | **Actionable:** 15 | **Status:** ported
+**Total tests:** 15 | **Ported:** 2 | **Actionable:** 15 | **Status:** pending
 
 ### `workers/global/index › getRepositoryConfig`
 

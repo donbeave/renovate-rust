@@ -5,7 +5,7 @@
 ## `lib/modules/manager/nuget/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/util.spec.ts
-**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** not-applicable
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending-applicable
 
 ### `findVersion`
 

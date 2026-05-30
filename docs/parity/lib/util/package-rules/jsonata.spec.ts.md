@@ -5,7 +5,7 @@
 ## `lib/util/package-rules/jsonata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/jsonata.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** not-applicable
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending-applicable
 
 ### `util/package-rules/jsonata`
 

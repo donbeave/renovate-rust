@@ -5,7 +5,7 @@
 ## `lib/util/exec/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/utils.spec.ts
-**Total tests:** 21 | **Ported:** 4 | **Actionable:** 21 | **Status:** ported
+**Total tests:** 21 | **Ported:** 4 | **Actionable:** 21 | **Status:** pending
 
 ### `util/exec/utils › isCommandWithOptions › when command is an array of 1 command`
 

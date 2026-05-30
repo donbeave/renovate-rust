@@ -5,7 +5,7 @@
 ## `lib/workers/repository/onboarding/branch/check.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/branch/check.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** not-applicable
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending-applicable
 
 ### `workers/repository/onboarding/branch/check`
 

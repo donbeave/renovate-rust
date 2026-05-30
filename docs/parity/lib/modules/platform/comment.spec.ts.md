@@ -5,7 +5,7 @@
 ## `lib/modules/platform/comment.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/comment.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** not-applicable
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending-applicable
 
 ### `modules/platform/comment › ensureComment`
 

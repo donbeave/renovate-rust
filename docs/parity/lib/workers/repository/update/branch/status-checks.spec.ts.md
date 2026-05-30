@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/branch/status-checks.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/status-checks.spec.ts
-**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** not-applicable
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending-applicable
 
 ### `workers/repository/update/branch/status-checks › setStability`
 

@@ -5,7 +5,7 @@
 ## `lib/util/emoji.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/emoji.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** not-applicable
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending-applicable
 
 ### `util/emoji › emojify`
 

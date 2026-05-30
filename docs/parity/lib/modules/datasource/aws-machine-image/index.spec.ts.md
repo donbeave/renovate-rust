@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/aws-machine-image/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/aws-machine-image/index.spec.ts
-**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** not-applicable
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending-applicable
 
 ### `modules/datasource/aws-machine-image/index › getSortedAwsMachineImages()`
 
