@@ -661,6 +661,7 @@ mod tests {
 
     // ── is_exact_pin ─────────────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for is_exact_pin helper
     #[test]
     fn bare_three_component_is_pinned() {
         assert!(is_exact_pin("4.17.21"));
@@ -668,11 +669,13 @@ mod tests {
         assert!(is_exact_pin("0.0.1"));
     }
 
+    // Rust-specific: unit tests for is_exact_pin helper
     #[test]
     fn explicit_equals_is_pinned() {
         assert!(is_exact_pin("=4.17.21"));
     }
 
+    // Rust-specific: unit tests for is_exact_pin helper
     #[test]
     fn range_constraints_are_not_pinned() {
         for c in &["^4.17.21", "~4.17.21", ">=4.0.0", "4.17", "4", "*"] {
@@ -682,6 +685,7 @@ mod tests {
 
     // ── resolve_latest_compatible ─────────────────────────────────────────────
 
+    // Rust-specific: unit tests for resolve_latest_compatible helper
     #[test]
     fn resolve_caret_range() {
         let versions = avail(&["17.0.0", "17.0.2", "18.0.0", "18.2.0", "19.0.0"]);
@@ -691,6 +695,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for resolve_latest_compatible helper
     #[test]
     fn resolve_gte_range() {
         let versions = avail(&["15.0.0", "16.0.0", "17.0.0"]);
@@ -700,6 +705,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for resolve_latest_compatible helper
     #[test]
     fn resolve_exact_pin() {
         let versions = avail(&["4.17.21", "4.18.0"]);
@@ -711,6 +717,7 @@ mod tests {
 
     // ── npm_update_summary ────────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for npm_update_summary edge cases
     #[test]
     fn pinned_with_newer_version_has_update() {
         let versions = avail(&["4.17.20", "4.17.21", "4.18.2"]);
@@ -722,6 +729,7 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("4.18.2"));
     }
 
+    // Rust-specific: unit tests for npm_update_summary edge cases
     #[test]
     fn pinned_with_exact_newer_patch_has_update() {
         let versions = avail(&["1.0.0", "1.0.1", "1.0.2"]);
@@ -731,6 +739,7 @@ mod tests {
         assert_eq!(s.latest_compatible.as_deref(), Some("1.0.0"));
     }
 
+    // Rust-specific: unit tests for npm_update_summary edge cases
     #[test]
     fn caret_range_not_flagged_when_latest_within_range() {
         let versions = avail(&["18.0.0", "18.2.0"]);
@@ -741,6 +750,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for npm_update_summary edge cases
     #[test]
     fn caret_range_flagged_when_latest_outside_range() {
         let versions = avail(&["18.0.0", "18.2.0", "19.0.0"]);
@@ -752,6 +762,7 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("19.0.0"));
     }
 
+    // Rust-specific: unit tests for npm_update_summary edge cases
     #[test]
     fn tilde_range_flagged_when_outside_range() {
         let versions = avail(&["18.0.0", "18.1.0"]);
@@ -763,6 +774,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for npm_update_summary edge cases
     #[test]
     fn gte_range_not_flagged_because_open_ended() {
         let versions = avail(&["18.0.0", "18.2.0", "19.0.0"]);
@@ -774,6 +786,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for npm_update_summary edge cases
     #[test]
     fn latest_tag_is_reported_even_for_ranges() {
         let versions = avail(&["1.0.0", "2.0.0"]);
@@ -781,6 +794,7 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("1.0.0"));
     }
 
+    // Rust-specific: unit tests for npm_update_summary edge cases
     #[test]
     fn no_versions_returns_none_fields() {
         let s = npm_update_summary("^1.0.0", &[], None);

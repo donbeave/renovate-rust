@@ -1528,3 +1528,51 @@ fn parity_pipenv_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for pipenv-skipped fixture");
 }
+
+#[test]
+fn parity_mix_skipped() {
+    let actual = run_fixture("mix-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "mix.exs",
+                    "manager": "mix",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "local_pkg",
+                            "status": "skipped",
+                            "reason": "localpath"
+                        },
+                        {
+                            "name": "git_pkg",
+                            "status": "skipped",
+                            "reason": "gitsource"
+                        },
+                        {
+                            "name": "noversion",
+                            "status": "skipped",
+                            "reason": "noversion"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for mix-skipped fixture");
+}
