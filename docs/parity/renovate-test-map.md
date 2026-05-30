@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,167 / 11,666 total tests ported (44%) · pending 3,956 · not-applicable 2,543 (22% of total) — updated 2026-05-30
+**Progress:** 5,167 / 11,666 total tests ported (44%) · pending 4,019 · not-applicable 2,480 (21% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -838,7 +838,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/config-migration/index.spec.ts` | Done | [details](lib/workers/repository/config-migration/index.spec.ts.md) |
 | `lib/workers/repository/config-migration/pr/index.spec.ts` | Done | [details](lib/workers/repository/config-migration/pr/index.spec.ts.md) |
 | `lib/workers/repository/configured.spec.ts` | Done | [details](lib/workers/repository/configured.spec.ts.md) |
-| `lib/workers/repository/dependency-dashboard.spec.ts` | Done | [details](lib/workers/repository/dependency-dashboard.spec.ts.md) |
+| `lib/workers/repository/dependency-dashboard.spec.ts` | Not done | [details](lib/workers/repository/dependency-dashboard.spec.ts.md) |
 | `lib/workers/repository/error-config.spec.ts` | Done | [details](lib/workers/repository/error-config.spec.ts.md) |
 | `lib/workers/repository/error.spec.ts` | Done | [details](lib/workers/repository/error.spec.ts.md) |
 | `lib/workers/repository/errors-warnings.spec.ts` | Done | [details](lib/workers/repository/errors-warnings.spec.ts.md) |

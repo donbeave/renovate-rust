@@ -5,109 +5,109 @@
 ## `lib/workers/repository/dependency-dashboard.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/dependency-dashboard.spec.ts
-**Total tests:** 63 | **Ported:** 0 | **Actionable:** 63 | **Status:** not-applicable
+**Total tests:** 63 | **Ported:** 0 | **Actionable:** 63 | **Status:** pending
 
 ### `workers/repository/dependency-dashboard › readDashboardBody()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses invalid dashboard body without throwing error | 98 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body | 121 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body and apply checkedBranches | 149 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body all pending approval | 176 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body open all rate-limited | 204 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body open all awaiting schedule | 232 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body and config migration checkbox - checked | 260 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body and config migration checkbox - unchecked | 274 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body and config migration pr link | 288 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| does not read dashboard body but applies checkedBranches regardless | 302 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| reads dashboard body and group size not met branches | 321 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| parses invalid dashboard body without throwing error | 98 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body | 121 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body and apply checkedBranches | 149 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body all pending approval | 176 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body open all rate-limited | 204 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body open all awaiting schedule | 232 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body and config migration checkbox - checked | 260 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body and config migration checkbox - unchecked | 274 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body and config migration pr link | 288 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| does not read dashboard body but applies checkedBranches regardless | 302 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| reads dashboard body and group size not met branches | 321 | pending | — | — | dependency dashboard runtime behavior is in scope |
 
 ### `workers/repository/dependency-dashboard › ensureDependencyDashboard()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does nothing if mode=silent | 346 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| do nothing if dependencyDashboard is disabled | 362 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| do nothing if it has no dependencyDashboardApproval branches | 377 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| closes Dependency Dashboard when there is 0 PR opened and dependencyDashboardAutoclose is true | 402 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true | 422 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false | 454 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| open or update Dependency Dashboard when rules contain approvals | 476 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached, 2 in error, 1 pending automerge and 1 other | 512 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| checks an issue with dependency dashboard categories | 607 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| checks an issue with 2 PR pr-edited | 701 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| checks an issue with 3 PR in progress and rebase all option | 743 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| checks an issue with 2 PR closed / ignored | 793 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| checks an issue with group size not met branches | 833 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| checks an issue with 3 PR in approval | 874 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| adds a checkbox for config migration | 929 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| adds config migration pr link when it exists | 960 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| adds related text when config migration pr has been modified | 992 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| does not add a config migration checkbox when not needed | 1024 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| contains logged problems | 1053 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| contains logged problems with custom header | 1107 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| dependency Dashboard All Pending Approval | 1144 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| dependency Dashboard Open All rate-limited | 1211 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| rechecks branches | 1275 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| skips fetching issue if content unchanged | 1335 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| forwards configured labels to the ensure issue call | 1365 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| does nothing if mode=silent | 346 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| do nothing if dependencyDashboard is disabled | 362 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| do nothing if it has no dependencyDashboardApproval branches | 377 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| closes Dependency Dashboard when there is 0 PR opened and dependencyDashboardAutoclose is true | 402 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true | 422 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false | 454 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| open or update Dependency Dashboard when rules contain approvals | 476 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached, 2 in error, 1 pending automerge and 1 other | 512 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| checks an issue with dependency dashboard categories | 607 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| checks an issue with 2 PR pr-edited | 701 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| checks an issue with 3 PR in progress and rebase all option | 743 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| checks an issue with 2 PR closed / ignored | 793 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| checks an issue with group size not met branches | 833 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| checks an issue with 3 PR in approval | 874 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| adds a checkbox for config migration | 929 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| adds config migration pr link when it exists | 960 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| adds related text when config migration pr has been modified | 992 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| does not add a config migration checkbox when not needed | 1024 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| contains logged problems | 1053 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| contains logged problems with custom header | 1107 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| dependency Dashboard All Pending Approval | 1144 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| dependency Dashboard Open All rate-limited | 1211 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| rechecks branches | 1275 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| skips fetching issue if content unchanged | 1335 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| forwards configured labels to the ensure issue call | 1365 | pending | — | — | dependency dashboard runtime behavior is in scope |
 
 ### `workers/repository/dependency-dashboard › ensureDependencyDashboard() › checks detected dependencies section › single base branch repo`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| add detected dependencies to the Dependency Dashboard body | 1404 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| show default message in issues body when packageFiles is empty | 1419 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| show default message in issues body when when packageFiles is null | 1436 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| shows different combinations of version+digest for a given dependency | 1453 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| shows deprecations | 1469 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles missing version/digest values correctly | 1501 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| add detected dependencies to the Dependency Dashboard body | 1404 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| show default message in issues body when packageFiles is empty | 1419 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| show default message in issues body when when packageFiles is null | 1436 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| shows different combinations of version+digest for a given dependency | 1453 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| shows deprecations | 1469 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| handles missing version/digest values correctly | 1501 | pending | — | — | dependency dashboard runtime behavior is in scope |
 
 ### `workers/repository/dependency-dashboard › ensureDependencyDashboard() › checks detected dependencies section › multi base branch repo`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| add detected dependencies to the Dependency Dashboard body | 1580 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| show default message in issues body when packageFiles is empty | 1595 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| show default message in issues body when when packageFiles is null | 1611 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| truncates the body of a really big repo | 1627 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| add detected dependencies to the Dependency Dashboard body | 1580 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| show default message in issues body when packageFiles is empty | 1595 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| show default message in issues body when when packageFiles is null | 1611 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| truncates the body of a really big repo | 1627 | pending | — | — | dependency dashboard runtime behavior is in scope |
 
 ### `workers/repository/dependency-dashboard › ensureDependencyDashboard() › checks detected dependencies section › dependency dashboard lookup warnings`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| Dependency Lookup Warnings message in issues body | 1659 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| Dependency Lookup Warnings message in issues body | 1659 | pending | — | — | dependency dashboard runtime behavior is in scope |
 
 ### `workers/repository/dependency-dashboard › ensureDependencyDashboard() › checks detected dependencies section › PackageFiles.getDashboardMarkdown()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not truncates as there is enough space to fit | 1695 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| removes a branch with no managers | 1705 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| removes a manager with no package files | 1716 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| does nothing when there are no base branches left | 1726 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| removes an entire base branch | 1731 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| ensures original data is unchanged | 1741 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| does not truncates as there is enough space to fit | 1695 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| removes a branch with no managers | 1705 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| removes a manager with no package files | 1716 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| does nothing when there are no base branches left | 1726 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| removes an entire base branch | 1731 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| ensures original data is unchanged | 1741 | pending | — | — | dependency dashboard runtime behavior is in scope |
 
 ### `workers/repository/dependency-dashboard › getDashboardMarkdownVulnerabilities()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return empty string if summary is empty | 1761 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| return empty string if summary is set to none | 1769 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| return no data section if summary is set to all and no vulnerabilities | 1780 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| return all vulnerabilities if set to all and disabled osvVulnerabilities | 1799 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| return unresolved vulnerabilities if set to "unresolved" | 1871 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| return empty string if summary is empty | 1761 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| return empty string if summary is set to none | 1769 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| return no data section if summary is set to all and no vulnerabilities | 1780 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| return all vulnerabilities if set to all and disabled osvVulnerabilities | 1799 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| return unresolved vulnerabilities if set to "unresolved" | 1871 | pending | — | — | dependency dashboard runtime behavior is in scope |
 
 ### `workers/repository/dependency-dashboard › getAbandonedPackagesMd()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty string when no abandoned packages exist | 1938 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| returns formatted markdown when abandoned packages exist | 1955 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles multiple abandoned packages across different managers | 1986 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| displays "unknown" when mostRecentTimestamp is missing | 2037 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles empty deps array | 2069 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| returns empty string when no abandoned packages exist | 1938 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| returns formatted markdown when abandoned packages exist | 1955 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| handles multiple abandoned packages across different managers | 1986 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| displays "unknown" when mostRecentTimestamp is missing | 2037 | pending | — | — | dependency dashboard runtime behavior is in scope |
+| handles empty deps array | 2069 | pending | — | — | dependency dashboard runtime behavior is in scope |
 
 ---
