@@ -196,7 +196,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/hackage/index.spec.ts` | Done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
 | `lib/modules/datasource/endoflife-date/index.spec.ts` | Done | [details](lib/modules/datasource/endoflife-date/index.spec.ts.md) |
 | `lib/modules/datasource/java-version/common.spec.ts` | Done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
-| `lib/modules/datasource/git-refs/index.spec.ts` | Not done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
+| `lib/modules/datasource/git-refs/index.spec.ts` | Done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
 | `lib/modules/datasource/dotnet-version/index.spec.ts` | Done | [details](lib/modules/datasource/dotnet-version/index.spec.ts.md) |
 | `lib/modules/datasource/elm-package/index.spec.ts` | Done | [details](lib/modules/datasource/elm-package/index.spec.ts.md) |
 | `lib/modules/datasource/ruby-version/index.spec.ts` | Done | [details](lib/modules/datasource/ruby-version/index.spec.ts.md) |
@@ -265,7 +265,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/massage.spec.ts` | Done | [details](lib/config/massage.spec.ts.md) |
 | `lib/config/secrets.spec.ts` | Done | [details](lib/config/secrets.spec.ts.md) |
 | `lib/config/inherit.spec.ts` | Done | [details](lib/config/inherit.spec.ts.md) |
-| `lib/config/decrypt.spec.ts` | Not done | [details](lib/config/decrypt.spec.ts.md) |
+| `lib/config/decrypt.spec.ts` | Done | [details](lib/config/decrypt.spec.ts.md) |
 | `lib/config/decrypt/bcpgp.spec.ts` | Not done | [details](lib/config/decrypt/bcpgp.spec.ts.md) |
 | `lib/config/decrypt/openpgp.spec.ts` | Not done | [details](lib/config/decrypt/openpgp.spec.ts.md) |
 | `lib/config/presets/forgejo/index.spec.ts` | Not done | [details](lib/config/presets/forgejo/index.spec.ts.md) |
