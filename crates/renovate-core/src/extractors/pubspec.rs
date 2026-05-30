@@ -453,6 +453,7 @@ mod tests {
             .collect()
     }
 
+    // Rust-specific: unit test for simple inline version extraction
     #[test]
     fn simple_inline_versions() {
         let content = r#"
@@ -473,6 +474,7 @@ dependencies:
         assert!(any.skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for SDK dependency skipping
     #[test]
     fn sdk_dep_skipped() {
         let content = r#"
@@ -487,6 +489,7 @@ dependencies:
         assert_eq!(flutter.skip_reason, Some(PubspecSkipReason::SdkDep));
     }
 
+    // Rust-specific: unit test for git dependency skipping
     #[test]
     fn git_dep_skipped() {
         let content = r#"
@@ -500,6 +503,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(PubspecSkipReason::GitSource));
     }
 
+    // Rust-specific: unit test for path dependency skipping
     #[test]
     fn path_dep_skipped() {
         let content = r#"
@@ -512,6 +516,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(PubspecSkipReason::LocalPath));
     }
 
+    // Rust-specific: unit test for version object form
     #[test]
     fn version_object_form() {
         let content = r#"
@@ -526,6 +531,7 @@ dependencies:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for dev_dependencies extraction
     #[test]
     fn dev_dependencies_extracted() {
         let content = r#"
@@ -549,6 +555,7 @@ dev_dependencies:
         assert!(test_dep.skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for real-world pubspec extraction
     #[test]
     fn real_world_pubspec() {
         let content = r#"
@@ -616,6 +623,7 @@ dev_dependencies:
         assert!(versioned.skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for empty pubspec handling
     #[test]
     fn empty_pubspec_returns_empty() {
         let content = "name: myapp\nversion: 1.0.0\n";
