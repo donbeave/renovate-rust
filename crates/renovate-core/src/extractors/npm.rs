@@ -309,18 +309,18 @@ pub fn detect_monorepos(package_files: &mut [NpmPackageFile]) {
         let mut internal_package_names: Vec<String> = Vec::new();
         let mut internal_indices: Vec<usize> = Vec::new();
 
-        for j in 0..package_files.len() {
+        for (j, pf_j) in package_files.iter().enumerate() {
             if j == i {
                 continue;
             }
-            let sub_dir = package_files[j]
+            let sub_dir = pf_j
                 .package_file
                 .rsplit('/')
                 .nth(1)
                 .unwrap_or(".");
             for pattern in &internal_package_patterns {
                 if sub_dir.starts_with(pattern.trim_end_matches("/*")) {
-                    if let Some(ref name) = package_files[j].manager_data.package_json_name {
+                    if let Some(ref name) = pf_j.manager_data.package_json_name {
                         internal_package_names.push(name.clone());
                     }
                     internal_indices.push(j);

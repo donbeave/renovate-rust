@@ -58,11 +58,10 @@ pub async fn generate_docker_command(
         parts.push(format!("-v \"{}\":\"{}\"", cache_dir, cache_dir));
     }
 
-    if let Some(ref cb_dir) = docker_config.containerbase_dir {
-        if docker_config.cache_dir.as_ref() != Some(cb_dir) {
+    if let Some(ref cb_dir) = docker_config.containerbase_dir
+        && docker_config.cache_dir.as_ref() != Some(cb_dir) {
             parts.push(format!("-v \"{}\":\"{}\"", cb_dir, cb_dir));
         }
-    }
 
     for vol in &docker_options.volumes {
         if !vol.is_empty() {

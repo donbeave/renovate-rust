@@ -40,11 +40,10 @@ fn resolve_cwd(opts: &ExecOptions, config: &ExecConfig) -> Option<String> {
     if let Some(ref cwd) = opts.cwd {
         return Some(cwd.clone());
     }
-    if let Some(ref cwd_file) = opts.cwd_file {
-        if let Some(parent) = Path::new(cwd_file).parent() {
+    if let Some(ref cwd_file) = opts.cwd_file
+        && let Some(parent) = Path::new(cwd_file).parent() {
             return Some(parent.to_string_lossy().to_string());
         }
-    }
     config.local_dir.clone()
 }
 

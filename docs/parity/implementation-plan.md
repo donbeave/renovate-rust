@@ -5,7 +5,6 @@ Covers source map (58 not-started + 222 partial rows), test map (174 not-done sp
 all infrastructure needed to reach full parity.
 
 **Current stats:** 240 full / 222 partial / 58 not-started / 103 out-of-scope (source files)
-**Test stats:** 749 done / 174 not done (spec files)
 **Build:** 6599 unit tests + 8 doctests passing
 
 ---

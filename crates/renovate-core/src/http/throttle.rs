@@ -68,7 +68,7 @@ pub async fn get_queue(url: &str) -> Option<SharedSemaphore> {
 
     {
         let mut queues = HOST_QUEUES.lock().unwrap();
-        queues.insert(host.clone(), Some(sem.clone()));
+        queues.insert(host, Some(sem.clone()));
     }
 
     Some(sem)
@@ -93,7 +93,7 @@ pub async fn get_throttle(url: &str) -> Option<SharedTimestamp> {
 
     {
         let mut throttles = HOST_THROTTLES.lock().unwrap();
-        throttles.insert(host.clone(), Some(timestamp.clone()));
+        throttles.insert(host, Some(timestamp.clone()));
     }
 
     Some(timestamp)
@@ -101,9 +101,8 @@ pub async fn get_throttle(url: &str) -> Option<SharedTimestamp> {
 
 pub async fn apply_throttle(url: &str) {
     let throttle_rules = get_throttle_rules();
-    let interval_ms = match get_throttle_interval_ms(url, &throttle_rules) {
-        Some(ms) => ms,
-        None => return,
+    let Some(interval_ms) = get_throttle_interval_ms(url, &throttle_rules) else {
+        return;
     };
 
     if let Some(timestamp) = get_throttle(url).await {

@@ -36,24 +36,18 @@ pub struct ExecOptions {
 }
 
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct ExecResult {
     pub stdout: String,
     pub stderr: String,
     pub exit_code: Option<i32>,
 }
 
-impl Default for ExecResult {
-    fn default() -> Self {
-        Self {
-            stdout: String::new(),
-            stderr: String::new(),
-            exit_code: None,
-        }
-    }
-}
 
 #[derive(Debug, Clone, PartialEq)]
+#[derive(Default)]
 pub enum BinarySource {
+    #[default]
     Global,
     Docker,
     Hermit,
@@ -61,8 +55,3 @@ pub enum BinarySource {
     Install,
 }
 
-impl Default for BinarySource {
-    fn default() -> Self {
-        Self::Global
-    }
-}

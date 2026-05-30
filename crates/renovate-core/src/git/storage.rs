@@ -20,6 +20,7 @@ pub enum GitNoVerifyOption {
 }
 
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct StorageConfig {
     pub current_branch: Option<String>,
     pub default_branch: Option<String>,
@@ -31,20 +32,6 @@ pub struct StorageConfig {
     pub full_clone: bool,
 }
 
-impl Default for StorageConfig {
-    fn default() -> Self {
-        Self {
-            current_branch: None,
-            default_branch: None,
-            url: String::new(),
-            upstream_url: None,
-            extra_clone_opts: HashMap::new(),
-            clone_submodules: false,
-            clone_submodules_filter: None,
-            full_clone: false,
-        }
-    }
-}
 
 #[derive(Debug, Clone)]
 pub enum FileChange {

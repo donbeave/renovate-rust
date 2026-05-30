@@ -85,12 +85,11 @@ pub fn find_matching_rule(
         return merged;
     }
 
-    if let Some(ht) = host_type {
-        if let Some(fallback_ht) = get_platform_fallback_host_type(ht, url, platform, platform_endpoint) {
+    if let Some(ht) = host_type
+        && let Some(fallback_ht) = get_platform_fallback_host_type(ht, url, platform, platform_endpoint) {
             let fallback = find_rules(url, Some(fallback_ht), host_rules);
             merge_rule_into(&mut merged, &fallback);
         }
-    }
 
     merged
 }
@@ -153,14 +152,13 @@ fn merge_rule_into(target: &mut HostRule, source: &HostRule) {
     if source.https_certificate.is_some() {
         target.https_certificate = source.https_certificate.clone();
     }
-    if source.headers.is_some() {
-        if let Some(ref h) = source.headers {
+    if source.headers.is_some()
+        && let Some(ref h) = source.headers {
             let target_headers = target.headers.get_or_insert_with(HashMap::new);
             for (k, v) in h {
                 target_headers.insert(k.clone(), v.clone());
             }
         }
-    }
 }
 
 fn get_platform_fallback_host_type<'a>(
@@ -175,19 +173,14 @@ fn get_platform_fallback_host_type<'a>(
     if url.starts_with("https://api.github.com/") {
         return Some("github");
     }
-    if platform == Some("github") {
-        if let Some(endpoint) = platform_endpoint {
-            if let Ok(parsed_url) = url::Url::parse(url) {
-                if let Some(host) = parsed_url.host_str() {
-                    if let Ok(endpoint_parsed) = url::Url::parse(endpoint) {
-                        if endpoint_parsed.host_str() == Some(host) {
+    if platform == Some("github")
+        && let Some(endpoint) = platform_endpoint
+            && let Ok(parsed_url) = url::Url::parse(url)
+                && let Some(host) = parsed_url.host_str()
+                    && let Ok(endpoint_parsed) = url::Url::parse(endpoint)
+                        && endpoint_parsed.host_str() == Some(host) {
                             return Some("github");
                         }
-                    }
-                }
-            }
-        }
-    }
     if GITLAB_API_USING_HOST_TYPES.contains(&host_type) {
         return Some("gitlab");
     }
@@ -207,9 +200,8 @@ fn get_platform_fallback_host_type<'a>(
 }
 
 fn host_matches(url: &str, pattern: &str) -> bool {
-    let host = match url::Url::parse(url).ok().and_then(|u| u.host_str().map(|h| h.to_owned())) {
-        Some(h) => h,
-        None => return false,
+    let Some(host) = url::Url::parse(url).ok().and_then(|u| u.host_str().map(|h| h.to_owned())) else {
+        return false;
     };
 
     if host == pattern {
@@ -226,7 +218,7 @@ fn host_matches(url: &str, pattern: &str) -> bool {
     if pattern.starts_with('*') && host.ends_with(&pattern[1..]) {
         return true;
     }
-    if pattern.starts_with('.') && (host.ends_with(pattern) || host == &pattern[1..]) {
+    if pattern.starts_with('.') && (host.ends_with(pattern) || host == pattern[1..]) {
         return true;
     }
     false
