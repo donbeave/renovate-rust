@@ -5,7 +5,7 @@
 ## `lib/modules/manager/deno/compat.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/compat.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending-applicable
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
 
 ### `extractDenoCompatiblePackageJson()`
 

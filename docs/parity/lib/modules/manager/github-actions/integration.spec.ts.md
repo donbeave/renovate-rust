@@ -5,7 +5,7 @@
 ## `lib/modules/manager/github-actions/integration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/integration.spec.ts
-**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending-applicable
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
 
 ### `modules/manager/github-actions/integration`
 

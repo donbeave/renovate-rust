@@ -5,7 +5,7 @@
 ## `lib/util/git/behind-base-branch-cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/behind-base-branch-cache.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending-applicable
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
 
 ### `util/git/behind-base-branch-cache › getCachedBehindBaseResult`
 

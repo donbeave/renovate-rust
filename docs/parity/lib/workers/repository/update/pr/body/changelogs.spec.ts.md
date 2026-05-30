@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/body/changelogs.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/changelogs.spec.ts
-**Total tests:** 2 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported-applicable
+**Total tests:** 2 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `workers/repository/update/pr/body/changelogs`
 

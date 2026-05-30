@@ -5,7 +5,7 @@
 ## `lib/workers/repository/updates/flatten.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/flatten.spec.ts
-**Total tests:** 6 | **Ported:** 1 | **Actionable:** 6 | **Status:** partial-applicable (remaining)
+**Total tests:** 6 | **Ported:** 1 | **Actionable:** 6 | **Status:** partial (remaining)
 
 ### `workers/repository/updates/flatten › sanitizeDepName()`
 

@@ -5,7 +5,7 @@
 ## `lib/config/migrations/base/abstract-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/base/abstract-migration.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable-applicable
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** done
 
 ### `config/migrations/base/abstract-migration`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/extract/manager-files.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/extract/manager-files.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
 
 ### `workers/repository/extract/manager-files › getManagerPackageFiles()`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/process/lookup/filter.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/filter.spec.ts
-**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending-applicable
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
 
 ### `workers/repository/process/lookup/filter › .filterVersions()`
 

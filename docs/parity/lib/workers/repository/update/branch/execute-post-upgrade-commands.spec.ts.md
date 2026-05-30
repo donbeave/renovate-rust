@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts
-**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending-applicable
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
 
 ### `workers/repository/update/branch/execute-post-upgrade-commands › postUpgradeCommandsExecutor`
 

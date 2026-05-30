@@ -5,7 +5,7 @@
 ## `lib/workers/repository/process/libyear.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/libyear.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
 
 ### `workers/repository/process/libyear › calculateLibYears`
 

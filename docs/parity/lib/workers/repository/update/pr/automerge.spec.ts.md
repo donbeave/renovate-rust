@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/automerge.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/automerge.spec.ts
-**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending-applicable
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
 
 ### `workers/repository/update/pr/automerge › checkAutoMerge(pr, config)`
 

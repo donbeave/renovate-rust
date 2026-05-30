@@ -103,6 +103,7 @@ pub mod composer;
 pub mod conan;
 pub mod conda;
 pub mod deb;
+pub mod debian;
 pub mod deno;
 pub mod devbox;
 pub mod docker;

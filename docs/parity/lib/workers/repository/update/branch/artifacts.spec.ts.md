@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/branch/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/artifacts.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
 
 ### `workers/repository/update/branch/artifacts › setArtifactsErrorStatus`
 

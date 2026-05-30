@@ -5,7 +5,7 @@
 ## `lib/workers/repository/init/cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/cache.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable-applicable
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** done
 
 ### `workers/repository/init/cache › initializeCaches()`
 

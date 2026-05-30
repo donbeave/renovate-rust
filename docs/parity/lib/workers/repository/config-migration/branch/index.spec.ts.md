@@ -5,7 +5,7 @@
 ## `lib/workers/repository/config-migration/branch/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/index.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending-applicable
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
 
 ### `workers/repository/config-migration/branch/index › checkConfigMigrationBranch`
 

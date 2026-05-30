@@ -5,7 +5,7 @@
 ## `lib/workers/global/autodiscover.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/autodiscover.spec.ts
-**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending-applicable
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
 
 ### `workers/global/autodiscover`
 

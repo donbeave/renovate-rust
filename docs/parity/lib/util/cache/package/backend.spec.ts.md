@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/backend.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/backend.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending-applicable
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
 
 ### `util/cache/package/backend`
 

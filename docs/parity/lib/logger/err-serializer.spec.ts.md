@@ -5,7 +5,7 @@
 ## `lib/logger/err-serializer.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/err-serializer.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** done
 
 ### `logger/err-serializer`
 

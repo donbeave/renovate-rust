@@ -11881,7 +11881,7 @@ dep1 = "^1.0.0"
     fn jsonc_behavior_inline_check() {
         let input = "{\n  \"name\": \"test\"\n  \"version\": \"1.0.0\"\n}";
         let r = schema_parse_jsonc(input);
-        eprintln!("JSONC missing comma is_err: {}", r.is_err());
+        assert!(r.is_err(), "JSONC missing comma should fail");
     }
 
     // ── prepare_graphql_query tests ───────────────────────────────────────

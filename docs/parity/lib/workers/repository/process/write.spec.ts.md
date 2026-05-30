@@ -5,7 +5,7 @@
 ## `lib/workers/repository/process/write.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/write.spec.ts
-**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending-applicable
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
 
 ### `workers/repository/process/write › writeUpdates()`
 

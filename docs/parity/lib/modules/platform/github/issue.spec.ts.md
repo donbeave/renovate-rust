@@ -5,7 +5,7 @@
 ## `lib/modules/platform/github/issue.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/issue.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
 
 ### `GithubIssueCache`
 

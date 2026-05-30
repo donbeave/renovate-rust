@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/body/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/index.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending-applicable
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
 
 ### `workers/repository/update/pr/body/index › getPrBody`
 

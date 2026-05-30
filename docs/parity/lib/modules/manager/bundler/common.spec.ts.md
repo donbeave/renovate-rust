@@ -5,7 +5,7 @@
 ## `lib/modules/manager/bundler/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/common.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending-applicable
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
 
 ### `getBundlerConstraint`
 

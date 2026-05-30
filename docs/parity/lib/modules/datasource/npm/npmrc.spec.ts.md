@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/npm/npmrc.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/npm/npmrc.spec.ts
-**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending-applicable
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
 
 ### `modules/datasource/npm/npmrc › getMatchHostFromNpmrcHost()`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/changelog/releases.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/releases.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending-applicable
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
 
 ### `workers/repository/update/pr/changelog/releases › getReleaseNotes()`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/labels.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/labels.spec.ts
-**Total tests:** 20 | **Ported:** 14 | **Actionable:** 20 | **Status:** partial-applicable
+**Total tests:** 20 | **Ported:** 14 | **Actionable:** 20 | **Status:** partial
 
 ### `workers/repository/update/pr/labels › prepareLabels(config)`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/init/apis.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/apis.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending-applicable
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
 
 ### `workers/repository/init/apis › initApis`
 

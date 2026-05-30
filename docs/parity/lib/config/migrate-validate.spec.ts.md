@@ -5,7 +5,7 @@
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
-**Total tests:** 5 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported-applicable
+**Total tests:** 5 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `config/migrate-validate › migrateAndValidate()`
 
