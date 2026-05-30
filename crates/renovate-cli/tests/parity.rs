@@ -1480,3 +1480,51 @@ fn parity_jsonnet_bundler_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for jsonnet-bundler-skipped fixture");
 }
+
+#[test]
+fn parity_pipenv_skipped() {
+    let actual = run_fixture("pipenv-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Pipfile",
+                    "manager": "pipenv",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "requests",
+                            "status": "skipped",
+                            "reason": "wildcard"
+                        },
+                        {
+                            "name": "urllib3",
+                            "status": "skipped",
+                            "reason": "wildcard"
+                        },
+                        {
+                            "name": "pytest",
+                            "status": "skipped",
+                            "reason": "wildcard"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for pipenv-skipped fixture");
+}
