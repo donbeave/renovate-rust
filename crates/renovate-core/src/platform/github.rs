@@ -139,7 +139,7 @@ impl GithubClient {
 
 /// Minimal GitHub user response.
 #[derive(Debug, Clone, Deserialize)]
-struct GithubUser {
+pub struct GithubUser {
     login: String,
 }
 
@@ -269,6 +269,7 @@ struct UpdatePrRequest {
 
 /// Request body for setting branch status.
 #[derive(Debug, Serialize)]
+#[allow(dead_code)]
 struct SetStatusRequest {
     state: String,
     context: String,
@@ -419,7 +420,7 @@ impl PlatformClient for GithubClient {
         if !response.status().is_success() {
             return Err(PlatformError::Http(HttpError::Status {
                 status: response.status(),
-                url: url.to_string(),
+                url: url.clone(),
             }));
         }
 

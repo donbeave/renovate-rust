@@ -844,7 +844,7 @@ pub fn all_managers_list() -> Vec<&'static str> {
 ///
 /// When `enabled_managers` is `None` or empty, returns all managers (built-in
 /// + custom).  When given a list, normalizes custom-prefixed names
-/// (`"custom.regex"` → `"regex"`) and filters to only those that exist, sorted.
+///   (`"custom.regex"` → `"regex"`) and filters to only those that exist, sorted.
 ///
 /// Mirrors `getEnabledManagersList()` from `lib/modules/manager/index.ts`.
 pub fn get_enabled_managers_list(enabled_managers: Option<&[String]>) -> Vec<&'static str> {

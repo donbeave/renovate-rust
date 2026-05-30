@@ -222,7 +222,7 @@ impl PlatformClient for LocalClient {
         _title: &str,
         _body: &str,
     ) -> Result<Option<i64>, PlatformError> {
-        Err(PlatformError::NotSupported("Local platform PR creation".to_string()))
+        Err(PlatformError::NotSupported("Local platform PR creation".to_owned()))
     }
 
     async fn update_pr(
@@ -234,7 +234,7 @@ impl PlatformClient for LocalClient {
         _body: Option<&str>,
         _state: Option<&str>,
     ) -> Result<(), PlatformError> {
-        Err(PlatformError::NotSupported("Local platform PR updates".to_string()))
+        Err(PlatformError::NotSupported("Local platform PR updates".to_owned()))
     }
 
     async fn get_branch_status(
@@ -243,7 +243,7 @@ impl PlatformClient for LocalClient {
         _repo: &str,
         _branch: &str,
     ) -> Result<CombinedBranchStatus, PlatformError> {
-        Err(PlatformError::NotSupported("Local platform branch status".to_string()))
+        Err(PlatformError::NotSupported("Local platform branch status".to_owned()))
     }
 
     async fn write_file(

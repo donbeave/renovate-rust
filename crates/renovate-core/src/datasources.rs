@@ -82,6 +82,7 @@ pub mod unity3d_packages;
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Per-datasource metadata needed by the registry.
+#[derive(Debug)]
 pub struct DatasourceInfo {
     pub id: &'static str,
     pub default_versioning: &'static str,
@@ -139,55 +140,49 @@ pub fn add_metadata(dep: &mut ReleaseResult, datasource: &str, package_name: &st
     let package_lower = package_name.to_lowercase();
 
     // Look up manual changelog URL.
-    if let Ok(changelog_map) = serde_json::from_str::<serde_json::Value>(CHANGELOG_URLS_JSON) {
-        if let Some(url) = changelog_map
+    if let Ok(changelog_map) = serde_json::from_str::<serde_json::Value>(CHANGELOG_URLS_JSON)
+        && let Some(url) = changelog_map
             .get(datasource)
             .and_then(|v| v.get(&package_lower))
             .and_then(|v| v.as_str())
-        {
-            dep.changelog_url = Some(url.to_owned());
-        }
+    {
+        dep.changelog_url = Some(url.to_owned());
     }
 
     // Look up manual source URL.
-    if dep.source_url.is_none() {
-        if let Ok(source_map) = serde_json::from_str::<serde_json::Value>(SOURCE_URLS_JSON) {
-            if let Some(url) = source_map
-                .get(datasource)
-                .and_then(|v| v.get(&package_lower))
-                .and_then(|v| v.as_str())
-            {
-                dep.source_url = Some(url.to_owned());
-            }
-        }
+    if dep.source_url.is_none()
+        && let Ok(source_map) = serde_json::from_str::<serde_json::Value>(SOURCE_URLS_JSON)
+        && let Some(url) = source_map
+            .get(datasource)
+            .and_then(|v| v.get(&package_lower))
+            .and_then(|v| v.as_str())
+    {
+        dep.source_url = Some(url.to_owned());
     }
 
     // Parse source URL to extract source directory (GitHub tree/ URLs).
-    if let Some(ref source_url) = dep.source_url.clone() {
-        if dep.source_directory.is_none() {
-            if let Some((base, dir)) = extract_source_directory(source_url) {
-                dep.source_url = Some(base);
-                dep.source_directory = Some(dir);
-            }
-        }
+    if let Some(ref source_url) = dep.source_url.clone()
+        && dep.source_directory.is_none()
+        && let Some((base, dir)) = extract_source_directory(source_url)
+    {
+        dep.source_url = Some(base);
+        dep.source_directory = Some(dir);
     }
 
     // If no source URL but have changelog URL on GitHub, use changelog URL.
-    if dep.source_url.is_none() {
-        if let Some(ref changelog_url) = dep.changelog_url.clone() {
-            if is_github_url(changelog_url) {
-                dep.source_url = Some(changelog_url.clone());
-            }
-        }
+    if dep.source_url.is_none()
+        && let Some(ref changelog_url) = dep.changelog_url.clone()
+        && is_github_url(changelog_url)
+    {
+        dep.source_url = Some(changelog_url.clone());
     }
 
     // If no source URL but have homepage on GitHub/GitLab, use homepage.
-    if dep.source_url.is_none() {
-        if let Some(ref homepage) = dep.homepage.clone() {
-            if is_github_url(homepage) || is_gitlab_url(homepage) {
-                dep.source_url = Some(homepage.clone());
-            }
-        }
+    if dep.source_url.is_none()
+        && let Some(ref homepage) = dep.homepage.clone()
+        && (is_github_url(homepage) || is_gitlab_url(homepage))
+    {
+        dep.source_url = Some(homepage.clone());
     }
 
     // Massage the source URL.
@@ -286,7 +281,7 @@ fn is_gitlab_url(url: &str) -> bool {
 }
 
 /// Config for constraint filtering.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct ConstraintsFilteringConfig {
     pub constraints_filtering: Option<String>,
     pub constraints: Option<std::collections::HashMap<String, String>>,
@@ -333,24 +328,18 @@ pub fn apply_constraints_filtering(
         let keep = match release_constraints {
             None => true, // no release constraints → keep
             Some(rc) => {
-                let rc_map = match rc.as_object() {
-                    Some(m) => m,
-                    None => {
-                        kept_releases.push(release);
-                        continue;
-                    }
+                let Some(rc_map) = rc.as_object() else {
+                    kept_releases.push(release);
+                    continue;
                 };
 
                 let mut satisfies_all = true;
                 for (name, config_constraint) in config_constraints {
                     // Check if this constraint name is in the release.
                     let release_constraint_arr = rc_map.get(name);
-                    let release_arr = match release_constraint_arr {
-                        None => {
-                            // No constraint for this name → keep
-                            continue;
-                        }
-                        Some(arr) => arr,
+                    let Some(release_arr) = release_constraint_arr else {
+                        // No constraint for this name → keep
+                        continue;
                     };
 
                     // Get the constraint values.
@@ -544,9 +533,8 @@ pub fn get_datasource_list() -> Vec<&'static str> {
 /// Requires `datasource` (non-empty string) and `packageName` (string).
 /// Mirrors `isGetPkgReleasesConfig()` from `lib/modules/datasource/common.ts`.
 pub fn is_get_pkg_releases_config(value: &serde_json::Value) -> bool {
-    let obj = match value.as_object() {
-        Some(o) => o,
-        None => return false,
+    let Some(obj) = value.as_object() else {
+        return false;
     };
     let _datasource = match obj.get("datasource").and_then(|v| v.as_str()) {
         Some(s) if !s.is_empty() => s,

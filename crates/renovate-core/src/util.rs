@@ -859,6 +859,7 @@ pub struct GithubTokenDep {
 ///
 /// Mirrors `lib/logger/once.ts` — the TS version uses stack traces for
 /// implicit keys; this Rust version uses explicit string keys.
+#[derive(Debug)]
 pub struct OnceTracker {
     seen: HashSet<String>,
 }
@@ -1137,7 +1138,7 @@ pub fn get_git_environment_variables(
                 auth_type: github_rule.auth_type.clone(),
                 token: github_rule.token.clone(),
                 username: github_rule.username.clone(),
-                password: github_rule.password.clone(),
+                password: github_rule.password,
                 host_type: Some("github".to_owned()),
                 match_host: Some("api.github.com".to_owned()),
                 ..Default::default()
@@ -4201,12 +4202,11 @@ pub fn get_inherited_or_global<T: PartialOrd + Copy>(
     match inherited {
         Some(inh) => {
             // For onboardingAutoCloseAge, do not let inherited exceed global
-            if is_onboarding_auto_close_age {
-                if let Some(glob) = global {
-                    if glob < inh {
-                        return Some(glob);
-                    }
-                }
+            if is_onboarding_auto_close_age
+                && let Some(glob) = global
+                && glob < inh
+            {
+                return Some(glob);
             }
             Some(inh)
         }

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,240 / 11,666 total tests ported (44.9%) · pending 5,938 · not-applicable 488 (4.2%) — updated 2026-05-30
+**Progress:** 5,255 / 11,666 total tests ported (45.0%) · pending 5,894 · not-applicable 517 (4.4%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -434,7 +434,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
 | `lib/modules/platform/comment.spec.ts` | Not done | [details](lib/modules/platform/comment.spec.ts.md) |
-| `lib/modules/platform/scm.spec.ts` | Not done | [details](lib/modules/platform/scm.spec.ts.md) |
+| `lib/modules/platform/scm.spec.ts` | Done | [details](lib/modules/platform/scm.spec.ts.md) |
 | `lib/modules/platform/pr-body.spec.ts` | Done | [details](lib/modules/platform/pr-body.spec.ts.md) |
 | `lib/modules/platform/index.spec.ts` | Not done | [details](lib/modules/platform/index.spec.ts.md) |
 | `lib/modules/platform/types.spec.ts` | Done | [details](lib/modules/platform/types.spec.ts.md) |
@@ -652,7 +652,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/nuget/update.spec.ts` | Done | [details](lib/modules/manager/nuget/update.spec.ts.md) |
 | `lib/modules/manager/nuget/util.spec.ts` | Not done | [details](lib/modules/manager/nuget/util.spec.ts.md) |
 | `lib/modules/manager/ocb/update.spec.ts` | Done | [details](lib/modules/manager/ocb/update.spec.ts.md) |
-| `lib/modules/manager/pep621/artifacts.spec.ts` | Not done | [details](lib/modules/manager/pep621/artifacts.spec.ts.md) |
+| `lib/modules/manager/pep621/artifacts.spec.ts` | Done | [details](lib/modules/manager/pep621/artifacts.spec.ts.md) |
 | `lib/modules/manager/pep621/processors/pdm.spec.ts` | Not done | [details](lib/modules/manager/pep621/processors/pdm.spec.ts.md) |
 | `lib/modules/manager/pep621/processors/uv.spec.ts` | Not done | [details](lib/modules/manager/pep621/processors/uv.spec.ts.md) |
 | `lib/modules/manager/pep621/update.spec.ts` | Done | [details](lib/modules/manager/pep621/update.spec.ts.md) |
@@ -695,7 +695,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/terraform/lockfile/index.spec.ts` | Not done | [details](lib/modules/manager/terraform/lockfile/index.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/update-locked.spec.ts` | Done | [details](lib/modules/manager/terraform/lockfile/update-locked.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/util.spec.ts` | Done | [details](lib/modules/manager/terraform/lockfile/util.spec.ts.md) |
-| `lib/modules/manager/terragrunt/artifacts.spec.ts` | Not done | [details](lib/modules/manager/terragrunt/artifacts.spec.ts.md) |
+| `lib/modules/manager/terragrunt/artifacts.spec.ts` | Done | [details](lib/modules/manager/terragrunt/artifacts.spec.ts.md) |
 | `lib/modules/manager/terragrunt/modules.spec.ts` | Done | [details](lib/modules/manager/terragrunt/modules.spec.ts.md) |
 | `lib/modules/manager/terragrunt/util.spec.ts` | Done | [details](lib/modules/manager/terragrunt/util.spec.ts.md) |
 | `lib/modules/manager/vendir/artifacts.spec.ts` | Not done | [details](lib/modules/manager/vendir/artifacts.spec.ts.md) |
@@ -705,14 +705,14 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/azure/util.spec.ts` | Done | [details](lib/modules/platform/azure/util.spec.ts.md) |
 | `lib/modules/platform/bitbucket/comments.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/comments.spec.ts.md) |
 | `lib/modules/platform/bitbucket/index.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/index.spec.ts.md) |
-| `lib/modules/platform/bitbucket/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/pr-cache.spec.ts.md) |
+| `lib/modules/platform/bitbucket/pr-cache.spec.ts` | Done | [details](lib/modules/platform/bitbucket/pr-cache.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/index.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/index.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/pr-cache.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/utils.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/utils.spec.ts.md) |
 | `lib/modules/platform/codecommit/index.spec.ts` | Not done | [details](lib/modules/platform/codecommit/index.spec.ts.md) |
 | `lib/modules/platform/forgejo/forgejo-helper.spec.ts` | Not done | [details](lib/modules/platform/forgejo/forgejo-helper.spec.ts.md) |
 | `lib/modules/platform/forgejo/index.spec.ts` | Not done | [details](lib/modules/platform/forgejo/index.spec.ts.md) |
-| `lib/modules/platform/forgejo/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/forgejo/pr-cache.spec.ts.md) |
+| `lib/modules/platform/forgejo/pr-cache.spec.ts` | Done | [details](lib/modules/platform/forgejo/pr-cache.spec.ts.md) |
 | `lib/modules/platform/forgejo/schema.spec.ts` | Done | [details](lib/modules/platform/forgejo/schema.spec.ts.md) |
 | `lib/modules/platform/forgejo/utils.spec.ts` | Done | [details](lib/modules/platform/forgejo/utils.spec.ts.md) |
 | `lib/modules/platform/gerrit/client.spec.ts` | Not done | [details](lib/modules/platform/gerrit/client.spec.ts.md) |
@@ -721,7 +721,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/gerrit/utils.spec.ts` | Not done | [details](lib/modules/platform/gerrit/utils.spec.ts.md) |
 | `lib/modules/platform/gitea/gitea-helper.spec.ts` | Not done | [details](lib/modules/platform/gitea/gitea-helper.spec.ts.md) |
 | `lib/modules/platform/gitea/index.spec.ts` | Not done | [details](lib/modules/platform/gitea/index.spec.ts.md) |
-| `lib/modules/platform/gitea/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/gitea/pr-cache.spec.ts.md) |
+| `lib/modules/platform/gitea/pr-cache.spec.ts` | Done | [details](lib/modules/platform/gitea/pr-cache.spec.ts.md) |
 | `lib/modules/platform/gitea/schema.spec.ts` | Done | [details](lib/modules/platform/gitea/schema.spec.ts.md) |
 | `lib/modules/platform/gitea/utils.spec.ts` | Done | [details](lib/modules/platform/gitea/utils.spec.ts.md) |
 | `lib/modules/platform/github/api-cache.spec.ts` | Done | [details](lib/modules/platform/github/api-cache.spec.ts.md) |
@@ -828,7 +828,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/global/index.spec.ts` | Not done | [details](lib/workers/global/index.spec.ts.md) |
 | `lib/workers/global/initialize.spec.ts` | Not done | [details](lib/workers/global/initialize.spec.ts.md) |
 | `lib/workers/global/limits.spec.ts` | Done | [details](lib/workers/global/limits.spec.ts.md) |
-| `lib/workers/repository/changelog/index.spec.ts` | Not done | [details](lib/workers/repository/changelog/index.spec.ts.md) |
+| `lib/workers/repository/changelog/index.spec.ts` | Done | [details](lib/workers/repository/changelog/index.spec.ts.md) |
 | `lib/workers/repository/common.spec.ts` | Done | [details](lib/workers/repository/common.spec.ts.md) |
 | `lib/workers/repository/config-migration/branch/commit-message.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) |
 | `lib/workers/repository/config-migration/branch/create.spec.ts` | Not done | [details](lib/workers/repository/config-migration/branch/create.spec.ts.md) |
@@ -850,7 +850,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/finalize/prune.spec.ts` | Not done | [details](lib/workers/repository/finalize/prune.spec.ts.md) |
 | `lib/workers/repository/finalize/repository-statistics.spec.ts` | Not done | [details](lib/workers/repository/finalize/repository-statistics.spec.ts.md) |
 | `lib/workers/repository/index.spec.ts` | Done | [details](lib/workers/repository/index.spec.ts.md) |
-| `lib/workers/repository/init/index.spec.ts` | Not done | [details](lib/workers/repository/init/index.spec.ts.md) |
+| `lib/workers/repository/init/index.spec.ts` | Done | [details](lib/workers/repository/init/index.spec.ts.md) |
 | `lib/workers/repository/init/inherited.spec.ts` | Not done | [details](lib/workers/repository/init/inherited.spec.ts.md) |
 | `lib/workers/repository/init/vulnerability.spec.ts` | Not done | [details](lib/workers/repository/init/vulnerability.spec.ts.md) |
 | `lib/workers/repository/model/custom-commit-message.spec.ts` | Done | [details](lib/workers/repository/model/custom-commit-message.spec.ts.md) |
@@ -890,7 +890,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/branch/automerge.spec.ts` | Not done | [details](lib/workers/repository/update/branch/automerge.spec.ts.md) |
 | `lib/workers/repository/update/branch/bump-versions.spec.ts` | Not done | [details](lib/workers/repository/update/branch/bump-versions.spec.ts.md) |
 | `lib/workers/repository/update/branch/check-existing.spec.ts` | Not done | [details](lib/workers/repository/update/branch/check-existing.spec.ts.md) |
-| `lib/workers/repository/update/branch/commit.spec.ts` | Not done | [details](lib/workers/repository/update/branch/commit.spec.ts.md) |
+| `lib/workers/repository/update/branch/commit.spec.ts` | Done | [details](lib/workers/repository/update/branch/commit.spec.ts.md) |
 | `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts` | Not done | [details](lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts.md) |
 | `lib/workers/repository/update/branch/get-updated.spec.ts` | Not done | [details](lib/workers/repository/update/branch/get-updated.spec.ts.md) |
 | `lib/workers/repository/update/branch/index.spec.ts` | Not done | [details](lib/workers/repository/update/branch/index.spec.ts.md) |

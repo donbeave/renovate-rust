@@ -10,6 +10,7 @@ use crate::versioning::deb;
 
 // ── Distro info data ──────────────────────────────────────────────────────────
 
+#[allow(dead_code)]
 struct DistroInfoEntry {
     version: &'static str,
     codename: &'static str,
@@ -341,7 +342,7 @@ fn rolling_schedule(input: &str) -> Option<&'static RollingEntry> {
 
 fn resolve_version(version: &str) -> String {
     let ver = rolling_get_version_by_lts(version);
-    distro_get_version_by_codename(&ver)
+    distro_get_version_by_codename(ver)
 }
 
 fn debian_parse(version: &str) -> Option<Vec<i64>> {
@@ -538,10 +539,10 @@ pub fn debian_min_satisfying_version<'a>(versions: &'a [&str], range: &str) -> O
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
 fn get_base_version(version: &str) -> String {
-    if deb::is_dated_codename(version) {
-        if let Some(codename) = deb::get_dated_container_image_codename(version) {
-            return distro_get_version_by_codename(codename);
-        }
+    if deb::is_dated_codename(version)
+        && let Some(codename) = deb::get_dated_container_image_codename(version)
+    {
+        return distro_get_version_by_codename(codename);
     }
     version.to_owned()
 }
@@ -724,6 +725,7 @@ mod tests {
 
     // Ported: 'getMajor, getMinor, getPatch for "$version"' — versioning/debian/index.spec.ts line 265
     #[test]
+    #[allow(clippy::type_complexity)]
     fn debian_get_major_minor_patch() {
         let cases: &[(&str, Option<i64>, Option<i64>, Option<i64>)] = &[
             ("3.1", Some(3), Some(1), None),
