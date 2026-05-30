@@ -11,9 +11,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should call a function only once | 15 | not-applicable | — | — | mocking framework internals — vi.fn() call tracking for once() deduplication mechanism; Rust has no direct equivalent|
-| supports support distinct calls | 28 | not-applicable | — | — | mocking framework internals — vi.fn() call tracking for once() deduplication mechanism; Rust has no direct equivalent|
-| resets keys | 44 | not-applicable | — | — | mocking framework internals — vi.fn() call tracking for once() deduplication mechanism; Rust has no direct equivalent|
+| should call a function only once | 15 | pending | — | — | — |
+| supports support distinct calls | 28 | pending | — | — | — |
+| resets keys | 44 | pending | — | — | — |
 
 ### `logger/once › logger`
 

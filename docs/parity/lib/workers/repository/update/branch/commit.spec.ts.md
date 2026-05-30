@@ -5,15 +5,15 @@
 ## `lib/workers/repository/update/branch/commit.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/commit.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** not-applicable
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
 
 ### `workers/repository/update/branch/commit › commitFilesToBranch`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles empty files | 29 | not-applicable | — | — | mocking framework internals — scm mock + platform commit; TypeScript branch commit pipeline|
-| commits files | 34 | not-applicable | — | — | mocking framework internals — scm mock + platform commit; TypeScript branch commit pipeline|
-| dry runs | 62 | not-applicable | — | — | mocking framework internals — scm mock + platform commit; TypeScript branch commit pipeline|
+| handles empty files | 29 | pending | — | — | — |
+| commits files | 34 | pending | — | — | — |
+| dry runs | 62 | pending | — | — | — |
 
 ---
 
