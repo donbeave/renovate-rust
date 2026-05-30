@@ -5,7 +5,7 @@
 ## `lib/util/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/common.spec.ts
-**Total tests:** 22 | **Ported:** 17 | **Actionable:** 17 | **Status:** pending
+**Total tests:** 22 | **Ported:** 17 | **Actionable:** 17 | **Status:** partial
 
 ### `util/common › detectPlatform`
 

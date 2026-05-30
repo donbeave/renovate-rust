@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/update/dependency/yarn.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/dependency/yarn.spec.ts
-**Total tests:** 26 | **Ported:** 25 | **Actionable:** 25 | **Status:** done
+**Total tests:** 26 | **Ported:** 25 | **Actionable:** 25 | **Status:** ported
 
 ### `updateYarnrcCatalogDependency`
 

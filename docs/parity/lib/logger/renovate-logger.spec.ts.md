@@ -5,7 +5,7 @@
 ## `lib/logger/renovate-logger.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/renovate-logger.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `logger/renovate-logger`
 

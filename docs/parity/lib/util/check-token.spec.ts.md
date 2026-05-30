@@ -5,7 +5,7 @@
 ## `lib/util/check-token.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/check-token.spec.ts
-**Total tests:** 34 | **Ported:** 27 | **Actionable:** 27 | **Status:** pending
+**Total tests:** 34 | **Ported:** 27 | **Actionable:** 27 | **Status:** partial
 
 
 ### `util/check-token › checkGithubToken`

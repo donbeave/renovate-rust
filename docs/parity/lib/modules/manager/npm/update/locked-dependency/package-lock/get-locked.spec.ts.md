@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts
-**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** done
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `getLockedDependencies()`
 

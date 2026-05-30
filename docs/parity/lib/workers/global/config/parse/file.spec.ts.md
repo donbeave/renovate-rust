@@ -5,7 +5,7 @@
 ## `lib/workers/global/config/parse/file.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts
-**Total tests:** 15 | **Ported:** 8 | **Actionable:** 15 | **Status:** pending-applicable
+**Total tests:** 15 | **Ported:** 8 | **Actionable:** 15 | **Status:** partial-applicable
 
 ### `workers/global/config/parse/file › .getConfig()`
 

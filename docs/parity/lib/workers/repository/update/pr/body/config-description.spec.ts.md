@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/body/config-description.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/config-description.spec.ts
-**Total tests:** 16 | **Ported:** 12 | **Actionable:** 16 | **Status:** pending
+**Total tests:** 16 | **Ported:** 12 | **Actionable:** 16 | **Status:** partial
 
 ### `workers/repository/update/pr/body/config-description › getPrConfigDescription`
 

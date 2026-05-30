@@ -5,7 +5,7 @@
 ## `lib/modules/manager/poetry/schema.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/schema.spec.ts
-**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** not-applicable
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** not-applicable-applicable
 
 ### `tests`
 

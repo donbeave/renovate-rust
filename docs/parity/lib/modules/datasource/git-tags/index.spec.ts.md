@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/git-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-tags/index.spec.ts
-**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** ported
+**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** partial
 
 ### `modules/datasource/git-tags/index`
 

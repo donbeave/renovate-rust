@@ -5,7 +5,7 @@
 ## `lib/util/http/throttle.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/throttle.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** not-applicable
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** not-applicable-applicable
 
 ### `util/http/throttle`
 

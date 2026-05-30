@@ -5,7 +5,7 @@
 ## `lib/logger/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/index.spec.ts
-**Total tests:** 26 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 26 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `logger/index`
 

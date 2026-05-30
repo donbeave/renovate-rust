@@ -5,7 +5,7 @@
 ## `lib/workers/repository/reconfigure/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/utils.spec.ts
-**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** partial
 
 ### `workers/repository/reconfigure/utils › getReconfigureConfig()`
 

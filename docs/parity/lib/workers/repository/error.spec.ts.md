@@ -5,7 +5,7 @@
 ## `lib/workers/repository/error.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/error.spec.ts
-**Total tests:** 9 | **Ported:** 4 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 9 | **Ported:** 4 | **Actionable:** 4 | **Status:** partial
 
 ### `workers/repository/error › handleError()`
 

@@ -5,7 +5,7 @@
 ## `lib/logger/once.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/once.spec.ts
-**Total tests:** 9 | **Ported:** 0 | **Actionable:** 3 | **Status:** not-applicable
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending-applicable
 
 ### `logger/once › core`
 

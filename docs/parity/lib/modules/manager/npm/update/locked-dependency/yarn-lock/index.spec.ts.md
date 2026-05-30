@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts
-**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** done
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `updateLockedDependency()`
 

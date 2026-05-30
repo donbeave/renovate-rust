@@ -5,7 +5,7 @@
 ## `lib/modules/manager/maven/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/update.spec.ts
-**Total tests:** 18 | **Ported:** 18 | **Actionable:** 18 | **Status:** done
+**Total tests:** 18 | **Ported:** 18 | **Actionable:** 18 | **Status:** ported
 
 ### `updateDependency`
 
