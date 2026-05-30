@@ -27,13 +27,13 @@ pub enum DebIndexError {
 
 /// Parsed package entry from a Debian Packages file.
 #[derive(Debug, Clone, Default)]
-struct PackageEntry {
-    package: String,
-    version: String,
-    architecture: Option<String>,
-    description: Option<String>,
-    filename: Option<String>,
-    size: Option<String>,
+pub struct PackageEntry {
+    pub package: String,
+    pub version: String,
+    pub architecture: Option<String>,
+    pub description: Option<String>,
+    pub filename: Option<String>,
+    pub size: Option<String>,
 }
 
 /// Parse a Debian Packages file into a map of package name -> list of entries.

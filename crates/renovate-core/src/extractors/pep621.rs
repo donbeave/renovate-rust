@@ -692,6 +692,7 @@ dependencies = [
         );
     }
 
+    // Rust-specific: unit test for environment marker stripping
     #[test]
     fn strips_environment_markers() {
         let content = r#"
@@ -703,6 +704,7 @@ dependencies = ["tomli>=1.1.0; python_version < \"3.11\""]
         assert_eq!(deps[0].current_value, ">=1.1.0");
     }
 
+    // Rust-specific: unit test for extras stripping
     #[test]
     fn strips_extras() {
         let content = r#"
@@ -761,6 +763,7 @@ all = [{include-group = "typing"}, "click==8.1.7"]
 
     // ── normalize_name ────────────────────────────────────────────────────────
 
+    // Rust-specific: unit test for normalize_name helper
     #[test]
     fn normalize_name_lowercases_and_replaces_separators() {
         assert_eq!(normalize_name("PyYAML"), "pyyaml");
@@ -770,6 +773,7 @@ all = [{include-group = "typing"}, "click==8.1.7"]
 
     // ── direct references ─────────────────────────────────────────────────────
 
+    // Rust-specific: unit test for direct reference skipping
     #[test]
     fn direct_reference_is_skipped() {
         let content = r#"
@@ -1076,6 +1080,7 @@ name = "pypi"
 
     // ── empty / no deps ───────────────────────────────────────────────────────
 
+    // Rust-specific: unit test for build-system-only extraction
     #[test]
     fn no_project_section_returns_build_system_only() {
         let content = "[build-system]\nrequires = [\"setuptools>=61.0\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\"\n";
@@ -1090,6 +1095,7 @@ name = "pypi"
         assert!(wheel.skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for build-system + project deps combined extraction
     #[test]
     fn build_system_requires_with_project_deps() {
         let content = r#"

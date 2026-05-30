@@ -45,6 +45,7 @@ struct ApiRelease {
     tag_name: String,
     name: Option<String>,
     prerelease: bool,
+    #[allow(dead_code)]
     draft: bool,
     published_at: Option<String>,
     assets: Vec<ApiAsset>,

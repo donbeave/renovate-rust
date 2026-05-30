@@ -32,10 +32,11 @@ pub enum RpmError {
 }
 
 #[derive(Debug, Clone)]
-struct RpmPackage {
+pub struct RpmPackage {
     name: String,
     version: String,
     release: String,
+    #[allow(dead_code)]
     arch: String,
     summary: Option<String>,
 }
@@ -48,6 +49,7 @@ pub fn parse_repomd_xml(content: &str) -> Result<Option<String>, RpmError> {
     reader.config_mut().trim_text(true);
 
     let mut in_data = false;
+    #[allow(unused_assignments)]
     let mut data_type = String::new();
     let mut location_href: Option<String> = None;
 
