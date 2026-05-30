@@ -1,21 +1,25 @@
-//! Shared HTTP client for platform and datasource calls.
-//!
-//! Wraps `reqwest::Client` with a Renovate-compatible `User-Agent` header,
-//! optional bearer-token authentication, and automatic retry on transient
-//! failures.
-//!
-//! ## Retry behaviour
-//!
-//! `get_retrying` retries on:
-//! - **429 Too Many Requests** — always, up to [`MAX_RETRIES`] times
-//! - **503 Service Unavailable** — always, up to [`MAX_RETRIES`] times
-//! - **504 Gateway Timeout** — always, up to [`MAX_RETRIES`] times
-//!
-//! The wait between retries is determined by the `Retry-After` response header
-//! (number of seconds or an HTTP-date); when absent, exponential backoff is
-//! used: 1 s, 2 s, 4 s (capped at [`MAX_RETRY_AFTER_SECS`]).
-//!
-//! Renovate reference: `lib/util/http/retry-after.ts` — `wrapWithRetry`.
+pub mod host_rules;
+pub mod rate_limits;
+pub mod throttle;
+
+// Shared HTTP client for platform and datasource calls.
+//
+// Wraps `reqwest::Client` with a Renovate-compatible `User-Agent` header,
+// optional bearer-token authentication, and automatic retry on transient
+// failures.
+//
+// ## Retry behaviour
+//
+// `get_retrying` retries on:
+// - **429 Too Many Requests** — always, up to [`MAX_RETRIES`] times
+// - **503 Service Unavailable** — always, up to [`MAX_RETRIES`] times
+// - **504 Gateway Timeout** — always, up to [`MAX_RETRIES`] times
+//
+// The wait between retries is determined by the `Retry-After` response header
+// (number of seconds or an HTTP-date); when absent, exponential backoff is
+// used: 1 s, 2 s, 4 s (capped at [`MAX_RETRY_AFTER_SECS`]).
+//
+// Renovate reference: `lib/util/http/retry-after.ts` — `wrapWithRetry`.
 
 use chrono::{DateTime, Utc};
 use reqwest::{Client, RequestBuilder, Response, StatusCode};
