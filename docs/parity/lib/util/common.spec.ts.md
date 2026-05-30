@@ -5,7 +5,7 @@
 ## `lib/util/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/common.spec.ts
-**Total tests:** 22 | **Ported:** 17 | **Actionable:** 17 | **Status:** ported
+**Total tests:** 22 | **Ported:** 17 | **Actionable:** 17 | **Status:** pending
 
 ### `util/common › detectPlatform`
 
@@ -22,9 +22,9 @@
 | returns parsed json | 123 | ported | `util.rs` | `test_parse_json_valid` | — |
 | supports jsonc | 131 | ported | `util.rs` | `test_parse_json_jsonc` | — |
 | throws error for invalid json | 149 | ported | `util.rs` | `test_parse_json_invalid` | — |
-| catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse | 153 | not-applicable | — | — | mocking framework internals — tests logger.warn spy only; parse behavior covered by sibling test 'supports jsonc' (ported) |
-| does not warn if filename ends with .jsonc | 167 | not-applicable | — | — | mocking framework internals — tests logger.warn not called; parse behavior covered by sibling test |
-| does not warn if filename ends with .json5 | 172 | not-applicable | — | — | mocking framework internals — tests logger.warn not called; parse behavior covered by sibling test |
+| catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse | 153 | pending | — | — | — |
+| does not warn if filename ends with .jsonc | 167 | pending | — | — | — |
+| does not warn if filename ends with .json5 | 172 | pending | — | — | — |
 
 ### `util/common › parseJsonc`
 
@@ -41,8 +41,8 @@
 | returns inherited value if only inherited value is set | 202 | ported | `util.rs` | `get_inherited_or_global_returns_inherited_when_only_inherited` | — |
 | returns global value if only global value is set | 209 | ported | `util.rs` | `get_inherited_or_global_returns_global_when_only_global` | — |
 | returns inherited value - when both global + inherited are set | 216 | ported | `util.rs` | `get_inherited_or_global_inherited_wins_when_both_set` | — |
-| handles null inherited values | 227 | not-applicable | — | — | TypeScript type-system test; uses null as never to pass null where T[] expected; Rust type system prevents this |
-| handles undefined inherited values | 238 | not-applicable | — | — | TypeScript type-system test; uses undefined as never to pass undefined where T[] expected; Rust Option handles this at type level |
+| handles null inherited values | 227 | pending | — | — | — |
+| handles undefined inherited values | 238 | pending | — | — | — |
 
 ### `util/common › getInheritedOrGlobal › when requesting onboardingAutoCloseAge, do not allow inherit config to override global config`
 

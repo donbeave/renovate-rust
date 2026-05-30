@@ -5,34 +5,34 @@
 ## `lib/workers/repository/process/limits.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/limits.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** not-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending-applicable
 
 ### `workers/repository/process/limits › getPrHourlyCount()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| calculates hourly pr count | 27 | not-applicable | — | — | mocking framework internals — vi.mock on platform/github; TypeScript rate-limit pipeline|
-| returns zero if errored | 45 | not-applicable | — | — | mocking framework internals — vi.mock on platform/github; TypeScript rate-limit pipeline|
+| calculates hourly pr count | 27 | pending | — | — | — |
+| returns zero if errored | 45 | pending | — | — | — |
 
 ### `workers/repository/process/limits › getCommitHourlyCount()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| calculates hourly commit count from SCM | 53 | not-applicable | — | — | mocking framework internals — vi.mock on platform/github; TypeScript rate-limit pipeline|
-| uses cache when available and falls back to SCM when missing | 68 | not-applicable | — | — | mocking framework internals — vi.mock on platform/github; TypeScript rate-limit pipeline|
-| returns zero if errored | 106 | not-applicable | — | — | mocking framework internals — vi.mock on platform/github; TypeScript rate-limit pipeline|
+| calculates hourly commit count from SCM | 53 | pending | — | — | — |
+| uses cache when available and falls back to SCM when missing | 68 | pending | — | — | — |
+| returns zero if errored | 106 | pending | — | — | — |
 
 ### `workers/repository/process/limits › getConcurrentPrsCount()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| calculates concurrent prs present | 116 | not-applicable | — | — | mocking framework internals — vi.mock on platform/github; TypeScript rate-limit pipeline|
+| calculates concurrent prs present | 116 | pending | — | — | — |
 
 ### `workers/repository/process/limits › getConcurrentBranchesCount()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| calculates concurrent branches present | 137 | not-applicable | — | — | mocking framework internals — vi.mock on platform/github; TypeScript rate-limit pipeline|
+| calculates concurrent branches present | 137 | pending | — | — | — |
 
 ---
 

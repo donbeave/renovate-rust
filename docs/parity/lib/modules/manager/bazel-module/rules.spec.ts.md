@@ -5,32 +5,32 @@
 ## `lib/modules/manager/bazel-module/rules.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/rules.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** not-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending-applicable
 
 ### `RuleToBazelModulePackageDep`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| .parse() with $msg | 145 | not-applicable | — | — | TypeScript type-system test; tests TypeScript class hierarchies (RuleToBazelModulePackageDep, GitRepositoryToPackageDep) for Bazel module rule parsing|
+| .parse() with $msg | 145 | pending | — | — | — |
 
 ### `GitRepositoryToPackageDep`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| .parse() with $msg | 176 | not-applicable | — | — | TypeScript type-system test; tests TypeScript class hierarchies (RuleToBazelModulePackageDep, GitRepositoryToPackageDep) for Bazel module rule parsing|
+| .parse() with $msg | 176 | pending | — | — | — |
 
 ### `.toPackageDependencies()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| with $msg | 239 | not-applicable | — | — | TypeScript type-system test; tests TypeScript class hierarchies (RuleToBazelModulePackageDep, GitRepositoryToPackageDep) for Bazel module rule parsing|
+| with $msg | 239 | pending | — | — | — |
 
 ### `.processModulePkgDeps`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns an empty array if the input is an empty array | 263 | not-applicable | — | — | TypeScript type-system test; tests TypeScript class hierarchies (RuleToBazelModulePackageDep, GitRepositoryToPackageDep) for Bazel module rule parsing|
-| returns the bazel_dep if more than one override is found | 267 | not-applicable | — | — | TypeScript type-system test; tests TypeScript class hierarchies (RuleToBazelModulePackageDep, GitRepositoryToPackageDep) for Bazel module rule parsing|
+| returns an empty array if the input is an empty array | 263 | pending | — | — | — |
+| returns the bazel_dep if more than one override is found | 267 | pending | — | — | — |
 
 ---
 

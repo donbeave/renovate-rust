@@ -5,22 +5,22 @@
 ## `lib/workers/global/config/parse/file.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts
-**Total tests:** 15 | **Ported:** 8 | **Actionable:** 15 | **Status:** not-applicable
+**Total tests:** 15 | **Ported:** 8 | **Actionable:** 15 | **Status:** pending-applicable
 
 ### `workers/global/config/parse/file › .getConfig()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses %s > %s | 27 | not-applicable | — | — | mocking framework internals — vi.spyOn on fs/config loading; TypeScript file-based config parsing|
-| migrates | 56 | not-applicable | — | — | mocking framework internals — vi.spyOn on fs/config loading; TypeScript file-based config parsing|
-| warns if config is invalid | 68 | not-applicable | — | — | mocking framework internals — vi.spyOn on fs/config loading; TypeScript file-based config parsing|
+| parses %s > %s | 27 | pending | — | — | — |
+| migrates | 56 | pending | — | — | — |
+| warns if config is invalid | 68 | pending | — | — | — |
 | parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env | 80 | ported | `file.rs` | `resolve_returns_none_when_env_not_set` | — |
-| fatal error and exit if error in parsing %s | 84 | not-applicable | — | — | mocking framework internals — vi.spyOn on fs/config loading; TypeScript file-based config parsing|
+| fatal error and exit if error in parsing %s | 84 | pending | — | — | — |
 | fatal error and exit if custom config file does not exist | 112 | ported | `file.rs` | `resolve_errors_when_explicit_file_missing` | — |
-| fatal error and exit if config.js contains unresolved env var | 126 | not-applicable | — | — | mocking framework internals — vi.spyOn on fs/config loading; TypeScript file-based config parsing|
+| fatal error and exit if config.js contains unresolved env var | 126 | pending | — | — | — |
 | fatal error and exit if %s | 147 | ported | `file.rs` | `load_rejects_unsupported_or_missing_extension` | — |
-| exports env variables to environment from processEnv object | 161 | not-applicable | — | — | mocking framework internals — vi.spyOn on fs/config loading; TypeScript file-based config parsing|
-| does not export env variables to environment from processEnv object if key/value is invalid | 184 | not-applicable | — | — | mocking framework internals — vi.spyOn on fs/config loading; TypeScript file-based config parsing|
+| exports env variables to environment from processEnv object | 161 | pending | — | — | — |
+| does not export env variables to environment from processEnv object if key/value is invalid | 184 | pending | — | — | — |
 
 ### `workers/global/config/parse/file › deleteConfigFile()`
 
