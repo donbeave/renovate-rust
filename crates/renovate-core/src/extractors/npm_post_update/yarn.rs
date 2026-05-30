@@ -35,7 +35,11 @@ pub fn detect_yarn_version(yarn_constraint: Option<&str>) -> YarnMajorVersion {
                 }
             }
         }
-        if constraint.starts_with(">=2") || constraint.starts_with("^2") || constraint.starts_with("^3") || constraint.starts_with("^4") {
+        if constraint.starts_with(">=2")
+            || constraint.starts_with("^2")
+            || constraint.starts_with("^3")
+            || constraint.starts_with("^4")
+        {
             return YarnMajorVersion::V2Plus;
         }
     }
@@ -123,45 +127,51 @@ pub fn build_yarn_upgrade_cmd(version: YarnMajorVersion, dep_name: &str) -> Vec<
             vec!["yarn".to_string(), "upgrade".to_string(), dep_name.to_string()]
         }
         YarnMajorVersion::V2Plus => {
-            vec!["yarn".to_string(), "up".to_string(), "-R".to_string(), dep_name.to_string()]
+            vec![
+                "yarn".to_string(),
+                "up".to_string(),
+                "-R".to_string(),
+                dep_name.to_string(),
+            ]
         }
     }
 }
 
-pub fn fuzzy_match_additional_yarnrc_yml(
-    additional: &str,
-    existing: &str,
-) -> String {
-    let mut result = additional.to_string();
-
+pub fn fuzzy_match_additional_yarnrc_yml(additional: &str, existing: &str) -> String {
     let add_registries: std::collections::BTreeMap<String, serde_json::Value> =
         serde_yaml::from_str(additional).unwrap_or_default();
 
     let existing_registries: std::collections::BTreeMap<String, serde_json::Value> =
         serde_yaml::from_str(existing).unwrap_or_default();
 
-    for key in add_registries.keys() {
-        let normalized = key.trim_end_matches('/');
-        for existing_key in existing_registries.keys() {
-            let existing_normalized = existing_key.trim_end_matches('/');
-            if normalized == existing_normalized
-                || normalize_registry_url(key) == normalize_registry_url(existing_key)
-            {
-                result = result.replace(key, existing_key);
+    let keys_to_replace: Vec<(String, String)> = add_registries
+        .keys()
+        .filter_map(|key| {
+            let normalized = key.trim_end_matches('/');
+            for existing_key in existing_registries.keys() {
+                let existing_normalized = existing_key.trim_end_matches('/');
+                if normalized == existing_normalized
+                    || normalize_registry_url(key) == normalize_registry_url(existing_key)
+                {
+                    return Some((key.clone(), existing_key.clone()));
+                }
             }
-        }
-    }
+            None
+        })
+        .collect();
 
+    let mut result = additional.to_string();
+    for (old_key, new_key) in keys_to_replace {
+        result = result.replace(&old_key, &new_key);
+    }
     result
 }
 
 fn normalize_registry_url(url: &str) -> String {
-    let mut normalized = url.trim_end_matches('/').to_string();
+    let normalized = url.trim_end_matches('/').to_string();
     if !normalized.starts_with("http://") && !normalized.starts_with("https://") {
-        if normalized.contains("://") {
-            if let Some(rest) = normalized.split_once("://").map(|(_, r)| r) {
-                normalized = format!("https://{}", rest);
-            }
+        if let Some(rest) = normalized.split_once("://").map(|(_, r)| r) {
+            return format!("https://{}", rest);
         }
     }
     normalized
@@ -171,7 +181,8 @@ pub fn get_optimize_command() -> Vec<String> {
     vec![
         "sed".to_string(),
         "-i".to_string(),
-        "s/stepTimer(&timer)/stepTimer(&timer); if (timer.skip === true) return/g".to_string(),
+        "s/stepTimer(&timer)/stepTimer(&timer); if (timer.skip === true) return/g"
+            .to_string(),
         "yarn.js".to_string(),
     ]
 }
@@ -181,42 +192,55 @@ mod tests {
     use super::*;
 
     #[test]
-    fn detect_yarn_version_v1() {
-        assert_eq!(detect_yarn_version(Some("1.22.19")), YarnMajorVersion::V1);
+    fn detect_yarn_v1() {
+        assert_eq!(
+            detect_yarn_version(Some("1.22.19")),
+            YarnMajorVersion::V1
+        );
     }
 
     #[test]
-    fn detect_yarn_version_v2() {
-        assert_eq!(detect_yarn_version(Some("2.4.3")), YarnMajorVersion::V2Plus);
+    fn detect_yarn_v2() {
+        assert_eq!(
+            detect_yarn_version(Some("2.4.3")),
+            YarnMajorVersion::V2Plus
+        );
     }
 
     #[test]
-    fn detect_yarn_version_v4() {
-        assert_eq!(detect_yarn_version(Some("4.1.0")), YarnMajorVersion::V2Plus);
+    fn detect_yarn_v4() {
+        assert_eq!(
+            detect_yarn_version(Some("4.1.0")),
+            YarnMajorVersion::V2Plus
+        );
     }
 
     #[test]
-    fn detect_yarn_version_none() {
+    fn detect_yarn_none() {
         assert_eq!(detect_yarn_version(None), YarnMajorVersion::V1);
     }
 
     #[test]
-    fn detect_yarn_version_caret4() {
-        assert_eq!(detect_yarn_version(Some("^4.0.0")), YarnMajorVersion::V2Plus);
+    fn detect_yarn_caret4() {
+        assert_eq!(
+            detect_yarn_version(Some("^4.0.0")),
+            YarnMajorVersion::V2Plus
+        );
     }
 
     #[test]
     fn check_yarnrc_offline_mirror() {
-        let content = "--install.offline-mirror true\n";
-        let info = check_yarnrc(content);
+        let info = check_yarnrc("--install.offline-mirror true\n");
         assert_eq!(info.offline_mirror.as_deref(), Some("true"));
     }
 
     #[test]
     fn check_yarnrc_yarn_path() {
-        let content = "--yarn-path .yarn/releases/yarn-4.1.0.cjs\n";
-        let info = check_yarnrc(content);
-        assert_eq!(info.yarn_path.as_deref(), Some(".yarn/releases/yarn-4.1.0.cjs"));
+        let info = check_yarnrc("--yarn-path .yarn/releases/yarn-4.1.0.cjs\n");
+        assert_eq!(
+            info.yarn_path.as_deref(),
+            Some(".yarn/releases/yarn-4.1.0.cjs")
+        );
     }
 
     #[test]
@@ -227,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn is_yarn_update_true() {
+    fn yarn_update_true() {
         let u = Upgrade {
             dep_name: "yarn".to_string(),
             ..Default::default()
@@ -236,7 +260,7 @@ mod tests {
     }
 
     #[test]
-    fn is_yarn_update_false() {
+    fn yarn_update_false() {
         let u = Upgrade {
             dep_name: "npm".to_string(),
             ..Default::default()
@@ -245,7 +269,7 @@ mod tests {
     }
 
     #[test]
-    fn get_yarn_constraint_from_upgrades() {
+    fn yarn_constraint_from_upgrades_found() {
         let upgrades = vec![Upgrade {
             dep_name: "yarn".to_string(),
             new_value: Some("4.1.0".to_string()),
@@ -258,7 +282,12 @@ mod tests {
     }
 
     #[test]
-    fn get_yarn_constraint_from_package_json() {
+    fn yarn_constraint_from_upgrades_not_found() {
+        assert_eq!(get_yarn_constraint_from_upgrades(&[]), None);
+    }
+
+    #[test]
+    fn yarn_constraint_from_pkg_json() {
         let pj = PackageJson::parse(r#"{"packageManager": "yarn@4.1.0"}"#).unwrap();
         assert_eq!(
             get_yarn_constraint_from_package_json(&pj),
@@ -267,7 +296,7 @@ mod tests {
     }
 
     #[test]
-    fn build_yarn_install_v1() {
+    fn yarn_install_v1_frozen() {
         assert_eq!(
             build_yarn_install_cmd(YarnMajorVersion::V1, true, false, false),
             vec!["yarn", "install", "--frozen-lockfile"]
@@ -275,7 +304,7 @@ mod tests {
     }
 
     #[test]
-    fn build_yarn_install_v2_with_mode() {
+    fn yarn_install_v2_mode() {
         assert_eq!(
             build_yarn_install_cmd(YarnMajorVersion::V2Plus, true, false, true),
             vec!["yarn", "install", "--mode", "update-lockfile"]
@@ -283,7 +312,7 @@ mod tests {
     }
 
     #[test]
-    fn build_yarn_upgrade_v1() {
+    fn yarn_upgrade_v1_cmd() {
         assert_eq!(
             build_yarn_upgrade_cmd(YarnMajorVersion::V1, "lodash"),
             vec!["yarn", "upgrade", "lodash"]
@@ -291,7 +320,7 @@ mod tests {
     }
 
     #[test]
-    fn build_yarn_upgrade_v2() {
+    fn yarn_upgrade_v2_cmd() {
         assert_eq!(
             build_yarn_upgrade_cmd(YarnMajorVersion::V2Plus, "lodash"),
             vec!["yarn", "up", "-R", "lodash"]
@@ -299,7 +328,7 @@ mod tests {
     }
 
     #[test]
-    fn get_optimize_command_returns_sed() {
+    fn optimize_command() {
         let cmd = get_optimize_command();
         assert_eq!(cmd[0], "sed");
     }

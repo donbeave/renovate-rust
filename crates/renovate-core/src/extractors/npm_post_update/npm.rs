@@ -2,8 +2,6 @@
 //!
 //! Ports `lib/modules/manager/npm/post-update/npm.ts`.
 
-use std::path::Path;
-
 use super::{PackageJson, Upgrade};
 
 #[derive(Debug, Clone, Default)]
@@ -40,21 +38,22 @@ pub fn get_npm_constraint_from_package_json(pj: &PackageJson) -> Option<String> 
     pj.get_package_manager_version("npm")
 }
 
-pub fn divide_workspace_and_root_deps(
-    upgrades: &[Upgrade],
+pub fn divide_workspace_and_root_deps<'a>(
+    upgrades: &'a [Upgrade],
     workspace_patterns: &[String],
-) -> (Vec<&Upgrade>, Vec<&Upgrade>) {
+) -> (Vec<&'a Upgrade>, Vec<&'a Upgrade>) {
     let mut workspace_deps = Vec::new();
     let mut root_deps = Vec::new();
 
     for upgrade in upgrades {
-        let is_workspace = workspace_patterns.iter().any(|pattern| {
-            upgrade.package_file.starts_with(pattern.trim_end_matches('/'))
-        }) || workspace_patterns.is_empty();
+        let is_workspace = !workspace_patterns.is_empty()
+            && workspace_patterns.iter().any(|pattern| {
+                upgrade
+                    .package_file
+                    .starts_with(pattern.trim_end_matches('/'))
+            });
 
-        if is_workspace && !upgrade.package_file.contains('/') {
-            root_deps.push(upgrade);
-        } else if !workspace_patterns.is_empty() {
+        if is_workspace {
             workspace_deps.push(upgrade);
         } else {
             root_deps.push(upgrade);
@@ -149,7 +148,7 @@ mod tests {
     }
 
     #[test]
-    fn get_npm_constraint_from_package_json() {
+    fn npm_constraint_from_pkg_json() {
         let pj = PackageJson::parse(
             r#"{"engines": {"npm": ">=9"}}"#,
         )

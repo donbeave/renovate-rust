@@ -258,7 +258,7 @@ mod tests {
             ..Default::default()
         }];
         let dirs = determine_lock_file_dirs(&upgrades, &[]);
-        assert_eq!(dirs, vec![PathBuf::from(".")]);
+        assert_eq!(dirs, vec![PathBuf::from("")]);
     }
 
     #[test]

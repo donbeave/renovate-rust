@@ -136,7 +136,7 @@ mod tests {
     }
 
     #[test]
-    fn get_pnpm_constraint_from_package_json() {
+    fn pnpm_constraint_from_pkg_json() {
         let pj = PackageJson::parse(
             r#"{"packageManager": "pnpm@9.0.0"}"#,
         )

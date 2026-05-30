@@ -95,6 +95,7 @@ pub async fn fetch_releases(
         }
         Err(crate::http::HttpError::Status { .. }) => return Ok(None),
         Err(crate::http::HttpError::Request(_)) => return Ok(None),
+        Err(crate::http::HttpError::Parse(_)) => return Ok(None),
     };
 
     let releases: Vec<GitlabRelease> = api_releases
