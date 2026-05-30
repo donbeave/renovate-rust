@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,199 / 11,666 total tests ported (45%) · pending 5,997 · not-applicable 470 (4% of total) — updated 2026-05-30
+**Progress:** 5,199 / 11,666 total tests ported (45%) · pending 5,995 · not-applicable 472 (4% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -247,7 +247,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) |
 | `lib/modules/datasource/bitrise/index.spec.ts` | Done | [details](lib/modules/datasource/bitrise/index.spec.ts.md) |
-| `lib/modules/datasource/terraform-module/base.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
+| `lib/modules/datasource/terraform-module/base.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/index.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/utils.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/utils.spec.ts.md) |
 | `lib/modules/datasource/terraform-provider/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-provider/index.spec.ts.md) |
