@@ -204,7 +204,11 @@ pub async fn fetch_releases(
 
 #[cfg(test)]
 mod tests {
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
     use super::*;
+    use crate::http::HttpClient;
 
     const SAMPLE: &str = r#"
 var Releases = []*Release{
@@ -315,5 +319,20 @@ var Releases = []*Release{
             err.to_string().contains("unexpected block terminator"),
             "unexpected: {err}"
         );
+    }
+
+    // Ported: "returns null for error 404" — golang-version/index.spec.ts line 112
+    #[tokio::test]
+    async fn fetch_releases_returns_none_for_404() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/HEAD/internal/history/release.go"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), &http).await.unwrap();
+        assert!(result.is_none());
     }
 }

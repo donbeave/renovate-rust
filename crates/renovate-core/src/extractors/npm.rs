@@ -100,24 +100,23 @@ impl NpmDepType {
 /// A single extracted npm dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NpmExtractedDep {
-    /// Package name (the key in the dep section).
     pub name: String,
-    /// Registry package name when it differs from the package.json key.
     pub package_name: Option<String>,
-    /// Datasource used to look up available versions.
     pub datasource: &'static str,
-    /// Source repository URL for non-npm dependencies.
     pub source_url: Option<String>,
-    /// Digest for commit-pinned non-npm dependencies.
     pub current_digest: Option<String>,
-    /// Original value when current value/digest is normalized.
     pub current_raw_value: Option<String>,
-    /// The version constraint string (e.g. `"^18.0.0"`).
     pub current_value: String,
-    /// Which dep section this came from.
     pub dep_type: NpmDepType,
-    /// Set when no registry lookup should be performed.
     pub skip_reason: Option<NpmSkipReason>,
+    pub locked_version: Option<String>,
+    pub is_internal: bool,
+    pub commit_message_topic: Option<String>,
+    pub pretty_dep_type: Option<String>,
+    pub git_ref: Option<String>,
+    pub pin_digests: Option<bool>,
+    pub versioning: Option<String>,
+    pub npm_package_alias: Option<bool>,
 }
 
 /// Yarn registry configuration relevant to npm package extraction.
@@ -185,6 +184,294 @@ pub struct PnpmWorkspaceExtraction {
 pub enum NpmExtractError {
     #[error("JSON parse error: {0}")]
     Json(#[from] serde_json::Error),
+}
+
+/// Manager-specific data attached to an npm package file.
+#[derive(Debug, Clone, Default)]
+pub struct NpmManagerData {
+    pub package_json_name: Option<String>,
+    pub yarn_zero_install: Option<bool>,
+    pub has_package_manager: Option<bool>,
+    pub workspaces_packages: Option<Vec<String>>,
+    pub npmrc_file_name: Option<String>,
+    pub npm_lock: Option<String>,
+    pub yarn_lock: Option<String>,
+    pub pnpm_shrinkwrap: Option<String>,
+}
+
+/// A fully extracted npm package file with all deps and metadata.
+#[derive(Debug, Clone, Default)]
+pub struct NpmPackageFile {
+    pub package_file: String,
+    pub deps: Vec<NpmExtractedDep>,
+    pub manager_data: NpmManagerData,
+    pub package_file_version: Option<String>,
+    pub npmrc: Option<String>,
+    pub skip_installs: Option<bool>,
+    pub extracted_constraints: Option<BTreeMap<String, String>>,
+    pub lock_files: Vec<String>,
+}
+
+/// Result of npmrc resolution.
+#[derive(Debug, Clone, Default)]
+pub struct NpmrcResult {
+    pub npmrc: Option<String>,
+    pub npmrc_file_name: Option<String>,
+}
+
+pub fn resolve_npmrc(
+    package_file: &str,
+    config_npmrc: Option<&str>,
+    config_npmrc_merge: bool,
+    repo_npmrc_content: Option<&str>,
+    expose_all_env: bool,
+) -> NpmrcResult {
+    let mut npmrc: Option<String> = None;
+    let mut npmrc_file_name: Option<String> = None;
+
+    if let Some(repo_content) = repo_npmrc_content {
+        npmrc_file_name = Some(format!(
+            "{}/.npmrc",
+            package_file.rsplit('/').nth(1).unwrap_or(".")
+        ));
+
+        if config_npmrc.is_some() && !config_npmrc_merge {
+            npmrc = config_npmrc.map(|s| s.to_owned());
+        } else {
+            let mut result = config_npmrc.unwrap_or("").to_owned();
+            if !result.is_empty() && !result.ends_with('\n') {
+                result.push('\n');
+            }
+
+            let mut repo_content = repo_content.to_owned();
+            if repo_content.contains("package-lock") {
+                repo_content = regex::Regex::new(r"(?m)^package-lock.*$")
+                    .map(|re| re.replace_all(&repo_content, "").to_string())
+                    .unwrap_or(repo_content);
+            }
+
+            if repo_content.contains("=${") && !expose_all_env {
+                repo_content = repo_content
+                    .lines()
+                    .filter(|line| !line.contains("=${"))
+                    .collect::<Vec<_>>()
+                    .join("\n");
+            }
+
+            result.push_str(&repo_content);
+            npmrc = Some(result);
+        }
+    } else if config_npmrc.is_some() {
+        npmrc = config_npmrc.map(|s| s.to_owned());
+    }
+
+    NpmrcResult {
+        npmrc,
+        npmrc_file_name,
+    }
+}
+
+pub fn detect_monorepos(package_files: &mut [NpmPackageFile]) {
+    for i in 0..package_files.len() {
+        let packages = package_files[i]
+            .manager_data
+            .workspaces_packages
+            .clone()
+            .unwrap_or_default();
+
+        if packages.is_empty() {
+            continue;
+        }
+
+        let parent_file = &package_files[i].package_file.clone();
+        let npmrc = package_files[i].npmrc.clone();
+        let skip_installs = package_files[i].skip_installs;
+        let extracted_constraints = package_files[i].extracted_constraints.clone();
+        let yarn_lock = package_files[i].manager_data.yarn_lock.clone();
+        let npm_lock = package_files[i].manager_data.npm_lock.clone();
+        let yarn_zero_install = package_files[i].manager_data.yarn_zero_install;
+        let has_package_manager = package_files[i].manager_data.has_package_manager;
+        let workspaces_packages = package_files[i].manager_data.workspaces_packages.clone();
+
+        let parent_dir = parent_file.rsplit('/').nth(1).unwrap_or(".");
+        let internal_package_patterns: Vec<String> = packages
+            .iter()
+            .map(|p| {
+                if p.starts_with('/') || p.starts_with("./") || p.starts_with("../") {
+                    format!("{}/{}", parent_dir, p.trim_start_matches("./"))
+                } else {
+                    format!("{}/{}", parent_dir, p)
+                }
+            })
+            .collect();
+
+        let mut internal_package_names: Vec<String> = Vec::new();
+        let mut internal_indices: Vec<usize> = Vec::new();
+
+        for j in 0..package_files.len() {
+            if j == i {
+                continue;
+            }
+            let sub_dir = package_files[j]
+                .package_file
+                .rsplit('/')
+                .nth(1)
+                .unwrap_or(".");
+            for pattern in &internal_package_patterns {
+                if sub_dir.starts_with(pattern.trim_end_matches("/*")) {
+                    if let Some(ref name) = package_files[j].manager_data.package_json_name {
+                        internal_package_names.push(name.clone());
+                    }
+                    internal_indices.push(j);
+                    break;
+                }
+            }
+        }
+
+        for dep in &mut package_files[i].deps {
+            if internal_package_names.contains(&dep.name) {
+                dep.is_internal = true;
+            }
+        }
+
+        for &j in &internal_indices {
+            let sub = &mut package_files[j];
+
+            for dep in &mut sub.deps {
+                if internal_package_names.contains(&dep.name) {
+                    dep.is_internal = true;
+                }
+            }
+
+            if sub.manager_data.yarn_lock.is_none() {
+                sub.manager_data.yarn_lock = yarn_lock.clone();
+            }
+            if sub.manager_data.npm_lock.is_none() {
+                sub.manager_data.npm_lock = npm_lock.clone();
+            }
+            sub.manager_data.yarn_zero_install = yarn_zero_install;
+            sub.manager_data.has_package_manager = has_package_manager;
+            sub.manager_data.workspaces_packages = workspaces_packages.clone();
+            sub.skip_installs = skip_installs.and(sub.skip_installs);
+            if sub.npmrc.is_none() {
+                sub.npmrc = npmrc.clone();
+            }
+
+            if let Some(ref ec) = extracted_constraints {
+                let merged = {
+                    let mut m = ec.clone();
+                    if let Some(ref sub_ec) = sub.extracted_constraints {
+                        for (k, v) in sub_ec {
+                            m.insert(k.clone(), v.clone());
+                        }
+                    }
+                    m
+                };
+                sub.extracted_constraints = Some(merged);
+            }
+        }
+    }
+}
+
+pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
+    let mut lock_cache: BTreeMap<String, NpmLock> = BTreeMap::new();
+    let mut yarn_lock_cache: BTreeMap<String, YarnLock> = BTreeMap::new();
+
+    for pf in package_files.iter_mut() {
+        let mut lock_files: Vec<String> = Vec::new();
+
+        if let Some(ref yarn_lock_path) = pf.manager_data.yarn_lock {
+            lock_files.push(yarn_lock_path.clone());
+            if !yarn_lock_cache.contains_key(yarn_lock_path) {
+                yarn_lock_cache.insert(yarn_lock_path.clone(), YarnLock::default());
+            }
+            let lock = yarn_lock_cache.get(yarn_lock_path).unwrap();
+
+            if !lock.is_yarn1 && pf.extracted_constraints.is_none_or(|c| !c.contains_key("yarn")) {
+                let yarn_ver = get_yarn_version_from_lock(lock);
+                if yarn_ver != "0.0.0" {
+                    let ec = pf.extracted_constraints.get_or_insert_with(BTreeMap::new);
+                    ec.insert("yarn".to_owned(), yarn_ver.to_owned());
+                }
+            }
+
+            for dep in pf.deps.iter_mut() {
+                let key = format!("{}@{}", dep.name, dep.current_value);
+                if let Some(v) = lock.locked_versions.get(&key) {
+                    dep.locked_version = Some(v.clone());
+                }
+                if (dep.dep_type == NpmDepType::Engines || dep.dep_type == NpmDepType::PackageManager)
+                    && dep.name == "yarn"
+                    && !lock.is_yarn1
+                {
+                    dep.package_name = Some("@yarnpkg/cli".to_owned());
+                }
+            }
+        } else if let Some(ref npm_lock_path) = pf.manager_data.npm_lock {
+            lock_files.push(npm_lock_path.clone());
+            if !lock_cache.contains_key(npm_lock_path) {
+                lock_cache.insert(npm_lock_path.clone(), NpmLock::default());
+            }
+            let lock = lock_cache.get(npm_lock_path).unwrap();
+
+            if let Some(lfv) = lock.lockfile_version {
+                let npm_constraint = match lfv {
+                    1 => Some("<7"),
+                    2 => Some("<9"),
+                    3 => Some(">=7"),
+                    _ => None,
+                };
+                if let Some(constraint) = npm_constraint {
+                    let ec = pf.extracted_constraints.get_or_insert_with(BTreeMap::new);
+                    ec.insert("npm".to_owned(), constraint.to_owned());
+                }
+            }
+
+            let package_dir = pf
+                .package_file
+                .rsplit('/')
+                .nth(1)
+                .unwrap_or(".");
+            let npm_root_dir = npm_lock_path.rsplit('/').nth(1).unwrap_or(".");
+            let relative_dir = if package_dir == npm_root_dir {
+                String::new()
+            } else {
+                package_dir
+                    .strip_prefix(npm_root_dir)
+                    .unwrap_or(package_dir)
+                    .trim_start_matches('/')
+                    .to_owned()
+            };
+
+            for dep in pf.deps.iter_mut() {
+                if dep.dep_type == NpmDepType::Engines
+                    || dep.dep_type == NpmDepType::PackageManager
+                    || dep.dep_type == NpmDepType::Volta
+                {
+                    continue;
+                }
+
+                let locked_name = if relative_dir.is_empty() {
+                    dep.name.clone()
+                } else {
+                    format!("{}/node_modules/{}", relative_dir, dep.name)
+                };
+
+                if let Some(v) = lock.locked_versions.get(&locked_name) {
+                    dep.locked_version = Some(v.clone());
+                }
+            }
+        }
+
+        if !lock_files.is_empty() {
+            pf.lock_files = lock_files;
+        }
+    }
+}
+
+pub fn post_extract(package_files: &mut [NpmPackageFile]) {
+    detect_monorepos(package_files);
+    get_locked_versions(package_files);
 }
 
 // ── Internal deserialization ──────────────────────────────────────────────────
@@ -936,6 +1223,14 @@ fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmEx
         current_value,
         dep_type,
         skip_reason,
+        locked_version: None,
+        is_internal: false,
+        commit_message_topic: None,
+        pretty_dep_type: None,
+        git_ref: None,
+        pin_digests: None,
+        versioning: None,
+        npm_package_alias: None,
     }
 }
 
