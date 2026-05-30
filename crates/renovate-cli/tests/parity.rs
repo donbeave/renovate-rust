@@ -1576,3 +1576,51 @@ fn parity_mix_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for mix-skipped fixture");
 }
+
+#[test]
+fn parity_cocoapods_skipped() {
+    let actual = run_fixture("cocoapods-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Podfile",
+                    "manager": "cocoapods",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "LocalLib",
+                            "status": "skipped",
+                            "reason": "localpath"
+                        },
+                        {
+                            "name": "GitLib",
+                            "status": "skipped",
+                            "reason": "gitsource"
+                        },
+                        {
+                            "name": "PodspecLib",
+                            "status": "skipped",
+                            "reason": "podspecsource"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for cocoapods-skipped fixture");
+}

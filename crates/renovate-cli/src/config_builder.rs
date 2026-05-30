@@ -636,6 +636,7 @@ mod tests {
         assert_eq!(config, GlobalConfig::default());
     }
 
+    // Rust-specific: CLI platform flag mapping tests
     #[test]
     fn platform_github_is_mapped() {
         use crate::cli::Platform as CliPlatform;
@@ -646,6 +647,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI platform flag mapping tests
     #[test]
     fn platform_gitlab_is_mapped() {
         use crate::cli::Platform as CliPlatform;
@@ -666,6 +668,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI credential flag mapping tests
     #[test]
     fn username_and_password_are_set() {
         let cli = cli_with(|c| {
@@ -677,6 +680,7 @@ mod tests {
         assert_eq!(config.password.as_deref(), Some("app-password"));
     }
 
+    // Rust-specific: CLI credential flag parsing tests
     #[test]
     fn username_and_password_flags_are_parsed() {
         let config = parse_and_build(&["--username", "some-user", "--password=app-password"]);
@@ -684,6 +688,7 @@ mod tests {
         assert_eq!(config.password.as_deref(), Some("app-password"));
     }
 
+    // Rust-specific: CLI runtime global flag parsing tests
     #[test]
     fn runtime_global_flags_are_parsed() {
         let config = parse_and_build(&[
@@ -735,6 +740,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI binary-source flag parsing tests
     #[test]
     fn binary_source_flag_is_parsed() {
         assert_eq!(
@@ -743,6 +749,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI binary-source flag parsing tests
     #[test]
     fn binary_source_auto_maps_to_global() {
         assert_eq!(
@@ -751,6 +758,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI fork mode flag parsing tests
     #[test]
     fn fork_mode_flags_are_parsed() {
         let config = parse_and_build(&[
@@ -763,6 +771,7 @@ mod tests {
         assert_eq!(config.fork_org.as_deref(), Some("renovate-forks"));
     }
 
+    // Rust-specific: CLI platform-commit flag parsing tests
     #[test]
     fn platform_commit_flag_is_parsed() {
         assert_eq!(
@@ -773,6 +782,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI self-hosted global flag parsing tests
     #[test]
     fn self_hosted_global_flags_are_parsed() {
         let config = parse_and_build(&[
@@ -907,11 +917,13 @@ mod tests {
     }
 
     // Ported: "supports boolean no value" — workers/global/config/parse/cli.spec.ts line 36
+    // Rust-specific: CLI config-migration flag parsing tests
     #[test]
     fn config_migration_bare_sets_true() {
         assert!(parse_and_build(&["--config-migration"]).config_migration);
     }
 
+    // Rust-specific: CLI print-config flag parsing tests
     #[test]
     fn print_config_flag_is_parsed() {
         assert_eq!(
@@ -924,6 +936,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: CLI onboarding flag parsing tests
     #[test]
     fn onboarding_flags_are_parsed() {
         let config = parse_and_build(&[
@@ -1002,21 +1015,25 @@ mod tests {
     }
 
     // Ported: "supports boolean equals false" — workers/global/config/parse/cli.spec.ts line 69
+    // Rust-specific: CLI config-migration flag parsing tests
     #[test]
     fn config_migration_equals_false_sets_false() {
         assert!(!parse_and_build(&["--config-migration=false"]).config_migration);
     }
 
+    // Rust-specific: CLI enabled flag parsing tests
     #[test]
     fn enabled_flag_sets_enabled_config() {
         assert_eq!(parse_and_build(&["--enabled=false"]).enabled, Some(false));
     }
 
+    // Rust-specific: CLI automerge flag parsing tests
     #[test]
     fn automerge_flag_sets_automerge_config() {
         assert_eq!(parse_and_build(&["--automerge"]).automerge, Some(true));
     }
 
+    // Rust-specific: CLI dependency-dashboard flag parsing tests
     #[test]
     fn dependency_dashboard_flags_are_parsed() {
         let config = parse_and_build(&[
@@ -1152,6 +1169,7 @@ mod tests {
         assert_eq!(config.onboarding_config["extends"][0], "config:recommended");
     }
 
+    // Rust-specific: CLI onboarding-config JSON5 parsing tests
     #[test]
     fn onboarding_config_json5_object_is_parsed() {
         let config = parse_and_build(&[r#"--onboarding-config={extends:['config:recommended'],}"#]);
@@ -1167,6 +1185,7 @@ mod tests {
         assert_eq!(err, "Invalid JSON value: 'Hello_World'");
     }
 
+    // Rust-specific: CLI dry-run flag mapping tests
     #[test]
     fn dry_run_full_is_mapped() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::Full));

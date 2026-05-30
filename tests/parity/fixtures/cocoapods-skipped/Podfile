@@ -1,0 +1,7 @@
+platform :ios, '14.0'
+
+target 'Example' do
+  pod 'LocalLib', :path => '../LocalLib'
+  pod 'GitLib', :git => 'https://github.com/user/GitLib.git'
+  pod 'PodspecLib', :podspec => 'https://example.com/PodspecLib.podspec'
+end
