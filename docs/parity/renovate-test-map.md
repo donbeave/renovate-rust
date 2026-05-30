@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,167 / 11,666 total tests ported (44%) · pending 3,902 · not-applicable 2,597 (22% of total) — updated 2026-05-30
+**Progress:** 5,167 / 11,666 total tests ported (44%) · pending 3,956 · not-applicable 2,543 (22% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -289,7 +289,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/index.spec.ts` | Done | [details](lib/config/index.spec.ts.md) |
 | `lib/config/migration.spec.ts` | Done | [details](lib/config/migration.spec.ts.md) |
 | `lib/config/options/index.spec.ts` | Done | [details](lib/config/options/index.spec.ts.md) |
-| `lib/config/options/env-options.spec.ts` | Done | [details](lib/config/options/env-options.spec.ts.md) |
+| `lib/config/options/env-options.spec.ts` | Not done | [details](lib/config/options/env-options.spec.ts.md) |
 | `lib/config/migrations/migrations-service.spec.ts` | Done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
 | `lib/config/migrations/base/abstract-migration.spec.ts` | Done | [details](lib/config/migrations/base/abstract-migration.spec.ts.md) |
 | `lib/config/migrations/custom/binary-source-migration.spec.ts` | Done | [details](lib/config/migrations/custom/binary-source-migration.spec.ts.md) |
@@ -572,7 +572,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/deps-edn/parser.spec.ts` | Done | [details](lib/modules/manager/deps-edn/parser.spec.ts.md) |
 | `lib/modules/manager/devbox/artifacts.spec.ts` | Not done | [details](lib/modules/manager/devbox/artifacts.spec.ts.md) |
 | `lib/modules/manager/flux/artifacts.spec.ts` | Not done | [details](lib/modules/manager/flux/artifacts.spec.ts.md) |
-| `lib/modules/manager/git-submodules/update.spec.ts` | Done | [details](lib/modules/manager/git-submodules/update.spec.ts.md) |
+| `lib/modules/manager/git-submodules/update.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/update.spec.ts.md) |
 | `lib/modules/manager/gitlabci/utils.spec.ts` | Done | [details](lib/modules/manager/gitlabci/utils.spec.ts.md) |
 | `lib/modules/manager/gleam/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gleam/artifacts.spec.ts.md) |
 | `lib/modules/manager/gleam/locked-version.spec.ts` | Done | [details](lib/modules/manager/gleam/locked-version.spec.ts.md) |
@@ -877,7 +877,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/process/lookup/timestamps.spec.ts` | Done | [details](lib/workers/repository/process/lookup/timestamps.spec.ts.md) |
 | `lib/workers/repository/process/lookup/utils.spec.ts` | Done | [details](lib/workers/repository/process/lookup/utils.spec.ts.md) |
 | `lib/workers/repository/process/sort.spec.ts` | Done | [details](lib/workers/repository/process/sort.spec.ts.md) |
-| `lib/workers/repository/process/vulnerabilities.spec.ts` | Done | [details](lib/workers/repository/process/vulnerabilities.spec.ts.md) |
+| `lib/workers/repository/process/vulnerabilities.spec.ts` | Not done | [details](lib/workers/repository/process/vulnerabilities.spec.ts.md) |
 | `lib/workers/repository/process/write.spec.ts` | Done | [details](lib/workers/repository/process/write.spec.ts.md) |
 | `lib/workers/repository/reconfigure/comment.spec.ts` | Done | [details](lib/workers/repository/reconfigure/comment.spec.ts.md) |
 | `lib/workers/repository/reconfigure/index.spec.ts` | Done | [details](lib/workers/repository/reconfigure/index.spec.ts.md) |
