@@ -47,7 +47,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: gemfile_path.clone(),
                     manager: "bundler".into(),
-                    deps: build_dep_reports_bundler(all_deps, &actionable, &update_map),
+                    deps: build_dep_reports_bundler(all_deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => tracing::warn!(repo=%repo_slug, file=%gemfile_path, "Gemfile not found"),

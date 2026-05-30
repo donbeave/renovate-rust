@@ -11,43 +11,43 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns undefined on cache miss | 53 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
-| returns undefined for invalid compressed payload | 62 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
-| returns undefined for invalid JSON payload | 77 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
-| returns undefined when the read fails | 93 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
+| returns undefined on cache miss | 53 | pending | — | — | — |
+| returns undefined for invalid compressed payload | 62 | pending | — | — | — |
+| returns undefined for invalid JSON payload | 77 | pending | — | — | — |
+| returns undefined when the read fails | 93 | pending | — | — | — |
 
 ### `util/cache/package/impl/sqlite › set`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| logs a warning and continues when serialization fails | 120 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
-| logs a warning and continues when the write fails | 137 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
+| logs a warning and continues when serialization fails | 120 | pending | — | — | — |
+| logs a warning and continues when the write fails | 137 | pending | — | — | — |
 
 ### `util/cache/package/impl/sqlite › set and get`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| overwrites and returns latest value | 161 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
+| overwrites and returns latest value | 161 | pending | — | — | — |
 
 ### `util/cache/package/impl/sqlite › expiry`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns undefined for immediately expired entry | 174 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
+| returns undefined for immediately expired entry | 174 | pending | — | — | — |
 
 ### `util/cache/package/impl/sqlite › destroy`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| deletes expired entries and closes database | 185 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
-| resolves and still closes when cleanup throws | 204 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
-| resolves when close throws | 219 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
+| deletes expired entries and closes database | 185 | pending | — | — | — |
+| resolves and still closes when cleanup throws | 204 | pending | — | — | — |
+| resolves when close throws | 219 | pending | — | — | — |
 
 ### `util/cache/package/impl/sqlite › persistence`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| retrieves value from persistent storage after reopening | 245 | not-applicable | — | — | TS-library-specific; uses better-sqlite3 npm package; TypeScript SQLite cache implementation|
+| retrieves value from persistent storage after reopening | 245 | pending | — | — | — |
 
 ---
 

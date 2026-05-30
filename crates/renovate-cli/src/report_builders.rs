@@ -8,6 +8,80 @@
 use std::collections::HashMap;
 
 use crate::output;
+use renovate_core::branch;
+use renovate_core::repo_config::RepoConfig;
+use renovate_core::versioning::semver_generic;
+
+/// Compute branch name, PR title, and update type for an `UpdateAvailable` dep.
+fn dep_meta(
+    dep_name: &str,
+    current_constraint: &str,
+    latest: &str,
+    repo_cfg: &RepoConfig,
+) -> (Option<String>, Option<String>, Option<String>) {
+    let update_type = semver_generic::classify_semver_update(current_constraint, latest);
+    let (is_major, is_minor, is_patch) = match update_type {
+        Some(semver_generic::UpdateType::Major) => (true, false, false),
+        Some(semver_generic::UpdateType::Minor) => (false, true, false),
+        Some(semver_generic::UpdateType::Patch) => (false, false, true),
+        _ => (false, false, false),
+    };
+    let update_type_str = match update_type {
+        Some(semver_generic::UpdateType::Major) => Some("major".to_owned()),
+        Some(semver_generic::UpdateType::Minor) => Some("minor".to_owned()),
+        Some(semver_generic::UpdateType::Patch) => Some("patch".to_owned()),
+        _ => None,
+    };
+
+    let new_major = semver_generic::parse_padded(latest).map(|v| v.major).unwrap_or(0);
+    let new_minor = semver_generic::parse_padded(latest).map(|v| v.minor).unwrap_or(0);
+
+    let topic = branch::branch_topic(
+        dep_name,
+        new_major,
+        new_minor,
+        is_patch,
+        is_minor,
+        repo_cfg.separate_minor_patch,
+        repo_cfg.separate_multiple_minor,
+    );
+
+    let branch_name = if let Some(limit) = repo_cfg.hashed_branch_length {
+        branch::hashed_branch_name(
+            &repo_cfg.branch_prefix,
+            &repo_cfg.additional_branch_prefix,
+            &topic,
+            limit,
+        )
+    } else {
+        branch::branch_name_with_strict(
+            &repo_cfg.branch_prefix,
+            &repo_cfg.additional_branch_prefix,
+            &topic,
+            repo_cfg.branch_name_strict,
+        )
+    };
+
+    let pr_title = branch::pr_title(
+        dep_name,
+        latest,
+        is_major,
+        &branch::PrTitleConfig {
+            semantic_commits: repo_cfg.semantic_commits.as_deref(),
+            action: None,
+            custom_prefix: None,
+            commit_message_topic: None,
+            semantic_commit_type: &repo_cfg.semantic_commit_type,
+            semantic_commit_scope: &repo_cfg.semantic_commit_scope,
+            commit_message_extra: None,
+            commit_message_suffix: None,
+            current_version: Some(current_constraint),
+            new_value: None,
+        },
+    );
+
+    (Some(branch_name), Some(pr_title), update_type_str)
+}
 
 pub(crate) fn build_dep_reports_cargo(
     all_deps: &[renovate_core::extractors::cargo::ExtractedDep],
@@ -19,7 +93,8 @@ pub(crate) fn build_dep_reports_cargo(
             renovate_core::datasources::crates_io::CratesIoError,
         >,
     >,
-    timestamps: &HashMap<String, renovate_core::datasources::crates_io::CrateTimestamps>,
+    timestamps: &HashMap<String, renovate_core::datasources::crates_io::CrateTimestamps>,    repo_cfg: &RepoConfig,
+
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -94,6 +169,12 @@ pub(crate) fn build_dep_reports_cargo(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.dep_name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         // Release timestamp for the absolute latest version.
         let release_timestamp = summary
             .and_then(|s| s.latest.as_deref())
@@ -114,15 +195,15 @@ pub(crate) fn build_dep_reports_cargo(
             }
         };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
@@ -154,7 +235,8 @@ pub(crate) fn build_dep_reports_npm(
     >,
     // Per-package release timestamps keyed by exact version string.
     // Used to populate `current_version_timestamp` for `matchCurrentAge` rules.
-    version_timestamps: &HashMap<String, HashMap<String, String>>,
+    version_timestamps: &HashMap<String, HashMap<String, String>>,    repo_cfg: &RepoConfig,
+
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -242,16 +324,22 @@ pub(crate) fn build_dep_reports_npm(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
@@ -281,6 +369,7 @@ pub(crate) fn build_dep_reports_github_actions(
             renovate_core::datasources::github_tags::GithubTagsError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -327,16 +416,22 @@ pub(crate) fn build_dep_reports_github_actions(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.action, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp: None,
             current_version_timestamp: None,
 
@@ -367,6 +462,7 @@ pub(crate) fn build_dep_reports_maven(
             renovate_core::datasources::maven::MavenError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -417,16 +513,22 @@ pub(crate) fn build_dep_reports_maven(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.dep_name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp: None,
             dep_type: Some(dep.renovate_dep_type().to_owned()),
@@ -456,6 +558,7 @@ pub(crate) fn build_dep_reports_pub(
             renovate_core::datasources::pub_dev::PubError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -506,16 +609,22 @@ pub(crate) fn build_dep_reports_pub(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp: None,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
@@ -545,6 +654,7 @@ pub(crate) fn build_dep_reports_nuget(
             renovate_core::datasources::nuget::NuGetError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -595,16 +705,22 @@ pub(crate) fn build_dep_reports_nuget(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.package_id, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp: None,
 
@@ -635,6 +751,7 @@ pub(crate) fn build_dep_reports_composer(
             renovate_core::datasources::packagist::PackagistError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -685,16 +802,22 @@ pub(crate) fn build_dep_reports_composer(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp: None,
 
@@ -725,6 +848,7 @@ pub(crate) fn build_dep_reports_gomod(
             renovate_core::datasources::gomod::GoModError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -775,16 +899,22 @@ pub(crate) fn build_dep_reports_gomod(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.module_path, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp: None,
 
@@ -815,6 +945,7 @@ pub(crate) fn build_dep_reports_poetry(
             renovate_core::datasources::pypi::PypiError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -868,16 +999,22 @@ pub(crate) fn build_dep_reports_poetry(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+                let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
@@ -907,6 +1044,7 @@ pub(crate) fn build_dep_reports_pip(
             renovate_core::datasources::pypi::PypiError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -960,16 +1098,22 @@ pub(crate) fn build_dep_reports_pip(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+                let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp,
             dep_type: None,
@@ -999,6 +1143,7 @@ pub(crate) fn build_dep_reports_bundler(
             renovate_core::datasources::rubygems::RubyGemsError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -1049,16 +1194,22 @@ pub(crate) fn build_dep_reports_bundler(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+                let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp: None,
 
@@ -1089,6 +1240,7 @@ pub(crate) fn build_dep_reports_terraform(
             renovate_core::datasources::terraform::TerraformError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -1135,16 +1287,22 @@ pub(crate) fn build_dep_reports_terraform(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+                let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp: None,
             current_version_timestamp: None,
 
@@ -1175,6 +1333,7 @@ pub(crate) fn build_dep_reports_helm(
             renovate_core::datasources::helm::HelmError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -1225,16 +1384,22 @@ pub(crate) fn build_dep_reports_helm(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+                let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp: None,
 
@@ -1265,6 +1430,7 @@ pub(crate) fn build_dep_reports_gradle(
             renovate_core::datasources::maven::MavenError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -1311,16 +1477,22 @@ pub(crate) fn build_dep_reports_gradle(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+                let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.dep_name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp: None,
             current_version_timestamp: None,
 
@@ -1351,6 +1523,7 @@ pub(crate) fn build_dep_reports_setup_cfg(
             renovate_core::datasources::pypi::PypiError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -1404,16 +1577,22 @@ pub(crate) fn build_dep_reports_setup_cfg(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+                let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp,
             dep_type: None,
@@ -1443,6 +1622,7 @@ pub(crate) fn build_dep_reports_pipfile(
             renovate_core::datasources::pypi::PypiError,
         >,
     >,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -1496,16 +1676,22 @@ pub(crate) fn build_dep_reports_pipfile(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        let (branch_name, pr_title, update_type) = match &status {
+            output::DepStatus::UpdateAvailable { current, latest } => {
+                dep_meta(&dep.name, current, latest, repo_cfg)
+            }
+            _ => (None, None, None),
+        };
         reports.push(output::DepReport {
-            branch_name: None,
+            branch_name,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
-            update_type: None,
+            update_type,
             pr_priority: None,
-            pr_title: None,
+            pr_title,
             release_timestamp,
             current_version_timestamp,
             dep_type: None,

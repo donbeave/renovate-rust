@@ -88,7 +88,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: tf_file_path.clone(),
                     manager: "terraform".into(),
-                    deps: build_dep_reports_terraform(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_terraform(&deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => {

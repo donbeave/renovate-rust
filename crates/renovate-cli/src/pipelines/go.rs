@@ -87,7 +87,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             ctx.report.files.push(output::FileReport {
                 path: gomod_file_path.clone(),
                 manager: "gomod".into(),
-                deps: build_dep_reports_gomod(&deps, &actionable, &update_map),
+                deps: build_dep_reports_gomod(&deps, &actionable, &update_map, ctx.repo_cfg),
             });
         }
     }

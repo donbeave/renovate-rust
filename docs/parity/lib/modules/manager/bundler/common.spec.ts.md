@@ -11,27 +11,27 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses existing constraint | 31 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
-| extracts from lockfile | 41 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
-| returns null | 49 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
+| uses existing constraint | 31 | pending | — | — | — |
+| extracts from lockfile | 41 | pending | — | — | — |
+| returns null | 49 | pending | — | — | — |
 
 ### `getRubyConstraint`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses existing constraint | 59 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
-| extracts from gemfile | 71 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
-| extracts from .ruby-version | 81 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
-| extracts from .tool-versions | 92 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
-| extracts from lockfile | 105 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
-| returns null | 120 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
+| uses existing constraint | 59 | pending | — | — | — |
+| extracts from gemfile | 71 | pending | — | — | — |
+| extracts from .ruby-version | 81 | pending | — | — | — |
+| extracts from .tool-versions | 92 | pending | — | — | — |
+| extracts from lockfile | 105 | pending | — | — | — |
+| returns null | 120 | pending | — | — | — |
 
 ### `getLockFileName`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns packageFileName.lock | 132 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
-| returns Gemfile.lock | 138 | not-applicable | — | — | mocking framework internals — vi.mock on fs/exec; TypeScript Bundler common utilities|
+| returns packageFileName.lock | 132 | pending | — | — | — |
+| returns Gemfile.lock | 138 | pending | — | — | — |
 
 ---
 

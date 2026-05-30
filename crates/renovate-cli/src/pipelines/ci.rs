@@ -85,7 +85,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                     .collect();
 
                 let mut all_deps =
-                    build_dep_reports_github_actions(&deps, &actionable, &update_map);
+                    build_dep_reports_github_actions(&deps, &actionable, &update_map, ctx.repo_cfg);
                 for dep in &docker_deps {
                     if let Some(reason) = &dep.skip_reason {
                         all_deps.push(output::DepReport {

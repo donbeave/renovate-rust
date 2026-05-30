@@ -54,7 +54,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: pub_file_path.clone(),
                     manager: "pub".into(),
-                    deps: build_dep_reports_pub(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_pub(&deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => {

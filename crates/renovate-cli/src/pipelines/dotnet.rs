@@ -85,7 +85,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             ctx.report.files.push(output::FileReport {
                 path: nuget_file_path.clone(),
                 manager: "nuget".into(),
-                deps: build_dep_reports_nuget(&deps, &actionable, &update_map),
+                deps: build_dep_reports_nuget(&deps, &actionable, &update_map, ctx.repo_cfg),
             });
         }
     }

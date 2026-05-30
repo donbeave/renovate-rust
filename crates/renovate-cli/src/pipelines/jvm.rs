@@ -210,7 +210,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             ctx.report.files.push(output::FileReport {
                 path: maven_file_path.clone(),
                 manager: "maven".into(),
-                deps: build_dep_reports_maven(&deps, &actionable, &update_map),
+                deps: build_dep_reports_maven(&deps, &actionable, &update_map, ctx.repo_cfg),
             });
         }
     }
@@ -464,7 +464,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: gradle_file_path.clone(),
                     manager: "gradle".into(),
-                    deps: build_dep_reports_gradle(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_gradle(&deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => {

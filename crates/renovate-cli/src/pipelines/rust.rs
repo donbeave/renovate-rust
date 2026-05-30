@@ -95,7 +95,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             ctx.report.files.push(output::FileReport {
                 path: cargo_file_path.clone(),
                 manager: "cargo".into(),
-                deps: build_dep_reports_cargo(&deps, &actionable, &update_map, &timestamps_cache),
+                deps: build_dep_reports_cargo(&deps, &actionable, &update_map, &timestamps_cache, ctx.repo_cfg),
             });
         }
     }

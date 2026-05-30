@@ -111,7 +111,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             ctx.report.files.push(output::FileReport {
                 path: npm_file_path.clone(),
                 manager: "npm".into(),
-                deps: build_dep_reports_npm(&deps, &actionable, &update_map, &npm_version_ts),
+                deps: build_dep_reports_npm(&deps, &actionable, &update_map, &npm_version_ts, ctx.repo_cfg),
             });
         }
     }
@@ -168,6 +168,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             &actionable,
                             &update_map,
                             &HashMap::new(),
+                            ctx.repo_cfg,
                         ),
                     });
                 }

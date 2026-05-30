@@ -11,23 +11,23 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null if @types | 56 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles unsupported changelog source | 65 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| returns null if no currentVersion | 74 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| returns null if currentVersion equals newVersion | 83 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| skips invalid repos | 93 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| works without Github | 102 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| uses GitHub tags | 140 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| filters unnecessary warns | 176 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| supports node engines | 206 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles no sourceUrl | 236 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles invalid sourceUrl | 245 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles missing Github token | 254 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles no releases | 264 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| handles not enough releases | 273 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| will call getInRangeReleases when releases is undefined | 282 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| supports github enterprise and github.com changelog | 291 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| supports github enterprise and github enterprise changelog | 325 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
-| supports github.com and github enterprise changelog | 364 | not-applicable | — | — | mocking framework internals — platform/git/scm/fs mock utilities; TypeScript platform integration pipeline|
+| returns null if @types | 56 | pending | — | — | — |
+| handles unsupported changelog source | 65 | pending | — | — | — |
+| returns null if no currentVersion | 74 | pending | — | — | — |
+| returns null if currentVersion equals newVersion | 83 | pending | — | — | — |
+| skips invalid repos | 93 | pending | — | — | — |
+| works without Github | 102 | pending | — | — | — |
+| uses GitHub tags | 140 | pending | — | — | — |
+| filters unnecessary warns | 176 | pending | — | — | — |
+| supports node engines | 206 | pending | — | — | — |
+| handles no sourceUrl | 236 | pending | — | — | — |
+| handles invalid sourceUrl | 245 | pending | — | — | — |
+| handles missing Github token | 254 | pending | — | — | — |
+| handles no releases | 264 | pending | — | — | — |
+| handles not enough releases | 273 | pending | — | — | — |
+| will call getInRangeReleases when releases is undefined | 282 | pending | — | — | — |
+| supports github enterprise and github.com changelog | 291 | pending | — | — | — |
+| supports github enterprise and github enterprise changelog | 325 | pending | — | — | — |
+| supports github.com and github enterprise changelog | 364 | pending | — | — | — |
 
 ---

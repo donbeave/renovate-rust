@@ -51,7 +51,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                     ctx.report.files.push(output::FileReport {
                         path: composer_file_path.clone(),
                         manager: "composer".into(),
-                        deps: build_dep_reports_composer(&deps, &actionable, &update_map),
+                        deps: build_dep_reports_composer(&deps, &actionable, &update_map, ctx.repo_cfg),
                     });
                 }
                 Err(err) => {

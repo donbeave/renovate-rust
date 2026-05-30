@@ -101,7 +101,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             ctx.report.files.push(output::FileReport {
                 path: file_path.clone(),
                 manager: manager_name.to_owned(),
-                deps: build_dep_reports_pip(&deps, &actionable, &update_map),
+                deps: build_dep_reports_pip(&deps, &actionable, &update_map, ctx.repo_cfg),
             });
         }
     }
@@ -144,7 +144,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: setup_py_path.clone(),
                     manager: "pip_setup".into(),
-                    deps: build_dep_reports_pip(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_pip(&deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => tracing::warn!(repo=%repo_slug, file=%setup_py_path, "setup.py not found"),
@@ -193,7 +193,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: setup_cfg_path.clone(),
                     manager: "setup-cfg".into(),
-                    deps: build_dep_reports_setup_cfg(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_setup_cfg(&deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => {
@@ -417,7 +417,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: pipfile_path.clone(),
                     manager: "pipenv".into(),
-                    deps: build_dep_reports_pipfile(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_pipfile(&deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => {
@@ -609,7 +609,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                     ctx.report.files.push(output::FileReport {
                         path: poetry_file_path.clone(),
                         manager: "poetry".into(),
-                        deps: build_dep_reports_poetry(&deps, &actionable, &update_map),
+                        deps: build_dep_reports_poetry(&deps, &actionable, &update_map, ctx.repo_cfg),
                     });
                 }
                 Err(err) => {

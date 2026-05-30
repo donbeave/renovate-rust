@@ -11,32 +11,32 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| encodes known shortcodes | 53 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
-| encodes aliases | 57 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
-| omits unknown shortcodes | 63 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
-| convert warning shortcode to emoji | 67 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
-| does not encode when config option is disabled | 72 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
+| encodes known shortcodes | 53 | pending | — | — | — |
+| encodes aliases | 57 | pending | — | — | — |
+| omits unknown shortcodes | 63 | pending | — | — | — |
+| convert warning shortcode to emoji | 67 | pending | — | — | — |
+| does not encode when config option is disabled | 72 | pending | — | — | — |
 
 ### `util/emoji › unemojify`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| strips emojis when the config has been set accordingly | 79 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
-| does not strip emojis when the config demands it | 88 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
-| converts warning emoji to shortcode | 97 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
+| strips emojis when the config has been set accordingly | 79 | pending | — | — | — |
+| does not strip emojis when the config demands it | 88 | pending | — | — | — |
+| converts warning emoji to shortcode | 97 | pending | — | — | — |
 
 ### `util/emoji › problematic characters`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| converts %s forth and back | 106 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
+| converts %s forth and back | 106 | pending | — | — | — |
 
 ### `util/emoji › stripEmojis`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| is independent of config option | 124 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
-| does not throw on standalone modifiers | 135 | not-applicable | — | — | TS-library-specific; tests emojibase npm package for emoji shortcode conversion; Rust would use different emoji data|
+| is independent of config option | 124 | pending | — | — | — |
+| does not throw on standalone modifiers | 135 | pending | — | — | — |
 
 ---
 

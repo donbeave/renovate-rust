@@ -11,17 +11,17 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| storeVarToken | 41 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| increaseNestingDepth | 46 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| reduceNestingDepth | 55 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| prependNestingDepth | 61 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| storeInTokenMap | 73 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| loadFromTokenMap | 79 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| cleanupTempVars | 89 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| stripReservedPrefixFromKeyTokens | 98 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| coalesceVariable | 115 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| findVariable | 125 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
-| interpolateString | 151 | not-applicable | — | — | TS-library-specific; tests @renovatebot/good-enough-parser TypeScript lexer/parser library; Rust uses different parsing approach|
+| storeVarToken | 41 | pending | — | — | — |
+| increaseNestingDepth | 46 | pending | — | — | — |
+| reduceNestingDepth | 55 | pending | — | — | — |
+| prependNestingDepth | 61 | pending | — | — | — |
+| storeInTokenMap | 73 | pending | — | — | — |
+| loadFromTokenMap | 79 | pending | — | — | — |
+| cleanupTempVars | 89 | pending | — | — | — |
+| stripReservedPrefixFromKeyTokens | 98 | pending | — | — | — |
+| coalesceVariable | 115 | pending | — | — | — |
+| findVariable | 125 | pending | — | — | — |
+| interpolateString | 151 | pending | — | — | — |
 
 ---
 

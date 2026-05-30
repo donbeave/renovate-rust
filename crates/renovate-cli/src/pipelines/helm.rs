@@ -43,7 +43,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: helm_file_path.clone(),
                     manager: "helmv3".into(),
-                    deps: build_dep_reports_helm(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_helm(&deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => {
@@ -101,7 +101,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: hf_path.clone(),
                     manager: "helmfile".into(),
-                    deps: build_dep_reports_helm(&deps, &actionable, &update_map),
+                    deps: build_dep_reports_helm(&deps, &actionable, &update_map, ctx.repo_cfg),
                 });
             }
             Ok(None) => {
