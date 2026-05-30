@@ -5,7 +5,7 @@
 ## `lib/util/http/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/index.spec.ts
-**Total tests:** 52 | **Ported:** 13 | **Actionable:** 11 | **Status:** partial
+**Total tests:** 52 | **Ported:** 20 | **Actionable:** 4 | **Status:** partial
 
 ### `util/http/index`
 
@@ -46,9 +46,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses yaml response without schema | 427 | pending | — | — | —|
-| parses yaml with options | 434 | pending | — | — | —|
-| throws on invalid yaml | 447 | pending | — | — | —|
+| parses yaml response without schema | 427 | ported | `http.rs` | `get_yaml_parses_response_body` | — |
+| parses yaml with options | 434 | pending | — | — | Custom options not implemented |
+| throws on invalid yaml | 447 | ported | `http.rs` | `get_yaml_throws_on_invalid_yaml` | — |
 
 ### `util/http/index › Schema support › getYaml`
 
@@ -57,7 +57,7 @@
 | parses yaml with schema validation | 457 | not-applicable | — | — | Zod schema validation not applicable to Rust |
 | parses yaml with options and schema | 464 | not-applicable | — | — | Zod schema validation not applicable to Rust |
 | throws on schema validation failure | 479 | not-applicable | — | — | Zod schema validation not applicable to Rust |
-| throws on invalid yaml | 487 | pending | — | — | —|
+| throws on invalid yaml | 487 | ported | `http.rs` | `get_yaml_throws_on_invalid_yaml` | — |
 
 ### `util/http/index › Schema support › getYamlSafe`
 
@@ -65,8 +65,8 @@
 |---|---|---|---|---|---|
 | returns successful result with schema validation | 497 | not-applicable | — | — | Zod schema validation not applicable to Rust |
 | returns schema error result | 508 | not-applicable | — | — | Zod schema validation not applicable to Rust |
-| returns error result for invalid yaml | 522 | pending | — | — | —|
-| returns error result for network errors | 533 | pending | — | — | —|
+| returns error result for invalid yaml | 522 | ported | `http.rs` | `get_yaml_returns_error_for_invalid_yaml` | — |
+| returns error result for network errors | 533 | ported | `http.rs` | `get_yaml_returns_error_for_network_errors` | — |
 | works with options and schema | 547 | not-applicable | — | — | Zod schema validation not applicable to Rust |
 
 ### `util/http/index › Schema support › getJson`
@@ -82,7 +82,7 @@
 |---|---|---|---|---|---|
 | uses schema for response body | 605 | not-applicable | — | — | Zod schema validation not applicable to Rust |
 | returns schema error result | 619 | not-applicable | — | — | Zod schema validation not applicable to Rust |
-| returns error result | 633 | pending | — | — | —|
+| returns error result | 633 | ported | `http.rs` | `get_returns_429_error_after_retries_exhausted` | Rust get_json returns Result<T, HttpError> natively; error handling covered by status code tests |
 
 ### `util/http/index › Schema support › postJson`
 
@@ -105,7 +105,7 @@
 | parses toml with schema validation | 711 | not-applicable | — | — | Zod schema validation not applicable to Rust |
 | parses toml with options and schema | 718 | not-applicable | — | — | Zod schema validation not applicable to Rust |
 | throws on schema validation failure | 737 | not-applicable | — | — | Zod schema validation not applicable to Rust |
-| throws on invalid toml | 752 | pending | — | — | —|
+| throws on invalid toml | 752 | ported | `http.rs` | `get_toml_throws_on_invalid_toml` | — |
 
 | sets default user-agent | 36 | ported | `http.rs` | `default_user_agent_is_set_on_requests` | — |
 | uses userAgent when set as a plain string | 46 | not-applicable | — | — | Custom user-agent not supported in Rust HTTP client |
