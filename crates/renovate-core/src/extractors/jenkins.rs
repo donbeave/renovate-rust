@@ -192,6 +192,7 @@ mod tests {
 
     // ── plugins.txt ──────────────────────────────────────────────────────────
 
+    // Rust-specific: unit test for plugins.txt extraction
     #[test]
     fn txt_extracts_plugin() {
         let content = "git:4.13.0\npipeline-model-definition:2.2189.v726e\n";
@@ -202,6 +203,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for plugins.txt comment ignoring
     #[test]
     fn txt_comment_lines_ignored() {
         let content = "# this is a header\ngit:4.13.0\n# another comment\n";
@@ -209,6 +211,7 @@ mod tests {
         assert_eq!(deps.len(), 1);
     }
 
+    // Rust-specific: unit test for plugins.txt inline comment stripping
     #[test]
     fn txt_inline_comment_stripped() {
         let content = "git:4.13.0 # keep this version\n";
@@ -217,6 +220,7 @@ mod tests {
         assert_eq!(deps[0].version.as_deref(), Some("4.13.0"));
     }
 
+    // Rust-specific: unit test for plugins.txt latest version skipping
     #[test]
     fn txt_latest_skipped() {
         let content = "git:latest\n";
@@ -227,6 +231,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for empty plugins.txt
     #[test]
     fn txt_empty_returns_empty() {
         assert!(extract_txt("").is_empty());
@@ -234,6 +239,7 @@ mod tests {
 
     // ── plugins.yml ──────────────────────────────────────────────────────────
 
+    // Rust-specific: unit test for plugins.yml extraction
     #[test]
     fn yml_extracts_plugin() {
         let content = r#"
@@ -249,6 +255,7 @@ plugins:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for multiple plugins in yml
     #[test]
     fn yml_multiple_plugins() {
         let content = r#"
@@ -266,6 +273,7 @@ plugins:
         assert!(deps.iter().any(|d| d.artifact_id == "workflow-aggregator"));
     }
 
+    // Rust-specific: unit test for plugins.yml no-version skipping
     #[test]
     fn yml_no_version_skipped() {
         let content = "plugins:\n- artifactId: git\n";
