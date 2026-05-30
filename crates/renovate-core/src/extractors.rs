@@ -104,6 +104,7 @@ pub mod spm;
 pub mod sveltos;
 pub mod tekton;
 pub mod terraform;
+pub mod terraform_hcl;
 pub mod terragrunt;
 pub mod tflint_plugin;
 pub mod travis;

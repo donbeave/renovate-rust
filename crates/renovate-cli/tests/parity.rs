@@ -1341,3 +1341,51 @@ fn parity_pub_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for pub-skipped fixture");
 }
+
+#[test]
+fn parity_gemspec_skipped() {
+    let actual = run_fixture("gemspec-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "example.gemspec",
+                    "manager": "gemspec",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "local_gem",
+                            "status": "skipped",
+                            "reason": "pathsource"
+                        },
+                        {
+                            "name": "git_gem",
+                            "status": "skipped",
+                            "reason": "gitsource"
+                        },
+                        {
+                            "name": "noversion",
+                            "status": "skipped",
+                            "reason": "noversion"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for gemspec-skipped fixture");
+}
