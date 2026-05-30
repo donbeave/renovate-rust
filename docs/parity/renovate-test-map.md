@@ -26,7 +26,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/deps-edn/extract.spec.ts` | Done | [details](lib/modules/manager/deps-edn/extract.spec.ts.md) |
 | `lib/modules/manager/droneci/extract.spec.ts` | Done | [details](lib/modules/manager/droneci/extract.spec.ts.md) |
 | `lib/modules/manager/fvm/extract.spec.ts` | Done | [details](lib/modules/manager/fvm/extract.spec.ts.md) |
-| `lib/modules/manager/glasskube/extract.spec.ts` | Not done | [details](lib/modules/manager/glasskube/extract.spec.ts.md) |
+| `lib/modules/manager/glasskube/extract.spec.ts` | Done | [details](lib/modules/manager/glasskube/extract.spec.ts.md) |
 | `lib/modules/manager/gleam/extract.spec.ts` | Done | [details](lib/modules/manager/gleam/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/extract.spec.ts` | Done | [details](lib/modules/manager/git-submodules/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | Done | [details](lib/modules/manager/git-submodules/artifact.spec.ts.md) |
@@ -205,12 +205,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/custom/index.spec.ts` | Not done | [details](lib/modules/datasource/custom/index.spec.ts.md) |
 | `lib/modules/datasource/rpm/index.spec.ts` | Not done | [details](lib/modules/datasource/rpm/index.spec.ts.md) |
 | `lib/modules/datasource/golang-version/index.spec.ts` | Done | [details](lib/modules/datasource/golang-version/index.spec.ts.md) |
-| `lib/modules/datasource/git-tags/index.spec.ts` | Done | [details](lib/modules/datasource/git-tags/index.spec.ts.md) |
+| `lib/modules/datasource/git-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/git-tags/index.spec.ts.md) |
 | `lib/modules/datasource/github-tags/index.spec.ts` | Done | [details](lib/modules/datasource/github-tags/index.spec.ts.md) |
 | `lib/modules/datasource/orb/index.spec.ts` | Done | [details](lib/modules/datasource/orb/index.spec.ts.md) |
 | `lib/modules/datasource/gitea-tags/index.spec.ts` | Done | [details](lib/modules/datasource/gitea-tags/index.spec.ts.md) |
 | `lib/modules/datasource/forgejo-tags/index.spec.ts` | Done | [details](lib/modules/datasource/forgejo-tags/index.spec.ts.md) |
-| `lib/modules/datasource/hex/v2/index.spec.ts` | Done | [details](lib/modules/datasource/hex/v2/index.spec.ts.md) |
+| `lib/modules/datasource/hex/v2/index.spec.ts` | Not done | [details](lib/modules/datasource/hex/v2/index.spec.ts.md) |
 | `lib/modules/datasource/hex/index.spec.ts` | Not done | [details](lib/modules/datasource/hex/index.spec.ts.md) |
 | `lib/modules/datasource/puppet-forge/index.spec.ts` | Done | [details](lib/modules/datasource/puppet-forge/index.spec.ts.md) |
 | `lib/modules/datasource/helm/index.spec.ts` | Done | [details](lib/modules/datasource/helm/index.spec.ts.md) |
@@ -247,7 +247,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) |
 | `lib/modules/datasource/bitrise/index.spec.ts` | Done | [details](lib/modules/datasource/bitrise/index.spec.ts.md) |
-| `lib/modules/datasource/terraform-module/base.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
+| `lib/modules/datasource/terraform-module/base.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/index.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/utils.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/utils.spec.ts.md) |
 | `lib/modules/datasource/terraform-provider/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-provider/index.spec.ts.md) |
@@ -540,7 +540,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bundler/host-rules.spec.ts` | Done | [details](lib/modules/manager/bundler/host-rules.spec.ts.md) |
 | `lib/modules/manager/bundler/locked-version.spec.ts` | Done | [details](lib/modules/manager/bundler/locked-version.spec.ts.md) |
 | `lib/modules/manager/bundler/update-locked.spec.ts` | Done | [details](lib/modules/manager/bundler/update-locked.spec.ts.md) |
-| `lib/modules/manager/cake/index.spec.ts` | Done | [details](lib/modules/manager/cake/index.spec.ts.md) |
+| `lib/modules/manager/cake/index.spec.ts` | Not done | [details](lib/modules/manager/cake/index.spec.ts.md) |
 | `lib/modules/manager/cargo/artifacts.spec.ts` | Not done | [details](lib/modules/manager/cargo/artifacts.spec.ts.md) |
 | `lib/modules/manager/cargo/locked-version.spec.ts` | Done | [details](lib/modules/manager/cargo/locked-version.spec.ts.md) |
 | `lib/modules/manager/cargo/range.spec.ts` | Done | [details](lib/modules/manager/cargo/range.spec.ts.md) |
@@ -828,7 +828,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/global/index.spec.ts` | Not done | [details](lib/workers/global/index.spec.ts.md) |
 | `lib/workers/global/initialize.spec.ts` | Not done | [details](lib/workers/global/initialize.spec.ts.md) |
 | `lib/workers/global/limits.spec.ts` | Done | [details](lib/workers/global/limits.spec.ts.md) |
-| `lib/workers/repository/changelog/index.spec.ts` | Done | [details](lib/workers/repository/changelog/index.spec.ts.md) |
+| `lib/workers/repository/changelog/index.spec.ts` | Not done | [details](lib/workers/repository/changelog/index.spec.ts.md) |
 | `lib/workers/repository/common.spec.ts` | Done | [details](lib/workers/repository/common.spec.ts.md) |
 | `lib/workers/repository/config-migration/branch/commit-message.spec.ts` | Done | [details](lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) |
 | `lib/workers/repository/config-migration/branch/create.spec.ts` | Not done | [details](lib/workers/repository/config-migration/branch/create.spec.ts.md) |
@@ -905,7 +905,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/pr/body/footer.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/footer.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/header.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/header.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/index.spec.ts.md) |
-| `lib/workers/repository/update/pr/body/notes.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/notes.spec.ts.md) |
+| `lib/workers/repository/update/pr/body/notes.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/notes.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/updates-table.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/updates-table.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts.md) |

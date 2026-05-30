@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/git-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-tags/index.spec.ts
-**Total tests:** 8 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** ported
 
 ### `modules/datasource/git-tags/index`
 
@@ -17,7 +17,7 @@
 | returns null if not found | 64 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_null_if_not_found` | notfound → None |
 | returns digest for tag | 74 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_digest_for_tag` | v1.0.2 → deref hash |
 | returns digest for HEAD | 84 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_digest_for_head` | None → HEAD hash |
-| returns digest for HEAD with authentication environment variables | 94 | not-applicable | — | — | hostRules subprocess integration — tests that datasources pass hostRules auth config as GIT_CONFIG_* env vars to git subprocess; Rust git-tags datasource doesn't integrate with host_rules module (architectural difference); TypeScript uses base class pattern with automatic env var injection, Rust would need explicit integration |
-| returns digest for HEAD with authentication environment variables for datasource type git-tags | 121 | not-applicable | — | — | hostRules subprocess integration — tests that datasources pass hostRules auth config as GIT_CONFIG_* env vars to git subprocess; Rust git-tags datasource doesn't integrate with host_rules module (architectural difference); TypeScript uses base class pattern with automatic env var injection, Rust would need explicit integration |
+| returns digest for HEAD with authentication environment variables | 94 | pending | — | — | — |
+| returns digest for HEAD with authentication environment variables for datasource type git-tags | 121 | pending | — | — | — |
 
 ---
