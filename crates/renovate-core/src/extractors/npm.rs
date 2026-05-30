@@ -2451,10 +2451,10 @@ fn update_dependency_package_json(
                             res_old.find('#').map(|i| &res_old[i..]).unwrap_or("#");
                         format!("{}{}{}", prefix, new_value, after_hash)
                     } else {
-                        new_value.clone()
+                        format!("{}", new_value)
                     }
                 } else {
-                    new_value.clone()
+                    format!("{}", new_value)
                 }
             };
             parsed["resolutions"][dep_key.as_str()] = serde_json::Value::String(res_new.clone());

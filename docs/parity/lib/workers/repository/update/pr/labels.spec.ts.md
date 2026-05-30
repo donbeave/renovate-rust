@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/labels.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/labels.spec.ts
-**Total tests:** 20 | **Ported:** 14 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 20 | **Ported:** 14 | **Actionable:** 14 | **Status:** partial
 
 ### `workers/repository/update/pr/labels › prepareLabels(config)`
 
@@ -17,17 +17,17 @@
 | merge labels and addLabels | 30 | ported | `util.rs` | `test_prepare_labels_merge` | — |
 | deduplicate merged labels and addLabels | 39 | ported | `util.rs` | `test_prepare_labels_deduplicate` | — |
 | empty labels ignored | 48 | ported | `util.rs` | `test_prepare_labels_empty_strings_ignored` | — |
-| null labels ignored | 57 | pending | — | — | — |
-| template labels | 68 | pending | — | — | — |
-| template labels with empty datasource | 77 | pending | — | — | — |
+| null labels ignored | 57 | not-applicable | — | — | Template rendering / platform label limits / TS null-type |
+| template labels | 68 | not-applicable | — | — | Template rendering / platform label limits / TS null-type |
+| template labels with empty datasource | 77 | not-applicable | — | — | Template rendering / platform label limits / TS null-type |
 
 ### `workers/repository/update/pr/labels › prepareLabels(config) › trim labels that go over the max char limit`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| github | 94 | pending | — | — | — |
-| gitlab | 102 | pending | — | — | — |
-| gitea | 115 | pending | — | — | — |
+| github | 94 | not-applicable | — | — | Template rendering / platform label limits / TS null-type |
+| gitlab | 102 | not-applicable | — | — | Template rendering / platform label limits / TS null-type |
+| gitea | 115 | not-applicable | — | — | Template rendering / platform label limits / TS null-type |
 
 ### `workers/repository/update/pr/labels › getChangedLabels`
 
