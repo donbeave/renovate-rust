@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns $expected for status code $statusCode and followRedirect $followRedirect | 5 | ported | — | — | — |
+| returns $expected for status code $statusCode and followRedirect $followRedirect | 5 | ported | `http.rs` | `test_is_response_ok` | — |
 
 ---
 

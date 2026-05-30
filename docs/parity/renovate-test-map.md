@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 6,305 / 12,626 total tests ported (49.9%) · pending 4,943 · not-applicable 1,378 (10.9%) — updated 2026-05-30
+**Progress:** 6,305 / 12,626 total tests ported (49.9%) · pending 4,913 · not-applicable 1,408 (11.1%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -756,7 +756,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/repository/impl/local.spec.ts` | Not done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
 | `lib/util/cache/repository/impl/s3.spec.ts` | Done | [details](lib/util/cache/repository/impl/s3.spec.ts.md) |
 | `lib/util/cache/repository/index.spec.ts` | Done | [details](lib/util/cache/repository/index.spec.ts.md) |
-| `lib/util/exec/common.spec.ts` | Not done | [details](lib/util/exec/common.spec.ts.md) |
+| `lib/util/exec/common.spec.ts` | Done | [details](lib/util/exec/common.spec.ts.md) |
 | `lib/util/exec/containerbase.spec.ts` | Not done | [details](lib/util/exec/containerbase.spec.ts.md) |
 | `lib/util/exec/docker/index.spec.ts` | Not done | [details](lib/util/exec/docker/index.spec.ts.md) |
 | `lib/util/exec/env.spec.ts` | Done | [details](lib/util/exec/env.spec.ts.md) |

@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| sanitizeValue("$input") == "$output" | 11 | ported | — | — | — |
+| sanitizeValue("$input") == "$output" | 11 | ported | `util.rs` | `test_sanitize_urls` | — |
 | sanitizes boxed String objects as strings | 26 | not-applicable | — | — | TypeScript type-system test; JavaScript boxed String objects (new String(...)) have no Rust equivalent |
 | preserves secret template strings in redacted fields | 39 | ported | `util.rs` | `test_sanitize_value_preserves_secret_templates` | — |
 

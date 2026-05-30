@@ -20,7 +20,7 @@
 | should throw if schema does not match and failureBehaviour "throw" | 122 | not-applicable | — | — |Tests Zod schema validation on parsed YAML; Rust does not use Zod |
 | should still return valid elements if schema does not match with "filter" behaviour | 143 | not-applicable | — | — |Tests Zod schema validation on parsed YAML; Rust does not use Zod |
 | should parse content with templates | 170 | ported | `util.rs` | `test_parse_yaml_templates` | — |
-| should parse content with templates without quotes | 193 | ported | — | — | — |
+| should parse content with templates without quotes | 193 | ported | `util.rs` | `test_parse_yaml_templates_without_quotes` | — |
 
 ### `util/yaml › load`
 
@@ -28,12 +28,12 @@
 |---|---|---|---|---|---|
 | should return undefined | 222 | ported | `util.rs` | `test_parse_single_yaml_empty` | — |
 | should parse content with single document | 226 | ported | `util.rs` | `test_parse_single_yaml_single` | — |
-| should parse invalid content using strict=false | 239 | ported | — | — | — |
+| should parse invalid content using strict=false | 239 | ported | `util.rs` | `test_parse_single_yaml_strict_false` | — |
 | should parse content with single document with schema | 253 | not-applicable | — | — |Tests Zod schema validation on parsed YAML; Rust does not use Zod |
 | should throw with single document with schema if parsing fails | 275 | not-applicable | — | — |Tests Zod schema validation on parsed YAML; Rust does not use Zod |
-| should parse content with multiple documents | 292 | ported | — | — | — |
+| should parse content with multiple documents | 292 | ported | `util.rs` | `test_parse_single_yaml_multidoc_throws` | `parse_single_yaml` returns Err on multi-doc |
 | should parse content with template | 303 | ported | `util.rs` | `test_parse_single_yaml_template` | — |
-| should parse content with template without quotes | 326 | ported | — | — | — |
+| should parse content with template without quotes | 326 | ported | `util.rs` | `test_parse_single_yaml_template_without_quotes` | — |
 | should parse content with yaml tags | 353 | ported | `util.rs` | `test_parse_single_yaml_custom_tags` | — |
 
 ---
