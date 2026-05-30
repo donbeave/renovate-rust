@@ -35,11 +35,35 @@ gate #4 in `prompts/claude-loop-renovate-rust.md`.
 
 | Fixture repo | Behavior covered | Upstream run | Rust run | Diff status |
 |---|---|---|---|---|
-| _none yet_ | — | — | — | pending |
+| `npm-empty` | npm extraction — empty `dependencies` | blocked | green | blocked |
+| `npm-skipped` | npm extraction — `file:` and URL installs skipped | blocked | green | blocked |
+| `cargo-workspace` | cargo extraction — workspace-inherited dep skipped | blocked | green | blocked |
 
 ## Blockers
 
-Record here when upstream Renovate cannot be executed (no Node, no install). In
-that case, build Rust behavior plus recorded expected-output fixtures and run the
-Rust side against the recorded expectation; restore the live two-sided diff once
-Node is available.
+Upstream Renovate's `--platform=local` does not accept a `repositories` list;
+it autodiscovers from the current working directory and errors when repositories
+are passed explicitly. `renovate-rust` intentionally diverges here: its local
+platform treats the first repository slug as a signal to scan `cwd` as that repo.
+
+This means a live two-sided diff for the local platform is not possible with
+identical CLI invocations. Options to restore it:
+
+1. Build a mock platform server (e.g. small Gitea/Forgejo instance in CI) and
+   point both implementations at it.
+2. Run upstream Renovate without `--platform=local` against a real hosted repo.
+3. Accept the divergence and run the Rust side against recorded expected output.
+
+Current approach is #3: the Rust harness tests in
+`crates/renovate-cli/tests/parity.rs` run `renovate-rust` against each fixture
+and assert the normalized JSON output matches the recorded expectation. These
+regression tests pass in CI and guard against output-format or pipeline-behavior
+breaks.
+
+## Fixture normalizer
+
+The harness strips volatile fields before comparison:
+
+- `releaseTimestamp` on every dep — registry metadata changes over time.
+- Log output (timestamps, ordering) is ignored; only the JSON `--output-format`
+  is compared.

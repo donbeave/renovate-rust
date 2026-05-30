@@ -278,22 +278,28 @@ fn build_pr_body(
     // Header
     body.push_str(&branch::get_pr_header(repo_cfg.pr_header.as_deref()));
 
-    // Update list
-    if !deps.is_empty() {
-        body.push_str("This PR contains the following updates:\n\n");
-        body.push_str("| Package | Update | Change |\n");
-        body.push_str("|---|---|---|\n");
-        for bd in deps {
+    // Update table
+    let table_deps: Vec<renovate_core::branch::PrTableDep> = deps
+        .iter()
+        .filter_map(|bd| {
             if let output::DepStatus::UpdateAvailable { ref current, ref latest } = bd.dep.status {
-                let update_type = bd.dep.update_type.as_deref().unwrap_or("unknown");
-                body.push_str(&format!(
-                    "| {} | {} | `{}` → `{}` |\n",
-                    bd.dep.name, update_type, current, latest
-                ));
+                Some(renovate_core::branch::PrTableDep {
+                    dep_name: bd.dep.name.clone(),
+                    new_name: bd.dep.replacement_name.clone(),
+                    dep_type: bd.dep.dep_type.clone(),
+                    update_type: bd.dep.update_type.clone(),
+                    current_value: Some(current.clone()),
+                    new_value: Some(bd.dep.new_value.clone().unwrap_or_else(|| latest.clone())),
+                })
+            } else {
+                None
             }
-        }
-        body.push('\n');
-    }
+        })
+        .collect();
+    body.push_str(&branch::get_pr_updates_table(
+        Some(&repo_cfg.pr_body_columns),
+        &table_deps,
+    ));
 
     // Extra notes
     for bd in deps {

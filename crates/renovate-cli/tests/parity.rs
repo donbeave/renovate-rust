@@ -99,3 +99,84 @@ fn parity_npm_empty() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for npm-empty fixture");
 }
+
+#[test]
+fn parity_npm_skipped() {
+    let actual = run_fixture("npm-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 2,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 2,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "package.json",
+                    "manager": "npm",
+                    "stats": {
+                        "total": 2,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 2,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "local-pkg",
+                            "status": "skipped",
+                            "reason": "localpath"
+                        },
+                        {
+                            "name": "url-pkg",
+                            "status": "skipped",
+                            "reason": "urlinstall"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for npm-skipped fixture");
+}
+
+#[test]
+fn parity_cargo_workspace() {
+    let actual = run_fixture("cargo-workspace");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Cargo.toml",
+                    "manager": "cargo",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "serde",
+                            "status": "skipped",
+                            "reason": "workspaceinherited"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for cargo-workspace fixture");
+}

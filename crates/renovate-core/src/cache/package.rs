@@ -54,7 +54,8 @@ pub struct CachedRecord {
 #[derive(Debug, Serialize, Deserialize)]
 struct FileEntry {
     value: Value,
-    expiry: String,
+    #[serde(default)]
+    expiry: Option<String>,
 }
 
 // ── FilePackageCache ─────────────────────────────────────────────────────────
@@ -103,7 +104,12 @@ impl FilePackageCache {
             .map_err(|e| trace!(namespace, key, "cache parse error: {e}"))
             .ok()?;
 
-        let expiry = DateTime::parse_from_rfc3339(&entry.expiry)
+        let expiry_str = entry.expiry
+            .as_deref()
+            .ok_or_else(|| trace!(namespace, key, "cache missing expiry"))
+            .ok()?;
+
+        let expiry = DateTime::parse_from_rfc3339(expiry_str)
             .map_err(|e| trace!(namespace, key, "cache expiry parse error: {e}"))
             .ok()?;
 
@@ -137,7 +143,7 @@ impl FilePackageCache {
         let expiry = Utc::now() + Duration::minutes(ttl_minutes);
         let entry = FileEntry {
             value,
-            expiry: expiry.to_rfc3339(),
+            expiry: Some(expiry.to_rfc3339()),
         };
         match serde_json::to_string(&entry) {
             Ok(json) => {
@@ -164,10 +170,18 @@ impl FilePackageCache {
                     for file in files {
                         total += 1;
                         if let Ok(contents) = tokio::fs::read_to_string(&file).await {
-                            let expired = serde_json::from_str::<FileEntry>(&contents)
-                                .ok()
-                                .and_then(|e| DateTime::parse_from_rfc3339(&e.expiry).ok())
-                                .is_none_or(|exp| now >= exp);
+                            let expired = match serde_json::from_str::<FileEntry>(&contents) {
+                                Ok(entry) => match entry.expiry {
+                                    None => false, // keep entries without expiry
+                                    Some(exp_str) => {
+                                        match DateTime::parse_from_rfc3339(&exp_str) {
+                                            Ok(exp) => now >= exp,
+                                            Err(_) => true, // invalid expiry → remove
+                                        }
+                                    }
+                                },
+                                Err(_) => true, // invalid JSON → remove
+                            };
                             if expired && tokio::fs::remove_file(&file).await.is_ok() {
                                 deleted += 1;
                             }
@@ -574,7 +588,7 @@ mod tests {
             .unwrap();
         let entry = FileEntry {
             value: Value::String("stale".into()),
-            expiry: (Utc::now() - Duration::minutes(1)).to_rfc3339(),
+            expiry: Some((Utc::now() - Duration::minutes(1)).to_rfc3339()),
         };
         tokio::fs::write(&path, serde_json::to_string(&entry).unwrap())
             .await
@@ -584,6 +598,172 @@ mod tests {
         assert!(result.is_none());
         // file should be gone
         assert!(!path.exists());
+    }
+
+    // Ported: "returns undefined for null cached value" — util/cache/package/impl/file.spec.ts line 65
+    #[tokio::test]
+    async fn file_cache_returns_none_for_null_value() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+        let path = cache.entry_path("_test-namespace", "null-key");
+        tokio::fs::create_dir_all(path.parent().unwrap())
+            .await
+            .unwrap();
+        let entry = FileEntry {
+            value: Value::Null,
+            expiry: Some((Utc::now() + Duration::minutes(5)).to_rfc3339()),
+        };
+        tokio::fs::write(&path, serde_json::to_string(&entry).unwrap())
+            .await
+            .unwrap();
+
+        let result: Option<String> = cache.get("_test-namespace", "null-key").await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns undefined for missing expiry" — util/cache/package/impl/file.spec.ts line 93
+    #[tokio::test]
+    async fn file_cache_returns_none_for_missing_expiry() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+        let path = cache.entry_path("_test-namespace", "no-expiry-key");
+        tokio::fs::create_dir_all(path.parent().unwrap())
+            .await
+            .unwrap();
+        // Write JSON without expiry field
+        tokio::fs::write(&path, r#"{"value":1234}"#).await.unwrap();
+
+        let result: Option<i32> = cache.get("_test-namespace", "no-expiry-key").await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns undefined for invalid expiry" — util/cache/package/impl/file.spec.ts line 102
+    #[tokio::test]
+    async fn file_cache_returns_none_for_invalid_expiry() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+        let path = cache.entry_path("_test-namespace", "bad-expiry-key");
+        tokio::fs::create_dir_all(path.parent().unwrap())
+            .await
+            .unwrap();
+        let entry = FileEntry {
+            value: Value::Number(1234.into()),
+            expiry: Some("not-a-date".to_owned()),
+        };
+        tokio::fs::write(&path, serde_json::to_string(&entry).unwrap())
+            .await
+            .unwrap();
+
+        let result: Option<i32> = cache.get("_test-namespace", "bad-expiry-key").await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "removes expired and invalid entries" — util/cache/package/impl/file.spec.ts line 127
+    #[tokio::test]
+    async fn file_cache_cleanup_removes_expired_and_invalid() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+
+        // Valid non-expired entry
+        cache
+            .set("_test-namespace", "valid", Value::String("ok".into()), 60)
+            .await;
+
+        // Expired entry
+        let expired_path = cache.entry_path("_test-namespace", "expired");
+        tokio::fs::create_dir_all(expired_path.parent().unwrap())
+            .await
+            .unwrap();
+        let expired_entry = FileEntry {
+            value: Value::String("stale".into()),
+            expiry: Some((Utc::now() - Duration::minutes(1)).to_rfc3339()),
+        };
+        tokio::fs::write(&expired_path, serde_json::to_string(&expired_entry).unwrap())
+            .await
+            .unwrap();
+
+        // Invalid JSON entry
+        let bad_path = cache.entry_path("_test-namespace", "bad-json");
+        tokio::fs::create_dir_all(bad_path.parent().unwrap())
+            .await
+            .unwrap();
+        tokio::fs::write(&bad_path, "not json").await.unwrap();
+
+        cache.cleanup().await;
+
+        // Valid entry should remain
+        let valid: Option<String> = cache.get("_test-namespace", "valid").await;
+        assert_eq!(valid, Some("ok".to_owned()));
+
+        // Expired and invalid should be gone
+        assert!(!expired_path.exists());
+        assert!(!bad_path.exists());
+    }
+
+    // Ported: "removes entries with invalid expiry" — util/cache/package/impl/file.spec.ts line 158
+    #[tokio::test]
+    async fn file_cache_cleanup_removes_invalid_expiry() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+
+        let bad_path = cache.entry_path("_test-namespace", "bad-expiry");
+        tokio::fs::create_dir_all(bad_path.parent().unwrap())
+            .await
+            .unwrap();
+        let entry = FileEntry {
+            value: Value::String("value".into()),
+            expiry: Some("invalid-date".to_owned()),
+        };
+        tokio::fs::write(&bad_path, serde_json::to_string(&entry).unwrap())
+            .await
+            .unwrap();
+
+        cache.cleanup().await;
+
+        assert!(!bad_path.exists());
+    }
+
+    // Ported: "keeps entries without expiry field" — util/cache/package/impl/file.spec.ts line 140
+    #[tokio::test]
+    async fn file_cache_cleanup_keeps_entries_without_expiry() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+
+        let path = cache.entry_path("_test-namespace", "no-expiry");
+        tokio::fs::create_dir_all(path.parent().unwrap())
+            .await
+            .unwrap();
+        // Write entry without expiry field
+        tokio::fs::write(&path, r#"{"value":1234}"#).await.unwrap();
+
+        cache.cleanup().await;
+
+        assert!(path.exists());
+    }
+
+    // Ported: "continues on cleanup errors" — util/cache/package/impl/file.spec.ts line 171
+    #[tokio::test]
+    async fn file_cache_cleanup_continues_on_errors() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+
+        // Valid entry
+        cache
+            .set("_test-namespace", "valid", Value::String("ok".into()), 60)
+            .await;
+
+        // Create a non-file entry (directory) that will cause an error during read
+        let ns_dir = cache.cache_dir.join("renovate").join("cache-v1").join("_test-namespace");
+        tokio::fs::create_dir_all(&ns_dir).await.unwrap();
+        let bad_path = ns_dir.join("not-a-file");
+        tokio::fs::create_dir(&bad_path).await.unwrap();
+
+        // Should not panic
+        cache.cleanup().await;
+
+        // Valid entry should still be there
+        let valid: Option<String> = cache.get("_test-namespace", "valid").await;
+        assert_eq!(valid, Some("ok".to_owned()));
     }
 
     // ── PackageCache ──────────────────────────────────────────────────────

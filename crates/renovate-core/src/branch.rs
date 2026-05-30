@@ -961,16 +961,115 @@ pub fn get_changelogs(has_release_notes: bool) -> String {
     String::new()
 }
 
+/// Data needed to render one row in the PR updates table.
+#[derive(Debug, Clone)]
+pub struct PrTableDep {
+    pub dep_name: String,
+    pub new_name: Option<String>,
+    pub dep_type: Option<String>,
+    pub update_type: Option<String>,
+    pub current_value: Option<String>,
+    pub new_value: Option<String>,
+}
+
 /// Return the updates table string, or empty if no columns are configured.
 ///
-/// Mirrors the early-return path of `getPrUpdatesTable` from
+/// Mirrors `getPrUpdatesTable` from
 /// `lib/workers/repository/update/pr/body/updates-table.ts`.
-pub fn get_pr_updates_table(pr_body_columns: Option<&[String]>) -> String {
-    if pr_body_columns.is_none() {
+///
+/// This is a partial implementation: it handles the default columns
+/// (`Package`, `Type`, `Update`, `Change`, `Pending`) with simple Rust
+/// string formatting. Custom `prBodyDefinitions` via Handlebars templates
+/// are not yet supported.
+pub fn get_pr_updates_table(
+    pr_body_columns: Option<&[String]>,
+    deps: &[PrTableDep],
+) -> String {
+    let columns = match pr_body_columns {
+        Some(c) => c,
+        None => return String::new(),
+    };
+    if deps.is_empty() || columns.is_empty() {
         return String::new();
     }
-    // Full implementation requires Handlebars template engine.
-    String::new()
+
+    // Build rows.
+    let mut rows: Vec<std::collections::HashMap<&str, String>> = Vec::new();
+    for dep in deps {
+        let mut row = std::collections::HashMap::new();
+        for col in columns {
+            let val = match col.as_str() {
+                "Package" => {
+                    let mut s = dep.dep_name.clone();
+                    if let Some(ref new_name) = dep.new_name {
+                        if new_name != &dep.dep_name {
+                            s.push_str(" → ");
+                            s.push_str(new_name);
+                        }
+                    }
+                    s
+                }
+                "Type" => dep.dep_type.clone().unwrap_or_default(),
+                "Update" => dep.update_type.clone().unwrap_or_default(),
+                "Change" => {
+                    let from = dep.current_value.as_deref().unwrap_or("");
+                    let to = dep.new_value.as_deref().unwrap_or("");
+                    if from.is_empty() && to.is_empty() {
+                        String::new()
+                    } else {
+                        format!("`{from}` → `{to}`")
+                    }
+                }
+                "Pending" => String::new(),
+                _ => String::new(),
+            };
+            row.insert(col.as_str(), val);
+        }
+        rows.push(row);
+    }
+
+    // Determine non-empty columns.
+    let non_empty: Vec<&String> = columns
+        .iter()
+        .filter(|col| rows.iter().any(|row| row.get(col.as_str()).map(|s| !s.is_empty()).unwrap_or(false)))
+        .collect();
+
+    if non_empty.is_empty() {
+        return String::new();
+    }
+
+    let mut out = String::from("\n\nThis PR contains the following updates:\n\n");
+    // Header row
+    out.push('|');
+    for col in &non_empty {
+        out.push(' ');
+        out.push_str(col);
+        out.push(' ');
+        out.push('|');
+    }
+    out.push('\n');
+    // Separator
+    out.push('|');
+    for _ in &non_empty {
+        out.push_str("---|");
+    }
+    out.push('\n');
+    // Data rows
+    for row in &rows {
+        out.push('|');
+        for col in &non_empty {
+            let content = row.get(col.as_str()).map(|s| s.as_str()).unwrap_or("");
+            // Escape pipe characters in content
+            let escaped = content.replace('|', "\\|");
+            out.push(' ');
+            out.push_str(&escaped);
+            out.push(' ');
+            out.push('|');
+        }
+        out.push('\n');
+    }
+    out.push('\n');
+    out
 }
 
 /// Return extra PR notes for special upgrade scenarios.
@@ -2346,7 +2445,28 @@ mod tests {
     // Ported: "checks a case where prBodyColumns are undefined" — workers/repository/update/pr/body/updates-table.spec.ts line 6
     #[test]
     fn get_pr_updates_table_returns_empty_without_columns() {
-        assert_eq!(get_pr_updates_table(None), "");
+        assert_eq!(get_pr_updates_table(None, &[]), "");
+    }
+
+    #[test]
+    fn get_pr_updates_table_builds_default_columns() {
+        let deps = vec![PrTableDep {
+            dep_name: "lodash".to_owned(),
+            new_name: None,
+            dep_type: Some("dependencies".to_owned()),
+            update_type: Some("major".to_owned()),
+            current_value: Some("^3.0.0".to_owned()),
+            new_value: Some("^4.0.0".to_owned()),
+        }];
+        let columns = vec![
+            "Package".to_owned(),
+            "Type".to_owned(),
+            "Update".to_owned(),
+            "Change".to_owned(),
+        ];
+        let table = get_pr_updates_table(Some(&columns), &deps);
+        assert!(table.contains("| Package | Type | Update | Change |"), "header row missing: {table}");
+        assert!(table.contains("| lodash | dependencies | major | `^3.0.0` → `^4.0.0` |"), "data row missing: {table}");
     }
 
     // Ported: "handles extra notes" — workers/repository/update/pr/body/notes.spec.ts line 44
