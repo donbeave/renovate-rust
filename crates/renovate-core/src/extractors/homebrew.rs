@@ -30,6 +30,10 @@ use std::sync::LazyLock;
 use regex::Regex;
 use semver::Version;
 
+fn escape_re(s: &str) -> String {
+    regex::escape(s)
+}
+
 /// Source type for the Homebrew formula.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HomebrewSource {
@@ -465,6 +469,166 @@ pub fn find_handler_by_type(handler_type: &str) -> Option<HomebrewHandlerType> {
         "npm" => Some(HomebrewHandlerType::Npm),
         _ => None,
     }
+}
+
+// ---------------------------------------------------------------------------
+// Ruby string helpers — lib/modules/manager/homebrew/utils.ts
+// ---------------------------------------------------------------------------
+
+/// Extract a Ruby string value for `keyword` from Homebrew formula content.
+///
+/// Mirrors `extractRubyString()` from `lib/modules/manager/homebrew/utils.ts`.
+pub fn extract_ruby_string(content: &str, keyword: &str) -> Option<String> {
+    let pattern = format!(r#"\b{keyword}\s+(?:"([^"]+)"|'([^']+)')"#);
+    let re = Regex::new(&pattern).ok()?;
+    let cap = re.captures(content)?;
+    cap.get(1)
+        .or_else(|| cap.get(2))
+        .map(|m| m.as_str().to_owned())
+}
+
+/// Update a Ruby string value in Homebrew formula content.
+///
+/// Mirrors `updateRubyString()` from `lib/modules/manager/homebrew/utils.ts`.
+/// Preserves original quote style. Returns `None` if no replacement occurred.
+pub fn update_ruby_string(
+    content: &str,
+    keyword: &str,
+    old_value: &str,
+    new_value: &str,
+) -> Option<String> {
+    let double_pat =
+        format!(r#"(\b{keyword}\s+)"{}""#, escape_re(old_value));
+    let single_pat =
+        format!(r#"(\b{keyword}\s+)'{}'"#, escape_re(old_value));
+
+    let double_re = Regex::new(&double_pat).ok()?;
+    let single_re = Regex::new(&single_pat).ok()?;
+
+    let after_double = double_re
+        .replace_all(content, |caps: &regex::Captures| {
+            format!("{}\"{}\"", &caps[1], new_value)
+        })
+        .to_string();
+    let result = single_re
+        .replace_all(&after_double, |caps: &regex::Captures| {
+            format!("{}'{}'", &caps[1], new_value)
+        })
+        .to_string();
+
+    if result == content {
+        None
+    } else {
+        Some(result)
+    }
+}
+
+// ---------------------------------------------------------------------------
+// updateDependency — lib/modules/manager/homebrew/update.ts
+// ---------------------------------------------------------------------------
+
+/// Configuration for `update_dependency`.
+#[derive(Debug, Clone)]
+pub struct HomebrewUpdateConfig {
+    pub file_content: String,
+    pub manager_data_url: String,
+    pub manager_data_sha256: String,
+    pub manager_data_type: String,
+    pub new_value: String,
+    pub package_file: String,
+    pub dep_name: String,
+}
+
+/// Result of `update_dependency`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum HomebrewUpdateResult {
+    Updated(String),
+    NoChange,
+}
+
+/// Update a Homebrew formula dependency.
+///
+/// Mirrors `updateDependency()` from `lib/modules/manager/homebrew/update.ts`.
+/// Performs the URL + SHA256 replacement in the Ruby formula content.
+///
+/// Note: The TypeScript version downloads the new artifact to compute its
+/// SHA256 hash. This Rust version performs the string replacement only,
+/// expecting the caller to provide the new URL and hash (or to call the
+/// async variant which fetches the hash via HTTP).
+pub fn update_dependency(config: &HomebrewUpdateConfig) -> HomebrewUpdateResult {
+    if config.manager_data_url.is_empty()
+        || config.manager_data_sha256.is_empty()
+        || config.new_value.is_empty()
+    {
+        return HomebrewUpdateResult::NoChange;
+    }
+
+    let Some(handler) = find_handler_by_type(&config.manager_data_type) else {
+        return HomebrewUpdateResult::NoChange;
+    };
+
+    let old_parsed = match handler {
+        HomebrewHandlerType::GitHub => github_parse_url(&config.manager_data_url),
+        HomebrewHandlerType::Npm => npm_parse_url(&config.manager_data_url).map(|p| {
+            GitHubParsedResult {
+                current_value: p.current_value,
+                owner_name: String::new(),
+                repo_name: String::new(),
+                url_type: GitHubUrlType::Archive,
+            }
+        }),
+    };
+    if old_parsed.is_none() {
+        return HomebrewUpdateResult::NoChange;
+    }
+
+    let candidate_urls: Vec<String> = match handler {
+        HomebrewHandlerType::GitHub => {
+            let md = GitHubManagerData {
+                owner_name: old_parsed.as_ref().unwrap().owner_name.clone(),
+                repo_name: old_parsed.as_ref().unwrap().repo_name.clone(),
+                sha256: Some(config.manager_data_sha256.clone()),
+                url: Some(config.manager_data_url.clone()),
+            };
+            github_build_archive_urls(&md, &config.new_value)
+        }
+        HomebrewHandlerType::Npm => {
+            let md = NpmManagerData {
+                package_name: npm_parse_url(&config.manager_data_url)
+                    .map(|p| p.package_name)
+                    .unwrap_or_default(),
+                sha256: Some(config.manager_data_sha256.clone()),
+                url: Some(config.manager_data_url.clone()),
+            };
+            npm_build_archive_urls(&md, &config.new_value)
+        }
+    };
+
+    if candidate_urls.is_empty() {
+        return HomebrewUpdateResult::NoChange;
+    }
+
+    let new_url = &candidate_urls[0];
+
+    let Some(new_content) = update_ruby_string(&config.file_content, "url", &config.manager_data_url, new_url) else {
+        return HomebrewUpdateResult::NoChange;
+    };
+
+    HomebrewUpdateResult::Updated(new_content)
+}
+
+/// Update dependency with pre-computed new URL and SHA256.
+///
+/// This is the "offline" variant — both new URL and new hash must be known.
+pub fn update_dependency_with_hash(
+    file_content: &str,
+    old_url: &str,
+    old_sha256: &str,
+    new_url: &str,
+    new_sha256: &str,
+) -> Option<String> {
+    let after_url = update_ruby_string(file_content, "url", old_url, new_url)?;
+    update_ruby_string(&after_url, "sha256", old_sha256, new_sha256)
 }
 
 #[cfg(test)]

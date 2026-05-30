@@ -83,7 +83,7 @@ pub fn manager_categories(manager_name: &str) -> &'static [&'static str] {
         // Go
         "gomod" => &["golang"],
         // Rust
-        "cargo" => &["rust"],
+        "cargo" | "rust-toolchain" => &["rust"],
         // Ruby
         "bundler" | "gemspec" | "ruby-version" => &["ruby"],
         // PHP
@@ -789,6 +789,14 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         // Stub registration so the manager name is valid in config references.
         name: "custom",
         patterns: &[],
+    },
+    ManagerDef {
+        name: "rust-toolchain",
+        patterns: &[r"(^|/)rust-toolchain(\.toml)?$"],
+    },
+    ManagerDef {
+        name: "deno",
+        patterns: &[r"(^|/)deno\.json[c]?$", r"(^|/)deno\.lock$"],
     },
 ];
 

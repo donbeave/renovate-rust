@@ -1,7 +1,11 @@
-//! Deno manager — dependency update and extraction.
+//! Deno manager — dependency update, extraction, and post-processing.
 //!
 //! Renovate reference:
 //! - `lib/modules/manager/deno/update.ts` — `updateDependency`
+//! - `lib/modules/manager/deno/post.ts` — `postExtract`, `getDenoLock`, etc.
+//! - `lib/modules/manager/deno/types.ts` — type definitions
+
+use std::collections::{HashMap, HashSet};
 
 use crate::extractors::npm::{NpmUpdateUpgrade, npm_update_dependency};
 
@@ -242,6 +246,233 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
     }
 
     result
+}
+
+// ---------------------------------------------------------------------------
+// Post-processing types — lib/modules/manager/deno/types.ts
+// ---------------------------------------------------------------------------
+
+/// Lock file data for Deno.
+#[derive(Debug, Clone, Default)]
+pub struct DenoLockFile {
+    pub locked_versions: HashMap<String, String>,
+    pub lockfile_version: Option<u64>,
+    pub redirect_versions: HashMap<String, String>,
+    pub remote_versions: HashSet<String>,
+}
+
+/// Manager data for Deno dependencies.
+#[derive(Debug, Clone, Default)]
+pub struct DenoManagerDataPost {
+    pub package_name: Option<String>,
+    pub workspaces: Option<Vec<String>>,
+    pub import_map_referrer: Option<String>,
+}
+
+/// A Deno dependency for post-processing.
+#[derive(Debug, Clone)]
+pub struct DenoDepPost {
+    pub datasource: Option<String>,
+    pub dep_name: Option<String>,
+    pub current_value: Option<String>,
+    pub current_raw_value: Option<String>,
+    pub locked_version: Option<String>,
+}
+
+/// A Deno package file for post-processing.
+#[derive(Debug, Clone)]
+pub struct DenoPackageFilePost {
+    pub package_file: String,
+    pub deps: Vec<DenoDepPost>,
+    pub lock_files: Vec<String>,
+    pub manager_data: DenoManagerDataPost,
+}
+
+// ---------------------------------------------------------------------------
+// Lock file parsing — lib/modules/manager/deno/post.ts getDenoLock
+// ---------------------------------------------------------------------------
+
+static DENO_LAND_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+    regex::Regex::new(r"https://deno\.land/(?P<type>std|x/(?P<mod>[^@]+))@(?P<currentValue>[^/]+)")
+        .unwrap()
+});
+
+static DEP_VALUE_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+    regex::Regex::new(r"^(?P<datasource>jsr|npm):(?P<depName>[^@]+)@(?P<currentValue>.+)$").unwrap()
+});
+
+/// Parse a Deno lock file from JSON content.
+pub fn parse_deno_lock(content: &str) -> Option<DenoLockFile> {
+    let parsed: serde_json::Value = serde_json::from_str(content).ok()?;
+
+    let version = parsed.get("version").and_then(|v| v.as_u64()).unwrap_or(0);
+    if version < 5 {
+        return None;
+    }
+
+    let mut lock = DenoLockFile {
+        lockfile_version: Some(version),
+        ..Default::default()
+    };
+
+    if let Some(packages) = parsed.get("packages").and_then(|p| p.as_object()) {
+        for (key, value) in packages {
+            if let Some(caps) = DEP_VALUE_RE.captures(key) {
+                let version = caps["currentValue"].to_owned();
+                lock.locked_versions.insert(key.clone(), version);
+            } else if let Some(v) = value.as_str() {
+                lock.locked_versions.insert(key.clone(), v.to_owned());
+            }
+        }
+    }
+
+    if let Some(remote) = parsed.get("remote").and_then(|r| r.as_object()) {
+        for url in remote.keys() {
+            lock.remote_versions.insert(url.clone());
+        }
+    }
+
+    if let Some(redirects) = parsed.get("redirects").and_then(|r| r.as_object()) {
+        for (from, to) in redirects {
+            if let Some(to_str) = to.as_str() {
+                lock.redirect_versions.insert(from.clone(), to_str.to_owned());
+            }
+        }
+    }
+
+    Some(lock)
+}
+
+/// Get the locked version for a Deno dependency from the lock file.
+pub fn get_locked_version(dep: &DenoDepPost, lock: &DenoLockFile) -> Option<String> {
+    let datasource = dep.datasource.as_deref()?;
+    let dep_name = dep.dep_name.as_deref()?;
+
+    if datasource == "deno" {
+        if let Some(raw) = dep.current_raw_value.as_deref() {
+            if lock.remote_versions.contains(raw) {
+                if let Some(caps) = DENO_LAND_RE.captures(raw) {
+                    return Some(caps["currentValue"].to_owned());
+                }
+            }
+        }
+
+        if let Some(cv) = dep.current_value.as_deref() {
+            let key = format!("{dep_name}@{cv}");
+            if let Some(redirect) = lock.redirect_versions.get(&key) {
+                if let Some(caps) = DENO_LAND_RE.captures(redirect) {
+                    return Some(caps["currentValue"].to_owned());
+                }
+            }
+            if let Some(redirect) = lock.redirect_versions.get(dep_name) {
+                if let Some(caps) = DENO_LAND_RE.captures(redirect) {
+                    return Some(caps["currentValue"].to_owned());
+                }
+            }
+        }
+
+        return None;
+    }
+
+    if datasource == "jsr" || datasource == "npm" {
+        if let Some(raw) = dep.current_raw_value.as_deref() {
+            if let Some(v) = lock.locked_versions.get(raw) {
+                return Some(v.clone());
+            }
+            let star_key = format!("{raw}@*");
+            if let Some(v) = lock.locked_versions.get(&star_key) {
+                return Some(v.clone());
+            }
+        }
+
+        if dep.current_value.is_some() {
+            for (key, value) in &lock.locked_versions {
+                if let Some(caps) = DEP_VALUE_RE.captures(key) {
+                    if &caps["depName"] == dep_name
+                        && &caps["datasource"] == datasource
+                    {
+                        return Some(value.clone());
+                    }
+                }
+            }
+        }
+    }
+
+    None
+}
+
+/// Normalize workspace package files — distribute lock files to members.
+pub fn normalize_workspace(package_files: &mut [DenoPackageFilePost]) {
+    let workspace_roots: Vec<(String, Vec<String>, Vec<String>)> = package_files
+        .iter()
+        .filter_map(|pkg| {
+            let workspaces = pkg.manager_data.workspaces.as_ref()?;
+            if workspaces.is_empty() {
+                return None;
+            }
+            let root_dir = pkg
+                .package_file
+                .rsplit_once('/')
+                .map(|(dir, _)| dir.to_owned())
+                .unwrap_or_else(|| ".".to_owned());
+            Some((root_dir, workspaces.clone(), pkg.lock_files.clone()))
+        })
+        .collect();
+
+    let root_files: HashSet<String> = workspace_roots
+        .iter()
+        .filter_map(|(_, _, lock_files)| lock_files.first().cloned())
+        .collect();
+
+    for pkg in package_files.iter_mut() {
+        if root_files.contains(&pkg.package_file) {
+            continue;
+        }
+        if !pkg.lock_files.is_empty() {
+            continue;
+        }
+
+        for (root_dir, _patterns, lock_files) in &workspace_roots {
+            if root_dir == "." || pkg.package_file.starts_with(root_dir.as_str()) {
+                pkg.lock_files = lock_files.clone();
+                break;
+            }
+        }
+    }
+}
+
+/// Apply locked versions from lock files to dependencies.
+pub fn apply_locked_versions(
+    package_files: &mut [DenoPackageFilePost],
+    lock_cache: &mut HashMap<String, DenoLockFile>,
+    lock_content_provider: &dyn Fn(&str) -> Option<String>,
+) {
+    for pkg in package_files.iter_mut() {
+        if pkg.lock_files.is_empty() {
+            continue;
+        }
+        let lock_path = &pkg.lock_files[0];
+
+        let lock = if let Some(existing) = lock_cache.get(lock_path) {
+            Some(existing.clone())
+        } else {
+            let content = lock_content_provider(lock_path);
+            let lock = content.and_then(|c| parse_deno_lock(&c));
+            if let Some(ref l) = lock {
+                lock_cache.insert(lock_path.clone(), l.clone());
+            }
+            lock
+        };
+
+        let Some(lock) = lock else { continue };
+
+        for dep in pkg.deps.iter_mut() {
+            if dep.locked_version.is_some() {
+                continue;
+            }
+            dep.locked_version = get_locked_version(dep, &lock);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -524,6 +755,131 @@ mod tests {
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
         assert_eq!(parsed["imports"]["dep1"].as_str().unwrap(), "npm:dep1@1.1.0");
         assert_eq!(parsed["imports"]["dep2"].as_str().unwrap(), "npm:dep2@1.0.0");
+    }
+
+    // --- post-processing tests ---
+
+    #[test]
+    fn parse_deno_lock_valid() {
+        let content = r#"{"version":5,"packages":{"jsr:@scope/dep1@1.0.0":"hash1","npm:express@4.18.2":"hash2"}}"#;
+        let lock = parse_deno_lock(content).unwrap();
+        assert_eq!(lock.lockfile_version, Some(5));
+        assert!(!lock.locked_versions.is_empty());
+    }
+
+    #[test]
+    fn parse_deno_lock_old_version_rejected() {
+        let content = r#"{"version":3}"#;
+        assert!(parse_deno_lock(content).is_none());
+    }
+
+    #[test]
+    fn parse_deno_lock_invalid_json_rejected() {
+        assert!(parse_deno_lock("not json").is_none());
+    }
+
+    #[test]
+    fn parse_deno_lock_no_version_rejected() {
+        assert!(parse_deno_lock(r#"{"packages":{}}"#).is_none());
+    }
+
+    #[test]
+    fn parse_deno_lock_with_remote() {
+        let content = r#"{"version":5,"remote":{"https://deno.land/std@0.223.0/fs/mod.ts":"hash1"}}"#;
+        let lock = parse_deno_lock(content).unwrap();
+        assert!(lock.remote_versions.contains("https://deno.land/std@0.223.0/fs/mod.ts"));
+    }
+
+    #[test]
+    fn parse_deno_lock_with_redirects() {
+        let content = r#"{"version":5,"redirects":{"https://deno.land/std":"https://deno.land/std@0.224.0"}}"#;
+        let lock = parse_deno_lock(content).unwrap();
+        assert_eq!(
+            lock.redirect_versions.get("https://deno.land/std"),
+            Some(&"https://deno.land/std@0.224.0".to_owned())
+        );
+    }
+
+    #[test]
+    fn get_locked_version_npm() {
+        let lock = DenoLockFile {
+            locked_versions: {
+                let mut m = HashMap::new();
+                m.insert("npm:express@4.18.2".to_owned(), "hash1".to_owned());
+                m
+            },
+            ..Default::default()
+        };
+        let dep = DenoDepPost {
+            datasource: Some("npm".to_owned()),
+            dep_name: Some("express".to_owned()),
+            current_value: Some("4.18.2".to_owned()),
+            current_raw_value: Some("npm:express@4.18.2".to_owned()),
+            locked_version: None,
+        };
+        assert_eq!(get_locked_version(&dep, &lock), Some("hash1".to_owned()));
+    }
+
+    #[test]
+    fn get_locked_version_not_found() {
+        let lock = DenoLockFile::default();
+        let dep = DenoDepPost {
+            datasource: Some("npm".to_owned()),
+            dep_name: Some("express".to_owned()),
+            current_value: Some("4.18.2".to_owned()),
+            current_raw_value: None,
+            locked_version: None,
+        };
+        assert!(get_locked_version(&dep, &lock).is_none());
+    }
+
+    #[test]
+    fn normalize_workspace_distributes_lock_files() {
+        let mut pkgs = vec![
+            DenoPackageFilePost {
+                package_file: "deno.json".to_owned(),
+                deps: vec![],
+                lock_files: vec!["deno.lock".to_owned()],
+                manager_data: DenoManagerDataPost {
+                    workspaces: Some(vec!["packages/*".to_owned()]),
+                    ..Default::default()
+                },
+            },
+            DenoPackageFilePost {
+                package_file: "packages/pkg1/deno.json".to_owned(),
+                deps: vec![],
+                lock_files: vec![],
+                manager_data: DenoManagerDataPost::default(),
+            },
+        ];
+        normalize_workspace(&mut pkgs);
+        assert!(pkgs[1].lock_files.contains(&"deno.lock".to_owned()));
+    }
+
+    #[test]
+    fn apply_locked_versions_basic() {
+        let lock_content = r#"{"version":5,"packages":{"npm:express@4.18.2":"4.18.2"}}"#;
+        let mut pkgs = vec![DenoPackageFilePost {
+            package_file: "deno.json".to_owned(),
+            deps: vec![DenoDepPost {
+                datasource: Some("npm".to_owned()),
+                dep_name: Some("express".to_owned()),
+                current_value: Some("4.18.2".to_owned()),
+                current_raw_value: Some("npm:express@4.18.2".to_owned()),
+                locked_version: None,
+            }],
+            lock_files: vec!["deno.lock".to_owned()],
+            manager_data: DenoManagerDataPost::default(),
+        }];
+        let mut cache = HashMap::new();
+        apply_locked_versions(&mut pkgs, &mut cache, &|path| {
+            if path == "deno.lock" {
+                Some(lock_content.to_owned())
+            } else {
+                None
+            }
+        });
+        assert_eq!(pkgs[0].deps[0].locked_version, Some("4.18.2".to_owned()));
     }
 
 }

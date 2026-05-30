@@ -217,6 +217,121 @@ pub fn update_artifacts(dep_names: &[&str]) -> Vec<SubmoduleArtifact> {
         .collect()
 }
 
+// ---------------------------------------------------------------------------
+// updateDependency — lib/modules/manager/git-submodules/update.ts
+// ---------------------------------------------------------------------------
+
+/// Configuration for `update_dependency`.
+#[derive(Debug, Clone)]
+pub struct GitSubmoduleUpdateConfig {
+    pub dep_name: String,
+    pub current_value: Option<String>,
+    pub new_value: Option<String>,
+    pub new_digest: Option<String>,
+    pub package_file: Option<String>,
+}
+
+/// Result of a submodule update.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GitSubmoduleUpdateResult {
+    Unchanged,
+    Updated(String),
+    Failed,
+}
+
+/// Compute the expected `.gitmodules` content after a submodule update.
+///
+/// Mirrors `updateDependency()` from `lib/modules/manager/git-submodules/update.ts`.
+pub fn update_dependency(
+    file_content: &str,
+    config: &GitSubmoduleUpdateConfig,
+) -> GitSubmoduleUpdateResult {
+    let dep_name = &config.dep_name;
+    let new_value = config.new_value.as_deref();
+    let current_value = config.current_value.as_deref();
+
+    let Some(new_val) = new_value else {
+        return GitSubmoduleUpdateResult::Unchanged;
+    };
+    if let Some(current) = current_value {
+        if current == new_val {
+            return GitSubmoduleUpdateResult::Unchanged;
+        }
+    }
+
+    let mut result = String::new();
+    let mut in_target_section = false;
+    let mut branch_updated = false;
+
+    for line in file_content.lines() {
+        if let Some(cap) = SECTION_RE.captures(line.trim()) {
+            in_target_section = &cap[1] == dep_name.as_str();
+        }
+
+        if in_target_section && !branch_updated {
+            if let Some(cap) = KV_RE.captures(line) {
+                if cap[1].trim() == "branch" {
+                    let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
+                    result.push_str(&format!("{indent}branch = {new_val}\n"));
+                    branch_updated = true;
+                    continue;
+                }
+            }
+        }
+
+        result.push_str(line);
+        result.push('\n');
+    }
+
+    if !branch_updated {
+        let mut final_result = String::new();
+        let mut in_target = false;
+        let mut added = false;
+
+        for line in file_content.lines() {
+            if let Some(cap) = SECTION_RE.captures(line.trim()) {
+                in_target = &cap[1] == dep_name.as_str();
+            }
+
+            final_result.push_str(line);
+            final_result.push('\n');
+
+            if in_target && !added {
+                if let Some(cap) = KV_RE.captures(line) {
+                    if cap[1].trim() == "url" {
+                        let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
+                        final_result.push_str(&format!("{indent}branch = {new_val}\n"));
+                        added = true;
+                    }
+                }
+            }
+        }
+
+        if added {
+            let trimmed = if file_content.ends_with('\n') {
+                final_result
+            } else {
+                final_result.trim_end_matches('\n').to_owned()
+            };
+            return GitSubmoduleUpdateResult::Updated(trimmed);
+        }
+
+        return GitSubmoduleUpdateResult::Failed;
+    }
+
+    let trimmed = if file_content.ends_with('\n') {
+        result
+    } else {
+        result.trim_end_matches('\n').to_owned()
+    };
+
+    if trimmed == file_content {
+        GitSubmoduleUpdateResult::Unchanged
+    } else {
+        GitSubmoduleUpdateResult::Updated(trimmed)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -430,5 +545,72 @@ mod tests {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].url, "https://github.com/PowerShell/PowerShell-Docs");
         assert_eq!(deps[0].branch.as_deref(), Some("staging"));
+    }
+
+    // --- updateDependency tests ---
+
+    #[test]
+    fn git_submodule_update_branch_value() {
+        let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n\tbranch = v0.0.1\n";
+        let config = GitSubmoduleUpdateConfig {
+            dep_name: "renovate".to_owned(),
+            current_value: Some("v0.0.1".to_owned()),
+            new_value: Some("v0.0.2".to_owned()),
+            new_digest: Some("abc123".to_owned()),
+            package_file: Some(".gitmodules".to_owned()),
+        };
+        let result = update_dependency(content, &config);
+        match result {
+            GitSubmoduleUpdateResult::Updated(new_content) => {
+                assert!(new_content.contains("branch = v0.0.2"));
+                assert!(!new_content.contains("branch = v0.0.1"));
+            }
+            _ => panic!("expected Updated"),
+        }
+    }
+
+    #[test]
+    fn git_submodule_update_same_value_unchanged() {
+        let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n\tbranch = v0.0.1\n";
+        let config = GitSubmoduleUpdateConfig {
+            dep_name: "renovate".to_owned(),
+            current_value: Some("v0.0.1".to_owned()),
+            new_value: Some("v0.0.1".to_owned()),
+            new_digest: None,
+            package_file: None,
+        };
+        assert_eq!(update_dependency(content, &config), GitSubmoduleUpdateResult::Unchanged);
+    }
+
+    #[test]
+    fn git_submodule_update_no_new_value_unchanged() {
+        let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n";
+        let config = GitSubmoduleUpdateConfig {
+            dep_name: "renovate".to_owned(),
+            current_value: None,
+            new_value: None,
+            new_digest: None,
+            package_file: None,
+        };
+        assert_eq!(update_dependency(content, &config), GitSubmoduleUpdateResult::Unchanged);
+    }
+
+    #[test]
+    fn git_submodule_update_adds_branch_when_missing() {
+        let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n";
+        let config = GitSubmoduleUpdateConfig {
+            dep_name: "renovate".to_owned(),
+            current_value: None,
+            new_value: Some("main".to_owned()),
+            new_digest: Some("abc".to_owned()),
+            package_file: Some(".gitmodules".to_owned()),
+        };
+        let result = update_dependency(content, &config);
+        match result {
+            GitSubmoduleUpdateResult::Updated(new_content) => {
+                assert!(new_content.contains("branch = main"));
+            }
+            _ => panic!("expected Updated"),
+        }
     }
 }
