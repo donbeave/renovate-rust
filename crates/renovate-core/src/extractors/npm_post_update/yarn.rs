@@ -1,0 +1,306 @@
+//! Yarn lock file generation.
+//!
+//! Ports `lib/modules/manager/npm/post-update/yarn.ts`.
+
+use super::{PackageJson, Upgrade};
+
+#[derive(Debug, Clone, Default)]
+pub struct YarnLockFileConfig {
+    pub lock_file_dir: String,
+    pub npmrc: Option<String>,
+    pub constraints: std::collections::BTreeMap<String, String>,
+    pub post_update_options: Vec<String>,
+    pub env: std::collections::BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct YarnLockFileResult {
+    pub lock_file_name: String,
+    pub content: Option<String>,
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum YarnMajorVersion {
+    V1,
+    V2Plus,
+}
+
+pub fn detect_yarn_version(yarn_constraint: Option<&str>) -> YarnMajorVersion {
+    if let Some(constraint) = yarn_constraint {
+        if let Some(major_str) = constraint.split('.').next() {
+            if let Ok(major) = major_str.parse::<u32>() {
+                if major >= 2 {
+                    return YarnMajorVersion::V2Plus;
+                }
+            }
+        }
+        if constraint.starts_with(">=2") || constraint.starts_with("^2") || constraint.starts_with("^3") || constraint.starts_with("^4") {
+            return YarnMajorVersion::V2Plus;
+        }
+    }
+    YarnMajorVersion::V1
+}
+
+pub fn check_yarnrc(yarnrc_content: &str) -> YarnRcInfo {
+    let mut info = YarnRcInfo::default();
+    for line in yarnrc_content.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        if let Some((key, value)) = trimmed.split_once(' ') {
+            match key {
+                "--install.offline-mirror" | "install.offline-mirror" => {
+                    info.offline_mirror = Some(value.trim().to_string());
+                }
+                "--yarn-path" | "yarn-path" => {
+                    info.yarn_path = Some(value.trim().to_string());
+                }
+                _ => {}
+            }
+        }
+    }
+    info
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct YarnRcInfo {
+    pub offline_mirror: Option<String>,
+    pub yarn_path: Option<String>,
+}
+
+pub fn is_yarn_update(upgrade: &Upgrade) -> bool {
+    upgrade.dep_name == "yarn"
+}
+
+pub fn get_yarn_constraint_from_package_json(pj: &PackageJson) -> Option<String> {
+    pj.get_package_manager_version("yarn")
+}
+
+pub fn get_yarn_constraint_from_upgrades(upgrades: &[Upgrade]) -> Option<String> {
+    upgrades
+        .iter()
+        .find(|u| u.dep_name == "yarn")
+        .and_then(|u| u.new_value.as_deref())
+        .map(|v| v.to_string())
+}
+
+pub fn build_yarn_install_cmd(
+    version: YarnMajorVersion,
+    lock_file_only: bool,
+    ignore_scripts: bool,
+    mode_flag: bool,
+) -> Vec<String> {
+    let mut cmd = vec!["yarn".to_string()];
+    match version {
+        YarnMajorVersion::V1 => {
+            cmd.push("install".to_string());
+            if lock_file_only {
+                cmd.push("--frozen-lockfile".to_string());
+            }
+            if ignore_scripts {
+                cmd.push("--ignore-scripts".to_string());
+            }
+        }
+        YarnMajorVersion::V2Plus => {
+            cmd.push("install".to_string());
+            if mode_flag && lock_file_only {
+                cmd.push("--mode".to_string());
+                cmd.push("update-lockfile".to_string());
+            }
+            if ignore_scripts {
+                cmd.push("--immutable".to_string());
+            }
+        }
+    }
+    cmd
+}
+
+pub fn build_yarn_upgrade_cmd(version: YarnMajorVersion, dep_name: &str) -> Vec<String> {
+    match version {
+        YarnMajorVersion::V1 => {
+            vec!["yarn".to_string(), "upgrade".to_string(), dep_name.to_string()]
+        }
+        YarnMajorVersion::V2Plus => {
+            vec!["yarn".to_string(), "up".to_string(), "-R".to_string(), dep_name.to_string()]
+        }
+    }
+}
+
+pub fn fuzzy_match_additional_yarnrc_yml(
+    additional: &str,
+    existing: &str,
+) -> String {
+    let mut result = additional.to_string();
+
+    let add_registries: std::collections::BTreeMap<String, serde_json::Value> =
+        serde_yaml::from_str(additional).unwrap_or_default();
+
+    let existing_registries: std::collections::BTreeMap<String, serde_json::Value> =
+        serde_yaml::from_str(existing).unwrap_or_default();
+
+    for key in add_registries.keys() {
+        let normalized = key.trim_end_matches('/');
+        for existing_key in existing_registries.keys() {
+            let existing_normalized = existing_key.trim_end_matches('/');
+            if normalized == existing_normalized
+                || normalize_registry_url(key) == normalize_registry_url(existing_key)
+            {
+                result = result.replace(key, existing_key);
+            }
+        }
+    }
+
+    result
+}
+
+fn normalize_registry_url(url: &str) -> String {
+    let mut normalized = url.trim_end_matches('/').to_string();
+    if !normalized.starts_with("http://") && !normalized.starts_with("https://") {
+        if normalized.contains("://") {
+            if let Some(rest) = normalized.split_once("://").map(|(_, r)| r) {
+                normalized = format!("https://{}", rest);
+            }
+        }
+    }
+    normalized
+}
+
+pub fn get_optimize_command() -> Vec<String> {
+    vec![
+        "sed".to_string(),
+        "-i".to_string(),
+        "s/stepTimer(&timer)/stepTimer(&timer); if (timer.skip === true) return/g".to_string(),
+        "yarn.js".to_string(),
+    ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn detect_yarn_version_v1() {
+        assert_eq!(detect_yarn_version(Some("1.22.19")), YarnMajorVersion::V1);
+    }
+
+    #[test]
+    fn detect_yarn_version_v2() {
+        assert_eq!(detect_yarn_version(Some("2.4.3")), YarnMajorVersion::V2Plus);
+    }
+
+    #[test]
+    fn detect_yarn_version_v4() {
+        assert_eq!(detect_yarn_version(Some("4.1.0")), YarnMajorVersion::V2Plus);
+    }
+
+    #[test]
+    fn detect_yarn_version_none() {
+        assert_eq!(detect_yarn_version(None), YarnMajorVersion::V1);
+    }
+
+    #[test]
+    fn detect_yarn_version_caret4() {
+        assert_eq!(detect_yarn_version(Some("^4.0.0")), YarnMajorVersion::V2Plus);
+    }
+
+    #[test]
+    fn check_yarnrc_offline_mirror() {
+        let content = "--install.offline-mirror true\n";
+        let info = check_yarnrc(content);
+        assert_eq!(info.offline_mirror.as_deref(), Some("true"));
+    }
+
+    #[test]
+    fn check_yarnrc_yarn_path() {
+        let content = "--yarn-path .yarn/releases/yarn-4.1.0.cjs\n";
+        let info = check_yarnrc(content);
+        assert_eq!(info.yarn_path.as_deref(), Some(".yarn/releases/yarn-4.1.0.cjs"));
+    }
+
+    #[test]
+    fn check_yarnrc_empty() {
+        let info = check_yarnrc("");
+        assert!(info.offline_mirror.is_none());
+        assert!(info.yarn_path.is_none());
+    }
+
+    #[test]
+    fn is_yarn_update_true() {
+        let u = Upgrade {
+            dep_name: "yarn".to_string(),
+            ..Default::default()
+        };
+        assert!(is_yarn_update(&u));
+    }
+
+    #[test]
+    fn is_yarn_update_false() {
+        let u = Upgrade {
+            dep_name: "npm".to_string(),
+            ..Default::default()
+        };
+        assert!(!is_yarn_update(&u));
+    }
+
+    #[test]
+    fn get_yarn_constraint_from_upgrades() {
+        let upgrades = vec![Upgrade {
+            dep_name: "yarn".to_string(),
+            new_value: Some("4.1.0".to_string()),
+            ..Default::default()
+        }];
+        assert_eq!(
+            get_yarn_constraint_from_upgrades(&upgrades),
+            Some("4.1.0".to_string())
+        );
+    }
+
+    #[test]
+    fn get_yarn_constraint_from_package_json() {
+        let pj = PackageJson::parse(r#"{"packageManager": "yarn@4.1.0"}"#).unwrap();
+        assert_eq!(
+            get_yarn_constraint_from_package_json(&pj),
+            Some("4.1.0".to_string())
+        );
+    }
+
+    #[test]
+    fn build_yarn_install_v1() {
+        assert_eq!(
+            build_yarn_install_cmd(YarnMajorVersion::V1, true, false, false),
+            vec!["yarn", "install", "--frozen-lockfile"]
+        );
+    }
+
+    #[test]
+    fn build_yarn_install_v2_with_mode() {
+        assert_eq!(
+            build_yarn_install_cmd(YarnMajorVersion::V2Plus, true, false, true),
+            vec!["yarn", "install", "--mode", "update-lockfile"]
+        );
+    }
+
+    #[test]
+    fn build_yarn_upgrade_v1() {
+        assert_eq!(
+            build_yarn_upgrade_cmd(YarnMajorVersion::V1, "lodash"),
+            vec!["yarn", "upgrade", "lodash"]
+        );
+    }
+
+    #[test]
+    fn build_yarn_upgrade_v2() {
+        assert_eq!(
+            build_yarn_upgrade_cmd(YarnMajorVersion::V2Plus, "lodash"),
+            vec!["yarn", "up", "-R", "lodash"]
+        );
+    }
+
+    #[test]
+    fn get_optimize_command_returns_sed() {
+        let cmd = get_optimize_command();
+        assert_eq!(cmd[0], "sed");
+    }
+}

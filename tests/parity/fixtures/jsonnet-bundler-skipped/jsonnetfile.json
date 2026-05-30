@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://gitlab.com/example/lib.git",
+          "subdir": ""
+        }
+      },
+      "version": "v1.0.0"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://bitbucket.org/example/other.git",
+          "subdir": ""
+        }
+      },
+      "version": "v2.0.0"
+    }
+  ]
+}

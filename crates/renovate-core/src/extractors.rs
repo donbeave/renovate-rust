@@ -77,6 +77,7 @@ pub mod mise;
 pub mod mix;
 pub mod nix;
 pub mod npm;
+pub mod npm_post_update;
 pub mod nuget;
 pub mod ocb;
 pub mod osgi;
