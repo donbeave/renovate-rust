@@ -466,6 +466,70 @@ mod tests {
         assert!(result.is_err());
     }
 
+    // Ported: "should return null for no versions" — lib/modules/datasource/npm/index.spec.ts line 44
+    #[tokio::test]
+    async fn fetch_versions_empty_versions_returns_empty() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/empty"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"name":"empty","versions":{},"dist-tags":{}}"#))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let entry = fetch_versions(&http, "empty", &server.uri()).await.unwrap();
+        assert!(entry.versions.is_empty());
+        assert_eq!(entry.latest_tag, None);
+    }
+
+    // Ported: "should fetch package info from npm" — lib/modules/datasource/npm/index.spec.ts line 55
+    #[tokio::test]
+    async fn fetch_versions_returns_latest_tag_and_versions() {
+        let server = MockServer::start().await;
+        let body = packument_json(&[("1.0.0", false), ("1.1.0", false)], "1.1.0");
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let entry = fetch_versions(&http, "pkg", &server.uri()).await.unwrap();
+        assert_eq!(entry.versions, vec!["1.0.0", "1.1.0"]);
+        assert_eq!(entry.latest_tag.as_deref(), Some("1.1.0"));
+    }
+
+    // Ported: "should handle no time" — lib/modules/datasource/npm/index.spec.ts line 203
+    #[tokio::test]
+    async fn fetch_versions_no_time_field() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"name":"pkg","versions":{"1.0.0":{}},"dist-tags":{"latest":"1.0.0"}}"#))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let entry = fetch_versions(&http, "pkg", &server.uri()).await.unwrap();
+        assert_eq!(entry.latest_timestamp, None);
+        assert!(entry.version_timestamps.is_empty());
+    }
+
+    // Ported: "should return null if lookup fails 401" — lib/modules/datasource/npm/index.spec.ts line 210
+    #[tokio::test]
+    async fn fetch_versions_401_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/private"))
+            .respond_with(ResponseTemplate::new(401))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_versions(&http, "private", &server.uri()).await;
+        assert!(matches!(result, Err(NpmError::Http(_))));
+    }
+
     #[tokio::test]
     async fn fetch_updates_concurrent_fetches_all() {
         let server = MockServer::start().await;

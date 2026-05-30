@@ -1838,3 +1838,42 @@ fn parity_buildkite_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for buildkite-skipped fixture");
 }
+
+// Rust-specific: parity behavior test
+#[test]
+fn parity_puppet_skipped() {
+    let actual = run_fixture("puppet-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Puppetfile",
+                    "manager": "puppet",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "puppetlabs/stdlib",
+                            "status": "skipped",
+                            "reason": "gitnotag"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for puppet-skipped fixture");
+}
