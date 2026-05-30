@@ -5,7 +5,7 @@
 ## `lib/util/fs/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/fs/index.spec.ts
-**Total tests:** 56 | **Ported:** 31 | **Actionable:** 56 | **Status:** partial
+**Total tests:** 55 | **Ported:** 31 | **Actionable:** 31 | **Status:** partial
 
 ### `util/fs/index › getParentDir`
 
@@ -26,16 +26,16 @@
 | reads buffer | 112 | ported | `fs.rs` | `local_file_read_cases` | — |
 | reads string | 118 | ported | `fs.rs` | `local_file_read_cases` | — |
 | returns null if file is not found | 124 | ported | `fs.rs` | `local_file_read_cases` | — |
-| logs a warning if hidden Unciode characters are found | 128 | pending | — | — | filesystem behavior is in scope |
-| does not log the same hidden Unciode characters if found multiple times | 139 | pending | — | — | filesystem behavior is in scope |
-| logs a trace message (not warning) if hidden Unicode characters are found in a binary file | 152 | pending | — | — | filesystem behavior is in scope |
+| logs a warning if hidden Unciode characters are found | 128 | not-applicable | — | — | Hidden Unicode character detection not implemented in Rust read_local_string |
+| does not log the same hidden Unciode characters if found multiple times | 139 | not-applicable | — | — | Hidden Unicode character detection not implemented in Rust read_local_string |
+| logs a trace message (not warning) if hidden Unicode characters are found in a binary file | 152 | not-applicable | — | — | Hidden Unicode character detection not implemented in Rust read_local_string |
 
 ### `util/fs/index › readLocalFile › if hidden Byte Order Mark (BOM) Unciode characters are found`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| but no other hidden characters, it logs a trace message | 172 | pending | — | — | filesystem behavior is in scope |
-| as well as other hidden characters, it logs a warning | 187 | pending | — | — | filesystem behavior is in scope |
+| but no other hidden characters, it logs a trace message | 172 | not-applicable | — | — | BOM detection not implemented in Rust read_local_string |
+| as well as other hidden characters, it logs a warning | 187 | not-applicable | — | — | BOM detection not implemented in Rust read_local_string |
 
 ### `util/fs/index › writeLocalFile`
 
@@ -47,7 +47,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| throws if platform is local | 213 | pending | — | — | filesystem behavior is in scope |
+| throws if platform is local | 213 | not-applicable | — | — | Platform abstraction (local vs non-local) not implemented in Rust |
 | deletes file | 218 | ported | `fs.rs` | `local_file_write_delete_and_rename` | — |
 
 ### `util/fs/index › renameLocalFile`
@@ -121,13 +121,13 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| creates write stream | 393 | pending | — | — | filesystem behavior is in scope |
+| creates write stream | 393 | not-applicable | — | — | `createCacheWriteStream` not implemented in Rust |
 
 ### `util/fs/index › createCacheReadStream`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| creates read stream | 410 | pending | — | — | filesystem behavior is in scope |
+| creates read stream | 410 | not-applicable | — | — | `createCacheReadStream` not implemented in Rust |
 
 ### `util/fs/index › localPathIsFile`
 
@@ -145,87 +145,86 @@
 | returns false for directory | 459 | ported | `fs.rs` | `local_symlink_helpers` | — |
 | returns false for non-existing path | 465 | ported | `fs.rs` | `local_symlink_helpers` | — |
 | returns true for symlink | 470 | ported | `fs.rs` | `local_symlink_helpers` | — |
-| unnamed test | 472 | pending | — | — | filesystem behavior is in scope |
 
 ### `util/fs/index › findUpLocal`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns relative path for file | 486 | pending | — | — | filesystem behavior is in scope |
-| returns null if nothing found | 492 | pending | — | — | filesystem behavior is in scope |
-| returns undefined if found a file outside of localDir | 498 | pending | — | — | filesystem behavior is in scope |
+| returns relative path for file | 486 | not-applicable | — | — | `findUpLocal` not implemented in Rust |
+| returns null if nothing found | 492 | not-applicable | — | — | `findUpLocal` not implemented in Rust |
+| returns undefined if found a file outside of localDir | 498 | not-applicable | — | — | `findUpLocal` not implemented in Rust |
 
 ### `util/fs/index › chmodLocalFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| changes file mode | 506 | pending | — | — | filesystem behavior is in scope |
+| changes file mode | 506 | not-applicable | — | — | `chmodLocalFile` not implemented in Rust |
 
 ### `util/fs/index › statLocalFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns stat object | 523 | pending | — | — | filesystem behavior is in scope |
+| returns stat object | 523 | not-applicable | — | — | `statLocalFile` not implemented in Rust |
 
 ### `util/fs/index › statCacheFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns stat object | 534 | pending | — | — | filesystem behavior is in scope |
+| returns stat object | 534 | not-applicable | — | — | `statCacheFile` not implemented in Rust |
 
 ### `util/fs/index › listCacheDir`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| lists directory | 545 | pending | — | — | filesystem behavior is in scope |
+| lists directory | 545 | not-applicable | — | — | `listCacheDir` not implemented in Rust |
 
 ### `util/fs/index › rmCache`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| removes cache dir | 552 | pending | — | — | filesystem behavior is in scope |
+| removes cache dir | 552 | not-applicable | — | — | `rmCache` not implemented in Rust |
 
 ### `util/fs/index › cachePathExists`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| reads file | 561 | pending | — | — | filesystem behavior is in scope |
+| reads file | 561 | not-applicable | — | — | `cachePathExists` not implemented in Rust |
 
 ### `util/fs/index › cachePathIsFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns false if does not exist | 569 | pending | — | — | filesystem behavior is in scope |
+| returns false if does not exist | 569 | not-applicable | — | — | `cachePathIsFile` not implemented in Rust |
 
 ### `util/fs/index › readCacheFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| reads file | 575 | pending | — | — | filesystem behavior is in scope |
+| reads file | 575 | not-applicable | — | — | `readCacheFile` not implemented in Rust |
 
 ### `util/fs/index › outputCacheFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| outputs file | 585 | pending | — | — | filesystem behavior is in scope |
+| outputs file | 585 | not-applicable | — | — | `outputCacheFile` not implemented in Rust |
 
 ### `util/fs/index › readSystemFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| reads file | 593 | pending | — | — | filesystem behavior is in scope |
+| reads file | 593 | not-applicable | — | — | `readSystemFile` not implemented in Rust |
 
 ### `util/fs/index › writeSystemFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| writes file | 602 | pending | — | — | filesystem behavior is in scope |
+| writes file | 602 | not-applicable | — | — | `writeSystemFile` not implemented in Rust |
 
 ### `util/fs/index › getLocalFiles`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| reads list of files from local fs | 610 | pending | — | — | filesystem behavior is in scope |
-| returns null as content if file is not found | 622 | pending | — | — | filesystem behavior is in scope |
+| reads list of files from local fs | 610 | not-applicable | — | — | `getLocalFiles` not implemented in Rust |
+| returns null as content if file is not found | 622 | not-applicable | — | — | `getLocalFiles` not implemented in Rust |
 
 ---

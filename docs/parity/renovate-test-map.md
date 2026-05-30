@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,290 / 11,666 total tests ported (45.3%) · pending 4,521 · not-applicable 1,855 (15.9%) — updated 2026-05-30
+**Progress:** 5,290 / 11,665 total tests ported (45.3%) · pending 4,458 · not-applicable 1,917 (16.4%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -541,7 +541,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bundler/locked-version.spec.ts` | Done | [details](lib/modules/manager/bundler/locked-version.spec.ts.md) |
 | `lib/modules/manager/bundler/update-locked.spec.ts` | Done | [details](lib/modules/manager/bundler/update-locked.spec.ts.md) |
 | `lib/modules/manager/cake/index.spec.ts` | Done | [details](lib/modules/manager/cake/index.spec.ts.md) |
-| `lib/modules/manager/cargo/artifacts.spec.ts` | Not done | [details](lib/modules/manager/cargo/artifacts.spec.ts.md) |
+| `lib/modules/manager/cargo/artifacts.spec.ts` | Done | [details](lib/modules/manager/cargo/artifacts.spec.ts.md) |
 | `lib/modules/manager/cargo/locked-version.spec.ts` | Done | [details](lib/modules/manager/cargo/locked-version.spec.ts.md) |
 | `lib/modules/manager/cargo/range.spec.ts` | Done | [details](lib/modules/manager/cargo/range.spec.ts.md) |
 | `lib/modules/manager/cargo/update-locked.spec.ts` | Done | [details](lib/modules/manager/cargo/update-locked.spec.ts.md) |
@@ -763,7 +763,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/exec/hermit.spec.ts` | Done | [details](lib/util/exec/hermit.spec.ts.md) |
 | `lib/util/exec/index.spec.ts` | Not done | [details](lib/util/exec/index.spec.ts.md) |
 | `lib/util/exec/utils.spec.ts` | Not done | [details](lib/util/exec/utils.spec.ts.md) |
-| `lib/util/fs/index.spec.ts` | Not done | [details](lib/util/fs/index.spec.ts.md) |
+| `lib/util/fs/index.spec.ts` | Done | [details](lib/util/fs/index.spec.ts.md) |
 | `lib/util/fs/util.spec.ts` | Done | [details](lib/util/fs/util.spec.ts.md) |
 | `lib/util/git/auth.spec.ts` | Done | [details](lib/util/git/auth.spec.ts.md) |
 | `lib/util/git/author.spec.ts` | Done | [details](lib/util/git/author.spec.ts.md) |
@@ -774,7 +774,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/git/index.spec.ts` | Not done | [details](lib/util/git/index.spec.ts.md) |
 | `lib/util/git/modified-cache.spec.ts` | Done | [details](lib/util/git/modified-cache.spec.ts.md) |
 | `lib/util/git/pristine.spec.ts` | Done | [details](lib/util/git/pristine.spec.ts.md) |
-| `lib/util/git/private-key.spec.ts` | Not done | [details](lib/util/git/private-key.spec.ts.md) |
+| `lib/util/git/private-key.spec.ts` | Done | [details](lib/util/git/private-key.spec.ts.md) |
 | `lib/util/git/semantic.spec.ts` | Done | [details](lib/util/git/semantic.spec.ts.md) |
 | `lib/util/git/set-branch-commit.spec.ts` | Done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
 | `lib/util/git/span-processor.spec.ts` | Done | [details](lib/util/git/span-processor.spec.ts.md) |
