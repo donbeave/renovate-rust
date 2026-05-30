@@ -2449,7 +2449,7 @@ fn update_dependency_package_json(
                         let prefix = caps.get(1).map_or("", |m| m.as_str());
                         let after_hash =
                             res_old.find('#').map(|i| &res_old[i..]).unwrap_or("#");
-                        format!("{}{}{}", prefix, new_value.clone(), after_hash)
+                        format!("{}{}{}", prefix, new_value, after_hash)
                     } else {
                         new_value.clone()
                     }
