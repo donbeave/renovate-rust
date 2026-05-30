@@ -478,6 +478,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for resolve_config_path when file exists
     #[test]
     fn resolve_returns_path_when_file_exists() {
         let (f, path) = write_temp("{}", ".json");
@@ -551,6 +552,7 @@ mod tests {
 
     // ── load ─────────────────────────────────────────────────────────────────
 
+    // Rust-specific: unit test for loading empty JSON config
     #[test]
     fn load_empty_json_returns_defaults() {
         let (_f, path) = write_temp("{}", ".json");
@@ -558,6 +560,7 @@ mod tests {
         assert_eq!(config, GlobalConfig::default());
     }
 
+    // Rust-specific: unit test for loading JSON config with values
     #[test]
     fn load_json_sets_platform_and_token() {
         let (_f, path) = write_temp(r#"{"platform":"gitlab","token":"mytoken"}"#, ".json");
@@ -566,6 +569,7 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("mytoken"));
     }
 
+    // Rust-specific: unit test for loading JSON5 config with comments
     #[test]
     fn load_json5_with_comment_succeeds() {
         let (_f, path) = write_temp(
@@ -577,6 +581,7 @@ mod tests {
         assert_eq!(config.dry_run, Some(DryRun::Full));
     }
 
+    // Rust-specific: unit test for loading .renovaterc without extension
     #[test]
     fn load_renovaterc_without_extension_succeeds() {
         let dir = tempfile::tempdir().unwrap();
@@ -586,12 +591,14 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("mytoken"));
     }
 
+    // Rust-specific: unit test for loading requireConfig from file
     #[test]
     fn load_require_config_from_file() {
         let (_f, path) = write_temp(r#"{"requireConfig":"optional"}"#, ".json");
         assert_eq!(load(&path).unwrap().require_config, RequireConfig::Optional);
     }
 
+    // Rust-specific: unit test for rejecting JS extension
     #[test]
     fn load_rejects_js_extension() {
         let (_f, path) = write_temp("module.exports = {}", ".js");
@@ -613,6 +620,7 @@ mod tests {
         assert!(matches!(err, ConfigFileError::UnsupportedFormat(_)));
     }
 
+    // Rust-specific: unit test for JSON parse error handling
     #[test]
     fn load_json_parse_error_is_clear() {
         let (_f, path) = write_temp("not json", ".json");
@@ -672,6 +680,7 @@ mod tests {
 
     // ── merge_over_base ──────────────────────────────────────────────────────
 
+    // Rust-specific: unit test for merging file config over base
     #[test]
     fn merge_file_token_over_base() {
         let base = GlobalConfig::default();
@@ -685,6 +694,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for base config preservation during merge
     #[test]
     fn merge_base_token_survives_when_file_has_none() {
         let base = GlobalConfig {

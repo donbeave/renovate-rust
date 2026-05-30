@@ -14,6 +14,7 @@ pub mod azure;
 pub mod azure_utils;
 pub mod bitbucket;
 pub mod bitbucket_server;
+pub mod forgejo;
 pub mod gerrit;
 pub mod gitea;
 pub mod gitea_forgejo_utils;
