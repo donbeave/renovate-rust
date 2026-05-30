@@ -210,7 +210,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/orb/index.spec.ts` | Done | [details](lib/modules/datasource/orb/index.spec.ts.md) |
 | `lib/modules/datasource/gitea-tags/index.spec.ts` | Done | [details](lib/modules/datasource/gitea-tags/index.spec.ts.md) |
 | `lib/modules/datasource/forgejo-tags/index.spec.ts` | Done | [details](lib/modules/datasource/forgejo-tags/index.spec.ts.md) |
-| `lib/modules/datasource/hex/v2/index.spec.ts` | Not done | [details](lib/modules/datasource/hex/v2/index.spec.ts.md) |
+| `lib/modules/datasource/hex/v2/index.spec.ts` | Done | [details](lib/modules/datasource/hex/v2/index.spec.ts.md) |
 | `lib/modules/datasource/hex/index.spec.ts` | Not done | [details](lib/modules/datasource/hex/index.spec.ts.md) |
 | `lib/modules/datasource/puppet-forge/index.spec.ts` | Done | [details](lib/modules/datasource/puppet-forge/index.spec.ts.md) |
 | `lib/modules/datasource/helm/index.spec.ts` | Done | [details](lib/modules/datasource/helm/index.spec.ts.md) |
