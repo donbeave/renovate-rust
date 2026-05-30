@@ -4372,6 +4372,131 @@ pub fn sanitize_markdown(markdown: &str) -> String {
     res
 }
 
+/// Linkify GitHub-style references in release-note Markdown.
+///
+/// Mirrors the observable `remark-github` output used by
+/// `lib/util/markdown.ts` for Renovate release note rendering.
+pub fn linkify_markdown(content: &str, repository: &str) -> String {
+    use regex::Regex;
+    static BULLET: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static REPO_COMMIT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static FORK_COMMIT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static COMMIT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static REPO_ISSUE: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static FORK_ISSUE: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static GH_ISSUE: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static ISSUE: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static MENTION: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    static PAREN_URL: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+
+    let (_, repo) = repository.split_once('/').unwrap_or((repository, ""));
+    let mut out = content.trim_matches('\n').to_owned();
+    let mut rendered_links = Vec::new();
+
+    let re = PAREN_URL.get_or_init(|| Regex::new(r"\((https?://[^<>\s)]+)\)").unwrap());
+    out = re.replace_all(&out, "(<$1>)").into_owned();
+
+    let re = BULLET.get_or_init(|| Regex::new(r"(?m)^(\s*)\*\s+").unwrap());
+    out = re.replace_all(&out, "$1- ").into_owned();
+
+    let re = REPO_COMMIT
+        .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40})\b").unwrap());
+    out = re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let repo = &caps[1];
+            let sha = &caps[2];
+            let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
+            rendered_links.push(format!("[{repo}@`{}`](https://github.com/{repo}/commit/{sha})", &sha[..7]));
+            placeholder
+        })
+        .into_owned();
+
+    let re = FORK_COMMIT
+        .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+)@([0-9a-f]{40})\b").unwrap());
+    out = re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let fork = &caps[1];
+            let sha = &caps[2];
+            let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
+            rendered_links.push(format!("[{fork}@`{}`](https://github.com/{fork}/{repo}/commit/{sha})", &sha[..7]));
+            placeholder
+        })
+        .into_owned();
+
+    let re = COMMIT.get_or_init(|| Regex::new(r"\b([0-9a-f]{40})\b").unwrap());
+    out = re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let sha = &caps[1];
+            let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
+            rendered_links.push(format!("[`{}`](https://github.com/{repository}/commit/{sha})", &sha[..7]));
+            placeholder
+        })
+        .into_owned();
+
+    let re = REPO_ISSUE
+        .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)#([0-9]+)\b").unwrap());
+    out = re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let repo = &caps[1];
+            let number = &caps[2];
+            let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
+            rendered_links.push(format!("[{repo}#{number}](https://github.com/{repo}/issues/{number})"));
+            placeholder
+        })
+        .into_owned();
+
+    let re = FORK_ISSUE
+        .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+)#([0-9]+)\b").unwrap());
+    out = re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let fork = &caps[1];
+            let number = &caps[2];
+            let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
+            rendered_links.push(format!("[{fork}#{number}](https://github.com/{fork}/{repo}/issues/{number})"));
+            placeholder
+        })
+        .into_owned();
+
+    let re = GH_ISSUE.get_or_init(|| Regex::new(r"\bGH-([0-9]+)\b").unwrap());
+    out = re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let number = &caps[1];
+            let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
+            rendered_links.push(format!("[GH-{number}](https://github.com/{repository}/issues/{number})"));
+            placeholder
+        })
+        .into_owned();
+
+    let re = ISSUE.get_or_init(|| Regex::new(r"(^|[^A-Za-z0-9_/])#([0-9]+)\b").unwrap());
+    out = re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let before = &caps[1];
+            let number = &caps[2];
+            let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
+            rendered_links.push(format!("[#{number}](https://github.com/{repository}/issues/{number})"));
+            format!("{before}{placeholder}")
+        })
+        .into_owned();
+
+    let re = MENTION.get_or_init(|| Regex::new(r"(^|[^A-Za-z0-9_`])@([A-Za-z0-9-]+)\b").unwrap());
+    out = re
+        .replace_all(&out, |caps: &regex::Captures<'_>| {
+            let before = &caps[1];
+            let user = &caps[2];
+            let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
+            rendered_links.push(format!("[@{user}](https://github.com/{user})"));
+            format!("{before}{placeholder}")
+        })
+        .into_owned();
+
+    for (idx, rendered) in rendered_links.into_iter().enumerate() {
+        out = out.replace(&format!("\u{E000}{idx}\u{E001}"), &rendered);
+    }
+
+    out.push('\n');
+    out
+}
+
 // ---------------------------------------------------------------------------
 // Sanitize — lib/util/sanitize.ts
 // ---------------------------------------------------------------------------
@@ -8680,6 +8805,26 @@ mod tests {
     // -----------------------------------------------------------------------
     // sanitize_markdown
     // -----------------------------------------------------------------------
+
+    // Ported: "works" — util/markdown.spec.ts line 33
+    #[test]
+    fn test_linkify_markdown_works() {
+        let before = "Some references:\n\n*   Commit: f8083175fe890cbf14f41d0a06e7aa35d4989587\n*   Commit (fork): foo@f8083175fe890cbf14f41d0a06e7aa35d4989587\n*   Commit (repo): remarkjs/remark@e1aa9f6c02de18b9459b7d269712bcb50183ce89\n*   Issue or PR (`#`): #1\n*   Issue or PR (`GH-`): GH-1\n*   Issue or PR (fork): foo#1\n*   Issue or PR (project): remarkjs/remark#1\n*   Mention: @wooorm";
+        let expected = "Some references:\n\n- Commit: [`f808317`](https://github.com/some/repo/commit/f8083175fe890cbf14f41d0a06e7aa35d4989587)\n- Commit (fork): [foo@`f808317`](https://github.com/foo/repo/commit/f8083175fe890cbf14f41d0a06e7aa35d4989587)\n- Commit (repo): [remarkjs/remark@`e1aa9f6`](https://github.com/remarkjs/remark/commit/e1aa9f6c02de18b9459b7d269712bcb50183ce89)\n- Issue or PR (`#`): [#1](https://github.com/some/repo/issues/1)\n- Issue or PR (`GH-`): [GH-1](https://github.com/some/repo/issues/1)\n- Issue or PR (fork): [foo#1](https://github.com/foo/repo/issues/1)\n- Issue or PR (project): [remarkjs/remark#1](https://github.com/remarkjs/remark/issues/1)\n- Mention: [@wooorm](https://github.com/wooorm)\n";
+        assert_eq!(linkify_markdown(before, "some/repo"), expected);
+    }
+
+    // Ported: "works with gitlab" — util/markdown.spec.ts line 38
+    #[test]
+    fn test_linkify_markdown_works_with_gitlab() {
+        assert_eq!(
+            linkify_markdown(
+                "(https://company.gitlab.local/shared/scanner/-/merge_requests/1177)",
+                "some/repo",
+            ),
+            "(<https://company.gitlab.local/shared/scanner/-/merge_requests/1177>)\n"
+        );
+    }
 
     // Ported: "sanitizeMarkdown check massaged release notes" — util/markdown.spec.ts line 48
     #[test]
