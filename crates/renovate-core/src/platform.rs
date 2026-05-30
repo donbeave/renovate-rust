@@ -10,7 +10,12 @@
 //! runtime dispatch — it delegates to each concrete client with zero
 //! allocation overhead.
 
+pub mod azure;
 pub mod azure_utils;
+pub mod bitbucket;
+pub mod bitbucket_server;
+pub mod gerrit;
+pub mod gitea;
 pub mod gitea_forgejo_utils;
 pub mod github;
 pub mod github_api_cache;

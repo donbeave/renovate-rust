@@ -370,7 +370,7 @@ impl PlatformClient for ForgejoClient {
     ) -> Result<(), PlatformError> {
         let url = format!(
             "{}/repos/{owner}/{repo}/pulls/{pr_number}",
-            client.api_base
+            self.api_base
         );
         if title.is_none() && body.is_none() && state.is_none() {
             return Ok(());

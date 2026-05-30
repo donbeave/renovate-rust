@@ -66,8 +66,8 @@ pub enum HttpError {
 /// an `Arc` internally and shares the connection pool.
 #[derive(Debug, Clone)]
 pub struct HttpClient {
-    inner: Client,
-    token: Option<String>,
+    pub(crate) inner: Client,
+    pub(crate) token: Option<String>,
 }
 
 impl HttpClient {

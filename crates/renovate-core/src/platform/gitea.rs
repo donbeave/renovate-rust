@@ -14,7 +14,8 @@ use serde::{Deserialize, Serialize};
 use crate::http::{HttpClient, HttpError};
 use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 use crate::platform::gitea_forgejo_utils::{
-    ContentsListResponse, ContentsResponse, ContentsType, get_merge_method, trim_trailing_api_path,
+    ContentsListResponse, ContentsResponse, ContentsType, get_merge_method,
+    trim_trailing_api_path,
 };
 
 pub const GITEA_API_VERSION: &str = "api/v1";

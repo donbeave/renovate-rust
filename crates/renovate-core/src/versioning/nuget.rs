@@ -901,11 +901,13 @@ mod tests {
 
     // ── compare ──────────────────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for compare helper
     #[test]
     fn equal_versions() {
         assert_eq!(compare("1.2.3", "1.2.3"), Ordering::Equal);
     }
 
+    // Rust-specific: unit tests for compare helper
     #[test]
     fn revision_zero_equals_three_part() {
         // 1.2.3.0 == 1.2.3 (revision defaults to 0)
@@ -913,34 +915,40 @@ mod tests {
         assert_eq!(compare("1.2.3", "1.2.3.0"), Ordering::Equal);
     }
 
+    // Rust-specific: unit tests for compare helper
     #[test]
     fn newer_patch() {
         assert_eq!(compare("1.2.4", "1.2.3"), Ordering::Greater);
         assert_eq!(compare("1.2.3", "1.2.4"), Ordering::Less);
     }
 
+    // Rust-specific: unit tests for compare helper
     #[test]
     fn newer_minor() {
         assert_eq!(compare("1.3.0", "1.2.9"), Ordering::Greater);
     }
 
+    // Rust-specific: unit tests for compare helper
     #[test]
     fn newer_major() {
         assert_eq!(compare("2.0.0", "1.9.9"), Ordering::Greater);
     }
 
+    // Rust-specific: unit tests for compare helper
     #[test]
     fn revision_bump() {
         assert_eq!(compare("1.2.3.1", "1.2.3.0"), Ordering::Greater);
         assert_eq!(compare("1.2.3.1", "1.2.3"), Ordering::Greater);
     }
 
+    // Rust-specific: unit tests for compare helper
     #[test]
     fn stable_greater_than_prerelease() {
         assert_eq!(compare("1.2.3", "1.2.3-alpha"), Ordering::Greater);
         assert_eq!(compare("1.2.3-rc1", "1.2.3"), Ordering::Less);
     }
 
+    // Rust-specific: unit tests for compare helper
     #[test]
     fn prerelease_ordering() {
         // alpha < beta < rc alphabetically
@@ -1047,12 +1055,14 @@ mod tests {
 
     // ── nuget_update_summary ─────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for nuget_update_summary edge cases
     #[test]
     fn same_version_no_update() {
         let s = nuget_update_summary("13.0.3", Some("13.0.3"));
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for nuget_update_summary revision handling
     #[test]
     fn revision_zero_no_false_positive() {
         // Registry returns "13.0.3.0"; current is "13.0.3" → no update.
@@ -1062,6 +1072,7 @@ mod tests {
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for nuget_update_summary edge cases
     #[test]
     fn newer_patch_triggers_update() {
         let s = nuget_update_summary("13.0.1", Some("13.0.3"));
@@ -1069,18 +1080,21 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("13.0.3"));
     }
 
+    // Rust-specific: unit tests for nuget_update_summary edge cases
     #[test]
     fn no_latest_no_update() {
         let s = nuget_update_summary("1.0.0", None);
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for nuget_update_summary edge cases
     #[test]
     fn empty_current_no_update() {
         let s = nuget_update_summary("", Some("1.0.0"));
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for nuget_update_summary edge cases
     #[test]
     fn older_latest_no_update() {
         let s = nuget_update_summary("2.0.0", Some("1.9.9"));
@@ -1089,6 +1103,7 @@ mod tests {
 
     // ── is_stable ────────────────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for is_stable helper
     #[test]
     fn stable_versions() {
         assert!(is_stable("1.2.3"));
@@ -1096,6 +1111,7 @@ mod tests {
         assert!(is_stable("1.2.3.4"));
     }
 
+    // Rust-specific: unit tests for is_stable helper
     #[test]
     fn prerelease_versions() {
         assert!(!is_stable("1.2.3-preview1"));

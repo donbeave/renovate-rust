@@ -11,6 +11,7 @@
 //! `username:app_password` pair passed as the token for compatibility;
 //! however, this client constructs basic-auth headers directly where needed.
 
+use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};

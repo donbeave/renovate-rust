@@ -175,7 +175,7 @@ pub async fn list_prs(
 ) -> Result<Vec<BbsPr>, PlatformError> {
     let state_param = state.unwrap_or("OPEN");
     let url = format!(
-        "{}/projects/{}/repos/pull-requests?state={}&limit=100",
+        "{}/projects/{}/repos/{}/pull-requests?state={}&limit=100",
         client.api_base, project, repo, state_param
     );
     let page: BbsPrPage = client
