@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,255 / 11,666 total tests ported (45.0%) · pending 5,860 · not-applicable 551 (4.7%) — updated 2026-05-30
+**Progress:** 5,255 / 11,666 total tests ported (45.0%) · pending 5,827 · not-applicable 584 (5.0%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -170,7 +170,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/deb/checksum.spec.ts` | Done | [details](lib/modules/datasource/deb/checksum.spec.ts.md) |
 | `lib/modules/datasource/deb/utils.spec.ts` | Done | [details](lib/modules/datasource/deb/utils.spec.ts.md) |
 | `lib/modules/datasource/deb/index.spec.ts` | Not done | [details](lib/modules/datasource/deb/index.spec.ts.md) |
-| `lib/modules/datasource/deb/packages.spec.ts` | Not done | [details](lib/modules/datasource/deb/packages.spec.ts.md) |
+| `lib/modules/datasource/deb/packages.spec.ts` | Done | [details](lib/modules/datasource/deb/packages.spec.ts.md) |
 | `lib/modules/datasource/deb/url.spec.ts` | Done | [details](lib/modules/datasource/deb/url.spec.ts.md) |
 | `lib/modules/datasource/utils.spec.ts` | Done | [details](lib/modules/datasource/utils.spec.ts.md) |
 | `lib/modules/datasource/span-processor.spec.ts` | Done | [details](lib/modules/datasource/span-processor.spec.ts.md) |
@@ -690,7 +690,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts.md) |
 | `lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts.md) |
 | `lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts.md) |
-| `lib/modules/manager/terraform/hcl/index.spec.ts` | Not done | [details](lib/modules/manager/terraform/hcl/index.spec.ts.md) |
+| `lib/modules/manager/terraform/hcl/index.spec.ts` | Done | [details](lib/modules/manager/terraform/hcl/index.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/hash.spec.ts` | Not done | [details](lib/modules/manager/terraform/lockfile/hash.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/index.spec.ts` | Not done | [details](lib/modules/manager/terraform/lockfile/index.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/update-locked.spec.ts` | Done | [details](lib/modules/manager/terraform/lockfile/update-locked.spec.ts.md) |
@@ -755,12 +755,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/repository/http-cache.spec.ts` | Done | [details](lib/util/cache/repository/http-cache.spec.ts.md) |
 | `lib/util/cache/repository/impl/local.spec.ts` | Not done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
 | `lib/util/cache/repository/impl/s3.spec.ts` | Not done | [details](lib/util/cache/repository/impl/s3.spec.ts.md) |
-| `lib/util/cache/repository/index.spec.ts` | Not done | [details](lib/util/cache/repository/index.spec.ts.md) |
+| `lib/util/cache/repository/index.spec.ts` | Done | [details](lib/util/cache/repository/index.spec.ts.md) |
 | `lib/util/exec/common.spec.ts` | Not done | [details](lib/util/exec/common.spec.ts.md) |
 | `lib/util/exec/containerbase.spec.ts` | Not done | [details](lib/util/exec/containerbase.spec.ts.md) |
 | `lib/util/exec/docker/index.spec.ts` | Not done | [details](lib/util/exec/docker/index.spec.ts.md) |
 | `lib/util/exec/env.spec.ts` | Done | [details](lib/util/exec/env.spec.ts.md) |
-| `lib/util/exec/hermit.spec.ts` | Not done | [details](lib/util/exec/hermit.spec.ts.md) |
+| `lib/util/exec/hermit.spec.ts` | Done | [details](lib/util/exec/hermit.spec.ts.md) |
 | `lib/util/exec/index.spec.ts` | Not done | [details](lib/util/exec/index.spec.ts.md) |
 | `lib/util/exec/utils.spec.ts` | Not done | [details](lib/util/exec/utils.spec.ts.md) |
 | `lib/util/fs/index.spec.ts` | Not done | [details](lib/util/fs/index.spec.ts.md) |
@@ -783,7 +783,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | Not done | [details](lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts.md) |
 | `lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts` | Done | [details](lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts.md) |
 | `lib/util/github/graphql/datasource-fetcher.spec.ts` | Not done | [details](lib/util/github/graphql/datasource-fetcher.spec.ts.md) |
-| `lib/util/github/graphql/index.spec.ts` | Not done | [details](lib/util/github/graphql/index.spec.ts.md) |
+| `lib/util/github/graphql/index.spec.ts` | Done | [details](lib/util/github/graphql/index.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts.md) |
@@ -793,12 +793,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/auth.spec.ts` | Done | [details](lib/util/http/auth.spec.ts.md) |
 | `lib/util/http/bitbucket-server.spec.ts` | Not done | [details](lib/util/http/bitbucket-server.spec.ts.md) |
 | `lib/util/http/bitbucket.spec.ts` | Not done | [details](lib/util/http/bitbucket.spec.ts.md) |
-| `lib/util/http/cache/memory-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/memory-http-cache-provider.spec.ts.md) |
+| `lib/util/http/cache/memory-http-cache-provider.spec.ts` | Done | [details](lib/util/http/cache/memory-http-cache-provider.spec.ts.md) |
 | `lib/util/http/cache/package-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/package-http-cache-provider.spec.ts.md) |
 | `lib/util/http/cache/repository-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/repository-http-cache-provider.spec.ts.md) |
-| `lib/util/http/forgejo.spec.ts` | Not done | [details](lib/util/http/forgejo.spec.ts.md) |
-| `lib/util/http/gerrit.spec.ts` | Not done | [details](lib/util/http/gerrit.spec.ts.md) |
-| `lib/util/http/gitea.spec.ts` | Not done | [details](lib/util/http/gitea.spec.ts.md) |
+| `lib/util/http/forgejo.spec.ts` | Done | [details](lib/util/http/forgejo.spec.ts.md) |
+| `lib/util/http/gerrit.spec.ts` | Done | [details](lib/util/http/gerrit.spec.ts.md) |
+| `lib/util/http/gitea.spec.ts` | Done | [details](lib/util/http/gitea.spec.ts.md) |
 | `lib/util/http/github.spec.ts` | Not done | [details](lib/util/http/github.spec.ts.md) |
 | `lib/util/http/gitlab.spec.ts` | Not done | [details](lib/util/http/gitlab.spec.ts.md) |
 | `lib/util/http/got.spec.ts` | Done | [details](lib/util/http/got.spec.ts.md) |

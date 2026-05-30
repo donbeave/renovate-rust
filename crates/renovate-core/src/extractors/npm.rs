@@ -1792,7 +1792,7 @@ pub fn package_lock_find_dep_constraints(
     lock_entry: &serde_json::Value,
     dep_name: &str,
     current_version: &str,
-    new_version: &str,
+    _new_version: &str,
     parent_dep_name: Option<&str>,
 ) -> Vec<ParentDependency> {
     let mut parents: Vec<ParentDependency> = Vec::new();
@@ -1803,40 +1803,38 @@ pub fn package_lock_find_dep_constraints(
             .get(*dep_section)
             .and_then(|s| s.get(dep_name))
             .and_then(|v| v.as_str())
+            && crate::versioning::npm::matches_range(current_version, constraint)
         {
-            if crate::versioning::npm::matches_range(current_version, constraint) {
-                parents.push(ParentDependency {
-                    constraint: constraint.to_owned(),
-                    dep_type: Some((*dep_section).to_owned()),
-                    parent_dep_name: None,
-                    parent_version: None,
-                });
-            }
+            parents.push(ParentDependency {
+                constraint: constraint.to_owned(),
+                dep_type: Some((*dep_section).to_owned()),
+                parent_dep_name: None,
+                parent_version: None,
+            });
         }
     }
 
     // Check requires in this lock entry (transitive constraints).
     let version = lock_entry.get("version").and_then(|v| v.as_str()).unwrap_or("");
-    if let Some(parent_name) = parent_dep_name {
-        if let Some(constraint) = lock_entry
+    if let Some(parent_name) = parent_dep_name
+        && let Some(constraint) = lock_entry
             .get("requires")
             .and_then(|r| r.get(dep_name))
             .and_then(|v| v.as_str())
+    {
+        // Normalize rc suffix: "1.0.0rc" → "1.0.0-rc"
+        let normalized = regex::Regex::new(r"(\d)rc$")
+            .map(|re| re.replace(constraint, "${1}-rc").into_owned())
+            .unwrap_or_else(|_| constraint.to_owned());
+        if crate::versioning::npm::is_valid(&normalized)
+            && crate::versioning::npm::matches_range(current_version, &normalized)
         {
-            // Normalize rc suffix: "1.0.0rc" → "1.0.0-rc"
-            let normalized = regex::Regex::new(r"(\d)rc$")
-                .map(|re| re.replace(constraint, "${1}-rc").into_owned())
-                .unwrap_or_else(|_| constraint.to_owned());
-            if crate::versioning::npm::is_valid(&normalized)
-                && crate::versioning::npm::matches_range(current_version, &normalized)
-            {
-                parents.push(ParentDependency {
-                    constraint: normalized.clone(),
-                    dep_type: None,
-                    parent_dep_name: Some(parent_name.to_owned()),
-                    parent_version: Some(version.to_owned()),
-                });
-            }
+            parents.push(ParentDependency {
+                constraint: normalized,
+                dep_type: None,
+                parent_dep_name: Some(parent_name.to_owned()),
+                parent_version: Some(version.to_owned()),
+            });
         }
     }
 
@@ -1848,7 +1846,7 @@ pub fn package_lock_find_dep_constraints(
                 dep,
                 dep_name,
                 current_version,
-                new_version,
+                _new_version,
                 Some(pkg_name.as_str()),
             );
             parents.extend(sub);
@@ -1899,10 +1897,10 @@ pub fn package_lock_get_locked_dependencies(
         let matches = current_version.map(|cv| cv == version).unwrap_or(true);
         if matches {
             let mut dep_clone = dep.clone();
-            if entry_bundled {
-                if let Some(obj) = dep_clone.as_object_mut() {
-                    obj.insert("bundled".to_owned(), serde_json::Value::Bool(true));
-                }
+            if entry_bundled
+                && let Some(obj) = dep_clone.as_object_mut()
+            {
+                obj.insert("bundled".to_owned(), serde_json::Value::Bool(true));
             }
             results.push(dep_clone);
         }
@@ -2257,10 +2255,10 @@ pub(crate) fn json_replace_verified(
                 new_str,
                 &content[i + search_str.len()..]
             );
-            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&candidate) {
-                if &parsed == expected {
-                    return Some(candidate);
-                }
+            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&candidate)
+                && &parsed == expected
+            {
+                return Some(candidate);
             }
         }
         let step = content[i..].chars().next().map_or(1, |c| c.len_utf8());
@@ -2279,10 +2277,10 @@ fn json_rename_key(root: &mut serde_json::Value, path: &[&str], old_key: &str, n
             None => return,
         }
     }
-    if let Some(map) = current.as_object_mut() {
-        if let Some(val) = map.remove(old_key) {
-            map.insert(new_key.to_owned(), val);
-        }
+    if let Some(map) = current.as_object_mut()
+        && let Some(val) = map.remove(old_key)
+    {
+        map.insert(new_key.to_owned(), val);
     }
 }
 
@@ -2347,10 +2345,10 @@ fn update_dependency_package_json(
             .and_then(|v| v.as_str())
             .map(|s| s.to_owned())?;
         let ev = new_value.clone();
-        if let Some(pnpm) = parsed.get_mut("pnpm") {
-            if let Some(overrides) = pnpm.get_mut("overrides") {
-                overrides[dep_name] = serde_json::Value::String(ev.clone());
-            }
+        if let Some(pnpm) = parsed.get_mut("pnpm")
+            && let Some(overrides) = pnpm.get_mut("overrides")
+        {
+            overrides[dep_name] = serde_json::Value::String(ev.clone());
         }
         (ov, ev)
     } else {
@@ -2382,15 +2380,15 @@ fn update_dependency_package_json(
                 if let Some(section) = parsed.get_mut("resolutions") {
                     section[dep_name] = serde_json::Value::String(patch_new.clone());
                 }
-                (old_version.clone(), patch_new)
+                (old_version, patch_new)
             } else {
-                (old_version.clone(), effective_new_value.clone())
+                (old_version, effective_new_value)
             }
         } else {
-            (old_version.clone(), effective_new_value.clone())
+            (old_version, effective_new_value)
         }
     } else {
-        (old_version.clone(), effective_new_value.clone())
+        (old_version, effective_new_value)
     };
 
     let new_name_final = upgrade.new_name.as_deref();
@@ -2453,10 +2451,10 @@ fn update_dependency_package_json(
                             res_old.find('#').map(|i| &res_old[i..]).unwrap_or("#");
                         format!("{}{}{}", prefix, new_value, after_hash)
                     } else {
-                        new_value.clone()
+                        new_value.to_owned()
                     }
                 } else {
-                    new_value.clone()
+                    new_value.to_owned()
                 }
             };
             parsed["resolutions"][dep_key.as_str()] = serde_json::Value::String(res_new.clone());

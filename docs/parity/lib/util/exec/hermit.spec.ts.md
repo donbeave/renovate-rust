@@ -5,26 +5,26 @@
 ## `lib/util/exec/hermit.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/hermit.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** done
 
 ### `util/exec/hermit › isHermit`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return true when binarySource is hermit | 16 | pending | — | — | —|
+| should return true when binarySource is hermit | 16 | not-applicable | Tests TypeScript hermit exec wrapper with mocking; no Rust equivalent | — | —|
 
 ### `util/exec/hermit › findHermitCwd`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| ("$dir") === $expected (hermit: $hermitLocation) | 30 | pending | — | — | —|
-| should throw error when hermit cwd is not found | 49 | pending | — | — | —|
+| ("$dir") === $expected (hermit: $hermitLocation) | 30 | not-applicable | Tests TypeScript hermit exec wrapper with mocking; no Rust equivalent | — | —|
+| should throw error when hermit cwd is not found | 49 | not-applicable | Tests TypeScript hermit exec wrapper with mocking; no Rust equivalent | — | —|
 
 ### `util/exec/hermit › getHermitEnvs`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return hermit environment variables when hermit env returns successfully | 62 | pending | — | — | —|
+| should return hermit environment variables when hermit env returns successfully | 62 | not-applicable | Tests TypeScript hermit exec wrapper with mocking; no Rust equivalent | — | —|
 
 ---
 
