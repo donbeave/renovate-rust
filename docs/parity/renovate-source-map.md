@@ -344,7 +344,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/deno/index.ts` | `managers.rs` | partial | fileMatch pattern present; `supersedesManagers`, `supportsLockFileMaintenance` partially handled |
 | `lib/modules/manager/deno/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
 | `lib/modules/manager/deno/compat.ts` | `extractors/deno.rs` | partial | Compat layer for npm re-export |
-| `lib/modules/manager/deno/post.ts` | `extractors/deno.rs` | full | Post-processing: parse_deno_lock, get_locked_version, normalize_workspace, apply_locked_versions |
+| `lib/modules/manager/deno/post.ts` | `extractors/deno.rs` | partial | Post-processing: parse_deno_lock, get_locked_version, normalize_workspace, apply_locked_versions present. Missing: collectPackageJsonAsWorkspaceMember, postExtract error handling, workspace member pattern matching |
 | `lib/modules/manager/deno/schema.ts` | N/A | out-of-scope | Zod schema |
 | `lib/modules/manager/deno/types.ts` | N/A | out-of-scope | Type-only file |
 | `lib/modules/manager/deno/update.ts` | `extractors/deno.rs` | full | `deno_update_dependency()` present |
@@ -774,7 +774,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/npm/extract/npm.ts` | `extractors/npm.rs` | partial | npm-specific extraction inline |
 | `lib/modules/manager/npm/extract/pnpm.ts` | `extractors/npm.rs` | full | `extract_pnpm_workspace_file()` present |
 | `lib/modules/manager/npm/extract/post/index.ts` | `extractors/npm.rs` | partial | Post-processing partially inline |
-| `lib/modules/manager/npm/extract/post/locked-versions.ts` | `extractors/npm.rs` | full | Lock file parsing (`parse_npm_lock()`, `parse_yarn_lock()`) present |
+| `lib/modules/manager/npm/extract/post/locked-versions.ts` | `extractors/npm.rs` | partial | Lock file parsing (`parse_npm_lock()`, `parse_yarn_lock()`) present. Missing: pnpm-lock locked version support, workspace lockfile path resolution, lockfile v2 constraint augmentation, engines/packageManager/volta exclusion |
 | `lib/modules/manager/npm/extract/post/monorepo.ts` | `extractors/npm.rs` | partial | Monorepo detection partially handled |
 | `lib/modules/manager/npm/extract/types.ts` | N/A | out-of-scope | Type-only file |
 | `lib/modules/manager/npm/extract/utils.ts` | `extractors/npm.rs` | partial | Utility functions inline |
@@ -1110,7 +1110,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/terraform/hcl/index.ts` | N/A | not-started | Full HCL parser not implemented (uses regex-based extraction) |
 | `lib/modules/manager/terraform/hcl/types.ts` | N/A | out-of-scope | Type-only file |
 | `lib/modules/manager/terraform/lockfile/hash.ts` | `extractors/terraform.rs` | partial | Lockfile hash handling inline |
-| `lib/modules/manager/terraform/lockfile/index.ts` | `extractors/terraform.rs` | full | `extract_terraform_locks()` + `extract_with_lockfile()` present |
+| `lib/modules/manager/terraform/lockfile/index.ts` | `extractors/terraform.rs` | partial | `extract_terraform_locks()` + `extract_with_lockfile()` present. Missing: getNewConstraint, full lockfile maintenance update, hash generation, subfolder handling |
 | `lib/modules/manager/terraform/lockfile/types.ts` | N/A | out-of-scope | Type-only file |
 | `lib/modules/manager/terraform/lockfile/update-locked.ts` | `extractors/terraform.rs` | full | `update_locked_terraform_dependency()` present |
 | `lib/modules/manager/terraform/lockfile/util.ts` | `extractors/terraform.rs` | partial | Lockfile utilities inline |
