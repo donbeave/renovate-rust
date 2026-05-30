@@ -259,7 +259,7 @@ pub fn parse_catalog(package_file: &str, content: &str) -> GradleCatalogResult {
     let plugins_sub_content = &content[plugins_start_index..];
 
     if let Some(plugins) = plugins {
-        for (plugin_name, descriptor) in plugins {
+        for (_plugin_name, descriptor) in plugins {
             let (dep_name_str, version_val, is_ref) = match descriptor {
                 toml::Value::String(s) => {
                     let parts: Vec<&str> = s.splitn(2, ':').collect();

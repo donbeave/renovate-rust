@@ -10746,6 +10746,26 @@ dep1 = "^1.0.0"
         assert!(res.contains("(in timezone Europe/Istanbul)"));
     }
 
+    // Ported: "renders UTC as the default timezone" — config-description.spec.ts line 54
+    #[test]
+    fn test_config_desc_utc_default() {
+        let schedule = vec!["* 1 * * *".to_owned()];
+        let res = get_pr_config_description(
+            Some(&schedule),
+            None,
+            None,
+            false,
+            false,
+            None,
+            false,
+            false,
+            0,
+            None,
+        );
+        assert!(res.contains("(UTC)"));
+        assert!(res.contains("`* 1 * * *`"));
+    }
+
     // Ported: "displays later schedules" — config-description.spec.ts line 67
     #[test]
     fn test_config_desc_later_schedules() {

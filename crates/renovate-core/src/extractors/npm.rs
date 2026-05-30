@@ -5143,7 +5143,7 @@ chalk@^2.4.1:
     // Ported: "validates versions" — npm/update/locked-dependency/index.spec.ts line 54
     #[test]
     fn npm_locked_dep_main_validates_versions() {
-        let mut config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "express", "4.0.0", "^2.0.0");
+        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "express", "4.0.0", "^2.0.0");
         let res = npm_update_locked_dependency_main(&config);
         // ^2.0.0 is not clean semver → update-failed
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);

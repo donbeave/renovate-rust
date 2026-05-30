@@ -5,28 +5,27 @@
 ## `lib/modules/versioning/debian/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/debian/index.spec.ts
-**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+**Total tests:** 16 | **Ported:** 14 | **Actionable:** 14 | **Status:** done
 
 ### `modules/versioning/debian/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| test | 18 | pending | — | — | — |
-| isValid("$version") === $expected | 22 | pending | — | — | — |
-| isCompatible("$version") === $expected | 82 | pending | — | — | — |
-| isSingleVersion("$version") === $expected | 104 | pending | — | — | — |
-| isStable("$version") === $expected | 115 | pending | — | — | — |
-| ensures that rolling release is not refreshed within frame time window: $version | 169 | pending | — | — | —|
-| isVersion("$version") === $expected | 188 | pending | — | — | — |
-| getMajor, getMinor, getPatch for "$version" | 248 | pending | — | — | — |
-| equals($a, $b) === $expected | 273 | pending | — | — | — |
-| isGreaterThan("$a", "$b") === $expected | 297 | pending | — | — | — |
-| getSatisfyingVersion($versions, "$range") === "$expected" | 340 | pending | — | — | — |
-| minSatisfyingVersion($versions, "$range") === "$expected" | 361 | pending | — | — | — |
-| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 383 | pending | — | — | — |
-| debian.sortVersions($a, $b) === $expected | 409 | pending | — | — | — |
-| matches("$version", "$range") === "$expected" | 429 | pending | — | — | — |
-| checks runtime date handling & refresh rolling release data | 441 | pending | — | — | —|
+| test | 18 | ported | versioning/debian.rs | debian_basic_test | — |
+| isValid("$version") === $expected | 22 | ported | versioning/debian.rs | debian_is_valid | — |
+| isCompatible("$version") === $expected | 82 | ported | versioning/debian.rs | debian_is_compatible | — |
+| isSingleVersion("$version") === $expected | 104 | ported | versioning/debian.rs | debian_is_single_version | — |
+| isStable("$version") === $expected | 115 | ported | versioning/debian.rs | debian_is_stable | — |
+| ensures that rolling release is not refreshed within frame time window: $version | 169 | not-applicable | — | — | Tests logging/debug infrastructure for cache refresh; fixed snapshot has no refresh |
+| isVersion("$version") === $expected | 188 | ported | versioning/debian.rs | debian_is_version | — |
+| getMajor, getMinor, getPatch for "$version" | 248 | ported | versioning/debian.rs | debian_get_major_minor_patch | — |
+| equals($a, $b) === $expected | 273 | ported | versioning/debian.rs | debian_equals | — |
+| isGreaterThan("$a", "$b") === $expected | 297 | ported | versioning/debian.rs | debian_is_greater_than | — |
+| getSatisfyingVersion($versions, "$range") === "$expected" | 340 | ported | versioning/debian.rs | debian_get_satisfying_version | — |
+| minSatisfyingVersion($versions, "$range") === "$expected" | 361 | ported | versioning/debian.rs | debian_min_satisfying_version | — |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 383 | ported | versioning/debian.rs | debian_get_new_value | — |
+| debian.sortVersions($a, $b) === $expected | 409 | ported | versioning/debian.rs | debian_sort_versions | — |
+| matches("$version", "$range") === $expected | 429 | ported | versioning/debian.rs | debian_matches | — |
+| checks runtime date handling & refresh rolling release data | 441 | not-applicable | — | — | Tests dynamic time-based refresh of rolling release data; fixed snapshot has no refresh |
 
 ---
-

@@ -102,15 +102,14 @@ pub(crate) fn collect_branch_updates(
         std::collections::BTreeMap::new();
     for file in &report.files {
         for dep in &file.deps {
-            if let output::DepStatus::UpdateAvailable { .. } = &dep.status {
-                if let Some(branch) = dep.branch_name.as_ref() {
+            if let output::DepStatus::UpdateAvailable { .. } = &dep.status
+                && let Some(branch) = dep.branch_name.as_ref() {
                     branches.entry(branch.clone()).or_default().push(BranchDep {
                         file_path: file.path.clone(),
                         manager: file.manager.clone(),
                         dep: dep.clone(),
                     });
                 }
-            }
         }
     }
     branches

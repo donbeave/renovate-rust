@@ -548,7 +548,7 @@ pub fn is_get_pkg_releases_config(value: &serde_json::Value) -> bool {
         Some(o) => o,
         None => return false,
     };
-    let datasource = match obj.get("datasource").and_then(|v| v.as_str()) {
+    let _datasource = match obj.get("datasource").and_then(|v| v.as_str()) {
         Some(s) if !s.is_empty() => s,
         _ => return false,
     };

@@ -241,16 +241,18 @@ fn distro_find_by_series(input: &str) -> Option<&'static DistroInfoEntry> {
 
 // ── Distro info functions ─────────────────────────────────────────────────────
 
-fn distro_get_version_by_codename(input: &str) -> &'static str {
-    distro_find_by_series(input)
-        .map(|e| e.version)
-        .unwrap_or(input)
+fn distro_get_version_by_codename(input: &str) -> String {
+    match distro_find_by_series(input) {
+        Some(e) => e.version.to_owned(),
+        None => input.to_owned(),
+    }
 }
 
-fn distro_get_codename_by_version(version: &str) -> &'static str {
-    distro_find_by_version(version)
-        .map(|e| e.series)
-        .unwrap_or(version)
+fn distro_get_codename_by_version(version: &str) -> String {
+    match distro_find_by_version(version) {
+        Some(e) => e.series.to_owned(),
+        None => version.to_owned(),
+    }
 }
 
 fn distro_is_created(version: &str) -> bool {
@@ -311,12 +313,11 @@ const ROLLING_DATA: &[RollingEntry] = &[
     },
 ];
 
-fn rolling_get_version_by_lts(input: &str) -> &'static str {
-    ROLLING_DATA
-        .iter()
-        .find(|e| e.series == input)
-        .map(|e| e.version)
-        .unwrap_or(input)
+fn rolling_get_version_by_lts(input: &str) -> &str {
+    match ROLLING_DATA.iter().find(|e| e.series == input) {
+        Some(e) => e.version,
+        None => input,
+    }
 }
 
 fn rolling_has(input: &str) -> bool {
@@ -330,11 +331,6 @@ fn rolling_get_lts_by_version(version: &str) -> Option<&'static str> {
         .map(|e| e.series)
 }
 
-struct RollingSchedule {
-    version: &'static str,
-    series: &'static str,
-}
-
 fn rolling_schedule(input: &str) -> Option<&'static RollingEntry> {
     ROLLING_DATA
         .iter()
@@ -343,9 +339,9 @@ fn rolling_schedule(input: &str) -> Option<&'static RollingEntry> {
 
 // ── Parse helper ──────────────────────────────────────────────────────────────
 
-fn resolve_version(version: &str) -> &'static str {
+fn resolve_version(version: &str) -> String {
     let ver = rolling_get_version_by_lts(version);
-    distro_get_version_by_codename(ver)
+    distro_get_version_by_codename(&ver)
 }
 
 fn debian_parse(version: &str) -> Option<Vec<i64>> {
@@ -355,7 +351,7 @@ fn debian_parse(version: &str) -> Option<Vec<i64>> {
     } else {
         resolve_version(version)
     };
-    if !distro_exists(ver) {
+    if !distro_exists(&ver) {
         return None;
     }
     Some(ver.split('.').filter_map(|s| s.parse().ok()).collect())
@@ -385,7 +381,7 @@ fn debian_compare_internal(a: &str, b: &str) -> i32 {
 pub fn debian_is_valid(version: &str) -> bool {
     let parsed_valid = debian_parse(version).is_some();
     let ver = resolve_version(version);
-    (parsed_valid && distro_is_created(ver)) || deb::is_dated_codename(version)
+    (parsed_valid && distro_is_created(&ver)) || deb::is_dated_codename(version)
 }
 
 pub fn debian_is_stable(version: &str) -> bool {
@@ -394,10 +390,10 @@ pub fn debian_is_stable(version: &str) -> bool {
             return false;
         };
         let ver = distro_get_version_by_codename(codename);
-        return distro_is_released(ver) && !distro_is_eol_lts(ver);
+        return distro_is_released(&ver) && !distro_is_eol_lts(&ver);
     }
     let ver = resolve_version(version);
-    distro_is_released(ver) && !distro_is_eol_lts(ver)
+    distro_is_released(&ver) && !distro_is_eol_lts(&ver)
 }
 
 pub fn debian_equals(a: &str, b: &str) -> bool {
@@ -413,7 +409,7 @@ pub fn debian_equals(a: &str, b: &str) -> bool {
     }
     let a_base = get_base_version(a);
     let b_base = get_base_version(b);
-    debian_compare_internal(a_base, b_base) == 0
+    debian_compare_internal(&a_base, &b_base) == 0
 }
 
 pub fn debian_is_greater_than(a: &str, b: &str) -> bool {
@@ -459,8 +455,8 @@ pub fn debian_is_greater_than(a: &str, b: &str) -> bool {
 
 pub fn debian_get_major(version: &str) -> Option<i64> {
     let ver = get_base_version(version);
-    if debian_is_valid(ver) {
-        debian_parse(ver).and_then(|r| r.first().copied())
+    if debian_is_valid(&ver) {
+        debian_parse(&ver).and_then(|r| r.first().copied())
     } else {
         None
     }
@@ -468,8 +464,8 @@ pub fn debian_get_major(version: &str) -> Option<i64> {
 
 pub fn debian_get_minor(version: &str) -> Option<i64> {
     let ver = get_base_version(version);
-    if debian_is_valid(ver) {
-        debian_parse(ver).and_then(|r| r.get(1).copied())
+    if debian_is_valid(&ver) {
+        debian_parse(&ver).and_then(|r| r.get(1).copied())
     } else {
         None
     }
@@ -477,8 +473,8 @@ pub fn debian_get_minor(version: &str) -> Option<i64> {
 
 pub fn debian_get_patch(version: &str) -> Option<i64> {
     let ver = get_base_version(version);
-    if debian_is_valid(ver) {
-        debian_parse(ver).and_then(|r| r.get(2).copied())
+    if debian_is_valid(&ver) {
+        debian_parse(&ver).and_then(|r| r.get(2).copied())
     } else {
         None
     }
@@ -501,14 +497,14 @@ pub fn debian_get_new_value(current_value: Option<&str>, new_version: &str) -> O
             Some(d) => d.version,
             None => new_version,
         };
-        return Some(distro_get_codename_by_version(ver).to_owned());
+        return Some(distro_get_codename_by_version(ver));
     }
 
     if rolling_has(new_version) {
         return rolling_schedule(new_version).map(|d| d.version.to_owned());
     }
 
-    Some(distro_get_version_by_codename(new_version).to_owned())
+    Some(distro_get_version_by_codename(new_version))
 }
 
 pub fn debian_sort_versions(a: &str, b: &str) -> i32 {
@@ -531,23 +527,23 @@ pub fn debian_is_version(version: &str) -> bool {
     debian_is_valid(version)
 }
 
-pub fn debian_get_satisfying_version(versions: &[&str], range: &str) -> Option<&str> {
+pub fn debian_get_satisfying_version<'a>(versions: &'a [&str], range: &str) -> Option<&'a str> {
     versions.iter().find(|&&v| debian_equals(v, range)).copied()
 }
 
-pub fn debian_min_satisfying_version(versions: &[&str], range: &str) -> Option<&str> {
+pub fn debian_min_satisfying_version<'a>(versions: &'a [&str], range: &str) -> Option<&'a str> {
     versions.iter().find(|&&v| debian_equals(v, range)).copied()
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
-fn get_base_version(version: &str) -> &'static str {
+fn get_base_version(version: &str) -> String {
     if deb::is_dated_codename(version) {
         if let Some(codename) = deb::get_dated_container_image_codename(version) {
             return distro_get_version_by_codename(codename);
         }
     }
-    version
+    version.to_owned()
 }
 
 fn parse_suffix_numeric(suffix: Option<&str>) -> f64 {
@@ -570,7 +566,7 @@ mod tests {
 
     // Ported: 'isValid("$version") === $expected' — versioning/debian/index.spec.ts line 78
     #[test]
-    fn debian_is_valid() {
+    fn test_debian_is_valid() {
         let valid = [
             "buzz", "rex", "bo", "hamm", "slink", "potato", "woody", "sarge", "etch", "lenny",
             "squeeze", "wheezy", "jessie", "stretch", "buster", "bullseye", "bookworm", "1.1",
@@ -601,18 +597,18 @@ mod tests {
     #[test]
     fn debian_is_compatible() {
         let compatible = [
-            ("7", None),
-            ("11", None),
-            ("12", None),
-            ("stable", None),
-            ("oldstable", None),
-            ("oldoldstable", None),
-            ("wheezy", None),
-            ("bullseye", None),
-            ("bookworm", None),
+            ("7", None::<&str>),
+            ("11", None::<&str>),
+            ("12", None::<&str>),
+            ("stable", None::<&str>),
+            ("oldstable", None::<&str>),
+            ("oldoldstable", None::<&str>),
+            ("wheezy", None::<&str>),
+            ("bullseye", None::<&str>),
+            ("bookworm", None::<&str>),
         ];
         let incompatible = [
-            ("forky", None),
+            ("forky", None::<&str>),
         ];
         for (version, range) in &compatible {
             assert!(
@@ -630,15 +626,15 @@ mod tests {
 
     // Ported: 'isSingleVersion("$version") === $expected' — versioning/debian/index.spec.ts line 111
     #[test]
-    fn debian_is_single_version() {
-        assert!(!debian_is_single_version("6"));
-        assert!(!debian_is_single_version(">=6"));
+    fn test_debian_is_single_version() {
+        assert!(!debian_is_single_version(""));
         assert!(debian_is_single_version("6"));
+        assert!(!debian_is_single_version(">=6"));
     }
 
     // Ported: 'isStable("$version") === $expected' — versioning/debian/index.spec.ts line 165
     #[test]
-    fn debian_is_stable() {
+    fn test_debian_is_stable() {
         let stable = [
             "buster",
             "bullseye",
@@ -701,7 +697,7 @@ mod tests {
 
     // Ported: 'isVersion("$version") === $expected' — versioning/debian/index.spec.ts line 244
     #[test]
-    fn debian_is_version() {
+    fn test_debian_is_version() {
         let valid = [
             "buzz", "rex", "bo", "hamm", "slink", "potato", "woody", "sarge", "etch", "lenny",
             "squeeze", "wheezy", "jessie", "stretch", "buster", "bullseye", "bookworm", "1.1",
@@ -752,7 +748,7 @@ mod tests {
 
     // Ported: 'equals($a, $b) === $expected' — versioning/debian/index.spec.ts line 293
     #[test]
-    fn debian_equals() {
+    fn test_debian_equals() {
         let cases: &[(&str, &str, bool)] = &[
             ("woody", "sarge", false),
             ("lenny", "3", false),
@@ -780,7 +776,7 @@ mod tests {
 
     // Ported: 'isGreaterThan("$a", "$b") === $expected' — versioning/debian/index.spec.ts line 336
     #[test]
-    fn debian_is_greater_than() {
+    fn test_debian_is_greater_than() {
         let cases: &[(&str, &str, bool)] = &[
             ("5", "6", false),
             ("6", "5", true),
@@ -831,7 +827,7 @@ mod tests {
 
     // Ported: 'getSatisfyingVersion($versions, "$range") === "$expected"' — versioning/debian/index.spec.ts line 355
     #[test]
-    fn debian_get_satisfying_version() {
+    fn test_debian_get_satisfying_version() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
             (&["8", "9", "10", "11"], "2020.04", None),
             (&["8", "9", "10", "11"], "foobar", None),
@@ -885,7 +881,7 @@ mod tests {
 
     // Ported: 'minSatisfyingVersion($versions, "$range") === "$expected"' — versioning/debian/index.spec.ts line 377
     #[test]
-    fn debian_min_satisfying_version() {
+    fn test_debian_min_satisfying_version() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
             (&["8", "9", "10", "11"], "2020.04", None),
             (&["8", "9", "10", "11"], "foobar", None),
@@ -944,7 +940,7 @@ mod tests {
 
     // Ported: 'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"' — versioning/debian/index.spec.ts line 396
     #[test]
-    fn debian_get_new_value() {
+    fn test_debian_get_new_value() {
         let cases: &[(Option<&str>, &str, Option<&str>)] = &[
             (None, "foobar", Some("foobar")),
             (Some("stretch"), "11", Some("bullseye")),
@@ -960,7 +956,7 @@ mod tests {
         for (current_value, new_version, expected) in cases {
             assert_eq!(
                 debian_get_new_value(*current_value, new_version),
-                *expected,
+                (*expected).map(|s| s.to_owned()),
                 "getNewValue({current_value:?}, {new_version:?})"
             );
         }
@@ -968,7 +964,7 @@ mod tests {
 
     // Ported: 'debian.sortVersions($a, $b) === $expected' — versioning/debian/index.spec.ts line 425
     #[test]
-    fn debian_sort_versions() {
+    fn test_debian_sort_versions() {
         let cases: &[(&str, &str, i32)] = &[
             ("woody", "sarge", -1),
             ("lenny", "3", 2),
@@ -996,7 +992,7 @@ mod tests {
 
     // Ported: 'matches("$version", "$range") === $expected' — versioning/debian/index.spec.ts line 436
     #[test]
-    fn debian_matches() {
+    fn test_debian_matches() {
         assert!(!debian_matches("10", "10-slim"));
         assert!(debian_matches("11", "11"));
         assert!(!debian_matches("11", "11.0"));
