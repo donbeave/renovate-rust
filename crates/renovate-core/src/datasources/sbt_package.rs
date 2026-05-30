@@ -1319,4 +1319,92 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         let ts = get_pom_release_timestamp(&[pkg_url.as_str()], "1.2.3", &http).await;
         assert_eq!(ts.as_deref(), Some("2015-10-21T07:28:00.000Z"));
     }
+
+    // Ported: "continues when parseUrl returns null for packageRootUrl" — datasource/sbt-package/index.spec.ts line 285
+    //
+    // The TS test mocks `parseUrl` to return null for the group root URL,
+    // preventing further URL construction. In Rust, the equivalent is the
+    // slash-separated group root returning a listing, but all artifact subdirs
+    // and the maven fallback returning nothing.
+    #[tokio::test]
+    async fn continues_when_package_root_url_fails() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/maven2/org/example/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                "<a href=\"example/\" title='example/'>example/</a>",
+            ))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/maven2/org.example/"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/maven2/org/example/example/"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/maven2/org/example/example/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_pkg_releases(
+            "org.example:example",
+            &format!("{}/maven2", server.uri()),
+            &http,
+        )
+        .await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "skips pkgUrl when parseUrl returns null for it" — datasource/sbt-package/index.spec.ts line 322
+    //
+    // The TS test mocks `parseUrl` to return null for the artifact subdir URL.
+    // In Rust, the artifact subdir listing returns version links but subsequent
+    // version URL resolution yields no versions.
+    #[tokio::test]
+    async fn skips_pkg_url_when_parse_url_returns_null() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/maven2/org/example/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                "<a href=\"example/\" title='example/'>example/</a>",
+            ))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/maven2/org.example/"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/maven2/org/example/example/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                "<a href='1.2.3/'>1.2.3/</a>",
+            ))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/maven2/org/example/example/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_pkg_releases(
+            "org.example:example",
+            &format!("{}/maven2", server.uri()),
+            &http,
+        )
+        .await;
+        assert!(result.is_some());
+        let res = result.unwrap();
+        assert_eq!(res.releases.len(), 1);
+        assert_eq!(res.releases[0].version, "1.2.3");
+    }
 }
