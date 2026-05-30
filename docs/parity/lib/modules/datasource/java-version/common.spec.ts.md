@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/java-version/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/java-version/common.spec.ts
-**Total tests:** 3 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 3 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/java-version/common`
 

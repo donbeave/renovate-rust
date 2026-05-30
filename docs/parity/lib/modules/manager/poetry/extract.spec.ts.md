@@ -5,7 +5,7 @@
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
-**Total tests:** 34 | **Ported:** 34 | **Actionable:** 34 | **Status:** ported
+**Total tests:** 34 | **Ported:** 34 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

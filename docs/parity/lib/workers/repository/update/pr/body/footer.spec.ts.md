@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/body/footer.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/footer.spec.ts
-**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `workers/repository/update/pr/body/footer`
 

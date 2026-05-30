@@ -5,7 +5,7 @@
 ## `lib/config/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/index.spec.ts
-**Total tests:** 12 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
+**Total tests:** 12 | **Ported:** 12 | **Actionable:** 0 | **Status:** done
 
 ### `config/index › mergeChildConfig(parentConfig, childConfig)`
 

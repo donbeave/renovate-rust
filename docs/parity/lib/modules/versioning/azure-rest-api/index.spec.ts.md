@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/azure-rest-api/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/azure-rest-api/index.spec.ts
-**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
+**Total tests:** 11 | **Ported:** 11 | **Actionable:** 0 | **Status:** done
 
 ### `modules/versioning/azure-rest-api/index`
 

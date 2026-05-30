@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/key.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/key.spec.ts
-**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 0 | **Status:** done
 
 ### `util/cache/package/key › getCombinedKey`
 

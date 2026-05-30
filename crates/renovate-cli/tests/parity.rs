@@ -1207,3 +1207,51 @@ fn parity_buildpacks_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for buildpacks-skipped fixture");
 }
+
+#[test]
+fn parity_setup_cfg_skipped() {
+    let actual = run_fixture("setup-cfg-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "setup.cfg",
+                    "manager": "setup-cfg",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "requests",
+                            "status": "skipped",
+                            "reason": "noversion"
+                        },
+                        {
+                            "name": "urllib3",
+                            "status": "skipped",
+                            "reason": "noversion"
+                        },
+                        {
+                            "name": "setuptools",
+                            "status": "skipped",
+                            "reason": "noversion"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for setup-cfg-skipped fixture");
+}

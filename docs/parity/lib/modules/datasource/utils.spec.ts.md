@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/utils.spec.ts
-**Total tests:** 6 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 6 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/utils`
 

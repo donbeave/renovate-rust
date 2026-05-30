@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/artifactory/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/artifactory/index.spec.ts
-**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/artifactory/index › getReleases`
 

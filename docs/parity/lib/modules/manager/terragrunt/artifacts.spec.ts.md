@@ -5,7 +5,7 @@
 ## `lib/modules/manager/terragrunt/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt/artifacts.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `tests`
 

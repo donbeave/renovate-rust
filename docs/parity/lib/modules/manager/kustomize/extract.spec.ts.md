@@ -5,7 +5,7 @@
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 43 | **Actionable:** 43 | **Status:** ported
+**Total tests:** 44 | **Ported:** 43 | **Actionable:** 0 | **Status:** done
 
 ### `parseKustomize` (top-level)
 

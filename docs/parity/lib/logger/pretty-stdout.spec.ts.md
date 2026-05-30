@@ -5,7 +5,7 @@
 ## `lib/logger/pretty-stdout.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/pretty-stdout.spec.ts
-**Total tests:** 15 | **Ported:** 14 | **Actionable:** 14 | **Status:** ported
+**Total tests:** 15 | **Ported:** 14 | **Actionable:** 0 | **Status:** done
 
 ### `logger/pretty-stdout › getMeta(rec)`
 

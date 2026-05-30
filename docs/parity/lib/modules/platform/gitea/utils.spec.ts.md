@@ -5,7 +5,7 @@
 ## `lib/modules/platform/gitea/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/utils.spec.ts
-**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 0 | **Status:** done
 
 ### `tests`
 

@@ -5,16 +5,16 @@
 ## `lib/workers/repository/config-migration/branch/rebase.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/rebase.spec.ts
-**Total tests:** 5 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+**Total tests:** 5 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
 
 ### `workers/repository/config-migration/branch/rebase › rebaseMigrationBranch()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does nothing if branch is up to date (%s) | 48 | not-applicable | — | — | SCM git operations / prettier formatting |
-| rebases migration branch (%s) | 66 | not-applicable | — | — | SCM git operations / prettier formatting |
-| applies prettier formatting when rebasing the migration branch (%s) | 83 | not-applicable | — | — | SCM git operations / prettier formatting |
-| does not rebases migration branch when in dryRun is on (%s) | 118 | not-applicable | — | — | SCM git operations / prettier formatting |
+| does nothing if branch is up to date (%s)  | 48 | pending | — | — | SCM git operations / prettier formatting |
+| rebases migration branch (%s)  | 66 | pending | — | — | SCM git operations / prettier formatting |
+| applies prettier formatting when rebasing the migration branch (%s)  | 83 | pending | — | — | SCM git operations / prettier formatting |
+| does not rebases migration branch when in dryRun is on (%s)  | 118 | pending | — | — | SCM git operations / prettier formatting |
 
 ### `workers/repository/config-migration/branch/rebase › jsonStripWhiteSpaces()`
 

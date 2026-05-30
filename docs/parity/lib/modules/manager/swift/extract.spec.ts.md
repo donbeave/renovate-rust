@@ -5,7 +5,7 @@
 ## `lib/modules/manager/swift/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/extract.spec.ts
-**Total tests:** 21 | **Ported:** 21 | **Actionable:** 21 | **Status:** ported
+**Total tests:** 21 | **Ported:** 21 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

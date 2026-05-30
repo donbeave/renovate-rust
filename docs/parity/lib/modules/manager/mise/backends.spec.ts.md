@@ -5,7 +5,7 @@
 ## `lib/modules/manager/mise/backends.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/backends.spec.ts
-**Total tests:** 37 | **Ported:** 37 | **Actionable:** 37 | **Status:** ported
+**Total tests:** 37 | **Ported:** 37 | **Actionable:** 0 | **Status:** done
 
 ### `createAquaToolConfig()`
 

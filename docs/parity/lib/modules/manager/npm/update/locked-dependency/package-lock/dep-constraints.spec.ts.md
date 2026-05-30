@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts
-**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 0 | **Status:** done
 
 ### `findDepConstraints()`
 

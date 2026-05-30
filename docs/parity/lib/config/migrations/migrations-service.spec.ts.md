@@ -5,7 +5,7 @@
 ## `lib/config/migrations/migrations-service.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/migrations-service.spec.ts
-**Total tests:** 6 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 6 | **Ported:** 4 | **Actionable:** 0 | **Status:** done
 
 ### `config/migrations/migrations-service`
 

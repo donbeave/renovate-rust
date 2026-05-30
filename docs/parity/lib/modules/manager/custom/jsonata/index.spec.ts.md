@@ -5,7 +5,7 @@
 ## `lib/modules/manager/custom/jsonata/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/custom/jsonata/index.spec.ts
-**Total tests:** 14 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `tests`
 

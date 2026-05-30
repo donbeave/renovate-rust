@@ -5,7 +5,7 @@
 ## `lib/modules/manager/pip-compile/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/common.spec.ts
-**Total tests:** 27 | **Ported:** 7 | **Actionable:** 27 | **Status:** partial
+**Total tests:** 27 | **Ported:** 7 | **Actionable:** 20 | **Status:** partial
 
 ### `extractHeaderCommand()`
 

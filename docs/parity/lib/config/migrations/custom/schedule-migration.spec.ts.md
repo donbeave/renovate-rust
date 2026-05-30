@@ -5,7 +5,7 @@
 ## `lib/config/migrations/custom/schedule-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/schedule-migration.spec.ts
-**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 0 | **Status:** done
 
 ### `config/migrations/custom/schedule-migration`
 

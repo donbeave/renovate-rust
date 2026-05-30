@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/deb/url.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deb/url.spec.ts
-**Total tests:** 6 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 6 | **Ported:** 4 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/deb/url`
 

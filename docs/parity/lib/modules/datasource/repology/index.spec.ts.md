@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/repology/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/repology/index.spec.ts
-**Total tests:** 19 | **Ported:** 18 | **Actionable:** 18 | **Status:** ported
+**Total tests:** 19 | **Ported:** 18 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/repology/index`
 

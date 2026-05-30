@@ -5,7 +5,7 @@
 ## `lib/modules/manager/helmv3/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmv3/extract.spec.ts
-**Total tests:** 12 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
+**Total tests:** 12 | **Ported:** 12 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

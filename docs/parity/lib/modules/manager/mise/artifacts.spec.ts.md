@@ -5,7 +5,7 @@
 ## `lib/modules/manager/mise/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/artifacts.spec.ts
-**Total tests:** 23 | **Ported:** 8 | **Actionable:** 23 | **Status:** partial
+**Total tests:** 23 | **Ported:** 8 | **Actionable:** 15 | **Status:** partial
 
 ### `modules/manager/mise/artifacts`
 

@@ -5,7 +5,7 @@
 ## `lib/config/presets/internal/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/schedule.spec.ts
-**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 0 | **Status:** done
 
 ### `config/presets/internal/schedule › daily`
 

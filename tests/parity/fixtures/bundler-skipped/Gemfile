@@ -1,0 +1,4 @@
+source "https://rubygems.org"
+
+gem "local_gem", path: "../local_gem"
+gem "other", path: "vendor/gems/other"

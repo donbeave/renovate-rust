@@ -5,7 +5,7 @@
 ## `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts
-**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `util/github/graphql/query-adapters/branches-query-adapter`
 

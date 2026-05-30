@@ -5,7 +5,7 @@
 ## `lib/util/http/jira.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/jira.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/http/jira`
 

@@ -5,7 +5,7 @@
 ## `lib/config/presets/http/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/http/index.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `config/presets/http/index › getPreset()`
 

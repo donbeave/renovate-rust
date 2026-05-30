@@ -5,7 +5,7 @@
 ## `lib/modules/manager/mise/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/index.spec.ts
-**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 0 | **Status:** done
 
 ### `modules/manager/mise/index › managerFilePatterns`
 

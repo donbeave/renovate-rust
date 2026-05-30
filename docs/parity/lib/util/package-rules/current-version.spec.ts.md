@@ -5,7 +5,7 @@
 ## `lib/util/package-rules/current-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/current-version.spec.ts
-**Total tests:** 10 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+**Total tests:** 10 | **Ported:** 9 | **Actionable:** 0 | **Status:** done
 
 ### `util/package-rules/current-version › match`
 

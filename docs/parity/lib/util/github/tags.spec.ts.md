@@ -5,7 +5,7 @@
 ## `lib/util/github/tags.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/tags.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `util/github/tags › findCommitOfTag`
 

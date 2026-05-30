@@ -5,7 +5,7 @@
 ## `lib/config/decrypt.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/decrypt.spec.ts
-**Total tests:** 15 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
+**Total tests:** 15 | **Ported:** 11 | **Actionable:** 0 | **Status:** done
 
 ### `config/decrypt › decryptConfig()`
 

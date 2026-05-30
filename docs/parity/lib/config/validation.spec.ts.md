@@ -5,7 +5,7 @@
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 131 | **Ported:** 131 | **Actionable:** 131 | **Status:** ported
+**Total tests:** 131 | **Ported:** 131 | **Actionable:** 0 | **Status:** done
 
 ### `config/validation › validateConfig(config)`
 

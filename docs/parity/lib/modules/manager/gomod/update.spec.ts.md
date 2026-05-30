@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gomod/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/update.spec.ts
-**Total tests:** 33 | **Ported:** 33 | **Actionable:** 33 | **Status:** ported
+**Total tests:** 33 | **Ported:** 33 | **Actionable:** 0 | **Status:** done
 
 ### `updateDependency`
 

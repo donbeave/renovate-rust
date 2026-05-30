@@ -5,7 +5,7 @@
 ## `lib/workers/repository/process/sort.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/sort.spec.ts
-**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 0 | **Status:** done
 
 ### `workers/repository/process/sort › sortBranches()`
 

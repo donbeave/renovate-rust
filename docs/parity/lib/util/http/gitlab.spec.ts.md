@@ -5,7 +5,7 @@
 ## `lib/util/http/gitlab.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/gitlab.spec.ts
-**Total tests:** 14 | **Ported:** 0 | **Actionable:** 0 | **Status:** done-applicable
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `util/http/gitlab`
 

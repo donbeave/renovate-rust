@@ -5,7 +5,7 @@
 ## `lib/modules/manager/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/index.spec.ts
-**Total tests:** 22 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
+**Total tests:** 22 | **Ported:** 10 | **Actionable:** 0 | **Status:** done
 
 ### `modules/manager/index › supportedDatasources`
 

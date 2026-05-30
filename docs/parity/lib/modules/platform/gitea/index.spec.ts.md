@@ -5,7 +5,7 @@
 ## `lib/modules/platform/gitea/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/index.spec.ts
-**Total tests:** 134 | **Ported:** 0 | **Actionable:** 134 | **Status:** pending
+**Total tests:** 137 | **Ported:** 0 | **Actionable:** 137 | **Status:** pending
 
 ### `initPlatform()`
 

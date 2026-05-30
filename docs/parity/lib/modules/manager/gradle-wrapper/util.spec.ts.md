@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gradle-wrapper/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle-wrapper/util.spec.ts
-**Total tests:** 14 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
+**Total tests:** 14 | **Ported:** 12 | **Actionable:** 0 | **Status:** done
 
 ### `getJavaConstraint() › returns Java constraint based on gradle support`
 

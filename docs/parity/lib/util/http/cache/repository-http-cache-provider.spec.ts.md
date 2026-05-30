@@ -5,7 +5,7 @@
 ## `lib/util/http/cache/repository-http-cache-provider.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/cache/repository-http-cache-provider.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `util/http/cache/repository-http-cache-provider`
 

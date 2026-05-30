@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/hex/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/hex/index.spec.ts
-**Total tests:** 33 | **Ported:** 3 | **Actionable:** 33 | **Status:** partial
+**Total tests:** 33 | **Ported:** 3 | **Actionable:** 30 | **Status:** partial
 
 ### `modules/datasource/hex/index › getReleases`
 

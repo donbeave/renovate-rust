@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/util.spec.ts
-**Total tests:** 29 | **Ported:** 27 | **Actionable:** 27 | **Status:** ported
+**Total tests:** 29 | **Ported:** 27 | **Actionable:** 0 | **Status:** done
 
 ### `getGitStatusContextCombinedName`
 

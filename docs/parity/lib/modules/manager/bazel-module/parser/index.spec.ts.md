@@ -5,7 +5,7 @@
 ## `lib/modules/manager/bazel-module/parser/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/parser/index.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `parse`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/rust-release-channel/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/rust-release-channel/parse.spec.ts
-**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 0 | **Status:** done
 
 ### `modules/versioning/rust-release-channel/parse › channel names`
 

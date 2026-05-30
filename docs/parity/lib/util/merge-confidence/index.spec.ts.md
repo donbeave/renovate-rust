@@ -5,7 +5,7 @@
 ## `lib/util/merge-confidence/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/merge-confidence/index.spec.ts
-**Total tests:** 28 | **Ported:** 7 | **Actionable:** 28 | **Status:** partial
+**Total tests:** 28 | **Ported:** 7 | **Actionable:** 21 | **Status:** partial
 
 ### `util/merge-confidence/index › isActiveConfidenceLevel()`
 

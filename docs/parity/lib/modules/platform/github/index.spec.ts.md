@@ -5,7 +5,7 @@
 ## `lib/modules/platform/github/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/index.spec.ts
-**Total tests:** 206 | **Ported:** 0 | **Actionable:** 206 | **Status:** pending
+**Total tests:** 208 | **Ported:** 0 | **Actionable:** 208 | **Status:** pending
 
 ### `initPlatform()`
 

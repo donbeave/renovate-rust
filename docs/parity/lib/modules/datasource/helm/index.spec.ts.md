@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/helm/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/helm/index.spec.ts
-**Total tests:** 14 | **Ported:** 14 | **Actionable:** 14 | **Status:** ported
+**Total tests:** 14 | **Ported:** 14 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/helm/index › getReleases`
 

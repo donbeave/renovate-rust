@@ -5,7 +5,7 @@
 ## `lib/config/secrets.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/secrets.spec.ts
-**Total tests:** 13 | **Ported:** 13 | **Actionable:** 13 | **Status:** ported
+**Total tests:** 13 | **Ported:** 13 | **Actionable:** 0 | **Status:** done
 
 ### `config/secrets › validateConfigSecretsAndVariables(config)`
 

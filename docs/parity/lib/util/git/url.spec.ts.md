@@ -5,7 +5,7 @@
 ## `lib/util/git/url.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/url.spec.ts
-**Total tests:** 23 | **Ported:** 23 | **Actionable:** 23 | **Status:** ported
+**Total tests:** 23 | **Ported:** 23 | **Actionable:** 0 | **Status:** done
 
 ### `util/git/url › parseGitUrl`
 

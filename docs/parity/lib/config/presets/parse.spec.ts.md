@@ -5,7 +5,7 @@
 ## `lib/config/presets/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/parse.spec.ts
-**Total tests:** 46 | **Ported:** 46 | **Actionable:** 46 | **Status:** ported
+**Total tests:** 46 | **Ported:** 46 | **Actionable:** 0 | **Status:** done
 
 ### `config/presets/parse › parsePreset`
 

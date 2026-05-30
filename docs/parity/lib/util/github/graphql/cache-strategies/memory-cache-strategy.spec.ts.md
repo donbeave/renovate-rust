@@ -5,7 +5,7 @@
 ## `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `util/github/graphql/cache-strategies/memory-cache-strategy`
 

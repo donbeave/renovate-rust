@@ -5,7 +5,7 @@
 ## `lib/modules/manager/github-actions/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/parse.spec.ts
-**Total tests:** 53 | **Ported:** 53 | **Actionable:** 53 | **Status:** ported
+**Total tests:** 53 | **Ported:** 53 | **Actionable:** 0 | **Status:** done
 
 ### `modules/manager/github-actions/parse › parseActionReference`
 

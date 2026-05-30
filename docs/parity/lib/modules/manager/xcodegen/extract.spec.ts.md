@@ -5,7 +5,7 @@
 ## `lib/modules/manager/xcodegen/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/xcodegen/extract.spec.ts
-**Total tests:** 24 | **Ported:** 24 | **Actionable:** 24 | **Status:** ported
+**Total tests:** 24 | **Ported:** 24 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

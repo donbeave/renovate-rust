@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/pep440/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/pep440/index.spec.ts
-**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 0 | **Status:** done
 
 ### `modules/versioning/pep440/index`
 

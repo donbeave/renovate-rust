@@ -5,7 +5,7 @@
 ## `lib/util/http/auth.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/auth.spec.ts
-**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
+**Total tests:** 11 | **Ported:** 11 | **Actionable:** 0 | **Status:** done
 
 ### `util/http/auth › applyAuthorization`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/nuget/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/nuget/index.spec.ts
-**Total tests:** 36 | **Ported:** 1 | **Actionable:** 36 | **Status:** partial
+**Total tests:** 36 | **Ported:** 1 | **Actionable:** 35 | **Status:** partial
 
 ### `modules/datasource/nuget/index › parseRegistryUrl`
 

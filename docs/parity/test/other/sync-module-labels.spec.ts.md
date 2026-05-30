@@ -5,7 +5,7 @@
 ## `test/other/sync-module-labels.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/test/other/sync-module-labels.spec.ts
-**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 0 | **Status:** done
 
 ### `other/sync-module-labels`
 

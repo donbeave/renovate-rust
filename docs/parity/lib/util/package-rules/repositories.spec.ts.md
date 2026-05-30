@@ -5,7 +5,7 @@
 ## `lib/util/package-rules/repositories.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/repositories.spec.ts
-**Total tests:** 15 | **Ported:** 15 | **Actionable:** 15 | **Status:** ported
+**Total tests:** 15 | **Ported:** 15 | **Actionable:** 0 | **Status:** done
 
 ### `util/package-rules/repositories › match`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/bazel/rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel/rules/index.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `tests`
 

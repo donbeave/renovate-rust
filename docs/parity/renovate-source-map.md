@@ -344,7 +344,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/deno/index.ts` | `managers.rs` | partial | fileMatch pattern present; `supersedesManagers`, `supportsLockFileMaintenance` partially handled |
 | `lib/modules/manager/deno/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
 | `lib/modules/manager/deno/compat.ts` | `extractors/deno.rs` | partial | Compat layer for npm re-export |
-| `lib/modules/manager/deno/post.ts` | N/A | not-started | Post-processing not implemented |
+| `lib/modules/manager/deno/post.ts` | `extractors/deno.rs` | full | Post-processing: parse_deno_lock, get_locked_version, normalize_workspace, apply_locked_versions |
 | `lib/modules/manager/deno/schema.ts` | N/A | out-of-scope | Zod schema |
 | `lib/modules/manager/deno/types.ts` | N/A | out-of-scope | Type-only file |
 | `lib/modules/manager/deno/update.ts` | `extractors/deno.rs` | full | `deno_update_dependency()` present |
@@ -438,7 +438,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/git-submodules/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 | `lib/modules/manager/git-submodules/artifacts.ts` | `extractors/git_submodules.rs` | partial | `update_artifacts()` stub present (returns empty) |
 | `lib/modules/manager/git-submodules/types.ts` | N/A | out-of-scope | Type-only file |
-| `lib/modules/manager/git-submodules/update.ts` | N/A | not-started | Update dependency not implemented |
+| `lib/modules/manager/git-submodules/update.ts` | `extractors/git_submodules.rs` | full | update_dependency with branch field update/add |
 
 ### github-actions
 

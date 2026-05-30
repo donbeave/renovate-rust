@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/go/goproxy-parser.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/go/goproxy-parser.spec.ts
-**Total tests:** 9 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+**Total tests:** 9 | **Ported:** 7 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/go/goproxy-parser › parseGoproxy`
 

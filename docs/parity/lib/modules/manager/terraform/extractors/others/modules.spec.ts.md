@@ -5,7 +5,7 @@
 ## `lib/modules/manager/terraform/extractors/others/modules.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/others/modules.spec.ts
-**Total tests:** 13 | **Ported:** 13 | **Actionable:** 13 | **Status:** ported
+**Total tests:** 13 | **Ported:** 13 | **Actionable:** 0 | **Status:** done
 
 ### `tests`
 

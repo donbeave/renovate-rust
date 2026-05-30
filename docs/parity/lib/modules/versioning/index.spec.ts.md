@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/index.spec.ts
-**Total tests:** 4 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+**Total tests:** 4 | **Ported:** 3 | **Actionable:** 0 | **Status:** done
 
 ### `modules/versioning/index`
 

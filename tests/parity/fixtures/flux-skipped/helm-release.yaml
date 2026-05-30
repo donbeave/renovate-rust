@@ -1,0 +1,11 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: test
+spec:
+  chart:
+    spec:
+      chart: ./local-chart
+      sourceRef:
+        kind: GitRepository
+        name: local

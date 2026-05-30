@@ -5,7 +5,7 @@
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 76 | **Ported:** 76 | **Actionable:** 76 | **Status:** ported
+**Total tests:** 76 | **Ported:** 76 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

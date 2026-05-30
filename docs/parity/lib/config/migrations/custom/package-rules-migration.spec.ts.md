@@ -5,7 +5,7 @@
 ## `lib/config/migrations/custom/package-rules-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/package-rules-migration.spec.ts
-**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 0 | **Status:** done
 
 ### `config/migrations/custom/package-rules-migration`
 

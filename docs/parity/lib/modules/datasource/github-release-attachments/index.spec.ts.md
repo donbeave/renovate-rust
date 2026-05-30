@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/github-release-attachments/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-release-attachments/index.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `modules/datasource/github-release-attachments/index`
 

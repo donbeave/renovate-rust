@@ -5,7 +5,7 @@
 ## `lib/util/package-rules/package-names.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/package-names.spec.ts
-**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 0 | **Status:** done
 
 ### `util/package-rules/package-names › match`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/cake/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cake/index.spec.ts
-**Total tests:** 5 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+**Total tests:** 5 | **Ported:** 3 | **Actionable:** 0 | **Status:** done
 
 ### `tests`
 

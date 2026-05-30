@@ -5,7 +5,7 @@
 ## `lib/modules/manager/bun-version/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bun-version/index.spec.ts
-**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/homebrew/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/extract.spec.ts
-**Total tests:** 17 | **Ported:** 17 | **Actionable:** 17 | **Status:** ported
+**Total tests:** 17 | **Ported:** 17 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

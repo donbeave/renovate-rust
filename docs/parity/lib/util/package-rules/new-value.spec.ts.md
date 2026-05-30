@@ -5,7 +5,7 @@
 ## `lib/util/package-rules/new-value.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/new-value.spec.ts
-**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 0 | **Status:** done
 
 ### `util/package-rules/new-value › match`
 

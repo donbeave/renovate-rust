@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/gitlab-packages/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/gitlab-packages/index.spec.ts
-**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/gitlab-packages/index`
 

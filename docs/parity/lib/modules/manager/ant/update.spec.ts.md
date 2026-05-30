@@ -5,7 +5,7 @@
 ## `lib/modules/manager/ant/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/update.spec.ts
-**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 0 | **Status:** done
 
 ### `modules/manager/ant/update`
 

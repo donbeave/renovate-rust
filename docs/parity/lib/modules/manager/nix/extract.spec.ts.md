@@ -5,7 +5,7 @@
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 38 | **Actionable:** 38 | **Status:** ported
+**Total tests:** 38 | **Ported:** 38 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

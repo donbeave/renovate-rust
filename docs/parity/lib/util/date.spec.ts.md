@@ -5,7 +5,7 @@
 ## `lib/util/date.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/date.spec.ts
-**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 0 | **Status:** done
 
 ### `util/date › getElapsedDays › by default`
 

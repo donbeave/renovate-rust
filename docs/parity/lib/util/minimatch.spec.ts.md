@@ -5,7 +5,7 @@
 ## `lib/util/minimatch.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/minimatch.spec.ts
-**Total tests:** 5 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 5 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `util/minimatch › minimatch`
 

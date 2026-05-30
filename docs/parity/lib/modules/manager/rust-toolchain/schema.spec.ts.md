@@ -5,7 +5,7 @@
 ## `lib/modules/manager/rust-toolchain/schema.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/rust-toolchain/schema.spec.ts
-**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 0 | **Status:** done
 
 ### `modules/manager/rust-toolchain/schema › RustToolchain`
 

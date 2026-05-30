@@ -5,7 +5,7 @@
 ## `lib/modules/platform/bitbucket/comments.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket/comments.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `ensureComment()`
 

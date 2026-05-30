@@ -5,7 +5,7 @@
 ## `lib/util/exec/containerbase.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/containerbase.spec.ts
-**Total tests:** 20 | **Ported:** 7 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 20 | **Ported:** 7 | **Actionable:** 13 | **Status:** partial
 
 ### `util/exec/containerbase › isDynamicInstall()`
 

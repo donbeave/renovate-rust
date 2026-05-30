@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/extract/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/index.spec.ts
-**Total tests:** 41 | **Ported:** 17 | **Actionable:** 41 | **Status:** partial
+**Total tests:** 41 | **Ported:** 17 | **Actionable:** 24 | **Status:** partial
 
 ### `modules/manager/npm/extract/index › .extractPackageFile()`
 

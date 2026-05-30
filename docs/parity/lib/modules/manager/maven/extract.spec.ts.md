@@ -5,7 +5,7 @@
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
-**Total tests:** 30 | **Ported:** 30 | **Actionable:** 30 | **Status:** ported
+**Total tests:** 30 | **Ported:** 30 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackage`
 

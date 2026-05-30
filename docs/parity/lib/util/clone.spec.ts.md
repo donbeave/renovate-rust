@@ -5,7 +5,7 @@
 ## `lib/util/clone.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/clone.spec.ts
-**Total tests:** 3 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 3 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `util/clone`
 

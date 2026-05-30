@@ -5,7 +5,7 @@
 ## `lib/util/git/semantic.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/semantic.spec.ts
-**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 0 | **Status:** done
 
 ### `util/git/semantic › detectSemanticCommits()`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/updates/branchify.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/branchify.spec.ts
-**Total tests:** 6 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+**Total tests:** 6 | **Ported:** 5 | **Actionable:** 1 | **Status:** partial
 
 ### `workers/repository/updates/branchify › branchifyUpgrades()`
 
@@ -16,7 +16,7 @@
 | deduplicates | 48 | ported | `crates/renovate-cli/src/report_builders.rs` | `collect_branch_updates_deduplicates_same_branch` | Core grouping logic ported |
 | groups if same compiled branch names | 76 | ported | `crates/renovate-cli/src/report_builders.rs` | `collect_branch_updates_groups_by_branch_name` | Core grouping logic ported |
 | groups if same compiled group name | 103 | ported | `crates/renovate-cli/src/report_builders.rs` | `collect_branch_updates_groups_by_branch_name` | groupName → branch_name is handled by `pipeline_utils::apply_update_blocking_to_report` |
-| no fetch changelogs | 134 | not-applicable | — | — | Changelog fetching is a separate workers layer not yet in scope for branchify parity |
+| no fetch changelogs  | 134 | pending | — | — | Changelog fetching is a separate workers layer not yet in scope for branchify parity |
 
 ---
 

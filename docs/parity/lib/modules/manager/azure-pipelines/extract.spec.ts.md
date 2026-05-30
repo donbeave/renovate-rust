@@ -5,7 +5,7 @@
 ## `lib/modules/manager/azure-pipelines/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/azure-pipelines/extract.spec.ts
-**Total tests:** 29 | **Ported:** 29 | **Actionable:** 29 | **Status:** ported
+**Total tests:** 29 | **Ported:** 29 | **Actionable:** 0 | **Status:** done
 
 ### `extractRepository / extractContainer / extractAzurePipelinesTaskDependency` helpers
 

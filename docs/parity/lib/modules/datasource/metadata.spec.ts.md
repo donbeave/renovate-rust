@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/metadata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata.spec.ts
-**Total tests:** 32 | **Ported:** 32 | **Actionable:** 32 | **Status:** ported
+**Total tests:** 33 | **Ported:** 33 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/metadata`
 

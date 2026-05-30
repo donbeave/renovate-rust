@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/common.spec.ts
-**Total tests:** 30 | **Ported:** 29 | **Actionable:** 29 | **Status:** ported
+**Total tests:** 30 | **Ported:** 29 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/common › getDatasourceFor`
 

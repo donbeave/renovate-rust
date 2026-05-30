@@ -5,7 +5,7 @@
 ## `lib/modules/manager/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/range.spec.ts
-**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 0 | **Status:** done
 
 ### `modules/manager/range`
 

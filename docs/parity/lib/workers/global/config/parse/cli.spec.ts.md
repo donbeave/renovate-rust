@@ -5,7 +5,7 @@
 ## `lib/workers/global/config/parse/cli.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/cli.spec.ts
-**Total tests:** 30 | **Ported:** 30 | **Actionable:** 30 | **Status:** ported
+**Total tests:** 30 | **Ported:** 30 | **Actionable:** 0 | **Status:** done
 
 ### `workers/global/config/parse/cli › .getCliName(definition)`
 

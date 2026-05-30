@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/crate/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/crate/index.spec.ts
-**Total tests:** 27 | **Ported:** 16 | **Actionable:** 16 | **Status:** ported
+**Total tests:** 27 | **Ported:** 16 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/crate/index › getIndexSuffix`
 

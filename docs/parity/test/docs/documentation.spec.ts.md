@@ -5,7 +5,7 @@
 ## `test/docs/documentation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/test/docs/documentation.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `docs/documentation`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/composer/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/composer/index.spec.ts
-**Total tests:** 18 | **Ported:** 18 | **Actionable:** 18 | **Status:** ported
+**Total tests:** 18 | **Ported:** 18 | **Actionable:** 0 | **Status:** done
 
 ### `modules/versioning/composer/index`
 

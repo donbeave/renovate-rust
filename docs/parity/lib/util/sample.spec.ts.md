@@ -5,7 +5,7 @@
 ## `lib/util/sample.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/sample.spec.ts
-**Total tests:** 7 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+**Total tests:** 7 | **Ported:** 5 | **Actionable:** 0 | **Status:** done
 
 ### `util/sample › sampleSize`
 

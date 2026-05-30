@@ -5,7 +5,7 @@
 ## `lib/util/promises.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/promises.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `util/promises › all`
 

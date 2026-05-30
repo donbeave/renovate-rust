@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/npm/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/npm/index.spec.ts
-**Total tests:** 24 | **Ported:** 6 | **Actionable:** 24 | **Status:** partial
+**Total tests:** 24 | **Ported:** 6 | **Actionable:** 18 | **Status:** partial
 
 ### `modules/datasource/npm/index`
 

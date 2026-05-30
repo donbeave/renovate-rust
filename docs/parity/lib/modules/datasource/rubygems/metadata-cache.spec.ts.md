@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/rubygems/metadata-cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/rubygems/metadata-cache.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `modules/datasource/rubygems/metadata-cache`
 

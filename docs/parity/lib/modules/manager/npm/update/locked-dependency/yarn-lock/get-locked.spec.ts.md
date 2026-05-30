@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts
-**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `replaceConstraintVersion()`
 

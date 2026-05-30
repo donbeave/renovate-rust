@@ -5,7 +5,7 @@
 ## `lib/modules/manager/cargo/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/extract.spec.ts
-**Total tests:** 32 | **Ported:** 32 | **Actionable:** 32 | **Status:** ported
+**Total tests:** 32 | **Ported:** 32 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

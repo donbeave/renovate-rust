@@ -5,7 +5,7 @@
 ## `lib/util/exec/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/common.spec.ts
-**Total tests:** 30 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 30 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/exec/common › exec`
 

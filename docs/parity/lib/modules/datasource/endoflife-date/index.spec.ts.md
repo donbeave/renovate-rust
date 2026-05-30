@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/endoflife-date/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/endoflife-date/index.spec.ts
-**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/endoflife-date/index › getReleases`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/platform/utils/pr-body.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/utils/pr-body.spec.ts
-**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 0 | **Status:** done
 
 ### `.smartTruncate`
 

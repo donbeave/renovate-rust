@@ -5,7 +5,7 @@
 ## `lib/util/exec/docker/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/docker/index.spec.ts
-**Total tests:** 20 | **Ported:** 3 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 20 | **Ported:** 2 | **Actionable:** 18 | **Status:** partial
 
 ### `util/exec/docker/index › prefetchDockerImage`
 

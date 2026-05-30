@@ -5,7 +5,7 @@
 ## `lib/config/migrations/custom/semantic-prefix-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/semantic-prefix-migration.spec.ts
-**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 0 | **Status:** done
 
 ### `config/migrations/custom/semantic-prefix-migration`
 

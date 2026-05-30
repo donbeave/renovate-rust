@@ -5,7 +5,7 @@
 ## `lib/modules/manager/pip_requirements/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/extract.spec.ts
-**Total tests:** 22 | **Ported:** 22 | **Actionable:** 22 | **Status:** ported
+**Total tests:** 22 | **Ported:** 22 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

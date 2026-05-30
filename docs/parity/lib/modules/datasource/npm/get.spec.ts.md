@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/npm/get.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/npm/get.spec.ts
-**Total tests:** 24 | **Ported:** 1 | **Actionable:** 24 | **Status:** partial
+**Total tests:** 24 | **Ported:** 1 | **Actionable:** 23 | **Status:** partial
 
 ### `modules/datasource/npm/get › has bearer auth`
 

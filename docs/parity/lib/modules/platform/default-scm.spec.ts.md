@@ -5,7 +5,7 @@
 ## `lib/modules/platform/default-scm.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/default-scm.spec.ts
-**Total tests:** 13 | **Ported:** 0 | **Actionable:** 0 | **Status:** done-applicable
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `modules/platform/default-scm`
 

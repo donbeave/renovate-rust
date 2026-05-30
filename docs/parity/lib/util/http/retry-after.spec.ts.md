@@ -5,7 +5,7 @@
 ## `lib/util/http/retry-after.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/retry-after.spec.ts
-**Total tests:** 13 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
+**Total tests:** 13 | **Ported:** 10 | **Actionable:** 0 | **Status:** done
 
 ### `util/http/retry-after › wrapWithRetry`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 49 | **Ported:** 49 | **Actionable:** 49 | **Status:** ported
+**Total tests:** 49 | **Ported:** 49 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile`
 

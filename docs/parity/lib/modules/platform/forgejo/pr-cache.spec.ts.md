@@ -5,7 +5,7 @@
 ## `lib/modules/platform/forgejo/pr-cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/forgejo/pr-cache.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `tests`
 

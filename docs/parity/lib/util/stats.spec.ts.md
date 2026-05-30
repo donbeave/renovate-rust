@@ -5,7 +5,7 @@
 ## `lib/util/stats.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/stats.spec.ts
-**Total tests:** 33 | **Ported:** 24 | **Actionable:** 24 | **Status:** ported
+**Total tests:** 33 | **Ported:** 24 | **Actionable:** 0 | **Status:** done
 
 ### `util/stats › makeTimingReport`
 

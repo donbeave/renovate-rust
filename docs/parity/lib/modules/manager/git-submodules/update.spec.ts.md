@@ -5,7 +5,7 @@
 ## `lib/modules/manager/git-submodules/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/git-submodules/update.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `updateDependency`
 

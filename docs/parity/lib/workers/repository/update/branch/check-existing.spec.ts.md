@@ -5,16 +5,16 @@
 ## `lib/workers/repository/update/branch/check-existing.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/check-existing.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending-applicable-applicable
 
 ### `workers/repository/update/branch/check-existing › prAlreadyExisted`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns false if recreating closed PRs | 21 | not-applicable | — | — |Tests TypeScript worker PR existence check with mocking; no Rust equivalent |
-| returns false if check misses | 27 | not-applicable | — | — |Tests TypeScript worker PR existence check with mocking; no Rust equivalent |
-| returns true if first check hits | 33 | not-applicable | — | — |Tests TypeScript worker PR existence check with mocking; no Rust equivalent |
-| returns true if second check hits | 45 | not-applicable | — | — |Tests TypeScript worker PR existence check with mocking; no Rust equivalent |
+| returns false if recreating closed PRs  | 21 | pending | — | — | Tests TypeScript worker PR existence check with mocking; no Rust equivalent |
+| returns false if check misses  | 27 | pending | — | — | Tests TypeScript worker PR existence check with mocking; no Rust equivalent |
+| returns true if first check hits  | 33 | pending | — | — | Tests TypeScript worker PR existence check with mocking; no Rust equivalent |
+| returns true if second check hits  | 45 | pending | — | — | Tests TypeScript worker PR existence check with mocking; no Rust equivalent |
 
 ---
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
-**Total tests:** 26 | **Ported:** 26 | **Actionable:** 26 | **Status:** ported
+**Total tests:** 26 | **Ported:** 26 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

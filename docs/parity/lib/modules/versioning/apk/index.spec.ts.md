@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/apk/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/apk/index.spec.ts
-**Total tests:** 53 | **Ported:** 53 | **Actionable:** 53 | **Status:** ported
+**Total tests:** 53 | **Ported:** 53 | **Actionable:** 0 | **Status:** done
 
 ### `modules/versioning/apk/index`
 

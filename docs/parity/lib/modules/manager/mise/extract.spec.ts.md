@@ -5,7 +5,7 @@
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 40 | **Ported:** 40 | **Actionable:** 40 | **Status:** ported
+**Total tests:** 40 | **Ported:** 40 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

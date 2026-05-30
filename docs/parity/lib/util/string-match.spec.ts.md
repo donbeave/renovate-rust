@@ -5,7 +5,7 @@
 ## `lib/util/string-match.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/string-match.spec.ts
-**Total tests:** 25 | **Ported:** 25 | **Actionable:** 25 | **Status:** ported
+**Total tests:** 25 | **Ported:** 25 | **Actionable:** 0 | **Status:** done
 
 ### `util/string-match › matchRegexOrGlobList()`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/updates/branch-name.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/branch-name.spec.ts
-**Total tests:** 27 | **Ported:** 27 | **Actionable:** 27 | **Status:** ported
+**Total tests:** 27 | **Ported:** 27 | **Actionable:** 0 | **Status:** done
 
 ### `workers/repository/updates/branch-name › getBranchName()`
 

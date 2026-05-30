@@ -5,7 +5,7 @@
 ## `lib/logger/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/utils.spec.ts
-**Total tests:** 8 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 8 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `logger/utils`
 

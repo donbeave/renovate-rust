@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/unity3d-packages/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/unity3d-packages/index.spec.ts
-**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 0 | **Status:** done
 
 ### `modules/versioning/unity3d-packages/index`
 

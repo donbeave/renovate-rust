@@ -5,7 +5,7 @@
 ## `lib/workers/repository/configured.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/configured.spec.ts
-**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 0 | **Status:** done
 
 ### `workers/repository/configured › checkIfConfigured()`
 

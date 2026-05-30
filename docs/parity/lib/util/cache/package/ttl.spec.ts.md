@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/ttl.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/ttl.spec.ts
-**Total tests:** 31 | **Ported:** 26 | **Actionable:** 26 | **Status:** ported
+**Total tests:** 31 | **Ported:** 26 | **Actionable:** 0 | **Status:** done
 
 ### `util/cache/package/ttl › getTtlOverride › No configuration`
 

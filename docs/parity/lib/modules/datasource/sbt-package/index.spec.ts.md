@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/sbt-package/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/sbt-package/index.spec.ts
-**Total tests:** 13 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
+**Total tests:** 13 | **Ported:** 12 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/sbt-package/index`
 

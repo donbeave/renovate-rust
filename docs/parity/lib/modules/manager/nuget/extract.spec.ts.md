@@ -5,7 +5,7 @@
 ## `lib/modules/manager/nuget/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/extract.spec.ts
-**Total tests:** 35 | **Ported:** 35 | **Actionable:** 35 | **Status:** ported
+**Total tests:** 35 | **Ported:** 35 | **Actionable:** 0 | **Status:** done
 
 ### `extractPackageFile()`
 

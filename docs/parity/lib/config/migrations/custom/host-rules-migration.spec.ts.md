@@ -5,7 +5,7 @@
 ## `lib/config/migrations/custom/host-rules-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/host-rules-migration.spec.ts
-**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
 
 ### `config/migrations/custom/host-rules-migration`
 

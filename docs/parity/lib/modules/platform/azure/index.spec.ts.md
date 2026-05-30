@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/index.spec.ts
-**Total tests:** 79 | **Ported:** 0 | **Actionable:** 79 | **Status:** pending
+**Total tests:** 81 | **Ported:** 0 | **Actionable:** 81 | **Status:** pending
 
 ### `initPlatform()`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/deb/packages.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deb/packages.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `modules/datasource/deb/packages`
 

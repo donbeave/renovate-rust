@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/pypi/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/pypi/index.spec.ts
-**Total tests:** 39 | **Ported:** 2 | **Actionable:** 39 | **Status:** partial
+**Total tests:** 39 | **Ported:** 2 | **Actionable:** 37 | **Status:** partial
 
 ### `modules/datasource/pypi/index › getReleases`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 44 | **Actionable:** 44 | **Status:** ported
+**Total tests:** 45 | **Ported:** 44 | **Actionable:** 1 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -48,7 +48,7 @@
 |---|---|---|---|---|---|
 | crashes | 357 | ported | `config_env.rs` | `invalid_renovate_config_is_rejected` | — |
 | migrates RENOVATE_CONFIG | 367 | ported | `config_env.rs` | `renovate_config_automerge_any_is_migrated` | — |
-| warns if config in RENOVATE_CONFIG is invalid | 376 | not-applicable | — | — | mocking framework internals — tests logger.warn spy for invalid config values; runtime validation behavior is covered by 'crashes' test (ported) |
+| warns if config in RENOVATE_CONFIG is invalid  | 376 | pending | — | — | mocking framework internals — tests logger.warn spy for invalid config values; runtime validation behavior is covered by 'crashes' test (ported) |
 
 ### `workers/global/config/parse/env › .getConfig(env) › migrations`
 

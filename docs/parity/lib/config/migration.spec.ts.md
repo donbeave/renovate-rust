@@ -5,7 +5,7 @@
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 29 | **Actionable:** 29 | **Status:** ported
+**Total tests:** 31 | **Ported:** 29 | **Actionable:** 0 | **Status:** done
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 

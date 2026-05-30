@@ -5,7 +5,7 @@
 ## `lib/config/options/env-options.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/options/env-options.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable-applicable
 
 ### `config/options/env-options`
 

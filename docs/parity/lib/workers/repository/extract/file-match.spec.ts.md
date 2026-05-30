@@ -5,7 +5,7 @@
 ## `lib/workers/repository/extract/file-match.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/extract/file-match.spec.ts
-**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 0 | **Status:** done
 
 ### `workers/repository/extract/file-match › getIncludedFiles()`
 

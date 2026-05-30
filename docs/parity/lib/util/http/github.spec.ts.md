@@ -5,7 +5,7 @@
 ## `lib/util/http/github.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/github.spec.ts
-**Total tests:** 54 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 54 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/http/github › HTTP`
 
