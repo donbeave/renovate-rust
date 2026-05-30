@@ -129,7 +129,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |---|---|---|---|
-| `lib/modules/manager/bazelisk/extract.ts` | `extractors/version_file.rs` | full | `extract_bazelisk()` present |
+| `lib/modules/manager/bazelisk/extract.ts` | `extractors/bazelisk.rs` | full | `extract_bazelisk()` present |
 | `lib/modules/manager/bazelisk/index.ts` | `managers.rs` | partial | fileMatch pattern present; `supportsLockFileMaintenance`, `lockFileNames` not stored |
 | `lib/modules/manager/bazelisk/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
 
@@ -214,11 +214,11 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/cargo/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 | `lib/modules/manager/cargo/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
 | `lib/modules/manager/cargo/locked-version.ts` | `extractors/cargo.rs` | full | `build_lock_map()` + `find_locked_version()` present |
-| `lib/modules/manager/cargo/range.ts` | N/A | not-started | Range strategy not yet in Rust |
+| `lib/modules/manager/cargo/range.ts` | `extractors/cargo.rs` | full | `get_range_strategy()` present |
 | `lib/modules/manager/cargo/schema.ts` | N/A | out-of-scope | Zod schema |
 | `lib/modules/manager/cargo/types.ts` | N/A | out-of-scope | Type-only file |
-| `lib/modules/manager/cargo/update-locked.ts` | N/A | not-started | Update-locked status not yet in Rust |
-| `lib/modules/manager/cargo/update.ts` | N/A | not-started | `bumpPackageVersion` not yet in Rust |
+| `lib/modules/manager/cargo/update-locked.ts` | `extractors/cargo.rs` | full | `update_locked_dependency()` present |
+| `lib/modules/manager/cargo/update.ts` | `extractors/cargo.rs` | full | `bump_package_version()` present |
 | `lib/modules/manager/cargo/utils.ts` | `extractors/cargo.rs` | partial | Some utility functions inline |
 
 ### cdnurl
