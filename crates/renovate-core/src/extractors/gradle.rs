@@ -210,16 +210,14 @@ pub fn parse_catalog(package_file: &str, content: &str) -> GradleCatalogResult {
     let mut vars = HashMap::new();
 
     for (key, ver_val) in &versions_section {
-        let (current_value, file_replace_position) =
-            match extract_literal_version_for_catalog(
-                ver_val,
-                version_start_index,
-                version_sub_content,
-                key,
-            ) {
-                Some(v) => v,
-                None => continue,
-            };
+        let Some((current_value, file_replace_position)) = extract_literal_version_for_catalog(
+            ver_val,
+            version_start_index,
+            version_sub_content,
+            key,
+        ) else {
+            continue;
+        };
         let normalized = normalize_alias(key);
         vars.insert(
             normalized.clone(),
@@ -320,7 +318,7 @@ pub fn parse_catalog(package_file: &str, content: &str) -> GradleCatalogResult {
                     v.as_table()
                         .and_then(|t| t.get("ref"))
                         .and_then(|r| r.as_str())
-                        .map(|r| normalize_alias(r))
+                        .map(normalize_alias)
                 })
             } else {
                 None
@@ -345,7 +343,7 @@ pub fn parse_catalog(package_file: &str, content: &str) -> GradleCatalogResult {
 }
 
 fn normalize_alias(alias: &str) -> String {
-    alias.replace('-', ".").replace('_', ".")
+    alias.replace(['-', '_'], ".")
 }
 
 fn strip_jinja_templates(content: &str) -> String {
@@ -503,6 +501,7 @@ fn find_original_alias(
     alias.to_owned()
 }
 
+#[allow(clippy::too_many_arguments)]
 fn extract_catalog_dependency(
     descriptor: &toml::Value,
     versions: &toml::map::Map<String, toml::Value>,
@@ -588,7 +587,7 @@ fn extract_catalog_dependency(
                 v.as_table()
                     .and_then(|t| t.get("ref"))
                     .and_then(|r| r.as_str())
-                    .map(|r| normalize_alias(r))
+                    .map(normalize_alias)
             })
         } else {
             None

@@ -34,10 +34,10 @@ fn deno_replace_verified(
                 new_str,
                 &content[i + old_str.len()..]
             );
-            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&candidate) {
-                if &parsed == expected {
-                    return Some(candidate);
-                }
+            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&candidate)
+                && &parsed == expected
+            {
+                return Some(candidate);
             }
         }
         let step = content[i..].chars().next().map_or(1, |c| c.len_utf8());
@@ -164,12 +164,12 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             let tasks = parsed.get_mut("tasks")?.as_object_mut()?;
             let mut found = false;
             for val in tasks.values_mut() {
-                if let Some(s) = val.as_str() {
-                    if s.contains(&search_current) {
-                        let new_val = s.replace(&search_current, &new_str);
-                        *val = serde_json::Value::String(new_val);
-                        found = true;
-                    }
+                if let Some(s) = val.as_str()
+                    && s.contains(&search_current)
+                {
+                    let new_val = s.replace(&search_current, &new_str);
+                    *val = serde_json::Value::String(new_val);
+                    found = true;
                 }
             }
             if !found {
@@ -181,16 +181,14 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             let tasks = parsed.get_mut("tasks")?.as_object_mut()?;
             let mut found = false;
             for val in tasks.values_mut() {
-                if let Some(obj) = val.as_object_mut() {
-                    if let Some(cmd) = obj.get_mut("command") {
-                        if let Some(s) = cmd.as_str() {
-                            if s.contains(&search_current) {
-                                let new_val = s.replace(&search_current, &new_str);
-                                *cmd = serde_json::Value::String(new_val);
-                                found = true;
-                            }
-                        }
-                    }
+                if let Some(obj) = val.as_object_mut()
+                    && let Some(cmd) = obj.get_mut("command")
+                    && let Some(s) = cmd.as_str()
+                    && s.contains(&search_current)
+                {
+                    let new_val = s.replace(&search_current, &new_str);
+                    *cmd = serde_json::Value::String(new_val);
+                    found = true;
                 }
             }
             if !found {

@@ -972,10 +972,10 @@ pub fn gomod_update_dependency(
     };
 
     // If we have a regex but it doesn't match, bail.
-    if let Some(ref re) = update_line_exp {
-        if !re.is_match(line_to_change) {
-            return None;
-        }
+    if let Some(ref re) = update_line_exp
+        && !re.is_match(line_to_change)
+    {
+        return None;
     }
 
     // Perform the replacement.
@@ -1027,7 +1027,7 @@ pub fn gomod_update_dependency(
         if current_name.starts_with("gopkg.in/") {
             // gopkg.in uses .v<N> suffix in the dep name.
             // Mirrors: newLine.replace(`.${oldV}`, `.v${newMajor}`)
-            let old_v_suffix = current_name.split('.').last().unwrap_or("v1");
+            let old_v_suffix = current_name.split('.').next_back().unwrap_or("v1");
             let old_dotv = format!(".{}", old_v_suffix);
             let new_dotv = format!(".v{}", new_major);
             new_line = new_line.replacen(&old_dotv, &new_dotv, 1);
@@ -2460,7 +2460,6 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             new_major: Some(2),
             update_type: Some("major".into()),
             manager_data: Some(GoModManagerData { line_number: 11, multi_line: false }),
-            ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
         assert!(res.contains("github.com/pravesht/gocql/v2 v2.0.0"));
@@ -2625,7 +2624,6 @@ replace (
             current_digest: Some("14d3d4c51834".into()),
             new_digest: Some("123456123456abcdef".into()),
             manager_data: Some(GoModManagerData { line_number: 11, multi_line: false }),
-            ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
         assert!(res.contains("123456123456"));

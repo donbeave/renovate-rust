@@ -1062,9 +1062,7 @@ pub fn maven_update_at_position(
             .filter_map(|tag| rest_part.find(tag))
             .min();
 
-        let Some(block_end) = block_end_relative else {
-            return None;
-        };
+        let block_end = block_end_relative?;
 
         let mut left_block = left_part[block_start..].to_owned();
         let mut right_block = rest_part[..block_end].to_owned();
@@ -1329,9 +1327,7 @@ fn find_root_version_position(content: &str) -> Option<(usize, usize)> {
                 if in_version_at_depth_one && depth == 2 {
                     in_version_at_depth_one = false;
                 }
-                if depth > 0 {
-                    depth -= 1;
-                }
+                depth = depth.saturating_sub(1);
             }
             Ok(Event::Eof) | Err(_) => break,
             _ => {}
@@ -2622,17 +2618,15 @@ mod tests {
                         std::str::from_utf8(e.name().as_ref()).unwrap_or("").to_owned();
                     stack.push(name);
                 }
-                Ok(Event::Text(e)) => {
-                    if result.is_none() {
-                        let text = std::str::from_utf8(e.as_ref()).unwrap_or("").trim().to_owned();
-                        if !text.is_empty() {
-                            let cur_path: Vec<&str> = stack.iter().map(|s| s.as_str()).collect();
-                            // Return first non-empty match where path ends with target path.
-                            if cur_path.len() >= path.len()
-                                && &cur_path[cur_path.len() - path.len()..] == path
-                            {
-                                result = Some(text);
-                            }
+                Ok(Event::Text(e)) if result.is_none() => {
+                    let text = std::str::from_utf8(e.as_ref()).unwrap_or("").trim().to_owned();
+                    if !text.is_empty() {
+                        let cur_path: Vec<&str> = stack.iter().map(|s| s.as_str()).collect();
+                        // Return first non-empty match where path ends with target path.
+                        if cur_path.len() >= path.len()
+                            && &cur_path[cur_path.len() - path.len()..] == path
+                        {
+                            result = Some(text);
                         }
                     }
                 }

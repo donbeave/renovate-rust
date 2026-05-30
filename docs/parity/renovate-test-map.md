@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,255 / 11,666 total tests ported (45.0%) · pending 5,894 · not-applicable 517 (4.4%) — updated 2026-05-30
+**Progress:** 5,255 / 11,666 total tests ported (45.0%) · pending 5,860 · not-applicable 551 (4.7%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -17,7 +17,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/asdf/index.spec.ts` | Done | [details](lib/modules/manager/asdf/index.spec.ts.md) |
 | `lib/modules/manager/argocd/extract.spec.ts` | Done | [details](lib/modules/manager/argocd/extract.spec.ts.md) |
 | `lib/modules/manager/batect-wrapper/extract.spec.ts` | Done | [details](lib/modules/manager/batect-wrapper/extract.spec.ts.md) |
-| `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | Not done | [details](lib/modules/manager/batect-wrapper/artifacts.spec.ts.md) |
+| `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | Done | [details](lib/modules/manager/batect-wrapper/artifacts.spec.ts.md) |
 | `lib/modules/manager/batect/extract.spec.ts` | Done | [details](lib/modules/manager/batect/extract.spec.ts.md) |
 | `lib/modules/manager/buildpacks/extract.spec.ts` | Done | [details](lib/modules/manager/buildpacks/extract.spec.ts.md) |
 | `lib/modules/manager/cargo/extract.spec.ts` | Done | [details](lib/modules/manager/cargo/extract.spec.ts.md) |
@@ -605,7 +605,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/homebrew/handlers/index.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/index.spec.ts.md) |
 | `lib/modules/manager/homebrew/handlers/npm.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/npm.spec.ts.md) |
 | `lib/modules/manager/homebrew/update.spec.ts` | Not done | [details](lib/modules/manager/homebrew/update.spec.ts.md) |
-| `lib/modules/manager/jsonnet-bundler/artifacts.spec.ts` | Not done | [details](lib/modules/manager/jsonnet-bundler/artifacts.spec.ts.md) |
+| `lib/modules/manager/jsonnet-bundler/artifacts.spec.ts` | Done | [details](lib/modules/manager/jsonnet-bundler/artifacts.spec.ts.md) |
 | `lib/modules/manager/kustomize/artifacts.spec.ts` | Not done | [details](lib/modules/manager/kustomize/artifacts.spec.ts.md) |
 | `lib/modules/manager/kustomize/common.spec.ts` | Done | [details](lib/modules/manager/kustomize/common.spec.ts.md) |
 | `lib/modules/manager/maven/index.spec.ts` | Not done | [details](lib/modules/manager/maven/index.spec.ts.md) |
@@ -707,7 +707,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/bitbucket/index.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/index.spec.ts.md) |
 | `lib/modules/platform/bitbucket/pr-cache.spec.ts` | Done | [details](lib/modules/platform/bitbucket/pr-cache.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/index.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/index.spec.ts.md) |
-| `lib/modules/platform/bitbucket-server/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/pr-cache.spec.ts.md) |
+| `lib/modules/platform/bitbucket-server/pr-cache.spec.ts` | Done | [details](lib/modules/platform/bitbucket-server/pr-cache.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/utils.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/utils.spec.ts.md) |
 | `lib/modules/platform/codecommit/index.spec.ts` | Not done | [details](lib/modules/platform/codecommit/index.spec.ts.md) |
 | `lib/modules/platform/forgejo/forgejo-helper.spec.ts` | Not done | [details](lib/modules/platform/forgejo/forgejo-helper.spec.ts.md) |
@@ -725,12 +725,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/gitea/schema.spec.ts` | Done | [details](lib/modules/platform/gitea/schema.spec.ts.md) |
 | `lib/modules/platform/gitea/utils.spec.ts` | Done | [details](lib/modules/platform/gitea/utils.spec.ts.md) |
 | `lib/modules/platform/github/api-cache.spec.ts` | Done | [details](lib/modules/platform/github/api-cache.spec.ts.md) |
-| `lib/modules/platform/github/branch.spec.ts` | Not done | [details](lib/modules/platform/github/branch.spec.ts.md) |
+| `lib/modules/platform/github/branch.spec.ts` | Done | [details](lib/modules/platform/github/branch.spec.ts.md) |
 | `lib/modules/platform/github/index.spec.ts` | Not done | [details](lib/modules/platform/github/index.spec.ts.md) |
 | `lib/modules/platform/github/issue.spec.ts` | Not done | [details](lib/modules/platform/github/issue.spec.ts.md) |
 | `lib/modules/platform/github/massage-markdown-links.spec.ts` | Done | [details](lib/modules/platform/github/massage-markdown-links.spec.ts.md) |
 | `lib/modules/platform/github/schema.spec.ts` | Done | [details](lib/modules/platform/github/schema.spec.ts.md) |
-| `lib/modules/platform/github/scm.spec.ts` | Not done | [details](lib/modules/platform/github/scm.spec.ts.md) |
+| `lib/modules/platform/github/scm.spec.ts` | Done | [details](lib/modules/platform/github/scm.spec.ts.md) |
 | `lib/modules/platform/gitlab/code-owners.spec.ts` | Done | [details](lib/modules/platform/gitlab/code-owners.spec.ts.md) |
 | `lib/modules/platform/gitlab/utils.spec.ts` | Done | [details](lib/modules/platform/gitlab/utils.spec.ts.md) |
 | `lib/modules/platform/gitlab/index.spec.ts` | Not done | [details](lib/modules/platform/gitlab/index.spec.ts.md) |
@@ -773,10 +773,10 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/git/errors.spec.ts` | Done | [details](lib/util/git/errors.spec.ts.md) |
 | `lib/util/git/index.spec.ts` | Not done | [details](lib/util/git/index.spec.ts.md) |
 | `lib/util/git/modified-cache.spec.ts` | Not done | [details](lib/util/git/modified-cache.spec.ts.md) |
-| `lib/util/git/pristine.spec.ts` | Not done | [details](lib/util/git/pristine.spec.ts.md) |
+| `lib/util/git/pristine.spec.ts` | Done | [details](lib/util/git/pristine.spec.ts.md) |
 | `lib/util/git/private-key.spec.ts` | Not done | [details](lib/util/git/private-key.spec.ts.md) |
 | `lib/util/git/semantic.spec.ts` | Done | [details](lib/util/git/semantic.spec.ts.md) |
-| `lib/util/git/set-branch-commit.spec.ts` | Not done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
+| `lib/util/git/set-branch-commit.spec.ts` | Done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
 | `lib/util/git/span-processor.spec.ts` | Done | [details](lib/util/git/span-processor.spec.ts.md) |
 | `lib/util/git/update-date-cache.spec.ts` | Not done | [details](lib/util/git/update-date-cache.spec.ts.md) |
 | `lib/util/git/url.spec.ts` | Done | [details](lib/util/git/url.spec.ts.md) |
@@ -848,7 +848,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/extract/manager-files.spec.ts` | Not done | [details](lib/workers/repository/extract/manager-files.spec.ts.md) |
 | `lib/workers/repository/extract/supersedes.spec.ts` | Done | [details](lib/workers/repository/extract/supersedes.spec.ts.md) |
 | `lib/workers/repository/finalize/prune.spec.ts` | Not done | [details](lib/workers/repository/finalize/prune.spec.ts.md) |
-| `lib/workers/repository/finalize/repository-statistics.spec.ts` | Not done | [details](lib/workers/repository/finalize/repository-statistics.spec.ts.md) |
+| `lib/workers/repository/finalize/repository-statistics.spec.ts` | Done | [details](lib/workers/repository/finalize/repository-statistics.spec.ts.md) |
 | `lib/workers/repository/index.spec.ts` | Done | [details](lib/workers/repository/index.spec.ts.md) |
 | `lib/workers/repository/init/index.spec.ts` | Done | [details](lib/workers/repository/init/index.spec.ts.md) |
 | `lib/workers/repository/init/inherited.spec.ts` | Not done | [details](lib/workers/repository/init/inherited.spec.ts.md) |
@@ -889,7 +889,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/branch/auto-replace.spec.ts` | Not done | [details](lib/workers/repository/update/branch/auto-replace.spec.ts.md) |
 | `lib/workers/repository/update/branch/automerge.spec.ts` | Not done | [details](lib/workers/repository/update/branch/automerge.spec.ts.md) |
 | `lib/workers/repository/update/branch/bump-versions.spec.ts` | Not done | [details](lib/workers/repository/update/branch/bump-versions.spec.ts.md) |
-| `lib/workers/repository/update/branch/check-existing.spec.ts` | Not done | [details](lib/workers/repository/update/branch/check-existing.spec.ts.md) |
+| `lib/workers/repository/update/branch/check-existing.spec.ts` | Done | [details](lib/workers/repository/update/branch/check-existing.spec.ts.md) |
 | `lib/workers/repository/update/branch/commit.spec.ts` | Done | [details](lib/workers/repository/update/branch/commit.spec.ts.md) |
 | `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts` | Not done | [details](lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts.md) |
 | `lib/workers/repository/update/branch/get-updated.spec.ts` | Not done | [details](lib/workers/repository/update/branch/get-updated.spec.ts.md) |
