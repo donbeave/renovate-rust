@@ -417,56 +417,52 @@ async fn process_repo(
         .cloned()
         .unwrap_or_else(|| "main".to_owned());
 
-    // Collect unique branch names from UpdateAvailable deps.
-    let mut seen_branches: std::collections::HashSet<String> = std::collections::HashSet::new();
-    for file in &repo_report.files {
-        for dep in &file.deps {
-            if let output::DepStatus::UpdateAvailable { .. } = &dep.status {
-                if let Some(branch) = dep.branch_name.clone() {
-                    if seen_branches.insert(branch.clone()) {
-                        match config.dry_run {
-                            Some(DryRun::Full) | Some(DryRun::Lookup) => {
-                                tracing::info!(
-                                    repo = %repo_slug,
-                                    branch = %branch,
-                                    title = %dep.pr_title.as_deref().unwrap_or("<no title>"),
-                                    "dry-run: would create branch and PR"
-                                );
-                            }
-                            _ => {
-                                if let Some(title) = dep.pr_title.as_deref() {
-                                    match client
-                                        .create_pr(owner, repo, &branch, &target_branch, title, "")
-                                        .await
-                                    {
-                                        Ok(Some(pr_number)) => {
-                                            tracing::info!(
-                                                repo = %repo_slug,
-                                                branch = %branch,
-                                                pr_number,
-                                                "created PR"
-                                            );
-                                        }
-                                        Ok(None) => {
-                                            tracing::debug!(
-                                                repo = %repo_slug,
-                                                branch = %branch,
-                                                "PR already exists or skipped"
-                                            );
-                                        }
-                                        Err(err) => {
-                                            tracing::error!(
-                                                repo = %repo_slug,
-                                                branch = %branch,
-                                                %err,
-                                                "failed to create PR"
-                                            );
-                                            had_error = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
+    // Branchify: group UpdateAvailable deps by branch_name so deps sharing
+    // a branch are coalesced into a single PR.  Mirrors Renovate's
+    // `branchifyUpgrades` step.
+    let branch_updates = report_builders::collect_branch_updates(&repo_report);
+    for (branch, deps) in branch_updates {
+        let title = deps
+            .first()
+            .and_then(|d| d.pr_title.as_deref())
+            .unwrap_or("<no title>");
+        match config.dry_run {
+            Some(DryRun::Full) | Some(DryRun::Lookup) => {
+                tracing::info!(
+                    repo = %repo_slug,
+                    branch = %branch,
+                    title = %title,
+                    "dry-run: would create branch and PR"
+                );
+            }
+            _ => {
+                match client
+                    .create_pr(owner, repo, &branch, &target_branch, title, "")
+                    .await
+                {
+                    Ok(Some(pr_number)) => {
+                        tracing::info!(
+                            repo = %repo_slug,
+                            branch = %branch,
+                            pr_number,
+                            "created PR"
+                        );
+                    }
+                    Ok(None) => {
+                        tracing::debug!(
+                            repo = %repo_slug,
+                            branch = %branch,
+                            "PR already exists or skipped"
+                        );
+                    }
+                    Err(err) => {
+                        tracing::error!(
+                            repo = %repo_slug,
+                            branch = %branch,
+                            %err,
+                            "failed to create PR"
+                        );
+                        had_error = true;
                     }
                 }
             }

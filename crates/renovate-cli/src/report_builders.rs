@@ -83,6 +83,31 @@ fn dep_meta(
     (Some(branch_name), Some(pr_title), update_type_str)
 }
 
+/// Collect all `UpdateAvailable` dependencies grouped by their `branch_name`.
+///
+/// Returns a map from branch name to a list of `DepReport` clones for that
+/// branch.  This mirrors Renovate's `branchifyUpgrades` step where deps
+/// sharing the same branch are coalesced into a single PR.
+pub(crate) fn collect_branch_updates(
+    report: &output::RepoReport,
+) -> std::collections::BTreeMap<String, Vec<output::DepReport>> {
+    let mut branches: std::collections::BTreeMap<String, Vec<output::DepReport>> =
+        std::collections::BTreeMap::new();
+    for file in &report.files {
+        for dep in &file.deps {
+            if let output::DepStatus::UpdateAvailable { .. } = &dep.status {
+                if let Some(branch) = dep.branch_name.as_ref() {
+                    branches
+                        .entry(branch.clone())
+                        .or_default()
+                        .push(dep.clone());
+                }
+            }
+        }
+    }
+    branches
+}
+
 pub(crate) fn build_dep_reports_cargo(
     all_deps: &[renovate_core::extractors::cargo::ExtractedDep],
     actionable: &[&renovate_core::extractors::cargo::ExtractedDep],
@@ -1776,5 +1801,158 @@ mod tests {
         let (branch, _title, _utype) = dep_meta("lodash", "^4.0.0", "5.1.2", &cfg);
         assert!(branch.as_ref().unwrap().starts_with("renovate/"));
         assert_eq!(branch.unwrap().len(), 20);
+    }
+
+    // ── collect_branch_updates tests ──────────────────────────────────
+
+    fn make_report(deps: Vec<output::DepReport>) -> output::RepoReport {
+        output::RepoReport {
+            repo_slug: "owner/repo".to_owned(),
+            draft_pr: false,
+            assign_automerge: false,
+            files: vec![output::FileReport {
+                path: "package.json".to_owned(),
+                manager: "npm".to_owned(),
+                deps,
+            }],
+        }
+    }
+
+    fn dep_report(
+        name: &str,
+        branch_name: Option<&str>,
+        pr_title: Option<&str>,
+        status: output::DepStatus,
+    ) -> output::DepReport {
+        output::DepReport {
+            name: name.to_owned(),
+            branch_name: branch_name.map(|s| s.to_owned()),
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
+            assignees: Vec::new(),
+            reviewers: Vec::new(),
+            update_type: None,
+            pr_priority: None,
+            pr_title: pr_title.map(|s| s.to_owned()),
+            release_timestamp: None,
+            current_version_timestamp: None,
+            dep_type: None,
+            package_name: None,
+            range_strategy: None,
+            follow_tag: None,
+            pin_digests: None,
+            versioning: None,
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
+            new_value: None,
+            status,
+        }
+    }
+
+    #[test]
+    fn collect_branch_updates_empty() {
+        let report = make_report(vec![]);
+        let branches = collect_branch_updates(&report);
+        assert!(branches.is_empty());
+    }
+
+    #[test]
+    fn collect_branch_updates_single() {
+        let report = make_report(vec![dep_report(
+            "lodash",
+            Some("renovate/lodash-4.x"),
+            Some("Update dependency lodash to v4.17.21"),
+            output::DepStatus::UpdateAvailable {
+                current: "^4.0.0".to_owned(),
+                latest: "4.17.21".to_owned(),
+            },
+        )]);
+        let branches = collect_branch_updates(&report);
+        assert_eq!(branches.len(), 1);
+        assert!(branches.contains_key("renovate/lodash-4.x"));
+        assert_eq!(branches["renovate/lodash-4.x"].len(), 1);
+    }
+
+    #[test]
+    fn collect_branch_updates_deduplicates_same_branch() {
+        let report = make_report(vec![
+            dep_report(
+                "lodash",
+                Some("renovate/lodash-4.x"),
+                Some("Update dependency lodash to v4.17.21"),
+                output::DepStatus::UpdateAvailable {
+                    current: "^4.0.0".to_owned(),
+                    latest: "4.17.21".to_owned(),
+                },
+            ),
+            dep_report(
+                "lodash",
+                Some("renovate/lodash-4.x"),
+                Some("Update dependency lodash to v4.17.21"),
+                output::DepStatus::UpdateAvailable {
+                    current: "^4.0.0".to_owned(),
+                    latest: "4.17.21".to_owned(),
+                },
+            ),
+        ]);
+        let branches = collect_branch_updates(&report);
+        assert_eq!(branches.len(), 1);
+        assert_eq!(branches["renovate/lodash-4.x"].len(), 2);
+    }
+
+    #[test]
+    fn collect_branch_updates_groups_by_branch_name() {
+        let report = make_report(vec![
+            dep_report(
+                "lodash",
+                Some("renovate/lodash-4.x"),
+                Some("Update dependency lodash to v4.17.21"),
+                output::DepStatus::UpdateAvailable {
+                    current: "^4.0.0".to_owned(),
+                    latest: "4.17.21".to_owned(),
+                },
+            ),
+            dep_report(
+                "express",
+                Some("renovate/express-4.x"),
+                Some("Update dependency express to v4.19.0"),
+                output::DepStatus::UpdateAvailable {
+                    current: "^4.0.0".to_owned(),
+                    latest: "4.19.0".to_owned(),
+                },
+            ),
+        ]);
+        let branches = collect_branch_updates(&report);
+        assert_eq!(branches.len(), 2);
+        assert_eq!(branches["renovate/lodash-4.x"].len(), 1);
+        assert_eq!(branches["renovate/express-4.x"].len(), 1);
+    }
+
+    #[test]
+    fn collect_branch_updates_ignores_non_update_available() {
+        let report = make_report(vec![
+            dep_report(
+                "lodash",
+                Some("renovate/lodash-4.x"),
+                Some("Update dependency lodash to v4.17.21"),
+                output::DepStatus::UpdateAvailable {
+                    current: "^4.0.0".to_owned(),
+                    latest: "4.17.21".to_owned(),
+                },
+            ),
+            dep_report(
+                "express",
+                None,
+                None,
+                output::DepStatus::UpToDate {
+                    latest: Some("4.19.0".to_owned()),
+                },
+            ),
+        ]);
+        let branches = collect_branch_updates(&report);
+        assert_eq!(branches.len(), 1);
+        assert!(branches.contains_key("renovate/lodash-4.x"));
     }
 }
