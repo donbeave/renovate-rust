@@ -784,6 +784,7 @@ mod tests {
         compare(a, b)
     }
 
+    // Rust-specific: unit tests for Maven version comparison
     #[test]
     fn numeric_versions() {
         assert_eq!(cmp("1.0.0", "1.0.1"), Ordering::Less);
@@ -793,6 +794,7 @@ mod tests {
         assert_eq!(cmp("1.10.0", "1.9.0"), Ordering::Greater);
     }
 
+    // Rust-specific: unit tests for Maven qualifier ordering
     #[test]
     fn qualifier_ordering() {
         // alpha < beta < milestone < rc < release < sp
@@ -803,6 +805,7 @@ mod tests {
         assert_eq!(cmp("1.0", "1.0-SP1"), Ordering::Less);
     }
 
+    // Rust-specific: unit tests for Maven release equivalent qualifiers
     #[test]
     fn release_equivalents() {
         // final, ga, release, and empty are all equivalent to release
@@ -811,18 +814,21 @@ mod tests {
         assert_eq!(cmp("1.0.Final", "1.0"), Ordering::Equal);
     }
 
+    // Rust-specific: unit tests for Maven SNAPSHOT handling
     #[test]
     fn snapshot_older_than_release() {
         assert_eq!(cmp("5.3.28-SNAPSHOT", "5.3.28"), Ordering::Less);
         assert_eq!(cmp("5.3.28", "5.3.28-SNAPSHOT"), Ordering::Greater);
     }
 
+    // Rust-specific: unit tests for Maven v-prefix stripping
     #[test]
     fn v_prefix_stripped() {
         assert_eq!(cmp("v1.0.0", "1.0.0"), Ordering::Equal);
         assert_eq!(cmp("v1.0.0", "v1.0.1"), Ordering::Less);
     }
 
+    // Rust-specific: unit tests for Maven short qualifier transitions
     #[test]
     fn transition_short_qualifiers() {
         // 1a → 1.alpha, 1b → 1.beta, 1m → 1.milestone
@@ -831,12 +837,14 @@ mod tests {
         assert_eq!(cmp("1.0m1", "1.0"), Ordering::Less);
     }
 
+    // Rust-specific: unit tests for Maven leading zero handling
     #[test]
     fn leading_zeros_ignored() {
         assert_eq!(cmp("1.0.0", "1"), Ordering::Equal);
         assert_eq!(cmp("1.0", "1.0.0"), Ordering::Equal);
     }
 
+    // Rust-specific: unit tests for Spring Framework version patterns
     #[test]
     fn spring_versions() {
         assert_eq!(cmp("5.3.28", "5.3.30"), Ordering::Less);
@@ -844,6 +852,7 @@ mod tests {
         assert_eq!(cmp("6.0.0-RC1", "6.0.0"), Ordering::Less);
     }
 
+    // Rust-specific: unit tests for Maven is_stable helper
     #[test]
     fn is_stable_checks() {
         assert!(is_stable("1.2.3"));
@@ -856,6 +865,7 @@ mod tests {
         assert!(!is_stable("1.0-RC1"));
     }
 
+    // Rust-specific: unit tests for maven_update_summary pinned versions
     #[test]
     fn maven_update_summary_pinned() {
         let s = maven_update_summary("5.3.28", Some("5.3.30"));
@@ -870,6 +880,7 @@ mod tests {
         assert!(!s3.update_available);
     }
 
+    // Rust-specific: unit tests for maven_update_summary with no latest
     #[test]
     fn maven_update_summary_none() {
         let s = maven_update_summary("1.0", None);
