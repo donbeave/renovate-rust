@@ -1,4 +1,7 @@
 pub mod author;
+pub mod storage;
+
+pub use storage::GitStorage;
 
 // ---------------------------------------------------------------------------
 // git/config — lib/util/git/config.ts
