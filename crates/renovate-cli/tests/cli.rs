@@ -244,3 +244,33 @@ fn git_fs_legacy_flags_are_silently_dropped() {
         .stdout(predicate::str::is_empty())
         .stderr(predicate::str::is_empty());
 }
+
+// ── Dry-run branch name output ─────────────────────────────────────────────
+
+#[test]
+fn dry_run_full_outputs_branch_names_for_outdated_deps() {
+    let fixture = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../tests/fixtures/npm-package");
+    let output = renovate()
+        .current_dir(&fixture)
+        .env("LOG_LEVEL", "fatal")
+        .arg("--platform=local")
+        .arg("--dry-run=full")
+        .arg("--output-format=json")
+        .output()
+        .expect("renovate binary runs");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("branchName"),
+        "JSON output should contain branchName field; got: {stdout}"
+    );
+    assert!(
+        stdout.contains("renovate/lodash-"),
+        "branch name should start with renovate/lodash-; got: {stdout}"
+    );
+    assert!(
+        stdout.contains("prTitle"),
+        "JSON output should contain prTitle field; got: {stdout}"
+    );
+}

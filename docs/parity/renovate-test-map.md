@@ -166,7 +166,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy-collection/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy-collection/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy/index.spec.ts.md) |
-| `lib/modules/datasource/repology/index.spec.ts` | Not done | [details](lib/modules/datasource/repology/index.spec.ts.md) |
+| `lib/modules/datasource/repology/index.spec.ts` | Done | [details](lib/modules/datasource/repology/index.spec.ts.md) |
 | `lib/modules/datasource/deb/checksum.spec.ts` | Done | [details](lib/modules/datasource/deb/checksum.spec.ts.md) |
 | `lib/modules/datasource/deb/utils.spec.ts` | Done | [details](lib/modules/datasource/deb/utils.spec.ts.md) |
 | `lib/modules/datasource/deb/index.spec.ts` | Not done | [details](lib/modules/datasource/deb/index.spec.ts.md) |
