@@ -1048,8 +1048,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/flutter-version/index.ts` | `crates/renovate-core/src/datasources/flutter_version.rs` | partial | Core GCS-backed release fetch and stable-pattern filtering ported; package-cache not ported |
 | `lib/modules/datasource/forgejo-releases/index.ts` | `crates/renovate-core/src/datasources/forgejo_releases.rs` | done | fetch_releases and get_digest ported; tag SHA and latest commit digest |
 | `lib/modules/datasource/forgejo-tags/index.ts` | `crates/renovate-core/src/datasources/forgejo_tags.rs` | done | fetch_releases and get_digest ported; maps name/commit.sha/commit.created |
-| `lib/modules/datasource/git-refs/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/git-tags/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/git-refs/index.ts` | `crates/renovate-core/src/datasources/git_refs.rs`; `crates/renovate-core/src/util.rs` | partial | ls-remote parsing, releases, digest lookup, annotated tag deref, and git auth env helpers ported; subprocess execution/cache integration not fully ported |
+| `lib/modules/datasource/git-tags/index.ts` | `crates/renovate-core/src/datasources/git_tags.rs`; `crates/renovate-core/src/util.rs` | partial | Tag-only release filtering, digest lookup, and git auth env helpers ported; subprocess execution/cache integration not fully ported |
 | `lib/modules/datasource/gitea-releases/index.ts` | `crates/renovate-core/src/datasources/gitea_releases.rs` | done | fetch_releases and get_digest ported; tag SHA and latest commit digest |
 | `lib/modules/datasource/gitea-tags/index.ts` | `crates/renovate-core/src/datasources/gitea_tags.rs` | done | fetch_releases and get_digest ported; maps name/commit.sha/commit.created |
 | `lib/modules/datasource/github-digest/index.ts` | — | not-started | Not ported |
@@ -1166,3 +1166,4 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/versioning/semver-coerced/index.ts` | `crates/renovate-core/src/versioning/semver_coerced.rs` | partial | Coerced semver ported |
 | `lib/modules/versioning/unity3d/index.ts` | `crates/renovate-core/src/versioning/unity3d.rs` | partial | Unity3D versioning ported |
 | `lib/modules/versioning/unity3d-packages/index.ts` | `crates/renovate-core/src/versioning/unity3d_packages.rs` | partial | Unity3D packages versioning ported |
+| `lib/util/git/auth.ts` | `crates/renovate-core/src/util.rs` | partial | Git authenticated environment variable generation ported for token, username/password, GitHub API host-rule rewrites, additional datasource host types, GitLab token username, and Bitbucket Server `/scm/` rewrite |

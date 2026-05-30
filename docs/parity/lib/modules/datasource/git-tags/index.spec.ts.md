@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/git-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-tags/index.spec.ts
-**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** done
 
 ### `modules/datasource/git-tags/index`
 
@@ -17,7 +17,7 @@
 | returns null if not found | 64 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_null_if_not_found` | notfound → None |
 | returns digest for tag | 74 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_digest_for_tag` | v1.0.2 → deref hash |
 | returns digest for HEAD | 84 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_digest_for_head` | None → HEAD hash |
-| returns digest for HEAD with authentication environment variables | 94 | pending | — | — | —|
-| returns digest for HEAD with authentication environment variables for datasource type git-tags | 121 | pending | — | — | —|
+| returns digest for HEAD with authentication environment variables | 94 | ported | `crates/renovate-core/src/util.rs` | `git_environment_variables_uses_github_api_rule_for_github_dot_com` | Host-rule token builds Git `insteadOf` env |
+| returns digest for HEAD with authentication environment variables for datasource type git-tags | 121 | ported | `crates/renovate-core/src/util.rs` | `git_environment_variables_allows_git_tags_datasource_host_type` | Additional datasource host type accepted |
 
 ---
