@@ -1204,7 +1204,7 @@ pub(crate) fn build_dep_reports_bundler(
             new_value: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
-                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+                reason: dep.skip_reason.as_ref().unwrap().as_str().to_owned(),
             },
         });
     }

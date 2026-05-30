@@ -2,7 +2,7 @@
 //!
 //! Mirrors `lib/modules/manager/bundler/extract.ts` — `extractPackageFile`.
 
-use std::{collections::HashMap, sync::LazyLock};
+use std::{collections::HashMap, ops::Deref, sync::LazyLock};
 
 use regex::Regex;
 
@@ -24,6 +24,28 @@ impl BundlerDepType {
     }
 }
 
+/// Why a bundler dep is skipped.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BundlerSkipReason {
+    /// Path/local gem (not resolvable via rubygems).
+    InternalPackage,
+}
+
+impl Deref for BundlerSkipReason {
+    type Target = str;
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl BundlerSkipReason {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            BundlerSkipReason::InternalPackage => "internal-package",
+        }
+    }
+}
+
 /// A single extracted gem dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BundlerExtractedDep {
@@ -31,8 +53,7 @@ pub struct BundlerExtractedDep {
     /// Version constraint including surrounding quotes, e.g. `'~> 7.0'` or `"~> 7.0"`.
     pub current_value: String,
     pub dep_type: BundlerDepType,
-    /// `"internal-package"` for path deps.
-    pub skip_reason: Option<String>,
+    pub skip_reason: Option<BundlerSkipReason>,
     pub locked_version: Option<String>,
     pub registry_urls: Vec<String>,
     /// `"rubygems"`, `"ruby-version"`, or `"git-refs"`.
@@ -394,7 +415,7 @@ fn parse_gem_line(line: &str, variables: &HashMap<String, String>) -> Option<Bun
 
     // path: → internal-package
     if PATH_MATCH.is_match(line) {
-        dep.skip_reason = Some("internal-package".to_owned());
+        dep.skip_reason = Some(BundlerSkipReason::InternalPackage);
         return Some(dep);
     }
 
@@ -815,7 +836,7 @@ end
         assert!(nokogiri.skip_reason.is_none());
 
         let local_gem = reg.iter().find(|d| d.name == "local_gem").unwrap();
-        assert_eq!(local_gem.skip_reason.as_deref(), Some("internal-package"));
+        assert_eq!(local_gem.skip_reason, Some(BundlerSkipReason::InternalPackage));
     }
 
     #[test]
@@ -1378,7 +1399,7 @@ end
         let pkg = extract(gemfile).unwrap();
         assert_eq!(pkg.deps.len(), 2);
         let foo = pkg.deps.iter().find(|d| d.name == "foo").unwrap();
-        assert_eq!(foo.skip_reason.as_deref(), Some("internal-package"));
+        assert_eq!(foo.skip_reason, Some(BundlerSkipReason::InternalPackage));
         let bar = pkg.deps.iter().find(|d| d.name == "bar").unwrap();
         assert!(bar.skip_reason.is_none());
     }

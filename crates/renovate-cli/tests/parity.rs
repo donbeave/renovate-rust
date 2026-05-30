@@ -1255,3 +1255,46 @@ fn parity_setup_cfg_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for setup-cfg-skipped fixture");
 }
+
+#[test]
+fn parity_bundler_skipped() {
+    let actual = run_fixture("bundler-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 2,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 2,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Gemfile",
+                    "manager": "bundler",
+                    "stats": {
+                        "total": 2,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 2,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "local_gem",
+                            "status": "skipped",
+                            "reason": "internal-package"
+                        },
+                        {
+                            "name": "other",
+                            "status": "skipped",
+                            "reason": "internal-package"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for bundler-skipped fixture");
+}
