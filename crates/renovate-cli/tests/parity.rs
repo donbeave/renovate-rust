@@ -1389,3 +1389,51 @@ fn parity_gemspec_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for gemspec-skipped fixture");
 }
+
+#[test]
+fn parity_cpanfile_skipped() {
+    let actual = run_fixture("cpanfile-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "cpanfile",
+                    "manager": "cpanfile",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "Moose",
+                            "status": "skipped",
+                            "reason": "unspecifiedversion"
+                        },
+                        {
+                            "name": "Test::More",
+                            "status": "skipped",
+                            "reason": "unspecifiedversion"
+                        },
+                        {
+                            "name": "Test::Exception",
+                            "status": "skipped",
+                            "reason": "unspecifiedversion"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for cpanfile-skipped fixture");
+}

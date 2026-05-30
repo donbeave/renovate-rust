@@ -1,0 +1,3 @@
+requires 'Moose';
+requires 'Test::More';
+test_requires 'Test::Exception';

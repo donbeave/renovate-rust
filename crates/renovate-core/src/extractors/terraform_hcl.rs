@@ -27,7 +27,7 @@ pub struct TerraformDefinitionFile {
 pub struct TerraformBlock {
     #[serde(rename = "required_providers", skip_serializing_if = "Option::is_none")]
     pub required_providers:
-        Option<Vec<BTreeMap<String, TerraformRequiredProviderOrString>>>,
+        Option<BTreeMap<String, TerraformRequiredProviderOrString>>,
     #[serde(rename = "required_version", skip_serializing_if = "Option::is_none")]
     pub required_version: Option<String>,
 }
@@ -101,12 +101,64 @@ pub fn parse_hcl(content: &str) -> Option<TerraformDefinitionFile> {
         Ok(v) => v,
         Err(_) => return None,
     };
-    let json_value = hcl_value_to_json(&raw);
+    let mut json_value = hcl_value_to_json(&raw);
+    normalize_hcl_json(&mut json_value);
     let def: TerraformDefinitionFile = match serde_json::from_value(json_value) {
         Ok(d) => d,
         Err(_) => return None,
     };
     Some(def)
+}
+
+fn normalize_hcl_json(val: &mut serde_json::Value) {
+    let Some(obj) = val.as_object_mut() else {
+        return;
+    };
+
+    let block_keys = [
+        "terraform",
+    ];
+    for key in block_keys {
+        if let Some(v) = obj.get_mut(key) {
+            if v.is_object() {
+                *v = serde_json::Value::Array(vec![v.clone()]);
+            }
+        }
+    }
+
+    let labeled_block_keys = ["module", "provider"];
+    for key in labeled_block_keys {
+        if let Some(v) = obj.get_mut(key) {
+            if v.is_object() {
+                let map = std::mem::take(v).as_object_mut().unwrap().clone();
+                let new_map: serde_json::Map<String, serde_json::Value> = map
+                    .into_iter()
+                    .map(|(k, inner)| {
+                        let wrapped = if inner.is_object() {
+                            serde_json::Value::Array(vec![inner])
+                        } else {
+                            inner
+                        };
+                        (k, wrapped)
+                    })
+                    .collect();
+                *v = serde_json::Value::Object(new_map);
+            }
+        }
+    }
+
+    if let Some(v) = obj.get_mut("resource") {
+        if v.is_object() {
+            let resource_types = std::mem::take(v).as_object_mut().unwrap().clone();
+            let mut result = serde_json::Map::new();
+            for (type_name, instances) in resource_types {
+                if instances.is_object() {
+                    result.insert(type_name, instances);
+                }
+            }
+            *v = serde_json::Value::Object(result);
+        }
+    }
 }
 
 pub fn parse_json(content: &str) -> Option<TerraformDefinitionFile> {
@@ -166,6 +218,8 @@ mod tests {
         let def = parse_hcl(hcl).unwrap();
         let blocks = def.terraform.unwrap();
         assert_eq!(blocks.len(), 1);
+        let rp = blocks[0].required_providers.as_ref().unwrap();
+        assert!(rp.contains_key("aws"));
     }
 
     #[test]
@@ -213,25 +267,6 @@ mod tests {
         let def = parse_json(json).unwrap();
         let modules = def.module.unwrap();
         assert!(modules.contains_key("vpc"));
-    }
-
-    #[test]
-    fn debug_hcl_json_structure() {
-        let hcl = r#"
-            terraform {
-              required_providers {
-                aws = {
-                  source  = "hashicorp/aws"
-                  version = "~> 5.0"
-                }
-              }
-            }
-        "#;
-        let raw: hcl::Value = hcl::from_str(hcl).unwrap();
-        let json = hcl_value_to_json(&raw);
-        eprintln!("JSON: {}", serde_json::to_string_pretty(&json).unwrap());
-        let def: Result<TerraformDefinitionFile, _> = serde_json::from_value(json);
-        eprintln!("DEF RESULT: {:?}", def);
     }
 
     #[test]

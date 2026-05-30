@@ -1,0 +1,239 @@
+//! npm lock file generation.
+//!
+//! Ports `lib/modules/manager/npm/post-update/npm.ts`.
+
+use std::path::Path;
+
+use super::{PackageJson, Upgrade};
+
+#[derive(Debug, Clone, Default)]
+pub struct NpmLockFileConfig {
+    pub lock_file_dir: String,
+    pub npmrc: Option<String>,
+    pub skip_installs: bool,
+    pub constraints: std::collections::BTreeMap<String, String>,
+    pub post_update_options: Vec<String>,
+    pub env: std::collections::BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct NpmLockFileResult {
+    pub lock_file_name: String,
+    pub content: Option<String>,
+    pub error: Option<String>,
+}
+
+pub fn get_npm_constraint_from_package_lock(
+    lock_file_content: &str,
+) -> Option<String> {
+    let v: serde_json::Value = serde_json::from_str(lock_file_content).ok()?;
+    let lockfile_version = v.get("lockfileVersion").and_then(|v| v.as_u64())?;
+    match lockfile_version {
+        1 => Some("<7".to_string()),
+        2 => Some("<9".to_string()),
+        3 => Some(">=7".to_string()),
+        _ => None,
+    }
+}
+
+pub fn get_npm_constraint_from_package_json(pj: &PackageJson) -> Option<String> {
+    pj.get_package_manager_version("npm")
+}
+
+pub fn divide_workspace_and_root_deps(
+    upgrades: &[Upgrade],
+    workspace_patterns: &[String],
+) -> (Vec<&Upgrade>, Vec<&Upgrade>) {
+    let mut workspace_deps = Vec::new();
+    let mut root_deps = Vec::new();
+
+    for upgrade in upgrades {
+        let is_workspace = workspace_patterns.iter().any(|pattern| {
+            upgrade.package_file.starts_with(pattern.trim_end_matches('/'))
+        }) || workspace_patterns.is_empty();
+
+        if is_workspace && !upgrade.package_file.contains('/') {
+            root_deps.push(upgrade);
+        } else if !workspace_patterns.is_empty() {
+            workspace_deps.push(upgrade);
+        } else {
+            root_deps.push(upgrade);
+        }
+    }
+
+    (workspace_deps, root_deps)
+}
+
+pub fn generate_package_key(name: &str, version: &str) -> String {
+    format!("{}@{}", name, version)
+}
+
+pub fn parse_npmrc_cooldown_date(npmrc: &str) -> Option<(String, String)> {
+    let mut before = None;
+    let mut min_release_age = None;
+    for line in npmrc.lines() {
+        let line = line.trim();
+        if line.starts_with('#') || line.is_empty() {
+            continue;
+        }
+        if let Some((key, value)) = line.split_once('=') {
+            match key.trim() {
+                "before" => before = Some(value.trim().to_string()),
+                "min-release-age" => min_release_age = Some(value.trim().to_string()),
+                _ => {}
+            }
+        }
+    }
+    match (before, min_release_age) {
+        (Some(b), Some(m)) => Some((b, m)),
+        _ => None,
+    }
+}
+
+pub fn build_npm_install_cmd(
+    package_lock_only: bool,
+    prefer_dedupe: bool,
+    ignore_scripts: bool,
+    before: Option<&str>,
+) -> Vec<String> {
+    let mut cmd = vec!["npm".to_string(), "install".to_string()];
+    if package_lock_only {
+        cmd.push("--package-lock-only".to_string());
+    }
+    if prefer_dedupe {
+        cmd.push("--prefer-dedupe".to_string());
+    }
+    if ignore_scripts {
+        cmd.push("--ignore-scripts".to_string());
+    }
+    if let Some(b) = before {
+        cmd.push(format!("--before={}", b));
+    }
+    cmd
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_npm_constraint_from_lock_v1() {
+        assert_eq!(
+            get_npm_constraint_from_package_lock(r#"{"lockfileVersion":1}"#),
+            Some("<7".to_string())
+        );
+    }
+
+    #[test]
+    fn get_npm_constraint_from_lock_v2() {
+        assert_eq!(
+            get_npm_constraint_from_package_lock(r#"{"lockfileVersion":2}"#),
+            Some("<9".to_string())
+        );
+    }
+
+    #[test]
+    fn get_npm_constraint_from_lock_v3() {
+        assert_eq!(
+            get_npm_constraint_from_package_lock(r#"{"lockfileVersion":3}"#),
+            Some(">=7".to_string())
+        );
+    }
+
+    #[test]
+    fn get_npm_constraint_from_lock_invalid() {
+        assert_eq!(
+            get_npm_constraint_from_package_lock("not json"),
+            None
+        );
+    }
+
+    #[test]
+    fn get_npm_constraint_from_package_json() {
+        let pj = PackageJson::parse(
+            r#"{"engines": {"npm": ">=9"}}"#,
+        )
+        .unwrap();
+        assert_eq!(
+            get_npm_constraint_from_package_json(&pj),
+            Some(">=9".to_string())
+        );
+    }
+
+    #[test]
+    fn generate_package_key_basic() {
+        assert_eq!(
+            generate_package_key("lodash", "4.17.21"),
+            "lodash@4.17.21"
+        );
+    }
+
+    #[test]
+    fn parse_npmrc_cooldown_date_found() {
+        let npmrc = "before=2024-01-01\nmin-release-age=7d\n";
+        assert_eq!(
+            parse_npmrc_cooldown_date(npmrc),
+            Some(("2024-01-01".to_string(), "7d".to_string()))
+        );
+    }
+
+    #[test]
+    fn parse_npmrc_cooldown_date_missing() {
+        assert_eq!(parse_npmrc_cooldown_date("# no settings\n"), None);
+    }
+
+    #[test]
+    fn build_npm_install_cmd_basic() {
+        assert_eq!(
+            build_npm_install_cmd(true, false, false, None),
+            vec!["npm", "install", "--package-lock-only"]
+        );
+    }
+
+    #[test]
+    fn build_npm_install_cmd_all_flags() {
+        assert_eq!(
+            build_npm_install_cmd(true, true, true, Some("2024-01-01")),
+            vec![
+                "npm",
+                "install",
+                "--package-lock-only",
+                "--prefer-dedupe",
+                "--ignore-scripts",
+                "--before=2024-01-01"
+            ]
+        );
+    }
+
+    #[test]
+    fn divide_workspace_and_root_deps_no_patterns() {
+        let upgrades = vec![Upgrade {
+            dep_name: "lodash".to_string(),
+            package_file: "package.json".to_string(),
+            ..Default::default()
+        }];
+        let (ws, root) = divide_workspace_and_root_deps(&upgrades, &[]);
+        assert!(ws.is_empty());
+        assert_eq!(root.len(), 1);
+    }
+
+    #[test]
+    fn divide_workspace_and_root_deps_with_patterns() {
+        let upgrades = vec![
+            Upgrade {
+                dep_name: "lodash".to_string(),
+                package_file: "packages/a/package.json".to_string(),
+                ..Default::default()
+            },
+            Upgrade {
+                dep_name: "express".to_string(),
+                package_file: "package.json".to_string(),
+                ..Default::default()
+            },
+        ];
+        let patterns = vec!["packages/".to_string()];
+        let (ws, root) = divide_workspace_and_root_deps(&upgrades, &patterns);
+        assert_eq!(ws.len(), 1);
+        assert_eq!(root.len(), 1);
+    }
+}

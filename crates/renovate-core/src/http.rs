@@ -227,6 +227,35 @@ impl HttpClient {
         Ok(result)
     }
 
+    /// Send a PUT request with a JSON body and deserialize the JSON response.
+    pub async fn put_json<T: serde::de::DeserializeOwned>(
+        &self,
+        url: &str,
+        body: &str,
+    ) -> Result<T, HttpError> {
+        let rb = self
+            .inner
+            .put(url)
+            .header("Content-Type", "application/json");
+        let rb = match &self.token {
+            Some(t) => rb.bearer_auth(t),
+            None => rb,
+        };
+        let resp = rb
+            .body(body.to_owned())
+            .send()
+            .await
+            .map_err(HttpError::Request)?;
+        if !resp.status().is_success() {
+            return Err(HttpError::Status {
+                status: resp.status(),
+                url: url.to_owned(),
+            });
+        }
+        let result = resp.json::<T>().await?;
+        Ok(result)
+    }
+
     /// Send a PATCH request with a JSON body.
     ///
     /// Returns the raw response; callers must check the status code.
@@ -244,6 +273,40 @@ impl HttpClient {
             .send()
             .await
             .map_err(HttpError::Request)?;
+        Ok(resp)
+    }
+
+    /// Send a DELETE request and deserialize the JSON response.
+    pub async fn delete_json<T: serde::de::DeserializeOwned>(
+        &self,
+        url: &str,
+    ) -> Result<T, HttpError> {
+        let rb = self.inner.delete(url);
+        let rb = match &self.token {
+            Some(t) => rb.bearer_auth(t),
+            None => rb,
+        };
+        let resp = rb.send().await.map_err(HttpError::Request)?;
+        if !resp.status().is_success() {
+            return Err(HttpError::Status {
+                status: resp.status(),
+                url: url.to_owned(),
+            });
+        }
+        let result = resp.json::<T>().await?;
+        Ok(result)
+    }
+
+    /// Send a HEAD request and return the response.
+    ///
+    /// Returns the raw response; callers must check the status code.
+    pub async fn head_json(&self, url: &str) -> Result<reqwest::Response, HttpError> {
+        let rb = self.inner.head(url);
+        let rb = match &self.token {
+            Some(t) => rb.bearer_auth(t),
+            None => rb,
+        };
+        let resp = rb.send().await.map_err(HttpError::Request)?;
         Ok(resp)
     }
 }
@@ -753,6 +816,42 @@ mod tests {
         assert_eq!(val["id"], 123);
     }
 
+    // Ported: "get" — util/http/index.spec.ts line 29
+    #[tokio::test]
+    async fn get_sends_request_and_receives_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/test"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("hello"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let resp = http
+            .get(&format!("{}/test", server.uri()))
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        let body = resp.text().await.unwrap();
+        assert_eq!(body, "hello");
+    }
+
+    // Ported: "returns 429 error" — util/http/index.spec.ts line 40
+    #[tokio::test]
+    async fn get_returns_429_error_after_retries_exhausted() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(429))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let resp = http.get_retrying(&server.uri()).await.unwrap();
+        assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
+    }
+
     // Ported: "returns 401 error" — util/http/index.spec.ts line 48
     #[tokio::test]
     async fn get_returns_401_error() {
@@ -775,6 +874,108 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
         let header = resp.headers().get("www-authenticate").unwrap().to_str().unwrap();
         assert!(header.contains("Bearer"));
+    }
+
+    // Ported: "putJson" — util/http/index.spec.ts line 166
+    #[tokio::test]
+    async fn put_json_sends_body_and_parses_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"updated": true})))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let val: serde_json::Value = http
+            .put_json(&server.uri(), "{}")
+            .await
+            .unwrap();
+        assert_eq!(val["updated"], true);
+    }
+
+    // Ported: "patchJson" — util/http/index.spec.ts line 181
+    #[tokio::test]
+    async fn patch_json_sends_body_and_returns_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("PATCH"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"patched": true})))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let resp = http.patch_json(&server.uri(), "{}").await.unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    // Ported: "deleteJson" — util/http/index.spec.ts line 196
+    #[tokio::test]
+    async fn delete_json_sends_request_and_parses_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("DELETE"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"deleted": true})))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let val: serde_json::Value = http
+            .delete_json(&server.uri())
+            .await
+            .unwrap();
+        assert_eq!(val["deleted"], true);
+    }
+
+    // Ported: "headJson" — util/http/index.spec.ts line 211
+    #[tokio::test]
+    async fn head_json_sends_request_and_returns_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("HEAD"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).insert_header("x-custom", "value"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let resp = http.head_json(&server.uri()).await.unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+        assert_eq!(resp.headers().get("x-custom").unwrap(), "value");
+    }
+
+    // Ported: "sets default user-agent" — util/http/index.spec.ts line 36
+    #[tokio::test]
+    async fn default_user_agent_is_set_on_requests() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let resp = http.get(&server.uri()).send().await.unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    // Ported: "preserves existing headers" — util/http/index.spec.ts line 100
+    #[tokio::test]
+    async fn get_preserves_existing_headers() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let resp = http
+            .get(&server.uri())
+            .header("x-custom", "value")
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
     }
 }
 

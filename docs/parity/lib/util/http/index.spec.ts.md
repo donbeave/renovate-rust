@@ -5,14 +5,14 @@
 ## `lib/util/http/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/index.spec.ts
-**Total tests:** 52 | **Ported:** 5 | **Actionable:** 19 | **Status:** partial
+**Total tests:** 52 | **Ported:** 13 | **Actionable:** 11 | **Status:** partial
 
 ### `util/http/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| get | 29 | pending | — | — | —|
-| returns 429 error | 40 | pending | — | — | —|
+| get | 29 | ported | `http.rs` | `get_sends_request_and_receives_response` | — |
+| returns 429 error | 40 | ported | `http.rs` | `get_returns_429_error_after_retries_exhausted` | — |
 | returns 401 error | 48 | ported | `http.rs` | `get_returns_401_error` | Verifies status code and www-authenticate header |
 | converts 404 error to ExternalHostError | 84 | not-applicable | — | — | `ExternalHostError` concept not implemented in Rust |
 | disables hosts | 93 | not-applicable | — | — | Host disabling not implemented in Rust HTTP client |
@@ -20,10 +20,10 @@
 | does not pass auth on redirects | 109 | not-applicable | — | — | Redirect auth stripping not implemented in Rust |
 | getJson | 127 | ported | `http.rs` | `get_json_parses_json_body` | Rust does not send `Accept: application/json` header automatically |
 | postJson | 151 | ported | `http.rs` | `post_json_sends_body_and_parses_response` | — |
-| putJson | 166 | pending | — | — | —|
-| patchJson | 181 | pending | — | — | —|
-| deleteJson | 196 | pending | — | — | —|
-| headJson | 211 | pending | — | — | —|
+| putJson | 166 | ported | `http.rs` | `put_json_sends_body_and_parses_response` | — |
+| patchJson | 181 | ported | `http.rs` | `patch_json_sends_body_and_returns_response` | — |
+| deleteJson | 196 | ported | `http.rs` | `delete_json_sends_request_and_parses_response` | — |
+| headJson | 211 | ported | `http.rs` | `head_json_sends_request_and_returns_response` | — |
 | stream | 226 | pending | — | — | —|
 | disables hosts for stream | 251 | not-applicable | — | — | Host disabling not implemented in Rust HTTP client |
 | limits concurrency by host | 259 | not-applicable | — | — | Concurrency limiting not implemented in Rust HTTP client |
@@ -107,11 +107,11 @@
 | throws on schema validation failure | 737 | not-applicable | — | — | Zod schema validation not applicable to Rust |
 | throws on invalid toml | 752 | pending | — | — | —|
 
-| sets default user-agent | 36 | pending | — | — | —|
+| sets default user-agent | 36 | ported | `http.rs` | `default_user_agent_is_set_on_requests` | — |
 | uses userAgent when set as a plain string | 46 | not-applicable | — | — | Custom user-agent not supported in Rust HTTP client |
 | interpolates {{renovateVersion}} in a custom userAgent template | 55 | not-applicable | — | — | Handlebars templating not applicable to Rust |
 | renders unknown template variables as empty string | 68 | not-applicable | — | — | Handlebars templating not applicable to Rust |
 | supports Handlebars helpers in userAgent template | 77 | not-applicable | — | — | Handlebars templating not applicable to Rust |
 | supports conditional Handlebars syntax in userAgent template | 88 | not-applicable | — | — | Handlebars templating not applicable to Rust |
-| preserves existing headers | 100 | pending | — | — | —|
+| preserves existing headers | 100 | ported | `http.rs` | `get_preserves_existing_headers` | — |
 ---
