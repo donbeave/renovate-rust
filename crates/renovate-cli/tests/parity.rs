@@ -1164,3 +1164,46 @@ fn parity_ansible_scratch() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for ansible-scratch fixture");
 }
+
+#[test]
+fn parity_buildpacks_skipped() {
+    let actual = run_fixture("buildpacks-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 2,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 2,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "project.toml",
+                    "manager": "buildpacks",
+                    "stats": {
+                        "total": 2,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 2,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "docker-image"
+                        },
+                        {
+                            "name": "scratch:latest",
+                            "status": "skipped",
+                            "reason": "docker-image"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for buildpacks-skipped fixture");
+}

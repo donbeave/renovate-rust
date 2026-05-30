@@ -1,0 +1,5 @@
+[io.buildpacks]
+builder = "docker://scratch"
+
+[[io.buildpacks.group]]
+uri = "docker://scratch:latest"
