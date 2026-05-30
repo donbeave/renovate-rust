@@ -396,7 +396,7 @@ pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
                 }
             }
 
-            for dep in pf.deps.iter_mut() {
+            for dep in &mut pf.deps {
                 let key = format!("{}@{}", dep.name, dep.current_value);
                 if let Some(v) = lock.locked_versions.get(&key) {
                     dep.locked_version = Some(v.clone());
@@ -444,7 +444,7 @@ pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
                     .to_owned()
             };
 
-            for dep in pf.deps.iter_mut() {
+            for dep in &mut pf.deps {
                 if dep.dep_type == NpmDepType::Engines
                     || dep.dep_type == NpmDepType::PackageManager
                     || dep.dep_type == NpmDepType::Volta
