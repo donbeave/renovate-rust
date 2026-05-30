@@ -701,6 +701,81 @@ mod tests {
 
         assert_eq!(val["v"], 42);
     }
+
+    // Ported: "getJson" — util/http/index.spec.ts line 209
+    #[tokio::test]
+    async fn get_json_parses_json_body() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"test": true})))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let val: serde_json::Value = http.get_json(&server.uri()).await.unwrap();
+        assert_eq!(val["test"], true);
+    }
+
+    // Ported: "gets plain text with correct headers" — util/http/index.spec.ts line 402
+    #[tokio::test]
+    async fn get_raw_with_accept_returns_body() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/raw"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("plain text"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let body = http
+            .get_raw_with_accept(&format!("{}/raw", server.uri()), "text/plain")
+            .await
+            .unwrap();
+        assert_eq!(body, "plain text");
+    }
+
+    // Ported: "postJson" — util/http/index.spec.ts line 233
+    #[tokio::test]
+    async fn post_json_sends_body_and_parses_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"id": 123})))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let val: serde_json::Value = http
+            .post_json(&server.uri(), "{}")
+            .await
+            .unwrap();
+        assert_eq!(val["id"], 123);
+    }
+
+    // Ported: "returns 401 error" — util/http/index.spec.ts line 48
+    #[tokio::test]
+    async fn get_returns_401_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/v2/"))
+            .respond_with(
+                ResponseTemplate::new(401)
+                    .insert_header("www-authenticate", "Bearer realm=\"https://renovate.com/v2/token\",service=\"container_registry\",scope=\"*\""),
+            )
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let resp = http
+            .get(&format!("{}/v2/", server.uri()))
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
+        let header = resp.headers().get("www-authenticate").unwrap().to_str().unwrap();
+        assert!(header.contains("Bearer"));
+    }
 }
 
 // ── WWW-Authenticate header parser ───────────────────────────────────────────

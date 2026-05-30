@@ -5,7 +5,7 @@
 ## `lib/util/http/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/index.spec.ts
-**Total tests:** 52 | **Ported:** 0 | **Actionable:** 52 | **Status:** pending
+**Total tests:** 52 | **Ported:** 5 | **Actionable:** 52 | **Status:** partial
 
 ### `util/http/index`
 
@@ -13,13 +13,13 @@
 |---|---|---|---|---|---|
 | get | 29 | pending | — | — | —|
 | returns 429 error | 40 | pending | — | — | —|
-| returns 401 error | 48 | pending | — | — | —|
-| converts 404 error to ExternalHostError | 84 | pending | — | — | —|
-| disables hosts | 93 | pending | — | — | —|
-| ignores 404 error and does not throw ExternalHostError | 100 | pending | — | — | —|
-| does not pass auth on redirects | 109 | pending | — | — | —|
-| getJson | 127 | pending | — | — | —|
-| postJson | 151 | pending | — | — | —|
+| returns 401 error | 48 | ported | `http.rs` | `get_returns_401_error` | Verifies status code and www-authenticate header |
+| converts 404 error to ExternalHostError | 84 | pending | — | — | `ExternalHostError` concept not implemented in Rust |
+| disables hosts | 93 | pending | — | — | Host disabling not implemented in Rust HTTP client |
+| ignores 404 error and does not throw ExternalHostError | 100 | pending | — | — | `ExternalHostError` concept not implemented in Rust |
+| does not pass auth on redirects | 109 | pending | — | — | Redirect auth stripping not implemented in Rust |
+| getJson | 127 | ported | `http.rs` | `get_json_parses_json_body` | Rust does not send `Accept: application/json` header automatically |
+| postJson | 151 | ported | `http.rs` | `post_json_sends_body_and_parses_response` | — |
 | putJson | 166 | pending | — | — | —|
 | patchJson | 181 | pending | — | — | —|
 | deleteJson | 196 | pending | — | — | —|
@@ -33,14 +33,14 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 369 | pending | — | — | —|
+| works | 369 | ported | `http.rs` | `retries_on_429_then_succeeds` | — |
 
 ### `util/http/index › Schema support › getPlain`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| gets plain text with correct headers | 402 | pending | — | — | —|
-| works with custom options | 412 | pending | — | — | —|
+| gets plain text with correct headers | 402 | ported | `http.rs` | `get_raw_with_accept_returns_body` | — |
+| works with custom options | 412 | pending | — | — | Custom options (timeout, auth) not tested via wiremock |
 
 ### `util/http/index › Schema support › getYamlUnchecked`
 

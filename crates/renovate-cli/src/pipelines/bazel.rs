@@ -303,4 +303,91 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             }
         }
     }
+
+    // ── Bazelisk (.bazelversion) ────────────────────────────────────────────
+    for bazelisk_path in manager_files(detected, "bazelisk") {
+        match client.get_raw_file(owner, repo, &bazelisk_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::bazelisk::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %bazelisk_path,
+                    total = deps.as_ref().map(|d| d.len()).unwrap_or(0),
+                    "extracted bazelisk deps"
+                );
+                let mut dep_reports = Vec::new();
+                if let Some(deps) = deps {
+                    for dep in &deps {
+                        if repo_cfg.is_dep_ignored_for_manager(dep.dep_name, "bazelisk") {
+                            continue;
+                        }
+                        let status = match github_releases_datasource::fetch_latest_release(
+                            dep.package_name,
+                            &gh_http,
+                            gh_api_base,
+                        )
+                        .await
+                        {
+                            Ok(Some((tag, _))) => {
+                                let stripped = tag.trim_start_matches('v');
+                                let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                    &dep.current_value, Some(stripped),
+                                );
+                                if s.update_available {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.current_value.clone(),
+                                        latest: stripped.to_owned(),
+                                    }
+                                } else {
+                                    output::DepStatus::UpToDate {
+                                        latest: Some(stripped.to_owned()),
+                                    }
+                                }
+                            }
+                            Ok(None) => output::DepStatus::UpToDate { latest: None },
+                            Err(e) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                        };
+                        dep_reports.push(output::DepReport {
+                            branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
+                            assignees: Vec::new(),
+                            reviewers: Vec::new(),
+                            update_type: None,
+                            pr_priority: None,
+                            pr_title: None,
+                            release_timestamp: None,
+                            current_version_timestamp: None,
+                            dep_type: None,
+                            package_name: Some(dep.package_name.to_owned()),
+                            range_strategy: None,
+                            follow_tag: None,
+                            pin_digests: None,
+                            versioning: Some(dep.versioning.to_owned()),
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
+                            new_value: None,
+                            name: dep.dep_name.to_owned(),
+                            status,
+                        });
+                    }
+                }
+                if !dep_reports.is_empty() {
+                    ctx.report.files.push(output::FileReport {
+                        path: bazelisk_path.clone(),
+                        manager: "bazelisk".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%bazelisk_path, ".bazelversion not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%bazelisk_path, %err, "failed to fetch .bazelversion");
+                ctx.had_error = true;
+            }
+        }
+    }
 }
