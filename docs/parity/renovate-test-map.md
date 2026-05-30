@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,196 / 11,666 total tests ported (45%) · pending 4,742 · not-applicable 1,728 (15% of total) — updated 2026-05-30
+**Progress:** 5,196 / 11,666 total tests ported (45%) · pending 4,995 · not-applicable 1,475 (13% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -627,7 +627,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/extract/post/monorepo.spec.ts` | Done | [details](lib/modules/manager/npm/extract/post/monorepo.spec.ts.md) |
 | `lib/modules/manager/npm/extract/utils.spec.ts` | Done | [details](lib/modules/manager/npm/extract/utils.spec.ts.md) |
 | `lib/modules/manager/npm/npmrc.spec.ts` | Done | [details](lib/modules/manager/npm/npmrc.spec.ts.md) |
-| `lib/modules/manager/npm/post-update/index.spec.ts` | Done | [details](lib/modules/manager/npm/post-update/index.spec.ts.md) |
+| `lib/modules/manager/npm/post-update/index.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/index.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/node-version.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/node-version.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/npm.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/npm.spec.ts.md) |
 | `lib/modules/manager/npm/post-update/pnpm.spec.ts` | Not done | [details](lib/modules/manager/npm/post-update/pnpm.spec.ts.md) |
@@ -692,7 +692,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts` | Done | [details](lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts.md) |
 | `lib/modules/manager/terraform/hcl/index.spec.ts` | Not done | [details](lib/modules/manager/terraform/hcl/index.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/hash.spec.ts` | Not done | [details](lib/modules/manager/terraform/lockfile/hash.spec.ts.md) |
-| `lib/modules/manager/terraform/lockfile/index.spec.ts` | Done | [details](lib/modules/manager/terraform/lockfile/index.spec.ts.md) |
+| `lib/modules/manager/terraform/lockfile/index.spec.ts` | Not done | [details](lib/modules/manager/terraform/lockfile/index.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/update-locked.spec.ts` | Done | [details](lib/modules/manager/terraform/lockfile/update-locked.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/util.spec.ts` | Done | [details](lib/modules/manager/terraform/lockfile/util.spec.ts.md) |
 | `lib/modules/manager/terragrunt/artifacts.spec.ts` | Not done | [details](lib/modules/manager/terragrunt/artifacts.spec.ts.md) |
@@ -700,7 +700,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/terragrunt/util.spec.ts` | Done | [details](lib/modules/manager/terragrunt/util.spec.ts.md) |
 | `lib/modules/manager/vendir/artifacts.spec.ts` | Not done | [details](lib/modules/manager/vendir/artifacts.spec.ts.md) |
 | `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | Done | [details](lib/modules/platform/azure/azure-got-wrapper.spec.ts.md) |
-| `lib/modules/platform/azure/azure-helper.spec.ts` | Done | [details](lib/modules/platform/azure/azure-helper.spec.ts.md) |
+| `lib/modules/platform/azure/azure-helper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-helper.spec.ts.md) |
 | `lib/modules/platform/azure/index.spec.ts` | Not done | [details](lib/modules/platform/azure/index.spec.ts.md) |
 | `lib/modules/platform/azure/util.spec.ts` | Done | [details](lib/modules/platform/azure/util.spec.ts.md) |
 | `lib/modules/platform/bitbucket/comments.spec.ts` | Not done | [details](lib/modules/platform/bitbucket/comments.spec.ts.md) |
@@ -718,7 +718,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/gerrit/client.spec.ts` | Not done | [details](lib/modules/platform/gerrit/client.spec.ts.md) |
 | `lib/modules/platform/gerrit/index.spec.ts` | Not done | [details](lib/modules/platform/gerrit/index.spec.ts.md) |
 | `lib/modules/platform/gerrit/scm.spec.ts` | Not done | [details](lib/modules/platform/gerrit/scm.spec.ts.md) |
-| `lib/modules/platform/gerrit/utils.spec.ts` | Done | [details](lib/modules/platform/gerrit/utils.spec.ts.md) |
+| `lib/modules/platform/gerrit/utils.spec.ts` | Not done | [details](lib/modules/platform/gerrit/utils.spec.ts.md) |
 | `lib/modules/platform/gitea/gitea-helper.spec.ts` | Not done | [details](lib/modules/platform/gitea/gitea-helper.spec.ts.md) |
 | `lib/modules/platform/gitea/index.spec.ts` | Not done | [details](lib/modules/platform/gitea/index.spec.ts.md) |
 | `lib/modules/platform/gitea/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/gitea/pr-cache.spec.ts.md) |
@@ -803,7 +803,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/gitlab.spec.ts` | Not done | [details](lib/util/http/gitlab.spec.ts.md) |
 | `lib/util/http/got.spec.ts` | Not done | [details](lib/util/http/got.spec.ts.md) |
 | `lib/util/http/hooks.spec.ts` | Done | [details](lib/util/http/hooks.spec.ts.md) |
-| `lib/util/http/host-rules.spec.ts` | Done | [details](lib/util/http/host-rules.spec.ts.md) |
+| `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
 | `lib/util/http/index.spec.ts` | Not done | [details](lib/util/http/index.spec.ts.md) |
 | `lib/util/http/jira.spec.ts` | Not done | [details](lib/util/http/jira.spec.ts.md) |
 | `lib/util/http/queue.spec.ts` | Done | [details](lib/util/http/queue.spec.ts.md) |
@@ -858,12 +858,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/onboarding/branch/check.spec.ts` | Done | [details](lib/workers/repository/onboarding/branch/check.spec.ts.md) |
 | `lib/workers/repository/onboarding/branch/config.spec.ts` | Done | [details](lib/workers/repository/onboarding/branch/config.spec.ts.md) |
 | `lib/workers/repository/onboarding/branch/create.spec.ts` | Done | [details](lib/workers/repository/onboarding/branch/create.spec.ts.md) |
-| `lib/workers/repository/onboarding/branch/index.spec.ts` | Done | [details](lib/workers/repository/onboarding/branch/index.spec.ts.md) |
-| `lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts` | Done | [details](lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts.md) |
+| `lib/workers/repository/onboarding/branch/index.spec.ts` | Not done | [details](lib/workers/repository/onboarding/branch/index.spec.ts.md) |
+| `lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts` | Not done | [details](lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts.md) |
 | `lib/workers/repository/onboarding/branch/rebase.spec.ts` | Done | [details](lib/workers/repository/onboarding/branch/rebase.spec.ts.md) |
 | `lib/workers/repository/onboarding/pr/base-branch.spec.ts` | Done | [details](lib/workers/repository/onboarding/pr/base-branch.spec.ts.md) |
 | `lib/workers/repository/onboarding/pr/config-description.spec.ts` | Done | [details](lib/workers/repository/onboarding/pr/config-description.spec.ts.md) |
-| `lib/workers/repository/onboarding/pr/index.spec.ts` | Done | [details](lib/workers/repository/onboarding/pr/index.spec.ts.md) |
+| `lib/workers/repository/onboarding/pr/index.spec.ts` | Not done | [details](lib/workers/repository/onboarding/pr/index.spec.ts.md) |
 | `lib/workers/repository/onboarding/pr/pr-list.spec.ts` | Done | [details](lib/workers/repository/onboarding/pr/pr-list.spec.ts.md) |
 | `lib/workers/repository/process/extract-update.spec.ts` | Done | [details](lib/workers/repository/process/extract-update.spec.ts.md) |
 | `lib/workers/repository/process/fetch.spec.ts` | Done | [details](lib/workers/repository/process/fetch.spec.ts.md) |
@@ -888,14 +888,14 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/branch/artifacts.spec.ts` | Done | [details](lib/workers/repository/update/branch/artifacts.spec.ts.md) |
 | `lib/workers/repository/update/branch/auto-replace.spec.ts` | Not done | [details](lib/workers/repository/update/branch/auto-replace.spec.ts.md) |
 | `lib/workers/repository/update/branch/automerge.spec.ts` | Done | [details](lib/workers/repository/update/branch/automerge.spec.ts.md) |
-| `lib/workers/repository/update/branch/bump-versions.spec.ts` | Done | [details](lib/workers/repository/update/branch/bump-versions.spec.ts.md) |
+| `lib/workers/repository/update/branch/bump-versions.spec.ts` | Not done | [details](lib/workers/repository/update/branch/bump-versions.spec.ts.md) |
 | `lib/workers/repository/update/branch/check-existing.spec.ts` | Done | [details](lib/workers/repository/update/branch/check-existing.spec.ts.md) |
 | `lib/workers/repository/update/branch/commit.spec.ts` | Done | [details](lib/workers/repository/update/branch/commit.spec.ts.md) |
 | `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts` | Done | [details](lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts.md) |
 | `lib/workers/repository/update/branch/get-updated.spec.ts` | Not done | [details](lib/workers/repository/update/branch/get-updated.spec.ts.md) |
 | `lib/workers/repository/update/branch/index.spec.ts` | Not done | [details](lib/workers/repository/update/branch/index.spec.ts.md) |
 | `lib/workers/repository/update/branch/lock-files/index.spec.ts` | Done | [details](lib/workers/repository/update/branch/lock-files/index.spec.ts.md) |
-| `lib/workers/repository/update/branch/reuse.spec.ts` | Done | [details](lib/workers/repository/update/branch/reuse.spec.ts.md) |
+| `lib/workers/repository/update/branch/reuse.spec.ts` | Not done | [details](lib/workers/repository/update/branch/reuse.spec.ts.md) |
 | `lib/workers/repository/update/branch/schedule.spec.ts` | Done | [details](lib/workers/repository/update/branch/schedule.spec.ts.md) |
 | `lib/workers/repository/update/branch/status-checks.spec.ts` | Done | [details](lib/workers/repository/update/branch/status-checks.spec.ts.md) |
 | `lib/workers/repository/update/pr/automerge.spec.ts` | Done | [details](lib/workers/repository/update/pr/automerge.spec.ts.md) |
