@@ -1,0 +1,12 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@abcdef1234567890abcdef1234567890abcdef12
+      - uses: ./.github/actions/local
+      - uses: docker://node:18

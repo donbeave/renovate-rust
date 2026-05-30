@@ -145,10 +145,10 @@ impl GithubIssueCache {
             for (key, val) in map {
                 if let Ok(issue) = serde_json::from_value::<GithubIssue>(val.clone()) {
                     self.issues.insert(issue.number, issue);
-                } else if let Ok(num) = key.parse::<u64>() {
-                    if let Ok(issue) = serde_json::from_value::<GithubIssue>(val.clone()) {
-                        self.issues.insert(num, issue);
-                    }
+                } else if let Ok(num) = key.parse::<u64>()
+                    && let Ok(issue) = serde_json::from_value::<GithubIssue>(val.clone())
+                {
+                    self.issues.insert(num, issue);
                 }
             }
         }
@@ -210,11 +210,11 @@ impl GithubIssueCache {
         let mut is_reconciled = false;
         for issue in &queue {
             let cached = self.issues.get(&issue.number);
-            if let Some(cached) = cached {
-                if cached.number == issue.number && cached.last_modified == issue.last_modified {
-                    is_reconciled = true;
-                    break;
-                }
+            if let Some(cached) = cached
+                && cached.number == issue.number && cached.last_modified == issue.last_modified
+            {
+                is_reconciled = true;
+                break;
             }
             self.issues.insert(issue.number, issue.clone());
         }

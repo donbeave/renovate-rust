@@ -510,6 +510,12 @@ async fn process_repo(
                         } else {
                             Vec::new()
                         };
+                        // For maven, re-extract to get file_replace_position needed by the update fn.
+                        let maven_extracted = if manager == "maven" {
+                            renovate_core::extractors::maven::extract(&content).unwrap_or_default()
+                        } else {
+                            Vec::new()
+                        };
                         for bd in file_deps {
                             if let output::DepStatus::UpdateAvailable { ref current, ref latest } =
                                 bd.dep.status
@@ -542,6 +548,32 @@ async fn process_repo(
                                             ..Default::default()
                                         };
                                         renovate_core::extractors::gomod::gomod_update_dependency(
+                                            &content, &upgrade,
+                                        )
+                                    }
+                                    "maven" => {
+                                        let file_replace_position = maven_extracted
+                                            .iter()
+                                            .find(|d| d.dep_name == bd.dep.name)
+                                            .and_then(|d| d.file_replace_position);
+                                        let Some(pos) = file_replace_position else {
+                                            tracing::warn!(
+                                                repo = %repo_slug,
+                                                branch = %branch,
+                                                file = %file_path,
+                                                dep = %bd.dep.name,
+                                                "maven dep missing file_replace_position"
+                                            );
+                                            continue;
+                                        };
+                                        let upgrade = renovate_core::extractors::maven::MavenUpdateUpgrade {
+                                            dep_name: Some(bd.dep.name.clone()),
+                                            new_value: Some(bd.dep.new_value.clone().unwrap_or_else(|| latest.clone())),
+                                            current_value: Some(current.clone()),
+                                            file_replace_position: pos,
+                                            ..Default::default()
+                                        };
+                                        renovate_core::extractors::maven::maven_update_dependency(
                                             &content, &upgrade,
                                         )
                                     }

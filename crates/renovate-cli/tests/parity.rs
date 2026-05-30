@@ -331,3 +331,51 @@ fn parity_dockerfile_scratch() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for dockerfile-scratch fixture");
 }
+
+#[test]
+fn parity_github_actions_skipped() {
+    let actual = run_fixture("github-actions-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".github/workflows/ci.yml",
+                    "manager": "github-actions",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "actions/checkout",
+                            "status": "skipped",
+                            "reason": "shapin"
+                        },
+                        {
+                            "name": "./.github/actions/local",
+                            "status": "skipped",
+                            "reason": "localaction"
+                        },
+                        {
+                            "name": "docker://node:18",
+                            "status": "skipped",
+                            "reason": "dockerref"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for github-actions-skipped fixture");
+}

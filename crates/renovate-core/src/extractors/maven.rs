@@ -113,6 +113,8 @@ pub struct MavenExtractedDep {
     pub replace_string: Option<String>,
     /// Maven property name that supplied the version, when the version is shared.
     pub shared_variable_name: Option<String>,
+    /// Byte offset of the `<version>` text content in the XML file (after leading whitespace).
+    pub file_replace_position: Option<usize>,
 }
 
 impl MavenExtractedDep {
@@ -160,9 +162,16 @@ pub enum MavenExtractError {
 pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractError> {
     let (mut deps, properties) = parse_pom(content)?;
 
+    // Adjust file_replace_position to be relative to the first '<' in content,
+    // matching what maven_update_dependency expects.
+    let offset = content.find('<').unwrap_or(0);
+
     // Resolve ${property} references using the POM's own <properties> section.
     // groupId and artifactId can also be property refs (e.g. ${quuxGroup}).
     for dep in &mut deps {
+        if let Some(pos) = dep.file_replace_position {
+            dep.file_replace_position = Some(pos - offset);
+        }
         // Resolve dep_name (${groupId}:${artifactId}).
         if dep.dep_name.contains("${") {
             dep.dep_name = apply_props(&dep.dep_name, &properties);
@@ -490,6 +499,7 @@ fn parse_pom(
     let mut buf = Vec::new();
 
     loop {
+        let pos_before = reader.buffer_position() as usize;
         match reader.read_event_into(&mut buf)? {
             Event::Start(e) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
@@ -578,7 +588,10 @@ fn parse_pom(
                     match stack.last().map(String::as_str) {
                         Some("groupId") => dep.group_id = text.clone(),
                         Some("artifactId") => dep.artifact_id = text.clone(),
-                        Some("version") => dep.version = text.clone(),
+                        Some("version") => {
+                            dep.version = text.clone();
+                            dep.file_replace_position = Some(pos_before);
+                        }
                         Some("scope") => dep.scope = Some(text.clone()),
                         _ => {}
                     }
@@ -660,6 +673,8 @@ struct CurrentDep {
     version: String,
     /// Maven `<scope>` value for `<dependency>` elements (e.g. "compile", "test").
     scope: Option<String>,
+    /// Byte offset of the `<version>` text content in the XML file.
+    file_replace_position: Option<usize>,
 }
 
 impl CurrentDep {
@@ -670,6 +685,7 @@ impl CurrentDep {
             artifact_id: String::new(),
             version: String::new(),
             scope: None,
+            file_replace_position: None,
         }
     }
 }
@@ -708,6 +724,7 @@ fn build_dep(dep: &CurrentDep) -> Option<MavenExtractedDep> {
         registry_urls: Vec::new(),
         replace_string: None,
         shared_variable_name: None,
+        file_replace_position: dep.file_replace_position,
     })
 }
 
@@ -794,6 +811,7 @@ fn container_style_dep(
         registry_urls: Vec::new(),
         replace_string,
         shared_variable_name: None,
+        file_replace_position: None,
     }
 }
 
@@ -2438,6 +2456,7 @@ mod tests {
             registry_urls: Vec::new(),
             replace_string: None,
             shared_variable_name: None,
+            file_replace_position: None,
         };
         assert_eq!(dep.renovate_dep_type(), "test");
     }
@@ -2456,6 +2475,7 @@ mod tests {
             registry_urls: Vec::new(),
             replace_string: None,
             shared_variable_name: None,
+            file_replace_position: None,
         };
         assert_eq!(dep.renovate_dep_type(), "compile");
     }
@@ -2876,5 +2896,107 @@ mod tests {
         let result = maven_bump_package_version(PRERELEASE_POM, "1.0.0-1", "prerelease");
         let version = parse_xml_value(&result.bumped_content, &["project", "version"]);
         assert_eq!(version.as_deref(), Some("1.0.0-2"));
+    }
+
+    // Verify file_replace_position tracking matches known fixture positions.
+    #[test]
+    fn extract_tracks_file_replace_position() {
+        let deps = extract(SIMPLE_POM_FULL).unwrap();
+        let foo_dep = deps.iter().find(|d| d.dep_name == "org.example:foo").unwrap();
+        assert_eq!(foo_dep.file_replace_position, Some(905));
+
+        let quuz_dep = deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        assert_eq!(quuz_dep.file_replace_position, Some(3086));
+
+        let hard_range = deps.iter().find(|d| d.dep_name == "org.example:hard-range").unwrap();
+        assert_eq!(hard_range.file_replace_position, Some(3410));
+    }
+
+    // ── Ported from maven/index.spec.ts ───────────────────────────────────────
+
+    // Ported: "should update an existing dependency" — maven/index.spec.ts line 26
+    #[test]
+    fn maven_index_update_existing_dependency() {
+        let new_value = "9.9.9.9-final";
+        let deps = extract(SIMPLE_POM_FULL).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some(dep.dep_name.clone()),
+            current_value: Some(dep.current_value.clone()),
+            new_value: Some(new_value.to_owned()),
+            file_replace_position: dep.file_replace_position.unwrap(),
+            ..Default::default()
+        };
+        let updated = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
+        let updated_deps = extract(&updated).unwrap();
+        let updated_dep = updated_deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        assert_eq!(updated_dep.current_value, new_value);
+    }
+
+    // Ported: "should not touch content if new and old versions are equal" — maven/index.spec.ts line 67
+    #[test]
+    fn maven_index_no_touch_when_equal() {
+        let deps = extract(SIMPLE_POM_FULL).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some(dep.dep_name.clone()),
+            current_value: Some(dep.current_value.clone()),
+            new_value: Some(dep.current_value.clone()),
+            file_replace_position: dep.file_replace_position.unwrap(),
+            ..Default::default()
+        };
+        let updated = maven_update_dependency(SIMPLE_POM_FULL, &upgrade);
+        assert_eq!(updated.as_deref(), Some(SIMPLE_POM_FULL));
+    }
+
+    // Ported: "should return null if current versions in content and upgrade are not same" — maven/index.spec.ts line 150
+    #[test]
+    fn maven_index_returns_none_when_current_mismatch() {
+        let deps = extract(SIMPLE_POM_FULL).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some(dep.dep_name.clone()),
+            current_value: Some("1.2.2".to_owned()),
+            new_value: Some("1.2.4".to_owned()),
+            file_replace_position: dep.file_replace_position.unwrap(),
+            ..Default::default()
+        };
+        let updated = maven_update_dependency(SIMPLE_POM_FULL, &upgrade);
+        assert!(updated.is_none());
+    }
+
+    // Ported: "should update ranges" — maven/index.spec.ts line 162
+    #[test]
+    fn maven_index_update_ranges() {
+        let new_value = "[1.2.3]";
+        let deps = extract(SIMPLE_POM_FULL).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "org.example:hard-range").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some(dep.dep_name.clone()),
+            current_value: Some(dep.current_value.clone()),
+            new_value: Some(new_value.to_owned()),
+            file_replace_position: dep.file_replace_position.unwrap(),
+            ..Default::default()
+        };
+        let updated = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
+        let updated_deps = extract(&updated).unwrap();
+        let updated_dep = updated_deps.iter().find(|d| d.dep_name == "org.example:hard-range").unwrap();
+        assert_eq!(updated_dep.current_value, new_value);
+    }
+
+    // Ported: "should preserve ranges" — maven/index.spec.ts line 181
+    #[test]
+    fn maven_index_preserve_ranges() {
+        let deps = extract(SIMPLE_POM_FULL).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "org.example:hard-range").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some(dep.dep_name.clone()),
+            current_value: Some(dep.current_value.clone()),
+            new_value: Some("[1.0.0]".to_owned()),
+            file_replace_position: dep.file_replace_position.unwrap(),
+            ..Default::default()
+        };
+        let updated = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
+        assert_eq!(updated, SIMPLE_POM_FULL);
     }
 }

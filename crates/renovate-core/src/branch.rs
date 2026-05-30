@@ -985,9 +985,8 @@ pub fn get_pr_updates_table(
     pr_body_columns: Option<&[String]>,
     deps: &[PrTableDep],
 ) -> String {
-    let columns = match pr_body_columns {
-        Some(c) => c,
-        None => return String::new(),
+    let Some(columns) = pr_body_columns else {
+        return String::new();
     };
     if deps.is_empty() || columns.is_empty() {
         return String::new();
@@ -1001,11 +1000,11 @@ pub fn get_pr_updates_table(
             let val = match col.as_str() {
                 "Package" => {
                     let mut s = dep.dep_name.clone();
-                    if let Some(ref new_name) = dep.new_name {
-                        if new_name != &dep.dep_name {
-                            s.push_str(" → ");
-                            s.push_str(new_name);
-                        }
+                    if let Some(ref new_name) = dep.new_name
+                        && new_name != &dep.dep_name
+                    {
+                        s.push_str(" → ");
+                        s.push_str(new_name);
                     }
                     s
                 }
