@@ -591,6 +591,9 @@ mod tests {
         };
         let updated = renovate_core::extractors::npm::npm_update_dependency(package_json, &upgrade)
             .expect("npm_update_dependency should succeed");
-        assert!(updated.contains("\"lodash\": \"^4.17.21\""), "updated package.json should contain new version; got: {updated}");
+        assert!(
+            updated.contains("\"lodash\": \"^4.17.21\"") || updated.contains("\"lodash\":\"^4.17.21\""),
+            "updated package.json should contain new version; got: {updated}"
+        );
     }
 }

@@ -893,6 +893,19 @@ impl Default for OnceTracker {
     }
 }
 
+/// Azure Tags datasource: build cache key from registry URL, repo, and type.
+/// Mirrors `AzureTagsDatasource.getCacheKey()`.
+pub fn azure_tags_cache_key(registry_url: &str, repo: &str, ref_type: &str) -> String {
+    format!("{registry_url}:{repo}:{ref_type}")
+}
+
+/// Azure Tags datasource: build source URL from repo name and registry URL.
+/// Mirrors `AzureTagsDatasource.getSourceUrl()`.
+pub fn azure_tags_source_url(package_name: &str, registry_url: &str) -> String {
+    let normalized = ensure_trailing_slash(registry_url);
+    format!("{normalized}_git/{package_name}")
+}
+
 // ---------------------------------------------------------------------------
 // Git URL conversion — lib/util/git/url.ts
 // ---------------------------------------------------------------------------
@@ -4237,8 +4250,8 @@ pub fn classify_repo_error(message: &str) -> &str {
         "repository-no-config",
         "platform-rate-limit-exceeded",
         "platform-bad-credentials",
-        "platform-authentication-error",
-        "platform-integration-unauthorized",
+        "authentication-error",
+        "integration-unauthorized",
         "missing-api-credentials",
         "manager-lockfile-error",
         "cannot-fork",
@@ -6641,8 +6654,24 @@ mod tests {
         assert_eq!(count, 2);
     }
 
-    // -----------------------------------------------------------------------
-    // get_http_url
+    // Ported: "getCacheKey returns the expected format" — datasource/azure-tags/index.spec.ts line 83
+    #[test]
+    fn test_azure_tags_cache_key() {
+        assert_eq!(
+            azure_tags_cache_key("registry-url", "repo-name", "tags"),
+            "registry-url:repo-name:tags"
+        );
+    }
+
+    // Ported: "getSourceUrl returns the correct URL format" — datasource/azure-tags/index.spec.ts line 92
+    #[test]
+    fn test_azure_tags_source_url() {
+        assert_eq!(
+            azure_tags_source_url("repo-name", "https://dev.azure.com/organization/"),
+            "https://dev.azure.com/organization/_git/repo-name"
+        );
+    }
+
     // -----------------------------------------------------------------------
 
     // Ported: "supports ports" — util/git/url.spec.ts line 9
