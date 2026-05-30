@@ -19,6 +19,7 @@ pub struct AzureClient {
     http: HttpClient,
     api_base: String,
     org: String,
+    #[allow(dead_code)]
     project: String,
     pat: String,
 }
@@ -448,7 +449,7 @@ impl PlatformClient for AzureClient {
 
     async fn create_pr(
         &self,
-        owner: &str,
+        _owner: &str,
         repo: &str,
         source_branch: &str,
         target_branch: &str,

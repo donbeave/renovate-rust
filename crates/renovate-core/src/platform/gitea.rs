@@ -24,6 +24,7 @@ pub const GITEA_API_VERSION: &str = "api/v1";
 pub struct GiteaClient {
     http: HttpClient,
     api_base: String,
+    #[allow(dead_code)]
     server_url: String,
 }
 

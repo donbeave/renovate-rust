@@ -39,9 +39,6 @@ impl BitbucketServerClient {
         })
     }
 
-    fn project_repo(project: &str, repo: &str) -> String {
-        format!("{project}/{repo}")
-    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -135,8 +132,8 @@ pub async fn create_pr(
     body: &str,
 ) -> Result<Option<i64>, PlatformError> {
     let url = format!(
-        "{}/projects/{}/repos/pull-requests",
-        client.api_base, project
+        "{}/projects/{}/repos/{}/pull-requests",
+        client.api_base, project, repo
     );
     let request = CreatePrRequest {
         title: title.to_owned(),
@@ -194,9 +191,10 @@ pub async fn merge_pr(
     version: Option<i64>,
 ) -> Result<(), PlatformError> {
     let url = format!(
-        "{}/projects/{}/repos/pull-requests/{}/merge?version={}",
+        "{}/projects/{}/repos/{}/pull-requests/{}/merge?version={}",
         client.api_base,
         project,
+        repo,
         pr_id,
         version.unwrap_or(0)
     );
@@ -238,8 +236,8 @@ pub async fn add_comment(
     text: &str,
 ) -> Result<BbsComment, PlatformError> {
     let url = format!(
-        "{}/projects/{}/repos/pull-requests/{}/comments",
-        client.api_base, project, pr_id
+        "{}/projects/{}/repos/{}/pull-requests/{}/comments",
+        client.api_base, project, repo, pr_id
     );
     let request = CommentRequest {
         text: text.to_owned(),
@@ -261,8 +259,8 @@ pub async fn get_pr(
     pr_id: i64,
 ) -> Result<BbsPr, PlatformError> {
     let url = format!(
-        "{}/projects/{}/repos/pull-requests/{}",
-        client.api_base, project, pr_id
+        "{}/projects/{}/repos/{}/pull-requests/{}",
+        client.api_base, project, repo, pr_id
     );
     let pr: BbsPr = client
         .http
@@ -279,8 +277,7 @@ pub async fn get_pr(
 
 impl PlatformClient for BitbucketServerClient {
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
-        let url = format!("{}/application-properties", self.api_base);
-        let user_url = format!("{}/users/current", self.api_base.replace("/rest/api/1.0", "/rest/api/1.0"));
+        let user_url = format!("{}/users/current", self.api_base);
         let resp = self
             .http
             .get_retrying(&user_url)
@@ -386,8 +383,8 @@ impl PlatformClient for BitbucketServerClient {
         state: Option<&str>,
     ) -> Result<(), PlatformError> {
         let url = format!(
-            "{}/projects/{}/repos/pull-requests/{}",
-            self.api_base, owner, pr_number
+            "{}/projects/{}/repos/{}/pull-requests/{}",
+            self.api_base, owner, repo, pr_number
         );
         if title.is_none() && body.is_none() && state.is_none() {
             return Ok(());

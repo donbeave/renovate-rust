@@ -118,12 +118,6 @@ pub struct GerritSubmitInput {
 }
 
 #[derive(Debug, Serialize)]
-struct ReviewInput {
-    message: Option<String>,
-    labels: Option<std::collections::HashMap<String, i64>>,
-}
-
-#[derive(Debug, Serialize)]
 struct SubmitInput {
     on_behalf_of: Option<String>,
 }

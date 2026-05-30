@@ -246,6 +246,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for v-prefix stripping
     #[test]
     fn terraform_version_with_v_prefix() {
         // Some tools write `v1.6.3` in the file; strip the `v`.
@@ -253,6 +254,7 @@ mod tests {
         assert_eq!(dep.current_value, "1.6.3");
     }
 
+    // Rust-specific: unit test for go-version file extraction
     #[test]
     fn go_version_file() {
         let dep = extract("1.21.4\n", "go-version").unwrap();
@@ -267,6 +269,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for python-version file extraction
     #[test]
     fn python_version_file() {
         let dep = extract("3.11.5\n", "python-version").unwrap();
@@ -274,12 +277,14 @@ mod tests {
         assert_eq!(dep.current_value, "3.11.5");
     }
 
+    // Rust-specific: unit test for node-version file extraction
     #[test]
     fn node_version_file() {
         let dep = extract("20.9.0\n", "node-version").unwrap();
         assert_eq!(dep.tool, "nodejs");
     }
 
+    // Rust-specific: unit test for nvmrc lts alias handling
     #[test]
     fn nvmrc_lts_alias_returns_none() {
         assert!(extract("lts/*\n", "nvmrc").is_none());
@@ -307,27 +312,32 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for inline comment stripping
     #[test]
     fn strips_inline_comment() {
         let dep = extract("1.6.3 # pinned\n", "terraform-version").unwrap();
         assert_eq!(dep.current_value, "1.6.3");
     }
 
+    // Rust-specific: unit test for empty file handling
     #[test]
     fn empty_file_returns_none() {
         assert!(extract("", "terraform-version").is_none());
     }
 
+    // Rust-specific: unit test for comment-only file handling
     #[test]
     fn comment_only_returns_none() {
         assert!(extract("# just a comment\n", "terraform-version").is_none());
     }
 
+    // Rust-specific: unit test for unknown manager handling
     #[test]
     fn unknown_manager_returns_none() {
         assert!(extract("1.0.0\n", "unknown-manager").is_none());
     }
 
+    // Rust-specific: unit test for manager_for_file helper
     #[test]
     fn manager_for_file_dot_terraform() {
         assert_eq!(
@@ -340,11 +350,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for manager_for_file helper
     #[test]
     fn manager_for_file_nvmrc() {
         assert_eq!(manager_for_file(".nvmrc"), Some("nvmrc"));
     }
 
+    // Rust-specific: unit test for manager_for_file helper
     #[test]
     fn manager_for_file_unknown() {
         assert_eq!(manager_for_file("Gemfile"), None);
@@ -365,6 +377,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit test for manager_for_file helper
     #[test]
     fn manager_for_file_ruby_version() {
         assert_eq!(manager_for_file(".ruby-version"), Some("ruby-version"));
