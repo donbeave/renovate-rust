@@ -683,6 +683,215 @@ pub fn parse_gradle_dependency_string(input: &str) -> Option<GradleParsedDep> {
     })
 }
 
+// ── Content descriptors & package registries ─────────────────────────────────
+//
+// Mirrors `lib/modules/manager/gradle/types.ts` ContentDescriptorSpec,
+// PackageRegistry and `lib/modules/manager/gradle/extract.ts`
+// matchesContentDescriptor / getRegistryUrlsForDep.
+
+/// Well-known Maven repository base URLs.
+///
+/// Mirrors `lib/modules/manager/gradle/parser/common.ts` REGISTRY_URLS.
+pub mod registry_urls {
+    pub const MAVEN_CENTRAL: &str = "https://repo.maven.apache.org/maven2";
+    pub const GRADLE_PLUGIN_PORTAL: &str = "https://plugins.gradle.org/m2/";
+    pub const GOOGLE: &str = "https://dl.google.com/android/maven2/";
+    pub const JCENTER: &str = "https://jcenter.bintray.com/";
+}
+
+/// How a content descriptor matches group/artifact IDs.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ContentDescriptorMatcher {
+    Simple,
+    Regex,
+    Subgroup,
+}
+
+/// Whether a descriptor includes or excludes matching deps.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ContentDescriptorMode {
+    Include,
+    Exclude,
+}
+
+/// A single content descriptor filter entry.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContentDescriptorSpec {
+    pub mode: ContentDescriptorMode,
+    pub matcher: ContentDescriptorMatcher,
+    pub group_id: String,
+    pub artifact_id: Option<String>,
+    pub version: Option<String>,
+}
+
+/// Whether a package registry is regular or exclusive.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RegistryType {
+    Regular,
+    Exclusive,
+}
+
+/// Whether the registry applies to deps or plugins.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RegistryScope {
+    Dep,
+    Plugin,
+}
+
+/// A Maven repository discovered during Gradle extraction.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PackageRegistry {
+    pub registry_url: String,
+    pub registry_type: RegistryType,
+    pub scope: RegistryScope,
+    pub content: Option<Vec<ContentDescriptorSpec>>,
+}
+
+/// A simplified dep representation for content descriptor matching.
+#[derive(Debug, Clone)]
+pub struct ContentDescriptorDep {
+    pub dep_name: String,
+    pub current_value: Option<String>,
+    pub dep_type: Option<String>,
+}
+
+/// Test whether `dep` matches the given content descriptors.
+///
+/// Mirrors `lib/modules/manager/gradle/extract.ts` `matchesContentDescriptor()`.
+/// Returns `true` when no descriptors are provided (default-include).
+pub fn matches_content_descriptor(
+    dep: &ContentDescriptorDep,
+    content_descriptors: Option<&[ContentDescriptorSpec]>,
+) -> bool {
+    let descriptors = match content_descriptors {
+        Some(d) if !d.is_empty() => d,
+        _ => return true,
+    };
+
+    let full_name = dep.dep_name.as_str();
+    let (group_id, artifact_id) = full_name
+        .split_once(':')
+        .map(|(g, a)| (g.to_owned(), a.to_owned()))
+        .unwrap_or((full_name.to_owned(), String::new()));
+
+    let mut has_includes = false;
+    let mut has_excludes = false;
+    let mut matches_include = false;
+    let mut matches_exclude = false;
+
+    for desc in descriptors {
+        let group_match = match desc.matcher {
+            ContentDescriptorMatcher::Regex => regex::Regex::new(&desc.group_id)
+                .map(|re| re.is_match(&group_id))
+                .unwrap_or(false),
+            ContentDescriptorMatcher::Subgroup => {
+                group_id == desc.group_id
+                    || format!("{group_id}.").starts_with(&desc.group_id)
+            }
+            ContentDescriptorMatcher::Simple => group_id == desc.group_id,
+        };
+
+        let artifact_match = if group_match {
+            match &desc.artifact_id {
+                Some(aid) => match desc.matcher {
+                    ContentDescriptorMatcher::Regex => regex::Regex::new(aid)
+                        .map(|re| re.is_match(&artifact_id))
+                        .unwrap_or(false),
+                    _ => artifact_id == *aid,
+                },
+                None => true,
+            }
+        } else {
+            false
+        };
+
+        let version_match = if group_match && artifact_match {
+            match (&desc.version, &dep.current_value) {
+                (Some(dv), Some(cv)) => match desc.matcher {
+                    ContentDescriptorMatcher::Regex => regex::Regex::new(dv)
+                        .map(|re| re.is_match(cv))
+                        .unwrap_or(false),
+                    _ => crate::versioning::gradle_version_matches(cv, dv),
+                },
+                _ => true,
+            }
+        } else {
+            true
+        };
+
+        let is_match = group_match && artifact_match && version_match;
+
+        match desc.mode {
+            ContentDescriptorMode::Include => {
+                has_includes = true;
+                if is_match {
+                    matches_include = true;
+                }
+            }
+            ContentDescriptorMode::Exclude => {
+                has_excludes = true;
+                if is_match {
+                    matches_exclude = true;
+                }
+            }
+        }
+    }
+
+    if has_includes && has_excludes {
+        matches_include && !matches_exclude
+    } else if has_includes {
+        matches_include
+    } else if has_excludes {
+        !matches_exclude
+    } else {
+        true
+    }
+}
+
+/// Collect the deduplicated, scope-appropriate registry URLs for a dep.
+///
+/// Mirrors `lib/modules/manager/gradle/extract.ts` `getRegistryUrlsForDep()`.
+pub fn get_registry_urls_for_dep(
+    registries: &[PackageRegistry],
+    dep: &ContentDescriptorDep,
+) -> Vec<String> {
+    let scope = match dep.dep_type.as_deref() {
+        Some("plugin") => RegistryScope::Plugin,
+        _ => RegistryScope::Dep,
+    };
+
+    let matching: Vec<&PackageRegistry> = registries
+        .iter()
+        .filter(|r| {
+            r.scope == scope && matches_content_descriptor(dep, r.content.as_deref())
+        })
+        .collect();
+
+    let exclusive: Vec<&&PackageRegistry> = matching
+        .iter()
+        .filter(|r| r.registry_type == RegistryType::Exclusive)
+        .collect();
+
+    let urls: Vec<&str> = if !exclusive.is_empty() {
+        exclusive.iter().map(|r| r.registry_url.as_str()).collect()
+    } else {
+        matching.iter().map(|r| r.registry_url.as_str()).collect()
+    };
+
+    let mut deduped: Vec<String> = Vec::new();
+    for url in urls {
+        if !deduped.contains(&url.to_owned()) {
+            deduped.push(url.to_owned());
+        }
+    }
+
+    if deduped.is_empty() && scope == RegistryScope::Plugin {
+        deduped.push(registry_urls::GRADLE_PLUGIN_PORTAL.to_owned());
+    }
+
+    deduped
+}
+
 // ── Filetype classification ───────────────────────────────────────────────────
 
 /// Mirrors `lib/modules/manager/gradle/utils.ts` `isGradleScriptFile()`.
@@ -1982,6 +2191,352 @@ bad = { reject = "1.0.0" }
         assert_eq!(lock_map.len(), 2);
         assert_eq!(lock_map["this.is:valid.dep"].dep_type, "dependencies");
         assert_eq!(lock_map["this.is:valid.test.dep"].dep_type, "test");
+    }
+
+    // ── Content descriptor tests ──────────────────────────────────────────────
+
+    fn cd_dep(input: &str) -> ContentDescriptorDep {
+        let parts: Vec<&str> = input.splitn(3, ':').collect();
+        ContentDescriptorDep {
+            dep_name: format!("{}:{}", parts[0], parts[1]),
+            current_value: parts.get(2).map(|s| (*s).to_owned()),
+            dep_type: None,
+        }
+    }
+
+    fn cd_spec(
+        mode: ContentDescriptorMode,
+        matcher: ContentDescriptorMatcher,
+        group_id: &str,
+    ) -> ContentDescriptorSpec {
+        ContentDescriptorSpec {
+            mode,
+            matcher,
+            group_id: group_id.to_owned(),
+            artifact_id: None,
+            version: None,
+        }
+    }
+
+    fn cd_spec_full(
+        mode: ContentDescriptorMode,
+        matcher: ContentDescriptorMatcher,
+        group_id: &str,
+        artifact_id: Option<&str>,
+        version: Option<&str>,
+    ) -> ContentDescriptorSpec {
+        ContentDescriptorSpec {
+            mode,
+            matcher,
+            group_id: group_id.to_owned(),
+            artifact_id: artifact_id.map(|s| s.to_owned()),
+            version: version.map(|s| s.to_owned()),
+        }
+    }
+
+    // Ported: "$input | $output" — gradle/extract.spec.ts line 568
+    #[test]
+    fn content_descriptor_simple_matches() {
+        let cases: Vec<(&str, bool, Option<Vec<ContentDescriptorSpec>>)> = vec![
+            ("foo:bar:1.2.3", true, None),
+            ("foo:bar:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo")])),
+            ("foo:bar:1.2.3", false, Some(vec![cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo")])),
+            ("foo:bar:1.2.3", false, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "bar")])),
+            ("foo:bar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("bar"), None)])),
+            ("foo:bar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo", Some("bar"), None)])),
+            ("foo:bar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("baz"), None)])),
+            ("foo:bar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("bar"), Some("1.2.3"))])),
+            ("foo:bar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo", Some("bar"), Some("1.2.3"))])),
+            ("foo:bar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("bar"), Some("1.2.+"))])),
+            ("foo:bar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("baz"), Some("4.5.6"))])),
+            ("foo:bar:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Subgroup, "foo")])),
+            ("foo.bar.baz:qux:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Subgroup, "foo.bar.baz")])),
+            ("foo.bar.baz:qux:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Subgroup, "foo.bar")])),
+            ("foo.bar.baz:qux:1.2.3", false, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Subgroup, "foo.barbaz")])),
+            ("foobarbaz:qux:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, ".*bar.*")])),
+            ("foobarbaz:qux:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, ".*bar.*", Some("qux"), None)])),
+            ("foobar:foobar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, ".*bar.*", Some("foo.*"), None)])),
+            ("foobar:foobar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, "foobar", Some("^bar"), None)])),
+            ("foobar:foobar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, "foobar", Some("^foo.*"), Some("1\\.*"))])),
+            ("foobar:foobar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, "foobar", Some("^foo"), Some("3.+"))])),
+            ("foobar:foobar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, "foobar", Some("qux"), Some("1\\.*"))])),
+        ];
+
+        for (input, expected_output, descriptor) in &cases {
+            let dep = cd_dep(input);
+            let result = matches_content_descriptor(&dep, descriptor.as_deref());
+            assert_eq!(
+                result, *expected_output,
+                "input={input:?}, descriptor={descriptor:?}"
+            );
+        }
+    }
+
+    // Ported: "if both includes and excludes exist, dep must match include and not match exclude" — gradle/extract.spec.ts line 609
+    #[test]
+    fn content_descriptor_both_includes_and_excludes() {
+        let dep = cd_dep("foo:bar:1.2.3");
+
+        let result = matches_content_descriptor(
+            &dep,
+            Some(&[
+                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo"),
+                cd_spec_full(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo", Some("baz"), None),
+            ]),
+        );
+        assert!(result);
+
+        let result = matches_content_descriptor(
+            &dep,
+            Some(&[
+                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo"),
+                cd_spec_full(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo", Some("bar"), None),
+            ]),
+        );
+        assert!(!result);
+    }
+
+    // Ported: "if only includes exist, dep must match at least one include" — gradle/extract.spec.ts line 635
+    #[test]
+    fn content_descriptor_only_includes() {
+        let dep = cd_dep("foo:bar:1.2.3");
+
+        let result = matches_content_descriptor(
+            &dep,
+            Some(&[
+                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "some"),
+                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo"),
+                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "bar"),
+            ]),
+        );
+        assert!(result);
+
+        let result = matches_content_descriptor(
+            &dep,
+            Some(&[
+                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "some"),
+                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "other"),
+                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "bar"),
+            ]),
+        );
+        assert!(!result);
+    }
+
+    // Ported: "if only excludes exist, dep must match not match any exclude" — gradle/extract.spec.ts line 653
+    #[test]
+    fn content_descriptor_only_excludes() {
+        let dep = cd_dep("foo:bar:1.2.3");
+
+        let result = matches_content_descriptor(
+            &dep,
+            Some(&[
+                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "some"),
+                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo"),
+                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "bar"),
+            ]),
+        );
+        assert!(!result);
+
+        let result = matches_content_descriptor(
+            &dep,
+            Some(&[
+                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "some"),
+                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "other"),
+                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "bar"),
+            ]),
+        );
+        assert!(result);
+    }
+
+    // Ported: "deduplicates registry urls" — gradle/extract.spec.ts line 414
+    #[test]
+    fn registry_urls_deduplicate() {
+        let registries = vec![
+            PackageRegistry {
+                registry_url: "https://repo.maven.apache.org/maven2".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+            PackageRegistry {
+                registry_url: "https://repo.maven.apache.org/maven2".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+            PackageRegistry {
+                registry_url: "https://example.com".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+            PackageRegistry {
+                registry_url: "https://example.com".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+            PackageRegistry {
+                registry_url: "https://plugins.gradle.org/m2/".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Plugin,
+                content: None,
+            },
+        ];
+
+        let plugin_dep = ContentDescriptorDep {
+            dep_name: "foo.bar".to_owned(),
+            current_value: Some("1.2.3".to_owned()),
+            dep_type: Some("plugin".to_owned()),
+        };
+        let urls = get_registry_urls_for_dep(&registries, &plugin_dep);
+        assert_eq!(urls, vec!["https://plugins.gradle.org/m2/"]);
+
+        let dep_dep = ContentDescriptorDep {
+            dep_name: "foo:bar".to_owned(),
+            current_value: Some("1.2.3".to_owned()),
+            dep_type: None,
+        };
+        let urls = get_registry_urls_for_dep(&registries, &dep_dep);
+        assert_eq!(
+            urls,
+            vec![
+                "https://repo.maven.apache.org/maven2",
+                "https://example.com",
+            ]
+        );
+    }
+
+    // Ported: "supports separate registry URLs for plugins" — gradle/extract.spec.ts line 507
+    #[test]
+    fn registry_urls_separate_plugin_scopes() {
+        let registries = vec![
+            PackageRegistry {
+                registry_url: "https://foo.bar/plugins".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Plugin,
+                content: None,
+            },
+            PackageRegistry {
+                registry_url: "https://foo.bar/deps".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+            PackageRegistry {
+                registry_url: "https://repo.maven.apache.org/maven2".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+        ];
+
+        let plugin_dep = ContentDescriptorDep {
+            dep_name: "foo.bar".to_owned(),
+            current_value: Some("1.2.3".to_owned()),
+            dep_type: Some("plugin".to_owned()),
+        };
+        let urls = get_registry_urls_for_dep(&registries, &plugin_dep);
+        assert_eq!(urls, vec!["https://foo.bar/plugins"]);
+
+        let dep_dep = ContentDescriptorDep {
+            dep_name: "io.jsonwebtoken:jjwt-api".to_owned(),
+            current_value: Some("0.11.2".to_owned()),
+            dep_type: None,
+        };
+        let urls = get_registry_urls_for_dep(&registries, &dep_dep);
+        assert_eq!(
+            urls,
+            vec![
+                "https://foo.bar/deps",
+                "https://repo.maven.apache.org/maven2",
+            ]
+        );
+    }
+
+    // Ported: "exclusiveContent" — gradle/extract.spec.ts line 775
+    #[test]
+    fn registry_urls_exclusive_content() {
+        let registries = vec![
+            PackageRegistry {
+                registry_url: "https://dl.google.com/android/maven2/".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+            PackageRegistry {
+                registry_url: "https://artifactory.foo.bar/artifactory/test".to_owned(),
+                registry_type: RegistryType::Exclusive,
+                scope: RegistryScope::Dep,
+                content: Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo.bar",
+                )]),
+            },
+        ];
+
+        let matching_dep = ContentDescriptorDep {
+            dep_name: "foo.bar:protobuf-java".to_owned(),
+            current_value: Some("2.17.0".to_owned()),
+            dep_type: None,
+        };
+        let urls = get_registry_urls_for_dep(&registries, &matching_dep);
+        assert_eq!(
+            urls,
+            vec!["https://artifactory.foo.bar/artifactory/test"]
+        );
+
+        let non_matching_dep = ContentDescriptorDep {
+            dep_name: "com.google.protobuf:protobuf-java".to_owned(),
+            current_value: Some("2.17.1".to_owned()),
+            dep_type: None,
+        };
+        let urls = get_registry_urls_for_dep(&registries, &non_matching_dep);
+        assert_eq!(
+            urls,
+            vec!["https://dl.google.com/android/maven2/"]
+        );
+    }
+
+    // Ported: "exclusiveContent with repeated repository definition" — gradle/extract.spec.ts line 823
+    #[test]
+    fn registry_urls_exclusive_content_repeated_repo() {
+        let registries = vec![
+            PackageRegistry {
+                registry_url: "https://dl.google.com/android/maven2/".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+            PackageRegistry {
+                registry_url: "https://artifactory.foo.bar/artifactory/test".to_owned(),
+                registry_type: RegistryType::Exclusive,
+                scope: RegistryScope::Dep,
+                content: Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo.bar",
+                )]),
+            },
+            PackageRegistry {
+                registry_url: "https://dl.google.com/android/maven2/".to_owned(),
+                registry_type: RegistryType::Regular,
+                scope: RegistryScope::Dep,
+                content: None,
+            },
+        ];
+
+        let dep = ContentDescriptorDep {
+            dep_name: "foo.bar:protobuf-java".to_owned(),
+            current_value: Some("2.17.0".to_owned()),
+            dep_type: None,
+        };
+        let urls = get_registry_urls_for_dep(&registries, &dep);
+        assert_eq!(
+            urls,
+            vec!["https://artifactory.foo.bar/artifactory/test"]
+        );
     }
 }
 

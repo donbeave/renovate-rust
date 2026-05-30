@@ -147,6 +147,10 @@ pub mod ubuntu;
 pub mod unity3d;
 pub mod unity3d_packages;
 
+/// Convenience wrapper for gradle version matching used by content descriptor logic.
+pub fn gradle_version_matches(version: &str, range: &str) -> bool {
+    gradle::matches_range(version, range)
+}
 
 #[cfg(test)]
 mod tests {

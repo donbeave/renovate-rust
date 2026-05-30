@@ -479,8 +479,10 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/gradle/extract.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | Core extraction ported |
+| `lib/modules/manager/gradle/extract.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | Content descriptor matching, registry URL logic, GCV plugin ported; Missing: extractAllPackageFiles orchestration, apply-from cross-file loading, variable interpolation, registry URL extraction from build files |
 | `lib/modules/manager/gradle/index.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | Manager metadata |
+| `lib/modules/manager/gradle/types.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | ContentDescriptorSpec, PackageRegistry, ContentDescriptorMatcher ported; Ctx/lexer types not ported |
+| `lib/modules/manager/gradle/parser/common.ts` | `crates/renovate-core/src/extractors/gradle.rs` | partial | REGISTRY_URLS constants ported; Missing: good-enough-parser query builders |
 
 ### gradle-wrapper
 
