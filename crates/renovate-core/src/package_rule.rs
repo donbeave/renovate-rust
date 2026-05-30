@@ -182,6 +182,13 @@ pub struct PackageRule {
     /// Renovate reference: `lib/util/package-rules/current-age.ts`
     pub match_current_age: Option<String>,
 
+    /// Merge confidence levels from `matchConfidence` (e.g. `["high"]`).
+    /// Matches when the dep's `mergeConfidenceLevel` is at least as high
+    /// as the minimum level specified here.
+    ///
+    /// Renovate reference: `lib/util/package-rules/confidence.ts`
+    pub match_confidence: Vec<String>,
+
     // ── Per-rule update controls ──────────────────────────────────────────────
     /// Per-rule minimum release age.  When set, supersedes the global
     /// `minimumReleaseAge` for matching packages.
@@ -701,6 +708,10 @@ impl PackageRule {
             return false;
         }
 
+        if !self.confidence_matches(ctx.merge_confidence_level) {
+            return false;
+        }
+
         true
     }
 
@@ -733,6 +744,25 @@ impl PackageRule {
             return false;
         };
         crate::schedule::satisfies_date_range(ts, range)
+    }
+
+    /// Return `true` when this rule's `matchConfidence` condition matches.
+    ///
+    /// Uses `satisfies_confidence_level` from merge_confidence module.
+    /// When `match_confidence` is empty, always returns `true` (no constraint).
+    /// When `merge_confidence_level` is `None` and there is a constraint, returns `false`.
+    ///
+    /// Renovate reference: `lib/util/package-rules/confidence.ts`
+    pub fn confidence_matches(&self, level: Option<&str>) -> bool {
+        if self.match_confidence.is_empty() {
+            return true;
+        }
+        let Some(dep_level) = level else {
+            return false;
+        };
+        self.match_confidence
+            .iter()
+            .any(|min| crate::merge_confidence::satisfies_confidence_level(dep_level, min))
     }
 }
 
@@ -805,6 +835,9 @@ pub struct DepContext<'a> {
     /// manager-derived categories from `manager_categories()`.
     /// Mirrors Renovate's `categories` field in `PackageRuleInputConfig`.
     pub categories: &'a [&'a str],
+    /// Merge confidence level for this dep (e.g. `"high"`, `"low"`).
+    /// Mirrors Renovate's `mergeConfidenceLevel` field.
+    pub merge_confidence_level: Option<&'a str>,
 }
 
 impl<'a> DepContext<'a> {

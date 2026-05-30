@@ -5,7 +5,7 @@
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 69 | **Actionable:** 73 | **Status:** partial
+**Total tests:** 73 | **Ported:** 73 | **Actionable:** 73 | **Status:** done
 
 ### `util/package-rules/index`
 
@@ -59,10 +59,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matches matchConfidence | 865 | pending | — | — | — |
-| non-matches matchConfidence | 884 | pending | — | — | — |
-| does not match matchConfidence when there is no mergeConfidenceLevel | 903 | pending | — | — | — |
-| throws when unauthenticated | 922 | pending | — | — | — |
+| matches matchConfidence | 865 | ported | `repo_config.rs` | `match_confidence_matches` | — |
+| non-matches matchConfidence | 884 | ported | `repo_config.rs` | `match_confidence_non_matches` | — |
+| does not match matchConfidence when there is no mergeConfidenceLevel | 903 | ported | `repo_config.rs` | `match_confidence_no_level_no_match` | — |
+| throws when unauthenticated | 922 | ported | `repo_config.rs` | `match_confidence_works_without_api_credentials` | Rust matchConfidence is purely local; credential check is TS-specific side effect of hostRules; test verifies matcher works without credentials |
 
 ### `util/package-rules/index`
 

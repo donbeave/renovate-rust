@@ -2460,6 +2460,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             new_major: Some(2),
             update_type: Some("major".into()),
             manager_data: Some(GoModManagerData { line_number: 11, multi_line: false }),
+            ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
         assert!(res.contains("github.com/pravesht/gocql/v2 v2.0.0"));

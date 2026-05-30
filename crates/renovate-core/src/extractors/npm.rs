@@ -2449,12 +2449,12 @@ fn update_dependency_package_json(
                         let prefix = caps.get(1).map_or("", |m| m.as_str());
                         let after_hash =
                             res_old.find('#').map(|i| &res_old[i..]).unwrap_or("#");
-                        format!("{}{}{}", prefix, new_value, after_hash)
+                        format!("{}{}{}", prefix, new_value.clone(), after_hash)
                     } else {
-                        new_value.to_owned()
+                        new_value.clone()
                     }
                 } else {
-                    new_value.to_owned()
+                    new_value.clone()
                 }
             };
             parsed["resolutions"][dep_key.as_str()] = serde_json::Value::String(res_new.clone());
@@ -2521,8 +2521,8 @@ fn yaml_replace_line_value(
     let rest = &after_colon[spacing_len..];
 
     // Detect and preserve optional YAML anchor `&anchor_name`.
-    let (anchor_prefix, value_in_line) = if rest.starts_with('&') {
-        let anchor_end = rest[1..]
+    let (anchor_prefix, value_in_line) = if let Some(stripped) = rest.strip_prefix('&') {
+        let anchor_end = stripped
             .find(char::is_whitespace)
             .map(|i| i + 1)
             .unwrap_or(rest.len());
@@ -2560,7 +2560,7 @@ fn yaml_replace_line_value(
         // In YAML, `#` starts a comment only when preceded by whitespace;
         // inside a word (e.g. "gulpjs/gulp#v4.0.0") it is part of the value.
         let end = actual_value_str
-            .find(|c: char| c == ' ' || c == '\t')
+            .find([' ', '\t'])
             .unwrap_or(actual_value_str.len());
         (end, end)
     };
@@ -2652,9 +2652,7 @@ fn yaml_update_at_path(
 
         while !section_indents.is_empty() && indent <= *section_indents.last().unwrap() {
             section_indents.pop();
-            if path_depth > 0 {
-                path_depth -= 1;
-            }
+            path_depth = path_depth.saturating_sub(1);
         }
 
         if path_depth < path.len() {
@@ -2762,7 +2760,7 @@ fn yaml_replace_quoted_key_value(
             } else {
                 // Unquoted in flow
                 let end = rest
-                    .find(|c: char| c == ',' || c == '}' || c == ' ')
+                    .find([',', '}', ' '])
                     .unwrap_or(rest.len());
                 let found = &rest[..end];
                 if found != old_value {
@@ -2803,7 +2801,7 @@ pub fn update_pnpm_workspace_dependency(
     } else {
         // "pnpm.catalog.default" → "default"
         // "pnpm.catalog.mycat"   → "mycat"
-        dep_type.split('.').last().filter(|s| !s.is_empty())
+        dep_type.split('.').next_back().filter(|s| !s.is_empty())
     };
 
     let mut new_value: Option<String> = upgrade.new_value.clone();
@@ -2877,7 +2875,7 @@ pub fn update_yarnrc_catalog_dependency(
 
     // "yarn.catalog.default" → "default"
     // "yarn.catalog.mycat"   → "mycat"
-    let catalog_name = dep_type.split('.').last().filter(|s| !s.is_empty())?;
+    let catalog_name = dep_type.split('.').next_back().filter(|s| !s.is_empty())?;
 
     let mut new_value: Option<String> = upgrade.new_value.clone();
     new_value = npm_get_new_git_value(upgrade).or(new_value);
@@ -2936,13 +2934,7 @@ pub fn npm_update_dependency(file_content: &str, upgrade: &NpmUpdateUpgrade) -> 
         return update_yarnrc_catalog_dependency(file_content, upgrade);
     }
 
-    match update_dependency_package_json(file_content, upgrade) {
-        Some(content) => Some(content),
-        None => {
-            // Log equivalent: updateDependency error.
-            None
-        }
-    }
+    update_dependency_package_json(file_content, upgrade)
 }
 
 #[cfg(test)]
@@ -5114,6 +5106,7 @@ chalk@^2.4.1:
 
     const PKG_LOCK_V2: &str =
         include_str!("../../tests/fixtures/npm/package-lock/package-lock-v2.json");
+    #[allow(dead_code)]
     const PKG_JSON_FIXTURE_LOCK: &str =
         include_str!("../../tests/fixtures/npm/package-lock/package.json");
 
@@ -5124,7 +5117,6 @@ chalk@^2.4.1:
             dep_name: Some(dep.into()),
             current_version: Some(cur.into()),
             new_version: Some(new_v.into()),
-            ..Default::default()
         }
     }
 
