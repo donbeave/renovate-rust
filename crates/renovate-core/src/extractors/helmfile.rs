@@ -1065,6 +1065,7 @@ releases:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::UnknownRegistry));
     }
 
+    // Rust-specific: unit test for release with repo extraction
     #[test]
     fn extracts_release_with_repo() {
         let content = r#"
@@ -1085,6 +1086,7 @@ releases:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for stable alias resolution
     #[test]
     fn stable_alias_resolved_without_repo_entry() {
         let content = r#"
@@ -1099,6 +1101,7 @@ releases:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Rust-specific: unit test for OCI chart datasource
     #[test]
     fn oci_chart_uses_docker_datasource() {
         let content = r#"
@@ -1116,6 +1119,7 @@ releases:
         );
     }
 
+    // Rust-specific: unit test for unknown alias skip reason
     #[test]
     fn unknown_alias_has_unknown_registry_skip() {
         let content = r#"
@@ -1129,6 +1133,7 @@ releases:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::UnknownRegistry));
     }
 
+    // Rust-specific: unit test for multiple releases extraction
     #[test]
     fn multiple_releases() {
         let content = r#"
@@ -1152,6 +1157,7 @@ releases:
         assert!(deps.iter().any(|d| d.name == "nginx"));
     }
 
+    // Rust-specific: unit test for OCI-backed repo alias
     #[test]
     fn oci_backed_repo_alias_uses_docker_datasource() {
         let content = r#"
@@ -1170,6 +1176,7 @@ releases:
         assert_eq!(deps[0].datasource.as_deref(), Some("docker"));
     }
 
+    // Rust-specific: unit test for template expression handling
     #[test]
     fn template_expression_in_chart_has_unknown_registry() {
         let content = r#"
@@ -1183,6 +1190,7 @@ releases:
         assert!(deps.is_empty() || deps[0].skip_reason.is_some());
     }
 
+    // Rust-specific: unit test for release without version
     #[test]
     fn release_without_version_has_skip_reason() {
         let content = r#"
