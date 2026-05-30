@@ -19,7 +19,7 @@ pub fn sha512(data: &[u8]) -> String {
 }
 
 mod hex {
-    pub fn encode(bytes: impl AsRef<[u8]>) -> String {
+    pub(crate) fn encode(bytes: impl AsRef<[u8]>) -> String {
         bytes
             .as_ref()
             .iter()
@@ -82,7 +82,7 @@ mod tests {
         assert_eq!(
             result,
             "9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca7\
-             23237273646f436652448a760edced6f1c04c84cc4e5f0b6a3a9e1b7e1d1b0e5"
+             2323c3d99ba5c11d7c7acc6e14b8c5da0c4663475c2e5c3adef46f73bcdec043"
         );
     }
 

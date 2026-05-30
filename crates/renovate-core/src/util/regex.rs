@@ -11,24 +11,24 @@ pub fn config_regex_to_rust_regex(pattern: &str) -> String {
         return String::new();
     }
 
-    if let (Some('/'), Some('/')) = (trimmed.chars().next(), trimmed.chars().last()) {
-        if trimmed.len() >= 2 {
-            let inner = &trimmed[1..trimmed.len() - 1];
-            if inner.is_empty() {
-                return String::new();
-            }
-            return inner.to_owned();
+    if let (Some('/'), Some('/')) = (trimmed.chars().next(), trimmed.chars().last())
+        && trimmed.len() >= 2
+    {
+        let inner = &trimmed[1..trimmed.len() - 1];
+        if inner.is_empty() {
+            return String::new();
         }
+        return inner.to_owned();
     }
 
-    if let (Some('/'), rest) = (trimmed.chars().next(), &trimmed[1..]) {
-        if let Some(slash_pos) = rest.rfind('/') {
-            let inner = &rest[..slash_pos];
-            if inner.is_empty() {
-                return String::new();
-            }
-            return inner.to_owned();
+    if let (Some('/'), rest) = (trimmed.chars().next(), &trimmed[1..])
+        && let Some(slash_pos) = rest.rfind('/')
+    {
+        let inner = &rest[..slash_pos];
+        if inner.is_empty() {
+            return String::new();
         }
+        return inner.to_owned();
     }
 
     if !trimmed.starts_with('^') && !trimmed.ends_with('$') {

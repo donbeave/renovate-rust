@@ -3,7 +3,18 @@
 //! This module contains small, pure utility functions used throughout the
 //! Renovate Rust implementation.
 
+extern crate regex as regex_lib;
+extern crate url as url_lib;
+
+pub mod array;
+pub mod clone;
+pub mod date;
+pub mod hash;
 pub mod host_rules;
+pub mod markdown;
+pub mod regex;
+pub mod split;
+pub mod url;
 
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -59,8 +70,8 @@ const BASIC_ENV_VARS: &[&str] = &[
     "PNPM_MAX_WORKERS",
 ];
 
-static URL_REPLACE_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
-    regex::Regex::new(r"^URL_REPLACE_\d+_(FROM|TO)$").expect("valid regex")
+static URL_REPLACE_RE: std::sync::LazyLock<regex_lib::Regex> = std::sync::LazyLock::new(|| {
+    regex_lib::Regex::new(r"^URL_REPLACE_\d+_(FROM|TO)$").expect("valid regex")
 });
 
 /// Build child-process environment from `env_source`.
@@ -921,7 +932,7 @@ pub struct ParsedGitUrl {
 }
 
 pub fn parse_git_url(url: &str) -> Option<ParsedGitUrl> {
-    let parsed = url::Url::parse(url).ok()?;
+    let parsed = url_lib::Url::parse(url).ok()?;
     let resource = parsed.host_str()?.to_owned();
     let host = parsed
         .port()
@@ -1269,7 +1280,7 @@ fn get_git_authentication_rules(
 
 fn parse_git_auth_url(input: &str) -> ParsedGitAuthUrl {
     let input = input.trim();
-    if let Ok(url) = url::Url::parse(input) {
+    if let Ok(url) = url_lib::Url::parse(input) {
         let protocol = if matches!(url.scheme(), "http" | "https") {
             url.scheme().to_owned()
         } else {
@@ -1357,11 +1368,11 @@ fn normalize_git_auth_path(path: &str) -> String {
 
 fn create_git_auth_url_from_host_or_url(input: &str) -> Option<String> {
     if input.contains("://") {
-        url::Url::parse(input).ok()?;
+        url_lib::Url::parse(input).ok()?;
         Some(input.to_owned())
     } else {
         let url = format!("https://{input}");
-        url::Url::parse(&url).ok()?;
+        url_lib::Url::parse(&url).ok()?;
         Some(url)
     }
 }
@@ -1607,7 +1618,7 @@ pub fn changelog_get_base_url(source_url: Option<&str>) -> String {
     if url.is_empty() {
         return String::new();
     }
-    match url::Url::parse(url) {
+    match url_lib::Url::parse(url) {
         Ok(parsed) => {
             let scheme = parsed.scheme();
             let host = parsed.host_str().unwrap_or("");
@@ -1630,7 +1641,7 @@ pub fn changelog_get_repository_from_url(source_url: Option<&str>) -> String {
     if url.is_empty() {
         return String::new();
     }
-    let Ok(parsed) = url::Url::parse(url) else {
+    let Ok(parsed) = url_lib::Url::parse(url) else {
         return String::new();
     };
     let path = parsed.path().trim_start_matches('/');
@@ -1710,7 +1721,7 @@ pub fn parse_goproxy(input: &str) -> Vec<GoproxyItem> {
 /// - `,` → alternation separator
 ///
 /// Mirrors `parseNoproxy()` from `lib/modules/datasource/go/goproxy-parser.ts`.
-pub fn parse_noproxy(input: &str) -> Option<regex::Regex> {
+pub fn parse_noproxy(input: &str) -> Option<regex_lib::Regex> {
     if input.is_empty() {
         return None;
     }
@@ -1728,7 +1739,7 @@ pub fn parse_noproxy(input: &str) -> Option<regex::Regex> {
     }
 
     let pattern = format!("^(?:{})(?:/.*)?$", alts.join("|"));
-    regex::Regex::new(&pattern).ok()
+    regex_lib::Regex::new(&pattern).ok()
 }
 
 fn glob_to_regex_part(pattern: &str) -> String {
@@ -2040,10 +2051,10 @@ pub fn calculate_most_recent_timestamp<'a>(
 // Datasource metadata URL utilities — lib/modules/datasource/metadata.ts
 // ---------------------------------------------------------------------------
 
-static GIT_PREFIX_RE: std::sync::LazyLock<regex::Regex> =
-    std::sync::LazyLock::new(|| regex::Regex::new(r"^git:/?/?").unwrap());
-static GITHUB_PAGES_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
-    regex::Regex::new(r"^https://([^.]+)\.github\.com/([^/]+)$").unwrap()
+static GIT_PREFIX_RE: std::sync::LazyLock<regex_lib::Regex> =
+    std::sync::LazyLock::new(|| regex_lib::Regex::new(r"^git:/?/?").unwrap());
+static GITHUB_PAGES_RE: std::sync::LazyLock<regex_lib::Regex> = std::sync::LazyLock::new(|| {
+    regex_lib::Regex::new(r"^https://([^.]+)\.github\.com/([^/]+)$").unwrap()
 });
 
 fn massage_git_at_url(url: &str) -> String {
@@ -2081,12 +2092,12 @@ pub fn massage_github_url(url: &str) -> String {
 ///
 /// Mirrors `massageGitlabUrl()` from `lib/modules/datasource/metadata.ts`.
 pub fn massage_gitlab_url(url: &str) -> String {
-    static TREE_RE: std::sync::LazyLock<regex::Regex> =
-        std::sync::LazyLock::new(|| regex::Regex::new(r"(?i)/tree/.*$").unwrap());
-    static TRAILING_SLASH_RE: std::sync::LazyLock<regex::Regex> =
-        std::sync::LazyLock::new(|| regex::Regex::new(r"(?i)/$").unwrap());
-    static DOT_GIT_RE: std::sync::LazyLock<regex::Regex> =
-        std::sync::LazyLock::new(|| regex::Regex::new(r"(?i)\.git$").unwrap());
+    static TREE_RE: std::sync::LazyLock<regex_lib::Regex> =
+        std::sync::LazyLock::new(|| regex_lib::Regex::new(r"(?i)/tree/.*$").unwrap());
+    static TRAILING_SLASH_RE: std::sync::LazyLock<regex_lib::Regex> =
+        std::sync::LazyLock::new(|| regex_lib::Regex::new(r"(?i)/$").unwrap());
+    static DOT_GIT_RE: std::sync::LazyLock<regex_lib::Regex> =
+        std::sync::LazyLock::new(|| regex_lib::Regex::new(r"(?i)\.git$").unwrap());
 
     let mut s = massage_git_at_url(url);
     s = s.replace("http:", "https:");
@@ -2523,7 +2534,7 @@ pub fn apply_version_compatibility(
         None | Some("") => return releases,
         Some(p) => p,
     };
-    let Ok(re) = regex::Regex::new(pattern) else {
+    let Ok(re) = regex_lib::Regex::new(pattern) else {
         return releases;
     };
     releases
@@ -2555,7 +2566,7 @@ pub fn apply_extract_version(
         None | Some("") => return releases,
         Some(p) => p,
     };
-    let Ok(re) = regex::Regex::new(pattern) else {
+    let Ok(re) = regex_lib::Regex::new(pattern) else {
         return releases;
     };
     releases
@@ -2632,8 +2643,8 @@ fn emojify_simple(text: &str) -> String {
 }
 
 /// Regex matching a basic 5-part cron pattern.
-static CRON_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
-    regex::Regex::new(r"^[\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+$").unwrap()
+static CRON_RE: std::sync::LazyLock<regex_lib::Regex> = std::sync::LazyLock::new(|| {
+    regex_lib::Regex::new(r"^[\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+ [\d*,\-/]+$").unwrap()
 });
 
 fn schedule_to_string(schedule: Option<&[String]>, _timezone: Option<&str>) -> String {
@@ -2856,8 +2867,8 @@ pub fn get_dep_warnings_dashboard(
         return String::new();
     }
     // Strip "Failed to look up X dependency " prefixes
-    static STRIP_PREFIX_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
-        regex::Regex::new(r"^Failed to look up(?: [-\w]+)? dependency ").unwrap()
+    static STRIP_PREFIX_RE: std::sync::LazyLock<regex_lib::Regex> = std::sync::LazyLock::new(|| {
+        regex_lib::Regex::new(r"^Failed to look up(?: [-\w]+)? dependency ").unwrap()
     });
     let dep_list: Vec<String> = warnings
         .iter()
@@ -2927,8 +2938,8 @@ pub struct PrListBranch<'a> {
 
 /// Convert `@org/repo` patterns to `@&#8203;org/repo` (zero-width space after @).
 fn sanitize_pr_title(title: &str) -> String {
-    static RE: std::sync::LazyLock<regex::Regex> =
-        std::sync::LazyLock::new(|| regex::Regex::new(r"@([a-z]+/[a-z]+)").unwrap());
+    static RE: std::sync::LazyLock<regex_lib::Regex> =
+        std::sync::LazyLock::new(|| regex_lib::Regex::new(r"@([a-z]+/[a-z]+)").unwrap());
     RE.replace_all(title, "@\u{200B}$1").into_owned()
 }
 
@@ -3362,7 +3373,7 @@ pub fn validate_interpolated_values(
     input: Option<&serde_json::Value>,
     name_pattern: &str,
 ) -> Result<(), String> {
-    use regex::Regex;
+    use regex_lib::Regex;
     let Some(input) = input else {
         return Ok(());
     };
@@ -4436,7 +4447,7 @@ pub fn find_hidden_unicode_chars(content: &str) -> Vec<char> {
 /// prevent unintended GitHub auto-linking.  Mirrors `sanitizeMarkdown` from
 /// `lib/util/markdown.ts`.
 pub fn sanitize_markdown(markdown: &str) -> String {
-    use regex::Regex;
+    use regex_lib::Regex;
     static AT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     static HASH_NONWORD: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     static UNDO_BACKTICK_AT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
@@ -4508,7 +4519,7 @@ pub fn sanitize_markdown(markdown: &str) -> String {
 /// Mirrors the observable `remark-github` output used by
 /// `lib/util/markdown.ts` for Renovate release note rendering.
 pub fn linkify_markdown(content: &str, repository: &str) -> String {
-    use regex::Regex;
+    use regex_lib::Regex;
     static BULLET: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     static REPO_COMMIT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     static FORK_COMMIT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
@@ -4533,7 +4544,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
     let re = REPO_COMMIT
         .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40})\b").unwrap());
     out = re
-        .replace_all(&out, |caps: &regex::Captures<'_>| {
+        .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let repo = &caps[1];
             let sha = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
@@ -4545,7 +4556,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
     let re = FORK_COMMIT
         .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+)@([0-9a-f]{40})\b").unwrap());
     out = re
-        .replace_all(&out, |caps: &regex::Captures<'_>| {
+        .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let fork = &caps[1];
             let sha = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
@@ -4556,7 +4567,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
 
     let re = COMMIT.get_or_init(|| Regex::new(r"\b([0-9a-f]{40})\b").unwrap());
     out = re
-        .replace_all(&out, |caps: &regex::Captures<'_>| {
+        .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let sha = &caps[1];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
             rendered_links.push(format!("[`{}`](https://github.com/{repository}/commit/{sha})", &sha[..7]));
@@ -4567,7 +4578,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
     let re = REPO_ISSUE
         .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)#([0-9]+)\b").unwrap());
     out = re
-        .replace_all(&out, |caps: &regex::Captures<'_>| {
+        .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let repo = &caps[1];
             let number = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
@@ -4579,7 +4590,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
     let re = FORK_ISSUE
         .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+)#([0-9]+)\b").unwrap());
     out = re
-        .replace_all(&out, |caps: &regex::Captures<'_>| {
+        .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let fork = &caps[1];
             let number = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
@@ -4590,7 +4601,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
 
     let re = GH_ISSUE.get_or_init(|| Regex::new(r"\bGH-([0-9]+)\b").unwrap());
     out = re
-        .replace_all(&out, |caps: &regex::Captures<'_>| {
+        .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let number = &caps[1];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
             rendered_links.push(format!("[GH-{number}](https://github.com/{repository}/issues/{number})"));
@@ -4600,7 +4611,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
 
     let re = ISSUE.get_or_init(|| Regex::new(r"(^|[^A-Za-z0-9_/])#([0-9]+)\b").unwrap());
     out = re
-        .replace_all(&out, |caps: &regex::Captures<'_>| {
+        .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let before = &caps[1];
             let number = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
@@ -4611,7 +4622,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
 
     let re = MENTION.get_or_init(|| Regex::new(r"(^|[^A-Za-z0-9_`])@([A-Za-z0-9-]+)\b").unwrap());
     out = re
-        .replace_all(&out, |caps: &regex::Captures<'_>| {
+        .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let before = &caps[1];
             let user = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
@@ -4786,9 +4797,9 @@ fn parse_single_spec(spec: &str) -> Option<i64> {
 fn preprocess_time_spec(s: &str) -> String {
     // Convert "N M" (months) to "N month" and "N Y" to "N year"
     // The TypeScript applyCustomFormat handles this via regex
-    static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-    let re = RE.get_or_init(|| regex::Regex::new(r"(\d+)\s*(?:months?|M)").unwrap());
-    re.replace_all(s, |caps: &regex::Captures| {
+    static RE: std::sync::OnceLock<regex_lib::Regex> = std::sync::OnceLock::new();
+    let re = RE.get_or_init(|| regex_lib::Regex::new(r"(\d+)\s*(?:months?|M)").unwrap());
+    re.replace_all(s, |caps: &regex_lib::Captures| {
         let n: i64 = caps[1].parse().unwrap_or(0);
         format!("{}d", n * 30)
     })
@@ -5212,7 +5223,7 @@ const SANITIZE_CONTENT_FIELDS: &[&str] =
 /// - `secrets` key: replace all values with `"***********"`
 /// - Objects/arrays: recurse
 pub fn sanitize_value(value: &serde_json::Value) -> serde_json::Value {
-    use regex::Regex;
+    use regex_lib::Regex;
     use std::sync::LazyLock;
     static SECRETS_TEMPLATE_RE: LazyLock<Regex> =
         LazyLock::new(|| Regex::new(r"^\{\{\s*secrets\..*\}\}$").unwrap());
@@ -5269,14 +5280,14 @@ pub fn sanitize_value(value: &serde_json::Value) -> serde_json::Value {
 pub fn sanitize_urls(text: &str) -> String {
     use std::sync::LazyLock;
     // Matches scheme://credentials@host  (scheme is 3-9 alpha chars)
-    static URL_RE: LazyLock<regex::Regex> =
-        LazyLock::new(|| regex::Regex::new(r"(?i)[a-z]{3,9}://[^@/]+@[a-z0-9.\-]+").unwrap());
+    static URL_RE: LazyLock<regex_lib::Regex> =
+        LazyLock::new(|| regex_lib::Regex::new(r"(?i)[a-z]{3,9}://[^@/]+@[a-z0-9.\-]+").unwrap());
     // Matches //credentials@ within a URL
-    static URL_CRED_RE: LazyLock<regex::Regex> =
-        LazyLock::new(|| regex::Regex::new(r"//[^@]+@").unwrap());
+    static URL_CRED_RE: LazyLock<regex_lib::Regex> =
+        LazyLock::new(|| regex_lib::Regex::new(r"//[^@]+@").unwrap());
     // Matches data URI with content after the semicolon
-    static DATA_URI_RE: LazyLock<regex::Regex> =
-        LazyLock::new(|| regex::Regex::new(r"(?i)^(data:[0-9a-z-]+/[0-9a-z-]+;).+").unwrap());
+    static DATA_URI_RE: LazyLock<regex_lib::Regex> =
+        LazyLock::new(|| regex_lib::Regex::new(r"(?i)^(data:[0-9a-z-]+/[0-9a-z-]+;).+").unwrap());
 
     // First handle data URIs (apply to whole string if it matches)
     let text = if DATA_URI_RE.is_match(text) {
@@ -5287,7 +5298,7 @@ pub fn sanitize_urls(text: &str) -> String {
 
     // Then redact URL credentials
     URL_RE
-        .replace_all(&text, |caps: &regex::Captures| {
+        .replace_all(&text, |caps: &regex_lib::Captures| {
             URL_CRED_RE
                 .replace(&caps[0], "//**redacted**@")
                 .into_owned()
@@ -9106,11 +9117,11 @@ mod tests {
         // that could cause catastrophic backtracking or are not RE2-compatible.
         // This mirrors the TypeScript `regEx` which uses RE2 and rejects `x++`.
         assert!(
-            regex::Regex::new(r"(?=foo)").is_err(),
+            regex_lib::Regex::new(r"(?=foo)").is_err(),
             "lookahead should be rejected"
         );
         assert!(
-            regex::Regex::new(r"\1").is_err(),
+            regex_lib::Regex::new(r"\1").is_err(),
             "backreference should be rejected"
         );
     }

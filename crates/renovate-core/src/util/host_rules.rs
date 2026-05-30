@@ -7,7 +7,9 @@
 
 use std::cell::RefCell;
 
-use url::Url;
+extern crate url as url_lib;
+
+use url_lib::Url;
 
 // ---------------------------------------------------------------------------
 // Types
