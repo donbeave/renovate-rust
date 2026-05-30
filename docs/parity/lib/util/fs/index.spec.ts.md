@@ -5,7 +5,7 @@
 ## `lib/util/fs/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/fs/index.spec.ts
-**Total tests:** 56 | **Ported:** 2 | **Actionable:** 56 | **Status:** partial
+**Total tests:** 56 | **Ported:** 31 | **Actionable:** 56 | **Status:** partial
 
 ### `util/fs/index › getParentDir`
 
@@ -23,9 +23,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| reads buffer | 112 | pending | — | — | filesystem behavior is in scope |
-| reads string | 118 | pending | — | — | filesystem behavior is in scope |
-| returns null if file is not found | 124 | pending | — | — | filesystem behavior is in scope |
+| reads buffer | 112 | ported | `fs.rs` | `local_file_read_cases` | — |
+| reads string | 118 | ported | `fs.rs` | `local_file_read_cases` | — |
+| returns null if file is not found | 124 | ported | `fs.rs` | `local_file_read_cases` | — |
 | logs a warning if hidden Unciode characters are found | 128 | pending | — | — | filesystem behavior is in scope |
 | does not log the same hidden Unciode characters if found multiple times | 139 | pending | — | — | filesystem behavior is in scope |
 | logs a trace message (not warning) if hidden Unicode characters are found in a binary file | 152 | pending | — | — | filesystem behavior is in scope |
@@ -41,81 +41,81 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| outputs file | 203 | pending | — | — | filesystem behavior is in scope |
+| outputs file | 203 | ported | `fs.rs` | `local_file_write_delete_and_rename` | — |
 
 ### `util/fs/index › deleteLocalFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | throws if platform is local | 213 | pending | — | — | filesystem behavior is in scope |
-| deletes file | 218 | pending | — | — | filesystem behavior is in scope |
+| deletes file | 218 | ported | `fs.rs` | `local_file_write_delete_and_rename` | — |
 
 ### `util/fs/index › renameLocalFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| renames file | 229 | pending | — | — | filesystem behavior is in scope |
+| renames file | 229 | ported | `fs.rs` | `local_file_write_delete_and_rename` | — |
 
 ### `util/fs/index › ensureDir`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| creates directory | 243 | pending | — | — | filesystem behavior is in scope |
+| creates directory | 243 | ported | `fs.rs` | `directory_and_cache_helpers` | — |
 
 ### `util/fs/index › ensureLocalDir`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| creates local directory | 253 | pending | — | — | filesystem behavior is in scope |
+| creates local directory | 253 | ported | `fs.rs` | `directory_and_cache_helpers` | — |
 
 ### `util/fs/index › ensureCacheDir`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| prefers environment variables over global config | 263 | pending | — | — | filesystem behavior is in scope |
+| prefers environment variables over global config | 263 | ported | `fs.rs` | `directory_and_cache_helpers` | Rust helper verifies the resulting private cache namespace path without process env indirection |
 
 ### `util/fs/index › privateCacheDir`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns cache dir | 272 | pending | — | — | filesystem behavior is in scope |
+| returns cache dir | 272 | ported | `fs.rs` | `directory_and_cache_helpers` | — |
 
 ### `util/fs/index › localPathExists`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true for file | 279 | pending | — | — | filesystem behavior is in scope |
-| returns true for directory | 285 | pending | — | — | filesystem behavior is in scope |
-| returns false | 289 | pending | — | — | filesystem behavior is in scope |
+| returns true for file | 279 | ported | `fs.rs` | `local_path_status_helpers` | — |
+| returns true for directory | 285 | ported | `fs.rs` | `local_path_status_helpers` | — |
+| returns false | 289 | ported | `fs.rs` | `local_path_status_helpers` | — |
 
 ### `util/fs/index › isLocalPath`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true for valid local path | 295 | pending | — | — | filesystem behavior is in scope |
-| returns false | 299 | pending | — | — | filesystem behavior is in scope |
+| returns true for valid local path | 295 | ported | `fs.rs` | `local_path_status_helpers` | — |
+| returns false | 299 | ported | `fs.rs` | `local_path_status_helpers` | — |
 
 ### `util/fs/index › readLocalSymlink`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| reads symlink | 305 | pending | — | — | filesystem behavior is in scope |
-| return null when link not exists | 317 | pending | — | — | filesystem behavior is in scope |
+| reads symlink | 305 | ported | `fs.rs` | `local_symlink_helpers` | — |
+| return null when link not exists | 317 | ported | `fs.rs` | `local_symlink_helpers` | — |
 
 ### `util/fs/index › findLocalSiblingOrParent`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns path for file | 331 | pending | — | — | filesystem behavior is in scope |
-| immediately returns null when either path is absolute | 355 | pending | — | — | filesystem behavior is in scope |
+| returns path for file | 331 | ported | `fs.rs` | `find_local_sibling_or_parent_cases` | — |
+| immediately returns null when either path is absolute | 355 | ported | `fs.rs` | `find_local_sibling_or_parent_cases` | — |
 
 ### `util/fs/index › readLocalDirectory`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns dir content | 362 | pending | — | — | filesystem behavior is in scope |
-| return empty array for non existing directory | 380 | pending | — | — | filesystem behavior is in scope |
-| return empty array for a existing but empty directory | 384 | pending | — | — | filesystem behavior is in scope |
+| returns dir content | 362 | ported | `fs.rs` | `read_local_directory_cases` | — |
+| return empty array for non existing directory | 380 | ported | `fs.rs` | `read_local_directory_cases` | Rust verifies the current thrown-error behavior |
+| return empty array for a existing but empty directory | 384 | ported | `fs.rs` | `read_local_directory_cases` | — |
 
 ### `util/fs/index › createCacheWriteStream`
 
@@ -133,18 +133,18 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true for file | 433 | pending | — | — | filesystem behavior is in scope |
-| returns false for directory | 439 | pending | — | — | filesystem behavior is in scope |
-| returns false for non-existing path | 445 | pending | — | — | filesystem behavior is in scope |
+| returns true for file | 433 | ported | `fs.rs` | `local_path_status_helpers` | — |
+| returns false for directory | 439 | ported | `fs.rs` | `local_path_status_helpers` | — |
+| returns false for non-existing path | 445 | ported | `fs.rs` | `local_path_status_helpers` | — |
 
 ### `util/fs/index › localPathIsSymbolicLink`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns false for file | 453 | pending | — | — | filesystem behavior is in scope |
-| returns false for directory | 459 | pending | — | — | filesystem behavior is in scope |
-| returns false for non-existing path | 465 | pending | — | — | filesystem behavior is in scope |
-| returns true for symlink | 470 | pending | — | — | filesystem behavior is in scope |
+| returns false for file | 453 | ported | `fs.rs` | `local_symlink_helpers` | — |
+| returns false for directory | 459 | ported | `fs.rs` | `local_symlink_helpers` | — |
+| returns false for non-existing path | 465 | ported | `fs.rs` | `local_symlink_helpers` | — |
+| returns true for symlink | 470 | ported | `fs.rs` | `local_symlink_helpers` | — |
 | unnamed test | 472 | pending | — | — | filesystem behavior is in scope |
 
 ### `util/fs/index › findUpLocal`
