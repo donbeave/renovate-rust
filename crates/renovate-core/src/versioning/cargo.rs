@@ -838,6 +838,7 @@ mod update_summary_tests {
         s.iter().map(|x| (*x).to_owned()).collect()
     }
 
+    // Rust-specific: unit tests for update_summary edge cases
     #[test]
     fn pinned_version_with_newer_available_is_update() {
         let avail = v(&["1.0.0", "1.0.100", "1.0.228"]);
@@ -846,6 +847,7 @@ mod update_summary_tests {
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for update_summary edge cases
     #[test]
     fn pinned_version_already_latest_is_not_update() {
         let avail = v(&["1.0.0", "1.0.228"]);
@@ -853,6 +855,7 @@ mod update_summary_tests {
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for update_summary edge cases
     #[test]
     fn range_constraint_not_flagged_when_latest_within_range() {
         // All available versions satisfy the constraints — no out-of-range release.
@@ -866,6 +869,7 @@ mod update_summary_tests {
         }
     }
 
+    // Rust-specific: unit tests for update_summary edge cases
     #[test]
     fn range_constraint_flagged_when_latest_outside_range() {
         // 2.0.0 is outside ^1.0.0 — an update should be suggested.
@@ -876,6 +880,7 @@ mod update_summary_tests {
         assert_eq!(s.latest_compatible.as_deref(), Some("1.5.0"));
     }
 
+    // Rust-specific: unit tests for update_summary edge cases
     #[test]
     fn tilde_range_flagged_when_minor_bump_outside_range() {
         // ~1.0 covers 1.0.x; 1.1.0 is outside that range.
@@ -885,6 +890,7 @@ mod update_summary_tests {
         assert_eq!(s.latest.as_deref(), Some("1.1.0"));
     }
 
+    // Rust-specific: unit tests for update_summary edge cases
     #[test]
     fn caret_not_flagged_when_minor_within_range() {
         // ^1.0 covers >=1.0, <2.0 — 1.9.9 is within range.
@@ -896,6 +902,7 @@ mod update_summary_tests {
         );
     }
 
+    // Rust-specific: unit tests for update_summary edge cases
     #[test]
     fn no_compatible_versions_is_not_update() {
         let avail = v(&["1.0.0"]);
@@ -904,6 +911,7 @@ mod update_summary_tests {
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for update_summary build metadata handling
     #[test]
     fn build_metadata_same_precedence_is_not_update() {
         // "1.1.2" and "1.1.2+spec-1.1.0" have equal SemVer precedence.
@@ -917,6 +925,7 @@ mod update_summary_tests {
         );
     }
 
+    // Rust-specific: unit tests for update_summary build metadata handling
     #[test]
     fn build_metadata_with_actual_newer_version_is_update() {
         // If a genuinely newer version exists alongside a build-metadata variant,
@@ -927,6 +936,7 @@ mod update_summary_tests {
         assert_eq!(s.latest_compatible.as_deref(), Some("1.1.3"));
     }
 
+    // Rust-specific: unit tests for update_summary prerelease handling
     #[test]
     fn prerelease_versions_excluded_from_latest() {
         // A prerelease newer than stable should not trigger update for stable users.
@@ -936,6 +946,7 @@ mod update_summary_tests {
         assert_eq!(s.latest.as_deref(), Some("1.0.0"));
     }
 
+    // Rust-specific: unit tests for update_summary edge cases
     #[test]
     fn latest_field_reflects_absolute_max() {
         let avail = v(&["1.0.0", "1.5.0", "2.0.0"]);
@@ -953,27 +964,32 @@ mod tests {
         v.iter().map(|s| (*s).to_owned()).collect()
     }
 
+    // Rust-specific: unit tests for parse_constraint helper
     #[test]
     fn parses_bare_version() {
         assert!(parse_constraint("1.0").is_some());
         assert!(parse_constraint("1.52").is_some());
     }
 
+    // Rust-specific: unit tests for parse_constraint helper
     #[test]
     fn parses_caret_constraint() {
         assert!(parse_constraint("^1.0").is_some());
     }
 
+    // Rust-specific: unit tests for parse_constraint helper
     #[test]
     fn parses_tilde_constraint() {
         assert!(parse_constraint("~1.2").is_some());
     }
 
+    // Rust-specific: unit tests for parse_constraint helper
     #[test]
     fn rejects_invalid_constraint() {
         assert!(parse_constraint("not.a.version.!").is_none());
     }
 
+    // Rust-specific: unit tests for resolve_latest helper
     #[test]
     fn resolve_latest_returns_highest_matching() {
         let avail = versions(&["1.0.0", "1.1.0", "1.2.0", "2.0.0"]);
@@ -981,18 +997,21 @@ mod tests {
         assert_eq!(resolve_latest("^1.0", &avail), Some("1.2.0".to_owned()));
     }
 
+    // Rust-specific: unit tests for resolve_latest helper
     #[test]
     fn resolve_latest_exact_match() {
         let avail = versions(&["0.9.0", "1.0.0", "1.0.1"]);
         assert_eq!(resolve_latest("=1.0.0", &avail), Some("1.0.0".to_owned()));
     }
 
+    // Rust-specific: unit tests for resolve_latest helper
     #[test]
     fn resolve_latest_no_match_returns_none() {
         let avail = versions(&["1.0.0", "1.1.0"]);
         assert_eq!(resolve_latest("^2.0", &avail), None);
     }
 
+    // Rust-specific: unit tests for check_update helper
     #[test]
     fn check_update_up_to_date_when_latest_is_current() {
         let avail = versions(&["1.0.0", "1.1.0", "1.2.0"]);
@@ -1000,6 +1019,7 @@ mod tests {
         assert_eq!(check_update("^1", &avail), UpdateDecision::UpToDate);
     }
 
+    // Rust-specific: unit tests for check_update helper
     #[test]
     fn check_update_unparseable_constraint() {
         assert_eq!(
@@ -1008,6 +1028,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for check_update helper
     #[test]
     fn check_update_no_compatible_versions() {
         let avail = versions(&["1.0.0", "1.1.0"]);
