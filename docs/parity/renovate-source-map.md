@@ -1179,3 +1179,4 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/util/git/url.ts` | `crates/renovate-core/src/util.rs` | full | Git URL parsing, HTTP URL coercion, platform credential injection, Bitbucket Server SSH URL rewriting, and host-rule credential lookup ported |
 | `lib/util/markdown.ts` | `crates/renovate-core/src/util.rs` | full | Markdown release-note sanitizing and GitHub-style linkification ported, including commit, issue, mention, and angle-bracket URL rendering |
 | `lib/modules/datasource/postprocess-release.ts` | `crates/renovate-core/src/datasources.rs` | full | postprocessRelease: dispatches release postprocessing through datasource-specific hooks; default passthrough when no override exists |
+| `lib/modules/platform/github/issue.ts` | `crates/renovate-core/src/platform/github_api_cache.rs` | full | GithubIssueCache: issue storage, update, delete, reconcile queue, failed reconciliation reset |

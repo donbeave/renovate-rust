@@ -727,7 +727,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/github/api-cache.spec.ts` | Done | [details](lib/modules/platform/github/api-cache.spec.ts.md) |
 | `lib/modules/platform/github/branch.spec.ts` | Done | [details](lib/modules/platform/github/branch.spec.ts.md) |
 | `lib/modules/platform/github/index.spec.ts` | Not done | [details](lib/modules/platform/github/index.spec.ts.md) |
-| `lib/modules/platform/github/issue.spec.ts` | Not done | [details](lib/modules/platform/github/issue.spec.ts.md) |
+| `lib/modules/platform/github/issue.spec.ts` | Done | [details](lib/modules/platform/github/issue.spec.ts.md) |
 | `lib/modules/platform/github/massage-markdown-links.spec.ts` | Done | [details](lib/modules/platform/github/massage-markdown-links.spec.ts.md) |
 | `lib/modules/platform/github/schema.spec.ts` | Done | [details](lib/modules/platform/github/schema.spec.ts.md) |
 | `lib/modules/platform/github/scm.spec.ts` | Done | [details](lib/modules/platform/github/scm.spec.ts.md) |
