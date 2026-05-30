@@ -785,6 +785,142 @@ mod tests {
         assert!(result.is_none());
     }
 
+    #[tokio::test]
+    async fn get_file_list_returns_blobs() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/trees/HEAD"))
+            .and(wiremock::matchers::query_param("recursive", "1"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "tree": [
+                    {"path": "README.md", "type": "blob"},
+                    {"path": "src/main.rs", "type": "blob"},
+                    {"path": "src/lib", "type": "tree"},
+                    {"path": "Cargo.toml", "type": "blob"},
+                ],
+                "truncated": false,
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let files = client.get_file_list("owner", "repo").await.unwrap();
+        assert_eq!(files.len(), 3);
+        assert!(files.contains(&"README.md".to_owned()));
+        assert!(files.contains(&"src/main.rs".to_owned()));
+        assert!(files.contains(&"Cargo.toml".to_owned()));
+    }
+
+    #[tokio::test]
+    async fn create_pr_returns_pr_number() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 42,
+                "title": "Update deps",
+                "state": "open",
+                "head": {"ref": "renovate/deps", "sha": "abc", "repo": null},
+                "base": {"ref": "main", "sha": "def", "repo": null},
+                "node_id": "nid",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(42));
+    }
+
+    #[tokio::test]
+    async fn create_pr_returns_none_on_validation_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(422))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .await
+            .unwrap();
+        assert_eq!(pr_number, None);
+    }
+
+    #[tokio::test]
+    async fn update_pr_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/pulls/42"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .update_pr("owner", "repo", 42, Some("New title"), None, None)
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn update_pr_no_op_when_nothing_to_update() {
+        let server = MockServer::start().await;
+        // No mock needed — request should not be sent when all args are None
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .update_pr("owner", "repo", 42, None, None, None)
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn get_branch_status_returns_combined_state() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "success",
+                "statuses": [
+                    {"context": "ci/build", "state": "success"},
+                    {"context": "ci/test", "state": "success"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        assert_eq!(status.state, CombinedBranchState::Success);
+        assert_eq!(status.statuses.len(), 2);
+    }
+
+    #[tokio::test]
+    async fn write_file_returns_not_supported() {
+        let server = MockServer::start().await;
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client
+            .write_file("owner", "repo", "path", "content")
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::NotSupported(_)));
+    }
+
     // ── is_date_expired ───────────────────────────────────────────────────────
 
     // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected"
