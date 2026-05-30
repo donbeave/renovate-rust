@@ -20,7 +20,7 @@
 | isStable("$version") === $expected | 63 | ported | `versioning/composer.rs` | `is_stable_cases` | — |
 | isValid("$version") === $expected | 75 | ported | `versioning/composer.rs` | `is_valid_cases` | — |
 | isLessThanRange("$a", "$b") === $expected | 108 | ported | `versioning/composer.rs` | `is_less_than_range_cases` | — |
-| getSatisfyingVersion($versions, "$range") === $expected | 116 | ported | `versioning/composer.rs` | `get_satisfying_version_cases` | Partial: @stability and -pXX cases pending |
+| getSatisfyingVersion($versions, "$range") === $expected | 116 | ported | `versioning/composer.rs` | `get_satisfying_version_cases` | — |
 | minSatisfyingVersion($versions, "$range") === $expected | 131 | ported | `versioning/composer.rs` | `min_satisfying_version_cases` | — |
 | matches("$a", "$b") === $expected | 147 | ported | `composer.rs` | `matches_cases` | — |
 | subset("$a", "$b") === $expected | 155 | ported | `composer.rs` | `subset_cases` | — |

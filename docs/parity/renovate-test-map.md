@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,291 / 11,665 total tests ported (45.4%) · pending 5,056 · not-applicable 1,318 (11.3%) — updated 2026-05-30
+**Progress:** 6,293 / 12,626 total tests ported (49.8%) · pending 5,039 · not-applicable 1,294 (10.2%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -760,7 +760,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/exec/containerbase.spec.ts` | Not done | [details](lib/util/exec/containerbase.spec.ts.md) |
 | `lib/util/exec/docker/index.spec.ts` | Not done | [details](lib/util/exec/docker/index.spec.ts.md) |
 | `lib/util/exec/env.spec.ts` | Done | [details](lib/util/exec/env.spec.ts.md) |
-| `lib/util/exec/hermit.spec.ts` | Not done | [details](lib/util/exec/hermit.spec.ts.md) |
+| `lib/util/exec/hermit.spec.ts` | Done | [details](lib/util/exec/hermit.spec.ts.md) |
 | `lib/util/exec/index.spec.ts` | Not done | [details](lib/util/exec/index.spec.ts.md) |
 | `lib/util/exec/utils.spec.ts` | Done | [details](lib/util/exec/utils.spec.ts.md) |
 | `lib/util/fs/index.spec.ts` | Done | [details](lib/util/fs/index.spec.ts.md) |

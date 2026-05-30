@@ -1,0 +1,6 @@
+pipelines:
+  default:
+    - step:
+        image: scratch
+        script:
+          - echo "hello"
