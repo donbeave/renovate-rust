@@ -19,6 +19,7 @@ pub mod conan;
 pub mod conda;
 pub mod cpan;
 pub mod crates_io;
+pub mod custom;
 pub mod dart_version;
 pub mod deb;
 pub mod deno;

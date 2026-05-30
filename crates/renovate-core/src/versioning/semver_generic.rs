@@ -173,18 +173,21 @@ mod tests {
         }
     }
 
+    // Rust-specific: unit tests for semver_update_summary edge cases
     #[test]
     fn same_version_no_update() {
         let s = semver_update_summary("1.2.3", Some("1.2.3"));
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for semver_update_summary edge cases
     #[test]
     fn newer_version_update() {
         let s = semver_update_summary("1.2.3", Some("1.2.4"));
         assert!(s.update_available);
     }
 
+    // Rust-specific: verifies padded semver comparison avoids false positives
     #[test]
     fn caret_range_lower_bound_match() {
         // "^6.4" lower bound is "6.4" = semver 6.4.0
@@ -193,12 +196,14 @@ mod tests {
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for semver_update_summary edge cases
     #[test]
     fn caret_range_newer() {
         let s = semver_update_summary("^6.4", Some("6.5.0"));
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for semver_update_summary edge cases
     #[test]
     fn pessimistic_tilde_range() {
         // "~> 1.7.0" lower bound "1.7.0"
@@ -206,12 +211,14 @@ mod tests {
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for semver_update_summary edge cases
     #[test]
     fn gte_constraint() {
         let s = semver_update_summary(">= 1.0.0", Some("1.5.0"));
         assert!(s.update_available);
     }
 
+    // Rust-specific: verifies padded semver comparison avoids false positives
     #[test]
     fn two_component_vs_three() {
         // "1.7" lower bound → semver 1.7.0; latest "1.7.0" → equal → no update
@@ -219,18 +226,21 @@ mod tests {
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for semver_update_summary edge cases
     #[test]
     fn unconstrained_no_update() {
         let s = semver_update_summary("", Some("1.0.0"));
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for semver_update_summary edge cases
     #[test]
     fn no_latest_no_update() {
         let s = semver_update_summary("1.0.0", None);
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for semver_update_summary edge cases
     #[test]
     fn multi_constraint_lower_bound() {
         // ">= 1.0, < 2.0" → lower bound "1.0" → semver 1.0.0
@@ -238,44 +248,52 @@ mod tests {
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for parse_padded helper
     #[test]
     fn parse_padded_one_component() {
         let v = parse_padded("6").unwrap();
         assert_eq!(v.to_string(), "6.0.0");
     }
 
+    // Rust-specific: unit tests for parse_padded helper
     #[test]
     fn parse_padded_two_components() {
         let v = parse_padded("6.4").unwrap();
         assert_eq!(v.to_string(), "6.4.0");
     }
 
+    // Rust-specific: unit tests for parse_padded helper
     #[test]
     fn parse_padded_three_components() {
         let v = parse_padded("6.4.1").unwrap();
         assert_eq!(v.to_string(), "6.4.1");
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_caret() {
         assert_eq!(lower_bound("^1.2.3"), "1.2.3");
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_tilde_gt() {
         assert_eq!(lower_bound("~> 1.7"), "1.7");
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_gte() {
         assert_eq!(lower_bound(">= 1.0.0"), "1.0.0");
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_exact() {
         assert_eq!(lower_bound("1.2.3"), "1.2.3");
     }
 
+    // Rust-specific: defensive test for semver_update_summary edge case
     #[test]
     fn older_version_no_update() {
         // Latest is older than lower bound (shouldn't happen but defensive)
@@ -285,6 +303,7 @@ mod tests {
 
     // ── classify_semver_update tests ─────────────────────────────────────────
 
+    // Rust-specific: unit tests for classify_semver_update helper
     #[test]
     fn classify_major_bump() {
         assert_eq!(
@@ -293,6 +312,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for classify_semver_update helper
     #[test]
     fn classify_minor_bump() {
         assert_eq!(
@@ -301,6 +321,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for classify_semver_update helper
     #[test]
     fn classify_patch_bump() {
         assert_eq!(
@@ -309,11 +330,13 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for classify_semver_update helper
     #[test]
     fn classify_same_version_returns_none() {
         assert_eq!(classify_semver_update("1.2.3", "1.2.3"), None);
     }
 
+    // Rust-specific: unit tests for classify_semver_update helper
     #[test]
     fn classify_strips_v_prefix() {
         assert_eq!(
@@ -322,6 +345,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for classify_semver_update helper
     #[test]
     fn classify_caret_range_to_major() {
         assert_eq!(
@@ -330,6 +354,7 @@ mod tests {
         );
     }
 
+    // Rust-specific: unit tests for classify_semver_update helper
     #[test]
     fn classify_non_semver_returns_none() {
         assert_eq!(classify_semver_update("latest", "2.0.0"), None);
