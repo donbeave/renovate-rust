@@ -573,3 +573,25 @@ async fn process_repo(
 
     (Some(repo_report), had_error)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Smoke-test that the NpmUpdateUpgrade mapping we build in process_repo
+    /// actually works with npm_update_dependency.
+    #[test]
+    fn npm_manifest_update_smoke() {
+        let package_json = r#"{"dependencies":{"lodash":"^3.0.0"}}"#;
+        let upgrade = renovate_core::extractors::npm::NpmUpdateUpgrade {
+            dep_type: "dependencies".to_owned(),
+            dep_name: "lodash".to_owned(),
+            new_value: Some("^4.17.21".to_owned()),
+            current_value: Some("^3.0.0".to_owned()),
+            ..Default::default()
+        };
+        let updated = renovate_core::extractors::npm::npm_update_dependency(package_json, &upgrade)
+            .expect("npm_update_dependency should succeed");
+        assert!(updated.contains("\"lodash\": \"^4.17.21\""), "updated package.json should contain new version; got: {updated}");
+    }
+}

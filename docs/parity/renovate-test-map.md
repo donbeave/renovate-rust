@@ -247,7 +247,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | Not done | [details](lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) |
 | `lib/modules/datasource/bitrise/index.spec.ts` | Done | [details](lib/modules/datasource/bitrise/index.spec.ts.md) |
-| `lib/modules/datasource/terraform-module/base.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
+| `lib/modules/datasource/terraform-module/base.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/index.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/utils.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/utils.spec.ts.md) |
 | `lib/modules/datasource/terraform-provider/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-provider/index.spec.ts.md) |
@@ -366,7 +366,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/renovate-logger.spec.ts` | Done | [details](lib/logger/renovate-logger.spec.ts.md) |
 | `lib/logger/pretty-stdout.spec.ts` | Done | [details](lib/logger/pretty-stdout.spec.ts.md) |
 | `lib/logger/err-serializer.spec.ts` | Not done | [details](lib/logger/err-serializer.spec.ts.md) |
-| `lib/logger/once.spec.ts` | Not done | [details](lib/logger/once.spec.ts.md) |
+| `lib/logger/once.spec.ts` | Done | [details](lib/logger/once.spec.ts.md) |
 | `lib/logger/utils.spec.ts` | Done | [details](lib/logger/utils.spec.ts.md) |
 | `lib/logger/index.spec.ts` | Done | [details](lib/logger/index.spec.ts.md) |
 | `lib/util/string-match.spec.ts` | Done | [details](lib/util/string-match.spec.ts.md) |
@@ -540,7 +540,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bundler/host-rules.spec.ts` | Done | [details](lib/modules/manager/bundler/host-rules.spec.ts.md) |
 | `lib/modules/manager/bundler/locked-version.spec.ts` | Done | [details](lib/modules/manager/bundler/locked-version.spec.ts.md) |
 | `lib/modules/manager/bundler/update-locked.spec.ts` | Done | [details](lib/modules/manager/bundler/update-locked.spec.ts.md) |
-| `lib/modules/manager/cake/index.spec.ts` | Not done | [details](lib/modules/manager/cake/index.spec.ts.md) |
+| `lib/modules/manager/cake/index.spec.ts` | Done | [details](lib/modules/manager/cake/index.spec.ts.md) |
 | `lib/modules/manager/cargo/artifacts.spec.ts` | Not done | [details](lib/modules/manager/cargo/artifacts.spec.ts.md) |
 | `lib/modules/manager/cargo/locked-version.spec.ts` | Done | [details](lib/modules/manager/cargo/locked-version.spec.ts.md) |
 | `lib/modules/manager/cargo/range.spec.ts` | Done | [details](lib/modules/manager/cargo/range.spec.ts.md) |

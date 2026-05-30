@@ -5,15 +5,15 @@
 ## `lib/logger/once.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/once.spec.ts
-**Total tests:** 9 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending-applicable
+**Total tests:** 9 | **Ported:** 3 | **Actionable:** 3 | **Status:** done
 
 ### `logger/once › core`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should call a function only once | 15 | pending | — | — | — |
-| supports support distinct calls | 28 | pending | — | — | — |
-| resets keys | 44 | pending | — | — | — |
+| should call a function only once | 15 | ported | `util.rs` | `test_once_tracker_calls_once` | — |
+| supports support distinct calls | 28 | ported | `util.rs` | `test_once_tracker_distinct_keys` | — |
+| resets keys | 44 | ported | `util.rs` | `test_once_tracker_reset` | — |
 
 ### `logger/once › logger`
 

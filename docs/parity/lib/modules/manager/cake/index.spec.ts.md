@@ -5,7 +5,7 @@
 ## `lib/modules/manager/cake/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cake/index.spec.ts
-**Total tests:** 5 | **Ported:** 3 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 3 | **Actionable:** 3 | **Status:** done
 
 ### `tests`
 
@@ -14,7 +14,7 @@
 | extracts | 21 | ported | `cake.rs` | `extracts_build_cake_fixture` | — |
 | extracts dotnet tools from single sdk style build file | 45 | ported | `cake.rs` | `extracts_install_tools_dotnet` | — |
 | skips invalid entries in InstallTools | 101 | ported | `cake.rs` | `skips_invalid_install_tools_entries` | — |
-| calls applyRegistries to honor nuget.config files if present for .cake files | 124 | pending | — | — | — |
-| calls applyRegistries to honor nuget.config files if present for InstallTools | 141 | pending | — | — | — |
+| calls applyRegistries to honor nuget.config files if present for .cake files | 124 | not-applicable | — | — | Spy test: verifies applyRegistries mock is called, not output behavior; registry application tested in nuget/extract.spec.ts |
+| calls applyRegistries to honor nuget.config files if present for InstallTools | 141 | not-applicable | — | — | Spy test: verifies applyRegistries mock is called, not output behavior; registry application tested in nuget/extract.spec.ts |
 
 ---

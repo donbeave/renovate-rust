@@ -854,6 +854,45 @@ pub struct GithubTokenDep {
     pub skip_reason: Option<String>,
 }
 
+/// Tracks whether a callback has been invoked for a given key, ensuring it
+/// runs at most once until `reset()` is called.
+///
+/// Mirrors `lib/logger/once.ts` — the TS version uses stack traces for
+/// implicit keys; this Rust version uses explicit string keys.
+pub struct OnceTracker {
+    seen: HashSet<String>,
+}
+
+impl OnceTracker {
+    pub fn new() -> Self {
+        Self {
+            seen: HashSet::new(),
+        }
+    }
+
+    /// Call `f` only if `key` has not been seen before.
+    /// Returns `true` if `f` was called, `false` if skipped.
+    pub fn once<F: FnOnce()>(&mut self, key: &str, f: F) -> bool {
+        if self.seen.contains(key) {
+            return false;
+        }
+        self.seen.insert(key.to_owned());
+        f();
+        true
+    }
+
+    /// Clear all seen keys, allowing previously-used keys to fire again.
+    pub fn reset(&mut self) {
+        self.seen.clear();
+    }
+}
+
+impl Default for OnceTracker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Git URL conversion — lib/util/git/url.ts
 // ---------------------------------------------------------------------------
@@ -6535,6 +6574,45 @@ mod tests {
         assert_eq!(warned, vec!["foo/foo", "bar/bar"]);
         assert_eq!(refs[0].skip_reason.as_deref(), Some("github-token-required"));
         assert_eq!(refs[1].skip_reason.as_deref(), Some("github-token-required"));
+    }
+
+    // Ported: "should call a function only once" — logger/once.spec.ts line 15
+    #[test]
+    fn test_once_tracker_calls_once() {
+        let mut tracker = OnceTracker::new();
+        let mut count = 0;
+        tracker.once("key1", || count += 1);
+        tracker.once("key1", || count += 1);
+        tracker.once("key1", || count += 1);
+        assert_eq!(count, 1);
+    }
+
+    // Ported: "supports support distinct calls" — logger/once.spec.ts line 28
+    #[test]
+    fn test_once_tracker_distinct_keys() {
+        let mut tracker = OnceTracker::new();
+        let mut count1 = 0;
+        let mut count2 = 0;
+        fn outer(tracker: &mut OnceTracker, c1: &mut i32, c2: &mut i32) {
+            tracker.once("key1", || *c1 += 1);
+            tracker.once("key2", || *c2 += 1);
+        }
+        outer(&mut tracker, &mut count1, &mut count2);
+        outer(&mut tracker, &mut count1, &mut count2);
+        outer(&mut tracker, &mut count1, &mut count2);
+        assert_eq!(count1, 1);
+        assert_eq!(count2, 1);
+    }
+
+    // Ported: "resets keys" — logger/once.spec.ts line 44
+    #[test]
+    fn test_once_tracker_reset() {
+        let mut tracker = OnceTracker::new();
+        let mut count = 0;
+        tracker.once("key1", || count += 1);
+        tracker.reset();
+        tracker.once("key1", || count += 1);
+        assert_eq!(count, 2);
     }
 
     // -----------------------------------------------------------------------
