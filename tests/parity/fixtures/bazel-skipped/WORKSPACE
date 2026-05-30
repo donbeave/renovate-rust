@@ -1,0 +1,4 @@
+http_archive(
+    name = "rules_jvm_external",
+    url = "https://example.com/rules_jvm_external.zip",
+)

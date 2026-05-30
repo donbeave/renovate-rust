@@ -1012,3 +1012,79 @@ fn parity_quadlet_scratch() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for quadlet-scratch fixture");
 }
+
+#[test]
+fn parity_bazel_module_skipped() {
+    let actual = run_fixture("bazel-module-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "MODULE.bazel",
+                    "manager": "bazel-module",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "rules_pkg",
+                            "status": "skipped",
+                            "reason": "unspecifiedversion"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for bazel-module-skipped fixture");
+}
+
+#[test]
+fn parity_bazel_skipped() {
+    let actual = run_fixture("bazel-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "WORKSPACE",
+                    "manager": "bazel",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "rules_jvm_external",
+                            "status": "skipped",
+                            "reason": "no-github-url"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for bazel-skipped fixture");
+}
