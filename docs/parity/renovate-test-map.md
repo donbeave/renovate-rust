@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,143 / 11,666 total tests ported (44%) · pending 3,883 · not-applicable 2,640 (23% of total) — updated 2026-05-30
+**Progress:** 5,143 / 11,666 total tests ported (44%) · pending 3,926 · not-applicable 2,597 (22% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -567,7 +567,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/deno/compat.spec.ts` | Done | [details](lib/modules/manager/deno/compat.spec.ts.md) |
 | `lib/modules/manager/deno/extract.spec.ts` | Done | [details](lib/modules/manager/deno/extract.spec.ts.md) |
 | `lib/modules/manager/deno/post.spec.ts` | Not done | [details](lib/modules/manager/deno/post.spec.ts.md) |
-| `lib/modules/manager/deno/schema.spec.ts` | Done | [details](lib/modules/manager/deno/schema.spec.ts.md) |
+| `lib/modules/manager/deno/schema.spec.ts` | Not done | [details](lib/modules/manager/deno/schema.spec.ts.md) |
 | `lib/modules/manager/deno/update.spec.ts` | Done | [details](lib/modules/manager/deno/update.spec.ts.md) |
 | `lib/modules/manager/deps-edn/parser.spec.ts` | Done | [details](lib/modules/manager/deps-edn/parser.spec.ts.md) |
 | `lib/modules/manager/devbox/artifacts.spec.ts` | Not done | [details](lib/modules/manager/devbox/artifacts.spec.ts.md) |
