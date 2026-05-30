@@ -1447,3 +1447,238 @@ syn = "2.foo.1"
         }
     }
 }
+
+// ── range strategy ──────────────────────────────────────────────────────────
+// Ported from lib/modules/manager/cargo/range.ts
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RangeStrategy {
+    Auto,
+    Pin,
+    Bump,
+    Replace,
+    Widen,
+    UpdateLockfile,
+}
+
+pub fn get_range_strategy(
+    current_value: Option<&str>,
+    range_strategy: &RangeStrategy,
+) -> RangeStrategy {
+    if range_strategy != &RangeStrategy::Auto {
+        return range_strategy.clone();
+    }
+    if current_value.map_or(false, |v| v.contains('<')) {
+        RangeStrategy::Widen
+    } else {
+        RangeStrategy::UpdateLockfile
+    }
+}
+
+// ── update-locked ───────────────────────────────────────────────────────────
+// Ported from lib/modules/manager/cargo/update-locked.ts
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum UpdateLockedStatus {
+    AlreadyUpdated,
+    Unsupported,
+    UpdateFailed,
+}
+
+pub struct UpdateLockedConfig<'a> {
+    pub dep_name: &'a str,
+    pub current_version: &'a str,
+    pub new_version: &'a str,
+    pub lock_file: &'a str,
+    pub lock_file_content: Option<&'a str>,
+}
+
+pub fn update_locked_dependency(config: &UpdateLockedConfig<'_>) -> UpdateLockedStatus {
+    let lock_content = match config.lock_file_content {
+        Some(c) => c,
+        None => return UpdateLockedStatus::UpdateFailed,
+    };
+
+    let locked = extract_lock_versions(lock_content);
+    match locked.get(config.dep_name) {
+        Some(versions) => {
+            if versions.iter().any(|v| v == config.new_version) {
+                UpdateLockedStatus::AlreadyUpdated
+            } else {
+                UpdateLockedStatus::Unsupported
+            }
+        }
+        None => UpdateLockedStatus::Unsupported,
+    }
+}
+
+fn extract_lock_versions(content: &str) -> std::collections::HashMap<String, Vec<String>> {
+    let mut result: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+    let mut current_name: Option<String> = None;
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("name = \"") {
+            if let Some(name) = trimmed.trim_start_matches("name = \"").strip_suffix('"') {
+                current_name = Some(name.to_owned());
+            }
+        } else if trimmed.starts_with("version = \"") {
+            if let Some(version) = trimmed.trim_start_matches("version = \"").strip_suffix('"') {
+                if let Some(name) = &current_name {
+                    result.entry(name.clone()).or_default().push(version.to_owned());
+                }
+            }
+        } else if trimmed == "[[package]]" || trimmed == "" {
+            current_name = None;
+        }
+    }
+
+    result
+}
+
+// ── bump package version ───────────────────────────────────────────────────
+// Ported from lib/modules/manager/cargo/update.ts
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BumpVersion {
+    Major,
+    Minor,
+    Patch,
+}
+
+pub struct BumpResult {
+    pub bumped_content: String,
+}
+
+pub fn bump_package_version(
+    content: &str,
+    current_value: &str,
+    bump_version: &BumpVersion,
+) -> BumpResult {
+    if semver::Version::parse(current_value).is_err() {
+        return BumpResult {
+            bumped_content: content.to_owned(),
+        };
+    }
+
+    let Ok(mut ver) = semver::Version::parse(current_value) else {
+        return BumpResult {
+            bumped_content: content.to_owned(),
+        };
+    };
+
+    match bump_version {
+        BumpVersion::Major => {
+            ver.major += 1;
+            ver.minor = 0;
+            ver.patch = 0;
+        }
+        BumpVersion::Minor => {
+            ver.minor += 1;
+            ver.patch = 0;
+        }
+        BumpVersion::Patch => {
+            ver.patch += 1;
+        }
+    }
+
+    let new_version = ver.to_string();
+    let bumped = content.replacen(&format!("version = \"{}\"", current_value), &format!("version = \"{}\"", new_version), 1);
+
+    BumpResult {
+        bumped_content: bumped,
+    }
+}
+
+#[cfg(test)]
+mod range_update_tests {
+    use super::*;
+
+    #[test]
+    fn get_range_strategy_auto_default() {
+        assert_eq!(
+            get_range_strategy(None, &RangeStrategy::Auto),
+            RangeStrategy::UpdateLockfile
+        );
+    }
+
+    #[test]
+    fn get_range_strategy_auto_with_lt() {
+        assert_eq!(
+            get_range_strategy(Some(">=1.0.0 <2.0.0"), &RangeStrategy::Auto),
+            RangeStrategy::Widen
+        );
+    }
+
+    #[test]
+    fn get_range_strategy_non_auto_passthrough() {
+        assert_eq!(
+            get_range_strategy(None, &RangeStrategy::Pin),
+            RangeStrategy::Pin
+        );
+    }
+
+    #[test]
+    fn update_locked_already_updated() {
+        let config = UpdateLockedConfig {
+            dep_name: "serde",
+            current_version: "1.0.100",
+            new_version: "1.0.200",
+            lock_file: "Cargo.lock",
+            lock_file_content: Some("[[package]]\nname = \"serde\"\nversion = \"1.0.200\"\n"),
+        };
+        assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::AlreadyUpdated);
+    }
+
+    #[test]
+    fn update_locked_unsupported() {
+        let config = UpdateLockedConfig {
+            dep_name: "serde",
+            current_version: "1.0.100",
+            new_version: "1.0.200",
+            lock_file: "Cargo.lock",
+            lock_file_content: Some("[[package]]\nname = \"serde\"\nversion = \"1.0.100\"\n"),
+        };
+        assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::Unsupported);
+    }
+
+    #[test]
+    fn update_locked_no_content() {
+        let config = UpdateLockedConfig {
+            dep_name: "serde",
+            current_version: "1.0.100",
+            new_version: "1.0.200",
+            lock_file: "Cargo.lock",
+            lock_file_content: None,
+        };
+        assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::UpdateFailed);
+    }
+
+    #[test]
+    fn bump_package_version_patch() {
+        let content = "[package]\nname = \"foo\"\nversion = \"1.2.3\"\n";
+        let result = bump_package_version(content, "1.2.3", &BumpVersion::Patch);
+        assert!(result.bumped_content.contains("version = \"1.2.4\""));
+    }
+
+    #[test]
+    fn bump_package_version_minor() {
+        let content = "[package]\nname = \"foo\"\nversion = \"1.2.3\"\n";
+        let result = bump_package_version(content, "1.2.3", &BumpVersion::Minor);
+        assert!(result.bumped_content.contains("version = \"1.3.0\""));
+    }
+
+    #[test]
+    fn bump_package_version_major() {
+        let content = "[package]\nname = \"foo\"\nversion = \"1.2.3\"\n";
+        let result = bump_package_version(content, "1.2.3", &BumpVersion::Major);
+        assert!(result.bumped_content.contains("version = \"2.0.0\""));
+    }
+
+    #[test]
+    fn bump_package_version_invalid_semver_noop() {
+        let content = "[package]\nname = \"foo\"\nversion = \"not-semver\"\n";
+        let result = bump_package_version(content, "not-semver", &BumpVersion::Patch);
+        assert_eq!(result.bumped_content, content);
+    }
+}
