@@ -784,3 +784,155 @@ fn parity_woodpecker_scratch() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for woodpecker-scratch fixture");
 }
+
+#[test]
+fn parity_kubernetes_scratch() {
+    let actual = run_fixture("kubernetes-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "kubernetes/deployment.yml",
+                    "manager": "kubernetes",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "no-version"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for kubernetes-scratch fixture");
+}
+
+#[test]
+fn parity_cloudbuild_scratch() {
+    let actual = run_fixture("cloudbuild-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "cloudbuild.yml",
+                    "manager": "cloudbuild",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for cloudbuild-scratch fixture");
+}
+
+#[test]
+fn parity_bitbucket_pipelines_scratch() {
+    let actual = run_fixture("bitbucket-pipelines-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "bitbucket-pipelines.yml",
+                    "manager": "bitbucket-pipelines",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for bitbucket-pipelines-scratch fixture");
+}
+
+#[test]
+fn parity_devcontainer_scratch() {
+    let actual = run_fixture("devcontainer-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".devcontainer.json",
+                    "manager": "devcontainer",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for devcontainer-scratch fixture");
+}
