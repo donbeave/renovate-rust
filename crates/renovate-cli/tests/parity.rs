@@ -1760,3 +1760,42 @@ fn parity_poetry_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for poetry-skipped fixture");
 }
+
+// Rust-specific: parity behavior test
+#[test]
+fn parity_homebrew_skipped() {
+    let actual = run_fixture("homebrew-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Formula/test.rb",
+                    "manager": "homebrew",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "Test",
+                            "status": "skipped",
+                            "reason": "invalid-sha256"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for homebrew-skipped fixture");
+}
