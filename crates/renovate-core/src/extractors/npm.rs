@@ -7221,4 +7221,98 @@ chalk@^2.4.1:
         get_locked_versions(&mut files);
         assert!(files[0].extracted_constraints.is_none() || files[0].extracted_constraints.as_ref().unwrap().is_empty());
     }
+
+    #[test]
+    fn parse_npm_lock_v1_extracts_dependencies() {
+        let content = r#"{"lockfileVersion":1,"dependencies":{"lodash":{"version":"4.17.21"}}}"#;
+        let lock = parse_npm_lock(Some(content));
+        assert_eq!(lock.lockfile_version, Some(1));
+        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+    }
+
+    #[test]
+    fn parse_npm_lock_v2_extracts_packages() {
+        let content = r#"{"lockfileVersion":2,"packages":{"node_modules/lodash":{"version":"4.17.21"}}}"#;
+        let lock = parse_npm_lock(Some(content));
+        assert_eq!(lock.lockfile_version, Some(2));
+        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+    }
+
+    #[test]
+    fn parse_npm_lock_v3_extracts_packages() {
+        let content = r#"{"lockfileVersion":3,"packages":{"node_modules/lodash":{"version":"4.17.21"}}}"#;
+        let lock = parse_npm_lock(Some(content));
+        assert_eq!(lock.lockfile_version, Some(3));
+        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+    }
+
+    #[test]
+    fn parse_npm_lock_none_returns_default() {
+        let lock = parse_npm_lock(None);
+        assert!(lock.locked_versions.is_empty());
+        assert_eq!(lock.lockfile_version, None);
+    }
+
+    #[test]
+    fn parse_npm_lock_invalid_json_returns_default() {
+        let lock = parse_npm_lock(Some("not json"));
+        assert!(lock.locked_versions.is_empty());
+        assert_eq!(lock.lockfile_version, None);
+    }
+
+    #[test]
+    fn parse_yarn_lock_v1_format() {
+        let content = "lodash@^4.0.0:\n  version \"4.17.21\"\n  resolved ...\n";
+        let lock = parse_yarn_lock(Some(content));
+        assert!(lock.is_yarn1);
+        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+    }
+
+    #[test]
+    fn parse_yarn_lock_v2_format() {
+        let content = "__metadata:\n  version: 6\nlodash@npm:^4.0.0:\n  version: 4.17.21\n";
+        let lock = parse_yarn_lock(Some(content));
+        assert!(!lock.is_yarn1);
+        assert_eq!(lock.lockfile_version, Some(6));
+        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+    }
+
+    #[test]
+    fn parse_yarn_lock_v3_format() {
+        let content = "__metadata:\n  version: 8\nlodash@npm:^4.0.0:\n  version: 4.17.21\n";
+        let lock = parse_yarn_lock(Some(content));
+        assert!(!lock.is_yarn1);
+        assert_eq!(lock.lockfile_version, Some(8));
+        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+    }
+
+    #[test]
+    fn get_yarn_version_from_lock_v1() {
+        let lock = YarnLock { is_yarn1: true, lockfile_version: None, locked_versions: BTreeMap::new() };
+        assert_eq!(get_yarn_version_from_lock(&lock), "^1.22.18");
+    }
+
+    #[test]
+    fn get_yarn_version_from_lock_v2() {
+        let lock = YarnLock { is_yarn1: false, lockfile_version: Some(6), locked_versions: BTreeMap::new() };
+        assert_eq!(get_yarn_version_from_lock(&lock), "^2.2.0");
+    }
+
+    #[test]
+    fn get_yarn_version_from_lock_v3() {
+        let lock = YarnLock { is_yarn1: false, lockfile_version: Some(8), locked_versions: BTreeMap::new() };
+        assert_eq!(get_yarn_version_from_lock(&lock), "^3.0.0");
+    }
+
+    #[test]
+    fn get_yarn_version_from_lock_v4() {
+        let lock = YarnLock { is_yarn1: false, lockfile_version: Some(10), locked_versions: BTreeMap::new() };
+        assert_eq!(get_yarn_version_from_lock(&lock), "^4.0.0");
+    }
+
+    #[test]
+    fn get_yarn_version_from_lock_v4_gte() {
+        let lock = YarnLock { is_yarn1: false, lockfile_version: Some(12), locked_versions: BTreeMap::new() };
+        assert_eq!(get_yarn_version_from_lock(&lock), ">=4.0.0");
+    }
 }

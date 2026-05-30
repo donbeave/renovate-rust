@@ -1799,3 +1799,42 @@ fn parity_homebrew_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for homebrew-skipped fixture");
 }
+
+// Rust-specific: parity behavior test
+#[test]
+fn parity_buildkite_skipped() {
+    let actual = run_fixture("buildkite-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".buildkite/pipeline.yml",
+                    "manager": "buildkite",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "docker-compose",
+                            "status": "skipped",
+                            "reason": "invalidversion"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for buildkite-skipped fixture");
+}
