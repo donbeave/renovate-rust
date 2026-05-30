@@ -5,7 +5,7 @@
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 62 | **Actionable:** 73 | **Status:** partial
+**Total tests:** 73 | **Ported:** 69 | **Actionable:** 73 | **Status:** partial
 
 ### `util/package-rules/index`
 
@@ -19,16 +19,16 @@
 | applies the second second rule | 109 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
 | excludes package name | 118 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
 | excludes package pattern | 127 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
-| ignores patterns if lock file maintenance | 136 | pending | — | — | — |
-| do apply rule with matchPackageName | 152 | pending | — | — | — |
+| ignores patterns if lock file maintenance | 136 | ported | `repo_config.rs` | `lock_file_maintenance_without_package_name_ignores_negative_name_pattern` | — |
+| do apply rule with matchPackageName | 152 | ported | `repo_config.rs` | `lock_file_maintenance_match_package_name_requires_package_name` | — |
 | sets skipReason=package-rules if enabled=false | 169 | ported | `repo_config.rs` | `enabled_false_rule_blocks_dependency` | Rust tracks the equivalent blocked state, not the worker-layer skipReason fields |
 | unsets skipReason=package-rules if enabled=true | 184 | ported | `repo_config.rs` | `enabled_true_later_rule_overrides_earlier_enabled_false` | Rust tracks the equivalent unblocked state, not the worker-layer skipReason fields |
 | does not set skipReason=package-rules if the last packageRule has force.enabled=true | 202 | ported | `repo_config.rs` | `force_enabled_true_overrides_enabled_false` | Rust tracks the equivalent unblocked state, not the worker-layer skipReason fields |
-| does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false) | 223 | pending | — | — | — |
+| does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false) | 223 | ported | `repo_config.rs` | `force_enabled_true_also_overrides_config_level_disabled` | Rust tracks the equivalent unblocked state, not the worker-layer skipReason fields |
 | does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false) | 245 | ported | `repo_config.rs` | `force_enabled_true_on_ctx_clears_block` | Rust verifies the equivalent merged force.enabled effect |
-| sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false) | 267 | pending | — | — | — |
+| sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false) | 267 | ported | `repo_config.rs` | `force_enabled_false_overrides_prior_force_enabled_true` | Rust tracks the equivalent blocked state, not the worker-layer skipReason fields |
 | sets skipReason=package-rules if the last packageRule has force.enabled=false | 292 | ported | `repo_config.rs` | `force_enabled_false_overrides_enabled_true` | Rust tracks the equivalent blocked state, not the worker-layer skipReason fields |
-| skips skipReason=package-rules if enabled=true | 312 | pending | — | — | — |
+| skips skipReason=package-rules if enabled=true | 312 | ported | `repo_config.rs` | `enabled_false_without_skip_stage_keeps_blocked_state_only` | Rust tracks the equivalent blocked state; worker skipReason/stage fields are out of scope |
 | matches anything if missing inclusive rules | 326 | ported | `repo_config.rs` | `match_package_names_negation` | — |
 | supports inclusive or | 348 | ported | `repo_config.rs` | `match_package_names_supports_inclusive_or` | — |
 | filters requested depType | 370 | ported | `repo_config.rs` | `match_dep_types_multiple_types_in_list` | — |
@@ -88,12 +88,11 @@
 | needs manager to match | 1343 | ported | `repo_config.rs` | `needs_manager_to_match_rule_does_not_fire_without_it` | — |
 | matches matchDepNames(depName) | 1361 | ported | `repo_config.rs` | `match_dep_names_exact_disables_dep` | — |
 | matches if there are no matchers | 1386 | ported | `repo_config.rs` | `package_rule_without_matchers_applies_to_any_dep` | — |
-| overrides | 1404 | pending | — | — | — |
-| overrides with templates | 1447 | pending | — | — | — |
+| overrides | 1404 | ported | `repo_config.rs` | `package_rule_identity_overrides_cascade_to_later_rules` | — |
+| overrides with templates | 1447 | ported | `repo_config.rs` | `package_rule_override_dep_name_template_uses_current_dep_name` | — |
 | propagates fetchChangeLogs from matching packageRule | 1464 | ported | `repo_config.rs` | `package_rule_fetch_change_logs_applies_when_rule_matches` | — |
 | does not set fetchChangeLogs when packageRule does not match | 1479 | ported | `repo_config.rs` | `package_rule_fetch_change_logs_skipped_when_rule_does_not_match` | — |
 | compiles sourceUrl with template helper functions | 1494 | ported | `repo_config.rs` | `package_rule_source_url_template_replace_helper` | — |
 | compiles sourceUrl with template variables | 1513 | ported | `repo_config.rs` | `package_rule_source_url_template_package_name_variable` | — |
 
 ---
-

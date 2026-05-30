@@ -548,6 +548,9 @@ impl PackageRule {
     /// "unknown → the rule's constraint cannot be satisfied → false".
     pub fn matches_context(&self, ctx: &DepContext<'_>) -> bool {
         let name = ctx.package_name.unwrap_or(ctx.dep_name);
+        if self.has_name_constraint && name.is_empty() {
+            return false;
+        }
         if !self.name_matches(name) {
             return false;
         }

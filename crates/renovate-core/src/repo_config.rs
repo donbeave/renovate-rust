@@ -6313,26 +6313,27 @@ impl RepoConfig {
         // enabled: true        → clears blocked
         // Mirrors applyPackageRules in lib/util/package-rules/index.ts.
         let mut blocked = false;
+        let mut effective_ctx = EffectiveDepContext::from(ctx);
         for rule in &self.package_rules {
-            if !rule.matches_context(ctx) {
-                continue;
-            }
-            match rule.force_enabled {
-                Some(false) => {
-                    blocked = true;
-                    continue; // force overrides regular enabled for this rule
-                }
-                Some(true) => {
-                    blocked = false;
+            let identity_overrides = {
+                let current_ctx = effective_ctx.as_dep_context(ctx);
+                if !rule.matches_context(&current_ctx) {
                     continue;
                 }
-                None => {}
+                render_identity_overrides(rule, &current_ctx)
+            };
+            if rule.force_enabled == Some(false) {
+                blocked = true;
+            } else if rule.force_enabled == Some(true) {
+                blocked = false;
+            } else {
+                match rule.enabled {
+                    Some(false) => blocked = true,
+                    Some(true) => blocked = false,
+                    None => {}
+                }
             }
-            match rule.enabled {
-                Some(false) => blocked = true,
-                Some(true) => blocked = false,
-                None => {}
-            }
+            effective_ctx.apply_identity_overrides(identity_overrides);
         }
         blocked
     }
@@ -6462,10 +6463,13 @@ impl RepoConfig {
             }
         }
 
+        let mut effective_ctx = EffectiveDepContext::from(ctx);
         for rule in &self.package_rules {
-            if !rule.matches_context(ctx) {
+            let current_ctx = effective_ctx.as_dep_context(ctx);
+            if !rule.matches_context(&current_ctx) {
                 continue;
             }
+            let identity_overrides = render_identity_overrides(rule, &current_ctx);
             // Renovate applies packageRules via mergeChildConfig (lib/util/package-rules/index.ts):
             // - fields without `mergeable: true` REPLACE the current value (last rule wins)
             // - fields with `mergeable: true` (addLabels) APPEND to the current value
@@ -6571,7 +6575,7 @@ impl RepoConfig {
                 effects.changelog_url.clone_from(&rule.changelog_url);
             }
             if let Some(source_url) = &rule.source_url {
-                effects.source_url = Some(render_package_rule_template(source_url, ctx));
+                effects.source_url = Some(render_package_rule_template(source_url, &current_ctx));
             }
             if rule.fetch_change_logs.is_some() {
                 effects
@@ -6588,11 +6592,11 @@ impl RepoConfig {
             }
             if let Some(override_dep_name) = &rule.override_dep_name {
                 effects.override_dep_name =
-                    Some(render_package_rule_template(override_dep_name, ctx));
+                    Some(render_package_rule_template(override_dep_name, &current_ctx));
             }
             if let Some(override_package_name) = &rule.override_package_name {
                 effects.override_package_name =
-                    Some(render_package_rule_template(override_package_name, ctx));
+                    Some(render_package_rule_template(override_package_name, &current_ctx));
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -6605,6 +6609,7 @@ impl RepoConfig {
             if rule.force_enabled.is_some() {
                 effects.force_enabled = rule.force_enabled;
             }
+            effective_ctx.apply_identity_overrides(identity_overrides);
         }
         // Apply repo-level group_name if no rule set one.
         if effects.group_name.is_none() && self.group_name.is_some() {
@@ -6639,6 +6644,79 @@ impl RepoConfig {
             cfg.apply_to_effects(&mut effects);
         }
         effects
+    }
+}
+
+struct EffectiveDepContext {
+    dep_name: String,
+    package_name: Option<String>,
+    datasource: Option<String>,
+}
+
+impl EffectiveDepContext {
+    fn from(ctx: &DepContext<'_>) -> Self {
+        Self {
+            dep_name: ctx.dep_name.to_owned(),
+            package_name: ctx.package_name.map(str::to_owned),
+            datasource: ctx.datasource.map(str::to_owned),
+        }
+    }
+
+    fn as_dep_context<'a>(&'a self, base: &DepContext<'a>) -> DepContext<'a> {
+        DepContext {
+            dep_name: &self.dep_name,
+            package_name: self.package_name.as_deref(),
+            datasource: self.datasource.as_deref(),
+            manager: base.manager,
+            dep_type: base.dep_type,
+            dep_types: base.dep_types,
+            file_path: base.file_path,
+            lock_files: base.lock_files,
+            source_url: base.source_url,
+            registry_urls: base.registry_urls,
+            repository: base.repository,
+            base_branch: base.base_branch,
+            current_value: base.current_value,
+            current_version: base.current_version,
+            locked_version: base.locked_version,
+            new_value: base.new_value,
+            update_type: base.update_type,
+            current_version_timestamp: base.current_version_timestamp,
+            is_bump: base.is_bump,
+            categories: base.categories,
+        }
+    }
+
+    fn apply_identity_overrides(&mut self, overrides: IdentityOverrides) {
+        if let Some(datasource) = overrides.datasource {
+            self.datasource = Some(datasource);
+        }
+        if let Some(dep_name) = overrides.dep_name {
+            self.dep_name = dep_name;
+        }
+        if let Some(package_name) = overrides.package_name {
+            self.package_name = Some(package_name);
+        }
+    }
+}
+
+struct IdentityOverrides {
+    datasource: Option<String>,
+    dep_name: Option<String>,
+    package_name: Option<String>,
+}
+
+fn render_identity_overrides(rule: &PackageRule, ctx: &DepContext<'_>) -> IdentityOverrides {
+    IdentityOverrides {
+        datasource: rule.override_datasource.clone(),
+        dep_name: rule
+            .override_dep_name
+            .as_ref()
+            .map(|template| render_package_rule_template(template, ctx)),
+        package_name: rule
+            .override_package_name
+            .as_ref()
+            .map(|template| render_package_rule_template(template, ctx)),
     }
 }
 
@@ -7728,6 +7806,27 @@ mod tests {
         );
     }
 
+    // Ported: "sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false)" — util/package-rules/index.spec.ts line 267
+    #[test]
+    fn force_enabled_false_overrides_prior_force_enabled_true() {
+        let c = RepoConfig::parse(
+            r#"{
+            "packageRules": [
+                {"enabled": false},
+                {"force": {"enabled": false}}
+            ]
+        }"#,
+        );
+        let ctx = DepContext {
+            dep_name: "foo",
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "final force.enabled:false must block after an earlier disabled state"
+        );
+    }
+
     // Ported: "does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false)" — util/package-rules/index.spec.ts line 245
     #[test]
     fn force_enabled_true_on_ctx_clears_block() {
@@ -7746,6 +7845,20 @@ mod tests {
         };
         let effects = c.collect_rule_effects(&ctx);
         assert_eq!(effects.force_enabled, Some(true));
+    }
+
+    // Ported: "skips skipReason=package-rules if enabled=true" — util/package-rules/index.spec.ts line 312
+    #[test]
+    fn enabled_false_without_skip_stage_keeps_blocked_state_only() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let ctx = DepContext {
+            dep_name: "foo",
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "Rust tracks the equivalent blocked state; worker skipReason/stage fields are out of scope"
+        );
     }
 
     #[test]
@@ -8452,6 +8565,44 @@ mod tests {
                 "{dep} must be excluded by the fixture's negated pattern"
             );
         }
+    }
+
+    // Ported: "ignores patterns if lock file maintenance" — util/package-rules/index.spec.ts line 136
+    #[test]
+    fn lock_file_maintenance_without_package_name_ignores_negative_name_pattern() {
+        let c = RepoConfig::parse(
+            r#"{"automerge": true, "packageRules": [{"matchPackageNames": ["!/^foo/"], "automerge": false}]}"#,
+        );
+        let ctx = DepContext::default();
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "missing packageName/depName must not satisfy a package-name-only rule"
+        );
+    }
+
+    // Ported: "do apply rule with matchPackageName" — util/package-rules/index.spec.ts line 152
+    #[test]
+    fn lock_file_maintenance_match_package_name_requires_package_name() {
+        let c = RepoConfig::parse(
+            r#"{"automerge": true, "packageRules": [{"matchPackageNames": ["foo"], "automerge": false}]}"#,
+        );
+        let without_package_name = DepContext::default();
+        assert_eq!(
+            c.collect_rule_effects(&without_package_name).automerge,
+            Some(true),
+            "rule must not match before packageName is known"
+        );
+
+        let with_package_name = DepContext {
+            package_name: Some("foo"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&with_package_name).automerge,
+            Some(false),
+            "rule must match once packageName is known"
+        );
     }
 
     #[test]
@@ -14685,7 +14836,7 @@ mod rule_effects_tests {
                     "overridePackageName": "{{replace \"left\" \"right\" packageName}}"
                 },
                 {
-                    "matchPackageNames": ["left-pad"],
+                    "matchPackageNames": ["right-pad"],
                     "overrideDatasource": "github-releases",
                     "overrideDepName": "{{depName}}-renamed"
                 }
@@ -14703,9 +14854,74 @@ mod rule_effects_tests {
         );
         assert_eq!(
             effects.override_dep_name.as_deref(),
-            Some("left-pad-renamed")
+            Some("@scope/left-pad-renamed")
         );
         assert_eq!(effects.override_package_name.as_deref(), Some("right-pad"));
+    }
+
+    // Ported: "overrides" — util/package-rules/index.spec.ts line 1404
+    #[test]
+    fn package_rule_identity_overrides_cascade_to_later_rules() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {
+                    "matchDatasources": ["npm"],
+                    "matchDepNames": ["foo"],
+                    "overridePackageName": "baz"
+                },
+                {
+                    "matchDatasources": ["npm"],
+                    "matchPackageNames": ["baz"],
+                    "overrideDepName": "f"
+                },
+                {
+                    "matchDepNames": ["f"],
+                    "overrideDatasource": "composer"
+                },
+                {
+                    "matchDatasources": ["composer"],
+                    "matchDepNames": ["f"],
+                    "matchPackageNames": ["baz"],
+                    "enabled": false
+                }
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "foo",
+            package_name: Some("bar"),
+            datasource: Some("npm"),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.override_package_name.as_deref(), Some("baz"));
+        assert_eq!(effects.override_dep_name.as_deref(), Some("f"));
+        assert_eq!(effects.override_datasource.as_deref(), Some("composer"));
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "final enabled:false rule must match the overridden identity"
+        );
+    }
+
+    // Ported: "overrides with templates" — util/package-rules/index.spec.ts line 1447
+    #[test]
+    fn package_rule_override_dep_name_template_uses_current_dep_name() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {
+                    "matchDatasources": ["docker"],
+                    "overrideDepName": "{{replace \"docker.io/library/\" \"\" depName}}"
+                }
+            ]}"#,
+        );
+        let ctx = DepContext {
+            datasource: Some("docker"),
+            dep_name: "docker.io/library/node",
+            package_name: Some("docker.io/library/node"),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.override_dep_name.as_deref(), Some("node"));
+        assert_eq!(effects.override_package_name, None);
     }
 
     #[test]

@@ -1112,7 +1112,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/util/cache/package/types.ts` | `crates/renovate-core/src/cache/package.rs` | full | CachedRecord type ported |
 | `lib/util/cache/package/with-cache.ts` | `crates/renovate-core/src/cache/package.rs` | full | withCache soft/hard TTL, stale fallback, shouldCacheResult predicate fully ported |
 | `lib/util/string-match.ts` | `crates/renovate-core/src/string_match.rs` | partial | String matching partially ported |
-| `lib/util/package-rules/index.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Package rule matching partially ported |
+| `lib/util/package-rules/index.ts` | `crates/renovate-core/src/package_rule.rs`; `crates/renovate-core/src/repo_config.rs` | partial | Package rule matching/application partially ported, including sequential identity overrides |
 | `lib/util/package-rules/managers.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Inlined |
 | `lib/util/package-rules/dep-names.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Inlined |
 
