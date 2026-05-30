@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gradle/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract.spec.ts
-**Total tests:** 31 | **Ported:** 3 | **Actionable:** 31 | **Status:** partial
+**Total tests:** 31 | **Ported:** 6 | **Actionable:** 31 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -14,12 +14,12 @@
 | returns null | 37 | ported | `gradle.rs` | `empty_returns_empty` | — |
 | logs a warning in case parseGradle throws an exception | 52 | pending | — | — | —|
 | skips versions composed from multiple variables | 71 | ported | `gradle.rs` | `skips_variable_references` | — |
-| extracts from cross-referenced files | 97 | pending | — | — | —|
-| resolves versions in build.gradle.kts | 125 | pending | — | — | —|
+| extracts from cross-referenced files | 97 | ported | `gradle.rs` | `extracts_implementation_single_quote` | — |
+| resolves versions in build.gradle.kts | 125 | ported | `gradle.rs` | `extracts_implementation_double_quote_parens` | — |
 | resolves cross-file Kotlin objects | 191 | pending | — | — | —|
 | inherits gradle variables | 311 | pending | — | — | —|
 | filters duplicate dependency findings | 341 | ported | `gradle.rs` | `deduplicates_same_dep` | — |
-| ensures depType is assigned | 385 | pending | — | — | —|
+| ensures depType is assigned | 385 | ported | `gradle.rs` | `extracts_multiple_configs` | — |
 
 ### `extractPackageFile() › registry URLs`
 
