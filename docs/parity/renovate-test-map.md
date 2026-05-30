@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,196 / 11,666 total tests ported (45%) · pending 4,570 · not-applicable 1,900 (16% of total) — updated 2026-05-30
+**Progress:** 5,196 / 11,666 total tests ported (45%) · pending 4,742 · not-applicable 1,728 (15% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -385,7 +385,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/init/cache.spec.ts` | Done | [details](lib/workers/repository/init/cache.spec.ts.md) |
 | `lib/workers/global/config/parse/file.spec.ts` | Done | [details](lib/workers/global/config/parse/file.spec.ts.md) |
 | `lib/workers/global/config/parse/env.spec.ts` | Done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
-| `lib/workers/repository/init/merge.spec.ts` | Done | [details](lib/workers/repository/init/merge.spec.ts.md) |
+| `lib/workers/repository/init/merge.spec.ts` | Not done | [details](lib/workers/repository/init/merge.spec.ts.md) |
 | `lib/util/package-rules/index.spec.ts` | Not done | [details](lib/util/package-rules/index.spec.ts.md) |
 | `lib/renovate.spec.ts` | Done | [details](lib/renovate.spec.ts.md) |
 | `lib/proxy.spec.ts` | Done | [details](lib/proxy.spec.ts.md) |
@@ -586,7 +586,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/gradle/extract/catalog.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract/catalog.spec.ts.md) |
 | `lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts` | Done | [details](lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts.md) |
 | `lib/modules/manager/gradle/parser/common.spec.ts` | Done | [details](lib/modules/manager/gradle/parser/common.spec.ts.md) |
-| `lib/modules/manager/gradle/parser.spec.ts` | Done | [details](lib/modules/manager/gradle/parser.spec.ts.md) |
+| `lib/modules/manager/gradle/parser.spec.ts` | Not done | [details](lib/modules/manager/gradle/parser.spec.ts.md) |
 | `lib/modules/manager/gradle/update.spec.ts` | Done | [details](lib/modules/manager/gradle/update.spec.ts.md) |
 | `lib/modules/manager/gradle/utils.spec.ts` | Done | [details](lib/modules/manager/gradle/utils.spec.ts.md) |
 | `lib/modules/manager/gradle-wrapper/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gradle-wrapper/artifacts.spec.ts.md) |
@@ -717,7 +717,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/forgejo/utils.spec.ts` | Done | [details](lib/modules/platform/forgejo/utils.spec.ts.md) |
 | `lib/modules/platform/gerrit/client.spec.ts` | Not done | [details](lib/modules/platform/gerrit/client.spec.ts.md) |
 | `lib/modules/platform/gerrit/index.spec.ts` | Not done | [details](lib/modules/platform/gerrit/index.spec.ts.md) |
-| `lib/modules/platform/gerrit/scm.spec.ts` | Done | [details](lib/modules/platform/gerrit/scm.spec.ts.md) |
+| `lib/modules/platform/gerrit/scm.spec.ts` | Not done | [details](lib/modules/platform/gerrit/scm.spec.ts.md) |
 | `lib/modules/platform/gerrit/utils.spec.ts` | Done | [details](lib/modules/platform/gerrit/utils.spec.ts.md) |
 | `lib/modules/platform/gitea/gitea-helper.spec.ts` | Not done | [details](lib/modules/platform/gitea/gitea-helper.spec.ts.md) |
 | `lib/modules/platform/gitea/index.spec.ts` | Not done | [details](lib/modules/platform/gitea/index.spec.ts.md) |
@@ -823,7 +823,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/global/autodiscover.spec.ts` | Done | [details](lib/workers/global/autodiscover.spec.ts.md) |
 | `lib/workers/global/config/parse/additional-config-file.spec.ts` | Done | [details](lib/workers/global/config/parse/additional-config-file.spec.ts.md) |
 | `lib/workers/global/config/parse/host-rules-from-env.spec.ts` | Done | [details](lib/workers/global/config/parse/host-rules-from-env.spec.ts.md) |
-| `lib/workers/global/config/parse/index.spec.ts` | Done | [details](lib/workers/global/config/parse/index.spec.ts.md) |
+| `lib/workers/global/config/parse/index.spec.ts` | Not done | [details](lib/workers/global/config/parse/index.spec.ts.md) |
 | `lib/workers/global/config/parse/util.spec.ts` | Done | [details](lib/workers/global/config/parse/util.spec.ts.md) |
 | `lib/workers/global/index.spec.ts` | Done | [details](lib/workers/global/index.spec.ts.md) |
 | `lib/workers/global/initialize.spec.ts` | Done | [details](lib/workers/global/initialize.spec.ts.md) |
@@ -918,7 +918,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/pr/changelog/release-notes.spec.ts` | Not done | [details](lib/workers/repository/update/pr/changelog/release-notes.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/releases.spec.ts` | Done | [details](lib/workers/repository/update/pr/changelog/releases.spec.ts.md) |
 | `lib/workers/repository/update/pr/changelog/source.spec.ts` | Done | [details](lib/workers/repository/update/pr/changelog/source.spec.ts.md) |
-| `lib/workers/repository/update/pr/code-owners.spec.ts` | Done | [details](lib/workers/repository/update/pr/code-owners.spec.ts.md) |
+| `lib/workers/repository/update/pr/code-owners.spec.ts` | Not done | [details](lib/workers/repository/update/pr/code-owners.spec.ts.md) |
 | `lib/workers/repository/update/pr/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/index.spec.ts.md) |
 | `lib/workers/repository/update/pr/labels.spec.ts` | Done | [details](lib/workers/repository/update/pr/labels.spec.ts.md) |
 | `lib/workers/repository/update/pr/participants.spec.ts` | Done | [details](lib/workers/repository/update/pr/participants.spec.ts.md) |
