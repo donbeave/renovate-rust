@@ -330,6 +330,7 @@ mod tests {
         assert!(release_rows("unknown").is_none());
     }
 
+    // Rust-specific: unit tests for variant_suffix helper
     #[test]
     fn variant_suffix_empty_for_plain_version() {
         assert_eq!(variant_suffix("22.04"), "");
@@ -337,6 +338,7 @@ mod tests {
         assert_eq!(variant_suffix("15"), "");
     }
 
+    // Rust-specific: unit tests for variant_suffix helper
     #[test]
     fn variant_suffix_captures_non_numeric_tail() {
         assert_eq!(variant_suffix("22.04-arm"), "-arm");
@@ -344,6 +346,7 @@ mod tests {
         assert_eq!(variant_suffix("15-large"), "-large");
     }
 
+    // Rust-specific: unit tests for is_valid_runner helper
     #[test]
     fn is_valid_runner_known_versions() {
         assert!(is_valid_runner("ubuntu", "22.04"));
@@ -353,24 +356,28 @@ mod tests {
         assert!(is_valid_runner("windows", "2022"));
     }
 
+    // Rust-specific: unit tests for is_valid_runner helper
     #[test]
     fn is_valid_runner_unknown_name() {
         assert!(!is_valid_runner("debian", "12"));
         assert!(!is_valid_runner("", "22.04"));
     }
 
+    // Rust-specific: unit tests for is_valid_runner helper
     #[test]
     fn is_valid_runner_unknown_version() {
         assert!(!is_valid_runner("ubuntu", "99.99"));
         assert!(!is_valid_runner("macos", "latest"));
     }
 
+    // Rust-specific: unit tests for latest_stable helper
     #[test]
     fn latest_stable_ubuntu_plain() {
         // ubuntu-22.04 → latest plain ubuntu is 24.04
         assert_eq!(latest_stable("ubuntu", "22.04"), Some("24.04"));
     }
 
+    // Rust-specific: unit tests for latest_stable helper
     #[test]
     fn latest_stable_ubuntu_arm() {
         // ubuntu-22.04-arm → latest -arm ubuntu is 24.04-arm (currently unstable, so falls back)
@@ -378,27 +385,32 @@ mod tests {
         assert_eq!(latest_stable("ubuntu", "22.04-arm"), None);
     }
 
+    // Rust-specific: unit tests for latest_stable helper
     #[test]
     fn latest_stable_macos_xlarge() {
         // macos-14-xlarge → latest xlarge macos
         assert_eq!(latest_stable("macos", "14-xlarge"), Some("15-xlarge"));
     }
 
+    // Rust-specific: unit tests for latest_stable helper
     #[test]
     fn latest_stable_macos_plain() {
         assert_eq!(latest_stable("macos", "14"), Some("15"));
     }
 
+    // Rust-specific: unit tests for latest_stable helper
     #[test]
     fn latest_stable_windows() {
         assert_eq!(latest_stable("windows", "2022"), Some("2025"));
     }
 
+    // Rust-specific: unit tests for latest_stable helper
     #[test]
     fn latest_stable_already_latest() {
         assert_eq!(latest_stable("ubuntu", "24.04"), Some("24.04"));
     }
 
+    // Rust-specific: unit tests for update_summary helper
     #[test]
     fn update_summary_outdated() {
         let s = update_summary("ubuntu", "22.04");
@@ -407,6 +419,7 @@ mod tests {
         assert!(!s.deprecated);
     }
 
+    // Rust-specific: unit tests for update_summary helper
     #[test]
     fn update_summary_up_to_date() {
         let s = update_summary("ubuntu", "24.04");
@@ -414,6 +427,7 @@ mod tests {
         assert_eq!(s.latest, Some("24.04".into()));
     }
 
+    // Rust-specific: unit tests for update_summary helper
     #[test]
     fn update_summary_deprecated() {
         let s = update_summary("ubuntu", "20.04");
@@ -422,6 +436,7 @@ mod tests {
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for update_summary helper
     #[test]
     fn update_summary_windows_outdated() {
         let s = update_summary("windows", "2019");

@@ -50,14 +50,20 @@ pub struct EksAddonRelease {
 ///
 /// Returns a list of releases for the given addon, optionally filtered by
 /// kubernetes version constraints.
+///
+/// `api_base` is typically `https://eks.{region}.amazonaws.com` but can be
+/// overridden for testing.
 pub async fn fetch_versions(
     http: &HttpClient,
     addon_name: &str,
     kubernetes_version: Option<&str>,
     region: &str,
     cluster_name: &str,
+    api_base: Option<&str>,
 ) -> Result<Vec<EksAddonRelease>, EksAddonError> {
-    let base = format!("https://eks.{region}.amazonaws.com");
+    let base = api_base
+        .map(|s| s.to_owned())
+        .unwrap_or_else(|| format!("https://eks.{region}.amazonaws.com"));
     let mut url = format!(
         "{}/clusters/{}/addons/{}/versions",
         base, cluster_name, addon_name
@@ -150,12 +156,11 @@ mod tests {
             None,
             "us-east-1",
             "my-cluster",
+            Some(&server.uri()),
         )
         .await
         .unwrap();
 
-        // The test uses a mock server, so the URL prefix is different but the
-        // parsing logic is the same. We verify the parsing works correctly.
         assert_eq!(releases.len(), 2);
         assert_eq!(releases[0].version, "v1.14.0-eksbuild.1");
         assert_eq!(releases[1].version, "v1.13.0-eksbuild.1");
@@ -177,6 +182,7 @@ mod tests {
             None,
             "us-east-1",
             "my-cluster",
+            Some(&server.uri()),
         )
         .await;
         assert!(result.is_err());
@@ -198,6 +204,7 @@ mod tests {
             None,
             "us-east-1",
             "my-cluster",
+            Some(&server.uri()),
         )
         .await;
         assert!(result.is_err());
@@ -221,6 +228,7 @@ mod tests {
             Some("1.28"),
             "us-east-1",
             "my-cluster",
+            Some(&server.uri()),
         )
         .await
         .unwrap();
