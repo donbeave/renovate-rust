@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,113 / 11,666 total tests ported (44%) · pending 3,862 · not-applicable 2,691 (23% of total) — updated 2026-05-30
+**Progress:** 5,113 / 11,666 total tests ported (44%) · pending 3,883 · not-applicable 2,670 (23% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -623,7 +623,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/detect.spec.ts` | Done | [details](lib/modules/manager/npm/detect.spec.ts.md) |
 | `lib/modules/manager/npm/extract/common/catalogs.spec.ts` | Done | [details](lib/modules/manager/npm/extract/common/catalogs.spec.ts.md) |
 | `lib/modules/manager/npm/extract/common/package-file.spec.ts` | Done | [details](lib/modules/manager/npm/extract/common/package-file.spec.ts.md) |
-| `lib/modules/manager/npm/extract/post/locked-versions.spec.ts` | Done | [details](lib/modules/manager/npm/extract/post/locked-versions.spec.ts.md) |
+| `lib/modules/manager/npm/extract/post/locked-versions.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/post/locked-versions.spec.ts.md) |
 | `lib/modules/manager/npm/extract/post/monorepo.spec.ts` | Done | [details](lib/modules/manager/npm/extract/post/monorepo.spec.ts.md) |
 | `lib/modules/manager/npm/extract/utils.spec.ts` | Done | [details](lib/modules/manager/npm/extract/utils.spec.ts.md) |
 | `lib/modules/manager/npm/npmrc.spec.ts` | Done | [details](lib/modules/manager/npm/npmrc.spec.ts.md) |
