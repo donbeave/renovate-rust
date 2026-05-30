@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,199 / 11,666 total tests ported (45%) · pending 6,005 · not-applicable 462 (4% of total) — updated 2026-05-30
+**Progress:** 5,199 / 11,666 total tests ported (45%) · pending 6,004 · not-applicable 463 (4% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -33,7 +33,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/github-actions/extract.spec.ts` | Done | [details](lib/modules/manager/github-actions/extract.spec.ts.md) |
 | `lib/modules/manager/github-actions/integration.spec.ts` | Not done | [details](lib/modules/manager/github-actions/integration.spec.ts.md) |
 | `lib/modules/manager/github-actions/parse.spec.ts` | Done | [details](lib/modules/manager/github-actions/parse.spec.ts.md) |
-| `lib/modules/manager/gitlabci/extract.spec.ts` | Not done | [details](lib/modules/manager/gitlabci/extract.spec.ts.md) |
+| `lib/modules/manager/gitlabci/extract.spec.ts` | Done | [details](lib/modules/manager/gitlabci/extract.spec.ts.md) |
 | `lib/modules/manager/gomod/extract.spec.ts` | Done | [details](lib/modules/manager/gomod/extract.spec.ts.md) |
 | `lib/modules/manager/gradle/extract.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract.spec.ts.md) |
 | `lib/modules/manager/helm-values/extract.spec.ts` | Done | [details](lib/modules/manager/helm-values/extract.spec.ts.md) |
