@@ -263,6 +263,60 @@ async fn main() -> ExitCode {
     }
 }
 
+/// Build a minimal markdown PR body for a branch update.
+///
+/// Includes header/footer from repo config and a bullet list of deps.
+/// Mirrors the early slices of Renovate's PR body generation.
+fn build_pr_body(
+    deps: &[report_builders::BranchDep],
+    repo_cfg: &renovate_core::repo_config::RepoConfig,
+) -> String {
+    use renovate_core::branch;
+
+    let mut body = String::new();
+
+    // Header
+    body.push_str(&branch::get_pr_header(repo_cfg.pr_header.as_deref()));
+
+    // Update list
+    if !deps.is_empty() {
+        body.push_str("This PR contains the following updates:\n\n");
+        body.push_str("| Package | Update | Change |\n");
+        body.push_str("|---|---|---|\n");
+        for bd in deps {
+            if let output::DepStatus::UpdateAvailable { ref current, ref latest } = bd.dep.status {
+                let update_type = bd.dep.update_type.as_deref().unwrap_or("unknown");
+                body.push_str(&format!(
+                    "| {} | {} | `{}` → `{}` |\n",
+                    bd.dep.name, update_type, current, latest
+                ));
+            }
+        }
+        body.push('\n');
+    }
+
+    // Extra notes
+    for bd in deps {
+        if let output::DepStatus::UpdateAvailable { .. } = bd.dep.status {
+            let is_pin = bd.dep.range_strategy.as_deref() == Some("pin");
+            let has_git_ref = bd.dep.pin_digests.unwrap_or(false);
+            let notes = branch::get_pr_extra_notes(
+                has_git_ref,
+                bd.dep.update_type.as_deref().unwrap_or(""),
+                is_pin,
+            );
+            if !notes.is_empty() && !body.contains(&notes) {
+                body.push_str(&notes);
+            }
+        }
+    }
+
+    // Footer
+    body.push_str(&branch::get_pr_footer(Some(&repo_cfg.pr_footer)));
+
+    body
+}
+
 /// Process a single repository and return its update report.
 ///
 /// Returns `(Option<RepoReport>, had_error)`:
@@ -528,6 +582,7 @@ async fn process_repo(
             .first()
             .and_then(|d| d.dep.pr_title.as_deref())
             .unwrap_or("<no title>");
+        let body = build_pr_body(&deps, &repo_cfg);
         match config.dry_run {
             Some(DryRun::Full) | Some(DryRun::Lookup) => {
                 tracing::info!(
@@ -539,7 +594,7 @@ async fn process_repo(
             }
             _ => {
                 match client
-                    .create_pr(owner, repo, &branch, &target_branch, title, "")
+                    .create_pr(owner, repo, &branch, &target_branch, title, &body)
                     .await
                 {
                     Ok(Some(pr_number)) => {

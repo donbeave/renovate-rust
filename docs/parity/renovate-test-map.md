@@ -429,7 +429,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/mask.spec.ts` | Done | [details](lib/util/mask.spec.ts.md) |
 | `lib/util/host-rules.spec.ts` | Done | [details](lib/util/host-rules.spec.ts.md) |
 | `lib/util/stats.spec.ts` | Not done | [details](lib/util/stats.spec.ts.md) |
-| `lib/util/s3.spec.ts` | Not done | [details](lib/util/s3.spec.ts.md) |
+| `lib/util/s3.spec.ts` | Done | [details](lib/util/s3.spec.ts.md) |
 | `lib/util/jsonata.spec.ts` | Not done | [details](lib/util/jsonata.spec.ts.md) |
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
@@ -840,7 +840,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/configured.spec.ts` | Done | [details](lib/workers/repository/configured.spec.ts.md) |
 | `lib/workers/repository/dependency-dashboard.spec.ts` | Not done | [details](lib/workers/repository/dependency-dashboard.spec.ts.md) |
 | `lib/workers/repository/error-config.spec.ts` | Not done | [details](lib/workers/repository/error-config.spec.ts.md) |
-| `lib/workers/repository/error.spec.ts` | Not done | [details](lib/workers/repository/error.spec.ts.md) |
+| `lib/workers/repository/error.spec.ts` | Done | [details](lib/workers/repository/error.spec.ts.md) |
 | `lib/workers/repository/errors-warnings.spec.ts` | Done | [details](lib/workers/repository/errors-warnings.spec.ts.md) |
 | `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | Done | [details](lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) |
 | `lib/workers/repository/extract/file-match.spec.ts` | Done | [details](lib/workers/repository/extract/file-match.spec.ts.md) |

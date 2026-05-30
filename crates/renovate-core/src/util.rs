@@ -9811,6 +9811,24 @@ dep1 = "^1.0.0"
         assert_eq!(classify_repo_error("abcdefg"), "unknown-error");
     }
 
+    // Ported: "logs config validation errors as warnings by default" — workers/repository/error.spec.ts line 120
+    #[test]
+    fn config_validation_log_level_default_warn() {
+        assert_eq!(config_validation_log_level(None), "warn");
+    }
+
+    // Ported: "logs config validation errors as warnings when configValidationError is false" — workers/repository/error.spec.ts line 130
+    #[test]
+    fn config_validation_log_level_false_warn() {
+        assert_eq!(config_validation_log_level(Some(false)), "warn");
+    }
+
+    // Ported: "logs config validation errors as errors when configValidationError is true" — workers/repository/error.spec.ts line 140
+    #[test]
+    fn config_validation_log_level_true_error() {
+        assert_eq!(config_validation_log_level(Some(true)), "error");
+    }
+
     // Ported: "errors ${err}" — workers/repository/error.spec.ts lines 77-81
     // Tests that known Renovate error constants pass through unchanged.
     #[test]

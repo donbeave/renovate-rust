@@ -5,7 +5,7 @@
 ## `lib/workers/repository/error.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/error.spec.ts
-**Total tests:** 9 | **Ported:** 6 | **Actionable:** 9 | **Status:** partial
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** done
 
 ### `workers/repository/error › handleError()`
 
@@ -17,9 +17,9 @@
 | rewrites git remote error | 99 | ported | `util.rs` | `classify_repo_error_rewrites_git_remote_error` | — |
 | rewrites git fatal error | 107 | ported | `util.rs` | `classify_repo_error_rewrites_git_fatal` | — |
 | handles unknown error | 115 | ported | `util.rs` | `classify_repo_error_unknown` | — |
-| logs config validation errors as warnings by default | 120 | pending | — | — | — |
-| logs config validation errors as warnings when configValidationError is false | 130 | pending | — | — | — |
-| logs config validation errors as errors when configValidationError is true | 140 | pending | — | — | — |
+| logs config validation errors as warnings by default | 120 | ported | `util.rs` | `config_validation_log_level_default_warn` | — |
+| logs config validation errors as warnings when configValidationError is false | 130 | ported | `util.rs` | `config_validation_log_level_false_warn` | — |
+| logs config validation errors as errors when configValidationError is true | 140 | ported | `util.rs` | `config_validation_log_level_true_error` | — |
 
 ---
 
