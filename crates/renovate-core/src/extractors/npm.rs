@@ -141,6 +141,7 @@ pub struct NpmLock {
 
 /// Parsed Yarn lock metadata used to choose the expected Yarn version range.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default)]
 pub struct YarnLock {
     pub is_yarn1: bool,
     pub lockfile_version: Option<u64>,
@@ -387,7 +388,7 @@ pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
             }
             let lock = yarn_lock_cache.get(yarn_lock_path).unwrap();
 
-            if !lock.is_yarn1 && pf.extracted_constraints.is_none_or(|c| !c.contains_key("yarn")) {
+            if !lock.is_yarn1 && pf.extracted_constraints.as_ref().is_none_or(|c| !c.contains_key("yarn")) {
                 let yarn_ver = get_yarn_version_from_lock(lock);
                 if yarn_ver != "0.0.0" {
                     let ec = pf.extracted_constraints.get_or_insert_with(BTreeMap::new);
