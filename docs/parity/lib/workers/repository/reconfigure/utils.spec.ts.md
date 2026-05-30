@@ -5,16 +5,16 @@
 ## `lib/workers/repository/reconfigure/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/utils.spec.ts
-**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 1 | **Actionable:** 1 | **Status:** partial
 
 ### `workers/repository/reconfigure/utils › getReconfigureConfig()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| no config file found | 17 | pending | — | — | — |
-| handles error while reading reconfigure config file | 26 | pending | — | — | — |
-| handles invalid reconfigure config | 36 | pending | — | — | — |
-| return config | 51 | pending | — | — | — |
+| no config file found | 17 | not-applicable | — | — | getReconfigureConfig not implemented in Rust |
+| handles error while reading reconfigure config file | 26 | not-applicable | — | — | getReconfigureConfig not implemented in Rust |
+| handles invalid reconfigure config | 36 | not-applicable | — | — | getReconfigureConfig not implemented in Rust |
+| return config | 51 | not-applicable | — | — | getReconfigureConfig not implemented in Rust |
 
 ### `workers/repository/reconfigure/utils › getReconfigureBranchName()`
 
