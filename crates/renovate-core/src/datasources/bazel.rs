@@ -2,8 +2,10 @@
 //!
 //! Renovate reference: `lib/modules/datasource/bazel/index.ts`
 //! API: `GET {registry}/modules/{name}/metadata.json`
+//! Local: `file://{registry}/modules/{name}/metadata.json`
 
 use std::collections::HashMap;
+use std::path::Path;
 
 use serde::Deserialize;
 use thiserror::Error;
@@ -18,6 +20,8 @@ pub const DATASOURCE_ID: &str = "bazel";
 pub enum BazelError {
     #[error("HTTP error: {0}")]
     Http(#[from] crate::http::HttpError),
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
 }
 
 #[derive(Debug, Clone)]
@@ -44,10 +48,54 @@ struct BazelMetadata {
     homepage: Option<String>,
 }
 
+fn parse_metadata(meta: BazelMetadata, registry_url: &str) -> Option<BazelResult> {
+    if meta.versions.is_empty() {
+        return None;
+    }
+
+    let mut releases: Vec<BazelRelease> = meta
+        .versions
+        .iter()
+        .map(|v| BazelRelease {
+            version: v.clone(),
+            is_deprecated: meta.yanked_versions.contains_key(v),
+        })
+        .collect();
+
+    releases.sort_by(|a, b| {
+        let av = semver::Version::parse(&a.version).ok();
+        let bv = semver::Version::parse(&b.version).ok();
+        match (av, bv) {
+            (Some(av), Some(bv)) => av.cmp(&bv),
+            (Some(_), None) => std::cmp::Ordering::Greater,
+            (None, Some(_)) => std::cmp::Ordering::Less,
+            (None, None) => a.version.cmp(&b.version),
+        }
+    });
+
+    Some(BazelResult {
+        releases,
+        source_url: meta.homepage,
+        registry_url: registry_url.to_owned(),
+    })
+}
+
 /// Fetch Bazel Central Registry module releases.
 ///
+/// Supports both HTTP and `file://` registry URLs.
 /// 404 → `Ok(None)`. 5xx / network errors → `Err(...)`. Empty versions → `Ok(None)`.
 pub async fn fetch_releases(
+    registry_url: &str,
+    package_name: &str,
+    http: &HttpClient,
+) -> Result<Option<BazelResult>, BazelError> {
+    if registry_url.starts_with("file://") {
+        return fetch_releases_local(registry_url, package_name).await;
+    }
+    fetch_releases_http(registry_url, package_name, http).await
+}
+
+async fn fetch_releases_http(
     registry_url: &str,
     package_name: &str,
     http: &HttpClient,
@@ -68,36 +116,32 @@ pub async fn fetch_releases(
         Err(_) => return Ok(None),
     };
 
-    if meta.versions.is_empty() {
+    Ok(parse_metadata(meta, base))
+}
+
+async fn fetch_releases_local(
+    registry_url: &str,
+    package_name: &str,
+) -> Result<Option<BazelResult>, BazelError> {
+    let local_path = registry_url
+        .strip_prefix("file://")
+        .unwrap_or(registry_url);
+    let file_path = Path::new(local_path)
+        .join("modules")
+        .join(package_name)
+        .join("metadata.json");
+
+    if !file_path.exists() {
         return Ok(None);
     }
 
-    let mut releases: Vec<BazelRelease> = meta
-        .versions
-        .iter()
-        .map(|v| BazelRelease {
-            version: v.clone(),
-            is_deprecated: meta.yanked_versions.contains_key(v),
-        })
-        .collect();
+    let text = tokio::fs::read_to_string(&file_path).await?;
+    let meta: BazelMetadata = match serde_json::from_str(&text) {
+        Ok(v) => v,
+        Err(_) => return Ok(None),
+    };
 
-    // Sort ascending by semver (matches BzlmodVersion.defaultCompare).
-    releases.sort_by(|a, b| {
-        let av = semver::Version::parse(&a.version).ok();
-        let bv = semver::Version::parse(&b.version).ok();
-        match (av, bv) {
-            (Some(av), Some(bv)) => av.cmp(&bv),
-            (Some(_), None) => std::cmp::Ordering::Greater,
-            (None, Some(_)) => std::cmp::Ordering::Less,
-            (None, None) => a.version.cmp(&b.version),
-        }
-    });
-
-    Ok(Some(BazelResult {
-        releases,
-        source_url: meta.homepage,
-        registry_url: base.to_owned(),
-    }))
+    Ok(parse_metadata(meta, registry_url))
 }
 
 /// Update summary used by pipeline.
@@ -278,5 +322,72 @@ mod tests {
         assert_eq!(result.releases[3].version, "0.16.0");
         assert!(!result.releases[3].is_deprecated);
         assert!(result.source_url.is_none());
+    }
+
+    // Ported: "should handle local file correctly" — datasource/bazel/index.spec.ts line 106
+    #[tokio::test]
+    async fn local_file_handles_correctly() {
+        let dir = tempfile::tempdir().unwrap();
+        let modules_dir = dir.path().join("modules").join("rules_foo");
+        tokio::fs::create_dir_all(&modules_dir).await.unwrap();
+        let metadata = serde_json::json!({
+            "versions": ["0.14.8", "0.14.9", "0.15.0", "0.16.0"],
+            "yanked_versions": {"0.15.0": "yanked for security reasons"},
+            "homepage": "https://github.com/foo/bar"
+        });
+        tokio::fs::write(
+            modules_dir.join("metadata.json"),
+            serde_json::to_string(&metadata).unwrap(),
+        )
+        .await
+        .unwrap();
+
+        let http = HttpClient::new().unwrap();
+        let registry_url = format!("file://{}", dir.path().display());
+        let result = fetch_releases(&registry_url, "rules_foo", &http)
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(result.registry_url, registry_url);
+        assert_eq!(result.releases.len(), 4);
+        assert_eq!(result.releases[0].version, "0.14.8");
+        assert!(!result.releases[0].is_deprecated);
+        assert_eq!(result.releases[1].version, "0.14.9");
+        assert_eq!(result.releases[2].version, "0.15.0");
+        assert!(result.releases[2].is_deprecated);
+        assert_eq!(result.releases[3].version, "0.16.0");
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/foo/bar")
+        );
+    }
+
+    // Ported: "should return null for invalid file path" — datasource/bazel/index.spec.ts line 135
+    #[tokio::test]
+    async fn local_file_returns_null_for_invalid_path() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases("file:///nonexistent/path", "rules_foo", &http)
+            .await
+            .unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "should return null for empty file content" — datasource/bazel/index.spec.ts line 146
+    #[tokio::test]
+    async fn local_file_returns_null_for_empty_content() {
+        let dir = tempfile::tempdir().unwrap();
+        let modules_dir = dir.path().join("modules").join("rules_foo");
+        tokio::fs::create_dir_all(&modules_dir).await.unwrap();
+        tokio::fs::write(modules_dir.join("metadata.json"), "")
+            .await
+            .unwrap();
+
+        let http = HttpClient::new().unwrap();
+        let registry_url = format!("file://{}", dir.path().display());
+        let result = fetch_releases(&registry_url, "rules_foo", &http)
+            .await
+            .unwrap();
+        assert!(result.is_none());
     }
 }

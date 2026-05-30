@@ -984,7 +984,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |----------------------|-----------|--------|-------|
 | `lib/modules/datasource/azure-bicep-resource/index.ts` | `crates/renovate-core/src/datasources/azure_bicep.rs` | partial | Core version fetch via Bicep types index API ported; package-cache not ported |
 | `lib/modules/datasource/azure-pipelines-tasks/index.ts` | `crates/renovate-core/src/datasources/azure_pipelines_tasks.rs` | partial | Core tasks version fetch via GitHub tags API ported; package-cache not ported |
-| `lib/modules/datasource/bazel/index.ts` | `crates/renovate-core/src/datasources/bazel.rs` | partial | Core version fetch via GitHub releases ported; package-cache not ported |
+| `lib/modules/datasource/bazel/index.ts` | `crates/renovate-core/src/datasources/bazel.rs` | partial | Core version fetch via GitHub releases ported; local file:// URL support ported; package-cache not ported |
 | `lib/modules/datasource/bitrise/index.ts` | `crates/renovate-core/src/datasources/bitrise.rs` | partial | Steplib index fetch and version lookup ported; caching not ported |
 | `lib/modules/datasource/buildpacks-registry/index.ts` | `crates/renovate-core/src/datasources/buildpacks_registry.rs` | partial | Core version fetch via builder index API ported; package-cache not ported |
 | `lib/modules/datasource/cdnjs/index.ts` | `crates/renovate-core/src/datasources/cdnjs.rs` | partial | Core latest version fetch via cdnjs API ported; package-cache not ported |

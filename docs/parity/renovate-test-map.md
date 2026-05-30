@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,232 / 11,666 total tests ported (45%) · pending 5,962 · not-applicable 472 (4% of total) — updated 2026-05-30
+**Progress:** 5,235 / 11,666 total tests ported (45%) · pending 5,959 · not-applicable 472 (4% of total) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -205,7 +205,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/custom/index.spec.ts` | Not done | [details](lib/modules/datasource/custom/index.spec.ts.md) |
 | `lib/modules/datasource/rpm/index.spec.ts` | Not done | [details](lib/modules/datasource/rpm/index.spec.ts.md) |
 | `lib/modules/datasource/golang-version/index.spec.ts` | Done | [details](lib/modules/datasource/golang-version/index.spec.ts.md) |
-| `lib/modules/datasource/git-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/git-tags/index.spec.ts.md) |
+| `lib/modules/datasource/git-tags/index.spec.ts` | Done | [details](lib/modules/datasource/git-tags/index.spec.ts.md) |
 | `lib/modules/datasource/github-tags/index.spec.ts` | Done | [details](lib/modules/datasource/github-tags/index.spec.ts.md) |
 | `lib/modules/datasource/orb/index.spec.ts` | Done | [details](lib/modules/datasource/orb/index.spec.ts.md) |
 | `lib/modules/datasource/gitea-tags/index.spec.ts` | Done | [details](lib/modules/datasource/gitea-tags/index.spec.ts.md) |
@@ -236,7 +236,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/cdnjs/index.spec.ts` | Done | [details](lib/modules/datasource/cdnjs/index.spec.ts.md) |
 | `lib/modules/datasource/conda/index.spec.ts` | Done | [details](lib/modules/datasource/conda/index.spec.ts.md) |
 | `lib/modules/datasource/github-releases/index.spec.ts` | Done | [details](lib/modules/datasource/github-releases/index.spec.ts.md) |
-| `lib/modules/datasource/bazel/index.spec.ts` | Not done | [details](lib/modules/datasource/bazel/index.spec.ts.md) |
+| `lib/modules/datasource/bazel/index.spec.ts` | Done | [details](lib/modules/datasource/bazel/index.spec.ts.md) |
 | `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts` | Done | [details](lib/modules/datasource/azure-pipelines-tasks/index.spec.ts.md) |
 | `lib/modules/datasource/helm/schema.spec.ts` | Done | [details](lib/modules/datasource/helm/schema.spec.ts.md) |
 | `lib/modules/datasource/npm/schema.spec.ts` | Done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
