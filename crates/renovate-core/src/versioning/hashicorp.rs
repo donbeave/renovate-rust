@@ -591,42 +591,50 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_pessimistic_patch() {
         assert_eq!(lower_bound("~> 5.0.1"), Some("5.0.1".to_owned()));
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_pessimistic_minor() {
         assert_eq!(lower_bound("~> 5.0"), Some("5.0".to_owned()));
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_pessimistic_major_only() {
         assert_eq!(lower_bound("~> 5"), Some("5".to_owned()));
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_gte() {
         assert_eq!(lower_bound(">= 2.0.0"), Some("2.0.0".to_owned()));
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_exact() {
         assert_eq!(lower_bound("= 3.1.4"), Some("3.1.4".to_owned()));
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_bare_version() {
         assert_eq!(lower_bound("3.1.4"), Some("3.1.4".to_owned()));
     }
 
+    // Rust-specific: unit tests for lower_bound helper
     #[test]
     fn lower_bound_range() {
         // `>= 1.0, < 2.0` — lower bound is 1.0
         assert_eq!(lower_bound(">= 1.0, < 2.0"), Some("1.0".to_owned()));
     }
 
+    // Rust-specific: unit tests for hashicorp_update_summary edge cases
     #[test]
     fn update_available_when_newer() {
         let s = hashicorp_update_summary("~> 5.0", Some("5.7.3"));
@@ -634,6 +642,7 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("5.7.3"));
     }
 
+    // Rust-specific: unit tests for hashicorp_update_summary edge cases
     #[test]
     fn no_update_when_same_lower_bound() {
         // Lower bound is 5.0.1; latest is also 5.0.1
@@ -641,6 +650,7 @@ mod tests {
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for hashicorp_update_summary edge cases
     #[test]
     fn no_update_when_older() {
         // Lower bound 5.0, latest 4.9.9 (unlikely but defensive)
@@ -648,24 +658,28 @@ mod tests {
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for hashicorp_update_summary edge cases
     #[test]
     fn no_update_when_latest_none() {
         let s = hashicorp_update_summary("~> 5.0", None);
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for hashicorp_update_summary edge cases
     #[test]
     fn exact_pinned_update() {
         let s = hashicorp_update_summary("= 5.0.0", Some("5.1.0"));
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for hashicorp_update_summary edge cases
     #[test]
     fn gte_constraint_update() {
         let s = hashicorp_update_summary(">= 4.0.0", Some("5.0.0"));
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for hashicorp_update_summary edge cases
     #[test]
     fn multi_element_constraint() {
         // >= 2.0.0, < 3.0.0 — lower bound 2.0.0
@@ -673,6 +687,7 @@ mod tests {
         assert!(s.update_available);
     }
 
+    // Rust-specific: unit tests for hashicorp_update_summary edge cases
     #[test]
     fn version_padding() {
         // ~> 5 → lower bound 5.0.0; latest 5.1.0 → update
