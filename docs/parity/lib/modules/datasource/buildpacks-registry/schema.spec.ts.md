@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses buildpack-registry schema | 4 | ported | `buildpacks_registry.rs` | `buildpacks_registry_schema_parses_latest_and_versions` | — |
+| parses buildpack-registry schema | 4 | ported | `buildpacks_registry.rs` | `processes_real_data` | — |
 
 ---
 

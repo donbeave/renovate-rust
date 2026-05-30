@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses metadata | 6 | ported | `bazel.rs` | `bazel_module_metadata_parses_versions_with_yanked_versions` | — |
+| parses metadata | 6 | ported | `bazel.rs` | `metadata_with_yanked_versions` | — |
 
 ---
 

@@ -500,35 +500,64 @@ async fn process_repo(
                     continue;
                 }
                 let manager = &file_deps[0].manager;
-                if manager != "npm" {
-                    tracing::debug!(
-                        repo = %repo_slug,
-                        branch = %branch,
-                        file = %file_path,
-                        manager = %manager,
-                        "manifest editing not yet supported for this manager"
-                    );
-                    continue;
-                }
 
                 match client.get_raw_file(owner, repo, file_path).await {
                     Ok(Some(raw)) => {
                         let mut content = raw.content;
+                        // For gomod, re-extract to get line numbers needed by the update fn.
+                        let gomod_extracted = if manager == "gomod" {
+                            renovate_core::extractors::gomod::extract(&content)
+                        } else {
+                            Vec::new()
+                        };
                         for bd in file_deps {
-                            if let output::DepStatus::UpdateAvailable { ref current, .. } =
+                            if let output::DepStatus::UpdateAvailable { ref current, ref latest } =
                                 bd.dep.status
                             {
-                                let upgrade = renovate_core::extractors::npm::NpmUpdateUpgrade {
-                                    dep_type: bd.dep.dep_type.clone().unwrap_or_default(),
-                                    dep_name: bd.dep.name.clone(),
-                                    new_value: bd.dep.new_value.clone(),
-                                    current_value: Some(current.clone()),
-                                    ..Default::default()
+                                let updated = match manager.as_str() {
+                                    "npm" => {
+                                        let upgrade = renovate_core::extractors::npm::NpmUpdateUpgrade {
+                                            dep_type: bd.dep.dep_type.clone().unwrap_or_default(),
+                                            dep_name: bd.dep.name.clone(),
+                                            new_value: bd.dep.new_value.clone(),
+                                            current_value: Some(current.clone()),
+                                            ..Default::default()
+                                        };
+                                        renovate_core::extractors::npm::npm_update_dependency(
+                                            &content, &upgrade,
+                                        )
+                                    }
+                                    "gomod" => {
+                                        let manager_data = gomod_extracted
+                                            .iter()
+                                            .find(|d| d.module_path == bd.dep.name)
+                                            .and_then(|d| d.manager_data.clone());
+                                        let upgrade = renovate_core::extractors::gomod::GoModUpdateUpgrade {
+                                            dep_name: Some(bd.dep.name.clone()),
+                                            dep_type: bd.dep.dep_type.clone(),
+                                            update_type: bd.dep.update_type.clone(),
+                                            new_value: Some(bd.dep.new_value.clone().unwrap_or_else(|| latest.clone())),
+                                            current_value: Some(current.clone()),
+                                            manager_data,
+                                            ..Default::default()
+                                        };
+                                        renovate_core::extractors::gomod::gomod_update_dependency(
+                                            &content, &upgrade,
+                                        )
+                                    }
+                                    _ => {
+                                        tracing::debug!(
+                                            repo = %repo_slug,
+                                            branch = %branch,
+                                            file = %file_path,
+                                            manager = %manager,
+                                            "manifest editing not yet supported for this manager"
+                                        );
+                                        None
+                                    }
                                 };
-                                match renovate_core::extractors::npm::npm_update_dependency(
-                                    &content, &upgrade,
-                                ) {
-                                    Some(updated) => content = updated,
+                                match updated {
+                                    Some(new_content) => content = new_content,
                                     None => {
                                         tracing::warn!(
                                             repo = %repo_slug,

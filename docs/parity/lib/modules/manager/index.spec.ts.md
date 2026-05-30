@@ -35,7 +35,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 51 | ported | `managers.rs` | `manager_registry_get_enabled_managers_all/filtered` | —  | — | — | — |
+| works | 51 | ported | `managers.rs` | `manager_registry_get_enabled_managers_all`, `manager_registry_get_enabled_managers_filtered` | — |
 
 ### `modules/manager/index`
 

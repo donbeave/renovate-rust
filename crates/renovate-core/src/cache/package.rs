@@ -814,7 +814,7 @@ mod tests {
         assert!(!cache.is_initialized());
 
         let dir = TempDir::new().unwrap();
-        let cache_with_backend = PackageCache::with_backend(FilePackageCache::new(dir.path()));
+        let cache_with_backend = PackageCache::with_dir(dir.path());
         assert!(cache_with_backend.is_initialized());
     }
 
@@ -825,7 +825,7 @@ mod tests {
         assert_eq!(cache.cache_type(), None);
 
         let dir = std::env::temp_dir();
-        let cache_with_backend = PackageCache::with_backend(FilePackageCache::new(&dir));
+        let cache_with_backend = PackageCache::with_dir(&dir);
         assert_eq!(cache_with_backend.cache_type(), Some("file"));
     }
 

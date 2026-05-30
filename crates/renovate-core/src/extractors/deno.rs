@@ -390,6 +390,14 @@ mod tests {
         assert!(result.is_none());
     }
 
+    // Ported: "handles error during update gracefully" — deno/update.spec.ts line 731
+    #[test]
+    fn deno_update_invalid_json_returns_none() {
+        let upgrade = mk_deno_upgrade("https://deno.land/std", "imports", "deno", "0.223.0", "0.224.0");
+        let result = deno_update_dependency("not valid json {{ ", &upgrade);
+        assert!(result.is_none());
+    }
+
     // Ported: "returns null for not supported datasource" — deno/update.spec.ts line 575
     #[test]
     fn deno_update_unsupported_datasource() {

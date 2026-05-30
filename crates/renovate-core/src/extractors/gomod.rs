@@ -352,6 +352,8 @@ pub struct GoModExtractedDep {
     pub is_replace_directive: bool,
     /// Set to `Some(false)` for indirect tool-module candidates that do not match a tool directive.
     pub enabled: Option<bool>,
+    /// Line number and block context for manifest editing.
+    pub manager_data: Option<GoModManagerData>,
 }
 
 // ── Compiled regexes ───────────────────────────────────────────────────────
@@ -428,7 +430,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
     let mut in_exclude_block = false;
     let mut in_replace_block = false;
 
-    for line in content.lines() {
+    for (line_number, line) in content.lines().enumerate() {
         // Strip inline comments for matching purposes.
         let is_indirect = line.contains("// indirect");
         let bare = strip_comment(line);
@@ -454,7 +456,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 let replacement = cap[1].to_owned();
                 let version = cap[2].to_owned();
                 if !replacement.starts_with("./") && !replacement.starts_with("../") {
-                    deps.push(make_replace_dep(replacement, version, is_indirect));
+                    deps.push(make_replace_dep(replacement, version, is_indirect, line_number, true));
                 }
             }
             continue;
@@ -478,6 +480,8 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                     current_value,
                     is_indirect,
                     &local_replaces,
+                    line_number,
+                    true,
                 ));
             }
             continue;
@@ -498,6 +502,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 is_toolchain_directive: false,
                 is_replace_directive: false,
                 enabled: None,
+                manager_data: Some(GoModManagerData { line_number, multi_line: false }),
             });
             continue;
         }
@@ -512,6 +517,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 is_toolchain_directive: true,
                 is_replace_directive: false,
                 enabled: None,
+                manager_data: Some(GoModManagerData { line_number, multi_line: false }),
             });
             continue;
         }
@@ -521,7 +527,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
             let replacement = cap[1].to_owned();
             let version = cap[2].to_owned();
             if !replacement.starts_with("./") && !replacement.starts_with("../") {
-                deps.push(make_replace_dep(replacement, version, is_indirect));
+                deps.push(make_replace_dep(replacement, version, is_indirect, line_number, false));
                 continue;
             }
         }
@@ -534,6 +540,8 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 current_value,
                 is_indirect,
                 &local_replaces,
+                line_number,
+                false,
             ));
         }
     }
@@ -628,6 +636,8 @@ fn make_dep(
     current_value: String,
     is_indirect: bool,
     local_replaces: &HashSet<String>,
+    line_number: usize,
+    multi_line: bool,
 ) -> GoModExtractedDep {
     let skip_reason = if local_replaces.contains(&module_path) {
         Some(GoModSkipReason::LocalReplace)
@@ -646,6 +656,7 @@ fn make_dep(
         is_toolchain_directive: false,
         is_replace_directive: false,
         enabled: None,
+        manager_data: Some(GoModManagerData { line_number, multi_line }),
     }
 }
 
@@ -653,6 +664,8 @@ fn make_replace_dep(
     module_path: String,
     current_value: String,
     is_indirect: bool,
+    line_number: usize,
+    multi_line: bool,
 ) -> GoModExtractedDep {
     GoModExtractedDep {
         module_path,
@@ -663,6 +676,7 @@ fn make_replace_dep(
         is_toolchain_directive: false,
         is_replace_directive: true,
         enabled: None,
+        manager_data: Some(GoModManagerData { line_number, multi_line }),
     }
 }
 
@@ -873,7 +887,7 @@ pub fn get_extra_deps_notice(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Manager-specific data for a gomod upgrade.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct GoModManagerData {
     /// 0-based line number in the go.mod file to update.
     pub line_number: usize,
