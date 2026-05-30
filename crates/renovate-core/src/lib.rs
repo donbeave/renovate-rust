@@ -28,6 +28,7 @@ pub mod timestamp;
 pub mod util;
 pub mod versioning;
 pub mod vulnerability;
+pub mod workers;
 
 /// Library version string, sourced from the workspace package version.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
