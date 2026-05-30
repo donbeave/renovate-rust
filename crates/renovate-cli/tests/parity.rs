@@ -936,3 +936,79 @@ fn parity_devcontainer_scratch() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for devcontainer-scratch fixture");
 }
+
+#[test]
+fn parity_batect_scratch() {
+    let actual = run_fixture("batect-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "batect.yml",
+                    "manager": "batect",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for batect-scratch fixture");
+}
+
+#[test]
+fn parity_quadlet_scratch() {
+    let actual = run_fixture("quadlet-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "app.container",
+                    "manager": "quadlet",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for quadlet-scratch fixture");
+}
