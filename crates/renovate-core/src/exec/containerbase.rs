@@ -246,6 +246,7 @@ mod tests {
         assert!(!supports_dynamic_install("foobar"));
     }
 
+    // Ported: "returns false if binarySource is not install" — util/exec/containerbase.spec.ts line 22
     #[test]
     fn is_dynamic_install_requires_install_source() {
         let tc = vec![ToolConstraint {
@@ -254,6 +255,35 @@ mod tests {
         }];
         assert!(!is_dynamic_install(&BinarySource::Global, &tc));
         assert!(!is_dynamic_install(&BinarySource::Docker, &tc));
+    }
+
+    // Ported: "returns false if not containerbase" — util/exec/containerbase.spec.ts line 26
+    #[test]
+    fn is_dynamic_install_requires_containerbase_env() {
+        let tc = vec![ToolConstraint {
+            tool_name: "node".to_owned(),
+            constraint: Some("18".to_owned()),
+        }];
+        // When CONTAINERBASE env is not set, should return false even with Install source
+        if std::env::var("CONTAINERBASE").is_err() {
+            assert!(!is_dynamic_install(&BinarySource::Install, &tc));
+        }
+    }
+
+    // Ported: "returns false if any unsupported tools" — util/exec/containerbase.spec.ts line 31
+    #[test]
+    fn is_dynamic_install_false_if_any_unsupported() {
+        let tc = vec![
+            ToolConstraint {
+                tool_name: "node".to_owned(),
+                constraint: None,
+            },
+            ToolConstraint {
+                tool_name: "invalid-tool".to_owned(),
+                constraint: None,
+            },
+        ];
+        assert!(!is_dynamic_install(&BinarySource::Install, &tc));
     }
 
     #[tokio::test]
