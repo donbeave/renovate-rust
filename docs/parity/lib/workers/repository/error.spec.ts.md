@@ -5,14 +5,14 @@
 ## `lib/workers/repository/error.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/error.spec.ts
-**Total tests:** 9 | **Ported:** 4 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 9 | **Ported:** 6 | **Actionable:** 9 | **Status:** partial
 
 ### `workers/repository/error › handleError()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| errors ${err} | 77 | pending | — | — | — |
-| handles ExternalHostError | 83 | pending | — | — | — |
+| errors ${err} | 77 | ported | `util.rs` | `classify_repo_error_known_constants_pass_through` | — |
+| handles ExternalHostError | 83 | ported | `util.rs` | `classify_repo_error_external_host_error_constant` | — |
 | rewrites git 5xx error | 91 | ported | `util.rs` | `classify_repo_error_rewrites_git_5xx` | — |
 | rewrites git remote error | 99 | ported | `util.rs` | `classify_repo_error_rewrites_git_remote_error` | — |
 | rewrites git fatal error | 107 | ported | `util.rs` | `classify_repo_error_rewrites_git_fatal` | — |

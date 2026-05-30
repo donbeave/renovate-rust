@@ -365,7 +365,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/logger/remap.spec.ts` | Done | [details](lib/logger/remap.spec.ts.md) |
 | `lib/logger/renovate-logger.spec.ts` | Done | [details](lib/logger/renovate-logger.spec.ts.md) |
 | `lib/logger/pretty-stdout.spec.ts` | Done | [details](lib/logger/pretty-stdout.spec.ts.md) |
-| `lib/logger/err-serializer.spec.ts` | Not done | [details](lib/logger/err-serializer.spec.ts.md) |
+| `lib/logger/err-serializer.spec.ts` | Done | [details](lib/logger/err-serializer.spec.ts.md) |
 | `lib/logger/once.spec.ts` | Done | [details](lib/logger/once.spec.ts.md) |
 | `lib/logger/utils.spec.ts` | Done | [details](lib/logger/utils.spec.ts.md) |
 | `lib/logger/index.spec.ts` | Done | [details](lib/logger/index.spec.ts.md) |
@@ -407,7 +407,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/lazy.spec.ts` | Done | [details](lib/util/lazy.spec.ts.md) |
 | `lib/util/mutex.spec.ts` | Done | [details](lib/util/mutex.spec.ts.md) |
 | `lib/util/yaml.spec.ts` | Not done | [details](lib/util/yaml.spec.ts.md) |
-| `lib/util/common.spec.ts` | Not done | [details](lib/util/common.spec.ts.md) |
+| `lib/util/common.spec.ts` | Done | [details](lib/util/common.spec.ts.md) |
 | `lib/util/string.spec.ts` | Done | [details](lib/util/string.spec.ts.md) |
 | `lib/util/interpolator.spec.ts` | Done | [details](lib/util/interpolator.spec.ts.md) |
 | `lib/util/date.spec.ts` | Done | [details](lib/util/date.spec.ts.md) |

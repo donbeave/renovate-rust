@@ -587,7 +587,6 @@ mod tests {
             dep_type: "dependencies".to_owned(),
             dep_name: "lodash".to_owned(),
             new_value: Some("^4.17.21".to_owned()),
-            current_value: Some("^3.0.0".to_owned()),
             ..Default::default()
         };
         let updated = renovate_core::extractors::npm::npm_update_dependency(package_json, &upgrade)

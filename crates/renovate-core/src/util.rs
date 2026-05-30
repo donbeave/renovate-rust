@@ -3532,11 +3532,33 @@ fn platform_from_host_type(host_type: &str) -> Option<&'static str> {
 /// Returns `Err` for strings that parse neither as JSON nor JSON5.
 ///
 /// Mirrors `parseJson` from `lib/util/common.ts`.
-pub fn parse_json(content: &str) -> Result<serde_json::Value, String> {
-    serde_json::from_str(content)
-        .or_else(|_| json5::from_str::<serde_json::Value>(content))
-        .map_err(|e| e.to_string())
-}
+ pub fn parse_json(content: &str) -> Result<serde_json::Value, String> {
+     serde_json::from_str(content)
+         .or_else(|_| json5::from_str::<serde_json::Value>(content))
+         .map_err(|e| e.to_string())
+ }
+
+/// Like `parse_json` but also returns whether a JSON5 fallback was needed.
+/// Mirrors the deprecation warning logic in `lib/util/common.ts` `parseJson`.
+pub fn parse_json_with_fallback(
+    content: &str,
+    file_name: &str,
+) -> Result<(serde_json::Value, bool), String> {
+    match serde_json::from_str(content) {
+        Ok(v) => Ok((v, false)),
+        Err(json_err) => match json5::from_str::<serde_json::Value>(content) {
+            Ok(v) => {
+                let needs_warning = !file_name.ends_with(".json5")
+                    && !file_name.ends_with(".jsonc");
+                Ok((v, needs_warning))
+            }
+            Err(e5) => {
+                let _ = json_err;
+                Err(e5.to_string())
+            }
+        },
+    }
+ }
 
 /// Schema-utils v4 parse result (mirrors Zod's `SafeParseReturnType`).
 #[derive(Debug)]
@@ -4215,8 +4237,12 @@ pub fn classify_repo_error(message: &str) -> &str {
         "repository-no-config",
         "platform-rate-limit-exceeded",
         "platform-bad-credentials",
+        "platform-authentication-error",
+        "platform-integration-unauthorized",
         "missing-api-credentials",
         "manager-lockfile-error",
+        "cannot-fork",
+        "no-vulnerability-alerts",
     ];
     if KNOWN_CONSTANTS.contains(&message) {
         return message;
@@ -8747,6 +8773,34 @@ mod tests {
         assert!(parse_json(input).is_err());
     }
 
+    // Ported: "catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse" — util/common.spec.ts line 153
+    #[test]
+    fn test_parse_json_fallback_warns() {
+        let input = r#"{name: 'Bob', age: 35, city: 'San Francisco', isMarried: false}"#;
+        let (val, needs_warning) =
+            parse_json_with_fallback(input, "renovate.json").unwrap();
+        assert!(needs_warning);
+        assert_eq!(val["name"], "Bob");
+    }
+
+    // Ported: "does not warn if filename ends with .jsonc" — util/common.spec.ts line 167
+    #[test]
+    fn test_parse_json_no_warn_jsonc() {
+        let input = r#"{"name": "John Doe", "age": 30, "city": "New York"}"#;
+        let (_, needs_warning) =
+            parse_json_with_fallback(input, "renovate.jsonc").unwrap();
+        assert!(!needs_warning);
+    }
+
+    // Ported: "does not warn if filename ends with .json5" — util/common.spec.ts line 172
+    #[test]
+    fn test_parse_json_no_warn_json5() {
+        let input = r#"{name: 'Bob', age: 35, city: 'San Francisco', isMarried: false}"#;
+        let (_, needs_warning) =
+            parse_json_with_fallback(input, "renovate.json5").unwrap();
+        assert!(!needs_warning);
+    }
+
     // -----------------------------------------------------------------------
     // interpolator (validateInterpolatedValues)
     // -----------------------------------------------------------------------
@@ -9713,6 +9767,32 @@ dep1 = "^1.0.0"
     #[test]
     fn classify_repo_error_unknown() {
         assert_eq!(classify_repo_error("abcdefg"), "unknown-error");
+    }
+
+    // Ported: "errors ${err}" — workers/repository/error.spec.ts lines 77-81
+    // Tests that known Renovate error constants pass through unchanged.
+    #[test]
+    fn classify_repo_error_known_constants_pass_through() {
+        let constants = [
+            "no-vulnerability-alerts",
+            "cannot-fork",
+            "integration-unauthorized",
+            "authentication-error",
+            "temporary-error",
+        ];
+        for msg in constants {
+            assert_eq!(
+                classify_repo_error(msg),
+                msg,
+                "constant {msg} should pass through unchanged"
+            );
+        }
+    }
+
+    // Ported: "handles ExternalHostError" — workers/repository/error.spec.ts line 83
+    #[test]
+    fn classify_repo_error_external_host_error_constant() {
+        assert_eq!(classify_repo_error("external-host-error"), "external-host-error");
     }
 
     // ── parse_repo_org ────────────────────────────────────────────────────────
