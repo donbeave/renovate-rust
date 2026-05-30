@@ -5,18 +5,18 @@
 ## `lib/config/options/env-options.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/options/env-options.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `config/options/env-options`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| maps camelCase config names to RENOVATE_SCREAMING_SNAKE_CASE env vars | 6 | pending | — | — | config environment option behavior is in scope |
-| maps multi-word config names correctly | 14 | pending | — | — | config environment option behavior is in scope |
-| marks globalOnly options correctly | 22 | pending | — | — | config environment option behavior is in scope |
-| marks non-globalOnly options correctly | 31 | pending | — | — | config environment option behavior is in scope |
-| marks inheritConfigSupport options correctly | 40 | pending | — | — | config environment option behavior is in scope |
-| excludes options with env: false | 49 | pending | — | — | config environment option behavior is in scope |
-| includes the option type | 54 | pending | — | — | config environment option behavior is in scope |
+| maps camelCase config names to RENOVATE_SCREAMING_SNAKE_CASE env vars | 6 | not-applicable | — | — | TS config option metadata system |
+| maps multi-word config names correctly | 14 | not-applicable | — | — | TS config option metadata system |
+| marks globalOnly options correctly | 22 | not-applicable | — | — | TS config option metadata system |
+| marks non-globalOnly options correctly | 31 | not-applicable | — | — | TS config option metadata system |
+| marks inheritConfigSupport options correctly | 40 | not-applicable | — | — | TS config option metadata system |
+| excludes options with env: false | 49 | not-applicable | — | — | TS config option metadata system |
+| includes the option type | 54 | not-applicable | — | — | TS config option metadata system |
 
 ---

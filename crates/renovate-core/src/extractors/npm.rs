@@ -2436,6 +2436,7 @@ fn update_dependency_package_json(
         });
 
         if let Some(dep_key) = dep_key_opt {
+            let new_value = new_value.clone();
             let res_old = parsed["resolutions"][dep_key.as_str()]
                 .as_str()
                 .map(|s| s.to_owned())
@@ -2451,10 +2452,10 @@ fn update_dependency_package_json(
                             res_old.find('#').map(|i| &res_old[i..]).unwrap_or("#");
                         format!("{}{}{}", prefix, new_value, after_hash)
                     } else {
-                        format!("{}", new_value)
+                        new_value
                     }
                 } else {
-                    format!("{}", new_value)
+                    new_value
                 }
             };
             parsed["resolutions"][dep_key.as_str()] = serde_json::Value::String(res_new.clone());
