@@ -5,7 +5,7 @@
 ## `lib/util/jsonata.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/jsonata.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** done
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/jsonata › getExpression`
 

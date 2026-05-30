@@ -465,3 +465,170 @@ fn parity_composer_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for composer-skipped fixture");
 }
+
+#[test]
+fn parity_terraform_local() {
+    let actual = run_fixture("terraform-local");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "main.tf",
+                    "manager": "terraform",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "./modules/local",
+                            "status": "skipped",
+                            "reason": "externalsource"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for terraform-local fixture");
+}
+
+#[test]
+fn parity_pre_commit_skipped() {
+    let actual = run_fixture("pre-commit-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 2,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 2,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".pre-commit-config.yaml",
+                    "manager": "pre-commit",
+                    "stats": {
+                        "total": 2,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 2,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "local",
+                            "status": "skipped",
+                            "reason": "localhook"
+                        },
+                        {
+                            "name": "meta",
+                            "status": "skipped",
+                            "reason": "metahook"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for pre-commit-skipped fixture");
+}
+
+#[test]
+fn parity_asdf_skipped() {
+    let actual = run_fixture("asdf-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": ".tool-versions",
+                    "manager": "asdf",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "unknowntool",
+                            "status": "skipped",
+                            "reason": "unsupportedtool"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for asdf-skipped fixture");
+}
+
+#[test]
+fn parity_pip_skipped() {
+    let actual = run_fixture("pip-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 3,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 3,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "requirements.txt",
+                    "manager": "pip_requirements",
+                    "stats": {
+                        "total": 3,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 3,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "repo",
+                            "status": "skipped",
+                            "reason": "gitsource"
+                        },
+                        {
+                            "name": "unknown",
+                            "status": "skipped",
+                            "reason": "urlinstall"
+                        },
+                        {
+                            "name": "other.txt",
+                            "status": "skipped",
+                            "reason": "subrequirement"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for pip-skipped fixture");
+}

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/maven/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/index.spec.ts
-**Total tests:** 8 | **Ported:** 5 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 8 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `updateDependency`
 

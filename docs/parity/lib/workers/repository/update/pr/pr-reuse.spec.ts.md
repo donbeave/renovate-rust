@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/pr-reuse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/pr-reuse.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `workers/repository/update/pr/pr-reuse`
 

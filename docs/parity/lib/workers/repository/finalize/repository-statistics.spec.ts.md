@@ -5,7 +5,7 @@
 ## `lib/workers/repository/finalize/repository-statistics.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/finalize/repository-statistics.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** done
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `workers/repository/finalize/repository-statistics › runRenovateRepoStats`
 

@@ -5,7 +5,7 @@
 ## `lib/workers/repository/config-migration/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/index.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `workers/repository/config-migration/index`
 

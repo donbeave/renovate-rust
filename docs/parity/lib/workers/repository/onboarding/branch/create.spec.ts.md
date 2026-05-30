@@ -5,7 +5,7 @@
 ## `lib/workers/repository/onboarding/branch/create.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/branch/create.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `workers/repository/onboarding/branch/create › createOnboardingBranch`
 

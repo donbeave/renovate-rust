@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/maven/cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/cache.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `modules/datasource/maven/cache`
 

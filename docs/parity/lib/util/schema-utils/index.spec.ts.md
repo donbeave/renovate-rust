@@ -5,7 +5,7 @@
 ## `lib/util/schema-utils/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/schema-utils/index.spec.ts
-**Total tests:** 35 | **Ported:** 0 | **Actionable:** 35 | **Status:** done
+**Total tests:** 35 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/schema-utils/index › LooseArray`
 

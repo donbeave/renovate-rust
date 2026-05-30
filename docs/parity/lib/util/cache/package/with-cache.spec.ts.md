@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/with-cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/with-cache.spec.ts
-**Total tests:** 14 | **Ported:** 14 | **Actionable:** 0 | **Status:** done
+**Total tests:** 14 | **Ported:** 14 | **Actionable:** 14 | **Status:** ported
 
 ### `util/cache/package/with-cache`
 

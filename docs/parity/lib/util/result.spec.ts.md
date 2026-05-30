@@ -5,7 +5,7 @@
 ## `lib/util/result.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/result.spec.ts
-**Total tests:** 85 | **Ported:** 0 | **Actionable:** 85 | **Status:** done
+**Total tests:** 85 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/result › Result › constructors`
 

@@ -5,7 +5,7 @@
 ## `lib/config/decrypt/openpgp.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/decrypt/openpgp.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `config/decrypt/openpgp › decryptConfig()`
 

@@ -5,7 +5,7 @@
 ## `lib/util/fs/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/fs/index.spec.ts
-**Total tests:** 55 | **Ported:** 31 | **Actionable:** 31 | **Status:** partial
+**Total tests:** 55 | **Ported:** 31 | **Actionable:** 31 | **Status:** ported
 
 ### `util/fs/index › getParentDir`
 

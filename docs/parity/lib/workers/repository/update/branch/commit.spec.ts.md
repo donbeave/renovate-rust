@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/branch/commit.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/commit.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** done
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `workers/repository/update/branch/commit › commitFilesToBranch`
 

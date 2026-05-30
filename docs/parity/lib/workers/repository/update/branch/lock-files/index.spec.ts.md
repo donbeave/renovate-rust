@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/branch/lock-files/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/lock-files/index.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `workers/repository/update/branch/lock-files/index › writeUpdatedPackageFiles`
 

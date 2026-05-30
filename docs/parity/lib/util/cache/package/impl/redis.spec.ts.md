@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/impl/redis.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/impl/redis.spec.ts
-**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** done
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/cache/package/impl/redis › normalizeRedisUrl`
 

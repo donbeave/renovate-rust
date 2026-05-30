@@ -5,7 +5,7 @@
 ## `lib/util/git/update-date-cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/update-date-cache.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `util/git/update-date-cache › getCachedUpdateDateResult`
 

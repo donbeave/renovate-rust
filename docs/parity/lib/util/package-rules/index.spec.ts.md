@@ -5,7 +5,7 @@
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 73 | **Actionable:** 73 | **Status:** done
+**Total tests:** 73 | **Ported:** 73 | **Actionable:** 73 | **Status:** ported
 
 ### `util/package-rules/index`
 

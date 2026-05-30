@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: custom-script
+        name: Custom script
+        entry: ./scripts/check.sh
+        language: script
+  - repo: meta
+    hooks:
+      - id: check-useless-excludes

@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/impl/file.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/impl/file.spec.ts
-**Total tests:** 16 | **Ported:** 13 | **Actionable:** 14 | **Status:** done
+**Total tests:** 16 | **Ported:** 14 | **Actionable:** 14 | **Status:** ported
 
 ### `util/cache/package/impl/file › basic operations`
 

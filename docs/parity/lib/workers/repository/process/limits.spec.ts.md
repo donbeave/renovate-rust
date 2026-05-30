@@ -5,7 +5,7 @@
 ## `lib/workers/repository/process/limits.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/limits.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
 
 ### `workers/repository/process/limits › getPrHourlyCount()`
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/extract/pnpm.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/pnpm.spec.ts
-**Total tests:** 16 | **Ported:** 5 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 16 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `modules/manager/npm/extract/pnpm › .extractPnpmFilters()`
 

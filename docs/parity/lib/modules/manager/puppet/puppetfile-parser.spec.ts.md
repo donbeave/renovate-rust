@@ -5,7 +5,7 @@
 ## `lib/modules/manager/puppet/puppetfile-parser.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/puppet/puppetfile-parser.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `parsePuppetfile()`
 

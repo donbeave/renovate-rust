@@ -1,0 +1,3 @@
+git+https://github.com/user/repo.git@main
+https://example.com/package.tar.gz
+-r other.txt
