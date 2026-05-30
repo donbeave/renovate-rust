@@ -695,12 +695,14 @@ mod tests {
 
     // ── exact_pin_version ─────────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for exact_pin_version helper
     #[test]
     fn exact_pin_simple() {
         assert_eq!(exact_pin_version("==1.2.3"), Some("1.2.3".to_owned()));
         assert_eq!(exact_pin_version("== 4.2.7"), Some("4.2.7".to_owned()));
     }
 
+    // Rust-specific: unit tests for exact_pin_version helper
     #[test]
     fn ranges_are_not_pins() {
         for s in &[">=1.0", ">=1.0,<2.0", "~=1.4", "!=1.5", ""] {
@@ -708,6 +710,7 @@ mod tests {
         }
     }
 
+    // Rust-specific: unit tests for exact_pin_version helper
     #[test]
     fn wildcard_is_not_pin() {
         assert!(exact_pin_version("==1.*").is_none());
@@ -715,6 +718,7 @@ mod tests {
 
     // ── pep440_update_summary ─────────────────────────────────────────────────
 
+    // Rust-specific: unit tests for pep440_update_summary edge cases
     #[test]
     fn pinned_with_newer_latest_has_update() {
         let s = pep440_update_summary("==4.2.7", Some("4.2.10"));
@@ -722,12 +726,14 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("4.2.10"));
     }
 
+    // Rust-specific: unit tests for pep440_update_summary edge cases
     #[test]
     fn pinned_already_latest_has_no_update() {
         let s = pep440_update_summary("==4.2.10", Some("4.2.10"));
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for pep440_update_summary edge cases
     #[test]
     fn range_specifier_has_no_update() {
         let s = pep440_update_summary(">=4.0,<5.0", Some("4.2.10"));
@@ -735,12 +741,14 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("4.2.10"));
     }
 
+    // Rust-specific: unit tests for pep440_update_summary edge cases
     #[test]
     fn unconstrained_has_no_update() {
         let s = pep440_update_summary("", Some("4.2.10"));
         assert!(!s.update_available);
     }
 
+    // Rust-specific: unit tests for pep440_update_summary edge cases
     #[test]
     fn no_latest_has_no_update() {
         let s = pep440_update_summary("==4.2.7", None);
