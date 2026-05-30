@@ -1,0 +1,3 @@
+- name: Run container
+  community.docker.docker_container:
+    image: scratch

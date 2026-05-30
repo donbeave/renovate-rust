@@ -1088,3 +1088,79 @@ fn parity_bazel_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for bazel-skipped fixture");
 }
+
+#[test]
+fn parity_argocd_skipped() {
+    let actual = run_fixture("argocd-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "argocd/app.yml",
+                    "manager": "argocd",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "redis",
+                            "status": "skipped",
+                            "reason": "unspecified-version"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for argocd-skipped fixture");
+}
+
+#[test]
+fn parity_ansible_scratch() {
+    let actual = run_fixture("ansible-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "tasks/main.yml",
+                    "manager": "ansible",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "scratch",
+                            "status": "skipped",
+                            "reason": "scratch"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for ansible-scratch fixture");
+}

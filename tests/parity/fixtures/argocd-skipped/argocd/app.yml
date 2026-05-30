@@ -1,0 +1,8 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test
+spec:
+  source:
+    repoURL: https://charts.helm.sh/stable
+    chart: redis
