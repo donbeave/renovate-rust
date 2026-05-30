@@ -1214,8 +1214,6 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 ---
 
----
-
 ## Datasources (`lib/modules/datasource/`)
 
 ### Infrastructure (root-level files)
@@ -1868,8 +1866,6 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 ---
 
----
-
 ## Versioning (`lib/modules/versioning/`)
 
 ### Infrastructure (root-level files)
@@ -2237,8 +2233,6 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | Renovate source file | Rust file | Status | Notes |
 |---|---|---|---|
 | `unity3d-packages/index.ts` | `versioning/unity3d_packages.rs` | full | (202 lines) |
-
----
 
 ---
 
@@ -3084,8 +3078,6 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 ---
 
----
-
 ## Other (`lib/types/`, `lib/logger/`, `lib/instrumentation/`, `lib/constants/`, root files)
 
 
@@ -3098,12 +3090,12 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | Managers | ~500 | ~280 (56%) | ~140 (28%) | ~55 (11%) | ~25 (5%) |
 | Datasources | ~120 | ~80 (67%) | ~5 (4%) | ~7 (6%) | ~0 |
 | Versioning | ~54 | ~30 (56%) | ~18 (33%) | ~0 | ~6 (11%) |
-| Platform | ~75 | ~3 (4%) | ~5 (7%) | ~10 (13%) | ~0 |
+| Platform | ~75 | ~10 (13%) | ~12 (16%) | ~40 (53%) | ~0 |
 | Config | ~117 | ~9 (8%) | ~10 (9%) | ~65 (56%) | ~33 (28%) |
 | Util | ~177 | ~21 (12%) | ~40 (23%) | ~95 (54%) | ~21 (12%) |
 | Workers | ~151 | ~7 (5%) | ~30 (20%) | ~106 (70%) | ~8 (5%) |
 | Other | ~41 | ~2 (5%) | ~15 (37%) | ~16 (39%) | ~8 (20%) |
-| **Total** | **~1394** | **548 (39%)** | **280 (20%)** | **458 (33%)** | **108 (8%)** |
+| **Total** | **~1469** | **562 (38%)** | **303 (21%)** | **496 (34%)** | **108 (7%)** |
 
 ### Key Findings
 
