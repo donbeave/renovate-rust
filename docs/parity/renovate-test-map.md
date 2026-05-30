@@ -413,11 +413,11 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/date.spec.ts` | Done | [details](lib/util/date.spec.ts.md) |
 | `lib/util/fingerprint.spec.ts` | Done | [details](lib/util/fingerprint.spec.ts.md) |
 | `lib/util/hash.spec.ts` | Done | [details](lib/util/hash.spec.ts.md) |
-| `lib/util/regex.spec.ts` | Not done | [details](lib/util/regex.spec.ts.md) |
+| `lib/util/regex.spec.ts` | Done | [details](lib/util/regex.spec.ts.md) |
 | `lib/util/result.spec.ts` | Done | [details](lib/util/result.spec.ts.md) |
 | `lib/util/number.spec.ts` | Done | [details](lib/util/number.spec.ts.md) |
 | `lib/util/assign-keys.spec.ts` | Done | [details](lib/util/assign-keys.spec.ts.md) |
-| `lib/util/check-token.spec.ts` | Not done | [details](lib/util/check-token.spec.ts.md) |
+| `lib/util/check-token.spec.ts` | Done | [details](lib/util/check-token.spec.ts.md) |
 | `lib/util/minimatch.spec.ts` | Done | [details](lib/util/minimatch.spec.ts.md) |
 | `lib/util/emoji.spec.ts` | Not done | [details](lib/util/emoji.spec.ts.md) |
 | `lib/util/unicode.spec.ts` | Done | [details](lib/util/unicode.spec.ts.md) |

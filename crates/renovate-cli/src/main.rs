@@ -421,6 +421,108 @@ async fn process_repo(
     // a branch are coalesced into a single PR.  Mirrors Renovate's
     // `branchifyUpgrades` step.
     let branch_updates = report_builders::collect_branch_updates(&repo_report);
+
+    // Manifest editing: apply newValue constraints to source files.
+    // Only npm/package.json is supported in this slice; other managers
+    // are logged and skipped.
+    if config.dry_run.is_none() {
+        for (branch, deps) in &branch_updates {
+            // Group deps by file path so a single file is read once,
+            // updated for all deps on this branch, then written back.
+            let mut by_file: std::collections::BTreeMap<&str, Vec<&report_builders::BranchDep>> =
+                std::collections::BTreeMap::new();
+            for dep in deps {
+                by_file.entry(&dep.file_path).or_default().push(dep);
+            }
+
+            for (file_path, file_deps) in by_file {
+                if file_deps.is_empty() {
+                    continue;
+                }
+                let manager = &file_deps[0].manager;
+                if manager != "npm" {
+                    tracing::debug!(
+                        repo = %repo_slug,
+                        branch = %branch,
+                        file = %file_path,
+                        manager = %manager,
+                        "manifest editing not yet supported for this manager"
+                    );
+                    continue;
+                }
+
+                match client.get_raw_file(owner, repo, file_path).await {
+                    Ok(Some(raw)) => {
+                        let mut content = raw.content;
+                        for bd in file_deps {
+                            if let output::DepStatus::UpdateAvailable { ref current, .. } =
+                                bd.dep.status
+                            {
+                                let upgrade = renovate_core::extractors::npm::NpmUpdateUpgrade {
+                                    dep_type: bd.dep.dep_type.clone().unwrap_or_default(),
+                                    dep_name: bd.dep.name.clone(),
+                                    new_value: bd.dep.new_value.clone(),
+                                    current_value: Some(current.clone()),
+                                    ..Default::default()
+                                };
+                                match renovate_core::extractors::npm::npm_update_dependency(
+                                    &content, &upgrade,
+                                ) {
+                                    Some(updated) => content = updated,
+                                    None => {
+                                        tracing::warn!(
+                                            repo = %repo_slug,
+                                            branch = %branch,
+                                            file = %file_path,
+                                            dep = %bd.dep.name,
+                                            "failed to update dependency in file"
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                        if let Err(err) = client.write_file(owner, repo, file_path, &content).await
+                        {
+                            tracing::error!(
+                                repo = %repo_slug,
+                                branch = %branch,
+                                file = %file_path,
+                                %err,
+                                "failed to write updated manifest"
+                            );
+                            had_error = true;
+                        } else {
+                            tracing::info!(
+                                repo = %repo_slug,
+                                branch = %branch,
+                                file = %file_path,
+                                "updated manifest"
+                            );
+                        }
+                    }
+                    Ok(None) => {
+                        tracing::warn!(
+                            repo = %repo_slug,
+                            branch = %branch,
+                            file = %file_path,
+                            "file not found for manifest editing"
+                        );
+                    }
+                    Err(err) => {
+                        tracing::error!(
+                            repo = %repo_slug,
+                            branch = %branch,
+                            file = %file_path,
+                            %err,
+                            "failed to read file for manifest editing"
+                        );
+                        had_error = true;
+                    }
+                }
+            }
+        }
+    }
+
     for (branch, deps) in branch_updates {
         let title = deps
             .first()

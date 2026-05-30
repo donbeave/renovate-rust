@@ -5,20 +5,20 @@
 ## `lib/util/check-token.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/check-token.spec.ts
-**Total tests:** 34 | **Ported:** 27 | **Actionable:** 27 | **Status:** partial
+**Total tests:** 34 | **Ported:** 34 | **Actionable:** 34 | **Status:** done
 
 
 ### `util/check-token › checkGithubToken`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does nothing if data is empty | 26 | pending | — | — | — |
-| returns early if GitHub token is found | 33 | pending | — | — | — |
-| returns early if token warnings are disabled | 45 | pending | — | — | — |
-| does not warn if there is dependencies with GitHub sourceUrl | 60 | pending | — | — | — |
-| logs warning for github-tags datasource | 68 | pending | — | — | — |
-| logs warning for github-releases datasource | 85 | pending | — | — | — |
-| logs warning once | 102 | pending | — | — | — |
+| does nothing if data is empty | 26 | ported | `util.rs` | `test_check_github_token_empty` | — |
+| returns early if GitHub token is found | 33 | ported | `util.rs` | `test_check_github_token_found` | — |
+| returns early if token warnings are disabled | 45 | ported | `util.rs` | `test_check_github_token_disabled` | — |
+| does not warn if there is dependencies with GitHub sourceUrl | 60 | ported | `util.rs` | `test_check_github_token_no_github_datasource` | — |
+| logs warning for github-tags datasource | 68 | ported | `util.rs` | `test_check_github_token_tags` | — |
+| logs warning for github-releases datasource | 85 | ported | `util.rs` | `test_check_github_token_releases` | — |
+| logs warning once | 102 | ported | `util.rs` | `test_check_github_token_multiple` | — |
 
 ### `util/check-token › isGithubPersonalAccessToken`
 

@@ -814,6 +814,46 @@ pub fn take_personal_access_token_if_possible<'a>(
     git_tags_token.or(github_token)
 }
 
+/// Check whether a GitHub token is available and warn if deps use GitHub
+/// datasources without a token.
+///
+/// Returns a list of dep names that were marked with `github-token-required`.
+/// Pure function — takes config and deps explicitly, no global state.
+pub fn check_github_token(
+    github_token: Option<&str>,
+    github_token_warn: bool,
+    deps: &mut [&mut GithubTokenDep],
+) -> Vec<String> {
+    if github_token.is_some() {
+        return Vec::new();
+    }
+    if !github_token_warn {
+        return Vec::new();
+    }
+    let mut github_deps = Vec::new();
+    for dep in deps.iter_mut() {
+        if dep.skip_reason.is_none()
+            && (dep.datasource == "github-tags"
+                || dep.datasource == "github-releases"
+                || dep.datasource == "github-release-attachments")
+        {
+            dep.skip_reason = Some("github-token-required".to_owned());
+            if !dep.dep_name.is_empty() {
+                github_deps.push(dep.dep_name.clone());
+            }
+        }
+    }
+    github_deps
+}
+
+/// Trait-like struct for deps passed to `check_github_token`.
+#[derive(Debug, Clone, Default)]
+pub struct GithubTokenDep {
+    pub dep_name: String,
+    pub datasource: String,
+    pub skip_reason: Option<String>,
+}
+
 // ---------------------------------------------------------------------------
 // Git URL conversion — lib/util/git/url.ts
 // ---------------------------------------------------------------------------
@@ -6396,6 +6436,105 @@ mod tests {
             take_personal_access_token_if_possible(Some("unknownTokenType"), None),
             Some("unknownTokenType")
         );
+    }
+
+    // Ported: "does nothing if data is empty" — util/check-token.spec.ts line 26
+    #[test]
+    fn test_check_github_token_empty() {
+        let warned = check_github_token(None, true, &mut []);
+        assert!(warned.is_empty());
+    }
+
+    // Ported: "returns early if GitHub token is found" — util/check-token.spec.ts line 33
+    #[test]
+    fn test_check_github_token_found() {
+        let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
+            dep_name: "foo/bar".into(),
+            datasource: "github-tags".into(),
+            skip_reason: None,
+        }];
+        let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
+        let warned = check_github_token(Some("ghp_123"), true, &mut refs);
+        assert!(warned.is_empty());
+        assert!(refs[0].skip_reason.is_none());
+    }
+
+    // Ported: "returns early if token warnings are disabled" — util/check-token.spec.ts line 45
+    #[test]
+    fn test_check_github_token_disabled() {
+        let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
+            dep_name: "foo/bar".into(),
+            datasource: "github-tags".into(),
+            skip_reason: None,
+        }];
+        let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
+        let warned = check_github_token(None, false, &mut refs);
+        assert!(warned.is_empty());
+        assert!(refs[0].skip_reason.is_none());
+    }
+
+    // Ported: "does not warn if there is dependencies with GitHub sourceUrl" — util/check-token.spec.ts line 60
+    #[test]
+    fn test_check_github_token_no_github_datasource() {
+        let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
+            dep_name: "renovatebot/renovate".into(),
+            datasource: "npm".into(),
+            skip_reason: None,
+        }];
+        let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
+        let warned = check_github_token(None, true, &mut refs);
+        assert!(warned.is_empty());
+        assert!(refs[0].skip_reason.is_none());
+    }
+
+    // Ported: "logs warning for github-tags datasource" — util/check-token.spec.ts line 68
+    #[test]
+    fn test_check_github_token_tags() {
+        let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
+            dep_name: "foo/bar".into(),
+            datasource: "github-tags".into(),
+            skip_reason: None,
+        }];
+        let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
+        let warned = check_github_token(None, true, &mut refs);
+        assert_eq!(warned, vec!["foo/bar"]);
+        assert_eq!(refs[0].skip_reason.as_deref(), Some("github-token-required"));
+    }
+
+    // Ported: "logs warning for github-releases datasource" — util/check-token.spec.ts line 85
+    #[test]
+    fn test_check_github_token_releases() {
+        let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
+            dep_name: "foo/bar".into(),
+            datasource: "github-releases".into(),
+            skip_reason: None,
+        }];
+        let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
+        let warned = check_github_token(None, true, &mut refs);
+        assert_eq!(warned, vec!["foo/bar"]);
+        assert_eq!(refs[0].skip_reason.as_deref(), Some("github-token-required"));
+    }
+
+    // Ported: "logs warning once" — util/check-token.spec.ts line 102
+    #[test]
+    fn test_check_github_token_multiple() {
+        let mut deps: Vec<GithubTokenDep> = vec![
+            GithubTokenDep {
+                dep_name: "foo/foo".into(),
+                datasource: "github-tags".into(),
+                skip_reason: None,
+            },
+            GithubTokenDep {
+                dep_name: "bar/bar".into(),
+                datasource: "github-releases".into(),
+                skip_reason: None,
+            },
+        ];
+        let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
+        let warned = check_github_token(None, true, &mut refs);
+        assert_eq!(warned, vec!["foo/foo", "bar/bar"]);
+        assert_eq!(refs[0].skip_reason.as_deref(), Some("github-token-required"));
+        assert_eq!(refs[1].skip_reason.as_deref(), Some("github-token-required"));
     }
 
     // -----------------------------------------------------------------------
