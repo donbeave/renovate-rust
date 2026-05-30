@@ -1,0 +1,8 @@
+{
+  "name": "npm-skipped-fixture",
+  "version": "1.0.0",
+  "dependencies": {
+    "local-pkg": "file:../local-pkg",
+    "url-pkg": "https://example.com/package.tgz"
+  }
+}

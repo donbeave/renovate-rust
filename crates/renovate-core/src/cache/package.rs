@@ -808,6 +808,243 @@ mod tests {
         assert_eq!(r2, "stale-value");
     }
 
+    // Ported: "caches null values" — util/cache/package/with-cache.spec.ts line 115
+    #[tokio::test]
+    async fn with_cache_caches_null_values() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        let cfg = default_config();
+        let opts = WithCacheOptions::new("_test-namespace", "key");
+        let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+
+        let cc1 = call_count.clone();
+        let r1: Option<String> = with_cache(
+            &cache,
+            &cfg,
+            opts.clone(),
+            None,
+            move || {
+                cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                async { Ok::<_, anyhow::Error>(None::<String>) }
+            },
+        )
+        .await
+        .unwrap();
+
+        let cc2 = call_count.clone();
+        let r2: Option<String> = with_cache(
+            &cache,
+            &cfg,
+            opts.clone(),
+            None,
+            move || {
+                cc2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                async { Ok::<_, anyhow::Error>(Some("second".to_owned())) }
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(r1, None);
+        assert_eq!(r2, None); // cached null returned
+        assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 1);
+    }
+
+    // Ported: "ignores cached values rejected by cacheResult predicate" — util/cache/package/with-cache.spec.ts line 170
+    #[tokio::test]
+    async fn with_cache_ignores_cached_values_rejected_by_predicate() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        let cfg = default_config();
+        let opts = WithCacheOptions::new("_test-namespace", "key");
+        let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+
+        // First call caches a rejected value
+        let cc1 = call_count.clone();
+        let r1 = with_cache(
+            &cache,
+            &cfg,
+            opts.clone(),
+            Some(|v: &Value| v != &Value::Null),
+            move || {
+                cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                async { Ok::<_, anyhow::Error>(None::<String>) }
+            },
+        )
+        .await
+        .unwrap();
+
+        // Second call — predicate rejects cached null, so fn is called again
+        let cc2 = call_count.clone();
+        let r2 = with_cache(
+            &cache,
+            &cfg,
+            opts.clone(),
+            Some(|v: &Value| v != &Value::Null),
+            move || {
+                cc2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                async { Ok::<_, anyhow::Error>(Some("fresh".to_owned())) }
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(r1, None);
+        assert_eq!(r2, Some("fresh".to_owned()));
+        assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 2);
+    }
+
+    // Ported: "uses custom ttlMinutes" — util/cache/package/with-cache.spec.ts line 232
+    #[tokio::test]
+    async fn with_cache_uses_custom_ttl_minutes() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        let cfg = default_config();
+        let mut opts = WithCacheOptions::new("_test-namespace", "key");
+        opts.ttl_minutes = 5;
+
+        let r1 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Ok::<_, anyhow::Error>("cached".to_owned())
+        })
+        .await
+        .unwrap();
+
+        let r2 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Ok::<_, anyhow::Error>("fresh".to_owned())
+        })
+        .await
+        .unwrap();
+
+        assert_eq!(r1, "cached");
+        assert_eq!(r2, "cached"); // still within custom 5-min TTL
+    }
+
+    // Ported: "does not return stale values rejected by cacheResult predicate" — util/cache/package/with-cache.spec.ts line 414
+    #[tokio::test]
+    async fn with_cache_does_not_return_stale_rejected_by_predicate() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        let cfg = CacheTtlConfig {
+            hard_ttl_minutes: 120,
+            ..Default::default()
+        };
+        let mut opts = WithCacheOptions::new("_test-namespace", "key");
+        opts.ttl_minutes = 1;
+        opts.fallback = true;
+
+        // Populate cache with null (rejected by predicate)
+        let r1: Option<String> = with_cache(
+            &cache,
+            &cfg,
+            opts.clone(),
+            Some(|v: &Value| v != &Value::Null),
+            || async { Ok::<_, anyhow::Error>(None::<String>) },
+        )
+        .await
+        .unwrap();
+
+        // Backdate the cached record
+        let past = Utc::now() - Duration::minutes(10);
+        let record = CachedRecord {
+            value: Value::Null,
+            cached_at: past.to_rfc3339(),
+        };
+        cache
+            .set_with_raw_ttl("_test-namespace", "cache-decorator:key", &record, 120)
+            .await;
+
+        // Second call fails — predicate rejects stale null, so error propagates
+        let r2 = with_cache(
+            &cache,
+            &cfg,
+            opts.clone(),
+            Some(|v: &Value| v != &Value::Null),
+            || async { Err::<Option<String>, _>(anyhow::anyhow!("upstream error")) },
+        )
+        .await;
+
+        assert_eq!(r1, None);
+        assert!(r2.is_err());
+    }
+
+    // Ported: "drops stale value after hard TTL expires" — util/cache/package/with-cache.spec.ts line 454
+    #[tokio::test]
+    async fn with_cache_drops_stale_after_hard_ttl_expires() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        let cfg = CacheTtlConfig {
+            hard_ttl_minutes: 10,
+            ..Default::default()
+        };
+        let mut opts = WithCacheOptions::new("_test-namespace", "key");
+        opts.ttl_minutes = 1;
+        opts.fallback = true;
+
+        let r1 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Ok::<_, anyhow::Error>("stale".to_owned())
+        })
+        .await
+        .unwrap();
+
+        // Backdate past both soft and hard TTL
+        let past = Utc::now() - Duration::minutes(15);
+        let record = CachedRecord {
+            value: Value::String("stale".into()),
+            cached_at: past.to_rfc3339(),
+        };
+        cache
+            .set_with_raw_ttl("_test-namespace", "cache-decorator:key", &record, 10)
+            .await;
+
+        // Second call fails — hard TTL expired, no fallback
+        let r2 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Err::<String, _>(anyhow::anyhow!("upstream error"))
+        })
+        .await;
+
+        assert_eq!(r1, "stale");
+        assert!(r2.is_err());
+    }
+
+    // Ported: "does not use fallback when fallback=false" — util/cache/package/with-cache.spec.ts line 505
+    #[tokio::test]
+    async fn with_cache_no_fallback_when_disabled() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        let cfg = CacheTtlConfig {
+            hard_ttl_minutes: 120,
+            ..Default::default()
+        };
+        let mut opts = WithCacheOptions::new("_test-namespace", "key");
+        opts.ttl_minutes = 1;
+        opts.fallback = false; // disabled
+
+        let r1 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Ok::<_, anyhow::Error>("original".to_owned())
+        })
+        .await
+        .unwrap();
+
+        // Backdate past soft TTL
+        let past = Utc::now() - Duration::minutes(10);
+        let record = CachedRecord {
+            value: Value::String("original".into()),
+            cached_at: past.to_rfc3339(),
+        };
+        cache
+            .set_with_raw_ttl("_test-namespace", "cache-decorator:key", &record, 120)
+            .await;
+
+        // Second call fails — fallback disabled, so error propagates
+        let r2 = with_cache(&cache, &cfg, opts.clone(), None, || async {
+            Err::<String, _>(anyhow::anyhow!("upstream error"))
+        })
+        .await;
+
+        assert_eq!(r1, "original");
+        assert!(r2.is_err());
+    }
+
     // ── resolve_ttl_values ────────────────────────────────────────────────
 
     // Ported: "overrides soft ttl and updates result" — util/cache/package/with-cache.spec.ts line 313
