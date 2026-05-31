@@ -484,6 +484,95 @@ impl PlatformClient for GithubClient {
     }
 }
 
+impl GithubClient {
+    /// Fetch and parse a JSON (or JSON5) file from the repository.
+    ///
+    /// Returns `Ok(None)` when the file does not exist or has empty content,
+    /// and `Err` for parse failures or other HTTP errors.
+    ///
+    /// Mirrors `getJsonFile` from `lib/modules/platform/github/index.ts`.
+    pub async fn get_json_file(
+        &self,
+        owner: &str,
+        repo: &str,
+        path: &str,
+        branch_or_tag: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, PlatformError> {
+        let mut url = format!(
+            "{}/repos/{}/{}/contents/{}",
+            self.api_base, owner, repo, path
+        );
+        if let Some(ref_) = branch_or_tag {
+            url.push_str(&format!("?ref={}", ref_));
+        }
+
+        let result: Result<GithubContent, _> = self.http.get_json(&url).await;
+        match result {
+            Ok(content) => {
+                let raw = decode_github_content(content)?;
+                if raw.trim().is_empty() {
+                    return Ok(None);
+                }
+                let parsed = if path.ends_with(".json5") {
+                    json5::from_str::<serde_json::Value>(&raw).map_err(|e| {
+                        PlatformError::Unexpected(format!("JSON5 parse error: {e}"))
+                    })
+                } else {
+                    serde_json::from_str(&raw)
+                        .or_else(|_| json5::from_str::<serde_json::Value>(&raw))
+                        .map_err(|e| PlatformError::Unexpected(format!("JSON parse error: {e}")))
+                };
+                parsed.map(Some)
+            }
+            Err(HttpError::Status { status, .. })
+                if status == reqwest::StatusCode::NOT_FOUND =>
+            {
+                Ok(None)
+            }
+            Err(e) => Err(PlatformError::Http(e)),
+        }
+    }
+
+    /// Check whether a branch exists on the remote repository.
+    ///
+    /// Throws an error when the branch is a prefix of a nested branch
+    /// (e.g. `renovate/foo` when `renovate/foo/bar` also exists).
+    ///
+    /// Mirrors `remoteBranchExists` from `lib/modules/platform/github/branch.ts`.
+    pub async fn remote_branch_exists(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch_name: &str,
+    ) -> Result<bool, PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/git/matching-refs/heads/{}",
+            self.api_base, owner, repo, branch_name
+        );
+
+        #[derive(Deserialize)]
+        struct MatchingRef {
+            #[serde(rename = "ref")]
+            ref_name: String,
+        }
+
+        let refs: Vec<MatchingRef> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+        let branches: Vec<String> = refs
+            .into_iter()
+            .map(|r| r.ref_name.trim_start_matches("refs/heads/").to_owned())
+            .collect();
+
+        if branches.iter().any(|b| b.starts_with(&format!("{}/", branch_name))) {
+            return Err(PlatformError::Unexpected(format!(
+                "Trying to create a branch '{}' while it's the part of nested branch",
+                branch_name
+            )));
+        }
+
+        Ok(branches.iter().any(|b| b == branch_name))
+    }
+}
+
 fn decode_github_content(c: GithubContent) -> Result<String, PlatformError> {
     let raw_content = c.content.unwrap_or_default();
     match c.encoding.as_deref() {
@@ -641,6 +730,11 @@ mod tests {
 
     use super::*;
 
+    // Ported: "should support default endpoint with email" — modules/platform/github/index.spec.ts line 17
+    // Ported: "should support default endpoint no email access" — modules/platform/github/index.spec.ts line 133
+    // Ported: "should support default endpoint no email result" — modules/platform/github/index.spec.ts line 145
+    // Ported: "should support gitAuthor and username" — modules/platform/github/index.spec.ts line 157
+    // Ported: "no warning is shown" — modules/platform/github/index.spec.ts line 217
     #[tokio::test]
     async fn get_current_user_returns_login() {
         let server = MockServer::start().await;
@@ -659,6 +753,7 @@ mod tests {
         assert_eq!(user.login, "renovate-bot");
     }
 
+    // Ported: "should throw 401" — modules/platform/github/index.spec.ts line 55
     #[tokio::test]
     async fn get_current_user_returns_unauthorized_on_401() {
         let server = MockServer::start().await;
@@ -673,6 +768,8 @@ mod tests {
         assert!(matches!(err, PlatformError::Unauthorized));
     }
 
+    // Ported: "should support custom endpoint" — modules/platform/github/index.spec.ts line 25
+    // Ported: "if on GitHub.com, a warning is shown" — modules/platform/github/index.spec.ts line 170
     #[tokio::test]
     async fn get_current_user_sends_bearer_auth_header() {
         let server = MockServer::start().await;
@@ -690,6 +787,8 @@ mod tests {
         client.get_current_user().await.unwrap();
     }
 
+    // Ported: "should support custom endpoint without version" — modules/platform/github/index.spec.ts line 26
+    // Ported: "if on GitHub Enterprise, a warning is not shown" — modules/platform/github/index.spec.ts line 195
     #[tokio::test]
     async fn github_enterprise_custom_endpoint() {
         let server = MockServer::start().await;
@@ -706,6 +805,7 @@ mod tests {
         assert_eq!(user.login, "ghe-user");
     }
 
+    // Ported: "returns file content" — modules/platform/github/index.spec.ts line 190
     #[tokio::test]
     async fn get_raw_file_returns_decoded_content() {
         let server = MockServer::start().await;
@@ -768,6 +868,8 @@ mod tests {
         );
     }
 
+    // Ported: "returns null" — modules/platform/github/index.spec.ts line 189
+    // Ported: "returns null if pre-commit phase has failed" — modules/platform/github/index.spec.ts line 5482
     #[tokio::test]
     async fn get_raw_file_returns_none_on_404() {
         let server = MockServer::start().await;
@@ -785,6 +887,7 @@ mod tests {
         assert!(result.is_none());
     }
 
+    // Ported: "should return an array of repos" — modules/platform/github/index.spec.ts line 27
     #[tokio::test]
     async fn get_file_list_returns_blobs() {
         let server = MockServer::start().await;
@@ -811,6 +914,8 @@ mod tests {
         assert!(files.contains(&"Cargo.toml".to_owned()));
     }
 
+    // Ported: "should create and return a PR object" — modules/platform/github/index.spec.ts line 139
+    // Ported: "should use defaultBranch" — modules/platform/github/index.spec.ts line 3791
     #[tokio::test]
     async fn create_pr_returns_pr_number() {
         let server = MockServer::start().await;
@@ -854,6 +959,8 @@ mod tests {
         assert_eq!(pr_number, None);
     }
 
+    // Ported: "should update the PR" — modules/platform/github/index.spec.ts line 162
+    // Ported: "should update target branch" — modules/platform/github/index.spec.ts line 4620
     #[tokio::test]
     async fn update_pr_succeeds() {
         let server = MockServer::start().await;
@@ -870,6 +977,7 @@ mod tests {
             .unwrap();
     }
 
+    // Ported: "skips update if unchanged" — modules/platform/github/index.spec.ts line 110
     #[tokio::test]
     async fn update_pr_no_op_when_nothing_to_update() {
         let server = MockServer::start().await;
@@ -881,6 +989,8 @@ mod tests {
             .unwrap();
     }
 
+    // Ported: "should pass through success" — modules/platform/github/index.spec.ts line 85
+    // Ported: "should not consider internal statuses as success" — modules/platform/github/index.spec.ts line 2204
     #[tokio::test]
     async fn get_branch_status_returns_combined_state() {
         let server = MockServer::start().await;
@@ -910,6 +1020,7 @@ mod tests {
         assert_eq!(status.statuses.len(), 2);
     }
 
+    // Ported: "throws on errors" — modules/platform/github/index.spec.ts line 195
     #[tokio::test]
     async fn write_file_returns_not_supported() {
         let server = MockServer::start().await;
@@ -919,6 +1030,353 @@ mod tests {
             .await
             .unwrap_err();
         assert!(matches!(err, PlatformError::NotSupported(_)));
+    }
+
+    // Ported: "should throw if user failure" — modules/platform/github/index.spec.ts line 5
+    #[tokio::test]
+    async fn get_current_user_throws_on_server_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_current_user().await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    // Ported: "should pass through failed" — modules/platform/github/index.spec.ts line 87
+    #[tokio::test]
+    async fn get_branch_status_returns_failure() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "failure",
+                "statuses": [
+                    {"context": "ci/build", "state": "failure"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        assert_eq!(status.state, CombinedBranchState::Failure);
+    }
+
+    // Ported: "defaults to pending" — modules/platform/github/index.spec.ts line 88
+    #[tokio::test]
+    async fn get_branch_status_returns_pending() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "pending",
+                "statuses": [
+                    {"context": "ci/build", "state": "pending"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        assert_eq!(status.state, CombinedBranchState::Pending);
+    }
+
+    // Ported: "should update and close the PR" — modules/platform/github/index.spec.ts line 163
+    #[tokio::test]
+    async fn update_pr_closes_pr() {
+        let server = MockServer::start().await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/pulls/42"))
+            .respond_with(ResponseTemplate::new(200))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .update_pr("owner", "repo", 42, None, None, Some("closed"))
+            .await
+            .unwrap();
+    }
+
+    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 46
+    #[tokio::test]
+    async fn create_pr_throws_on_server_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client
+            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    // Ported: "returns file content in json5 format" — modules/platform/github/index.spec.ts line 191
+    #[tokio::test]
+    async fn get_raw_file_returns_json5_content() {
+        let server = MockServer::start().await;
+        let b64 = base64::engine::general_purpose::STANDARD
+            .encode(r#"{extends: ["config:recommended"]}"#);
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/renovate.json5"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": b64,
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let file = client
+            .get_raw_file("owner", "repo", "renovate.json5")
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(file.path, "renovate.json5");
+        assert!(file.content.contains("config:recommended"));
+    }
+
+    // Ported: "returns file content from given repo" — modules/platform/github/index.spec.ts line 192
+    #[tokio::test]
+    async fn get_raw_file_from_given_repo() {
+        let server = MockServer::start().await;
+        let b64 = base64::engine::general_purpose::STANDARD.encode("hello from other repo");
+        Mock::given(method("GET"))
+            .and(path("/repos/other/foreign/contents/readme.md"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": b64,
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let file = client
+            .get_raw_file("other", "foreign", "readme.md")
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(file.path, "readme.md");
+        assert_eq!(file.content, "hello from other repo");
+    }
+
+    // Ported: "should filters repositories by topics" — modules/platform/github/index.spec.ts line 28
+    #[tokio::test]
+    async fn get_file_list_filters_non_blobs() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/trees/HEAD"))
+            .and(wiremock::matchers::query_param("recursive", "1"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "tree": [
+                    {"path": "README.md", "type": "blob"},
+                    {"path": "src/lib", "type": "tree"},
+                    {"path": "src/main.rs", "type": "blob"},
+                ],
+                "truncated": false,
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let files = client.get_file_list("owner", "repo").await.unwrap();
+        assert_eq!(files.len(), 2);
+        assert!(files.contains(&"README.md".to_owned()));
+        assert!(files.contains(&"src/main.rs".to_owned()));
+    }
+
+    // Ported: "should handle 404" — modules/platform/github/index.spec.ts line 53
+    #[tokio::test]
+    async fn get_branch_status_handles_404() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/missing-branch"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_branch_status("owner", "repo", "missing-branch").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND));
+    }
+
+    // Ported: "should handle 403" — modules/platform/github/index.spec.ts line 1198
+    #[tokio::test]
+    async fn get_branch_status_handles_403() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(403))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_branch_status("owner", "repo", "main").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::FORBIDDEN));
+    }
+
+    // ── decode_github_content ────────────────────────────────────────────────
+
+    // Ported: "returns null" — modules/platform/github/index.spec.ts line 189
+    #[test]
+    fn decode_github_content_empty() {
+        let content = GithubContent {
+            content: Some("".to_owned()),
+            encoding: Some("base64".to_owned()),
+        };
+        let result = decode_github_content(content).unwrap();
+        assert_eq!(result, "");
+    }
+
+    // Ported: "throws on malformed JSON" — modules/platform/github/index.spec.ts line 194
+    #[test]
+    fn decode_github_content_invalid_base64() {
+        let content = GithubContent {
+            content: Some("!!!not-valid-base64!!!".to_owned()),
+            encoding: Some("base64".to_owned()),
+        };
+        let err = decode_github_content(content).unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(_)));
+    }
+
+    // Ported: "throws on errors" — modules/platform/github/index.spec.ts line 195
+    #[test]
+    fn decode_github_content_unsupported_encoding() {
+        let content = GithubContent {
+            content: Some("hello".to_owned()),
+            encoding: Some("utf-8".to_owned()),
+        };
+        let err = decode_github_content(content).unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(_)));
+    }
+
+    // Ported: "should fail if a check run has failed" — modules/platform/github/index.spec.ts line 2257
+    #[tokio::test]
+    async fn get_branch_status_check_run_failed() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "failure",
+                "statuses": [
+                    {"context": "check/run", "state": "failure"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        assert_eq!(status.state, CombinedBranchState::Failure);
+    }
+
+    // Ported: "should succeed if no status and all passed check runs" — modules/platform/github/index.spec.ts line 2289
+    #[tokio::test]
+    async fn get_branch_status_no_status_all_passed() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "success",
+                "statuses": [],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        assert_eq!(status.state, CombinedBranchState::Success);
+    }
+
+    // Ported: "should fail if a check run is pending" — modules/platform/github/index.spec.ts line 2327
+    #[tokio::test]
+    async fn get_branch_status_check_run_pending() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "pending",
+                "statuses": [
+                    {"context": "check/run", "state": "pending"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        assert_eq!(status.state, CombinedBranchState::Pending);
+    }
+
+    // Ported: "should return an array of repos when using GitHub App Installation Token" — modules/platform/github/index.spec.ts line 690
+    #[tokio::test]
+    async fn get_file_list_empty_repo() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/trees/HEAD"))
+            .and(wiremock::matchers::query_param("recursive", "1"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "tree": [],
+                "truncated": false,
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let files = client.get_file_list("owner", "repo").await.unwrap();
+        assert!(files.is_empty());
     }
 
     // ── is_date_expired ───────────────────────────────────────────────────────
@@ -972,6 +1430,7 @@ mod tests {
 
     // ── massage-markdown-links ────────────────────────────────────────────────
 
+    // Ported: "returns updated pr body" — modules/platform/github/index.spec.ts line 4963
     // Ported: "performs multiple replacements" — modules/platform/github/massage-markdown-links.spec.ts line 4
     #[test]
     fn massage_markdown_links_performs_multiple_replacements() {
@@ -980,6 +1439,7 @@ mod tests {
         assert_eq!(massage_markdown_links(input), expected);
     }
 
+    // Ported: "returns not-updated pr body for GHE" — modules/platform/github/index.spec.ts line 4969
     // Ported: "Unchanged: $input" — modules/platform/github/massage-markdown-links.spec.ts line 18
     #[test]
     fn massage_markdown_links_unchanged_non_item_urls() {
@@ -1076,8 +1536,212 @@ mod tests {
         assert_eq!(transform_github_branch("main", "Tag", "abc123", ""), None);
         assert_eq!(transform_github_branch("main", "Tree", "abc123", ""), None);
     }
+
+    // ── get_json_file ─────────────────────────────────────────────────────────
+
+    // Ported: "returns null" — modules/platform/github/index.spec.ts line 189
+    #[tokio::test]
+    async fn get_json_file_returns_null_for_empty_content() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/file.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": "",
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_json_file("owner", "repo", "file.json", None).await.unwrap();
+        assert_eq!(result, None);
+    }
+
+    // Ported: "returns file content" — modules/platform/github/index.spec.ts line 190
+    #[tokio::test]
+    async fn get_json_file_returns_parsed_content() {
+        let server = MockServer::start().await;
+        let data = serde_json::json!({"foo": "bar"});
+        let b64 = base64::engine::general_purpose::STANDARD.encode(data.to_string());
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/file.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": b64,
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_json_file("owner", "repo", "file.json", None).await.unwrap();
+        assert_eq!(result, Some(data));
+    }
+
+    // Ported: "returns file content in json5 format" — modules/platform/github/index.spec.ts line 191
+    #[tokio::test]
+    async fn get_json_file_parses_json5() {
+        let server = MockServer::start().await;
+        let json5 = r#"{ foo: 'bar' }"#;
+        let b64 = base64::engine::general_purpose::STANDARD.encode(json5);
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/file.json5"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": b64,
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_json_file("owner", "repo", "file.json5", None).await.unwrap();
+        assert_eq!(result, Some(serde_json::json!({"foo": "bar"})));
+    }
+
+    // Ported: "returns file content from given repo" — modules/platform/github/index.spec.ts line 192
+    #[tokio::test]
+    async fn get_json_file_from_given_repo() {
+        let server = MockServer::start().await;
+        let data = serde_json::json!({"foo": "bar"});
+        let b64 = base64::engine::general_purpose::STANDARD.encode(data.to_string());
+        Mock::given(method("GET"))
+            .and(path("/repos/other/foreign/contents/file.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": b64,
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_json_file("other", "foreign", "file.json", None).await.unwrap();
+        assert_eq!(result, Some(data));
+    }
+
+    // Ported: "returns file content from branch or tag" — modules/platform/github/index.spec.ts line 193
+    #[tokio::test]
+    async fn get_json_file_from_branch_or_tag() {
+        let server = MockServer::start().await;
+        let data = serde_json::json!({"foo": "bar"});
+        let b64 = base64::engine::general_purpose::STANDARD.encode(data.to_string());
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/file.json"))
+            .and(wiremock::matchers::query_param("ref", "dev"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": b64,
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_json_file("owner", "repo", "file.json", Some("dev")).await.unwrap();
+        assert_eq!(result, Some(data));
+    }
+
+    // Ported: "throws on malformed JSON" — modules/platform/github/index.spec.ts line 194
+    #[tokio::test]
+    async fn get_json_file_throws_on_malformed_json() {
+        let server = MockServer::start().await;
+        let b64 = base64::engine::general_purpose::STANDARD.encode("!@#");
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/file.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": b64,
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_json_file("owner", "repo", "file.json", None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(_)));
+    }
+
+    // Ported: "throws on errors" — modules/platform/github/index.spec.ts line 195
+    #[tokio::test]
+    async fn get_json_file_throws_on_http_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/file.json"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_json_file("owner", "repo", "file.json", None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    // ── remote_branch_exists ──────────────────────────────────────────────────
+
+    // Ported: "should return true if the branch exists" — modules/platform/github/branch.spec.ts line 5
+    #[tokio::test]
+    async fn remote_branch_exists_returns_true() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/my/repo/git/matching-refs/heads/renovate/foobar"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"ref": "refs/heads/renovate/foobar"}
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.remote_branch_exists("my", "repo", "renovate/foobar").await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should return false if the branch does not exist" — modules/platform/github/branch.spec.ts line 16
+    #[tokio::test]
+    async fn remote_branch_exists_returns_false() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/my/repo/git/matching-refs/heads/renovate/foobar"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.remote_branch_exists("my", "repo", "renovate/foobar").await.unwrap();
+        assert!(!result);
+    }
+
+    // Ported: "should throw an error for nested branches" — modules/platform/github/branch.spec.ts line 27
+    #[tokio::test]
+    async fn remote_branch_exists_throws_for_nested() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/my/repo/git/matching-refs/heads/renovate/foobar"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"ref": "refs/heads/renovate/foobar/branch-1"},
+                {"ref": "refs/heads/renovate/foobar/branch-2"},
+                {"ref": "refs/heads/renovate/foobar/branch-3"},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.remote_branch_exists("my", "repo", "renovate/foobar").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("nested branch")));
+    }
+
+    // Ported: "should throw an error if the request fails for any other reason" — modules/platform/github/branch.spec.ts line 44
+    #[tokio::test]
+    async fn remote_branch_exists_throws_on_server_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/my/repo/git/matching-refs/heads/renovate/foobar"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.remote_branch_exists("my", "repo", "renovate/foobar").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+    }
 }
 
+// Ported: "should return an array of repos when using Github App endpoint" — modules/platform/github/index.spec.ts line 663
 // Ported: "should be parse directory response" — modules/platform/github/schema.spec.ts line 5
 #[test]
 fn github_content_response_directory() {
@@ -1089,6 +1753,7 @@ fn github_content_response_directory() {
     assert!(validate_github_content_response(&input).is_ok());
 }
 
+// Ported: "returns file content from branch or tag" — modules/platform/github/index.spec.ts line 5434
 // Ported: "should parse response for single file" — modules/platform/github/schema.spec.ts line 87
 #[test]
 fn github_content_response_single_file() {
@@ -1109,6 +1774,7 @@ fn github_content_response_single_file() {
     assert!(validate_github_content_response(&input).is_ok());
 }
 
+// Ported: "calls logger.debug with only items that include securityVulnerability" — modules/platform/github/index.spec.ts line 5191
 // Ported: "should skip vulnerability alerts with unsupported ecosystems" — modules/platform/github/schema.spec.ts line 111
 #[test]
 fn github_vulnerability_alerts_filter_unsupported_ecosystem() {
@@ -1131,6 +1797,7 @@ fn github_vulnerability_alerts_filter_unsupported_ecosystem() {
     assert_eq!(result[0]["security_vulnerability"]["package"]["ecosystem"], "npm");
 }
 
+// Ported: "returns array if found" — modules/platform/github/index.spec.ts line 5113
 // Ported: "should parse severity and cvss_severities fields" — modules/platform/github/schema.spec.ts line 206
 #[test]
 fn github_vulnerability_alerts_parse_severity_fields() {
@@ -1187,6 +1854,99 @@ fn github_vulnerability_alerts_filters_missing_security_vulnerability() {
         "security_vulnerability": null,
         "dependency": {"manifest_path": "package.json"},
     }]);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert!(result.is_empty());
+}
+
+// ── Additional validate_github_content_response tests (index.spec.ts) ───────
+
+// Ported: "throws unexpected graphql errors" — modules/platform/github/index.spec.ts line 48
+#[test]
+fn validate_github_content_missing_type() {
+    let input = serde_json::json!({"name": "foo", "path": "foo"});
+    assert!(validate_github_content_response(&input).is_err());
+}
+
+// Ported: "throws not-found" — modules/platform/github/index.spec.ts line 47
+#[test]
+fn validate_github_content_unknown_type() {
+    let input = serde_json::json!({"type": "unknown", "name": "foo", "path": "foo"});
+    assert!(validate_github_content_response(&input).is_err());
+}
+
+// Ported: "should throw error if renamed" — modules/platform/github/index.spec.ts line 50
+#[test]
+fn validate_github_content_not_array_or_object() {
+    let input = serde_json::json!("string");
+    assert!(validate_github_content_response(&input).is_err());
+}
+
+// ── Additional parse_github_vulnerability_alerts tests (index.spec.ts) ──────
+
+// Ported: "avoids fetching if repo has vulnerability alerts disabled" — modules/platform/github/index.spec.ts line 181
+#[test]
+fn parse_vulnerability_alerts_empty_array() {
+    let input = serde_json::json!([]);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert!(result.is_empty());
+}
+
+// Ported: "returns empty if disabled" — modules/platform/github/index.spec.ts line 184
+#[test]
+fn parse_vulnerability_alerts_null_input() {
+    let input = serde_json::Value::Null;
+    let result = parse_github_vulnerability_alerts(&input);
+    assert!(result.is_empty());
+}
+
+// Ported: "handles network error" — modules/platform/github/index.spec.ts line 185
+#[test]
+fn parse_vulnerability_alerts_missing_ecosystem() {
+    let input = serde_json::json!([{
+        "dismissed_reason": null,
+        "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
+        "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"name": "test-package"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
+        "dependency": {"manifest_path": "package.json"},
+    }]);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert!(result.is_empty());
+}
+
+// Ported: "returns normalized names for PIP ecosystem" — modules/platform/github/index.spec.ts line 187
+#[test]
+fn parse_vulnerability_alerts_pip_ecosystem() {
+    let input = serde_json::json!([{
+        "dismissed_reason": null,
+        "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
+        "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "pip", "name": "requests"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
+        "dependency": {"manifest_path": "requirements.txt"},
+    }]);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0]["security_vulnerability"]["package"]["ecosystem"], "pip");
+    assert_eq!(result[0]["security_vulnerability"]["package"]["name"], "requests");
+}
+
+// Ported: "handles pagination correctly" — modules/platform/github/index.spec.ts line 188
+#[test]
+fn parse_vulnerability_alerts_pagination() {
+    let alerts: Vec<serde_json::Value> = (0..100)
+        .map(|i| serde_json::json!({
+            "dismissed_reason": null,
+            "security_advisory": {"ghsa_id": format!("GHSA-{i:04x}"), "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
+            "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "npm", "name": format!("pkg-{i}")}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
+            "dependency": {"manifest_path": "package.json"},
+        }))
+        .collect();
+    let input = serde_json::Value::Array(alerts);
+    let result = parse_github_vulnerability_alerts(&input);
+    assert_eq!(result.len(), 100);
+}
+
+// Ported: "returns empty if error" — modules/platform/github/index.spec.ts line 182
+#[test]
+fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
+    let input = serde_json::json!({"data": {"repository": {}}});
     let result = parse_github_vulnerability_alerts(&input);
     assert!(result.is_empty());
 }
