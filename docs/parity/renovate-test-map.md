@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,366 / 11,650 total tests ported (46.1%) · pending 5,160 · not-applicable 1,124 (9.6%) — updated 2026-05-30
+**Progress:** 5,366 / 11,650 total tests ported (46.1%) · pending 5,150 · not-applicable 1,134 (9.7%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -382,9 +382,9 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/package-rules/jsonata.spec.ts` | Done | [details](lib/util/package-rules/jsonata.spec.ts.md) |
 | `lib/workers/global/config/parse/cli.spec.ts` | Done | [details](lib/workers/global/config/parse/cli.spec.ts.md) |
 | `lib/workers/repository/init/apis.spec.ts` | Not done | [details](lib/workers/repository/init/apis.spec.ts.md) |
-| `lib/workers/repository/init/cache.spec.ts` | Not done | [details](lib/workers/repository/init/cache.spec.ts.md) |
+| `lib/workers/repository/init/cache.spec.ts` | Done | [details](lib/workers/repository/init/cache.spec.ts.md) |
 | `lib/workers/global/config/parse/file.spec.ts` | Not done | [details](lib/workers/global/config/parse/file.spec.ts.md) |
-| `lib/workers/global/config/parse/env.spec.ts` | Not done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
+| `lib/workers/global/config/parse/env.spec.ts` | Done | [details](lib/workers/global/config/parse/env.spec.ts.md) |
 | `lib/workers/repository/init/merge.spec.ts` | Not done | [details](lib/workers/repository/init/merge.spec.ts.md) |
 | `lib/util/package-rules/index.spec.ts` | Done | [details](lib/util/package-rules/index.spec.ts.md) |
 | `lib/renovate.spec.ts` | Done | [details](lib/renovate.spec.ts.md) |
@@ -434,7 +434,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/url.spec.ts` | Done | [details](lib/util/url.spec.ts.md) |
 | `lib/util/toml.spec.ts` | Done | [details](lib/util/toml.spec.ts.md) |
 | `lib/modules/platform/comment.spec.ts` | Done | [details](lib/modules/platform/comment.spec.ts.md) |
-| `lib/modules/platform/scm.spec.ts` | Not done | [details](lib/modules/platform/scm.spec.ts.md) |
+| `lib/modules/platform/scm.spec.ts` | Done | [details](lib/modules/platform/scm.spec.ts.md) |
 | `lib/modules/platform/pr-body.spec.ts` | Done | [details](lib/modules/platform/pr-body.spec.ts.md) |
 | `lib/modules/platform/index.spec.ts` | Done | [details](lib/modules/platform/index.spec.ts.md) |
 | `lib/modules/platform/types.spec.ts` | Done | [details](lib/modules/platform/types.spec.ts.md) |
@@ -443,7 +443,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/range.spec.ts` | Done | [details](lib/modules/manager/range.spec.ts.md) |
 | `lib/modules/manager/index.spec.ts` | Not done | [details](lib/modules/manager/index.spec.ts.md) |
 | `lib/modules/manager/util.spec.ts` | Done | [details](lib/modules/manager/util.spec.ts.md) |
-| `lib/modules/manager/fingerprint.spec.ts` | Not done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
+| `lib/modules/manager/fingerprint.spec.ts` | Done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
 | `lib/modules/manager/metadata.spec.ts` | Done | [details](lib/modules/manager/metadata.spec.ts.md) |
 | `lib/modules/versioning/schema.spec.ts` | Done | [details](lib/modules/versioning/schema.spec.ts.md) |
 | `lib/modules/versioning/index.spec.ts` | Done | [details](lib/modules/versioning/index.spec.ts.md) |
@@ -842,14 +842,14 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/error-config.spec.ts` | Not done | [details](lib/workers/repository/error-config.spec.ts.md) |
 | `lib/workers/repository/error.spec.ts` | Done | [details](lib/workers/repository/error.spec.ts.md) |
 | `lib/workers/repository/errors-warnings.spec.ts` | Done | [details](lib/workers/repository/errors-warnings.spec.ts.md) |
-| `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | Not done | [details](lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) |
+| `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | Done | [details](lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) |
 | `lib/workers/repository/extract/file-match.spec.ts` | Done | [details](lib/workers/repository/extract/file-match.spec.ts.md) |
 | `lib/workers/repository/extract/index.spec.ts` | Not done | [details](lib/workers/repository/extract/index.spec.ts.md) |
 | `lib/workers/repository/extract/manager-files.spec.ts` | Not done | [details](lib/workers/repository/extract/manager-files.spec.ts.md) |
 | `lib/workers/repository/extract/supersedes.spec.ts` | Done | [details](lib/workers/repository/extract/supersedes.spec.ts.md) |
 | `lib/workers/repository/finalize/prune.spec.ts` | Not done | [details](lib/workers/repository/finalize/prune.spec.ts.md) |
 | `lib/workers/repository/finalize/repository-statistics.spec.ts` | Not done | [details](lib/workers/repository/finalize/repository-statistics.spec.ts.md) |
-| `lib/workers/repository/index.spec.ts` | Not done | [details](lib/workers/repository/index.spec.ts.md) |
+| `lib/workers/repository/index.spec.ts` | Done | [details](lib/workers/repository/index.spec.ts.md) |
 | `lib/workers/repository/init/index.spec.ts` | Not done | [details](lib/workers/repository/init/index.spec.ts.md) |
 | `lib/workers/repository/init/inherited.spec.ts` | Not done | [details](lib/workers/repository/init/inherited.spec.ts.md) |
 | `lib/workers/repository/init/vulnerability.spec.ts` | Not done | [details](lib/workers/repository/init/vulnerability.spec.ts.md) |
@@ -899,7 +899,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/branch/schedule.spec.ts` | Not done | [details](lib/workers/repository/update/branch/schedule.spec.ts.md) |
 | `lib/workers/repository/update/branch/status-checks.spec.ts` | Not done | [details](lib/workers/repository/update/branch/status-checks.spec.ts.md) |
 | `lib/workers/repository/update/pr/automerge.spec.ts` | Not done | [details](lib/workers/repository/update/pr/automerge.spec.ts.md) |
-| `lib/workers/repository/update/pr/body/changelogs.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/changelogs.spec.ts.md) |
+| `lib/workers/repository/update/pr/body/changelogs.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/changelogs.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/config-description.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/config-description.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/controls.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/controls.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/footer.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/footer.spec.ts.md) |
