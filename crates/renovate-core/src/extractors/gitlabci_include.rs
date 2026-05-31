@@ -135,6 +135,104 @@ fn normalize_gitlab_endpoint(endpoint: &str) -> Option<String> {
     Some(endpoint)
 }
 
+/// Update the `ref:` value for a given GitLab CI include project.
+///
+/// Searches the YAML content for an include block containing
+/// `project: <dep_name>` and then updates the corresponding `ref:` line
+/// from `current_value` to `new_value`.
+pub fn gitlabci_include_update_dependency(
+    content: &str,
+    dep_name: &str,
+    current_value: &str,
+    new_value: &str,
+) -> Option<String> {
+    let mut result = String::with_capacity(content.len());
+    let mut in_include = false;
+    let mut found_project = false;
+
+    for raw in content.lines() {
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        let trimmed = line.trim_start();
+        let indent = leading_spaces(line);
+
+        if trimmed.is_empty() {
+            result.push_str(raw);
+            result.push('\n');
+            continue;
+        }
+
+        // `include:` at any indent level (handles nested includes).
+        if trimmed == "include:" {
+            in_include = true;
+            found_project = false;
+            result.push_str(raw);
+            result.push('\n');
+            continue;
+        }
+
+        // Leaving the include block when we see a top-level key.
+        if indent == 0 && !trimmed.starts_with('-') && in_include {
+            in_include = false;
+            found_project = false;
+            result.push_str(raw);
+            result.push('\n');
+            continue;
+        }
+
+        if !in_include {
+            result.push_str(raw);
+            result.push('\n');
+            continue;
+        }
+
+        // New list item resets the project match.
+        if trimmed.starts_with("- ") {
+            found_project = false;
+            let rest = trimmed.strip_prefix("- ").unwrap_or("");
+            if let Some(val) = strip_key(rest, "project") {
+                let project_val = val.trim().trim_matches('"').trim_matches('\'');
+                if project_val == dep_name {
+                    found_project = true;
+                }
+            }
+            result.push_str(raw);
+            result.push('\n');
+            continue;
+        }
+
+        // Inline project key (non-list form).
+        if let Some(val) = strip_key(trimmed, "project") {
+            let project_val = val.trim().trim_matches('"').trim_matches('\'');
+            found_project = project_val == dep_name;
+            result.push_str(raw);
+            result.push('\n');
+            continue;
+        }
+
+        if let Some(val) = strip_key(trimmed, "ref")
+            && found_project
+        {
+            let ref_val = val.trim().trim_matches('"').trim_matches('\'');
+            if ref_val == current_value {
+                // Replace first occurrence of current_value on this line.
+                let new_raw = raw.replacen(current_value, new_value, 1);
+                result.push_str(&new_raw);
+                result.push('\n');
+                continue;
+            }
+        }
+
+        result.push_str(raw);
+        result.push('\n');
+    }
+
+    if result != content {
+        Some(result)
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -300,5 +398,77 @@ include:
             assert_eq!(deps.len(), 1);
             assert_eq!(deps[0].registry_urls, vec!["http://gitlab.test"]);
         }
+    }
+
+    #[test]
+    fn update_ref_value() {
+        let content = "\
+include:
+  - project: org/templates
+    ref: v2.1.0
+    file: /templates/build.yml
+";
+        let updated = gitlabci_include_update_dependency(content, "org/templates", "v2.1.0", "v3.0.0");
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("ref: v3.0.0"));
+        assert!(!updated.contains("ref: v2.1.0"));
+    }
+
+    #[test]
+    fn update_ref_preserves_quotes() {
+        let content = "\
+include:
+  - project: org/templates
+    ref: 'v2.1.0'
+";
+        let updated = gitlabci_include_update_dependency(content, "org/templates", "v2.1.0", "v3.0.0");
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("ref: 'v3.0.0'"));
+    }
+
+    #[test]
+    fn update_ref_no_match_returns_none() {
+        let content = "\
+include:
+  - project: org/templates
+    ref: v2.1.0
+";
+        let updated = gitlabci_include_update_dependency(content, "org/other", "v2.1.0", "v3.0.0");
+        assert!(updated.is_none());
+    }
+
+    #[test]
+    fn update_ref_only_matching_current() {
+        let content = "\
+include:
+  - project: org/templates
+    ref: v2.1.0
+  - project: org/other
+    ref: v1.0.0
+";
+        let updated = gitlabci_include_update_dependency(content, "org/other", "v1.0.0", "v2.0.0");
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("org/other\n    ref: v2.0.0"));
+        assert!(updated.contains("org/templates\n    ref: v2.1.0"));
+    }
+
+    #[test]
+    fn update_ref_nested_include() {
+        let content = "\
+trigger-my-job:
+  trigger:
+    include:
+      - project: mikebryant/include-source-example
+        file: /template.yaml
+        ref: master
+";
+        let updated = gitlabci_include_update_dependency(content, "mikebryant/include-source-example", "master", "main");
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("ref: main"));
+        assert!(!updated.contains("ref: master"));
     }
 }

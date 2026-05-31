@@ -478,6 +478,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/gitlabci-include/extract.ts` | `extractors/gitlabci_include.rs` | full | `extract()` + `extract_with_endpoint()` handle include directives |
 | `lib/modules/manager/gitlabci-include/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/gitlabci-include/update.ts` | `extractors/gitlabci_include.rs` | partial | `gitlabci_include_update_dependency()` replaces `ref:` values; wired in CLI pipeline |
 | `lib/modules/manager/gitlabci-include/dep-types.ts` | `extractors/gitlabci_include.rs` | full | Dep types embedded |
 | `lib/modules/manager/gitlabci-include/schema.ts` | N/A | out-of-scope | Zod schema |
 
