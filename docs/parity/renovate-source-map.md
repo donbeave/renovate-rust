@@ -235,6 +235,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/circleci/extract.ts` | `extractors/circleci.rs` | full | `extract()` handles Docker images + orbs |
 | `lib/modules/manager/circleci/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/circleci/update.ts` | `extractors/circleci.rs` | partial | `circleci_update_orb()` for orbs + dockerfile logic for images; missing: inline orbs |
 | `lib/modules/manager/circleci/dep-types.ts` | `extractors/circleci.rs` | full | Dep types embedded |
 | `lib/modules/manager/circleci/range.ts` | `extractors/circleci.rs` | full | `get_range_strategy()` present |
 | `lib/modules/manager/circleci/schema.ts` | N/A | out-of-scope | Zod schema |

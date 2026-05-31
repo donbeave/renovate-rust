@@ -215,6 +215,43 @@ pub fn extract_orbs(content: &str) -> Vec<CircleCiOrbDep> {
     out
 }
 
+/// Update a single CircleCI orb dependency in a config YAML file.
+///
+/// Mirrors `updateDependency()` from `lib/modules/manager/circleci/update.ts`.
+///
+/// Returns `Some(updated_content)` when the replacement was made, or `None`
+/// when the orb could not be found or matched.
+pub fn circleci_update_orb(
+    file_content: &str,
+    package_name: &str,
+    current_version: &str,
+    new_version: &str,
+) -> Option<String> {
+    let old_ref = format!("{package_name}@{current_version}");
+    let new_ref = format!("{package_name}@{new_version}");
+    let mut content = file_content.to_owned();
+    let mut found = false;
+
+    for line in file_content.lines() {
+        let raw = line.split(" #").next().unwrap_or(line).trim_end();
+        if let Some((_, rest)) = raw.split_once(':') {
+            let val = rest.trim().trim_matches('"').trim_matches('\'');
+            if val == old_ref {
+                let new_line = line.replace(&old_ref, &new_ref);
+                content = content.replacen(line, &new_line, 1);
+                found = true;
+                break;
+            }
+        }
+    }
+
+    if found {
+        Some(content)
+    } else {
+        None
+    }
+}
+
 fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
 }
@@ -635,5 +672,43 @@ workflows:
         for path in &should_not_match {
             assert!(!matches_file_pattern(path), "expected no match for {path}");
         }
+    }
+
+    // Rust-specific: circleci orb update behavior tests
+    #[test]
+    fn circleci_update_orb_replaces_version() {
+        let content = "orbs:\n  node: circleci/node@5.1.0\n";
+        let updated = circleci_update_orb(content, "circleci/node", "5.1.0", "5.2.0");
+        assert_eq!(
+            updated,
+            Some("orbs:\n  node: circleci/node@5.2.0\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn circleci_update_orb_no_match() {
+        let content = "orbs:\n  node: circleci/node@5.1.0\n";
+        let updated = circleci_update_orb(content, "circleci/python", "2.1.1", "2.2.0");
+        assert_eq!(updated, None);
+    }
+
+    #[test]
+    fn circleci_update_orb_quoted() {
+        let content = "orbs:\n  node: \"circleci/node@5.1.0\"\n";
+        let updated = circleci_update_orb(content, "circleci/node", "5.1.0", "5.2.0");
+        assert_eq!(
+            updated,
+            Some("orbs:\n  node: \"circleci/node@5.2.0\"\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn circleci_update_orb_multiple_orbs() {
+        let content = "orbs:\n  node: circleci/node@5.1.0\n  python: circleci/python@2.1.1\n";
+        let updated = circleci_update_orb(content, "circleci/python", "2.1.1", "2.2.0");
+        assert_eq!(
+            updated,
+            Some("orbs:\n  node: circleci/node@5.1.0\n  python: circleci/python@2.2.0\n".to_owned())
+        );
     }
 }

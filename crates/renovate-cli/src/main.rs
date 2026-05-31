@@ -609,6 +609,20 @@ async fn process_repo(
                                             &content, &bd.dep.name, current, &new_value,
                                         )
                                     }
+                                    "circleci" => {
+                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        if bd.dep.name.contains(':') {
+                                            // Docker image dep — reuse dockerfile logic.
+                                            renovate_core::extractors::dockerfile::dockerfile_update_dependency(
+                                                &content, &bd.dep.name, &new_value,
+                                            )
+                                        } else {
+                                            // Orb dep.
+                                            renovate_core::extractors::circleci::circleci_update_orb(
+                                                &content, &bd.dep.name, current, &new_value,
+                                            )
+                                        }
+                                    }
                                     _ => {
                                         tracing::debug!(
                                             repo = %repo_slug,
