@@ -28,6 +28,7 @@ pub const ALL_VERSIONING_IDS: &[&str] = &[
     "deno",
     "devbox",
     "docker",
+    "distro",
     "elm",
     "exact",
     "git",
@@ -106,6 +107,7 @@ pub mod deb;
 pub mod debian;
 pub mod deno;
 pub mod devbox;
+pub mod distro;
 pub mod docker;
 pub mod elm;
 pub mod exact;
