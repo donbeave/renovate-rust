@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/crate/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/crate/index.spec.ts
-**Total tests:** 27 | **Ported:** 16 | **Actionable:** 0 | **Status:** done
+**Total tests:** 27 | **Ported:** 16 | **Actionable:** 11 | **Status:** pending
 
 ### `modules/datasource/crate/index › getIndexSuffix`
 
@@ -28,16 +28,16 @@
 | processes real data: libc | 263 | ported | `crates_io.rs` | `processes_real_data_libc` | NDJSON + API; yanked=isDeprecated; pubtime=releaseTimestamp; +metadata strips |
 | processes real data: amethyst | 281 | ported | `crates_io.rs` | `processes_real_data_amethyst` | homepage set; sourceUrl set; 1 yanked |
 | uses cached registry config for subsequent packages | 299 | ported | `crates_io.rs` | `uses_cached_registry_config_for_subsequent_packages` | two packages succeed |
-| refuses to clone if allowCustomCrateRegistries is not true | 329 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| clones cloudsmith private registry | 342 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| clones other private registry | 357 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| clones once then reuses the cache | 372 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| reads config.json from cloned registry | 389 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| guards against race conditions while cloning | 402 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| returns null when git clone fails | 429 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| does not clone for sparse registries | 449 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| retries if shallow fails because of dumb http git repo | 467 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
-| retries if shallow fails but retry can also fail | 513 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
+| refuses to clone if allowCustomCrateRegistries is not true | 329 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| clones cloudsmith private registry | 342 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| clones other private registry | 357 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| clones once then reuses the cache | 372 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| reads config.json from cloned registry | 389 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| guards against race conditions while cloning | 402 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| returns null when git clone fails | 429 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| does not clone for sparse registries | 449 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| retries if shallow fails because of dumb http git repo | 467 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
+| retries if shallow fails but retry can also fail | 513 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
 
 ### `modules/datasource/crate/index › postprocessRelease`
 
@@ -52,6 +52,6 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| clones other private registry with explicit gitTimeout | 357 | not-applicable | — | — | Git-clone based Cargo registries not supported in Rust |
+| clones other private registry with explicit gitTimeout | 357 | pending | — | — | Git-clone based Cargo registries not supported in Rust |
 
 ---
