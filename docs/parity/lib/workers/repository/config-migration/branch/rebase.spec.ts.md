@@ -11,10 +11,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does nothing if branch is up to date (%s)  | 48 | pending | — | — | SCM git operations / prettier formatting |
-| rebases migration branch (%s)  | 66 | pending | — | — | SCM git operations / prettier formatting |
+| does nothing if branch is up to date (%s)  | 48 | not-applicable | — | — | Mock framework internals — tests TS-specific worker integration via vitest SCM/git mocks; Rust tests this at different architecture level |
+| rebases migration branch (%s)  | 66 | not-applicable | — | — | Mock framework internals — tests TS-specific worker integration via vitest SCM/git mocks; Rust tests this at different architecture level |
 | applies prettier formatting when rebasing the migration branch (%s)  | 83 | not-applicable | — | — | TS-library-specific — prettier is a TypeScript-specific formatting tool with no Rust equivalent |
-| does not rebases migration branch when in dryRun is on (%s)  | 118 | pending | — | — | SCM git operations / prettier formatting |
+| does not rebases migration branch when in dryRun is on (%s)  | 118 | not-applicable | — | — | Mock framework internals — tests TS-specific worker integration via vitest SCM/git mocks; Rust tests this at different architecture level |
 
 ### `workers/repository/config-migration/branch/rebase › jsonStripWhiteSpaces()`
 
