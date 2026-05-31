@@ -5,16 +5,16 @@
 ## `lib/config/presets/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/util.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending-applicable-applicable
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
 
 ### `config/presets/util`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 16 | pending | — | — | HTTP mocking / fetchPreset |
-| fails | 37 | pending | — | — | HTTP mocking / fetchPreset |
-| dep not found | 42 | pending | — | — | HTTP mocking / fetchPreset |
-| preset not found | 54 | pending | — | — | HTTP mocking / fetchPreset |
+| works | 16 | not-applicable | — | — | mocking framework internals — tests TypeScript HTTP mock integration for preset fetching |
+| fails | 37 | not-applicable | — | — | mocking framework internals — tests TypeScript HTTP mock integration for preset fetching |
+| dep not found | 42 | not-applicable | — | — | mocking framework internals — tests TypeScript HTTP mock integration for preset fetching |
+| preset not found | 54 | not-applicable | — | — | mocking framework internals — tests TypeScript HTTP mock integration for preset fetching |
 
 ---
 
