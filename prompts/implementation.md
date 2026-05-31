@@ -39,6 +39,28 @@ You do **not** own anything under `crates/**/tests/` or `mod tests` blocks —
 that's the test parity agent's territory. Keep changes to test code minimal
 (shells only) so the two agents don't collide.
 
+If you do write any test that is ported from an upstream `it(...)`, it **must**
+carry the canonical `// Ported:` comment so it counts toward Coverage:
+
+```rust
+// Ported: "extracts multiple image lines from docker_service" — ansible/extract.spec.ts line 16
+#[test]
+fn extracts_docker_service_images() {
+    let content = r#"---
+- name: run containers
+  docker_service:
+    definition:
+      services:
+        gitlab:
+          image: sameersbn/gitlab:11.5.1
+"#;
+    let deps = extract(content);
+    assert_eq!(deps.len(), 1);
+}
+```
+
+See `AGENTS.md` → **Ported Test Attribution** for the full rules and variants.
+
 ## Iteration
 
 1. **Pick the work**: open `docs/parity/milestones.md`, find the first

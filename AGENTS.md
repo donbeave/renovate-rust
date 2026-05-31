@@ -146,30 +146,102 @@ decide what to work on next.
 ## Ported Test Attribution (agent-only)
 
 Every Rust test that was ported from a Renovate TypeScript spec file **must**
-carry a provenance comment on the line immediately above the test attribute:
+carry a provenance comment on the line immediately above the test attribute.
 
-```rust
-// Ported: "<exact it() description>" — <upstream spec path> line <N>
-#[test]
-fn test_returns_null_for_invalid_yaml() {
+### The one canonical example — copy this form exactly
+
+Upstream TypeScript test
+(`renovate/lib/modules/manager/ansible/extract.spec.ts`):
+
+```typescript
+// line 16:
+    it('extracts multiple image lines from docker_service', () => {
+      const res = extractPackageFile(Fixtures.get('main2.yaml'), '', {});
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(4);
+    });
 ```
 
-Rules:
-- The quoted string is the exact text passed to `it(` in the TypeScript spec.
-- The spec path can be relative to `renovate/lib/` (e.g.
-  `modules/manager/cargo/extract.spec.ts`), relative to
-  `lib/modules/manager/` (e.g. `cargo/extract.spec.ts`), or a bare filename
-  if globally unique. The coverage script resolves all three.
-- The line number is the 1-based line of the `it(` call in the spec file.
-- For `#[rstest]`, place the comment above `#[rstest]`.
-- For `it.each` / `test.each`, one comment covers the whole call site.
-- One `// Ported:` per upstream `it()`; do **not** stamp the same comment on
-  multiple Rust tests. The coverage script flags duplicates as defects.
-- To locate existing attributions:
-  ```sh
-  rg "// Ported:" crates/ -g "*.rs"
-  python3 scripts/parity_coverage.py orphans
-  ```
+Matching Rust test
+(`renovate-rust/crates/renovate-core/src/extractors/ansible.rs`):
+
+```rust
+// Ported: "extracts multiple image lines from docker_service" — ansible/extract.spec.ts line 16
+#[test]
+fn extracts_docker_service_images() {
+    let content = r#"---
+- name: run containers
+  docker_service:
+    definition:
+      services:
+        gitlab:
+          image: sameersbn/gitlab:11.5.1
+        db:
+          image: sameersbn/postgresql:10
+        redis:
+          image: sameersbn/redis:4.0.9-1
+        nginx:
+          image: nginx:1.15.7
+"#;
+    let deps = extract(content);
+    assert_eq!(deps.len(), 4);
+}
+```
+
+Pattern: **`// Ported: "<exact it() text>" — <spec path> line <N>`** on the
+**single line immediately above** `#[test]` / `#[tokio::test]` / `#[rstest]`.
+Use the em dash `—` (U+2014), not a hyphen. The quoted text is verbatim from
+`it(...)` — same case, same punctuation. The spec path is whatever resolves
+through the coverage script (relative to `renovate/lib/`, relative to
+`lib/modules/manager/`, or a globally-unique bare filename). The line number
+is the 1-based line of the `it(` call in the upstream spec.
+
+### Variants of the same pattern
+
+`#[rstest]` parameterized test — one comment above the attribute, regardless of
+how many `#[case]` rows follow:
+
+```rust
+// Ported: "parses $type dependency" — cargo/extract.spec.ts line 142
+#[rstest]
+#[case("[dependencies]", DepType::Normal)]
+#[case("[dev-dependencies]", DepType::Dev)]
+#[case("[build-dependencies]", DepType::Build)]
+fn parses_dep_type(#[case] header: &str, #[case] expected: DepType) {
+    // ...
+}
+```
+
+Async test:
+
+```rust
+// Ported: "returns latest release for valid package" — crate/index.spec.ts line 87
+#[tokio::test]
+async fn returns_latest_release() {
+    // ...
+}
+```
+
+### Rules — no exceptions
+
+1. **One `// Ported:` per upstream `it()`.** If three Rust tests cover the
+   same upstream test, only the first carries `// Ported:`; the other two are
+   useful Rust-specific additions and stay un-attributed. Duplicate comments
+   inflate coverage counts and the script flags them as defects.
+2. **No `// Ported:` on a test that doesn't actually exercise the upstream
+   behavior.** Hard-coding the expected return value to make the test pass is
+   a defect, not a port.
+3. **No attributes between the comment and the test attribute.** If
+   `#[cfg(feature = "x")]` is needed, put `// Ported:` above the `#[cfg(...)]`
+   so the auditor's 5-line lookback still finds it.
+4. **Em dash, not hyphen.** The script accepts hyphen as a fallback, but the
+   canonical form is `—`.
+5. **Verify your work** before committing:
+   ```sh
+   rg "// Ported:" crates/ -g "*.rs"          # see all attributions
+   python3 scripts/parity_coverage.py orphans # comments whose ref doesn't resolve
+   python3 scripts/parity_coverage.py         # see duplicate count drop
+   ```
 
 ## Shared Conventions
 

@@ -38,43 +38,81 @@ no `// Ported:` comment in Rust yet. Pick a batch and port them.
 
 ## How to port one test
 
+### Required form — follow this exact example every time
+
+Upstream TypeScript test
+(`renovate/lib/modules/manager/ansible/extract.spec.ts`):
+
+```typescript
+// line 16:
+    it('extracts multiple image lines from docker_service', () => {
+      const res = extractPackageFile(Fixtures.get('main2.yaml'), '', {});
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(4);
+    });
+```
+
+Matching Rust test
+(`crates/renovate-core/src/extractors/ansible.rs`):
+
+```rust
+// Ported: "extracts multiple image lines from docker_service" — ansible/extract.spec.ts line 16
+#[test]
+fn extracts_docker_service_images() {
+    let content = r#"---
+- name: run containers
+  docker_service:
+    definition:
+      services:
+        gitlab:
+          image: sameersbn/gitlab:11.5.1
+        db:
+          image: sameersbn/postgresql:10
+        redis:
+          image: sameersbn/redis:4.0.9-1
+        nginx:
+          image: nginx:1.15.7
+"#;
+    let deps = extract(content);
+    assert_eq!(deps.len(), 4);
+}
+```
+
+Notice the four invariants:
+
+- **Single line** starting with `// Ported:` directly above the test attribute.
+- **Quoted text is verbatim** from `it(...)` — same case, same punctuation.
+- **Em dash `—`** (U+2014) between the description and the spec reference.
+- **Spec path + ` line <N>`** where `<N>` is the 1-based line of the `it(`
+  call in upstream. Path may be relative to `renovate/lib/` (e.g.
+  `modules/manager/cargo/extract.spec.ts`), relative to `lib/modules/manager/`
+  (e.g. `cargo/extract.spec.ts`), or a globally-unique bare filename.
+
+Variants of the same form: for `#[rstest]`, put `// Ported:` above
+`#[rstest]`; for `#[tokio::test]`, above `#[tokio::test]`; for `it.each` /
+`test.each`, one `// Ported:` covers the entire call site. Full variant
+examples live in `AGENTS.md` → **Ported Test Attribution**.
+
+### Step-by-step
+
 1. Read the upstream `it(...)` block and any fixtures it depends on
    (`__fixtures__/`, inline template literals, helper imports).
-2. Read the matching Rust file in `crates/.../*.rs` to understand the existing
-   test patterns there.
-3. Write the Rust test next to the existing tests for that module.
-4. Add the provenance comment **on the line immediately above the test
-   attribute**:
-   ```rust
-   // Ported: "<exact it() description>" — <upstream path> line <N>
-   #[test]
-   fn test_returns_null_for_invalid_yaml() {
-       // ...
-   }
-   ```
-   Path conventions accepted by the coverage script:
-   - relative to `renovate/lib/`        (`modules/manager/cargo/extract.spec.ts`)
-   - relative to `lib/modules/manager/` (`cargo/extract.spec.ts`)
-   - bare filename if globally unique   (`config-description.spec.ts`)
-
-   For `#[rstest]` tests, put `// Ported:` above the `#[rstest]` attribute.
-   For `it.each` / `test.each`, one `// Ported:` covers the whole call.
-
-5. Make the test actually exercise the behavior — the upstream input, the
+2. Read the matching Rust file in `crates/.../*.rs` to understand the
+   existing test patterns there.
+3. Write the Rust test next to the existing tests for that module, following
+   the example above exactly.
+4. Make the test actually exercise the behavior — the upstream input, the
    real implementation, the real assertions. Hard-coding the expected value
-   to make the test pass is a defect.
-
-6. **Compile and run the test before committing:**
+   to make the test pass is a defect, not a port.
+5. **Compile and run the test before committing:**
    ```sh
    cargo test -p <crate> <test_name>
    ```
-
-7. **Regenerate the ledger** so Coverage updates:
+6. **Regenerate the ledger** so Coverage updates:
    ```sh
    python3 scripts/parity_coverage.py ledger
    ```
-
-8. **Commit** with the conventional commit format (see `COMMITS.md`) and the
+7. **Commit** with the conventional commit format (see `COMMITS.md`) and the
    Co-authored-by trailer.
 
 ## What you do NOT do
