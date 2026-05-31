@@ -635,6 +635,12 @@ async fn process_repo(
                                             &content, &bd.dep.name, current, &new_value,
                                         )
                                     }
+                                    "helm-values" => {
+                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        renovate_core::extractors::helm_values::helm_values_update_dependency(
+                                            &content, &bd.dep.name, current, &new_value,
+                                        )
+                                    }
                                     "travis" | "cloudbuild" | "droneci" | "woodpecker" | "bitbucket-pipelines" => {
                                         let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::dockerfile::dockerfile_update_dependency(

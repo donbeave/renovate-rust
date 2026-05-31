@@ -134,6 +134,135 @@ fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
 }
 
+/// Update a Docker image dependency in a Helm `values.yaml` file.
+///
+/// Handles both inline form (`busyboxImage: busybox:1.36`) and object form
+/// (`image:\n  repository: nginx\n  tag: "1.25"`).
+///
+/// For object form, `dep_name` is expected as `image:tag` (e.g. `nginx:1.25`).
+/// The updater scans for object-form image blocks whose `repository:` matches
+/// the image part and whose `tag:` or `version:` matches `current_value`, then
+/// replaces the tag/version value.
+pub fn helm_values_update_dependency(
+    content: &str,
+    dep_name: &str,
+    current_value: &str,
+    new_value: &str,
+) -> Option<String> {
+    let (image, _tag) = dep_name.rsplit_once(':').unwrap_or((dep_name, ""));
+    let lines: Vec<&str> = content.lines().collect();
+    let len = lines.len();
+    let mut result = String::with_capacity(content.len());
+    let mut changed = false;
+    let mut i = 0;
+
+    while i < len {
+        let raw = lines[i];
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        let trimmed = line.trim_start();
+        let indent = leading_spaces(line);
+
+        let key_part = trimmed.strip_prefix("- ").unwrap_or(trimmed);
+        let Some((key, val)) = parse_kv(key_part) else {
+            result.push_str(raw);
+            result.push('\n');
+            i += 1;
+            continue;
+        };
+
+        if !key.to_lowercase().ends_with("image") {
+            result.push_str(raw);
+            result.push('\n');
+            i += 1;
+            continue;
+        }
+
+        let val_trimmed = val.trim().trim_matches('"').trim_matches('\'');
+
+        // Inline form: non-empty string value that is a direct image reference.
+        if !val_trimmed.is_empty() && !val_trimmed.starts_with('{') {
+            let dep = classify_image_ref(val_trimmed);
+            let dep_report_name = match &dep.tag {
+                Some(t) => format!("{}:{t}", dep.image),
+                None => dep.image.clone(),
+            };
+            if dep_report_name == dep_name {
+                let new_ref = match &dep.tag {
+                    Some(_) => format!("{}:{new_value}", dep.image),
+                    None => dep.image.clone(),
+                };
+                let new_raw = raw.replacen(val_trimmed, &new_ref, 1);
+                result.push_str(&new_raw);
+                result.push('\n');
+                changed = true;
+                i += 1;
+                continue;
+            }
+            result.push_str(raw);
+            result.push('\n');
+            i += 1;
+            continue;
+        }
+
+        // Object form: empty value — look ahead for repository + tag/version.
+        let mut j = i + 1;
+        let mut repository: Option<&str> = None;
+        let mut tag_line_idx: Option<usize> = None;
+        let mut tag_value: Option<&str> = None;
+
+        while j < len {
+            let l = lines[j].split(" #").next().unwrap_or(lines[j]).trim_end();
+            let t = l.trim_start();
+            let ind = leading_spaces(l);
+
+            if t.is_empty() {
+                j += 1;
+                continue;
+            }
+            if ind <= indent && !t.is_empty() {
+                break;
+            }
+
+            if let Some((k, v)) = parse_kv(t) {
+                let v = v.trim().trim_matches('"').trim_matches('\'');
+                match k {
+                    "repository" => repository = Some(v),
+                    "tag" | "version" => {
+                        tag_line_idx = Some(j);
+                        tag_value = Some(v);
+                    }
+                    _ => {}
+                }
+            }
+            j += 1;
+        }
+
+        let matches = repository.is_some_and(|repo| {
+            repo == image || image.ends_with(&format!("/{repo}"))
+        });
+
+        if matches && tag_value == Some(current_value) {
+            let tag_line = lines[tag_line_idx.unwrap()];
+            let new_tag_line = tag_line.replacen(current_value, new_value, 1);
+            result.push_str(&new_tag_line);
+            result.push('\n');
+            changed = true;
+            i = tag_line_idx.unwrap() + 1;
+            continue;
+        }
+
+        result.push_str(raw);
+        result.push('\n');
+        i += 1;
+    }
+
+    if changed {
+        Some(result)
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -270,5 +399,60 @@ spec:
                 .any(|d| d.image == "quay.io/metallb/speaker"
                     && d.tag.as_deref() == Some("v0.13.10"))
         );
+    }
+
+    #[test]
+    fn update_object_form_tag() {
+        let content = "image:\n  repository: nginx\n  tag: 1.16.1\n  pullPolicy: IfNotPresent\n";
+        let updated = helm_values_update_dependency(content, "nginx:1.16.1", "1.16.1", "1.17.0");
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("tag: 1.17.0"));
+        assert!(!updated.contains("tag: 1.16.1"));
+    }
+
+    #[test]
+    fn update_object_form_version() {
+        let content = "image:\n  repository: nginx\n  version: 1.16.1\n";
+        let updated = helm_values_update_dependency(content, "nginx:1.16.1", "1.16.1", "1.17.0");
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("version: 1.17.0"));
+    }
+
+    #[test]
+    fn update_object_form_preserves_quotes() {
+        let content = "image:\n  repository: nginx\n  tag: \"1.16.1\"\n";
+        let updated = helm_values_update_dependency(content, "nginx:1.16.1", "1.16.1", "1.17.0");
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("tag: \"1.17.0\""));
+    }
+
+    #[test]
+    fn update_object_form_no_match_returns_none() {
+        let content = "image:\n  repository: nginx\n  tag: 1.16.1\n";
+        let updated = helm_values_update_dependency(content, "redis:1.16.1", "1.16.1", "1.17.0");
+        assert!(updated.is_none());
+    }
+
+    #[test]
+    fn update_inline_form() {
+        let content = "busyboxImage: busybox:1.36\n";
+        let updated = helm_values_update_dependency(content, "busybox:1.36", "1.36", "1.37");
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("busyboxImage: busybox:1.37"));
+    }
+
+    #[test]
+    fn update_object_form_registry_prefix() {
+        let content = "image:\n  repository: quay.io/metallb/controller\n  tag: v0.13.10\n";
+        let updated = helm_values_update_dependency(
+            content, "quay.io/metallb/controller:v0.13.10", "v0.13.10", "v0.14.0"
+        );
+        assert!(updated.is_some());
+        let updated = updated.unwrap();
+        assert!(updated.contains("tag: v0.14.0"));
     }
 }

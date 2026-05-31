@@ -571,6 +571,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/helm-values/extract.ts` | `extractors/helm_values.rs` | full | `extract()` handles Docker image refs from Helm values YAML |
 | `lib/modules/manager/helm-values/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/helm-values/update.ts` | `extractors/helm_values.rs` | partial | `helm_values_update_dependency()` handles inline + object form; wired in CLI pipeline |
 | `lib/modules/manager/helm-values/types.ts` | N/A | out-of-scope | Type-only file |
 | `lib/modules/manager/helm-values/util.ts` | `extractors/helm_values.rs` | partial | Utility functions inline |
 
