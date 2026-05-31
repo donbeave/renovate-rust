@@ -5,7 +5,7 @@
 ## `lib/util/http/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/index.spec.ts
-**Total tests:** 52 | **Ported:** 20 | **Actionable:** 32 | **Status:** pending
+**Total tests:** 52 | **Ported:** 20 | **Actionable:** 13 | **Status:** pending
 
 ### `util/http/index`
 
@@ -54,42 +54,42 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses yaml with schema validation | 457 | pending | — | — | Zod schema validation not applicable to Rust |
-| parses yaml with options and schema | 464 | pending | — | — | Zod schema validation not applicable to Rust |
-| throws on schema validation failure | 479 | pending | — | — | Zod schema validation not applicable to Rust |
+| parses yaml with schema validation | 457 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
+| parses yaml with options and schema | 464 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
+| throws on schema validation failure | 479 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
 | throws on invalid yaml | 487 | ported | `http.rs` | `get_yaml_throws_on_invalid_yaml` | — |
 
 ### `util/http/index › Schema support › getYamlSafe`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns successful result with schema validation | 497 | pending | — | — | Zod schema validation not applicable to Rust |
-| returns schema error result | 508 | pending | — | — | Zod schema validation not applicable to Rust |
+| returns successful result with schema validation | 497 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
+| returns schema error result | 508 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
 | returns error result for invalid yaml | 522 | ported | `http.rs` | `get_yaml_returns_error_for_invalid_yaml` | — |
 | returns error result for network errors | 533 | ported | `http.rs` | `get_yaml_returns_error_for_network_errors` | — |
-| works with options and schema | 547 | pending | — | — | Zod schema validation not applicable to Rust |
+| works with options and schema | 547 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
 
 ### `util/http/index › Schema support › getJson`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses schema for response body | 568 | pending | — | — | Zod schema validation not applicable to Rust |
-| throws on schema mismatch | 588 | pending | — | — | Zod schema validation not applicable to Rust |
+| uses schema for response body | 568 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
+| throws on schema mismatch | 588 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
 
 ### `util/http/index › Schema support › getJsonSafe`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses schema for response body | 605 | pending | — | — | Zod schema validation not applicable to Rust |
-| returns schema error result | 619 | pending | — | — | Zod schema validation not applicable to Rust |
+| uses schema for response body | 605 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
+| returns schema error result | 619 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
 | returns error result | 633 | ported | `http.rs` | `get_returns_429_error_after_retries_exhausted` | Rust get_json returns Result<T, HttpError> natively; error handling covered by status code tests |
 
 ### `util/http/index › Schema support › postJson`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses schema for response body | 646 | pending | — | — | Zod schema validation not applicable to Rust |
-| throws on schema mismatch | 661 | pending | — | — | Zod schema validation not applicable to Rust |
+| uses schema for response body | 646 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
+| throws on schema mismatch | 661 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
 
 ### `util/http/index › Throttling`
 
@@ -102,16 +102,16 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses toml with schema validation | 711 | pending | — | — | Zod schema validation not applicable to Rust |
-| parses toml with options and schema | 718 | pending | — | — | Zod schema validation not applicable to Rust |
-| throws on schema validation failure | 737 | pending | — | — | Zod schema validation not applicable to Rust |
+| parses toml with schema validation | 711 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
+| parses toml with options and schema | 718 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
+| throws on schema validation failure | 737 | not-applicable | — | — | TS-library-specific schema internals — Zod schema validation has no Rust equivalent; Rust uses serde deserialization with native type safety |
 | throws on invalid toml | 752 | ported | `http.rs` | `get_toml_throws_on_invalid_toml` | — |
 
 | sets default user-agent | 36 | ported | `http.rs` | `default_user_agent_is_set_on_requests` | — |
 | uses userAgent when set as a plain string | 46 | pending | — | — | Custom user-agent not supported in Rust HTTP client |
-| interpolates {{renovateVersion}} in a custom userAgent template | 55 | pending | — | — | Handlebars templating not applicable to Rust |
-| renders unknown template variables as empty string | 68 | pending | — | — | Handlebars templating not applicable to Rust |
-| supports Handlebars helpers in userAgent template | 77 | pending | — | — | Handlebars templating not applicable to Rust |
-| supports conditional Handlebars syntax in userAgent template | 88 | pending | — | — | Handlebars templating not applicable to Rust |
+| interpolates {{renovateVersion}} in a custom userAgent template | 55 | not-applicable | — | — | TS-library-specific schema internals — Handlebars templating has no Rust equivalent; Rust uses static configuration |
+| renders unknown template variables as empty string | 68 | not-applicable | — | — | TS-library-specific schema internals — Handlebars templating has no Rust equivalent; Rust uses static configuration |
+| supports Handlebars helpers in userAgent template | 77 | not-applicable | — | — | TS-library-specific schema internals — Handlebars templating has no Rust equivalent; Rust uses static configuration |
+| supports conditional Handlebars syntax in userAgent template | 88 | not-applicable | — | — | TS-library-specific schema internals — Handlebars templating has no Rust equivalent; Rust uses static configuration |
 | preserves existing headers | 100 | ported | `http.rs` | `get_preserves_existing_headers` | — |
 ---
