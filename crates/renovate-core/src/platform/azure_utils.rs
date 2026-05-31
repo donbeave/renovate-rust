@@ -142,6 +142,32 @@ pub fn get_repo_by_name<'a>(name: &str, repos: &'a [AzureGitRepo]) -> Option<&'a
     })
 }
 
+/// Azure DevOps `maxBodyLength` constant.
+///
+/// Mirrors `maxBodyLength` from `lib/modules/platform/azure/index.ts`.
+pub const AZURE_MAX_BODY_LENGTH: usize = 4000;
+
+/// Transform Markdown content for Azure DevOps compatibility.
+///
+/// Replaces rebase-related text, strips renovate debug comments and HTML.
+/// Mirrors `massageMarkdown` from `lib/modules/platform/azure/index.ts`.
+pub fn massage_markdown(input: &str) -> String {
+    use crate::platform::pr_body::smart_truncate;
+    let s = smart_truncate(input, AZURE_MAX_BODY_LENGTH);
+    let s = s.replace(
+        "you tick the rebase/retry checkbox",
+        "PR is renamed to start with \"rebase!\"",
+    );
+    let s = s.replace(
+        "checking the rebase/retry box above",
+        "renaming the PR to start with \"rebase!\"",
+    );
+    let re = regex::Regex::new(r"\n---\n\n.*?<!-- rebase-check -->.*?\n").unwrap();
+    let s = re.replace(&s, "").into_owned();
+    let re = regex::Regex::new(r"<!--renovate-(?:debug|config-hash):.*?-->").unwrap();
+    re.replace(&s, "").into_owned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -427,5 +453,25 @@ mod tests {
         // "foo/bar/baz" has 3 parts - invalid; TypeScript throws, Rust returns None
         let result = get_repo_by_name("foo/bar/baz", &[]);
         assert!(result.is_none());
+    }
+
+    // Ported: "returns updated pr body" — modules/platform/azure/index.spec.ts line 1621
+    #[test]
+    fn massage_markdown_returns_updated_pr_body() {
+        let pr_body = "\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->plus also [a link](https://github.com/foo/bar/issues/5)";
+        assert_eq!(
+            massage_markdown(pr_body),
+            "plus also [a link](https://github.com/foo/bar/issues/5)"
+        );
+    }
+
+    // Ported: "returns updated comment content" — modules/platform/azure/index.spec.ts line 1630
+    #[test]
+    fn massage_markdown_returns_updated_comment_content() {
+        let comment = "You can manually request rebase by checking the rebase/retry box above.\n\nplus also [a link](https://github.com/foo/bar/issues/5)";
+        assert_eq!(
+            massage_markdown(comment),
+            "You can manually request rebase by renaming the PR to start with \"rebase!\".\n\nplus also [a link](https://github.com/foo/bar/issues/5)"
+        );
     }
 }
