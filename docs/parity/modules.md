@@ -23,8 +23,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5060 / 11667 distinct upstream it() tests ported (43.4%) across 292 modules.
-**Quality:** 5597 `// Ported:` comments → 510 duplicate, 26 orphan, 26 malformed.
+**Total:** 5066 / 11667 distinct upstream it() tests ported (43.4%) across 292 modules.
+**Quality:** 5603 `// Ported:` comments → 510 duplicate, 26 orphan, 26 malformed.
 
 ## managers  —  2217/3642 (61%)
 
@@ -148,7 +148,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | partial | 11/11 (100%) | index.ts(partial); update.ts(partial) |
 | `manager/xcodegen` | 1 | partial | 24/24 (100%) | index.ts(partial) |
 
-## datasources  —  545/1379 (40%)
+## datasources  —  551/1379 (40%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -170,7 +170,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/conan` | 1 | ? | 0/22 (0%) | — |
 | `datasource/conda` | 1 | ? | 9/9 (100%) | — |
 | `datasource/cpan` | 2 | ? | 8/8 (100%) | — |
-| `datasource/crate` | 1 | ? | 16/27 (59%) | — |
+| `datasource/crate` | 1 | ? | 22/27 (81%) | — |
 | `datasource/custom` | 1 | ? | 1/30 (3%) | — |
 | `datasource/dart` | 1 | ? | 6/6 (100%) | — |
 | `datasource/dart-version` | 1 | ? | 2/4 (50%) | — |

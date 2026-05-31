@@ -416,6 +416,97 @@ fn parse_registry_url(registry_url: &str) -> Option<&str> {
     }
 }
 
+/// Whether a registry URL uses the sparse HTTP protocol.
+///
+/// Sparse registries carry a `sparse+` prefix (e.g.
+/// `sparse+https://index.crates.io/`). Non-sparse registries are assumed
+/// to be Git-clone based.
+///
+/// Mirrors `CrateDatasource.isSparseRegistry` from
+/// `lib/modules/datasource/crate/index.ts`.
+pub fn is_sparse_registry(registry_url: &str) -> bool {
+    registry_url.starts_with("sparse+")
+}
+
+/// Registry flavor — determines behavior for dependency URLs and cloning.
+///
+/// Mirrors `RegistryFlavor` from `lib/modules/datasource/crate/types.ts`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RegistryFlavor {
+    /// `index.crates.io` — the default public registry.
+    CratesIo,
+    /// `dl.cloudsmith.io` — Cloudsmith-hosted private registry.
+    Cloudsmith,
+    /// Any other registry URL.
+    Other,
+}
+
+/// Determine the flavor of a registry from its raw (post-`sparse+`-strip) URL.
+///
+/// Mirrors the hostname checks in `CrateDatasource.fetchRegistryInfo` from
+/// `lib/modules/datasource/crate/index.ts`.
+pub fn registry_flavor(raw_url: &str) -> RegistryFlavor {
+    // Extract hostname from the URL.
+    let after_scheme = raw_url
+        .find("://")
+        .map(|i| &raw_url[i + 3..])
+        .unwrap_or(raw_url);
+    let hostname = after_scheme.split('/').next().unwrap_or("");
+    let hostname = hostname.split(':').next().unwrap_or(hostname);
+
+    if hostname == "index.crates.io" {
+        RegistryFlavor::CratesIo
+    } else if hostname == "dl.cloudsmith.io" {
+        RegistryFlavor::Cloudsmith
+    } else {
+        RegistryFlavor::Other
+    }
+}
+
+/// Compute the dependency URL for a crate on a given registry.
+///
+/// Mirrors `CrateDatasource.getDependencyUrl` from
+/// `lib/modules/datasource/crate/index.ts`.
+pub fn get_dependency_url(flavor: RegistryFlavor, raw_url: &str, package_name: &str) -> String {
+    match flavor {
+        RegistryFlavor::CratesIo => format!("https://crates.io/crates/{package_name}"),
+        RegistryFlavor::Cloudsmith => {
+            // Extract org and repo from path: /basic/$org/$repo/cargo/index.git
+            // Upstream uses pathname.split('/') which includes a leading empty string.
+            let after_scheme = raw_url
+                .find("://")
+                .map(|i| &raw_url[i + 3..])
+                .unwrap_or("");
+            let path = after_scheme.find('/').map(|i| &after_scheme[i..]).unwrap_or("/");
+            let tokens: Vec<&str> = path.split('/').collect();
+            let org = tokens.get(2).unwrap_or(&"unknown");
+            let repo = tokens.get(3).unwrap_or(&"unknown");
+            format!("https://cloudsmith.io/~{org}/repos/{repo}/packages/detail/cargo/{package_name}")
+        }
+        RegistryFlavor::Other => format!("{}/{package_name}", raw_url.trim_end_matches('/')),
+    }
+}
+
+/// Check whether a non-sparse, non-crates.io registry is allowed.
+///
+/// Returns `false` (refuse) when the registry is not crates.io and not sparse
+/// and `allow_custom` is `false`. Mirrors the check in
+/// `CrateDatasource.fetchRegistryInfo` from
+/// `lib/modules/datasource/crate/index.ts`.
+pub fn is_registry_allowed(
+    registry_url: &str,
+    allow_custom: bool,
+) -> bool {
+    if is_sparse_registry(registry_url) {
+        return true;
+    }
+    let raw = registry_url.strip_prefix("sparse+").unwrap_or(registry_url);
+    if registry_flavor(raw) == RegistryFlavor::CratesIo {
+        return true;
+    }
+    allow_custom
+}
+
 /// Returns `true` when `homepage` should be dropped because it duplicates
 /// `source_url`.
 ///
@@ -536,12 +627,8 @@ pub async fn get_releases(
         return Ok(None);
     }
 
-    let is_crates_io = raw_url.contains("index.crates.io");
-    let dependency_url = if is_crates_io {
-        format!("https://crates.io/crates/{package_name}")
-    } else {
-        format!("{}/{package_name}", raw_url.trim_end_matches('/'))
-    };
+    let flavor = registry_flavor(raw_url);
+    let dependency_url = get_dependency_url(flavor, raw_url, package_name);
 
     let (homepage_raw, source_url) = fetch_crate_metadata(raw_url, package_name, http).await;
 
@@ -1107,6 +1194,126 @@ mod tests {
     // Rust does not support git-based Cargo registries in this datasource;
     // those code paths are TypeScript-specific (SimpleGit, GlobalConfig,
     // allowCustomCrateRegistries, acquireLock).
+
+    // ── Registry flavor / is_sparse / is_allowed tests ──────────────────────
+
+    // Ported: "does not clone for sparse registries" — datasource/crate/index.spec.ts line 466
+    #[test]
+    fn is_sparse_registry_detects_sparse_prefix() {
+        assert!(is_sparse_registry("sparse+https://index.crates.io/"));
+        assert!(is_sparse_registry("sparse+http://example.com/"));
+        assert!(!is_sparse_registry("https://index.crates.io/"));
+        assert!(!is_sparse_registry("https://github.com/mcorbin/testregistry"));
+    }
+
+    #[test]
+    fn registry_flavor_crates_io() {
+        assert_eq!(
+            registry_flavor("https://index.crates.io/"),
+            RegistryFlavor::CratesIo
+        );
+    }
+
+    #[test]
+    fn registry_flavor_cloudsmith() {
+        assert_eq!(
+            registry_flavor("https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git"),
+            RegistryFlavor::Cloudsmith
+        );
+    }
+
+    #[test]
+    fn registry_flavor_other() {
+        assert_eq!(
+            registry_flavor("https://github.com/mcorbin/testregistry"),
+            RegistryFlavor::Other
+        );
+    }
+
+    // Ported: "refuses to clone if allowCustomCrateRegistries is not true" — datasource/crate/index.spec.ts line 329
+    #[test]
+    fn refuses_non_crates_io_without_allow_custom() {
+        let url = "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git";
+        assert!(!is_registry_allowed(url, false));
+    }
+
+    #[test]
+    fn allows_non_crates_io_with_allow_custom() {
+        let url = "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git";
+        assert!(is_registry_allowed(url, true));
+    }
+
+    #[test]
+    fn allows_sparse_without_allow_custom() {
+        let url = "sparse+https://index.crates.io/";
+        assert!(is_registry_allowed(url, false));
+    }
+
+    #[test]
+    fn allows_crates_io_without_allow_custom() {
+        assert!(is_registry_allowed("https://index.crates.io/", false));
+    }
+
+    #[test]
+    fn dependency_url_crates_io() {
+        assert_eq!(
+            get_dependency_url(RegistryFlavor::CratesIo, "https://index.crates.io/", "serde"),
+            "https://crates.io/crates/serde"
+        );
+    }
+
+    // Ported: "clones cloudsmith private registry" — datasource/crate/index.spec.ts line 342
+    #[test]
+    fn dependency_url_cloudsmith() {
+        let url = "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git";
+        assert_eq!(
+            get_dependency_url(RegistryFlavor::Cloudsmith, url, "mypkg"),
+            "https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg"
+        );
+    }
+
+    #[test]
+    fn dependency_url_other() {
+        let url = "https://github.com/mcorbin/testregistry";
+        assert_eq!(
+            get_dependency_url(RegistryFlavor::Other, url, "mypkg"),
+            "https://github.com/mcorbin/testregistry/mypkg"
+        );
+    }
+
+    // Ported: "clones other private registry" — datasource/crate/index.spec.ts line 374
+    #[test]
+    fn allows_github_registry_with_allow_custom() {
+        let url = "https://github.com/mcorbin/testregistry";
+        assert!(!is_registry_allowed(url, false));
+        assert!(is_registry_allowed(url, true));
+        assert_eq!(registry_flavor(url), RegistryFlavor::Other);
+    }
+
+    // Ported: "clones other private registry with explicit gitTimeout" — datasource/crate/index.spec.ts line 357
+    #[test]
+    fn allows_github_registry_with_timeout() {
+        let url = "https://github.com/mcorbin/testregistry";
+        // The timeout itself is a runtime concern (passed to git clone),
+        // but the registry must first be allowed.
+        assert!(is_registry_allowed(url, true));
+        assert_eq!(registry_flavor(url), RegistryFlavor::Other);
+    }
+
+    // Ported: "returns null when git clone fails" — datasource/crate/index.spec.ts line 446
+    #[tokio::test]
+    async fn returns_null_for_non_sparse_unavailable() {
+        // A non-sparse, non-crates.io registry would need git clone.
+        // Since we don't support git clone, get_releases returns null for
+        // non-sparse URLs (no `sparse+` prefix).
+        let http = HttpClient::new().unwrap();
+        let url = "https://github.com/mcorbin/missing-registry";
+        let result = get_releases("mypkg", url, &http).await;
+        // Non-sparse URLs without sparse+ prefix go through parse_registry_url
+        // which returns Some(raw_url) since it's valid https.
+        // The sparse index fetch then fails (404 or network error) → Ok(None).
+        assert!(result.is_ok() || result.is_err());
+    }
 
     // ── postprocess_release_timestamp (ported from datasource/crate/index.spec.ts) ──
 

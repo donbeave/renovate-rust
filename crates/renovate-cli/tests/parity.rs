@@ -26,9 +26,10 @@ fn normalize_report(value: &mut Value) {
                 for file in files {
                     if let Some(deps) = file.get_mut("deps").and_then(|d| d.as_array_mut()) {
                         for dep in deps {
-                            // Remove release timestamps — they change when registries update.
+                            // Remove volatile registry-sourced fields.
                             if let Some(obj) = dep.as_object_mut() {
                                 obj.remove("releaseTimestamp");
+                                obj.remove("latest");
                             }
                         }
                     }
@@ -186,6 +187,45 @@ fn parity_cargo_workspace() {
 
 // Rust-specific: parity behavior test
 #[test]
+fn parity_cargo_hello() {
+    let actual = run_fixture("cargo-hello");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 1,
+                "skipped": 0,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Cargo.toml",
+                    "manager": "cargo",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 1,
+                        "skipped": 0,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "serde",
+                            "depType": "dependencies",
+                            "status": "upToDate"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for cargo-hello fixture");
+}
+
+// Rust-specific: parity behavior test
+#[test]
 fn parity_gomod_empty() {
     let actual = run_fixture("gomod-empty");
     let expected = serde_json::json!([
@@ -212,8 +252,7 @@ fn parity_gomod_empty() {
                     "deps": [
                         {
                             "name": "go",
-                            "status": "upToDate",
-                            "latest": null
+                            "status": "upToDate"
                         }
                     ]
                 }
@@ -289,8 +328,7 @@ fn parity_gomod_replace() {
                         },
                         {
                             "name": "go",
-                            "status": "upToDate",
-                            "latest": null
+                            "status": "upToDate"
                         }
                     ]
                 }
@@ -1945,8 +1983,7 @@ fn parity_crossplane_scratch() {
                     "deps": [
                         {
                             "name": "Provider: scratch",
-                            "status": "upToDate",
-                            "latest": null
+                            "status": "upToDate"
                         }
                     ]
                 }
