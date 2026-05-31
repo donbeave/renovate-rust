@@ -1317,7 +1317,7 @@ mod tests {
 
     // ── postprocess_release_timestamp (ported from datasource/crate/index.spec.ts) ──
 
-    // Ported: "no-op for registries without cached config" — datasource/crate/index.spec.ts line 552
+    // Ported: "no-op for registries without cached config" — datasource/crate/index.spec.ts line 569
     #[tokio::test]
     async fn postprocess_no_op_for_missing_config() {
         let http = HttpClient::new().unwrap();
@@ -1326,7 +1326,7 @@ mod tests {
         assert!(ts.is_none());
     }
 
-    // Ported: "no-op when registryUrl is null" — datasource/crate/index.spec.ts line 566
+    // Ported: "no-op when registryUrl is null" — datasource/crate/index.spec.ts line 583
     #[tokio::test]
     async fn postprocess_no_op_when_registry_url_is_null() {
         let http = HttpClient::new().unwrap();
@@ -1334,7 +1334,7 @@ mod tests {
         assert!(ts.is_none());
     }
 
-    // Ported: "no-op for release with timestamp" — datasource/crate/index.spec.ts line 580
+    // Ported: "no-op for release with timestamp" — datasource/crate/index.spec.ts line 597
     #[test]
     fn postprocess_no_op_for_release_with_timestamp() {
         // The caller is responsible for checking existing timestamp before
@@ -1345,7 +1345,7 @@ mod tests {
         assert!(existing_ts.is_some());
     }
 
-    // Ported: "fetches releaseTimestamp" — datasource/crate/index.spec.ts line 597
+    // Ported: "fetches releaseTimestamp" — datasource/crate/index.spec.ts line 614
     #[tokio::test]
     async fn postprocess_fetches_release_timestamp() {
         let server = MockServer::start().await;

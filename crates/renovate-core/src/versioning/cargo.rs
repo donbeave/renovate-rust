@@ -1073,7 +1073,7 @@ mod renovate_compat_tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — cargo/index.spec.ts line 27
+    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — cargo/index.spec.ts line 26
     #[test]
     fn get_satisfying_version_cases() {
         let v1: Vec<&str> = vec!["4.2.1", "0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"];
@@ -1082,7 +1082,7 @@ mod renovate_compat_tests {
         assert_eq!(get_satisfying_version(&v2, "5.0, > 5.0.0"), Some("5.0.3"));
     }
 
-    // Ported: "isValid("$version") === $expected" — cargo/index.spec.ts line 40
+    // Ported: "isValid("$version") === $expected" — cargo/index.spec.ts line 37
     #[test]
     fn is_valid_cases() {
         assert!(is_valid("1"));
@@ -1095,7 +1095,7 @@ mod renovate_compat_tests {
         assert!(is_valid("< 3.0, >= 1.0.0 <= 2.0.0, = 5.1.2"));
     }
 
-    // Ported: "isVersion("$version") === $expected" — cargo/index.spec.ts line 53
+    // Ported: "isVersion("$version") === $expected" — cargo/index.spec.ts line 51
     #[test]
     fn is_version_cases() {
         assert!(!is_version("1"));
@@ -1103,14 +1103,14 @@ mod renovate_compat_tests {
         assert!(is_version("1.2.3"));
     }
 
-    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — cargo/index.spec.ts line 61
+    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — cargo/index.spec.ts line 60
     #[test]
     fn is_less_than_range_cases() {
         assert!(is_less_than_range("0.9.0", ">= 1.0.0 <= 2.0.0"));
         assert!(!is_less_than_range("1.9.0", ">= 1.0.0 <= 2.0.0"));
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — cargo/index.spec.ts line 74
+    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — cargo/index.spec.ts line 71
     #[test]
     fn min_satisfying_version_cases() {
         let v1: Vec<&str> = vec!["0.4.0", "0.5.0", "4.2.0", "4.3.0", "5.0.0"];
@@ -1126,7 +1126,7 @@ mod renovate_compat_tests {
         assert_eq!(min_satisfying_version(&v2, "6.2.0, 3.*"), None);
     }
 
-    // Ported: "isSingleVersion("$version") === $expected" — cargo/index.spec.ts line 92
+    // Ported: "isSingleVersion("$version") === $expected" — cargo/index.spec.ts line 85
     #[test]
     fn is_single_version_cases() {
         assert!(!is_single_version("1.2.3"));
@@ -1141,13 +1141,13 @@ mod renovate_compat_tests {
         assert!(!is_single_version("1.2.*"));
     }
 
-    // Ported: "returns a pinned value" — cargo/index.spec.ts line 107
+    // Ported: "returns a pinned value" — cargo/index.spec.ts line 101
     #[test]
     fn get_pinned_value_case() {
         assert_eq!(get_pinned_value("1.2.3"), "=1.2.3");
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — cargo/index.spec.ts line 111
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — cargo/index.spec.ts line 105
     #[test]
     fn get_new_value_cases() {
         let cases: &[(&str, RangeStrategy, &str, &str, Option<&str>)] = &[
@@ -1359,7 +1359,7 @@ mod renovate_compat_tests {
         }
     }
 
-    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — cargo/index.spec.ts line 176
+    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — cargo/index.spec.ts line 163
     #[test]
     fn is_breaking_cases() {
         let cases: &[(&str, &str, bool)] = &[
@@ -1387,7 +1387,7 @@ mod renovate_compat_tests {
     }
 
     // null currentValue case from spec
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — cargo/index.spec.ts line 113
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — cargo/index.spec.ts line 105
     #[test]
     fn get_new_value_null_returns_none() {
         assert_eq!(
@@ -1579,7 +1579,7 @@ mod renovate_compat_tests {
         "[package]\nname = \"test\"\nversion = \"0.0.2\"\n"
     }
 
-    // Ported: "increments" — modules/manager/cargo/update.spec.ts line 16
+    // Ported: "increments" — modules/manager/cargo/update.spec.ts line 12
     #[test]
     fn bump_package_version_increments_patch() {
         let content = cargo_toml_content();
@@ -1587,7 +1587,7 @@ mod renovate_compat_tests {
         assert_eq!(result.bumped_content, content.replace("0.0.2", "0.0.3"));
     }
 
-    // Ported: "no ops" — modules/manager/cargo/update.spec.ts line 24
+    // Ported: "no ops" — modules/manager/cargo/update.spec.ts line 22
     #[test]
     fn bump_package_version_no_ops_when_current_value_mismatch() {
         let content = cargo_toml_content();
@@ -1604,7 +1604,7 @@ mod renovate_compat_tests {
         assert_eq!(result.bumped_content, expected);
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/cargo/update.spec.ts line 38
+    // Ported: "returns content if bumping errors" — modules/manager/cargo/update.spec.ts line 41
     #[test]
     fn bump_package_version_returns_content_on_invalid_bump_type() {
         let content = cargo_toml_content();
@@ -1612,7 +1612,7 @@ mod renovate_compat_tests {
         assert_eq!(result.bumped_content, content);
     }
 
-    // Ported: "does not bump version if version is not a semantic version" — modules/manager/cargo/update.spec.ts line 47
+    // Ported: "does not bump version if version is not a semantic version" — modules/manager/cargo/update.spec.ts line 50
     #[test]
     fn bump_package_version_no_bump_if_not_semver() {
         let content = cargo_toml_content();

@@ -23,130 +23,130 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5066 / 11667 distinct upstream it() tests ported (43.4%) across 292 modules.
-**Quality:** 5603 `// Ported:` comments → 510 duplicate, 26 orphan, 26 malformed.
+**Total:** 5074 / 11667 distinct upstream it() tests ported (43.5%) across 292 modules.
+**Quality:** 5611 `// Ported:` comments → 510 duplicate, 26 orphan, 26 malformed.
 
-## managers  —  2217/3642 (61%)
+## managers  —  2225/3642 (61%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `manager/_common` | 5 | ? | 39/39 (100%) | — |
-| `manager/ansible` | 1 | partial | 6/6 (100%) | index.ts(partial) |
-| `manager/ansible-galaxy` | 1 | partial | 14/14 (100%) | index.ts(partial); collections-metadata.ts(partial); collections.ts(partial) +2 more |
-| `manager/ant` | 3 | partial | 65/65 (100%) | index.ts(partial) |
-| `manager/argocd` | 1 | partial | 8/8 (100%) | index.ts(partial); util.ts(partial) |
-| `manager/asdf` | 2 | partial | 14/14 (100%) | index.ts(partial) |
-| `manager/azure-pipelines` | 1 | partial | 27/29 (93%) | index.ts(partial); update.ts(partial) |
-| `manager/batect` | 1 | partial | 4/4 (100%) | index.ts(partial) |
-| `manager/batect-wrapper` | 2 | partial | 4/7 (57%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/bazel` | 5 | partial | 24/46 (52%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/bazel-module` | 10 | partial | 79/110 (72%) | index.ts(partial); lockfile.ts(partial); artifacts.ts(not-started) |
-| `manager/bazelisk` | 2 | partial | 4/10 (40%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/bicep` | 1 | partial | 9/9 (100%) | index.ts(partial) |
-| `manager/bitbucket-pipelines` | 1 | partial | 4/4 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/bitrise` | 2 | partial | 9/9 (100%) | index.ts(partial); utils.ts(partial) |
-| `manager/buildkite` | 1 | partial | 11/11 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/buildpacks` | 1 | partial | 3/3 (100%) | index.ts(partial) |
-| `manager/bun` | 3 | partial | 3/34 (9%) | extract.ts(partial); index.ts(partial); artifacts.ts(not-started) +1 more |
-| `manager/bun-version` | 1 | partial | 6/6 (100%) | index.ts(partial) |
-| `manager/bundler` | 7 | partial | 42/74 (57%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/cake` | 1 | partial | 3/5 (60%) | index.ts(partial) |
-| `manager/cargo` | 6 | partial | 53/73 (73%) | index.ts(partial); artifacts.ts(not-started); utils.ts(partial) |
-| `manager/cdnurl` | 1 | partial | 1/1 (100%) | index.ts(partial) |
-| `manager/circleci` | 4 | partial | 13/14 (93%) | index.ts(partial); update.ts(partial) |
-| `manager/cloudbuild` | 1 | partial | 2/2 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/cocoapods` | 2 | partial | 2/13 (15%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/composer` | 6 | partial | 22/89 (25%) | index.ts(partial); artifacts.ts(not-started); utils.ts(partial) |
-| `manager/conan` | 3 | partial | 6/17 (35%) | index.ts(partial); artifacts.ts(not-started); common.ts(partial) |
-| `manager/copier` | 3 | partial | 11/25 (44%) | index.ts(partial); artifacts.ts(not-started); utils.ts(partial) |
-| `manager/cpanfile` | 1 | partial | 11/11 (100%) | index.ts(partial); language.ts(partial); parser.ts(partial) |
-| `manager/crossplane` | 1 | partial | 9/9 (100%) | index.ts(partial) |
-| `manager/crow` | 1 | partial | 15/15 (100%) | index.ts(partial) |
-| `manager/custom` | 4 | partial | 9/54 (17%) | index.ts(partial); api.ts(not-started); utils.ts(partial) +5 more |
-| `manager/deno` | 6 | partial | 27/144 (19%) | extract.ts(partial); index.ts(partial); artifacts.ts(not-started) +3 more |
-| `manager/deps-edn` | 2 | partial | 4/4 (100%) | index.ts(partial); parser.ts(partial) |
-| `manager/devbox` | 2 | partial | 13/28 (46%) | index.ts(partial); artifacts.ts(not-started); tool-versioning.ts(partial) |
-| `manager/devcontainer` | 1 | partial | 15/15 (100%) | index.ts(partial) |
-| `manager/docker-compose` | 1 | partial | 13/13 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/dockerfile` | 1 | partial | 76/76 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/droneci` | 1 | partial | 5/5 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/fleet` | 1 | partial | 9/10 (90%) | index.ts(partial) |
-| `manager/flux` | 2 | partial | 59/66 (89%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/fvm` | 1 | partial | 7/7 (100%) | index.ts(partial) |
-| `manager/git-submodules` | 3 | partial | 10/16 (62%) | index.ts(partial); artifacts.ts(partial) |
-| `manager/github-actions` | 3 | partial | 81/98 (83%) | index.ts(partial); update.ts(partial); community.ts(partial) |
-| `manager/gitlabci` | 2 | partial | 17/18 (94%) | index.ts(partial); update.ts(partial); utils.ts(partial) |
-| `manager/gitlabci-include` | 1 | partial | 8/8 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/glasskube` | 1 | partial | 3/5 (60%) | index.ts(partial) |
-| `manager/gleam` | 4 | partial | 18/30 (60%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/gomod` | 6 | partial | 97/155 (63%) | index.ts(partial); artifacts.ts(partial) |
-| `manager/gradle` | 8 | partial | 42/143 (29%) | index.ts(partial); artifacts.ts(not-started); parser.ts(partial) +10 more |
-| `manager/gradle-wrapper` | 3 | partial | 20/36 (56%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/haskell-cabal` | 2 | partial | 8/8 (100%) | index.ts(partial) |
-| `manager/helm-requirements` | 1 | partial | 11/11 (100%) | index.ts(partial) |
-| `manager/helm-values` | 1 | partial | 6/6 (100%) | index.ts(partial); update.ts(partial); util.ts(partial) |
-| `manager/helmfile` | 2 | partial | 20/29 (69%) | index.ts(partial); artifacts.ts(not-started); utils.ts(partial) |
-| `manager/helmsman` | 1 | partial | 4/4 (100%) | index.ts(partial) |
-| `manager/helmv3` | 5 | partial | 26/52 (50%) | index.ts(partial); artifacts.ts(not-started); oci.ts(partial) +1 more |
-| `manager/hermit` | 4 | partial | 6/14 (43%) | index.ts(partial); artifacts.ts(not-started); default-config.ts(partial) |
-| `manager/homeassistant-manifest` | 1 | partial | 16/16 (100%) | index.ts(partial) |
-| `manager/homebrew` | 5 | partial | 44/64 (69%) | index.ts(partial); update.ts(not-started); utils.ts(partial) |
-| `manager/html` | 1 | partial | 2/2 (100%) | index.ts(partial) |
-| `manager/jenkins` | 1 | partial | 5/5 (100%) | index.ts(partial) |
-| `manager/jsonnet-bundler` | 2 | partial | 7/12 (58%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/kotlin-script` | 2 | partial | 5/5 (100%) | index.ts(partial) |
-| `manager/kubernetes` | 1 | partial | 14/15 (93%) | index.ts(partial) |
-| `manager/kustomize` | 3 | partial | 45/68 (66%) | index.ts(partial); artifacts.ts(not-started); common.ts(partial) |
-| `manager/leiningen` | 1 | partial | 4/4 (100%) | index.ts(partial) |
-| `manager/maven` | 3 | partial | 56/56 (100%) | index.ts(partial) |
-| `manager/maven-wrapper` | 2 | partial | 9/39 (23%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/meteor` | 1 | partial | 2/2 (100%) | index.ts(partial) |
-| `manager/mint` | 1 | partial | 5/5 (100%) | index.ts(partial) |
-| `manager/mise` | 7 | partial | 89/113 (79%) | index.ts(partial); artifacts.ts(not-started); lockfile.ts(partial) +1 more |
-| `manager/mix` | 3 | partial | 8/28 (29%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/nix` | 3 | partial | 40/50 (80%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/nodenv` | 1 | partial | 3/3 (100%) | index.ts(partial) |
-| `manager/npm` | 32 | partial | 190/439 (43%) | index.ts(partial); dependency.ts(partial); node.ts(partial) +33 more |
-| `manager/nuget` | 6 | partial | 51/93 (55%) | index.ts(partial); artifacts.ts(not-started); config-formatter.ts(partial) +2 more |
-| `manager/nvm` | 1 | partial | 4/4 (100%) | index.ts(partial) |
-| `manager/ocb` | 2 | partial | 9/9 (100%) | index.ts(partial) |
-| `manager/osgi` | 1 | partial | 14/14 (100%) | index.ts(partial) |
-| `manager/pep621` | 6 | partial | 19/48 (40%) | index.ts(partial); artifacts.ts(not-started); abstract.ts(partial) +5 more |
-| `manager/pep723` | 2 | partial | 6/6 (100%) | index.ts(partial); utils.ts(partial) |
-| `manager/pip-compile` | 4 | partial | 13/90 (14%) | extract.ts(partial); index.ts(partial); artifacts.ts(not-started) +2 more |
-| `manager/pip_requirements` | 4 | partial | 28/36 (78%) | index.ts(partial); artifacts.ts(not-started); common.ts(partial) |
-| `manager/pip_setup` | 1 | partial | 2/2 (100%) | index.ts(partial) |
-| `manager/pipenv` | 2 | partial | 15/37 (41%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/pixi` | 2 | partial | 16/26 (62%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/poetry` | 4 | partial | 30/71 (42%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/pre-commit` | 1 | partial | 12/12 (100%) | index.ts(partial); parsing.ts(partial) |
-| `manager/proto` | 2 | partial | 16/16 (100%) | index.ts(partial); upgradeable-tooling.ts(partial) |
-| `manager/pub` | 3 | partial | 6/21 (29%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/puppet` | 3 | partial | 13/21 (62%) | index.ts(partial); common.ts(partial); puppetfile-parser.ts(partial) |
-| `manager/pyenv` | 1 | partial | 3/3 (100%) | index.ts(partial) |
-| `manager/quadlet` | 1 | partial | 10/11 (91%) | index.ts(partial) |
-| `manager/renovate-config` | 1 | partial | 18/20 (90%) | index.ts(partial) |
-| `manager/ruby-version` | 1 | partial | 3/3 (100%) | index.ts(partial) |
-| `manager/runtime-version` | 1 | partial | 2/2 (100%) | index.ts(partial) |
-| `manager/rust-toolchain` | 2 | partial | 23/23 (100%) | index.ts(partial) |
-| `manager/sbt` | 3 | partial | 38/38 (100%) | index.ts(partial); util.ts(partial) |
-| `manager/scalafmt` | 1 | partial | 4/4 (100%) | index.ts(partial) |
-| `manager/setup-cfg` | 1 | partial | 2/2 (100%) | index.ts(partial) |
-| `manager/sveltos` | 1 | partial | 13/14 (93%) | index.ts(partial); util.ts(partial) |
-| `manager/swift` | 4 | partial | 28/59 (47%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/tekton` | 1 | partial | 5/5 (100%) | index.ts(partial) |
-| `manager/terraform` | 13 | partial | 43/88 (49%) | index.ts(partial); base.ts(partial); extractors.ts(partial) +9 more |
-| `manager/terraform-version` | 1 | partial | 2/2 (100%) | index.ts(partial) |
-| `manager/terragrunt` | 4 | partial | 15/18 (83%) | index.ts(partial); artifacts.ts(not-started); common.ts(partial) +3 more |
-| `manager/terragrunt-version` | 1 | partial | 1/1 (100%) | index.ts(partial) |
-| `manager/tflint-plugin` | 1 | partial | 6/6 (100%) | index.ts(partial); plugins.ts(partial); util.ts(partial) |
-| `manager/travis` | 1 | partial | 8/8 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/typst` | 1 | partial | 9/9 (100%) | index.ts(partial) |
-| `manager/unity3d` | 1 | partial | 3/3 (100%) | index.ts(partial) |
-| `manager/velaci` | 1 | partial | 6/6 (100%) | index.ts(partial) |
-| `manager/vendir` | 2 | partial | 5/19 (26%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/woodpecker` | 1 | partial | 11/11 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/xcodegen` | 1 | partial | 24/24 (100%) | index.ts(partial) |
+| `manager/ansible` | 1 | ? | 6/6 (100%) | — |
+| `manager/ansible-galaxy` | 1 | ? | 14/14 (100%) | — |
+| `manager/ant` | 3 | ? | 65/65 (100%) | — |
+| `manager/argocd` | 1 | ? | 8/8 (100%) | — |
+| `manager/asdf` | 2 | ? | 14/14 (100%) | — |
+| `manager/azure-pipelines` | 1 | ? | 27/29 (93%) | — |
+| `manager/batect` | 1 | ? | 4/4 (100%) | — |
+| `manager/batect-wrapper` | 2 | ? | 4/7 (57%) | — |
+| `manager/bazel` | 5 | ? | 24/46 (52%) | — |
+| `manager/bazel-module` | 10 | ? | 79/110 (72%) | — |
+| `manager/bazelisk` | 2 | ? | 4/10 (40%) | — |
+| `manager/bicep` | 1 | ? | 9/9 (100%) | — |
+| `manager/bitbucket-pipelines` | 1 | ? | 4/4 (100%) | — |
+| `manager/bitrise` | 2 | ? | 9/9 (100%) | — |
+| `manager/buildkite` | 1 | ? | 11/11 (100%) | — |
+| `manager/buildpacks` | 1 | ? | 3/3 (100%) | — |
+| `manager/bun` | 3 | ? | 3/34 (9%) | — |
+| `manager/bun-version` | 1 | ? | 6/6 (100%) | — |
+| `manager/bundler` | 7 | ? | 42/74 (57%) | — |
+| `manager/cake` | 1 | ? | 3/5 (60%) | — |
+| `manager/cargo` | 6 | partial | 61/73 (84%) | Missing: artifacts execution (`cargo update`), M4 scope. Extract/update/range/locked all full. |
+| `manager/cdnurl` | 1 | ? | 1/1 (100%) | — |
+| `manager/circleci` | 4 | ? | 13/14 (93%) | — |
+| `manager/cloudbuild` | 1 | ? | 2/2 (100%) | — |
+| `manager/cocoapods` | 2 | ? | 2/13 (15%) | — |
+| `manager/composer` | 6 | ? | 22/89 (25%) | — |
+| `manager/conan` | 3 | ? | 6/17 (35%) | — |
+| `manager/copier` | 3 | ? | 11/25 (44%) | — |
+| `manager/cpanfile` | 1 | ? | 11/11 (100%) | — |
+| `manager/crossplane` | 1 | ? | 9/9 (100%) | — |
+| `manager/crow` | 1 | ? | 15/15 (100%) | — |
+| `manager/custom` | 4 | ? | 9/54 (17%) | — |
+| `manager/deno` | 6 | ? | 27/144 (19%) | — |
+| `manager/deps-edn` | 2 | ? | 4/4 (100%) | — |
+| `manager/devbox` | 2 | ? | 13/28 (46%) | — |
+| `manager/devcontainer` | 1 | ? | 15/15 (100%) | — |
+| `manager/docker-compose` | 1 | ? | 13/13 (100%) | — |
+| `manager/dockerfile` | 1 | ? | 76/76 (100%) | — |
+| `manager/droneci` | 1 | ? | 5/5 (100%) | — |
+| `manager/fleet` | 1 | ? | 9/10 (90%) | — |
+| `manager/flux` | 2 | ? | 59/66 (89%) | — |
+| `manager/fvm` | 1 | ? | 7/7 (100%) | — |
+| `manager/git-submodules` | 3 | ? | 10/16 (62%) | — |
+| `manager/github-actions` | 3 | ? | 81/98 (83%) | — |
+| `manager/gitlabci` | 2 | ? | 17/18 (94%) | — |
+| `manager/gitlabci-include` | 1 | ? | 8/8 (100%) | — |
+| `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
+| `manager/gleam` | 4 | ? | 18/30 (60%) | — |
+| `manager/gomod` | 6 | ? | 97/155 (63%) | — |
+| `manager/gradle` | 8 | ? | 42/143 (29%) | — |
+| `manager/gradle-wrapper` | 3 | ? | 20/36 (56%) | — |
+| `manager/haskell-cabal` | 2 | ? | 8/8 (100%) | — |
+| `manager/helm-requirements` | 1 | ? | 11/11 (100%) | — |
+| `manager/helm-values` | 1 | ? | 6/6 (100%) | — |
+| `manager/helmfile` | 2 | ? | 20/29 (69%) | — |
+| `manager/helmsman` | 1 | ? | 4/4 (100%) | — |
+| `manager/helmv3` | 5 | ? | 26/52 (50%) | — |
+| `manager/hermit` | 4 | ? | 6/14 (43%) | — |
+| `manager/homeassistant-manifest` | 1 | ? | 16/16 (100%) | — |
+| `manager/homebrew` | 5 | ? | 44/64 (69%) | — |
+| `manager/html` | 1 | ? | 2/2 (100%) | — |
+| `manager/jenkins` | 1 | ? | 5/5 (100%) | — |
+| `manager/jsonnet-bundler` | 2 | ? | 7/12 (58%) | — |
+| `manager/kotlin-script` | 2 | ? | 5/5 (100%) | — |
+| `manager/kubernetes` | 1 | ? | 14/15 (93%) | — |
+| `manager/kustomize` | 3 | ? | 45/68 (66%) | — |
+| `manager/leiningen` | 1 | ? | 4/4 (100%) | — |
+| `manager/maven` | 3 | ? | 56/56 (100%) | — |
+| `manager/maven-wrapper` | 2 | ? | 9/39 (23%) | — |
+| `manager/meteor` | 1 | ? | 2/2 (100%) | — |
+| `manager/mint` | 1 | ? | 5/5 (100%) | — |
+| `manager/mise` | 7 | ? | 89/113 (79%) | — |
+| `manager/mix` | 3 | ? | 8/28 (29%) | — |
+| `manager/nix` | 3 | ? | 40/50 (80%) | — |
+| `manager/nodenv` | 1 | ? | 3/3 (100%) | — |
+| `manager/npm` | 32 | ? | 190/439 (43%) | — |
+| `manager/nuget` | 6 | ? | 51/93 (55%) | — |
+| `manager/nvm` | 1 | ? | 4/4 (100%) | — |
+| `manager/ocb` | 2 | ? | 9/9 (100%) | — |
+| `manager/osgi` | 1 | ? | 14/14 (100%) | — |
+| `manager/pep621` | 6 | ? | 19/48 (40%) | — |
+| `manager/pep723` | 2 | ? | 6/6 (100%) | — |
+| `manager/pip-compile` | 4 | ? | 13/90 (14%) | — |
+| `manager/pip_requirements` | 4 | ? | 28/36 (78%) | — |
+| `manager/pip_setup` | 1 | ? | 2/2 (100%) | — |
+| `manager/pipenv` | 2 | ? | 15/37 (41%) | — |
+| `manager/pixi` | 2 | ? | 16/26 (62%) | — |
+| `manager/poetry` | 4 | ? | 30/71 (42%) | — |
+| `manager/pre-commit` | 1 | ? | 12/12 (100%) | — |
+| `manager/proto` | 2 | ? | 16/16 (100%) | — |
+| `manager/pub` | 3 | ? | 6/21 (29%) | — |
+| `manager/puppet` | 3 | ? | 13/21 (62%) | — |
+| `manager/pyenv` | 1 | ? | 3/3 (100%) | — |
+| `manager/quadlet` | 1 | ? | 10/11 (91%) | — |
+| `manager/renovate-config` | 1 | ? | 18/20 (90%) | — |
+| `manager/ruby-version` | 1 | ? | 3/3 (100%) | — |
+| `manager/runtime-version` | 1 | ? | 2/2 (100%) | — |
+| `manager/rust-toolchain` | 2 | ? | 23/23 (100%) | — |
+| `manager/sbt` | 3 | ? | 38/38 (100%) | — |
+| `manager/scalafmt` | 1 | ? | 4/4 (100%) | — |
+| `manager/setup-cfg` | 1 | ? | 2/2 (100%) | — |
+| `manager/sveltos` | 1 | ? | 13/14 (93%) | — |
+| `manager/swift` | 4 | ? | 28/59 (47%) | — |
+| `manager/tekton` | 1 | ? | 5/5 (100%) | — |
+| `manager/terraform` | 13 | ? | 43/88 (49%) | — |
+| `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
+| `manager/terragrunt` | 4 | ? | 15/18 (83%) | — |
+| `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |
+| `manager/tflint-plugin` | 1 | ? | 6/6 (100%) | — |
+| `manager/travis` | 1 | ? | 8/8 (100%) | — |
+| `manager/typst` | 1 | ? | 9/9 (100%) | — |
+| `manager/unity3d` | 1 | ? | 3/3 (100%) | — |
+| `manager/velaci` | 1 | ? | 6/6 (100%) | — |
+| `manager/vendir` | 2 | ? | 5/19 (26%) | — |
+| `manager/woodpecker` | 1 | ? | 11/11 (100%) | — |
+| `manager/xcodegen` | 1 | ? | 24/24 (100%) | — |
 
 ## datasources  —  551/1379 (40%)
 
@@ -170,7 +170,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/conan` | 1 | ? | 0/22 (0%) | — |
 | `datasource/conda` | 1 | ? | 9/9 (100%) | — |
 | `datasource/cpan` | 2 | ? | 8/8 (100%) | — |
-| `datasource/crate` | 1 | full | 22/27 (81%) | Git-clone private registries not implemented (sparse-only) |
+| `datasource/crate` | 1 | partial | 22/27 (81%) | Missing: git-clone registry support. Sparse index + metadata + timestamps full. |
 | `datasource/custom` | 1 | ? | 1/30 (3%) | — |
 | `datasource/dart` | 1 | ? | 6/6 (100%) | — |
 | `datasource/dart-version` | 1 | ? | 2/4 (50%) | — |
@@ -304,7 +304,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/ruby` | 1 | ? | 14/15 (93%) | — |
 | `versioning/rust-release-channel` | 2 | ? | 17/23 (74%) | — |
 | `versioning/same-major` | 1 | ? | 8/10 (80%) | — |
-| `versioning/semver` | 2 | full | 6/6 (100%) | — |
+| `versioning/semver` | 2 | ? | 6/6 (100%) | — |
 | `versioning/semver-coerced` | 1 | ? | 48/53 (91%) | — |
 | `versioning/semver-partial` | 1 | ? | 18/18 (100%) | — |
 | `versioning/swift` | 1 | ? | 7/7 (100%) | — |
