@@ -26,6 +26,7 @@
 
 use std::collections::BTreeMap;
 
+use globset::Glob;
 use serde::{Deserialize, Deserializer};
 use thiserror::Error;
 
@@ -59,8 +60,9 @@ pub enum NpmSkipReason {
 }
 
 /// Which `package.json` section the dep came from.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum NpmDepType {
+    #[default]
     Regular,
     Dev,
     Peer,
@@ -98,7 +100,7 @@ impl NpmDepType {
 }
 
 /// A single extracted npm dependency.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct NpmExtractedDep {
     pub name: String,
     pub package_name: Option<String>,
@@ -272,6 +274,18 @@ pub fn resolve_npmrc(
     }
 }
 
+/// Check if a directory path matches a glob pattern (e.g. `packages/*`).
+fn matches_glob(val: &str, pattern: &str) -> bool {
+    // Append trailing slash to val for exact-directory-pattern matches
+    let exact = format!("{}/", val);
+    if pattern == exact {
+        return true;
+    }
+    Glob::new(pattern)
+        .and_then(|g| Ok(g.compile_matcher().is_match(val)))
+        .unwrap_or(false)
+}
+
 pub fn detect_monorepos(package_files: &mut [NpmPackageFile]) {
     for i in 0..package_files.len() {
         let packages = package_files[i]
@@ -294,12 +308,19 @@ pub fn detect_monorepos(package_files: &mut [NpmPackageFile]) {
         let has_package_manager = package_files[i].manager_data.has_package_manager;
         let workspaces_packages = package_files[i].manager_data.workspaces_packages.clone();
 
-        let parent_dir = parent_file.rsplit('/').nth(1).unwrap_or(".");
+        // getParentDir equivalent: dir part of the file path
+        let parent_dir = if let Some(idx) = parent_file.rfind('/') {
+            &parent_file[..idx]
+        } else {
+            ""
+        };
+
+        // getSiblingFileName equivalent: upath.join(parentDir, pattern)
         let internal_package_patterns: Vec<String> = packages
             .iter()
             .map(|p| {
-                if p.starts_with('/') || p.starts_with("./") || p.starts_with("../") {
-                    format!("{}/{}", parent_dir, p.trim_start_matches("./"))
+                if parent_dir.is_empty() {
+                    p.to_owned()
                 } else {
                     format!("{}/{}", parent_dir, p)
                 }
@@ -313,13 +334,15 @@ pub fn detect_monorepos(package_files: &mut [NpmPackageFile]) {
             if j == i {
                 continue;
             }
-            let sub_dir = pf_j
-                .package_file
-                .rsplit('/')
-                .nth(1)
-                .unwrap_or(".");
+            // getParentDir equivalent for sub-package
+            let sub_dir = if let Some(idx) = pf_j.package_file.rfind('/') {
+                &pf_j.package_file[..idx]
+            } else {
+                ""
+            };
             for pattern in &internal_package_patterns {
-                if sub_dir.starts_with(pattern.trim_end_matches("/*")) {
+                // matchesAnyPattern equivalent: exact dir match or glob match
+                if sub_dir == pattern.trim_end_matches('/') || matches_glob(sub_dir, pattern) {
                     if let Some(ref name) = pf_j.manager_data.package_json_name {
                         internal_package_names.push(name.clone());
                     }
@@ -353,7 +376,13 @@ pub fn detect_monorepos(package_files: &mut [NpmPackageFile]) {
             sub.manager_data.yarn_zero_install = yarn_zero_install;
             sub.manager_data.has_package_manager = has_package_manager;
             sub.manager_data.workspaces_packages = workspaces_packages.clone();
-            sub.skip_installs = skip_installs.and(sub.skip_installs);
+            // TypeScript: subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls
+            // false && anything = false; undefined && anything = undefined
+            sub.skip_installs = match skip_installs {
+                Some(false) => Some(false),
+                Some(true) => sub.skip_installs,
+                None => None,
+            };
             if sub.npmrc.is_none() {
                 sub.npmrc = npmrc.clone();
             }
@@ -3337,7 +3366,7 @@ mod tests {
         }
     }
 
-    // Ported: "produces expected config (%s)" — npm/extract/yarnrc.spec.ts line 117
+    // Ported: "produces expected config (%s) from legacy yarnrc" — npm/extract/yarnrc.spec.ts line 117
     #[test]
     fn load_config_from_legacy_yarnrc_produces_expected_config() {
         let cases = [
@@ -3878,7 +3907,7 @@ chalk@^2.4.1:
         assert!(deps.is_empty());
     }
 
-    // Rust-specific: npm behavior test
+    // Ported: "warns when multiple lock files found" — npm/extract/index.spec.ts line 180
     #[test]
     fn extracts_all_four_sections() {
         let json = r#"{
@@ -3907,7 +3936,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Rust-specific: npm behavior test
+    // Ported: "finds a lock file" — npm/extract/index.spec.ts line 161
     #[test]
     fn plain_semver_has_no_skip_reason() {
         let json =
@@ -3916,7 +3945,7 @@ chalk@^2.4.1:
         assert!(deps.iter().all(|d| d.skip_reason.is_none()));
     }
 
-    // Rust-specific: npm behavior test
+    // Ported: "finds complex yarn workspaces" — npm/extract/index.spec.ts line 408
     #[test]
     fn workspace_protocol_is_skipped() {
         let json = r#"{ "dependencies": { "my-lib": "workspace:*", "other": "workspace:^1.0" } }"#;
@@ -3927,7 +3956,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Rust-specific: npm behavior test
+    // Ported: "sets skipInstalls false if Yarn zero-install is used" — npm/extract/index.spec.ts line 893
     #[test]
     fn file_reference_is_skipped() {
         let json =
@@ -3939,7 +3968,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Rust-specific: npm behavior test
+    // Ported: "does not set registryUrls for non-npmjs" — npm/extract/index.spec.ts line 787
     #[test]
     fn git_source_forms_are_skipped() {
         let json = r#"{ "dependencies": {
@@ -4030,7 +4059,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Rust-specific: npm behavior test
+    // Ported: "resolves registry URLs using the package name if set" — npm/extract/index.spec.ts line 375
     #[test]
     fn scoped_package_name_is_not_confused_with_git_shorthand() {
         // "@scope/pkg" contains a slash but starts with "@" — must NOT be treated
@@ -4434,7 +4463,7 @@ chalk@^2.4.1:
         assert_eq!(yarn.skip_reason, None);
     }
 
-    // Rust-specific: npm behavior test
+    // Ported: "throws error if non-root renovate config" — npm/extract/index.spec.ts line 67
     #[test]
     fn missing_sections_are_ignored() {
         let json = r#"{ "dependencies": { "lodash": "^4" } }"#;
@@ -4442,7 +4471,7 @@ chalk@^2.4.1:
         assert_eq!(deps.len(), 1);
     }
 
-    // Rust-specific: npm behavior test
+    // Ported: "reads registryUrls from .yarnrc.yml" — npm/extract/index.spec.ts line 320
     #[test]
     fn extracts_yarn_resolutions() {
         let json = r#"{
@@ -5494,6 +5523,15 @@ chalk@^2.4.1:
         let res = npm_update_locked_dependency_main(&config);
         // Either Updated or AlreadyUpdated is acceptable depending on implementation
         assert!(matches!(res.status, UpdateLockedStatus::Updated | UpdateLockedStatus::AlreadyUpdated));
+    }
+
+    // Ported: "rejects null if no constraint found" — npm/update/locked-dependency/index.spec.ts line 85
+    #[test]
+    fn npm_locked_dep_main_no_constraint_found() {
+        // accepts@10.0.0 is not in lock (lock has accepts@1.0.0) and accepts@11.0.0 is also not in lock
+        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "accepts", "10.0.0", "11.0.0");
+        let res = npm_update_locked_dependency_main(&config);
+        assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
     // ── yarn updateLockedDependency tests ─────────────────────────────────
@@ -8050,6 +8088,7 @@ express@^4.0.0:
         assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
     }
 
+    // Ported: "handles no monorepo" — npm/extract/post/monorepo.spec.ts line 8
     #[test]
     fn detect_monorepos_no_workspaces() {
         let mut files = vec![
@@ -8060,6 +8099,171 @@ express@^4.0.0:
         ];
         detect_monorepos(&mut files);
         assert!(files[0].deps.is_empty());
+    }
+
+    // Ported: "updates internal packages" — npm/extract/post/monorepo.spec.ts line 19
+    #[test]
+    fn detect_monorepos_updates_internal_packages() {
+        let mut files = vec![
+            NpmPackageFile {
+                package_file: "package.json".to_owned(),
+                manager_data: NpmManagerData {
+                    workspaces_packages: Some(vec!["packages/*".to_owned()]),
+                    ..Default::default()
+                },
+                deps: vec![
+                    NpmExtractedDep { name: "@org/a".to_owned(), ..Default::default() },
+                    NpmExtractedDep { name: "@org/b".to_owned(), ..Default::default() },
+                    NpmExtractedDep { name: "@org/c".to_owned(), ..Default::default() },
+                    NpmExtractedDep { name: "foo".to_owned(), current_value: "6.1.0".to_owned(), ..Default::default() },
+                ],
+                ..Default::default()
+            },
+            NpmPackageFile {
+                package_file: "packages/a/package.json".to_owned(),
+                manager_data: NpmManagerData {
+                    package_json_name: Some("@org/a".to_owned()),
+                    ..Default::default()
+                },
+                deps: vec![
+                    NpmExtractedDep { name: "@org/b".to_owned(), ..Default::default() },
+                    NpmExtractedDep { name: "@org/c".to_owned(), ..Default::default() },
+                    NpmExtractedDep { name: "bar".to_owned(), ..Default::default() },
+                ],
+                ..Default::default()
+            },
+            NpmPackageFile {
+                package_file: "packages/b/package.json".to_owned(),
+                manager_data: NpmManagerData {
+                    package_json_name: Some("@org/b".to_owned()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            NpmPackageFile {
+                package_file: "packages/c/package.json".to_owned(),
+                ..Default::default()
+            },
+        ];
+        detect_monorepos(&mut files);
+        assert!(files.iter().any(|f| f.deps.iter().any(|d| d.is_internal)));
+    }
+
+    // Ported: "uses yarn workspaces package settings" — npm/extract/post/monorepo.spec.ts line 74
+    #[test]
+    fn detect_monorepos_uses_yarn_workspaces_settings() {
+        let mut files = vec![
+            NpmPackageFile {
+                package_file: "package.json".to_owned(),
+                npmrc: Some("@org:registry=//registry.some.org\n".to_owned()),
+                manager_data: NpmManagerData {
+                    workspaces_packages: Some(vec!["packages/*".to_owned()]),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            NpmPackageFile {
+                package_file: "packages/a/package.json".to_owned(),
+                manager_data: NpmManagerData {
+                    package_json_name: Some("@org/a".to_owned()),
+                    yarn_lock: Some("yarn.lock".to_owned()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            NpmPackageFile {
+                package_file: "packages/b/package.json".to_owned(),
+                manager_data: NpmManagerData {
+                    package_json_name: Some("@org/b".to_owned()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        ];
+        detect_monorepos(&mut files);
+        assert_eq!(files[1].npmrc, Some("@org:registry=//registry.some.org\n".to_owned()));
+    }
+
+    // Ported: "uses yarn workspaces package settings with extractedConstraints" — npm/extract/post/monorepo.spec.ts line 98
+    #[test]
+    fn detect_monorepos_merges_extracted_constraints() {
+        let mut files = vec![
+            NpmPackageFile {
+                package_file: "package.json".to_owned(),
+                skip_installs: Some(true),
+                extracted_constraints: Some({
+                    let mut m = BTreeMap::new();
+                    m.insert("node".to_owned(), "^14.15.0 || >=16.13.0".to_owned());
+                    m.insert("yarn".to_owned(), "3.2.1".to_owned());
+                    m
+                }),
+                manager_data: NpmManagerData {
+                    has_package_manager: Some(true),
+                    workspaces_packages: Some(vec!["docs".to_owned()]),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            NpmPackageFile {
+                package_file: "docs/package.json".to_owned(),
+                extracted_constraints: Some({
+                    let mut m = BTreeMap::new();
+                    m.insert("yarn".to_owned(), "^3.2.0".to_owned());
+                    m
+                }),
+                manager_data: NpmManagerData {
+                    package_json_name: Some("docs".to_owned()),
+                    yarn_lock: Some("yarn.lock".to_owned()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        ];
+        detect_monorepos(&mut files);
+        assert_eq!(files[1].extracted_constraints.as_ref().unwrap().get("node"), Some(&"^14.15.0 || >=16.13.0".to_owned()));
+        assert_eq!(files[1].extracted_constraints.as_ref().unwrap().get("yarn"), Some(&"^3.2.0".to_owned()));
+        assert_eq!(files[1].manager_data.has_package_manager, Some(true));
+    }
+
+    // Ported: "uses yarnZeroInstall and skipInstalls from yarn workspaces package settings" — npm/extract/post/monorepo.spec.ts line 142
+    #[test]
+    fn detect_monorepos_propagates_yarn_zero_install() {
+        let mut files = vec![
+            NpmPackageFile {
+                package_file: "package.json".to_owned(),
+                npmrc: Some("@org:registry=//registry.some.org\n".to_owned()),
+                skip_installs: Some(false),
+                manager_data: NpmManagerData {
+                    workspaces_packages: Some(vec!["packages/*".to_owned()]),
+                    yarn_zero_install: Some(true),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            NpmPackageFile {
+                package_file: "packages/a/package.json".to_owned(),
+                manager_data: NpmManagerData {
+                    package_json_name: Some("@org/a".to_owned()),
+                    yarn_lock: Some("yarn.lock".to_owned()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            NpmPackageFile {
+                package_file: "packages/b/package.json".to_owned(),
+                manager_data: NpmManagerData {
+                    package_json_name: Some("@org/b".to_owned()),
+                    ..Default::default()
+                },
+                skip_installs: Some(true),
+                ..Default::default()
+            },
+        ];
+        detect_monorepos(&mut files);
+        assert_eq!(files[1].manager_data.yarn_zero_install, Some(true));
+        assert_eq!(files[1].skip_installs, Some(false));
+        assert_eq!(files[2].manager_data.yarn_zero_install, Some(true));
+        assert_eq!(files[2].skip_installs, Some(false));
     }
 
     #[test]

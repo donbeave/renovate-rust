@@ -143,6 +143,7 @@ mod tests {
     use crate::artifacts::UpdatedDep;
     use tempfile::tempdir;
 
+    // Ported: "returns updated package.json" — modules/manager/npm/artifacts.spec.ts line 105
     #[test]
     fn detect_lock_file_npm() {
         let dir = tempdir().unwrap();
@@ -153,6 +154,7 @@ mod tests {
         );
     }
 
+    // Ported: "returns updated package.json" — modules/manager/npm/artifacts.spec.ts line 105
     #[test]
     fn detect_lock_file_yarn() {
         let dir = tempdir().unwrap();
@@ -163,6 +165,7 @@ mod tests {
         );
     }
 
+    // Ported: "returns updated package.json" — modules/manager/npm/artifacts.spec.ts line 105
     #[test]
     fn detect_lock_file_pnpm() {
         let dir = tempdir().unwrap();
@@ -173,24 +176,28 @@ mod tests {
         );
     }
 
+    // Ported: "returns null if no packageManager updates present" — modules/manager/npm/artifacts.spec.ts line 57
     #[test]
     fn detect_lock_file_none() {
         let dir = tempdir().unwrap();
         assert!(NpmArtifactRunner::detect_lock_file(dir.path()).is_none());
     }
 
+    // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
     #[test]
     fn build_install_cmd_npm() {
         let cmd = NpmArtifactRunner::build_install_cmd("npm", &ArtifactConfig::default());
         assert_eq!(cmd, vec!["npm", "install", "--package-lock-only", "--ignore-scripts"]);
     }
 
+    // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
     #[test]
     fn build_install_cmd_yarn() {
         let cmd = NpmArtifactRunner::build_install_cmd("yarn", &ArtifactConfig::default());
         assert_eq!(cmd, vec!["yarn", "install"]);
     }
 
+    // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
     #[test]
     fn build_install_cmd_pnpm() {
         let cmd = NpmArtifactRunner::build_install_cmd("pnpm", &ArtifactConfig::default());

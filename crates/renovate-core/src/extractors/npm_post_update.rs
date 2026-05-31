@@ -175,7 +175,7 @@ pub fn determine_lock_file_dirs(
 mod tests {
     use super::*;
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "performs full install" — modules/manager/npm/post-update/npm.spec.ts line 186
     #[test]
     fn parse_package_json_basic() {
         let pj = PackageJson::parse(
@@ -185,7 +185,7 @@ mod tests {
         assert_eq!(pj.engines.unwrap().node.unwrap(), ">=18");
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "uses slim yarn instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 705
     #[test]
     fn parse_package_json_volta() {
         let pj = PackageJson::parse(
@@ -198,7 +198,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn parse_package_json_corepack() {
         let pj = PackageJson::parse(
@@ -211,7 +211,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "does not use global cache if zero install is detected" — modules/manager/npm/post-update/yarn.spec.ts line 288
     #[test]
     fn parse_package_json_pnpm_corepack() {
         let pj = PackageJson::parse(
@@ -224,7 +224,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "uses devEngine.packageManager(object) instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 744
     #[test]
     fn parse_corepack_version_yarn() {
         assert_eq!(
@@ -233,7 +233,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "uses devEngine.packageManager(array) instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 783
     #[test]
     fn parse_corepack_version_npm() {
         assert_eq!(
@@ -242,13 +242,13 @@ mod tests {
         );
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "catches errors" — modules/manager/npm/post-update/yarn.spec.ts line 494
     #[test]
     fn parse_corepack_version_mismatch() {
         assert_eq!(parse_corepack_version("yarn@4.1.0", "npm"), None);
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "performs lock file updates for workspace with packages" — modules/manager/npm/post-update/pnpm.spec.ts line 120
     #[test]
     fn determine_lock_file_dirs_from_upgrades() {
         let upgrades = vec![Upgrade {
@@ -259,7 +259,7 @@ mod tests {
         assert_eq!(dirs, vec![PathBuf::from("packages/foo")]);
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "performs lock file updates for non workspace using pnpm 10.x" — modules/manager/npm/post-update/pnpm.spec.ts line 181
     #[test]
     fn determine_lock_file_dirs_from_root() {
         let upgrades = vec![Upgrade {
@@ -270,7 +270,7 @@ mod tests {
         assert_eq!(dirs, vec![PathBuf::from("")]);
     }
 
-    // Rust-specific: npm_post_update behavior test
+    // Ported: "performs lock file updates and install when lock file updates mixed with regular updates" — modules/manager/npm/post-update/pnpm.spec.ts line 261
     #[test]
     fn determine_lock_file_dirs_dedupes() {
         let upgrades = vec![

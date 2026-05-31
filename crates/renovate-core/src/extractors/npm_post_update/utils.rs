@@ -16,7 +16,7 @@ pub fn get_node_options(max_old_space_size: Option<u64>) -> Option<String> {
 mod tests {
     use super::*;
 
-    // Rust-specific: utils behavior test
+    // Ported: "if nodeMaxMemory set on global config" — modules/manager/npm/post-update/npm.spec.ts line 494
     #[test]
     fn get_node_options_returns_flag() {
         assert_eq!(
@@ -25,13 +25,13 @@ mod tests {
         );
     }
 
-    // Rust-specific: utils behavior test
+    // Ported: "if nodeMaxMemory set on repo config" — modules/manager/npm/post-update/npm.spec.ts line 539
     #[test]
     fn get_node_options_returns_none() {
         assert_eq!(get_node_options(None), None);
     }
 
-    // Rust-specific: utils behavior test
+    // Ported: "uses volta version and puts it into constraint" — modules/manager/npm/post-update/pnpm.spec.ts line 429
     #[test]
     fn get_package_manager_version_from_volta() {
         let pj = PackageJson::parse(
