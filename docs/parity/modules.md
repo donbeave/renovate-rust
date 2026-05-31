@@ -51,7 +51,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/bun-version` | 1 | ? | 6/6 (100%) | — |
 | `manager/bundler` | 7 | ? | 42/74 (57%) | — |
 | `manager/cake` | 1 | ? | 3/5 (60%) | — |
-| `manager/cargo` | 32 | full | 62/73 (85%) | — |
+| `manager/cargo` | 6 | full | 62/73 (85%) | — |
 | `manager/cdnurl` | 1 | ? | 1/1 (100%) | — |
 | `manager/circleci` | 4 | ? | 13/14 (93%) | — |
 | `manager/cloudbuild` | 1 | ? | 2/2 (100%) | — |
@@ -317,7 +317,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `worker/global` | 11 | ? | 116/208 (56%) | — |
-| `worker/repository` | 103 | ? | 238/1675 (14%) | — |
+| `worker/repository` | 103 | partial | 238/1675 (14%) | Branch-name, commit-message, and PR body rendering implemented. Missing: full branch/PR lifecycle, artifact updates, config migration. |
 
 ## config  —  427/700 (61%)
 
