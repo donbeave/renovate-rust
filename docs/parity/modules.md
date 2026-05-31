@@ -290,7 +290,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/maven` | 2 | ? | 8/23 (35%) | — |
 | `versioning/nixpkgs` | 1 | ? | 4/5 (80%) | — |
 | `versioning/node` | 1 | ? | 6/6 (100%) | — |
-| `versioning/npm` | 1 | ? | 7/7 (100%) | — |
+| `versioning/npm` | 1 | full | 7/7 (100%) | — |
 | `versioning/nuget` | 3 | ? | 29/34 (85%) | — |
 | `versioning/pep440` | 2 | ? | 13/14 (93%) | — |
 | `versioning/perl` | 1 | ? | 4/4 (100%) | — |
