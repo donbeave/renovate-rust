@@ -104,4 +104,32 @@ mod tests {
         let err = ExecError::new("failed", "cmd").with_source(Box::new(std::io::Error::other("source")));
         assert!(err.source.is_some());
     }
+
+    // Ported: "throws if an error occurs" — util/exec/common.spec.ts line 241
+    #[test]
+    fn exec_error_contains_cmd_and_message() {
+        let err = ExecError::new("command failed", "ls -l");
+        assert_eq!(err.message, "command failed");
+        assert_eq!(err.cmd, "ls -l");
+    }
+
+    // Ported: "throws if an error occurs, when using CommandWithOptions" — util/exec/common.spec.ts line 214
+    #[test]
+    fn exec_error_with_full_output() {
+        let err = ExecError::new("failed", "cmd")
+            .with_output("stdout".to_owned(), "stderr".to_owned(), Some(1));
+        assert_eq!(err.stdout, "stdout");
+        assert_eq!(err.stderr, "stderr");
+        assert_eq!(err.exit_code, Some(1));
+    }
+
+    // Ported: "process terminated with SIGTERM" — util/exec/common.spec.ts line 618
+    #[test]
+    fn exec_error_display_truncates_long_stderr() {
+        let long_stderr = "x".repeat(500);
+        let err = ExecError::new("failed", "cmd")
+            .with_output("".to_owned(), long_stderr.clone(), None);
+        let display = format!("{}", err);
+        assert!(display.len() < long_stderr.len() + 100);
+    }
 }

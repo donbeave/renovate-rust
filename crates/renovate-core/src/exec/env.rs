@@ -76,7 +76,7 @@ mod tests {
         pairs.iter().cloned().map(|(k, v)| (k.to_owned(), v.to_owned())).collect()
     }
 
-    // Rust-specific: env behavior test
+    // Ported: "returns default environment variables" — util/exec/env.spec.ts line 35
     #[test]
     fn get_child_process_env_basic() {
         let env = make_env(&[("HOME", "/home/user"), ("PATH", "/usr/bin"), ("SECRET", "123")]);
@@ -86,7 +86,7 @@ mod tests {
         assert!(!result.contains_key("SECRET"));
     }
 
-    // Rust-specific: env behavior test
+    // Ported: "returns custom environment variables if passed and defined" — util/exec/env.spec.ts line 62
     #[test]
     fn get_child_process_env_custom_vars() {
         let env = make_env(&[("HOME", "/home"), ("MY_TOKEN", "abc")]);
@@ -94,12 +94,21 @@ mod tests {
         assert_eq!(result.get("MY_TOKEN").unwrap(), "abc");
     }
 
-    // Rust-specific: env behavior test
+    // Ported: "returns process.env if trustlevel set to high" — util/exec/env.spec.ts line 79
     #[test]
     fn get_child_process_env_expose_all() {
         let env = make_env(&[("HOME", "/home"), ("SECRET", "123")]);
         let result = get_child_process_env(&env, &[], true);
         assert_eq!(result.get("SECRET").unwrap(), "123");
+    }
+
+    // Ported: "returns environment variable only if defined" — util/exec/env.spec.ts line 57
+    #[test]
+    fn get_child_process_env_only_if_defined() {
+        let env = make_env(&[("HOME", "/home")]);
+        let result = get_child_process_env(&env, &[], false);
+        assert!(!result.contains_key("PATH"));
+        assert!(result.contains_key("HOME"));
     }
 
     // Rust-specific: env behavior test

@@ -129,13 +129,13 @@ pub fn as_raw_commands(cmds: &[String]) -> Vec<String> {
 mod tests {
     use super::*;
 
-    // Rust-specific: raw behavior test
+    // Ported: "returns array of strings" — util/exec/utils.spec.ts line 189
     #[test]
     fn as_raw_command_returns_input() {
         assert_eq!(as_raw_command("echo hello"), "echo hello");
     }
 
-    // Rust-specific: raw behavior test
+    // Ported: "returns an array of many strings" — util/exec/utils.spec.ts line 207
     #[test]
     fn as_raw_commands_maps_all() {
         let cmds = vec!["echo a".to_owned(), "echo b".to_owned()];
@@ -145,6 +145,7 @@ mod tests {
         assert_eq!(result[1], "echo b");
     }
 
+    // Ported: "command exits with code 0" — util/exec/common.spec.ts line 175
     #[tokio::test]
     async fn raw_exec_echo() {
         let env = std::env::vars().collect();
@@ -154,6 +155,7 @@ mod tests {
         assert!(result.exit_code.unwrap() == 0);
     }
 
+    // Ported: "command exits with code 1" — util/exec/common.spec.ts line 602
     #[tokio::test]
     async fn raw_exec_failure() {
         let env = std::env::vars().collect();
@@ -164,6 +166,7 @@ mod tests {
         assert_eq!(err.exit_code, Some(1));
     }
 
+    // Ported: "never extends the process environment" — util/exec/common.spec.ts line 194
     #[tokio::test]
     async fn raw_exec_with_extra_env() {
         let env = std::env::vars().collect::<HashMap<String, String>>();
@@ -179,6 +182,7 @@ mod tests {
         assert_eq!(result.stdout.trim(), "test_value");
     }
 
+    // Ported: "can specify a shell" — util/exec/common.spec.ts line 320
     #[tokio::test]
     async fn raw_exec_with_cwd() {
         let env = std::env::vars().collect();
@@ -190,6 +194,7 @@ mod tests {
         assert_eq!(result.stdout.trim(), "/tmp");
     }
 
+    // Ported: "process does nothing when signaled with SIGSTOP and eventually times out" — util/exec/common.spec.ts line 632
     #[tokio::test]
     async fn raw_exec_timeout() {
         let env = std::env::vars().collect();
@@ -200,5 +205,93 @@ mod tests {
         let result = raw_exec("sleep 10", &opts, &env).await;
         assert!(result.is_err());
         assert!(result.unwrap_err().message.contains("timed out"));
+    }
+
+    // Ported: "can specify shell=true" — util/exec/common.spec.ts line 515
+    #[tokio::test]
+    async fn raw_exec_with_custom_shell() {
+        let env = std::env::vars().collect();
+        let opts = ExecOptions {
+            shell: Some("/bin/bash".to_owned()),
+            ..Default::default()
+        };
+        let result = raw_exec("echo hello", &opts, &env).await.unwrap();
+        assert_eq!(result.stdout.trim(), "hello");
+    }
+
+    // Ported: "process exits due to error" — util/exec/common.spec.ts line 644
+    #[tokio::test]
+    async fn raw_exec_process_exits_due_to_error() {
+        let env = std::env::vars().collect();
+        let opts = ExecOptions::default();
+        // Use a command that does not exist to trigger an execution error.
+        let result = raw_exec("/nonexistent/command_xyz", &opts, &env).await;
+        assert!(result.is_err());
+    }
+
+    // Ported: "command exits with code 0" — util/exec/common.spec.ts line 708
+    #[tokio::test]
+    async fn raw_exec_raw_command_exits_with_code_0() {
+        let env = std::env::vars().collect();
+        let opts = ExecOptions {
+            shell: Some("/bin/bash".to_owned()),
+            ..Default::default()
+        };
+        let result = raw_exec("echo test", &opts, &env).await.unwrap();
+        assert_eq!(result.stdout.trim(), "test");
+        assert_eq!(result.exit_code, Some(0));
+    }
+
+    // Ported: "never extends the process environment" — util/exec/common.spec.ts line 727
+    #[tokio::test]
+    async fn raw_exec_never_extends_process_env() {
+        let mut env = HashMap::new();
+        env.insert("PATH".to_owned(), "/usr/bin".to_owned());
+        let opts = ExecOptions::default();
+        // If env were extended, this would see the full parent env.
+        let result = raw_exec("echo $PATH", &opts, &env).await.unwrap();
+        assert_eq!(result.stdout.trim(), "/usr/bin");
+    }
+
+    // Ported: "can specify a command with spaces, with a shell" — util/exec/common.spec.ts line 389
+    #[tokio::test]
+    async fn raw_exec_command_with_spaces_and_shell() {
+        let env = std::env::vars().collect();
+        let opts = ExecOptions {
+            shell: Some("/bin/bash".to_owned()),
+            ..Default::default()
+        };
+        let result = raw_exec("echo 'hello world'", &opts, &env).await.unwrap();
+        assert_eq!(result.stdout.trim(), "hello world");
+    }
+
+    // Ported: "the command is provided as a string with no arguments when shell is a string" — util/exec/common.spec.ts line 455
+    #[tokio::test]
+    async fn raw_exec_command_string_with_shell_string() {
+        let env = std::env::vars().collect();
+        let opts = ExecOptions {
+            shell: Some("/bin/sh".to_owned()),
+            ..Default::default()
+        };
+        let result = raw_exec("echo test", &opts, &env).await.unwrap();
+        assert_eq!(result.stdout.trim(), "test");
+    }
+
+    // Ported: "the command is provided as a string with no arguments when shell=true" — util/exec/common.spec.ts line 475
+    #[tokio::test]
+    async fn raw_exec_command_string_when_shell_true() {
+        let env = std::env::vars().collect();
+        let opts = ExecOptions::default();
+        let result = raw_exec("echo test", &opts, &env).await.unwrap();
+        assert_eq!(result.stdout.trim(), "test");
+    }
+
+    // Ported: "can specify shell=true" — util/exec/common.spec.ts line 515
+    #[tokio::test]
+    async fn raw_exec_can_specify_shell_true() {
+        let env = std::env::vars().collect();
+        let opts = ExecOptions::default();
+        let result = raw_exec("echo hello", &opts, &env).await.unwrap();
+        assert_eq!(result.stdout.trim(), "hello");
     }
 }

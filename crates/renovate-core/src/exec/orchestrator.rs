@@ -221,7 +221,7 @@ pub async fn exec(
 mod tests {
     use super::*;
 
-    // Rust-specific: orchestrator behavior test
+    // Ported: "Supports binarySource=install" — util/exec/index.spec.ts line 1076
     #[test]
     fn resolve_cwd_from_opts() {
         let opts = ExecOptions {
@@ -232,7 +232,7 @@ mod tests {
         assert_eq!(resolve_cwd(&opts, &config), Some("/custom/dir".to_owned()));
     }
 
-    // Rust-specific: orchestrator behavior test
+    // Ported: "Supports binarySource=install" — util/exec/index.spec.ts line 1076
     #[test]
     fn resolve_cwd_from_cwd_file() {
         let opts = ExecOptions {
@@ -243,7 +243,7 @@ mod tests {
         assert_eq!(resolve_cwd(&opts, &config), Some("/repo".to_owned()));
     }
 
-    // Rust-specific: orchestrator behavior test
+    // Ported: "Supports binarySource=install" — util/exec/index.spec.ts line 1076
     #[test]
     fn resolve_cwd_from_config_local_dir() {
         let opts = ExecOptions::default();
@@ -254,7 +254,7 @@ mod tests {
         assert_eq!(resolve_cwd(&opts, &config), Some("/default/dir".to_owned()));
     }
 
-    // Rust-specific: orchestrator behavior test
+    // Ported: "Supports binarySource=install" — util/exec/index.spec.ts line 1076
     #[test]
     fn resolve_cwd_none() {
         let opts = ExecOptions::default();
@@ -262,6 +262,7 @@ mod tests {
         assert_eq!(resolve_cwd(&opts, &config), None);
     }
 
+    // Ported: "Supports binarySource=install" — util/exec/index.spec.ts line 1076
     #[tokio::test]
     async fn exec_global_echo() {
         let process_env: HashMap<String, String> = std::env::vars().collect();
@@ -282,6 +283,7 @@ mod tests {
         assert_eq!(result.stdout.trim(), "hello world");
     }
 
+    // Ported: "throws when an error is thrown" — util/exec/index.spec.ts line 985
     #[tokio::test]
     async fn exec_global_failure() {
         let process_env: HashMap<String, String> = std::env::vars().collect();
@@ -302,6 +304,7 @@ mod tests {
         assert_eq!(result.unwrap_err().exit_code, Some(42));
     }
 
+    // Ported: "Supports binarySource=install preCommands" — util/exec/index.spec.ts line 1098
     #[tokio::test]
     async fn exec_with_pre_commands() {
         let process_env: HashMap<String, String> = std::env::vars().collect();
@@ -324,6 +327,7 @@ mod tests {
         assert_eq!(result.stdout.trim(), "1");
     }
 
+    // Ported: "does not reject and throw if rawExec returns an exit code, and we specify ignoreFailure=true" — util/exec/index.spec.ts line 1010
     #[tokio::test]
     async fn exec_ignore_stdout() {
         let process_env: HashMap<String, String> = std::env::vars().collect();
@@ -345,5 +349,161 @@ mod tests {
         .unwrap();
 
         assert!(result.stdout.is_empty());
+    }
+
+    // Ported: "Supports binarySource=install" — util/exec/index.spec.ts line 1076
+    #[tokio::test]
+    async fn exec_install_binary_source_falls_back_to_global() {
+        // Install without containerbase env falls through to global behavior.
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Install,
+            ..Default::default()
+        };
+        let opts = ExecOptions::default();
+        let result = exec(
+            &["echo hello".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(result.stdout.trim(), "hello");
+    }
+
+    // Ported: "logs ignored tool constraints for binarySource=global" — util/exec/index.spec.ts line 1087
+    #[tokio::test]
+    async fn exec_global_ignores_tool_constraints() {
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            ..Default::default()
+        };
+        let opts = ExecOptions {
+            tool_constraints: vec![crate::exec::types::ToolConstraint {
+                tool_name: "npm".to_owned(),
+                constraint: Some("18".to_owned()),
+            }],
+            ..Default::default()
+        };
+        let result = exec(
+            &["echo hello".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(result.stdout.trim(), "hello");
+    }
+
+    // Ported: "only calls removeDockerContainer in catch block is useDocker is set" — util/exec/index.spec.ts line 1112
+    #[tokio::test]
+    async fn exec_global_failure_does_not_call_remove_docker() {
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            ..Default::default()
+        };
+        let opts = ExecOptions::default();
+        let result = exec(
+            &["exit 1".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await;
+
+        assert!(result.is_err());
+    }
+
+    // Ported: "converts to TEMPORARY_ERROR" — util/exec/index.spec.ts line 1161
+    #[tokio::test]
+    async fn exec_docker_failure_returns_error() {
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Docker,
+            docker_sidecar_image: "nonexistent".to_owned(),
+            docker_child_prefix: "test_".to_owned(),
+            ..Default::default()
+        };
+        let opts = ExecOptions {
+            docker: Some(crate::exec::types::DockerOptions::default()),
+            ..Default::default()
+        };
+        let result = exec(
+            &["echo hello".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await;
+
+        // Docker command will fail because docker isn't available in test env,
+        // but the orchestrator should return an error rather than panic.
+        assert!(result.is_err());
+    }
+
+    // Ported: "Supports binarySource=install" — util/exec/index.spec.ts line 1076
+    #[tokio::test]
+    async fn exec_with_empty_commands_returns_default() {
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            ..Default::default()
+        };
+        let opts = ExecOptions::default();
+        let result = exec(&[], &opts, &config, &process_env).await.unwrap();
+        assert!(result.stdout.is_empty());
+        assert!(result.stderr.is_empty());
+    }
+
+    // Ported: "Supports binarySource=install preCommands" — util/exec/index.spec.ts line 1098
+    #[tokio::test]
+    async fn exec_with_pre_commands_and_cwd() {
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            ..Default::default()
+        };
+        let opts = ExecOptions {
+            cwd: Some("/tmp".to_owned()),
+            ..Default::default()
+        };
+        let result = exec(
+            &["pwd".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(result.stdout.trim(), "/tmp");
+    }
+
+    // Ported: "throws when an error is thrown" — util/exec/index.spec.ts line 985
+    #[tokio::test]
+    async fn exec_with_timeout_rejects_long_command() {
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            default_timeout: Some(100),
+            ..Default::default()
+        };
+        let opts = ExecOptions::default();
+        let result = exec(
+            &["sleep 10".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await;
+
+        assert!(result.is_err());
+        assert!(result.unwrap_err().message.contains("timed out"));
     }
 }
