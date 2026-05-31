@@ -38,13 +38,13 @@ Chosen vertical: **cargo + crates.io + semver**.
 
 Acceptance:
 
-- [ ] `manager/cargo` Impl=`full`, Coverage ≥ 80%.
-- [ ] `datasource/crate` Impl=`full`, Coverage ≥ 80%.
-- [ ] `versioning/semver` Impl=`full`, Coverage ≥ 80% (already 100%).
+- [x] `manager/cargo` Impl=`full`, Coverage ≥ 80%.
+- [x] `datasource/crate` Impl=`full`, Coverage ≥ 80%.
+- [x] `versioning/semver` Impl=`full`, Coverage ≥ 80% (already 100%).
 - [ ] `tests/parity/fixtures/cargo-hello/` runs the diff harness and matches
       upstream Renovate output (or the recorded expected output) byte-for-byte
       after the normalizer.
-- [ ] `cargo build --workspace` and `cargo test -p renovate-core
+- [x] `cargo build --workspace` and `cargo test -p renovate-core
       -p renovate-cli` pass.
 
 ---
@@ -56,9 +56,9 @@ npm-style versioning** as a second end-to-end vertical.
 
 Acceptance:
 
-- [ ] `manager/npm` Impl=`full`, Coverage ≥ 80%.
-- [ ] `datasource/npm` Impl=`full`, Coverage ≥ 80%.
-- [ ] `versioning/npm` Impl=`full`, Coverage ≥ 80%.
+- [x] `manager/npm` Impl=`full`, Coverage ≥ 80%.
+- [x] `datasource/npm` Impl=`full`, Coverage ≥ 80%.
+- [x] `versioning/npm` Impl=`full`, Coverage ≥ 80%.
 - [ ] `tests/parity/fixtures/npm-hello/` matches via the diff harness.
 
 ---
