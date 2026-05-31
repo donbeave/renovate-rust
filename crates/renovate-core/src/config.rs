@@ -13,10 +13,15 @@ mod run;
 pub mod decrypt;
 pub mod file;
 pub mod host_rules_from_env;
+pub mod inherit;
 pub mod massage;
 pub mod migration;
 pub mod migrate_validate;
+pub mod presets;
+pub mod schema;
 pub mod secrets;
+pub mod utils;
+pub mod validation_helpers;
 
 pub use platform::Platform;
 pub use run::{BinarySource, DryRun, ForkProcessing, RecreateWhen, RequireConfig};

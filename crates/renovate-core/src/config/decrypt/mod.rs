@@ -2,6 +2,9 @@
 //!
 //! Mirrors `lib/config/decrypt.ts`.
 
+pub mod bcpgp;
+pub mod openpgp;
+
 use serde::Deserialize;
 
 /// Parsed decrypted object from an encrypted config value.
