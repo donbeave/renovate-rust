@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,366 / 11,650 total tests ported (46.1%) · pending 4,292 · not-applicable 1,992 (17.1%) — updated 2026-05-30
+**Progress:** 5,366 / 11,650 total tests ported (46.1%) · pending 5,000 · not-applicable 1,284 (11.0%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -35,7 +35,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/github-actions/parse.spec.ts` | Done | [details](lib/modules/manager/github-actions/parse.spec.ts.md) |
 | `lib/modules/manager/gitlabci/extract.spec.ts` | Done | [details](lib/modules/manager/gitlabci/extract.spec.ts.md) |
 | `lib/modules/manager/gomod/extract.spec.ts` | Done | [details](lib/modules/manager/gomod/extract.spec.ts.md) |
-| `lib/modules/manager/gradle/extract.spec.ts` | Done | [details](lib/modules/manager/gradle/extract.spec.ts.md) |
+| `lib/modules/manager/gradle/extract.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract.spec.ts.md) |
 | `lib/modules/manager/helm-values/extract.spec.ts` | Done | [details](lib/modules/manager/helm-values/extract.spec.ts.md) |
 | `lib/modules/manager/helmsman/extract.spec.ts` | Done | [details](lib/modules/manager/helmsman/extract.spec.ts.md) |
 | `lib/modules/manager/hermit/extract.spec.ts` | Done | [details](lib/modules/manager/hermit/extract.spec.ts.md) |
@@ -127,7 +127,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/extract/yarnrc.spec.ts` | Done | [details](lib/modules/manager/npm/extract/yarnrc.spec.ts.md) |
 | `lib/modules/manager/npm/extract/index.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/index.spec.ts.md) |
 | `lib/modules/manager/npm/extract/npm.spec.ts` | Done | [details](lib/modules/manager/npm/extract/npm.spec.ts.md) |
-| `lib/modules/manager/npm/extract/pnpm.spec.ts` | Done | [details](lib/modules/manager/npm/extract/pnpm.spec.ts.md) |
+| `lib/modules/manager/npm/extract/pnpm.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/pnpm.spec.ts.md) |
 | `lib/modules/manager/npm/extract/yarn.spec.ts` | Done | [details](lib/modules/manager/npm/extract/yarn.spec.ts.md) |
 | `lib/modules/manager/bazel-module/bazelrc.spec.ts` | Done | [details](lib/modules/manager/bazel-module/bazelrc.spec.ts.md) |
 | `lib/modules/manager/bazel-module/lockfile.spec.ts` | Done | [details](lib/modules/manager/bazel-module/lockfile.spec.ts.md) |
@@ -441,7 +441,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/util.spec.ts` | Done | [details](lib/modules/platform/util.spec.ts.md) |
 | `lib/modules/platform/default-scm.spec.ts` | Done | [details](lib/modules/platform/default-scm.spec.ts.md) |
 | `lib/modules/manager/range.spec.ts` | Done | [details](lib/modules/manager/range.spec.ts.md) |
-| `lib/modules/manager/index.spec.ts` | Done | [details](lib/modules/manager/index.spec.ts.md) |
+| `lib/modules/manager/index.spec.ts` | Not done | [details](lib/modules/manager/index.spec.ts.md) |
 | `lib/modules/manager/util.spec.ts` | Done | [details](lib/modules/manager/util.spec.ts.md) |
 | `lib/modules/manager/fingerprint.spec.ts` | Done | [details](lib/modules/manager/fingerprint.spec.ts.md) |
 | `lib/modules/manager/metadata.spec.ts` | Done | [details](lib/modules/manager/metadata.spec.ts.md) |

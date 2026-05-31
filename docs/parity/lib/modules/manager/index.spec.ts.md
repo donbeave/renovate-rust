@@ -5,7 +5,7 @@
 ## `lib/modules/manager/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/index.spec.ts
-**Total tests:** 22 | **Ported:** 10 | **Actionable:** 0 | **Status:** done
+**Total tests:** 22 | **Ported:** 10 | **Actionable:** 2 | **Status:** pending
 
 ### `modules/manager/index › supportedDatasources`
 
@@ -53,8 +53,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null | 114 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
-| returns non-null | 127 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| returns null | 114 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| returns non-null | 127 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
 
 ### `modules/manager/index › extractPackageFile()`
 

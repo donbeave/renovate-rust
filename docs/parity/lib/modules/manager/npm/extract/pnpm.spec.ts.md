@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/extract/pnpm.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/pnpm.spec.ts
-**Total tests:** 16 | **Ported:** 5 | **Actionable:** 0 | **Status:** done
+**Total tests:** 16 | **Ported:** 5 | **Actionable:** 3 | **Status:** pending
 
 ### `modules/manager/npm/extract/pnpm › .extractPnpmFilters()`
 
@@ -25,9 +25,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses pnpm workspaces | 114 | not-applicable | — | — | Workspace detection orchestration not implemented in Rust |
-| skips when pnpm shrinkwrap file has already been provided | 203 | not-applicable | — | — | Workspace detection orchestration not implemented in Rust |
-| filters none matching packages | 220 | not-applicable | — | — | Workspace detection orchestration not implemented in Rust |
+| uses pnpm workspaces | 114 | pending | — | — | Workspace detection orchestration not implemented in Rust |
+| skips when pnpm shrinkwrap file has already been provided | 203 | pending | — | — | Workspace detection orchestration not implemented in Rust |
+| filters none matching packages | 220 | pending | — | — | Workspace detection orchestration not implemented in Rust |
 
 ### `modules/manager/npm/extract/pnpm › .getPnpmLock()`
 

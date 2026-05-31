@@ -5,19 +5,19 @@
 ## `lib/modules/manager/gradle/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract.spec.ts
-**Total tests:** 31 | **Ported:** 14 | **Actionable:** 0 | **Status:** done
+**Total tests:** 30 | **Ported:** 13 | **Actionable:** 11 | **Status:** pending
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null | 37 | ported | `gradle.rs` | `empty_returns_empty` | — |
-| logs a warning in case parseGradle throws an exception | 52 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| logs a warning in case parseGradle throws an exception | 52 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
 | skips versions composed from multiple variables | 71 | ported | `gradle.rs` | `skips_variable_references` | — |
 | extracts from cross-referenced files | 97 | ported | `gradle.rs` | `extracts_implementation_single_quote` | — |
 | resolves versions in build.gradle.kts | 125 | ported | `gradle.rs` | `extracts_implementation_double_quote_parens` | — |
-| resolves cross-file Kotlin objects | 191 | not-applicable | — | — | `extractAllPackageFiles` orchestration with Kotlin source parsing not implemented in Rust |
-| inherits gradle variables | 311 | not-applicable | — | — | `extractAllPackageFiles` orchestration with variable inheritance not implemented in Rust |
+| resolves cross-file Kotlin objects | 191 | pending | — | — | `extractAllPackageFiles` orchestration with Kotlin source parsing not implemented in Rust |
+| inherits gradle variables | 311 | pending | — | — | `extractAllPackageFiles` orchestration with variable inheritance not implemented in Rust |
 | filters duplicate dependency findings | 341 | ported | `gradle.rs` | `deduplicates_same_dep` | — |
 | ensures depType is assigned | 385 | ported | `gradle.rs` | `extracts_multiple_configs` | — |
 
@@ -55,11 +55,11 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works with dependency catalogs | 889 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
-| provides versions from external version catalogs to gradle files | 1006 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
-| provides versions to gradle files with changed default catalog name | 1061 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
-| ignores version catalog accessor with non-get provider method | 1106 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
-| aligns sharedVariableName if version reference has multiple aliases | 1127 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| works with dependency catalogs | 889 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| provides versions from external version catalogs to gradle files | 1006 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| provides versions to gradle files with changed default catalog name | 1061 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| ignores version catalog accessor with non-get provider method | 1106 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| aligns sharedVariableName if version reference has multiple aliases | 1127 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
 
 ### `extractPackageFile() › apply from`
 
@@ -74,8 +74,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses versions files | 1335 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
-| plugin not used due to lockfile not a GCV lockfile | 1385 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
-| plugin not used due to lockfile missing | 1401 | not-applicable | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| parses versions files | 1335 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| plugin not used due to lockfile not a GCV lockfile | 1385 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
+| plugin not used due to lockfile missing | 1401 | pending | — | — | `extractAllPackageFiles` orchestration not implemented in Rust |
 
 ---
