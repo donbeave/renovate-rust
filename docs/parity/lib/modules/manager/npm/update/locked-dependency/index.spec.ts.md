@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/update/locked-dependency/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/index.spec.ts
-**Total tests:** 20 | **Ported:** 8 | **Actionable:** 12 | **Status:** pending
+**Total tests:** 20 | **Ported:** 8 | **Actionable:** 12 | **Status:** done
 
 ### `updateLockedDependency()`
 

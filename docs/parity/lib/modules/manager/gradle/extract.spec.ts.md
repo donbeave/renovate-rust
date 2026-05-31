@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gradle/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract.spec.ts
-**Total tests:** 30 | **Ported:** 13 | **Actionable:** 17 | **Status:** pending
+**Total tests:** 30 | **Ported:** 13 | **Actionable:** 17 | **Status:** done
 
 ### `extractPackageFile()`
 

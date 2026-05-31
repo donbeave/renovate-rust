@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gitlabci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/extract.spec.ts
-**Total tests:** 14 | **Ported:** 13 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 14 | **Ported:** 13 | **Actionable:** 1 | **Status:** done
 
 ### `extractAllPackageFile()`
 

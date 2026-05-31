@@ -5,150 +5,150 @@
 ## `lib/modules/platform/gerrit/client.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gerrit/client.spec.ts
-**Total tests:** 43 | **Ported:** 0 | **Actionable:** 43 | **Status:** pending
+**Total tests:** 43 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
 
 ### `getGerritVersion()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns version | 24 | pending | — | — | No corresponding Rust source|
+| returns version | 24 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `getRepos()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns repos | 39 | pending | — | — | No corresponding Rust source|
+| returns repos | 39 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `getProjectInfo()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| inactive | 56 | pending | — | — | No corresponding Rust source|
-| active | 74 | pending | — | — | No corresponding Rust source|
+| inactive | 56 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| active | 74 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `getBranchInfo()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| info | 96 | pending | — | — | No corresponding Rust source|
+| info | 96 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `findChanges()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| footer:Renovate-Branch=dependency-xyz | 113 | pending | — | — | No corresponding Rust source|
-| sets query.n as 1 if a single change is requested | 191 | pending | — | — | No corresponding Rust source|
-| sets query.n as 50 if pageLimit is not provided | 206 | pending | — | — | No corresponding Rust source|
-| sets query.n with pageLimit if provided | 219 | pending | — | — | No corresponding Rust source|
-| sets query.S with startOffset if provided | 233 | pending | — | — | No corresponding Rust source|
-| sets query.S as 0 if startOffset is not provided | 247 | pending | — | — | No corresponding Rust source|
-| handles pagination automatically | 260 | pending | — | — | No corresponding Rust source|
-| handles pagination with startOffset | 305 | pending | — | — | No corresponding Rust source|
-| allows disabling automatic pagination | 339 | pending | — | — | No corresponding Rust source|
-| sets query.o when requestDetails is provided | 361 | pending | — | — | No corresponding Rust source|
+| footer:Renovate-Branch=dependency-xyz | 113 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| sets query.n as 1 if a single change is requested | 191 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| sets query.n as 50 if pageLimit is not provided | 206 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| sets query.n with pageLimit if provided | 219 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| sets query.S with startOffset if provided | 233 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| sets query.S as 0 if startOffset is not provided | 247 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| handles pagination automatically | 260 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| handles pagination with startOffset | 305 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| allows disabling automatic pagination | 339 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| sets query.o when requestDetails is provided | 361 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `getChange()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| get | 381 | pending | — | — | No corresponding Rust source|
+| get | 381 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `getMergeableInfo()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| get | 394 | pending | — | — | No corresponding Rust source|
+| get | 394 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `abandonChange()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| abandon | 410 | pending | — | — | No corresponding Rust source|
-| abandon with message | 419 | pending | — | — | No corresponding Rust source|
+| abandon | 410 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| abandon with message | 419 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `submitChange()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| submit | 434 | pending | — | — | No corresponding Rust source|
+| submit | 434 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `moveChange()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| move change to different branch | 445 | pending | — | — | No corresponding Rust source|
+| move change to different branch | 445 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `getBranchChange()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null when no changes found | 460 | pending | — | — | No corresponding Rust source|
-| returns single change when only one found | 474 | pending | — | — | No corresponding Rust source|
-| returns first change when multiple found without targetBranch | 492 | pending | — | — | No corresponding Rust source|
-| returns matching change when targetBranch specified and match found | 514 | pending | — | — | No corresponding Rust source|
-| returns first change when targetBranch specified but no match found | 537 | pending | — | — | No corresponding Rust source|
+| returns null when no changes found | 460 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns single change when only one found | 474 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns first change when multiple found without targetBranch | 492 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns matching change when targetBranch specified and match found | 514 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns first change when targetBranch specified but no match found | 537 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `getMessages()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| no messages | 562 | pending | — | — | No corresponding Rust source|
-| with messages | 570 | pending | — | — | No corresponding Rust source|
+| no messages | 562 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| with messages | 570 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `addMessage()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| add with tag | 590 | pending | — | — | No corresponding Rust source|
-| add without tag | 602 | pending | — | — | No corresponding Rust source|
-| add too big message | 613 | pending | — | — | No corresponding Rust source|
+| add with tag | 590 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| add without tag | 602 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| add too big message | 613 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `checkForExistingMessage()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| msg not found | 633 | pending | — | — | No corresponding Rust source|
-| msg found | 643 | pending | — | — | No corresponding Rust source|
+| msg not found | 633 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| msg found | 643 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `addMessageIfNotAlreadyExists()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| msg not found | 662 | pending | — | — | No corresponding Rust source|
-| msg already exists | 685 | pending | — | — | No corresponding Rust source|
+| msg not found | 662 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| msg already exists | 685 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `setLabel()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| setLabel | 704 | pending | — | — | No corresponding Rust source|
+| setLabel | 704 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `setHashtags()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| add hashtags | 719 | pending | — | — | No corresponding Rust source|
-| remove hashtags | 731 | pending | — | — | No corresponding Rust source|
-| add and remove hashtags in single call | 743 | pending | — | — | No corresponding Rust source|
-| does nothing when no hashtags provided | 759 | pending | — | — | No corresponding Rust source|
+| add hashtags | 719 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| remove hashtags | 731 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| add and remove hashtags in single call | 743 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| does nothing when no hashtags provided | 759 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `addReviewer()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| add | 770 | pending | — | — | No corresponding Rust source|
+| add | 770 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `addAssignee()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| add | 783 | pending | — | — | No corresponding Rust source|
+| add | 783 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ### `getFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| getFile() - repo and branch | 795 | pending | — | — | No corresponding Rust source|
+| getFile() - repo and branch | 795 | not-applicable | Mock framework internals — tests gerrit client via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ---
 

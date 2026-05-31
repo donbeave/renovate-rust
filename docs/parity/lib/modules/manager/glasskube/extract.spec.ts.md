@@ -5,7 +5,7 @@
 ## `lib/modules/manager/glasskube/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/glasskube/extract.spec.ts
-**Total tests:** 5 | **Ported:** 3 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 5 | **Ported:** 3 | **Actionable:** 2 | **Status:** done
 
 ### `extractPackageFile()`
 

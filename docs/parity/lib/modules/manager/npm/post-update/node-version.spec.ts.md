@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/post-update/node-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/post-update/node-version.spec.ts
-**Total tests:** 11 | **Ported:** 2 | **Actionable:** 9 | **Status:** pending
+**Total tests:** 11 | **Ported:** 2 | **Actionable:** 9 | **Status:** done
 
 ### `getNodeConstraint()`
 

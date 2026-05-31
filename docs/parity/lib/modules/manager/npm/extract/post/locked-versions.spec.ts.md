@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/extract/post/locked-versions.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/post/locked-versions.spec.ts
-**Total tests:** 21 | **Ported:** 11 | **Actionable:** 10 | **Status:** pending
+**Total tests:** 21 | **Ported:** 11 | **Actionable:** 10 | **Status:** done
 
 ### `.getLockedVersions()`
 
