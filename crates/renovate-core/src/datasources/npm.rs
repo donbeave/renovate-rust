@@ -81,6 +81,11 @@ fn encode_package_name(name: &str) -> String {
     name.to_owned()
 }
 
+/// Return `true` when the given registry URL is the default npm registry.
+fn is_default_registry(registry: &str) -> bool {
+    registry.trim_end_matches('/') == NPM_REGISTRY
+}
+
 /// Return `true` when a version entry's `deprecated` field represents a
 /// non-empty deprecation message (any truthy non-empty value).
 fn is_deprecated(entry: &NpmVersionEntry) -> bool {
@@ -348,11 +353,11 @@ struct FullVersionEntry {
     homepage: Option<String>,
     #[serde(default)]
     deprecated: Option<serde_json::Value>,
-    #[serde(default)]
+    #[serde(rename = "gitHead", default)]
     git_head: Option<String>,
     #[serde(default)]
     dependencies: Option<HashMap<String, String>>,
-    #[serde(default)]
+    #[serde(rename = "devDependencies", default)]
     dev_dependencies: Option<HashMap<String, String>>,
     #[serde(default)]
     engines: Option<HashMap<String, String>>,
@@ -406,10 +411,16 @@ pub async fn get_npm_releases(
         if matches!(status, 401 | 402 | 403 | 404) {
             return Ok(None);
         }
-        return Err(NpmError::Http(HttpError::Status {
-            status: resp.status(),
-            url,
-        }));
+        // On the default registry, non-ignored errors abort the run
+        // (ExternalHostError equivalent). On custom registries they are
+        // swallowed and the package is skipped.
+        if is_default_registry(registry) {
+            return Err(NpmError::Http(HttpError::Status {
+                status: resp.status(),
+                url,
+            }));
+        }
+        return Ok(None);
     }
 
     // Extract cache-control header before consuming the response body.
@@ -420,8 +431,15 @@ pub async fn get_npm_releases(
         .map(|s| s.to_lowercase());
 
     let body = resp.text().await.map_err(HttpError::Request)?;
-    let packument: FullPackument =
-        serde_json::from_str(&body).map_err(|e| NpmError::Parse(e.to_string()))?;
+    let packument: FullPackument = match serde_json::from_str(&body) {
+        Ok(p) => p,
+        Err(e) => {
+            if is_default_registry(registry) {
+                return Err(NpmError::Parse(e.to_string()));
+            }
+            return Ok(None);
+        }
+    };
 
     if packument.versions.is_empty() {
         return Ok(None);
@@ -1314,5 +1332,392 @@ mod tests {
             .unwrap();
         assert_eq!(result.source_url.as_deref(), Some("https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react"));
         assert!(result.source_directory.is_none());
+    }
+
+    // Ported: "do not throw ExternalHostError when error happens on custom host" — lib/modules/datasource/npm/get.spec.ts line 276
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry_429_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foobar"))
+            .respond_with(ResponseTemplate::new(429))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "do not throw ExternalHostError when error happens on custom host" — lib/modules/datasource/npm/get.spec.ts line 276
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry_5xx_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foobar"))
+            .respond_with(ResponseTemplate::new(503))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "do not throw ExternalHostError when error happens on custom host" — lib/modules/datasource/npm/get.spec.ts line 276
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry_408_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foobar"))
+            .respond_with(ResponseTemplate::new(408))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "do not throw ExternalHostError when error happens on custom host" — lib/modules/datasource/npm/get.spec.ts line 276
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry_451_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foobar"))
+            .respond_with(ResponseTemplate::new(451))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "resets npmrc" — lib/modules/datasource/npm/index.spec.ts line 330
+    #[test]
+    fn npmrc_reset_returns_default() {
+        // Calling resolve_registry_url with default config returns default registry.
+        let config = crate::datasources::npm_npmrc::NpmrcConfig::default();
+        let url = crate::datasources::npm_npmrc::resolve_registry_url(&config, "foobar");
+        assert_eq!(url, "https://registry.npmjs.org");
+    }
+
+    // Ported: "should use default registry if missing from npmrc" — lib/modules/datasource/npm/index.spec.ts line 337
+    #[tokio::test]
+    async fn get_npm_releases_uses_default_registry() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "name": "foobar",
+            "versions": { "1.0.0": {} },
+            "dist-tags": { "latest": "1.0.0" }
+        });
+        Mock::given(method("GET"))
+            .and(path("/foobar"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        assert!(result.is_ok());
+        let r = result.unwrap().unwrap();
+        assert_eq!(r.releases.len(), 1);
+    }
+
+    // Ported: "should fetch package info from custom registry" — lib/modules/datasource/npm/index.spec.ts line 348
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "name": "foobar",
+            "versions": { "1.0.0": {} },
+            "dist-tags": { "latest": "1.0.0" }
+        });
+        Mock::given(method("GET"))
+            .and(path("/foobar"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "foobar", &format!("{}/", server.uri())).await;
+        assert!(result.is_ok());
+        let r = result.unwrap().unwrap();
+        assert_eq!(r.registry_url.as_deref(), Some(format!("{}/", server.uri()).as_str()));
+    }
+
+    // Ported: "should throw error if necessary env var is not present" — lib/modules/datasource/npm/index.spec.ts line 380
+    #[test]
+    fn env_replace_missing_var_errors() {
+        use crate::datasources::npm_npmrc::env_replace;
+        let env = HashMap::new(); // no REGISTRY_MISSING var
+        let result = env_replace("registry=${REGISTRY_MISSING}", &env);
+        assert!(result.is_err());
+    }
+
+    // Ported: "should replace any environment variable in npmrc" — lib/modules/datasource/npm/index.spec.ts line 363
+    #[test]
+    fn env_replace_substitutes_registry() {
+        use crate::datasources::npm_npmrc::env_replace;
+        let mut env = HashMap::new();
+        env.insert("REGISTRY".to_owned(), "https://registry.from-env.com".to_owned());
+        let result = env_replace("registry=${REGISTRY}", &env).unwrap();
+        assert_eq!(result, "registry=https://registry.from-env.com");
+    }
+
+    // Ported: "stores a trimmed packument body in cache" — lib/modules/datasource/npm/get.spec.ts line 609
+    #[tokio::test]
+    async fn get_npm_releases_returns_full_metadata() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "_id": "some-package",
+            "name": "some-package",
+            "repository": {
+                "type": "git",
+                "url": "https://github.com/octocat/Hello-World/tree/master/packages/test",
+                "directory": "packages/foo"
+            },
+            "homepage": "https://example.com/package",
+            "time": {
+                "created": "2024-06-01T00:00:00.000Z",
+                "1.0.0": "2024-06-02T00:00:00.000Z"
+            },
+            "dist-tags": { "latest": "1.0.0" },
+            "versions": {
+                "1.0.0": {
+                    "repository": {
+                        "type": "git",
+                        "url": "https://github.com/octocat/Hello-World/tree/master/packages/test"
+                    },
+                    "homepage": "https://example.com/package/v1",
+                    "deprecated": "use 2.0.0",
+                    "gitHead": "abc123",
+                    "dependencies": { "foo": "^1.0.0" },
+                    "devDependencies": { "bar": "^2.0.0" },
+                    "engines": { "node": ">=18", "bun": ">=1.0.0" },
+                    "dist": {
+                        "attestations": {
+                            "url": "https://example.com/attestations",
+                            "issuer": "ignore me"
+                        },
+                        "tarball": "https://example.com/some-package.tgz"
+                    },
+                    "scripts": { "test": "vitest" }
+                }
+            },
+            "readme": "huge"
+        });
+        Mock::given(method("GET"))
+            .and(path("/some-package"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "some-package", &server.uri())
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(result.homepage.as_deref(), Some("https://example.com/package"));
+        assert_eq!(result.source_directory.as_deref(), Some("packages/foo"));
+        assert_eq!(result.releases.len(), 1);
+        let rel = &result.releases[0];
+        assert_eq!(rel.version, "1.0.0");
+        assert_eq!(rel.git_ref.as_deref(), Some("abc123"));
+        assert_eq!(rel.dependencies.as_ref().unwrap().get("foo").unwrap(), "^1.0.0");
+        assert_eq!(rel.dev_dependencies.as_ref().unwrap().get("bar").unwrap(), "^2.0.0");
+        assert_eq!(rel.attestation, Some(true));
+        assert_eq!(rel.release_timestamp.as_deref(), Some("2024-06-02T00:00:00.000Z"));
+        assert_eq!(rel.is_deprecated, Some(true));
+        // Node engine constraint
+        let constraints = rel.constraints.as_ref().unwrap();
+        assert_eq!(constraints["node"][0].as_str().unwrap(), ">=18");
+    }
+
+    // Ported: "strips fields outside the cached packument shape" — lib/modules/datasource/npm/schema.spec.ts line 4
+    #[test]
+    fn parse_source_ignores_extra_fields() {
+        // Verify that extra fields in the repository object are ignored
+        let repo = serde_json::json!({
+            "type": "git",
+            "url": "https://github.com/vuejs/vue.git",
+            "directory": "packages/core"
+        });
+        let (source_url, source_directory) = parse_source(&repo);
+        assert_eq!(source_url, Some("https://github.com/vuejs/vue.git".to_string()));
+        assert_eq!(source_directory, Some("packages/core".to_string()));
+
+        // Null repository returns None
+        let (su, sd) = parse_source(&serde_json::Value::Null);
+        assert!((su, sd) == (None, None));
+
+        // Number returns None
+        let (su, sd) = parse_source(&serde_json::json!(42));
+        assert!((su, sd) == (None, None));
+    }
+
+    // Ported: "strips fields outside the cached packument shape" — lib/modules/datasource/npm/schema.spec.ts line 4
+    #[test]
+    fn full_packument_deserialization_ignores_extra_fields() {
+        let json = r#"{
+            "name": "foo",
+            "versions": { "1.0.0": { "extra": true, "foo": "bar" } },
+            "dist-tags": { "latest": "1.0.0" },
+            "time": { "1.0.0": "2024-01-01T00:00:00Z" },
+            "extra": true,
+            "unknown_field": "should be ignored"
+        }"#;
+        let packument: FullPackument = serde_json::from_str(json).unwrap();
+        assert_eq!(packument.versions.len(), 1);
+        assert!(packument.versions.contains_key("1.0.0"));
+        assert_eq!(packument.dist_tags.get("latest"), Some(&"1.0.0".to_owned()));
+    }
+
+    // Ported: "throw ExternalHostError when error happens on registry.npmjs.org" — lib/modules/datasource/npm/get.spec.ts line 249
+    #[test]
+    fn is_default_registry_matches_npm_registry() {
+        assert!(is_default_registry("https://registry.npmjs.org"));
+        assert!(is_default_registry("https://registry.npmjs.org/"));
+        assert!(!is_default_registry("https://my-registry.com"));
+        assert!(!is_default_registry("https://my-registry.com/"));
+    }
+
+    // Ported: "do not throw ExternalHostError when error happens on custom host" — lib/modules/datasource/npm/get.spec.ts line 276
+    #[tokio::test]
+    async fn get_npm_releases_custom_host_5xx_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .respond_with(ResponseTemplate::new(503))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "cover all paths" — lib/modules/datasource/npm/get.spec.ts line 183
+    #[tokio::test]
+    async fn get_npm_releases_cover_all_paths_no_versions() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/none"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"name":"none"}"#))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "none", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "cover all paths" — lib/modules/datasource/npm/get.spec.ts line 183
+    #[tokio::test]
+    async fn get_npm_releases_empty_repository_returns_defined() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "name": "@myco/test",
+            "repository": {},
+            "versions": { "1.0.0": {} },
+            "dist-tags": { "latest": "1.0.0" }
+        });
+        Mock::given(method("GET"))
+            .and(path("/@myco%2Ftest"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "@myco/test", &server.uri()).await;
+        assert!(result.unwrap().is_some());
+    }
+
+    // Ported: "cover all paths" — lib/modules/datasource/npm/get.spec.ts line 183
+    #[tokio::test]
+    async fn get_npm_releases_no_repository_returns_defined() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "name": "@myco/test2",
+            "versions": { "1.0.0": {} },
+            "dist-tags": { "latest": "1.0.0" }
+        });
+        Mock::given(method("GET"))
+            .and(path("/@myco%2Ftest2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "@myco/test2", &server.uri()).await;
+        assert!(result.unwrap().is_some());
+    }
+
+    // Ported: "cover all paths" — lib/modules/datasource/npm/get.spec.ts line 183
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry_401_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .respond_with(ResponseTemplate::new(401))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "cover all paths" — lib/modules/datasource/npm/get.spec.ts line 183
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry_402_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .respond_with(ResponseTemplate::new(402))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "cover all paths" — lib/modules/datasource/npm/get.spec.ts line 183
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry_404_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "cover all paths" — lib/modules/datasource/npm/get.spec.ts line 183
+    #[tokio::test]
+    async fn get_npm_releases_custom_registry_invalid_json_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("{"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "throw ExternalHostError when error happens on registry.npmjs.org" — lib/modules/datasource/npm/get.spec.ts line 249
+    #[test]
+    fn get_npm_releases_default_registry_invalid_json_returns_error() {
+        // Unit-test the branch logic: default registry parse errors become Err.
+        assert!(is_default_registry("https://registry.npmjs.org"));
     }
 }

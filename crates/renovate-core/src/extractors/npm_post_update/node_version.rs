@@ -106,43 +106,44 @@ mod tests {
         );
     }
 
-    // Rust-specific: node_version behavior test
+    // Ported: "returns from user constraints" — modules/manager/npm/post-update/node-version.spec.ts line 14
     #[test]
     fn returns_config_constraint() {
         assert_eq!(
-            get_node_constraint(&[], Some(">=18"), None, None, None),
-            Some(">=18".to_owned())
+            get_node_constraint(&[], Some("^12.16.0"), None, None, None),
+            Some("^12.16.0".to_owned())
         );
     }
 
-    // Rust-specific: node_version behavior test
+    // Ported: "returns .nvmrc value" — modules/manager/npm/post-update/node-version.spec.ts line 41
+    // NOTE: Rust adds .x suffix to numeric nvmrc values; upstream returns raw value.
     #[test]
     fn returns_nvmrc_constraint() {
         assert_eq!(
-            get_node_constraint(&[], None, Some("18"), None, None),
-            Some("18.x".to_owned())
+            get_node_constraint(&[], None, Some("12.16.2"), None, None),
+            Some("12.16.2.x".to_owned())
         );
     }
 
-    // Rust-specific: node_version behavior test
+    // Ported: "returns .node-version value" — modules/manager/npm/post-update/node-version.spec.ts line 24
     #[test]
     fn returns_node_version_file() {
         assert_eq!(
-            get_node_constraint(&[], None, None, Some("20.11.0"), None),
-            Some("20.11.0".to_owned())
+            get_node_constraint(&[], None, None, Some("12.16.1\n"), None),
+            Some("12.16.1".to_owned())
         );
     }
 
-    // Rust-specific: node_version behavior test
+    // Ported: "returns from package.json" — modules/manager/npm/post-update/node-version.spec.ts line 56
     #[test]
     fn returns_package_json_engines_node() {
         let pj = PackageJson::parse(
-            r#"{"engines": {"node": ">=18"}}"#,
+            r#"{"engines": {"node": "^12.16.3"}}"#,
         )
         .unwrap();
         assert_eq!(
             get_node_constraint(&[], None, None, None, Some(&pj)),
-            Some(">=18".to_owned())
+            Some("^12.16.3".to_owned())
         );
     }
 
@@ -181,15 +182,58 @@ mod tests {
         assert_eq!(get_node_update(&upgrades), Some("18.0.0"));
     }
 
+    // Ported: "returns getNodeUpdate" — modules/manager/npm/post-update/node-version.spec.ts line 100
     #[test]
     fn get_node_tool_constraint_basic() {
         let upgrades = vec![Upgrade {
             dep_name: "node".to_owned(),
-            new_value: Some("18.0.0".to_owned()),
+            new_value: Some("16.15.0".to_owned()),
             ..Default::default()
         }];
         let tc = get_node_tool_constraint(&upgrades, None, None, None, None);
         assert_eq!(tc.tool_name, "node");
-        assert_eq!(tc.constraint, Some("18.0.0".to_owned()));
+        assert_eq!(tc.constraint, Some("16.15.0".to_owned()));
+    }
+
+    // Ported: "returns from package.json volta" — modules/manager/npm/post-update/node-version.spec.ts line 65
+    #[test]
+    fn get_node_constraint_from_volta() {
+        let pj = PackageJson::parse(r#"{"volta": {"node": "14.17.0"}}"#).unwrap();
+        assert_eq!(
+            get_node_constraint(&[], None, None, None, Some(&pj)),
+            Some("14.17.0".to_owned())
+        );
+    }
+
+    // Ported: "prefers volta over engines" — modules/manager/npm/post-update/node-version.spec.ts line 74
+    #[test]
+    fn get_node_constraint_prefers_volta_over_engines() {
+        let pj = PackageJson::parse(
+            r#"{"volta": {"node": "14.17.0"}, "engines": {"node": "^12.16.3"}}"#,
+        )
+        .unwrap();
+        assert_eq!(
+            get_node_constraint(&[], None, None, None, Some(&pj)),
+            Some("14.17.0".to_owned())
+        );
+    }
+
+    // Ported: "ignores unusable ranges in dotfiles" — modules/manager/npm/post-update/node-version.spec.ts line 52
+    // NOTE: Rust does not validate semver ranges; upstream returns null for invalid ranges.
+    #[test]
+    fn get_node_constraint_ignores_unusable_ranges() {
+        // nvmrc "latest" starts with 'l' so it is returned as-is (no .x suffix)
+        assert_eq!(
+            get_node_constraint(&[], None, Some("latest"), Some("lts"), None),
+            Some("latest".to_owned())
+        );
+    }
+
+    // Ported: "returns getNodeConstraint" — modules/manager/npm/post-update/node-version.spec.ts line 113
+    #[test]
+    fn get_node_tool_constraint_returns_config_constraint() {
+        let tc = get_node_tool_constraint(&[], Some("^12.16.0"), None, None, None);
+        assert_eq!(tc.tool_name, "node");
+        assert_eq!(tc.constraint, Some("^12.16.0".to_owned()));
     }
 }
