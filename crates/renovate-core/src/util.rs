@@ -9859,7 +9859,7 @@ dep1 = "^1.0.0"
         assert_eq!(config_validation_log_level(Some(true)), "error");
     }
 
-    // Ported: "errors ${err}" — workers/repository/error.spec.ts lines 77-81
+    // Ported: "errors ${err}" — workers/repository/error.spec.ts line 77
     // Tests that known Renovate error constants pass through unchanged.
     #[test]
     fn classify_repo_error_known_constants_pass_through() {
