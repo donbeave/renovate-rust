@@ -53,6 +53,7 @@ pub mod gitlabci_include;
 pub mod glasskube;
 pub mod gleam;
 pub mod gomod;
+pub mod gomod_artifact_runner;
 pub mod gradle;
 pub mod gradle_wrapper;
 pub mod helm;

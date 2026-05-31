@@ -498,7 +498,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/gomod/extract.ts` | `extractors/gomod.rs` | full | `extract()` handles require, replace, tool directives |
 | `lib/modules/manager/gomod/index.ts` | `managers.rs` | partial | fileMatch pattern present |
-| `lib/modules/manager/gomod/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/gomod/artifacts.ts` | `extractors/gomod_artifact_runner.rs` | partial | `GomodArtifactRunner` implements lockfile regeneration via `go mod tidy`; wired into CLI pipeline; missing: `go mod vendor`, import path upgrades, marwan-at-work/mod |
 | `lib/modules/manager/gomod/artifacts-extra.ts` | `extractors/gomod.rs` | full | `get_extra_deps()` + `extra_deps_table()` + `get_extra_deps_notice()` present |
 | `lib/modules/manager/gomod/dep-types.ts` | `extractors/gomod.rs` | full | Dep types embedded |
 | `lib/modules/manager/gomod/line-parser.ts` | `extractors/gomod.rs` | full | `parse_line()` present |

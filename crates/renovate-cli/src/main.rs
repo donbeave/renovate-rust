@@ -33,6 +33,7 @@ use renovate_core::config::Platform;
 use renovate_core::config::{DryRun, GlobalConfig, file as config_file};
 use renovate_core::http::HttpClient;
 use renovate_core::artifacts::{ArtifactConfig, ArtifactRegistry, UpdateArtifact, UpdatedDep};
+use renovate_core::extractors::gomod_artifact_runner::GomodArtifactRunner;
 use renovate_core::extractors::npm_post_update::artifact_runner::NpmArtifactRunner;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
@@ -487,6 +488,7 @@ async fn process_repo(
     // Artifact runner registry: maps manager names to lockfile generators.
     let mut artifact_registry = ArtifactRegistry::new();
     artifact_registry.register("npm", Box::new(NpmArtifactRunner));
+    artifact_registry.register("gomod", Box::new(GomodArtifactRunner));
 
     // Manifest editing: apply newValue constraints to source files.
     // Only npm/package.json is supported in this slice; other managers
@@ -626,7 +628,7 @@ async fn process_repo(
                                 "updated manifest"
                             );
                             // Run artifact update (lockfile regeneration) for supported managers.
-                            if manager == "npm" {
+                            if manager == "npm" || manager == "gomod" {
                                 if let Some(lock_file_dir) = client.local_working_dir() {
                                     let updated_deps: Vec<UpdatedDep> = file_deps
                                         .iter()
@@ -639,7 +641,7 @@ async fn process_repo(
                                                     current_value: Some(current.clone()),
                                                     new_value: bd.dep.new_value.clone(),
                                                     package_file: file_path.to_owned(),
-                                                    manager: "npm".to_owned(),
+                                                    manager: manager.to_owned(),
                                                     datasource: None,
                                                 })
                                             } else {
@@ -657,7 +659,7 @@ async fn process_repo(
                                                 ..Default::default()
                                             },
                                         };
-                                        if let Some(runner) = artifact_registry.get("npm") {
+                                        if let Some(runner) = artifact_registry.get(manager) {
                                             match runner.update_artifacts(&artifact_input).await {
                                                 Ok(Some(results)) => {
                                                     for result in results {
