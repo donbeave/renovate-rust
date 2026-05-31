@@ -462,6 +462,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/gitlabci/extract.ts` | `extractors/gitlabci.rs` | full | `extract()` + `extract_docker_with_registry_aliases()` + `extract_components()` present |
 | `lib/modules/manager/gitlabci/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/gitlabci/update.ts` | `extractors/gitlabci.rs` | partial | Docker images use dockerfile logic; missing: component includes, `ref:` updates |
 | `lib/modules/manager/gitlabci/dep-types.ts` | `extractors/gitlabci.rs` | full | Dep types embedded |
 | `lib/modules/manager/gitlabci/schema.ts` | N/A | out-of-scope | Zod schema |
 | `lib/modules/manager/gitlabci/types.ts` | N/A | out-of-scope | Type-only file |
