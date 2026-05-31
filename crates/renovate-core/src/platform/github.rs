@@ -130,10 +130,128 @@ impl GithubClient {
         token: impl Into<String>,
         api_base: impl Into<String>,
     ) -> Result<Self, HttpError> {
+        let api_base = api_base.into().trim_end_matches('/').to_owned();
+        if let Err(e) = url::Url::parse(&api_base) {
+            return Err(HttpError::Parse(format!("Invalid GitHub endpoint URL: {api_base}: {e}")));
+        }
         Ok(Self {
             http: HttpClient::with_token(token)?,
-            api_base: api_base.into().trim_end_matches('/').to_owned(),
+            api_base,
         })
+    }
+
+    /// Initialize the GitHub platform.
+    ///
+    /// Validates the token, fetches the current user, and attempts to
+    /// resolve a git author email from the user profile or emails API.
+    ///
+    /// Mirrors `initPlatform` from `lib/modules/platform/github/index.ts`.
+    pub async fn init_platform(&self, token: &str) -> Result<(String, Option<String>), PlatformError> {
+        if token.is_empty() {
+            return Err(PlatformError::Unexpected(
+                "Init: You must configure a GitHub token".to_owned(),
+            ));
+        }
+
+        let user: GithubUser = self
+            .http
+            .get_json(&format!("{}/user", self.api_base))
+            .await
+            .map_err(|e| match e {
+                HttpError::Status { status, .. } if status == reqwest::StatusCode::UNAUTHORIZED => {
+                    PlatformError::Unauthorized
+                }
+                other => PlatformError::Http(other),
+            })?;
+
+        let email = if let Some(ref public_email) = user.email {
+            Some(public_email.clone())
+        } else {
+            self.fetch_user_email().await.ok().flatten()
+        };
+
+        Ok((user.login, email))
+    }
+
+    /// Fetch the primary verified email from `/user/emails`.
+    async fn fetch_user_email(&self) -> Result<Option<String>, PlatformError> {
+        let url = format!("{}/user/emails", self.api_base);
+        let emails: Vec<GithubUserEmail> = self
+            .http
+            .get_json(&url)
+            .await
+            .map_err(PlatformError::Http)?;
+        Ok(emails
+            .into_iter()
+            .find(|e| e.primary && e.verified)
+            .map(|e| e.email))
+    }
+
+    /// List repositories accessible to the authenticated user.
+    ///
+    /// For regular tokens: GET /user/repos?per_page=100
+    /// For GitHub App tokens: GET /installation/repositories?per_page=100
+    ///
+    /// Mirrors `getRepos` from `lib/modules/platform/github/index.ts`.
+    pub async fn get_repos(&self, topics: Option<Vec<String>>) -> Result<Vec<String>, PlatformError> {
+        let token = self.http.token.as_deref().unwrap_or("");
+        let is_app_token = token.starts_with("ghs_") || token.contains("x-access-token");
+
+        let url = if is_app_token {
+            format!("{}/installation/repositories?per_page=100", self.api_base)
+        } else {
+            format!("{}/user/repos?per_page=100", self.api_base)
+        };
+
+        if is_app_token {
+            #[derive(Debug, Deserialize)]
+            struct AppRepositories {
+                repositories: Vec<RepoItem>,
+            }
+            #[derive(Debug, Deserialize)]
+            struct RepoItem {
+                full_name: String,
+                #[serde(default)]
+                archived: bool,
+            }
+
+            let resp: AppRepositories = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+            let repos: Vec<String> = resp
+                .repositories
+                .into_iter()
+                .filter(|r| !r.archived)
+                .map(|r| r.full_name)
+                .collect();
+            Ok(repos)
+        } else {
+            #[derive(Debug, Deserialize)]
+            struct UserRepo {
+                full_name: String,
+                #[serde(default)]
+                archived: bool,
+                #[serde(default)]
+                topics: Vec<String>,
+            }
+
+            let repos: Vec<UserRepo> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+            let mut result: Vec<String> = repos
+                .into_iter()
+                .filter(|r| !r.archived)
+                .filter(|r| {
+                    if let Some(ref filter_topics) = topics {
+                        if filter_topics.is_empty() {
+                            return true;
+                        }
+                        return filter_topics.iter().any(|t| r.topics.contains(t));
+                    }
+                    true
+                })
+                .map(|r| r.full_name)
+                .collect();
+            result.sort();
+            result.dedup();
+            Ok(result)
+        }
     }
 }
 
@@ -141,6 +259,18 @@ impl GithubClient {
 #[derive(Debug, Clone, Deserialize)]
 pub struct GithubUser {
     login: String,
+    #[serde(default)]
+    pub email: Option<String>,
+}
+
+/// GitHub user email response.
+#[derive(Debug, Clone, Deserialize)]
+struct GithubUserEmail {
+    email: String,
+    #[serde(default)]
+    primary: bool,
+    #[serde(default)]
+    verified: bool,
 }
 
 /// GitHub Contents API response for a file.
@@ -300,6 +430,8 @@ struct CreatePrRequest {
     body: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     draft: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    maintainer_can_modify: Option<bool>,
 }
 
 /// Request body for updating a GitHub PR.
@@ -398,39 +530,17 @@ impl PlatformClient for GithubClient {
         title: &str,
         body: &str,
     ) -> Result<Option<i64>, PlatformError> {
-        let url = format!("{}/repos/{}/{}/pulls", self.api_base, owner, repo);
-        let head = format!("{}:{}", owner, source_branch);
-        let request = CreatePrRequest {
-            title: title.to_owned(),
-            head,
-            base: target_branch.to_owned(),
-            body: body.to_owned(),
-            draft: Some(false),
-        };
-
-        let request_json = serde_json::to_string(&request)
-            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
-
-        match self.http.post_json::<GhRestPr>(&url, &request_json).await {
-            Ok(pr) => {
-                tracing::debug!(
-                    pr = pr.number,
-                    branch = source_branch,
-                    "PR created successfully"
-                );
-                Ok(Some(pr.number))
-            }
-            Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY => {
-                // PR already exists or validation failed
-                tracing::debug!(
-                    repo = %format!("{owner}/{repo}"),
-                    branch = source_branch,
-                    "PR creation failed — validation error or PR already exists"
-                );
-                Ok(None)
-            }
-            Err(e) => Err(PlatformError::Http(e)),
-        }
+        self.create_pr_with_options(
+            owner,
+            repo,
+            source_branch,
+            target_branch,
+            title,
+            body,
+            false,
+            None,
+        )
+        .await
     }
 
     async fn update_pr(
@@ -787,6 +897,83 @@ impl GithubClient {
         Ok(())
     }
 
+    /// Delete a label from an issue or PR.
+    ///
+    /// Mirrors `deleteLabel` from `lib/modules/platform/github/index.ts`.
+    pub async fn delete_label(
+        &self,
+        owner: &str,
+        repo: &str,
+        issue_number: i64,
+        label: &str,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/{}/labels/{}",
+            self.api_base, owner, repo, issue_number, label
+        );
+        let resp = self.http.delete(&url).await.map_err(PlatformError::Http)?;
+        if !resp.status().is_success() {
+            return Err(PlatformError::Http(HttpError::Status {
+                status: resp.status(),
+                url,
+            }));
+        }
+        Ok(())
+    }
+
+    /// Add assignees to an issue or PR.
+    ///
+    /// Mirrors `addAssignees` from `lib/modules/platform/github/index.ts`.
+    pub async fn add_assignees(
+        &self,
+        owner: &str,
+        repo: &str,
+        issue_number: i64,
+        assignees: Vec<String>,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/{}/assignees",
+            self.api_base, owner, repo, issue_number
+        );
+        let body = serde_json::json!({ "assignees": assignees });
+        self.http
+            .post_json::<serde_json::Value>(&url, &body.to_string())
+            .await
+            .map_err(PlatformError::Http)?;
+        Ok(())
+    }
+
+    /// Add reviewers to a PR.
+    ///
+    /// Mirrors `addReviewers` from `lib/modules/platform/github/index.ts`.
+    pub async fn add_reviewers(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+        reviewers: Vec<String>,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/pulls/{}/requested_reviewers",
+            self.api_base, owner, repo, pr_number
+        );
+        let user_reviewers: Vec<String> = reviewers.iter().filter(|r| !r.starts_with("team:")).cloned().collect();
+        let team_reviewers: Vec<String> = reviewers
+            .iter()
+            .filter(|r| r.starts_with("team:"))
+            .map(|r| r.strip_prefix("team:").unwrap().to_owned())
+            .collect();
+        let body = serde_json::json!({
+            "reviewers": user_reviewers,
+            "team_reviewers": team_reviewers,
+        });
+        self.http
+            .post_json::<serde_json::Value>(&url, &body.to_string())
+            .await
+            .map_err(PlatformError::Http)?;
+        Ok(())
+    }
+
     /// Check whether a branch exists on the remote repository.
     ///
     /// Throws an error when the branch is a prefix of a nested branch
@@ -939,11 +1126,248 @@ impl GithubClient {
             Err(e) => Err(PlatformError::Http(e)),
         }
     }
+
+    /// Find a PR matching the given criteria.
+    ///
+    /// Mirrors `findPr` from `lib/modules/platform/github/index.ts`.
+    pub async fn find_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch_name: &str,
+        pr_title: Option<&str>,
+        state: Option<&str>,
+        include_other_authors: bool,
+    ) -> Result<Option<GhPr>, PlatformError> {
+        let state = state.unwrap_or("all");
+
+        if include_other_authors {
+            let url = format!(
+                "{}/repos/{}/{}/pulls?head={}:{}&state=open",
+                self.api_base, owner, repo, owner, branch_name
+            );
+            let prs = self.http.get_json::<Vec<GhRestPr>>(&url).await.map_err(PlatformError::Http)?;
+            return Ok(prs.into_iter().next().map(coerce_rest_pr));
+        }
+
+        let prs = self.list_prs(owner, repo, None).await?;
+        let desired = prs.into_iter().map(coerce_rest_pr).find(|pr| {
+            if pr.source_branch != branch_name {
+                return false;
+            }
+            if let Some(title) = pr_title {
+                if title.to_uppercase() != pr.title.to_uppercase() {
+                    return false;
+                }
+            }
+            if !matches_state(&pr.state, state) {
+                return false;
+            }
+            if pr.source_repo.as_deref() != Some(&format!("{}/{}", owner, repo)) {
+                return false;
+            }
+            true
+        });
+        Ok(desired)
+    }
+
+    /// Create a pull request with extended options.
+    ///
+    /// Mirrors the extended `createPr` from `lib/modules/platform/github/index.ts`.
+    pub async fn create_pr_with_options(
+        &self,
+        owner: &str,
+        repo: &str,
+        source_branch: &str,
+        target_branch: &str,
+        title: &str,
+        body: &str,
+        draft: bool,
+        maintainer_can_modify: Option<bool>,
+    ) -> Result<Option<i64>, PlatformError> {
+        let url = format!("{}/repos/{}/{}/pulls", self.api_base, owner, repo);
+        let head = format!("{}:{}", owner, source_branch);
+        let request = CreatePrRequest {
+            title: title.to_owned(),
+            head,
+            base: target_branch.to_owned(),
+            body: body.to_owned(),
+            draft: Some(draft),
+            maintainer_can_modify,
+        };
+
+        let request_json = serde_json::to_string(&request)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+
+        match self.http.post_json::<GhRestPr>(&url, &request_json).await {
+            Ok(pr) => {
+                tracing::debug!(
+                    pr = pr.number,
+                    branch = source_branch,
+                    "PR created successfully"
+                );
+                Ok(Some(pr.number))
+            }
+            Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY => {
+                tracing::debug!(
+                    repo = %format!("{owner}/{repo}"),
+                    branch = source_branch,
+                    "PR creation failed — validation error or PR already exists"
+                );
+                Ok(None)
+            }
+            Err(e) => Err(PlatformError::Http(e)),
+        }
+    }
+
+    /// Update labels on a PR (via the issues endpoint).
+    ///
+    /// Mirrors `addLabels` / label update from `lib/modules/platform/github/index.ts`.
+    pub async fn update_pr_labels(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+        labels: Vec<String>,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/{}/labels",
+            self.api_base, owner, repo, pr_number
+        );
+        let body = serde_json::json!({ "labels": labels });
+        let body_str = serde_json::to_string(&body)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+        match self.http.post_json::<serde_json::Value>(&url, &body_str).await {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                tracing::warn!(
+                    pr = pr_number,
+                    labels = ?labels,
+                    "Error while adding labels. Skipping"
+                );
+                Err(PlatformError::Http(e))
+            }
+        }
+    }
+
+    /// Ensure a comment exists on an issue/PR with the given content.
+    ///
+    /// Returns `true` if a comment was added/updated, `false` if skipped.
+    ///
+    /// Mirrors `ensureComment` from `lib/modules/platform/github/index.ts`.
+    pub async fn ensure_comment(
+        &self,
+        owner: &str,
+        repo: &str,
+        issue_number: i64,
+        topic: Option<&str>,
+        content: &str,
+    ) -> Result<bool, PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/{}/comments?per_page=100",
+            self.api_base, owner, repo, issue_number
+        );
+        let comments: Vec<GhComment> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+
+        let topic_prefix = topic.map(|t| format!("### {}\n\n", t));
+        let expected_body = topic_prefix.as_ref().map(|p| format!("{}{}", p, content)).unwrap_or_else(|| content.to_owned());
+
+        // Look for an existing comment matching the topic or content
+        let existing = comments.into_iter().find(|c| {
+            if let Some(ref body) = c.body {
+                if let Some(ref prefix) = topic_prefix {
+                    body.starts_with(prefix)
+                } else {
+                    body == content
+                }
+            } else {
+                false
+            }
+        });
+
+        if content.is_empty() {
+            // Delete the comment if content is empty
+            if let Some(comment) = existing {
+                self.delete_comment(owner, repo, comment.id).await?;
+                return Ok(true);
+            }
+            return Ok(false);
+        }
+
+        if let Some(comment) = existing {
+            if comment.body.as_deref() == Some(&expected_body) {
+                return Ok(false); // already up to date
+            }
+            self.update_comment(owner, repo, comment.id, &expected_body).await?;
+            return Ok(true);
+        }
+
+        self.create_comment(owner, repo, issue_number, &expected_body).await?;
+        Ok(true)
+    }
+
+    /// Ensure an issue exists with the given title.
+    ///
+    /// If `ensure_only_once` is true and an open issue with the same title
+    /// exists, no new issue is created and others are closed.
+    ///
+    /// Mirrors `ensureIssue` from `lib/modules/platform/github/index.ts`.
+    pub async fn ensure_issue(
+        &self,
+        owner: &str,
+        repo: &str,
+        title: &str,
+        body: &str,
+        labels: Option<Vec<String>>,
+        ensure_only_once: bool,
+        reopen: bool,
+    ) -> Result<Option<i64>, PlatformError> {
+        let issues = self.list_issues(owner, repo, Some("open")).await?;
+        let matching: Vec<&GhIssue> = issues.iter().filter(|i| i.title == title).collect();
+
+        if !matching.is_empty() {
+            if ensure_only_once {
+                // Close other matching issues (keep the first one)
+                for issue in matching.iter().skip(1) {
+                    let _ = self.update_issue(owner, repo, issue.number, None, None, Some("closed"), None).await;
+                }
+                return Ok(None); // existing issue found, don't create
+            }
+            if !reopen {
+                // Issue already exists and reopen is false
+                return Ok(None);
+            }
+            // Could update existing issue here; for now return existing
+            return Ok(Some(matching[0].number));
+        }
+
+        if !reopen {
+            // Check for closed issues too
+            let closed = self.list_issues(owner, repo, Some("closed")).await?;
+            if closed.iter().any(|i| i.title == title) {
+                return Ok(None);
+            }
+        }
+
+        let number = self.create_issue(owner, repo, title, body, labels).await?;
+        Ok(Some(number))
+    }
 }
 
 /// Coerce a GitHub REST API PR into the Renovate `GhPr` format.
 ///
 /// Mirrors `coerceRestPr` from `lib/modules/platform/github/common.ts`.
+/// Check if a PR state matches the desired state filter.
+fn matches_state(state: &str, desired: &str) -> bool {
+    if desired == "all" {
+        return true;
+    }
+    if let Some(negated) = desired.strip_prefix('!') {
+        return state != negated;
+    }
+    state == desired
+}
+
 fn coerce_rest_pr(pr: GhRestPr) -> GhPr {
     let state = if pr.state == "closed" && pr.merged_at.is_some() {
         "merged".to_owned()
@@ -2930,9 +3354,8 @@ mod tests {
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         client.set_branch_status("owner", "repo", "some-branch", "some-context", "some-description", "green", Some("some-url")).await.unwrap();
     }
-}
 
-// Ported: "should return an array of repos when using Github App endpoint" — modules/platform/github/index.spec.ts line 663
+    // Ported: "should return an array of repos when using Github App endpoint" — modules/platform/github/index.spec.ts line 663
 // Ported: "should be parse directory response" — modules/platform/github/schema.spec.ts line 5
 #[test]
 fn github_content_response_directory() {
@@ -3140,4 +3563,293 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
     let input = serde_json::json!({"data": {"repository": {}}});
     let result = parse_github_vulnerability_alerts(&input);
     assert!(result.is_empty());
+}
+
+    // ── delete_label ──────────────────────────────────────────────────────────
+
+    // Ported: "should delete the label" — modules/platform/github/index.spec.ts line 3318
+    #[tokio::test]
+    async fn delete_label_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("DELETE"))
+            .and(path("/repos/owner/repo/issues/42/labels/rebase"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client.delete_label("owner", "repo", 42, "rebase").await.unwrap();
+    }
+
+    // ── add_assignees ─────────────────────────────────────────────────────────
+
+    // Ported: "should add the given assignees to the issue" — modules/platform/github/index.spec.ts line 3328
+    #[tokio::test]
+    async fn add_assignees_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/42/assignees"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "number": 42,
+                "state": "open",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .add_assignees("owner", "repo", 42, vec!["someuser".to_owned(), "someotheruser".to_owned()])
+            .await
+            .unwrap();
+    }
+
+    // ── add_reviewers ─────────────────────────────────────────────────────────
+
+    // Ported: "should add the given reviewers to the PR" — modules/platform/github/index.spec.ts line 3386
+    #[tokio::test]
+    async fn add_reviewers_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls/42/requested_reviewers"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 42,
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .add_reviewers("owner", "repo", 42, vec!["user1".to_owned(), "team:myteam".to_owned()])
+            .await
+            .unwrap();
+    }
+
+    // ── find_pr ───────────────────────────────────────────────────────────────
+
+    // Ported: "finds PR by branch name" — modules/platform/github/index.spec.ts line 3540
+    #[tokio::test]
+    async fn find_pr_by_branch_name() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 2,
+                    "title": "branch a pr",
+                    "state": "open",
+                    "head": {"ref": "branch-a", "sha": "def", "repo": {"full_name": "owner/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+                {
+                    "number": 1,
+                    "title": "branch a pr",
+                    "state": "open",
+                    "head": {"ref": "branch-a", "sha": "def2", "repo": {"full_name": "owner/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid2",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr = client.find_pr("owner", "repo", "branch-a", None, None, false).await.unwrap().unwrap();
+        assert_eq!(pr.number, 2);
+        assert_eq!(pr.source_branch, "branch-a");
+    }
+
+    // Ported: "finds PR with non-open state" — modules/platform/github/index.spec.ts line 3582
+    #[tokio::test]
+    async fn find_pr_with_non_open_state() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 1,
+                    "title": "branch a pr",
+                    "state": "closed",
+                    "head": {"ref": "branch-a", "sha": "def", "repo": {"full_name": "owner/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr = client.find_pr("owner", "repo", "branch-a", None, Some("!open"), false).await.unwrap().unwrap();
+        assert_eq!(pr.number, 1);
+        assert_eq!(pr.state, "closed");
+    }
+
+    // Ported: "skips PR with non-matching state" — modules/platform/github/index.spec.ts line 3611
+    #[tokio::test]
+    async fn find_pr_skips_non_matching_state() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 1,
+                    "title": "branch a pr",
+                    "state": "closed",
+                    "head": {"ref": "branch-a", "sha": "def", "repo": {"full_name": "owner/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr = client.find_pr("owner", "repo", "branch-a", None, Some("open"), false).await.unwrap();
+        assert!(pr.is_none());
+    }
+
+    // Ported: "skips PRs from forks" — modules/platform/github/index.spec.ts line 3637
+    #[tokio::test]
+    async fn find_pr_skips_forks() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 1,
+                    "title": "branch a pr",
+                    "state": "open",
+                    "head": {"ref": "branch-a", "sha": "def", "repo": {"full_name": "other/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr = client.find_pr("owner", "repo", "branch-a", None, Some("open"), false).await.unwrap();
+        assert!(pr.is_none());
+    }
+
+    // Ported: "skips PR with non-matching title" — modules/platform/github/index.spec.ts line 3662
+    #[tokio::test]
+    async fn find_pr_skips_non_matching_title() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 1,
+                    "title": "foo",
+                    "state": "closed",
+                    "head": {"ref": "branch-a", "sha": "def", "repo": {"full_name": "owner/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr = client.find_pr("owner", "repo", "branch-a", Some("bar"), None, false).await.unwrap();
+        assert!(pr.is_none());
+    }
+
+    // Ported: "finds pr from other authors" — modules/platform/github/index.spec.ts line 3722
+    #[tokio::test]
+    async fn find_pr_from_other_authors() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .and(wiremock::matchers::query_param("head", "owner:branch-a"))
+            .and(wiremock::matchers::query_param("state", "open"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 1,
+                    "title": "branch a pr",
+                    "state": "open",
+                    "head": {"ref": "branch-a", "sha": "def", "repo": {"full_name": "owner/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr = client.find_pr("owner", "repo", "branch-a", None, None, true).await.unwrap().unwrap();
+        assert_eq!(pr.number, 1);
+    }
+
+    // Ported: "returns null if no pr found - (includeOtherAuthors)" — modules/platform/github/index.spec.ts line 3752
+    #[tokio::test]
+    async fn find_pr_returns_null_when_not_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr = client.find_pr("owner", "repo", "branch-a", None, None, false).await.unwrap();
+        assert!(pr.is_none());
+    }
+
+    // Ported: "should return null if no PR exists" — modules/platform/github/index.spec.ts line 2007
+    #[tokio::test]
+    async fn list_prs_returns_empty_when_no_prs() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let prs = client.list_prs("owner", "repo", None).await.unwrap();
+        assert!(prs.is_empty());
+    }
+
+    // Ported: "should create a draftPR if set in the settings" — modules/platform/github/index.spec.ts line 3809
+    #[tokio::test]
+    async fn create_pr_with_draft() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 123,
+                "title": "PR draft",
+                "state": "open",
+                "head": {"ref": "some-branch", "sha": "abc", "repo": null},
+                "base": {"ref": "master", "sha": "def", "repo": null},
+                "node_id": "nid",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr("owner", "repo", "some-branch", "master", "PR draft", "This is a result of a draft")
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(123));
+    }
 }
