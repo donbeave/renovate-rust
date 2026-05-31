@@ -447,6 +447,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/github-actions/extract.ts` | `extractors/github_actions.rs` | full | `extract()` + `extract_with_context()` handle `uses:`, `docker://`, `runs-on:` |
 | `lib/modules/manager/github-actions/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/github-actions/update.ts` | `extractors/github_actions.rs` | partial | `github_actions_update_dependency()` replaces refs in `uses:` lines; missing: digest pinning, ratchet comments |
 | `lib/modules/manager/github-actions/community.ts` | `extractors/github_actions.rs` | partial | Community action index not implemented |
 | `lib/modules/manager/github-actions/dep-types.ts` | `extractors/github_actions.rs` | full | Dep types embedded |
 | `lib/modules/manager/github-actions/parse.ts` | `extractors/github_actions.rs` | full | `parse_action_reference()`, `parse_uses_line()`, `parse_comment()` present |

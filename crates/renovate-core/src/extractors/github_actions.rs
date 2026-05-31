@@ -359,6 +359,51 @@ pub fn parse_uses_line(line: &str) -> Option<GithubActionsParsedUsesLine> {
     })
 }
 
+/// Update a single GitHub Actions dependency in a workflow YAML file.
+///
+/// Mirrors `updateDependency()` from `lib/modules/manager/github-actions/update.ts`.
+///
+/// Returns `Some(updated_content)` when the replacement was made, or `None`
+/// when the dep could not be found or matched.
+pub fn github_actions_update_dependency(
+    file_content: &str,
+    dep_name: &str,
+    current_value: &str,
+    new_value: &str,
+) -> Option<String> {
+    let mut content = file_content.to_owned();
+    let mut found = false;
+
+    for line in file_content.lines() {
+        let Some(parsed) = parse_uses_line(line) else {
+            continue;
+        };
+        let action_ref = parsed.action_ref?;
+        let repo_ref = match action_ref {
+            GithubActionReference::Repository { owner, repo, .. } => {
+                format!("{owner}/{repo}")
+            }
+            _ => continue,
+        };
+        if repo_ref != dep_name {
+            continue;
+        }
+        if !parsed.replace_string.contains(current_value) {
+            continue;
+        }
+        let new_replace = parsed.replace_string.replacen(current_value, new_value, 1);
+        let new_line = line.replacen(&parsed.replace_string, &new_replace, 1);
+        content = content.replacen(line, &new_line, 1);
+        found = true;
+    }
+
+    if found {
+        Some(content)
+    } else {
+        None
+    }
+}
+
 /// Extract and normalise the version string from a trailing `# <version>` comment.
 ///
 /// Handles these forms (TypeScript parity):
@@ -3258,5 +3303,53 @@ jobs:
         let yaml = "runs:\n  using: 'node20'\n  main: 'index.js'\n";
         let deps = extract(yaml);
         assert!(deps.is_empty());
+    }
+
+    // Rust-specific: github-actions update behavior tests
+    #[test]
+    fn github_actions_update_dependency_replaces_tag() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v3\n";
+        let updated = github_actions_update_dependency(content, "actions/checkout", "v3", "v4");
+        assert_eq!(
+            updated,
+            Some("jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn github_actions_update_dependency_no_match() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v3\n";
+        let updated = github_actions_update_dependency(content, "actions/setup-node", "v3", "v4");
+        assert_eq!(updated, None);
+    }
+
+    #[test]
+    fn github_actions_update_dependency_with_comment() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v3 # v3\n";
+        let updated = github_actions_update_dependency(content, "actions/checkout", "v3", "v4");
+        assert_eq!(
+            updated,
+            Some("jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4 # v3\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn github_actions_update_dependency_multiple_uses() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v3\n      - uses: actions/setup-node@v3\n";
+        let updated = github_actions_update_dependency(content, "actions/setup-node", "v3", "v4");
+        assert_eq!(
+            updated,
+            Some("jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v3\n      - uses: actions/setup-node@v4\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn github_actions_update_dependency_quoted() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: 'actions/checkout@v3'\n";
+        let updated = github_actions_update_dependency(content, "actions/checkout", "v3", "v4");
+        assert_eq!(
+            updated,
+            Some("jobs:\n  build:\n    steps:\n      - uses: 'actions/checkout@v4'\n".to_owned())
+        );
     }
 }
