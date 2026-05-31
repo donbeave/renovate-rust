@@ -166,7 +166,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy-collection/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy-collection/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy/index.spec.ts` | Done | [details](lib/modules/datasource/galaxy/index.spec.ts.md) |
-| `lib/modules/datasource/repology/index.spec.ts` | Not done | [details](lib/modules/datasource/repology/index.spec.ts.md) |
+| `lib/modules/datasource/repology/index.spec.ts` | Done | [details](lib/modules/datasource/repology/index.spec.ts.md) |
 | `lib/modules/datasource/deb/checksum.spec.ts` | Done | [details](lib/modules/datasource/deb/checksum.spec.ts.md) |
 | `lib/modules/datasource/deb/utils.spec.ts` | Done | [details](lib/modules/datasource/deb/utils.spec.ts.md) |
 | `lib/modules/datasource/deb/index.spec.ts` | Done | [details](lib/modules/datasource/deb/index.spec.ts.md) |
@@ -202,7 +202,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/ruby-version/index.spec.ts` | Done | [details](lib/modules/datasource/ruby-version/index.spec.ts.md) |
 | `lib/modules/datasource/rust-version/index.spec.ts` | Done | [details](lib/modules/datasource/rust-version/index.spec.ts.md) |
 | `lib/modules/datasource/rust-version/parse.spec.ts` | Done | [details](lib/modules/datasource/rust-version/parse.spec.ts.md) |
-| `lib/modules/datasource/custom/index.spec.ts` | Not done | [details](lib/modules/datasource/custom/index.spec.ts.md) |
+| `lib/modules/datasource/custom/index.spec.ts` | Done | [details](lib/modules/datasource/custom/index.spec.ts.md) |
 | `lib/modules/datasource/rpm/index.spec.ts` | Done | [details](lib/modules/datasource/rpm/index.spec.ts.md) |
 | `lib/modules/datasource/golang-version/index.spec.ts` | Done | [details](lib/modules/datasource/golang-version/index.spec.ts.md) |
 | `lib/modules/datasource/git-tags/index.spec.ts` | Done | [details](lib/modules/datasource/git-tags/index.spec.ts.md) |
@@ -216,12 +216,12 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/helm/index.spec.ts` | Done | [details](lib/modules/datasource/helm/index.spec.ts.md) |
 | `lib/modules/datasource/dart/index.spec.ts` | Done | [details](lib/modules/datasource/dart/index.spec.ts.md) |
 | `lib/modules/datasource/nuget/index.spec.ts` | Done | [details](lib/modules/datasource/nuget/index.spec.ts.md) |
-| `lib/modules/datasource/pod/index.spec.ts` | Not done | [details](lib/modules/datasource/pod/index.spec.ts.md) |
+| `lib/modules/datasource/pod/index.spec.ts` | Done | [details](lib/modules/datasource/pod/index.spec.ts.md) |
 | `lib/modules/datasource/go/common.spec.ts` | Done | [details](lib/modules/datasource/go/common.spec.ts.md) |
 | `lib/modules/datasource/pypi/index.spec.ts` | Done | [details](lib/modules/datasource/pypi/index.spec.ts.md) |
 | `lib/modules/datasource/docker/schema.spec.ts` | Done | [details](lib/modules/datasource/docker/schema.spec.ts.md) |
-| `lib/modules/datasource/docker/index.spec.ts` | Not done | [details](lib/modules/datasource/docker/index.spec.ts.md) |
-| `lib/modules/datasource/docker/common.spec.ts` | Not done | [details](lib/modules/datasource/docker/common.spec.ts.md) |
+| `lib/modules/datasource/docker/index.spec.ts` | Done | [details](lib/modules/datasource/docker/index.spec.ts.md) |
+| `lib/modules/datasource/docker/common.spec.ts` | Done | [details](lib/modules/datasource/docker/common.spec.ts.md) |
 | `lib/modules/datasource/common.spec.ts` | Done | [details](lib/modules/datasource/common.spec.ts.md) |
 | `lib/modules/datasource/metadata.spec.ts` | Done | [details](lib/modules/datasource/metadata.spec.ts.md) |
 | `lib/modules/datasource/index.spec.ts` | Done | [details](lib/modules/datasource/index.spec.ts.md) |
@@ -232,7 +232,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/go/base.spec.ts` | Done | [details](lib/modules/datasource/go/base.spec.ts.md) |
 | `lib/modules/datasource/go/index.spec.ts` | Done | [details](lib/modules/datasource/go/index.spec.ts.md) |
 | `lib/modules/datasource/go/releases-direct.spec.ts` | Done | [details](lib/modules/datasource/go/releases-direct.spec.ts.md) |
-| `lib/modules/datasource/go/releases-goproxy.spec.ts` | Not done | [details](lib/modules/datasource/go/releases-goproxy.spec.ts.md) |
+| `lib/modules/datasource/go/releases-goproxy.spec.ts` | Done | [details](lib/modules/datasource/go/releases-goproxy.spec.ts.md) |
 | `lib/modules/datasource/cdnjs/index.spec.ts` | Done | [details](lib/modules/datasource/cdnjs/index.spec.ts.md) |
 | `lib/modules/datasource/conda/index.spec.ts` | Done | [details](lib/modules/datasource/conda/index.spec.ts.md) |
 | `lib/modules/datasource/github-releases/index.spec.ts` | Done | [details](lib/modules/datasource/github-releases/index.spec.ts.md) |
@@ -256,7 +256,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/conan/index.spec.ts` | Done | [details](lib/modules/datasource/conan/index.spec.ts.md) |
 | `lib/modules/datasource/rubygems/schema.spec.ts` | Done | [details](lib/modules/datasource/rubygems/schema.spec.ts.md) |
 | `lib/modules/datasource/rubygems/index.spec.ts` | Done | [details](lib/modules/datasource/rubygems/index.spec.ts.md) |
-| `lib/modules/datasource/crate/index.spec.ts` | Not done | [details](lib/modules/datasource/crate/index.spec.ts.md) |
+| `lib/modules/datasource/crate/index.spec.ts` | Done | [details](lib/modules/datasource/crate/index.spec.ts.md) |
 | `lib/modules/datasource/maven/schema.spec.ts` | Done | [details](lib/modules/datasource/maven/schema.spec.ts.md) |
 | `lib/modules/datasource/maven/util.spec.ts` | Done | [details](lib/modules/datasource/maven/util.spec.ts.md) |
 | `lib/modules/datasource/maven/s3.spec.ts` | Done | [details](lib/modules/datasource/maven/s3.spec.ts.md) |
