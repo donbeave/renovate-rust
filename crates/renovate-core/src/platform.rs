@@ -202,6 +202,14 @@ impl AnyPlatformClient {
         Self::Local(LocalClient::new(base_dir))
     }
 
+    /// Return the local working directory if this is a local client.
+    pub fn local_working_dir(&self) -> Option<&std::path::Path> {
+        match self {
+            Self::Local(c) => Some(c.base_dir()),
+            _ => None,
+        }
+    }
+
     /// Verify authentication and return the currently-authenticated user.
     pub async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         match self {

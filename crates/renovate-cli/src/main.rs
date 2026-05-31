@@ -32,6 +32,8 @@ use cli::Cli;
 use renovate_core::config::Platform;
 use renovate_core::config::{DryRun, GlobalConfig, file as config_file};
 use renovate_core::http::HttpClient;
+use renovate_core::artifacts::{ArtifactConfig, ArtifactRegistry, UpdateArtifact, UpdatedDep};
+use renovate_core::extractors::npm_post_update::artifact_runner::NpmArtifactRunner;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
@@ -482,6 +484,10 @@ async fn process_repo(
     // `branchifyUpgrades` step.
     let branch_updates = report_builders::collect_branch_updates(&repo_report);
 
+    // Artifact runner registry: maps manager names to lockfile generators.
+    let mut artifact_registry = ArtifactRegistry::new();
+    artifact_registry.register("npm", Box::new(NpmArtifactRunner));
+
     // Manifest editing: apply newValue constraints to source files.
     // Only npm/package.json is supported in this slice; other managers
     // are logged and skipped.
@@ -516,7 +522,7 @@ async fn process_repo(
                         } else {
                             Vec::new()
                         };
-                        for bd in file_deps {
+                        for bd in &file_deps {
                             if let output::DepStatus::UpdateAvailable { ref current, ref latest } =
                                 bd.dep.status
                             {
@@ -619,6 +625,111 @@ async fn process_repo(
                                 file = %file_path,
                                 "updated manifest"
                             );
+                            // Run artifact update (lockfile regeneration) for supported managers.
+                            if manager == "npm" {
+                                if let Some(lock_file_dir) = client.local_working_dir() {
+                                    let updated_deps: Vec<UpdatedDep> = file_deps
+                                        .iter()
+                                        .filter_map(|bd| {
+                                            if let output::DepStatus::UpdateAvailable { ref current, .. } =
+                                                bd.dep.status
+                                            {
+                                                Some(UpdatedDep {
+                                                    dep_name: bd.dep.name.clone(),
+                                                    current_value: Some(current.clone()),
+                                                    new_value: bd.dep.new_value.clone(),
+                                                    package_file: file_path.to_owned(),
+                                                    manager: "npm".to_owned(),
+                                                    datasource: None,
+                                                })
+                                            } else {
+                                                None
+                                            }
+                                        })
+                                        .collect();
+                                    if !updated_deps.is_empty() {
+                                        let artifact_input = UpdateArtifact {
+                                            package_file_name: file_path.to_owned(),
+                                            updated_deps,
+                                            new_package_file_content: content.clone(),
+                                            config: ArtifactConfig {
+                                                lock_file_dir: lock_file_dir.to_path_buf(),
+                                                ..Default::default()
+                                            },
+                                        };
+                                        if let Some(runner) = artifact_registry.get("npm") {
+                                            match runner.update_artifacts(&artifact_input).await {
+                                                Ok(Some(results)) => {
+                                                    for result in results {
+                                                        if let Some(ref file_change) = result.file {
+                                                            if let Err(err) = client
+                                                                .write_file(
+                                                                    owner,
+                                                                    repo,
+                                                                    &file_change.path,
+                                                                    file_change.contents.as_deref().unwrap_or_default(),
+                                                                )
+                                                                .await
+                                                            {
+                                                                tracing::error!(
+                                                                    repo = %repo_slug,
+                                                                    branch = %branch,
+                                                                    file = %file_change.path,
+                                                                    %err,
+                                                                    "failed to write artifact file"
+                                                                );
+                                                                had_error = true;
+                                                            } else {
+                                                                tracing::info!(
+                                                                    repo = %repo_slug,
+                                                                    branch = %branch,
+                                                                    file = %file_change.path,
+                                                                    "updated artifact file"
+                                                                );
+                                                            }
+                                                        }
+                                                        if let Some(ref err) = result.artifact_error {
+                                                            tracing::error!(
+                                                                repo = %repo_slug,
+                                                                branch = %branch,
+                                                                lock_file = %err.lock_file,
+                                                                stderr = %err.stderr,
+                                                                "artifact update error"
+                                                            );
+                                                            had_error = true;
+                                                        }
+                                                    }
+                                                }
+                                                Ok(None) => {
+                                                    tracing::debug!(
+                                                        repo = %repo_slug,
+                                                        branch = %branch,
+                                                        file = %file_path,
+                                                        "no artifact changes"
+                                                    );
+                                                }
+                                                Err(err) => {
+                                                    tracing::error!(
+                                                        repo = %repo_slug,
+                                                        branch = %branch,
+                                                        file = %file_path,
+                                                        ?err,
+                                                        "artifact update failed"
+                                                    );
+                                                    had_error = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    tracing::debug!(
+                                        repo = %repo_slug,
+                                        branch = %branch,
+                                        file = %file_path,
+                                        "skipping artifact update: no local working directory"
+                                    );
+                                }
+                            }
                         }
                     }
                     Ok(None) => {

@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+pub mod artifact_runner;
 pub mod node_version;
 pub mod npm;
 pub mod pnpm;

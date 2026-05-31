@@ -781,7 +781,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/npm/extract/yarn.ts` | `extractors/npm.rs` | partial | Yarn-specific extraction inline |
 | `lib/modules/manager/npm/extract/yarnrc.ts` | `extractors/npm.rs` | full | `load_config_from_yarnrc_yml()` + `load_config_from_legacy_yarnrc()` present |
 | `lib/modules/manager/npm/index.ts` | `managers.rs` | partial | fileMatch pattern present |
-| `lib/modules/manager/npm/artifacts.ts` | N/A | not-started | Artifact execution not implemented |
+| `lib/modules/manager/npm/artifacts.ts` | `extractors/npm_post_update/artifact_runner.rs` | partial | `NpmArtifactRunner` implements lockfile regeneration for npm/yarn/pnpm; wired into CLI pipeline; missing: full constraint env, global npmrc, yarnrc, pnpmfile hooks |
 | `lib/modules/manager/npm/constants.ts` | `extractors/npm.rs` | partial | Some constants inline |
 | `lib/modules/manager/npm/dep-types.ts` | `extractors/npm.rs` | full | All dep types (NpmDepType) embedded |
 | `lib/modules/manager/npm/detect.ts` | `extractors/npm.rs` | full | `detect_global_config()` + `detect_global_config_from()` present |

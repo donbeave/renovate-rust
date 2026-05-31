@@ -25,6 +25,11 @@ impl LocalClient {
         }
     }
 
+    /// Return the base directory this client operates on.
+    pub fn base_dir(&self) -> &Path {
+        &self.base_dir
+    }
+
     pub async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         Ok(CurrentUser {
             login: "local".to_owned(),
