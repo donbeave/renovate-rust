@@ -151,6 +151,42 @@ pub fn extract(content: &str) -> Vec<BuildkiteDep> {
     out
 }
 
+/// Update a single Buildkite plugin dependency in a pipeline YAML file.
+///
+/// Mirrors `updateDependency()` from `lib/modules/manager/buildkite/update.ts`.
+///
+/// Returns `Some(updated_content)` when the replacement was made, or `None`
+/// when the dep could not be found or matched.
+pub fn buildkite_update_dependency(
+    file_content: &str,
+    dep_name: &str,
+    current_value: &str,
+    new_value: &str,
+) -> Option<String> {
+    let old_ref = format!("{dep_name}#{current_value}");
+    let new_ref = format!("{dep_name}#{new_value}");
+    let mut content = file_content.to_owned();
+    let mut found = false;
+
+    for line in file_content.lines() {
+        let raw = line.split(" #").next().unwrap_or(line).trim_end();
+        if PLUGIN_LINE.is_match(raw) {
+            let new_line = line.replacen(&old_ref, &new_ref, 1);
+            if new_line != *line {
+                content = content.replacen(line, &new_line, 1);
+                found = true;
+                break; // Only replace first match
+            }
+        }
+    }
+
+    if found {
+        Some(content)
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -339,5 +375,43 @@ steps:
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].dep_name, "test-collector");
         assert_eq!(deps[0].current_value, "v1.8.0");
+    }
+
+    // Rust-specific: buildkite update behavior tests
+    #[test]
+    fn buildkite_update_dependency_replaces_version() {
+        let content = "steps:\n  - plugins:\n    - docker-compose#v5.1.0:\n";
+        let updated = buildkite_update_dependency(content, "docker-compose", "v5.1.0", "v5.2.0");
+        assert_eq!(
+            updated,
+            Some("steps:\n  - plugins:\n    - docker-compose#v5.2.0:\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn buildkite_update_dependency_no_match() {
+        let content = "steps:\n  - plugins:\n    - docker-compose#v5.1.0:\n";
+        let updated = buildkite_update_dependency(content, "matrix-joiner", "v1.0.0", "v2.0.0");
+        assert_eq!(updated, None);
+    }
+
+    #[test]
+    fn buildkite_update_dependency_quoted() {
+        let content = "steps:\n  - plugins:\n    - 'test-collector#v1.8.0':\n";
+        let updated = buildkite_update_dependency(content, "test-collector", "v1.8.0", "v1.9.0");
+        assert_eq!(
+            updated,
+            Some("steps:\n  - plugins:\n    - 'test-collector#v1.9.0':\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn buildkite_update_dependency_multiple_plugins() {
+        let content = "steps:\n  - plugins:\n    - docker-compose#v5.1.0:\n    - artifacts#v1.9.3:\n";
+        let updated = buildkite_update_dependency(content, "artifacts", "v1.9.3", "v2.0.0");
+        assert_eq!(
+            updated,
+            Some("steps:\n  - plugins:\n    - docker-compose#v5.1.0:\n    - artifacts#v2.0.0:\n".to_owned())
+        );
     }
 }

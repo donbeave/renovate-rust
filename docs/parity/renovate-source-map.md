@@ -164,6 +164,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/buildkite/extract.ts` | `extractors/buildkite.rs` | full | `extract()` handles plugin and Docker image refs |
 | `lib/modules/manager/buildkite/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/buildkite/update.ts` | `extractors/buildkite.rs` | partial | `buildkite_update_dependency()` replaces plugin versions; missing: Docker image updates |
 
 ### buildpacks
 
