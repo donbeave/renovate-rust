@@ -5,7 +5,7 @@
 ## `lib/modules/manager/npm/extract/post/locked-versions.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/post/locked-versions.spec.ts
-**Total tests:** 21 | **Ported:** 13 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 21 | **Ported:** 11 | **Actionable:** 10 | **Status:** pending
 
 ### `.getLockedVersions()`
 
@@ -25,10 +25,10 @@
 | skips augmenting v2 lock file constraint | 559 | pending | — | — | — |
 | appends <7 to npm extractedConstraints | 596 | pending | — | — | — |
 | skips appending <7 to npm extractedConstraints | 641 | pending | — | — | — |
-| uses pnpm-lock | 687 | not-applicable | — | — | Rust does not support pnpm-lock parsing. |
-| uses pnpm-lock for pnpm.catalog depType | 748 | not-applicable | — | — | Rust does not support pnpm-lock parsing. |
-| uses pnpm-lock in subfolder | 808 | not-applicable | — | — | Rust does not support pnpm-lock parsing. |
-| uses pnpm-lock with workspaces | 869 | not-applicable | — | — | Rust does not support pnpm-lock parsing. |
+| uses pnpm-lock | 687 | pending | — | — | Rust does not support pnpm-lock parsing. |
+| uses pnpm-lock for pnpm.catalog depType | 748 | pending | — | — | Rust does not support pnpm-lock parsing. |
+| uses pnpm-lock in subfolder | 808 | pending | — | — | Rust does not support pnpm-lock parsing. |
+| uses pnpm-lock with workspaces | 869 | pending | — | — | Rust does not support pnpm-lock parsing. |
 | should log warning if unsupported lockfileVersion is found | 947 | pending | — | — | — |
 
 ### `lockfileVersion 3`

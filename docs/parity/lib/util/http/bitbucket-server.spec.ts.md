@@ -11,11 +11,11 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| posts | 25 | not-applicable | — | — | Bitbucket HTTP client / pagination mocking |
-| invalid path | 32 | not-applicable | — | — | Bitbucket HTTP client / pagination mocking |
-| pagination: uses default limit if not configured | 38 | not-applicable | — | — | Bitbucket HTTP client / pagination mocking |
-| pagination: uses configured limit | 82 | not-applicable | — | — | Bitbucket HTTP client / pagination mocking |
-| pagination: fetch only one entry with limit 1 and maxPages 1 | 113 | not-applicable | — | — | Bitbucket HTTP client / pagination mocking |
+| posts | 25 | not-applicable | — | — | TS-library-specific schema internals; Bitbucket `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
+| invalid path | 32 | not-applicable | — | — | TS-library-specific schema internals; Bitbucket `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
+| pagination: uses default limit if not configured | 38 | not-applicable | — | — | TS-library-specific schema internals; Bitbucket `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
+| pagination: uses configured limit | 82 | not-applicable | — | — | TS-library-specific schema internals; Bitbucket `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
+| pagination: fetch only one entry with limit 1 and maxPages 1 | 113 | not-applicable | — | — | TS-library-specific schema internals; Bitbucket `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
 
 ---
 

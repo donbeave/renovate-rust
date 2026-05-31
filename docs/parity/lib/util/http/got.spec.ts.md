@@ -11,8 +11,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| configures rejectUnauthorized when forced | 15 | not-applicable | — | — | Tests `got` HTTP client internals; Rust uses `reqwest` with a different architecture |
-| does a flat clone of options | 25 | not-applicable | — | — | Tests `got` HTTP client internals; Rust uses `reqwest` with a different architecture |
+| configures rejectUnauthorized when forced | 15 | not-applicable | — | — | TS-library-specific schema internals; `got` HTTP client pagination and caching APIs are TypeScript-specific with no direct Rust equivalent |
+| does a flat clone of options | 25 | not-applicable | — | — | TS-library-specific schema internals; `got` HTTP client pagination and caching APIs are TypeScript-specific with no direct Rust equivalent |
 
 ---
 

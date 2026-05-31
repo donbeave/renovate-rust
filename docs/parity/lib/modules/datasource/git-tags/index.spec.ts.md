@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/git-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-tags/index.spec.ts
-**Total tests:** 8 | **Ported:** 6 | **Actionable:** 0 | **Status:** done
+**Total tests:** 8 | **Ported:** 6 | **Actionable:** 1 | **Status:** pending
 
 ### `modules/datasource/git-tags/index`
 
@@ -17,7 +17,7 @@
 | returns null if not found | 64 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_null_if_not_found` | notfound → None |
 | returns digest for tag | 74 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_digest_for_tag` | v1.0.2 → deref hash |
 | returns digest for HEAD | 84 | ported | `crates/renovate-core/src/datasources/git_tags.rs` | `returns_digest_for_head` | None → HEAD hash |
-| returns digest for HEAD with authentication environment variables | 94 | not-applicable | — | — | Tests mock TypeScript-internal `simpleGit` infrastructure; auth env vars are handled by the git subprocess layer in `util.rs` which has its own coverage |
-| returns digest for HEAD with authentication environment variables for datasource type git-tags | 121 | not-applicable | — | — | Same reason as line 94 |
+| returns digest for HEAD with authentication environment variables | 94 | not-applicable | — | — | mocking framework internals — tests TypeScript  mock infrastructure |
+| returns digest for HEAD with authentication environment variables for datasource type git-tags | 121 | pending | — | — | Same reason as line 94 |
 
 ---

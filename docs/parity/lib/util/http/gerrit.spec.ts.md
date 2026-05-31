@@ -11,10 +11,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| content-type | 14 | not-applicable | — | — | Gerrit HTTP wrapper; no Gerrit wrapper in Rust HTTP layer |
-| getJson | 25 | not-applicable | — | — | Gerrit HTTP wrapper; no Gerrit wrapper in Rust HTTP layer |
-| postJson | 41 | not-applicable | — | — | Gerrit HTTP wrapper; no Gerrit wrapper in Rust HTTP layer |
-| putJson | 57 | not-applicable | — | — | Gerrit HTTP wrapper; no Gerrit wrapper in Rust HTTP layer |
+| content-type | 14 | not-applicable | — | — | TS-library-specific schema internals; Gerrit `got` wrapper API is TypeScript-specific with no direct Rust equivalent |
+| getJson | 25 | not-applicable | — | — | TS-library-specific schema internals; Gerrit `got` wrapper API is TypeScript-specific with no direct Rust equivalent |
+| postJson | 41 | not-applicable | — | — | TS-library-specific schema internals; Gerrit `got` wrapper API is TypeScript-specific with no direct Rust equivalent |
+| putJson | 57 | not-applicable | — | — | TS-library-specific schema internals; Gerrit `got` wrapper API is TypeScript-specific with no direct Rust equivalent |
 
 ---
 

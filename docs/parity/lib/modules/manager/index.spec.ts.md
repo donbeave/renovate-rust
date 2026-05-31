@@ -5,19 +5,19 @@
 ## `lib/modules/manager/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/index.spec.ts
-**Total tests:** 22 | **Ported:** 10 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 22 | **Ported:** 10 | **Actionable:** 12 | **Status:** pending
 
 ### `modules/manager/index › supportedDatasources`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| has valid supportedDatasources for ${m} | 18 | not-applicable | — | — | Manager registry datasource metadata enumeration not implemented in Rust |
+| has valid supportedDatasources for ${m} | 18 | pending | — | — | Manager registry datasource metadata enumeration not implemented in Rust |
 
 ### `modules/manager/index › lockFileNames`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| has lockFileNames for ${name} | 31 | not-applicable | — | — | Manager registry lockfile metadata enumeration not implemented in Rust |
+| has lockFileNames for ${name} | 31 | pending | — | — | Manager registry lockfile metadata enumeration not implemented in Rust |
 
 ### `modules/manager/index › get()`
 
@@ -41,7 +41,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| validates | 60 | not-applicable | — | — | Manager registry schema validation not implemented in Rust |
+| validates | 60 | pending | — | — | Manager registry schema validation not implemented in Rust |
 
 ### `modules/manager/index › detectGlobalConfig()`
 
@@ -60,18 +60,18 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null | 144 | not-applicable | — | — | `extractPackageFile` registry dispatch not implemented in Rust |
-| handles custom managers | 157 | not-applicable | — | — | `extractPackageFile` registry dispatch not implemented in Rust |
-| returns non-null | 168 | not-applicable | — | — | `extractPackageFile` registry dispatch not implemented in Rust |
+| returns null | 144 | pending | — | — | `extractPackageFile` registry dispatch not implemented in Rust |
+| handles custom managers | 157 | pending | — | — | `extractPackageFile` registry dispatch not implemented in Rust |
+| returns non-null | 168 | pending | — | — | `extractPackageFile` registry dispatch not implemented in Rust |
 
 ### `modules/manager/index › getRangeStrategy`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null | 186 | not-applicable | — | — | `getRangeStrategy` registry dispatch not implemented in Rust |
-| returns non-null | 196 | not-applicable | — | — | `getRangeStrategy` registry dispatch not implemented in Rust |
-| returns update-lockfile for in-range-only | 219 | not-applicable | — | — | `getRangeStrategy` registry dispatch not implemented in Rust |
-| returns update-lockfile for in-range-only if it is proposed my manager | 232 | not-applicable | — | — | `getRangeStrategy` registry dispatch not implemented in Rust |
+| returns null | 186 | pending | — | — | `getRangeStrategy` registry dispatch not implemented in Rust |
+| returns non-null | 196 | pending | — | — | `getRangeStrategy` registry dispatch not implemented in Rust |
+| returns update-lockfile for in-range-only | 219 | pending | — | — | `getRangeStrategy` registry dispatch not implemented in Rust |
+| returns update-lockfile for in-range-only if it is proposed my manager | 232 | pending | — | — | `getRangeStrategy` registry dispatch not implemented in Rust |
 
 ### `modules/manager/index › isKnownManager`
 

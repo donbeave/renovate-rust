@@ -11,9 +11,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns existing version scheme | 5 | not-applicable | — | — | Tests TypeScript Zod schema for versioning name lookup; no equivalent in Rust |
-| falls back to default version scheme | 13 | not-applicable | — | — | Tests TypeScript Zod schema fallback behavior |
-| catches errors | 19 | not-applicable | — | — | Tests TypeScript Zod schema error handling |
+| returns existing version scheme | 5 | not-applicable | — | — | TS-library-specific schema internals; Zod schema parsing is TypeScript-specific |
+| falls back to default version scheme | 13 | not-applicable | — | — | TS-library-specific schema internals; Zod schema parsing is TypeScript-specific |
+| catches errors | 19 | not-applicable | — | — | TS-library-specific schema internals; Zod schema parsing is TypeScript-specific |
 
 ---
 

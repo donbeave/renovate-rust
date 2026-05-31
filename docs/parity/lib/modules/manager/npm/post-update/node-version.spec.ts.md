@@ -5,19 +5,19 @@
 ## `lib/modules/manager/npm/post-update/node-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/post-update/node-version.spec.ts
-**Total tests:** 11 | **Ported:** 2 | **Actionable:** 0 | **Status:** done
+**Total tests:** 11 | **Ported:** 2 | **Actionable:** 9 | **Status:** pending
 
 ### `getNodeConstraint()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns from user constraints | 18 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
-| returns .node-version value | 29 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
-| returns .nvmrc value | 41 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
-| ignores unusable ranges in dotfiles | 52 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
-| returns from package.json | 64 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
-| returns from package.json volta | 74 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
-| prefers volta over engines | 84 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
+| returns from user constraints | 18 | pending | — | — | Node version constraint resolution (npm-specific) |
+| returns .node-version value | 29 | pending | — | — | Node version constraint resolution (npm-specific) |
+| returns .nvmrc value | 41 | pending | — | — | Node version constraint resolution (npm-specific) |
+| ignores unusable ranges in dotfiles | 52 | pending | — | — | Node version constraint resolution (npm-specific) |
+| returns from package.json | 64 | pending | — | — | Node version constraint resolution (npm-specific) |
+| returns from package.json volta | 74 | pending | — | — | Node version constraint resolution (npm-specific) |
+| prefers volta over engines | 84 | pending | — | — | Node version constraint resolution (npm-specific) |
 
 ### `getNodeUpdate()`
 
@@ -30,7 +30,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns getNodeUpdate | 113 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
-| returns getNodeConstraint | 127 | not-applicable | — | — | Node version constraint resolution (npm-specific) |
+| returns getNodeUpdate | 113 | pending | — | — | Node version constraint resolution (npm-specific) |
+| returns getNodeConstraint | 127 | pending | — | — | Node version constraint resolution (npm-specific) |
 
 ---

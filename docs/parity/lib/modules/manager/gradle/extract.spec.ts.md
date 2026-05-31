@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gradle/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract.spec.ts
-**Total tests:** 30 | **Ported:** 13 | **Actionable:** 11 | **Status:** pending
+**Total tests:** 30 | **Ported:** 13 | **Actionable:** 17 | **Status:** pending
 
 ### `extractPackageFile()`
 
@@ -26,7 +26,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | deduplicates registry urls | 414 | ported | `gradle.rs` | `registry_urls_deduplicate` | Pure function test via get_registry_urls_for_dep |
-| interpolates registry URLs | 451 | not-applicable | — | — | `extractAllPackageFiles` with variable interpolation not implemented in Rust |
+| interpolates registry URLs | 451 | pending | — | — | `extractAllPackageFiles` with variable interpolation not implemented in Rust |
 | supports separate registry URLs for plugins | 507 | ported | `gradle.rs` | `registry_urls_separate_plugin_scopes` | Pure function test via get_registry_urls_for_dep |
 
 ### `extractPackageFile() › registry URLs › content descriptors › simple descriptor matches`
@@ -47,7 +47,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts content descriptors | 672 | not-applicable | — | — | `extractAllPackageFiles` with registry URL + content descriptor extraction from build files not implemented in Rust |
+| extracts content descriptors | 672 | pending | — | — | `extractAllPackageFiles` with registry URL + content descriptor extraction from build files not implemented in Rust |
 | exclusiveContent | 775 | ported | `gradle.rs` | `registry_urls_exclusive_content` | Pure function test via get_registry_urls_for_dep with exclusive registry |
 | exclusiveContent with repeated repository definition | 823 | ported | `gradle.rs` | `registry_urls_exclusive_content_repeated_repo` | Pure function test |
 
@@ -65,10 +65,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| loads further scripts using apply from statements | 1175 | not-applicable | — | — | `extractAllPackageFiles` with apply-from cross-file loading not implemented in Rust |
-| works with files in sub-directories | 1269 | not-applicable | — | — | `extractAllPackageFiles` with apply-from not implemented in Rust |
-| prevents recursive apply from calls | 1304 | not-applicable | — | — | `extractAllPackageFiles` with apply-from recursion guard not implemented in Rust |
-| prevents inclusion of non-Gradle files | 1319 | not-applicable | — | — | `extractAllPackageFiles` with file type filtering not implemented in Rust |
+| loads further scripts using apply from statements | 1175 | pending | — | — | `extractAllPackageFiles` with apply-from cross-file loading not implemented in Rust |
+| works with files in sub-directories | 1269 | pending | — | — | `extractAllPackageFiles` with apply-from not implemented in Rust |
+| prevents recursive apply from calls | 1304 | pending | — | — | `extractAllPackageFiles` with apply-from recursion guard not implemented in Rust |
+| prevents inclusion of non-Gradle files | 1319 | pending | — | — | `extractAllPackageFiles` with file type filtering not implemented in Rust |
 
 ### `extractPackageFile() › gradle-consistent-versions plugin`
 

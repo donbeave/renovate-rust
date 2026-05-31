@@ -11,14 +11,14 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns updated lockfile when modified | 22 | not-applicable | — | — | Subprocess / git mocking |
-| returns updated lockfile when in not_added | 54 | not-applicable | — | — | Subprocess / git mocking |
-| returns null when lockfile is not modified | 83 | not-applicable | — | — | Subprocess / git mocking |
-| deletes lockfile during maintenance | 105 | not-applicable | — | — | Subprocess / git mocking |
-| does not delete lockfile when not in maintenance | 137 | not-applicable | — | — | Subprocess / git mocking |
-| re-throws TEMPORARY_ERROR | 154 | not-applicable | — | — | Subprocess / git mocking |
-| returns artifactError on exec failure | 168 | not-applicable | — | — | Subprocess / git mocking |
-| returns null when bazelModDeps is not allowed | 190 | not-applicable | — | — | Subprocess / git mocking |
+| returns updated lockfile when modified | 22 | not-applicable | — | — | mocking framework internals — tests subprocess and git mocking patterns |
+| returns updated lockfile when in not_added | 54 | not-applicable | — | — | mocking framework internals — tests subprocess and git mocking patterns |
+| returns null when lockfile is not modified | 83 | not-applicable | — | — | mocking framework internals — tests subprocess and git mocking patterns |
+| deletes lockfile during maintenance | 105 | not-applicable | — | — | mocking framework internals — tests subprocess and git mocking patterns |
+| does not delete lockfile when not in maintenance | 137 | not-applicable | — | — | mocking framework internals — tests subprocess and git mocking patterns |
+| re-throws TEMPORARY_ERROR | 154 | not-applicable | — | — | mocking framework internals — tests subprocess and git mocking patterns |
+| returns artifactError on exec failure | 168 | not-applicable | — | — | mocking framework internals — tests subprocess and git mocking patterns |
+| returns null when bazelModDeps is not allowed | 190 | not-applicable | — | — | mocking framework internals — tests subprocess and git mocking patterns |
 
 ---
 

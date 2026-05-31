@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/impl/file.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/impl/file.spec.ts
-**Total tests:** 18 | **Ported:** 16 | **Actionable:** 0 | **Status:** done
+**Total tests:** 16 | **Ported:** 14 | **Actionable:** 2 | **Status:** pending
 
 ### `util/cache/package/impl/file › basic operations`
 
@@ -35,7 +35,7 @@
 | keeps entries without expiry field | 148 | ported | cache/package.rs | `file_cache_cleanup_keeps_entries_without_expiry` | — |
 | removes entries with invalid expiry | 158 | ported | cache/package.rs | `file_cache_cleanup_removes_invalid_expiry` | — |
 | continues on cleanup errors | 171 | ported | cache/package.rs | `file_cache_cleanup_continues_on_errors` | — |
-| skips disk read for entry written this run | 183 | not-applicable | — | — | LRU expiry map optimization not ported |
-| skips disk read for expired entry written this run | 197 | not-applicable | — | — | LRU expiry map optimization not ported |
+| skips disk read for entry written this run | 183 | pending | — | — | LRU expiry map optimization not ported |
+| skips disk read for expired entry written this run | 197 | pending | — | — | LRU expiry map optimization not ported |
 
 ---

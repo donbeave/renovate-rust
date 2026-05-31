@@ -11,16 +11,16 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| supports sequential access | 25 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| supports concurrent access | 43 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| handles 404 | 57 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| handles unknown error | 69 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| refreshes after 15 minutes | 91 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| handles tail-head mismatch | 117 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| handles full body response | 154 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| handles 404 | 186 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| handles 416 | 196 | not-applicable | — | — | HTTP caching / rubygems-specific |
-| handles unknown errors | 216 | not-applicable | — | — | HTTP caching / rubygems-specific |
+| supports sequential access | 25 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| supports concurrent access | 43 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| handles 404 | 57 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| handles unknown error | 69 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| refreshes after 15 minutes | 91 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| handles tail-head mismatch | 117 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| handles full body response | 154 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| handles 404 | 186 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| handles 416 | 196 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
+| handles unknown errors | 216 | not-applicable | — | — | TS-library-specific schema internals; Rubygems HTTP client caching internals are TypeScript-specific |
 
 ---
 

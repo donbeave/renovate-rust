@@ -11,21 +11,21 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not throw | 15 | not-applicable | — | — | Bitbucket platform-specific comments |
-| add comment if not found | 31 | not-applicable | — | — | Bitbucket platform-specific comments |
-| finds reopen comment | 50 | not-applicable | — | — | Bitbucket platform-specific comments |
-| finds no reopen comment | 73 | not-applicable | — | — | Bitbucket platform-specific comments |
-| add updates comment if necessary | 96 | not-applicable | — | — | Bitbucket platform-specific comments |
-| skips comment | 120 | not-applicable | — | — | Bitbucket platform-specific comments |
+| does not throw | 15 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
+| add comment if not found | 31 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
+| finds reopen comment | 50 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
+| finds no reopen comment | 73 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
+| add updates comment if necessary | 96 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
+| skips comment | 120 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
 
 ### `ensureCommentRemoval()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not throw | 145 | not-applicable | — | — | Bitbucket platform-specific comments |
-| deletes comment by topic if found | 160 | not-applicable | — | — | Bitbucket platform-specific comments |
-| deletes comment by content if found | 185 | not-applicable | — | — | Bitbucket platform-specific comments |
-| deletes nothing | 210 | not-applicable | — | — | Bitbucket platform-specific comments |
+| does not throw | 145 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
+| deletes comment by topic if found | 160 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
+| deletes comment by content if found | 185 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
+| deletes nothing | 210 | not-applicable | — | — | TypeScript module system test; Bitbucket platform comment dispatch pattern is TypeScript-specific |
 
 ---
 

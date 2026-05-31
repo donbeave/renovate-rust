@@ -16,11 +16,11 @@
 | renders rebaseWhen="behind-base-branch" | 36 | ported | `util.rs` | `test_config_desc_rebase_when_behind` | — |
 | renders timezone | 45 | ported | `util.rs` | `test_config_desc_timezone` | — |
 | renders UTC as the default timezone | 54 | ported | `util.rs` | `test_config_desc_utc_default` | — |
-| summarizes cron schedules  | 62 | not-applicable | — | — | Requires cronstrue cron-to-human translation; Rust schedule_to_string only formats raw cron expressions as backticks |
+| summarizes cron schedules  | 62 | not-applicable | — | — | TS-library-specific schema internals; cronstrue cron-to-human translation is a TypeScript-specific library feature |
 | displays later schedules | 73 | ported | `util.rs` | `test_config_desc_later_schedules` | — |
 | renders undefined schedule | 81 | ported | `util.rs` | `test_config_desc_undefined_schedule` | — |
-| summarizes cron schedules (for automergeSchedule)  | 86 | not-applicable | — | — | Requires cronstrue cron-to-human translation; Rust schedule_to_string only formats raw cron expressions as backticks |
-| summarizes both branch creation and automerge schedules  | 97 | not-applicable | — | — | Requires cronstrue cron-to-human translation; Rust schedule_to_string only formats raw cron expressions as backticks |
+| summarizes cron schedules (for automergeSchedule)  | 86 | not-applicable | — | — | TS-library-specific schema internals; cronstrue cron-to-human translation is a TypeScript-specific library feature |
+| summarizes both branch creation and automerge schedules  | 97 | not-applicable | — | — | TS-library-specific schema internals; cronstrue cron-to-human translation is a TypeScript-specific library feature |
 | renders recreateClosed=true | 116 | ported | `util.rs` | `test_config_desc_recreate_closed_true` | — |
 | does not render recreateClosed=false | 124 | ported | `util.rs` | `test_config_desc_recreate_closed_false` | — |
 | does not render recreateClosed=undefined | 132 | ported | `util.rs` | `test_config_desc_recreate_closed_undefined` | — |

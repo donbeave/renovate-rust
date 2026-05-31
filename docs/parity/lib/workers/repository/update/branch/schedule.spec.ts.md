@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 64 | **Actionable:** 0 | **Status:** done
+**Total tests:** 68 | **Ported:** 64 | **Actionable:** 1 | **Status:** pending
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -115,7 +115,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should correctly convert "* 22 4 * *" to human-readable format  | 483 | not-applicable | — | — | TS-library-specific; tests cronstrue npm package cron-to-human conversion; no Rust equivalent |
+| should correctly convert "* 22 4 * *" to human-readable format  | 483 | pending | — | — | TS-library-specific; tests cronstrue npm package cron-to-human conversion; no Rust equivalent |
 | should correctly convert "* */2 * * *" to human-readable format  | 490 | not-applicable | — | — | TS-library-specific; tests cronstrue npm package cron-to-human conversion |
 | should correctly convert "* 23 * * *" to human-readable format  | 495 | not-applicable | — | — | TS-library-specific; tests cronstrue npm package cron-to-human conversion |
 | should not throw an error for an invalid cron expression "* * */2 6#1"  | 500 | not-applicable | — | — | TS-library-specific; tests cronstrue npm package error handling for invalid cron |

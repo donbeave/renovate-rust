@@ -11,19 +11,19 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| validates | 17 | not-applicable | — | — | Platform abstraction layer |
-| throws if no platform | 40 | not-applicable | — | — | Platform abstraction layer |
-| throws if wrong platform | 46 | not-applicable | — | — | Platform abstraction layer |
-| initializes | 55 | not-applicable | — | — | Platform abstraction layer |
-| merges config hostRules with platform hostRules | 82 | not-applicable | — | — | Platform abstraction layer |
-| merges config hostRules with platform hostRules | 128 | not-applicable | — | — | Platform abstraction layer |
-| merges platform hostRules with additionalHostRules | 196 | not-applicable | — | — | Platform abstraction layer |
+| validates | 17 | not-applicable | — | — | TypeScript module system test; platform module registry and dispatch pattern is TypeScript-specific |
+| throws if no platform | 40 | not-applicable | — | — | TypeScript module system test; platform module registry and dispatch pattern is TypeScript-specific |
+| throws if wrong platform | 46 | not-applicable | — | — | TypeScript module system test; platform module registry and dispatch pattern is TypeScript-specific |
+| initializes | 55 | not-applicable | — | — | TypeScript module system test; platform module registry and dispatch pattern is TypeScript-specific |
+| merges config hostRules with platform hostRules | 82 | not-applicable | — | — | TypeScript module system test; platform module registry and dispatch pattern is TypeScript-specific |
+| merges config hostRules with platform hostRules | 128 | not-applicable | — | — | TypeScript module system test; platform module registry and dispatch pattern is TypeScript-specific |
+| merges platform hostRules with additionalHostRules | 196 | not-applicable | — | — | TypeScript module system test; platform module registry and dispatch pattern is TypeScript-specific |
 
 ### `modules/platform/index › getPlatformList`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| has the same values as PLATFORM_HOST_TYPES | 252 | not-applicable | — | — | Platform abstraction layer |
+| has the same values as PLATFORM_HOST_TYPES | 252 | not-applicable | — | — | TypeScript module system test; platform module registry and dispatch pattern is TypeScript-specific |
 
 ---
 

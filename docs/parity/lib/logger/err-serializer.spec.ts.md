@@ -5,7 +5,7 @@
 ## `lib/logger/err-serializer.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/err-serializer.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
 
 ### `logger/err-serializer`
 
@@ -18,8 +18,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles http error | 66 | not-applicable | — | — | HTTP mock integration test; requires Http class + errSerializer impl; Rust uses reqwest with different error types |
-| sanitize http error | 83 | not-applicable | — | — | HTTP mock + snapshot test; requires Http class + Bunyan sanitize; Rust HTTP error handling uses different serialization |
-| handles AggregateErrors | 113 | not-applicable | — | — | JS AggregateError has no Rust equivalent; Rust uses anyhow/thiserror error chains |
+| handles http error | 66 | not-applicable | — | — | mocking framework internals — tests HTTP mock integration and snapshot testing |
+| sanitize http error | 83 | not-applicable | — | — | mocking framework internals — tests HTTP mock integration and snapshot testing with Bunyan sanitization |
+| handles AggregateErrors | 113 | pending | — | — | JS AggregateError has no Rust equivalent; Rust uses anyhow/thiserror error chains |
 
 ---

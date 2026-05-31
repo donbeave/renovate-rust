@@ -11,30 +11,30 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| paginates | 35 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| paginates with GITLAB_IGNORE_REPO_URL set | 63 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| supports different datasources | 85 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| attempts to paginate | 100 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| posts | 110 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| sets baseUrl | 117 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
+| paginates | 35 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| paginates with GITLAB_IGNORE_REPO_URL set | 63 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| supports different datasources | 85 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| attempts to paginate | 100 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| posts | 110 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| sets baseUrl | 117 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
 
 ### `util/http/gitlab › fails with`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| 403 | 122 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| 404 | 131 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| 500 | 140 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| EAI_AGAIN | 147 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| ParseError | 157 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
+| 403 | 122 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| 404 | 131 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| 500 | 140 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| EAI_AGAIN | 147 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| ParseError | 157 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
 
 ### `util/http/gitlab › handles 409 errors`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| retries the request on resource lock | 178 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| does not retry more than twice on resource lock | 186 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
-| does not retry for other reasons | 196 | not-applicable | — | — | GitLab-specific HTTP wrapper (`got` pagination, error handling); Rust uses generic `reqwest` client |
+| retries the request on resource lock | 178 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| does not retry more than twice on resource lock | 186 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
+| does not retry for other reasons | 196 | not-applicable | — | — | TS-library-specific schema internals; GitLab `got` wrapper pagination and error handling APIs are TypeScript-specific with no direct Rust equivalent |
 
 ---
 

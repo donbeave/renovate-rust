@@ -14,7 +14,7 @@
 | returns null if catalogName is missing and logs error | 8 | ported | `extractors/npm.rs` | `yarn_update_dep_null_on_missing_catalog_name` | — |
 | ensure continuation even if catalog list and update does not match | 33 | ported | `extractors/npm.rs` | `yarn_update_dep_null_catalog_mismatch` | — |
 | ensure continuation even if dependency and update does not match | 55 | ported | `extractors/npm.rs` | `yarn_update_dep_null_dep_mismatch` | — |
-| ensure trace logging | 78 | not-applicable | — | — | Tests TypeScript mock logger infrastructure; trace logging not testable via Rust tracing in unit tests |
+| ensure trace logging | 78 | not-applicable | — | — | mocking framework internals — tests TypeScript mock logger infrastructure and trace logging |
 
 ### `updateDependency`
 

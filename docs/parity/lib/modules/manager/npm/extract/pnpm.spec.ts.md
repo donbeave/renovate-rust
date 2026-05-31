@@ -5,21 +5,21 @@
 ## `lib/modules/manager/npm/extract/pnpm.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/pnpm.spec.ts
-**Total tests:** 16 | **Ported:** 5 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 16 | **Ported:** 5 | **Actionable:** 11 | **Status:** pending
 
 ### `modules/manager/npm/extract/pnpm › .extractPnpmFilters()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects errors in pnpm-workspace.yml file structure | 28 | not-applicable | — | — | Filesystem-based workspace detection not implemented in Rust |
-| detects errors when opening pnpm-workspace.yml file | 46 | not-applicable | — | — | Filesystem-based workspace detection not implemented in Rust |
+| detects errors in pnpm-workspace.yml file structure | 28 | pending | — | — | Filesystem-based workspace detection not implemented in Rust |
+| detects errors when opening pnpm-workspace.yml file | 46 | pending | — | — | Filesystem-based workspace detection not implemented in Rust |
 
 ### `modules/manager/npm/extract/pnpm › .findPnpmWorkspace()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects missing pnpm-workspace.yaml | 65 | not-applicable | — | — | Filesystem-based workspace detection not implemented in Rust |
-| detects missing pnpm-lock.yaml when pnpm-workspace.yaml was already found | 78 | not-applicable | — | — | Filesystem-based workspace detection not implemented in Rust |
+| detects missing pnpm-workspace.yaml | 65 | pending | — | — | Filesystem-based workspace detection not implemented in Rust |
+| detects missing pnpm-lock.yaml when pnpm-workspace.yaml was already found | 78 | pending | — | — | Filesystem-based workspace detection not implemented in Rust |
 
 ### `modules/manager/npm/extract/pnpm › .detectPnpmWorkspaces()`
 
@@ -33,10 +33,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty if failed to parse | 266 | not-applicable | — | — | Lockfile parsing from filesystem not implemented in Rust |
-| extracts version from monorepo | 272 | not-applicable | — | — | Lockfile parsing from filesystem not implemented in Rust |
-| extracts version from normal repo | 279 | not-applicable | — | — | Lockfile parsing from filesystem not implemented in Rust |
-| extracts version from catalogs | 289 | not-applicable | — | — | Lockfile parsing from filesystem not implemented in Rust |
+| returns empty if failed to parse | 266 | pending | — | — | Lockfile parsing from filesystem not implemented in Rust |
+| extracts version from monorepo | 272 | pending | — | — | Lockfile parsing from filesystem not implemented in Rust |
+| extracts version from normal repo | 279 | pending | — | — | Lockfile parsing from filesystem not implemented in Rust |
+| extracts version from catalogs | 289 | pending | — | — | Lockfile parsing from filesystem not implemented in Rust |
 | returns empty if no deps | 341 | ported | `npm.rs` | `pnpm_workspace_returns_empty_if_no_deps` | — |
 
 ### `modules/manager/npm/extract/pnpm › .extractPnpmWorkspaceFile()`

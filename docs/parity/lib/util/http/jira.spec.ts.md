@@ -11,8 +11,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| throws error if setBaseUrl not called | 7 | not-applicable | — | — | Jira-specific HTTP wrapper; no Jira wrapper in Rust HTTP layer |
-| accepts custom baseUrl | 11 | not-applicable | — | — | Jira-specific HTTP wrapper; no Jira wrapper in Rust HTTP layer |
+| throws error if setBaseUrl not called | 7 | not-applicable | — | — | TS-library-specific schema internals; Jira `got` wrapper API is TypeScript-specific with no direct Rust equivalent |
+| accepts custom baseUrl | 11 | not-applicable | — | — | TS-library-specific schema internals; Jira `got` wrapper API is TypeScript-specific with no direct Rust equivalent |
 
 ---
 

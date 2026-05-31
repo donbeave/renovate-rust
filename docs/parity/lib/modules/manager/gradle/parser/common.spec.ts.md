@@ -11,17 +11,17 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| storeVarToken | 41 | not-applicable | — | — | Gradle parser internals |
-| increaseNestingDepth | 46 | not-applicable | — | — | Gradle parser internals |
-| reduceNestingDepth | 55 | not-applicable | — | — | Gradle parser internals |
-| prependNestingDepth | 61 | not-applicable | — | — | Gradle parser internals |
-| storeInTokenMap | 73 | not-applicable | — | — | Gradle parser internals |
-| loadFromTokenMap | 79 | not-applicable | — | — | Gradle parser internals |
-| cleanupTempVars | 89 | not-applicable | — | — | Gradle parser internals |
-| stripReservedPrefixFromKeyTokens | 98 | not-applicable | — | — | Gradle parser internals |
-| coalesceVariable | 115 | not-applicable | — | — | Gradle parser internals |
-| findVariable | 125 | not-applicable | — | — | Gradle parser internals |
-| interpolateString | 151 | not-applicable | — | — | Gradle parser internals |
+| storeVarToken | 41 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| increaseNestingDepth | 46 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| reduceNestingDepth | 55 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| prependNestingDepth | 61 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| storeInTokenMap | 73 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| loadFromTokenMap | 79 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| cleanupTempVars | 89 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| stripReservedPrefixFromKeyTokens | 98 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| coalesceVariable | 115 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| findVariable | 125 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
+| interpolateString | 151 | not-applicable | — | — | TS-library-specific schema internals; Gradle AST parser APIs are TypeScript-specific |
 
 ---
 

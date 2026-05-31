@@ -12,6 +12,6 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | reuses data with etag | 17 | not-applicable | — | — | Tests in-memory HTTP cache provider with httpMock (nock) for real HTTP round-trip caching; Rust HTTP client uses different caching architecture |
-| does not allow cached responses to be mutated | 40 | not-applicable | — | — | Tests cache immutability via HTTP mock round-trip; Rust HTTP client uses different caching architecture |
+| does not allow cached responses to be mutated | 40 | not-applicable | — | — | mocking framework internals — tests HTTP mock round-trip cache immutability |
 
 ---

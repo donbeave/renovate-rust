@@ -5,16 +5,16 @@
 ## `lib/config/decrypt.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/decrypt.spec.ts
-**Total tests:** 15 | **Ported:** 11 | **Actionable:** 0 | **Status:** done
+**Total tests:** 15 | **Ported:** 11 | **Actionable:** 3 | **Status:** pending
 
 ### `config/decrypt › decryptConfig()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty with no privateKey | 23 | not-applicable | — | — | decrypt.ts is out-of-scope (requires JS/OpenPGP runtime); validation logic tested separately |
+| returns empty with no privateKey | 23 | pending | — | — | decrypt.ts is out-of-scope (requires JS/OpenPGP runtime); validation logic tested separately |
 | warns if no privateKey found | 29 | not-applicable | — | — | mocking framework internals — tests logger.once.warn spy; warn behavior covered by encryptedWarning config which is already tested |
-| throws exception if encrypted found but no privateKey | 41 | not-applicable | — | — | decrypt.ts is out-of-scope (requires JS/OpenPGP runtime); validation logic tested separately |
-| throws exception if encrypted found but no privateKey- Mend Hosted | 51 | not-applicable | — | — | decrypt.ts is out-of-scope (requires JS/OpenPGP runtime); validation logic tested separately |
+| throws exception if encrypted found but no privateKey | 41 | pending | — | — | decrypt.ts is out-of-scope (requires JS/OpenPGP runtime); validation logic tested separately |
+| throws exception if encrypted found but no privateKey- Mend Hosted | 51 | pending | — | — | decrypt.ts is out-of-scope (requires JS/OpenPGP runtime); validation logic tested separately |
 
 ### `config/decrypt › validateDecryptedValue() › platforms non azure`
 

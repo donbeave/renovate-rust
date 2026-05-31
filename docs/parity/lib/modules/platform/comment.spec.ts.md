@@ -11,21 +11,21 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| caches created comment | 20 | not-applicable | — | — | Platform comment caching abstraction |
-| caches comment with no topic | 39 | not-applicable | — | — | Platform comment caching abstraction |
-| does not cache failed comment | 58 | not-applicable | — | — | Platform comment caching abstraction |
-| short-circuits if comment already exists | 71 | not-applicable | — | — | Platform comment caching abstraction |
-| rewrites content hash | 80 | not-applicable | — | — | Platform comment caching abstraction |
-| caches comments many comments with different topics | 96 | not-applicable | — | — | Platform comment caching abstraction |
+| caches created comment | 20 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
+| caches comment with no topic | 39 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
+| does not cache failed comment | 58 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
+| short-circuits if comment already exists | 71 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
+| rewrites content hash | 80 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
+| caches comments many comments with different topics | 96 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
 
 ### `modules/platform/comment › ensureCommentRemoval`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| deletes cached comment by topic | 123 | not-applicable | — | — | Platform comment caching abstraction |
-| deletes cached comment by content | 131 | not-applicable | — | — | Platform comment caching abstraction |
-| deletes by content only one comment | 143 | not-applicable | — | — | Platform comment caching abstraction |
-| deletes only for selected PR | 160 | not-applicable | — | — | Platform comment caching abstraction |
+| deletes cached comment by topic | 123 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
+| deletes cached comment by content | 131 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
+| deletes by content only one comment | 143 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
+| deletes only for selected PR | 160 | not-applicable | — | — | TypeScript module system test; platform comment caching dispatch pattern is TypeScript-specific |
 
 ---
 

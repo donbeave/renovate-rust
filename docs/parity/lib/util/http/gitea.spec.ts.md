@@ -11,10 +11,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| supports responses without pagination when enabled | 15 | not-applicable | — | — | Gitea pagination wrapper; Rust uses generic `reqwest` client without platform-specific pagination |
-| supports root-level pagination | 27 | not-applicable | — | — | Gitea pagination wrapper; Rust uses generic `reqwest` client without platform-specific pagination |
-| supports pagination on data property | 46 | not-applicable | — | — | Gitea pagination wrapper; Rust uses generic `reqwest` client without platform-specific pagination |
-| handles pagination with empty response | 66 | not-applicable | — | — | Gitea pagination wrapper; Rust uses generic `reqwest` client without platform-specific pagination |
+| supports responses without pagination when enabled | 15 | not-applicable | — | — | TS-library-specific schema internals; Gitea `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
+| supports root-level pagination | 27 | not-applicable | — | — | TS-library-specific schema internals; Gitea `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
+| supports pagination on data property | 46 | not-applicable | — | — | TS-library-specific schema internals; Gitea `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
+| handles pagination with empty response | 66 | not-applicable | — | — | TS-library-specific schema internals; Gitea `got` wrapper pagination API is TypeScript-specific with no direct Rust equivalent |
 
 ---
 

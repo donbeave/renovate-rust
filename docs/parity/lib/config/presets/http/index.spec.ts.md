@@ -11,12 +11,12 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return parsed JSON | 13 | not-applicable | — | — | HTTP mocking / fetchPreset |
-| should return parsed JSON5 | 19 | not-applicable | — | — | HTTP mocking / fetchPreset |
-| throws if fails to parse | 30 | not-applicable | — | — | HTTP mocking / fetchPreset |
-| throws if file not found | 38 | not-applicable | — | — | HTTP mocking / fetchPreset |
-| throws on malformed URL | 46 | not-applicable | — | — | HTTP mocking / fetchPreset |
-| throws external host error | 51 | not-applicable | — | — | HTTP mocking / fetchPreset |
+| should return parsed JSON | 13 | not-applicable | — | — | mocking framework internals — tests HTTP mock preset fetching |
+| should return parsed JSON5 | 19 | not-applicable | — | — | mocking framework internals — tests HTTP mock preset fetching |
+| throws if fails to parse | 30 | not-applicable | — | — | mocking framework internals — tests HTTP mock preset fetching |
+| throws if file not found | 38 | not-applicable | — | — | mocking framework internals — tests HTTP mock preset fetching |
+| throws on malformed URL | 46 | not-applicable | — | — | mocking framework internals — tests HTTP mock preset fetching |
+| throws external host error | 51 | not-applicable | — | — | mocking framework internals — tests HTTP mock preset fetching |
 
 ---
 
