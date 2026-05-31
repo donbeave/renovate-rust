@@ -43,6 +43,9 @@ pub trait Migration: Send + Sync {
         migrated_config: &mut Map<String, Value>,
     );
     fn box_clone(&self) -> Box<dyn Migration>;
+    fn matches(&self, key: &str) -> bool {
+        self.property_name() == key
+    }
 }
 
 pub struct MigrationService {
