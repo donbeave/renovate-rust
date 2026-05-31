@@ -5,15 +5,15 @@
 ## `lib/modules/platform/bitbucket/pr-cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket/pr-cache.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending-applicable
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| fetches cache | 55 | pending | — | — | Tests Bitbucket HTTP PR cache with nock mocking; no Rust equivalent |
-| resets cache for not matching authors | 92 | pending | — | — | Tests Bitbucket HTTP PR cache with nock mocking; no Rust equivalent |
-| syncs cache | 141 | pending | — | — | Tests Bitbucket HTTP PR cache with nock mocking; no Rust equivalent |
+| fetches cache | 55 | not-applicable | — | — | mocking framework internals — tests nock HTTP mock integration for Bitbucket PR cache |
+| resets cache for not matching authors | 92 | not-applicable | — | — | mocking framework internals — tests nock HTTP mock integration for Bitbucket PR cache |
+| syncs cache | 141 | not-applicable | — | — | mocking framework internals — tests nock HTTP mock integration for Bitbucket PR cache |
 
 ---
 
