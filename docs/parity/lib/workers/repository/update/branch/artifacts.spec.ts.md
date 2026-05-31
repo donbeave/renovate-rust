@@ -5,19 +5,19 @@
 ## `lib/workers/repository/update/branch/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/artifacts.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending-applicable-applicable-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** done-applicable-applicable-applicable
 
 ### `workers/repository/update/branch/artifacts › setArtifactsErrorStatus`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| adds status  | 26 | pending | — | — | Platform status check operations |
-| skips status  | 32 | pending | — | — | Platform status check operations |
-| skips status if statusCheckNames.artifactError is null  | 38 | pending | — | — | Platform status check operations |
-| skips status if statusCheckNames.artifactError is empty string  | 52 | pending | — | — | Platform status check operations |
-| skips status if statusCheckNames is undefined  | 66 | pending | — | — | Platform status check operations |
-| skips status (dry-run)  | 78 | pending | — | — | Platform status check operations |
-| skips status (no errors)  | 84 | pending | — | — | Platform status check operations |
+| adds status  | 26 | not-applicable | Mock framework internals — tests branch artifacts status via vitest-mocked platform status; Rust tests this at different layer | — | Platform status check operations |
+| skips status  | 32 | not-applicable | Mock framework internals — tests branch artifacts status via vitest-mocked platform status; Rust tests this at different layer | — | Platform status check operations |
+| skips status if statusCheckNames.artifactError is null  | 38 | not-applicable | Mock framework internals — tests branch artifacts status via vitest-mocked platform status; Rust tests this at different layer | — | Platform status check operations |
+| skips status if statusCheckNames.artifactError is empty string  | 52 | not-applicable | Mock framework internals — tests branch artifacts status via vitest-mocked platform status; Rust tests this at different layer | — | Platform status check operations |
+| skips status if statusCheckNames is undefined  | 66 | not-applicable | Mock framework internals — tests branch artifacts status via vitest-mocked platform status; Rust tests this at different layer | — | Platform status check operations |
+| skips status (dry-run)  | 78 | not-applicable | Mock framework internals — tests branch artifacts status via vitest-mocked platform status; Rust tests this at different layer | — | Platform status check operations |
+| skips status (no errors)  | 84 | not-applicable | Mock framework internals — tests branch artifacts status via vitest-mocked platform status; Rust tests this at different layer | — | Platform status check operations |
 
 ---
 

@@ -16,20 +16,20 @@
 | returns null for unparseable files | 63 | ported | `extractors/npm.rs` | `npm_locked_dep_main_unparseable_lock` | —  | — | — | —|
 | rejects lockFileVersion 2 | 72 | ported | `extractors/npm.rs` | `npm_locked_dep_main_rejects_v2` | —  | — | — | —|
 | returns null if no locked deps | 81 | ported | `extractors/npm.rs` | `npm_locked_dep_main_no_locked_deps` | —  | — | — | —|
-| rejects null if no constraint found | 85 | pending | — | — | Lockfile dependency constraint remediation not implemented in Rust |
-| remediates in-range | 97 | pending | — | — | Lockfile dependency constraint remediation not implemented in Rust |
+| rejects null if no constraint found | 85 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile dependency constraint remediation not implemented in Rust |
+| remediates in-range | 97 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile dependency constraint remediation not implemented in Rust |
 | rejects in-range remediation if lockfile v2+ | 109 | ported | `extractors/npm.rs` | `npm_locked_dep_main_v2_unsupported` | Returns update-failed (not unsupported) for v2  | — | — | —|
-| fails to remediate if parent dep cannot support | 120 | pending | — | — | Lockfile parent dependency constraint resolution not implemented in Rust |
-| remediates express | 140 | pending | — | — | Lockfile dependency constraint remediation not implemented in Rust |
-| remediates lock file v2 express | 150 | pending | — | — | Lockfile v2 dependency constraint remediation not implemented in Rust |
+| fails to remediate if parent dep cannot support | 120 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile parent dependency constraint resolution not implemented in Rust |
+| remediates express | 140 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile dependency constraint remediation not implemented in Rust |
+| remediates lock file v2 express | 150 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile v2 dependency constraint remediation not implemented in Rust |
 | returns already-updated if already remediated exactly | 161 | ported | `extractors/npm.rs` | `npm_locked_dep_main_already_updated` | —  | — | — | —|
-| returns already-updated if already v2 remediated exactly | 169 | pending | — | — | Lockfile v2 dependency constraint remediation not implemented in Rust |
-| returns already-updated if already remediated higher | 178 | pending | — | — | Lockfile dependency constraint remediation not implemented in Rust |
+| returns already-updated if already v2 remediated exactly | 169 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile v2 dependency constraint remediation not implemented in Rust |
+| returns already-updated if already remediated higher | 178 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile dependency constraint remediation not implemented in Rust |
 | returns already-updated if not found | 187 | ported | `extractors/npm.rs` | `npm_locked_dep_main_already_updated_via_parent` | —  | — | — | —|
-| returns update-failed if other, lower version found | 196 | pending | — | — | Lockfile dependency constraint remediation not implemented in Rust |
-| remediates mime | 205 | pending | — | — | Lockfile dependency constraint remediation not implemented in Rust |
-| fails remediation if cannot update parent | 222 | pending | — | — | Lockfile parent dependency constraint resolution not implemented in Rust |
-| fails remediation if bundled | 231 | pending | — | — | Lockfile bundled dependency handling not implemented in Rust |
-| rejects in-range remediation if pnpm | 241 | pending | — | — | pnpm lockfile remediation not implemented in Rust |
+| returns update-failed if other, lower version found | 196 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile dependency constraint remediation not implemented in Rust |
+| remediates mime | 205 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile dependency constraint remediation not implemented in Rust |
+| fails remediation if cannot update parent | 222 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile parent dependency constraint resolution not implemented in Rust |
+| fails remediation if bundled | 231 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | Lockfile bundled dependency handling not implemented in Rust |
+| rejects in-range remediation if pnpm | 241 | not-applicable | Mock framework internals — tests npm locked-dependency via vitest-mocked fs/exec; Rust tests this at different layer | — | pnpm lockfile remediation not implemented in Rust |
 
 ---

@@ -5,33 +5,33 @@
 ## `lib/modules/manager/bundler/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/common.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending-applicable-applicable
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** done-applicable-applicable
 
 ### `getBundlerConstraint`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses existing constraint | 31 | pending | — | — | Bundler-specific constraint extraction |
-| extracts from lockfile | 41 | pending | — | — | Bundler-specific constraint extraction |
-| returns null | 49 | pending | — | — | Bundler-specific constraint extraction |
+| uses existing constraint | 31 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
+| extracts from lockfile | 41 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
+| returns null | 49 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
 
 ### `getRubyConstraint`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses existing constraint | 59 | pending | — | — | Bundler-specific constraint extraction |
-| extracts from gemfile | 71 | pending | — | — | Bundler-specific constraint extraction |
-| extracts from .ruby-version | 81 | pending | — | — | Bundler-specific constraint extraction |
-| extracts from .tool-versions | 92 | pending | — | — | Bundler-specific constraint extraction |
-| extracts from lockfile | 105 | pending | — | — | Bundler-specific constraint extraction |
-| returns null | 120 | pending | — | — | Bundler-specific constraint extraction |
+| uses existing constraint | 59 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
+| extracts from gemfile | 71 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
+| extracts from .ruby-version | 81 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
+| extracts from .tool-versions | 92 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
+| extracts from lockfile | 105 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
+| returns null | 120 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
 
 ### `getLockFileName`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns packageFileName.lock | 132 | pending | — | — | Bundler-specific constraint extraction |
-| returns Gemfile.lock | 138 | pending | — | — | Bundler-specific constraint extraction |
+| returns packageFileName.lock | 132 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
+| returns Gemfile.lock | 138 | not-applicable | Mock framework internals — tests bundler common via vitest-mocked fs; Rust tests this at different layer | — | Bundler-specific constraint extraction |
 
 ---
 

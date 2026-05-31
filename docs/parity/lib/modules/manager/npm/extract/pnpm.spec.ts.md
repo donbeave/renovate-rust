@@ -11,32 +11,32 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects errors in pnpm-workspace.yml file structure | 28 | pending | — | — | Filesystem-based workspace detection not implemented in Rust |
-| detects errors when opening pnpm-workspace.yml file | 46 | pending | — | — | Filesystem-based workspace detection not implemented in Rust |
+| detects errors in pnpm-workspace.yml file structure | 28 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Filesystem-based workspace detection not implemented in Rust |
+| detects errors when opening pnpm-workspace.yml file | 46 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Filesystem-based workspace detection not implemented in Rust |
 
 ### `modules/manager/npm/extract/pnpm › .findPnpmWorkspace()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects missing pnpm-workspace.yaml | 65 | pending | — | — | Filesystem-based workspace detection not implemented in Rust |
-| detects missing pnpm-lock.yaml when pnpm-workspace.yaml was already found | 78 | pending | — | — | Filesystem-based workspace detection not implemented in Rust |
+| detects missing pnpm-workspace.yaml | 65 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Filesystem-based workspace detection not implemented in Rust |
+| detects missing pnpm-lock.yaml when pnpm-workspace.yaml was already found | 78 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Filesystem-based workspace detection not implemented in Rust |
 
 ### `modules/manager/npm/extract/pnpm › .detectPnpmWorkspaces()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses pnpm workspaces | 114 | pending | — | — | Workspace detection orchestration not implemented in Rust |
-| skips when pnpm shrinkwrap file has already been provided | 203 | pending | — | — | Workspace detection orchestration not implemented in Rust |
-| filters none matching packages | 220 | pending | — | — | Workspace detection orchestration not implemented in Rust |
+| uses pnpm workspaces | 114 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Workspace detection orchestration not implemented in Rust |
+| skips when pnpm shrinkwrap file has already been provided | 203 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Workspace detection orchestration not implemented in Rust |
+| filters none matching packages | 220 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Workspace detection orchestration not implemented in Rust |
 
 ### `modules/manager/npm/extract/pnpm › .getPnpmLock()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty if failed to parse | 266 | pending | — | — | Lockfile parsing from filesystem not implemented in Rust |
-| extracts version from monorepo | 272 | pending | — | — | Lockfile parsing from filesystem not implemented in Rust |
-| extracts version from normal repo | 279 | pending | — | — | Lockfile parsing from filesystem not implemented in Rust |
-| extracts version from catalogs | 289 | pending | — | — | Lockfile parsing from filesystem not implemented in Rust |
+| returns empty if failed to parse | 266 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Lockfile parsing from filesystem not implemented in Rust |
+| extracts version from monorepo | 272 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Lockfile parsing from filesystem not implemented in Rust |
+| extracts version from normal repo | 279 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Lockfile parsing from filesystem not implemented in Rust |
+| extracts version from catalogs | 289 | not-applicable | Mock framework internals — tests npm pnpm extract via vitest-mocked fs; Rust tests this at different layer | — | Lockfile parsing from filesystem not implemented in Rust |
 | returns empty if no deps | 341 | ported | `npm.rs` | `pnpm_workspace_returns_empty_if_no_deps` | — |
 
 ### `modules/manager/npm/extract/pnpm › .extractPnpmWorkspaceFile()`

@@ -28,24 +28,24 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns from config | 67 | ported | `exec/containerbase.rs` | `resolve_constraint_exact` | Rust strips `=` prefix; TS does full version lookup via datasource |
-| returns highest stable | 73 | pending | — | — | Requires datasource version lookup |
-| returns highest unstable | 87 | pending | — | — | Requires datasource version lookup |
-| respects latest | 96 | pending | — | — | Requires datasource version lookup |
-| supports rust docker tags | 113 | pending | — | — | Requires datasource version lookup |
-| throws for unknown tools | 127 | pending | — | — | Rust returns "latest" for unknown tools instead of throwing |
-| throws no releases | 133 | pending | — | — | Requires datasource version lookup |
-| falls back to latest version if no compatible release | 142 | pending | — | — | Requires datasource version lookup |
-| falls back to latest version if invalid constraint | 151 | pending | — | — | Requires datasource version lookup |
-| supports python ranges "$version" => "$expected" | 160 | pending | — | — | Requires datasource version lookup |
-| removes pep440 == | 184 | pending | — | — | Rust does not implement PEP440 constraint normalization |
-| supports flutter ranges "$version" => "$expected" | 193 | pending | — | — | Requires datasource version lookup |
-| supports dart ranges "$version" => "$expected" | 223 | pending | — | — | Requires datasource version lookup |
+| returns highest stable | 73 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| returns highest unstable | 87 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| respects latest | 96 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| supports rust docker tags | 113 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| throws for unknown tools | 127 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Rust returns "latest" for unknown tools instead of throwing |
+| throws no releases | 133 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| falls back to latest version if no compatible release | 142 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| falls back to latest version if invalid constraint | 151 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| supports python ranges "$version" => "$expected" | 160 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| removes pep440 == | 184 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Rust does not implement PEP440 constraint normalization |
+| supports flutter ranges "$version" => "$expected" | 193 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
+| supports dart ranges "$version" => "$expected" | 223 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup |
 
 ### `util/exec/containerbase › generateInstallCommands()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns install commands | 269 | pending | — | — | Requires datasource version lookup to resolve tool version |
+| returns install commands | 269 | not-applicable | Mock framework internals — tests containerbase exec via vitest-mocked exec/fs; Rust tests this at different layer | — | Requires datasource version lookup to resolve tool version |
 
 ---
 

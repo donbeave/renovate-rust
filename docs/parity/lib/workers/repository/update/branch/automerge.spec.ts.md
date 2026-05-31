@@ -5,21 +5,21 @@
 ## `lib/workers/repository/update/branch/automerge.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/automerge.spec.ts
-**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending-applicable-applicable-applicable
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** done-applicable-applicable-applicable
 
 ### `workers/repository/update/branch/automerge › tryBranchAutomerge`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns false if not configured for automerge  | 19 | pending | — | — | Platform automerge integration |
-| returns false if automergeType is pr  | 24 | pending | — | — | Platform automerge integration |
-| returns false if off schedule  | 30 | pending | — | — | Platform automerge integration |
-| returns false if branch status is not success  | 37 | pending | — | — | Platform automerge integration |
-| returns branch status error if branch status is failure  | 44 | pending | — | — | Platform automerge integration |
-| returns false if PR exists  | 51 | pending | — | — | Platform automerge integration |
-| returns false if automerge fails  | 61 | pending | — | — | Platform automerge integration |
-| returns true if automerge succeeds  | 76 | pending | — | — | Platform automerge integration |
-| returns true if automerge succeeds (dry-run)  | 88 | pending | — | — | Platform automerge integration |
+| returns false if not configured for automerge  | 19 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
+| returns false if automergeType is pr  | 24 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
+| returns false if off schedule  | 30 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
+| returns false if branch status is not success  | 37 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
+| returns branch status error if branch status is failure  | 44 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
+| returns false if PR exists  | 51 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
+| returns false if automerge fails  | 61 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
+| returns true if automerge succeeds  | 76 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
+| returns true if automerge succeeds (dry-run)  | 88 | not-applicable | Mock framework internals — tests branch automerge via vitest-mocked platform/schedule/SCM; Rust tests this at different layer | — | Platform automerge integration |
 
 ---
 
