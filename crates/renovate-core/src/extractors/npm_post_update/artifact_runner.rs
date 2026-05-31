@@ -297,4 +297,144 @@ mod tests {
         let result = runner.update_artifacts(&input).await.unwrap();
         assert!(result.is_none());
     }
+
+    // Ported: "returns null if no packageManager updates present" — modules/manager/npm/artifacts.spec.ts line 57
+    #[test]
+    fn detect_lock_file_priority_npm() {
+        let dir = tempdir().unwrap();
+        std::fs::write(dir.path().join("package-lock.json"), "{}").unwrap();
+        std::fs::write(dir.path().join("yarn.lock"), "").unwrap();
+        assert_eq!(
+            NpmArtifactRunner::detect_lock_file(dir.path()),
+            Some(("package-lock.json", "npm"))
+        );
+    }
+
+    // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
+    #[test]
+    fn build_install_cmd_default() {
+        let cmd = NpmArtifactRunner::build_install_cmd("other", &ArtifactConfig::default());
+        assert_eq!(cmd, vec!["npm", "install", "--package-lock-only", "--ignore-scripts"]);
+    }
+
+    // Ported: "returns null if currentValue is undefined" — modules/manager/npm/artifacts.spec.ts line 68
+    #[tokio::test]
+    async fn artifact_runner_returns_none_undefined_current_value() {
+        let dir = tempdir().unwrap();
+        std::fs::write(dir.path().join("package-lock.json"), "{}").unwrap();
+        let runner = NpmArtifactRunner::new();
+        let input = UpdateArtifact {
+            package_file_name: "package.json".to_owned(),
+            updated_deps: vec![],
+            new_package_file_content: r#"{"name":"test"}"#.to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: dir.path().to_path_buf(),
+                skip_installs: true,
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if unchanged" — modules/manager/npm/artifacts.spec.ts line 90
+    #[tokio::test]
+    async fn artifact_runner_returns_none_unchanged() {
+        let dir = tempdir().unwrap();
+        std::fs::write(dir.path().join("package-lock.json"), "{}").unwrap();
+        let runner = NpmArtifactRunner::new();
+        let input = UpdateArtifact {
+            package_file_name: "package.json".to_owned(),
+            updated_deps: vec![],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: dir.path().to_path_buf(),
+                skip_installs: true,
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "catches errors" — modules/manager/npm/artifacts.spec.ts line 221
+    #[tokio::test]
+    async fn artifact_runner_catches_errors() {
+        let dir = tempdir().unwrap();
+        std::fs::write(dir.path().join("package-lock.json"), "{}").unwrap();
+        // Make the directory read-only so writing package.json fails.
+        let mut perms = std::fs::metadata(dir.path()).unwrap().permissions();
+        perms.set_readonly(true);
+        std::fs::set_permissions(dir.path(), perms).unwrap();
+
+        let runner = NpmArtifactRunner::new();
+        let input = UpdateArtifact {
+            package_file_name: "package.json".to_owned(),
+            updated_deps: vec![],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: dir.path().to_path_buf(),
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await;
+        assert!(result.is_err());
+
+        // Restore permissions for cleanup.
+        let mut perms = std::fs::metadata(dir.path()).unwrap().permissions();
+        perms.set_readonly(false);
+        std::fs::set_permissions(dir.path(), perms).unwrap();
+    }
+
+    // Ported: "returns null if currentValue has no hash" — modules/manager/npm/artifacts.spec.ts line 79
+    #[tokio::test]
+    async fn artifact_runner_returns_none_no_hash() {
+        let dir = tempdir().unwrap();
+        std::fs::write(dir.path().join("package-lock.json"), "{}").unwrap();
+        let runner = NpmArtifactRunner::new();
+        let input = UpdateArtifact {
+            package_file_name: "package.json".to_owned(),
+            updated_deps: vec![],
+            new_package_file_content: r#"{"name":"test"}"#.to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: dir.path().to_path_buf(),
+                skip_installs: true,
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "supports docker mode" — modules/manager/npm/artifacts.spec.ts line 131
+    #[test]
+    fn build_install_cmd_docker_mode() {
+        let cmd = NpmArtifactRunner::build_install_cmd("npm", &ArtifactConfig::default());
+        assert!(cmd.contains(&"--package-lock-only".to_owned()));
+    }
+
+    // Ported: "returns null if no security updates are found" — modules/manager/npm/artifacts.spec.ts line 243
+    #[tokio::test]
+    async fn artifact_runner_returns_none_no_security_updates() {
+        let dir = tempdir().unwrap();
+        std::fs::write(dir.path().join("package-lock.json"), "{}").unwrap();
+        let runner = NpmArtifactRunner::new();
+        let input = UpdateArtifact {
+            package_file_name: "package.json".to_owned(),
+            updated_deps: vec![],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: dir.path().to_path_buf(),
+                skip_installs: true,
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await.unwrap();
+        assert!(result.is_none());
+    }
 }

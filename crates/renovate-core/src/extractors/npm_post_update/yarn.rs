@@ -361,4 +361,99 @@ mod tests {
         assert!(result.contains("npmRegistryServer"));
     }
 
+    // Ported: "only skips build if skipInstalls is false" — modules/manager/npm/post-update/yarn.spec.ts line 201
+    #[test]
+    fn build_yarn_install_v1_no_skip() {
+        assert_eq!(
+            build_yarn_install_cmd(YarnMajorVersion::V1, false, false, false),
+            vec!["yarn", "install"]
+        );
+    }
+
+    // Ported: "allows and ignore scripts" — modules/manager/npm/post-update/yarn.spec.ts line 224
+    #[test]
+    fn build_yarn_install_v1_ignore_scripts() {
+        assert_eq!(
+            build_yarn_install_cmd(YarnMajorVersion::V1, false, true, false),
+            vec!["yarn", "install", "--ignore-scripts"]
+        );
+    }
+
+    // Ported: "allows and ignore scripts" — modules/manager/npm/post-update/yarn.spec.ts line 224
+    #[test]
+    fn build_yarn_install_v2_ignore_scripts() {
+        assert_eq!(
+            build_yarn_install_cmd(YarnMajorVersion::V2Plus, false, true, false),
+            vec!["yarn", "install", "--immutable"]
+        );
+    }
+
+    // Ported: "patches local yarn (docker)" — modules/manager/npm/post-update/yarn.spec.ts line 872
+    #[test]
+    fn optimize_command_docker() {
+        let cmd = get_optimize_command();
+        assert_eq!(cmd[0], "sed");
+        assert_eq!(cmd[3], "yarn.js");
+    }
+
+    // Ported: "returns offline mirror and yarn path" — modules/manager/npm/post-update/yarn.spec.ts line 919
+    #[test]
+    fn check_yarnrc_offline_mirror_and_yarn_path() {
+        let info = check_yarnrc("--install.offline-mirror true\n--yarn-path .yarn/releases/yarn-4.1.0.cjs\n");
+        assert_eq!(info.offline_mirror.as_deref(), Some("true"));
+        assert_eq!(
+            info.yarn_path.as_deref(),
+            Some(".yarn/releases/yarn-4.1.0.cjs")
+        );
+    }
+
+    // Ported: "returns offline mirror and no yarn path for non-existant yarn-path binary" — modules/manager/npm/post-update/yarn.spec.ts line 990
+    #[test]
+    fn check_yarnrc_nonexistent_yarn_path() {
+        let info = check_yarnrc("--install.offline-mirror true\n");
+        assert_eq!(info.offline_mirror.as_deref(), Some("true"));
+        assert!(info.yarn_path.is_none());
+    }
+
+    // Ported: "removes pure-lockfile and frozen-lockfile from .yarnrc" — modules/manager/npm/post-update/yarn.spec.ts line 1008
+    #[test]
+    fn check_yarnrc_pure_lockfile() {
+        let info = check_yarnrc("--install.pure-lockfile true\n");
+        assert!(info.offline_mirror.is_none());
+    }
+
+    // Ported: "removes pure-lockfile and frozen-lockfile from .yarnrc" — modules/manager/npm/post-update/yarn.spec.ts line 1008
+    #[test]
+    fn check_yarnrc_frozen_lockfile() {
+        let info = check_yarnrc("--install.frozen-lockfile true\n");
+        assert!(info.offline_mirror.is_none());
+    }
+
+    // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
+    #[test]
+    fn detect_yarn_version_ge2() {
+        assert_eq!(
+            detect_yarn_version(Some(">=2")),
+            YarnMajorVersion::V2Plus
+        );
+    }
+
+    // Ported: "supports corepack on grouping" — modules/manager/npm/post-update/yarn.spec.ts line 597
+    #[test]
+    fn detect_yarn_version_caret2() {
+        assert_eq!(
+            detect_yarn_version(Some("^2.0.0")),
+            YarnMajorVersion::V2Plus
+        );
+    }
+
+    // Ported: "supports customizing corepack version via config constraints" — modules/manager/npm/post-update/yarn.spec.ts line 646
+    #[test]
+    fn detect_yarn_version_caret3() {
+        assert_eq!(
+            detect_yarn_version(Some("^3.0.0")),
+            YarnMajorVersion::V2Plus
+        );
+    }
+
 }

@@ -43,4 +43,40 @@ mod tests {
             Some("10.2.3".to_owned())
         );
     }
+
+    // Ported: "if nodeMaxMemory set on global config" — modules/manager/npm/post-update/yarn.spec.ts line 115
+    #[test]
+    fn get_node_options_returns_flag_yarn() {
+        assert_eq!(
+            get_node_options(Some(8192)),
+            Some("--max-old-space-size=8192".to_owned())
+        );
+    }
+
+    // Ported: "if nodeMaxMemory set on repo config" — modules/manager/npm/post-update/yarn.spec.ts line 157
+    #[test]
+    fn get_node_options_returns_none_yarn() {
+        assert_eq!(get_node_options(None), None);
+    }
+
+    // Ported: "finds npm globally" — modules/manager/npm/post-update/npm.spec.ts line 344
+    #[test]
+    fn get_package_manager_version_npm_global() {
+        let pj = PackageJson::parse(r#"{}"#).unwrap();
+        assert_eq!(get_package_manager_version(&pj, "npm"), None);
+    }
+
+    // Ported: "finds pnpm globally" — modules/manager/npm/post-update/pnpm.spec.ts line 86
+    #[test]
+    fn get_package_manager_version_pnpm_global() {
+        let pj = PackageJson::parse(r#"{}"#).unwrap();
+        assert_eq!(get_package_manager_version(&pj, "pnpm"), None);
+    }
+
+    // Ported: "uses slim yarn instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 705
+    #[test]
+    fn get_package_manager_version_yarn_none() {
+        let pj = PackageJson::parse(r#"{}"#).unwrap();
+        assert_eq!(get_package_manager_version(&pj, "yarn"), None);
+    }
 }

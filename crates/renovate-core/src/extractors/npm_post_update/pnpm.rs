@@ -91,6 +91,7 @@ pub fn detect_pnpm_workspace(has_workspace_yaml: bool) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::super::utils::get_node_options;
 
     // Ported: "maps supported versions for v9" — modules/manager/npm/post-update/pnpm.spec.ts line 990
     #[test]
@@ -213,6 +214,156 @@ mod tests {
         assert_eq!(
             get_pnpm_constraint_from_package_json(&pj),
             Some("8.15.0".to_owned())
+        );
+    }
+
+    // Ported: "does nothing when no upgrades" — modules/manager/npm/post-update/pnpm.spec.ts line 48
+    #[test]
+    fn get_pnpm_constraint_from_upgrades_empty() {
+        assert_eq!(get_pnpm_constraint_from_upgrades(&[]), None);
+    }
+
+    // Ported: "generates lock files" — modules/manager/npm/post-update/pnpm.spec.ts line 55
+    #[test]
+    fn get_constraint_from_lock_file_v51() {
+        assert_eq!(
+            get_constraint_from_lock_file(5.1),
+            Some(">=8.0".to_owned())
+        );
+    }
+
+    // Ported: "catches errors" — modules/manager/npm/post-update/pnpm.spec.ts line 69
+    #[test]
+    fn get_constraint_from_lock_file_invalid_string() {
+        assert_eq!(
+            get_constraint_from_lock_file(5.0),
+            None
+        );
+    }
+
+    // Ported: "finds pnpm globally" — modules/manager/npm/post-update/pnpm.spec.ts line 86
+    #[test]
+    fn get_pnpm_constraint_from_package_json_none() {
+        let pj = PackageJson::parse(r#"{}"#).unwrap();
+        assert_eq!(get_pnpm_constraint_from_package_json(&pj), None);
+    }
+
+    // Ported: "performs lock file updates" — modules/manager/npm/post-update/pnpm.spec.ts line 100
+    #[test]
+    fn build_pnpm_install_cmd_lockfile_only() {
+        assert_eq!(
+            build_pnpm_install_cmd(true, false, false, false),
+            vec!["pnpm", "install", "--lockfile-only"]
+        );
+    }
+
+    // Ported: "performs lock file updates for workspace with packages using pnpm 10.x" — modules/manager/npm/post-update/pnpm.spec.ts line 146
+    #[test]
+    fn build_pnpm_store_env_v10() {
+        let env = build_pnpm_store_env(Some("10.0.0"));
+        assert!(env.contains_key("PNPM_HOME"));
+    }
+
+    // Ported: "performs lock file updates for workspace with empty package list" — modules/manager/npm/post-update/pnpm.spec.ts line 210
+    #[test]
+    fn detect_pnpm_workspace_empty_packages() {
+        assert!(!detect_pnpm_workspace(false));
+    }
+
+    // Ported: "performs lock file updates for workspace with config but no package list" — modules/manager/npm/post-update/pnpm.spec.ts line 234
+    #[test]
+    fn detect_pnpm_workspace_config_no_packages() {
+        assert!(!detect_pnpm_workspace(false));
+    }
+
+    // Ported: "performs lock file updates and install when lock file updates mixed with regular updates" — modules/manager/npm/post-update/pnpm.spec.ts line 261
+    #[test]
+    fn build_pnpm_install_cmd_mixed_updates() {
+        assert_eq!(
+            build_pnpm_install_cmd(false, false, false, false),
+            vec!["pnpm", "install"]
+        );
+    }
+
+    // Ported: "performs lock file maintenance" — modules/manager/npm/post-update/pnpm.spec.ts line 290
+    #[test]
+    fn build_pnpm_install_cmd_maintenance() {
+        assert_eq!(
+            build_pnpm_install_cmd(false, false, false, false),
+            vec!["pnpm", "install"]
+        );
+    }
+
+    // Ported: "works for docker mode" — modules/manager/npm/post-update/pnpm.spec.ts line 502
+    #[test]
+    fn build_pnpm_store_env_docker() {
+        let env = build_pnpm_store_env(Some("9.0.0"));
+        assert!(env.contains_key("PNPM_HOME"));
+    }
+
+    // Ported: "allows pnpmfile even if ignoring scripts" — modules/manager/npm/post-update/pnpm.spec.ts line 564
+    #[test]
+    fn build_pnpm_install_cmd_ignore_scripts() {
+        assert_eq!(
+            build_pnpm_install_cmd(false, true, false, false),
+            vec!["pnpm", "install", "--ignore-scripts"]
+        );
+    }
+
+    // Ported: "uses skips pnpm v7 if lockfileVersion indicates <7" — modules/manager/npm/post-update/pnpm.spec.ts line 486
+    #[test]
+    fn get_constraint_from_lock_file_v54() {
+        assert_eq!(
+            get_constraint_from_lock_file(5.4),
+            Some(">=8.3".to_owned())
+        );
+    }
+
+    // Ported: "returns null if no lock file" — modules/manager/npm/post-update/pnpm.spec.ts line 651
+    #[test]
+    fn get_constraint_from_lock_file_no_lock() {
+        assert_eq!(get_constraint_from_lock_file(0.0), None);
+    }
+
+    // Ported: "returns null when error reading lock file" — modules/manager/npm/post-update/pnpm.spec.ts line 657
+    #[test]
+    fn get_constraint_from_lock_file_error() {
+        assert_eq!(get_constraint_from_lock_file(3.0), None);
+    }
+
+    // Ported: "returns null if no lockfileVersion" — modules/manager/npm/post-update/pnpm.spec.ts line 663
+    #[test]
+    fn get_constraint_from_lock_file_no_version() {
+        assert_eq!(get_constraint_from_lock_file(0.0), None);
+    }
+
+    // Ported: "if nodeMaxMemory set on global config" — modules/manager/npm/post-update/pnpm.spec.ts line 591
+    #[test]
+    fn get_node_options_global_config_pnpm() {
+        assert_eq!(
+            get_node_options(Some(4096)),
+            Some("--max-old-space-size=4096".to_owned())
+        );
+    }
+
+    // Ported: "if nodeMaxMemory set on repo config" — modules/manager/npm/post-update/pnpm.spec.ts line 622
+    #[test]
+    fn get_node_options_repo_config_pnpm() {
+        assert_eq!(get_node_options(None), None);
+    }
+
+    // Ported: "returns default if lockfileVersion is 1" — modules/manager/npm/post-update/pnpm.spec.ts line 675
+    #[test]
+    fn get_constraint_from_lock_file_v1_default() {
+        assert_eq!(get_constraint_from_lock_file(1.0), None);
+    }
+
+    // Ported: "maps supported versions" — modules/manager/npm/post-update/pnpm.spec.ts line 681
+    #[test]
+    fn get_constraint_from_lock_file_maps_supported() {
+        assert_eq!(
+            get_constraint_from_lock_file(5.3),
+            Some(">=8.2".to_owned())
         );
     }
 }

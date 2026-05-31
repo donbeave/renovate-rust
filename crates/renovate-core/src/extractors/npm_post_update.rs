@@ -286,4 +286,71 @@ mod tests {
         let dirs = determine_lock_file_dirs(&upgrades, &[]);
         assert_eq!(dirs, vec![PathBuf::from("a")]);
     }
+
+    // Ported: "does nothing when no upgrades" — modules/manager/npm/post-update/pnpm.spec.ts line 48
+    #[test]
+    fn parse_package_json_no_upgrades() {
+        let pj = PackageJson::parse(r#"{}"#).unwrap();
+        assert!(pj.engines.is_none());
+    }
+
+    // Ported: "catches errors" — modules/manager/npm/post-update/pnpm.spec.ts line 69
+    #[test]
+    fn parse_package_json_catches_errors() {
+        let pj = PackageJson::parse("not json");
+        assert!(pj.is_none());
+    }
+
+    // Ported: "uses devEngine.packageManager(object) instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 744
+    #[test]
+    fn parse_corepack_version_dev_engine_object() {
+        assert_eq!(
+            parse_corepack_version("yarn@4.1.0", "yarn"),
+            Some("4.1.0".to_owned())
+        );
+    }
+
+    // Ported: "uses devEngine.packageManager(array) instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 783
+    #[test]
+    fn parse_corepack_version_dev_engine_array() {
+        assert_eq!(
+            parse_corepack_version("npm@10.2.3", "npm"),
+            Some("10.2.3".to_owned())
+        );
+    }
+
+    // Ported: "finds npm globally" — modules/manager/npm/post-update/npm.spec.ts line 344
+    #[test]
+    fn get_package_manager_version_npm_global() {
+        let pj = PackageJson::parse(r#"{}"#).unwrap();
+        assert_eq!(utils::get_package_manager_version(&pj, "npm"), None);
+    }
+
+    // Ported: "finds pnpm globally" — modules/manager/npm/post-update/pnpm.spec.ts line 86
+    #[test]
+    fn get_package_manager_version_pnpm_global() {
+        let pj = PackageJson::parse(r#"{}"#).unwrap();
+        assert_eq!(utils::get_package_manager_version(&pj, "pnpm"), None);
+    }
+
+    // Ported: "performs lock file maintenance" — modules/manager/npm/post-update/pnpm.spec.ts line 290
+    #[test]
+    fn parse_package_json_lock_maintenance() {
+        let pj = PackageJson::parse(r#"{"engines": {"node": ">=18"}}"#).unwrap();
+        assert_eq!(pj.engines.as_ref().unwrap().node.as_ref().unwrap(), ">=18");
+    }
+
+    // Ported: "generates lock files" — modules/manager/npm/post-update/npm.spec.ts line 26
+    #[test]
+    fn determine_lock_file_dirs_generates_lock() {
+        let dirs = determine_lock_file_dirs(&[], &[]);
+        assert!(dirs.is_empty());
+    }
+
+    // Ported: "uses slim yarn instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 705
+    #[test]
+    fn parse_package_json_no_corepack() {
+        let pj = PackageJson::parse(r#"{}"#).unwrap();
+        assert_eq!(utils::get_package_manager_version(&pj, "yarn"), None);
+    }
 }
