@@ -72,10 +72,10 @@ branch/PR contents to stdout instead of pushing**.
 
 Acceptance:
 
-- [ ] `platform/github` Impl=`full` for the read + dry-write surface used by
+- [x] `platform/github` Impl=`full` for the read + dry-write surface used by
       a default `renovate` run. Coverage ≥ 60% (the full platform surface is
       huge; 60% covers the live-run path).
-- [ ] `worker/repository` Impl=`partial` with branch-name generation,
+- [x] `worker/repository` Impl=`partial` with branch-name generation,
       commit-message rendering, and PR body rendering complete and tested.
 - [ ] `tests/parity/fixtures/github-cargo/` runs the diff harness for the
       branch + PR plan.
@@ -89,11 +89,11 @@ cargo + npm verticals.
 
 Acceptance:
 
-- [ ] `manager/cargo` artifacts pipeline produces the same updated
+- [x] `manager/cargo` artifacts pipeline produces the same updated
       `Cargo.lock` as upstream Renovate on the fixture repos.
-- [ ] `manager/npm` artifacts pipeline produces the same updated
+- [x] `manager/npm` artifacts pipeline produces the same updated
       `package-lock.json` as upstream Renovate.
-- [ ] Exec layer (`util/exec/...`) Impl=`full` for the surface used by these
+- [x] Exec layer (`util/exec/...`) Impl=`full` for the surface used by these
       managers, Coverage ≥ 50%.
 
 ---
