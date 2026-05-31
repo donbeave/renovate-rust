@@ -245,6 +245,55 @@ fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
     value
 }
 
+/// Update a single Docker image reference in a docker-compose file.
+///
+/// Mirrors `updateDependency()` from `lib/modules/manager/docker-compose/update.ts`.
+///
+/// Returns `Some(updated_content)` when the replacement was made, or `None`
+/// when the dep could not be found or matched.
+pub fn docker_compose_update_dependency(
+    file_content: &str,
+    dep_name: &str,
+    new_value: &str,
+) -> Option<String> {
+    let deps = extract(file_content).ok()?;
+    for dep in deps {
+        if dep.skip_reason.is_some() {
+            continue;
+        }
+        let dep_report_name = match &dep.tag {
+            Some(t) => format!("{}:{t}", dep.image),
+            None => dep.image.clone(),
+        };
+        if dep_report_name != dep_name {
+            continue;
+        }
+        let old_ref = image_ref(&dep.image, dep.tag.as_deref(), dep.digest.as_deref());
+        let new_ref = image_ref(&dep.image, Some(new_value), None);
+
+        // Targeted replacement: only within `image:` lines.
+        let mut updated = file_content.to_owned();
+        let mut found = false;
+        for line in file_content.lines() {
+            let trimmed = line.trim_start();
+            if let Some(rest) = trimmed.strip_prefix("image:") {
+                let val = rest.trim();
+                let unquoted = unquote(val);
+                if unquoted == old_ref {
+                    let new_line = line.replace(&old_ref, &new_ref);
+                    updated = updated.replacen(line, &new_line, 1);
+                    found = true;
+                    break; // Only replace first match
+                }
+            }
+        }
+        if found {
+            return Some(updated);
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -573,5 +622,43 @@ services:
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].image, "debian");
         assert_eq!(deps[0].tag.as_deref(), Some("11"));
+    }
+
+    // Rust-specific: docker-compose update behavior tests
+    #[test]
+    fn docker_compose_update_dependency_replaces_tag() {
+        let content = "services:\n  web:\n    image: nginx:1.19\n";
+        let updated = docker_compose_update_dependency(content, "nginx:1.19", "1.21");
+        assert_eq!(
+            updated,
+            Some("services:\n  web:\n    image: nginx:1.21\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn docker_compose_update_dependency_no_match() {
+        let content = "services:\n  web:\n    image: nginx:1.19\n";
+        let updated = docker_compose_update_dependency(content, "redis:6", "7");
+        assert_eq!(updated, None);
+    }
+
+    #[test]
+    fn docker_compose_update_dependency_quoted() {
+        let content = "services:\n  web:\n    image: \"nginx:1.19\"\n";
+        let updated = docker_compose_update_dependency(content, "nginx:1.19", "1.21");
+        assert_eq!(
+            updated,
+            Some("services:\n  web:\n    image: \"nginx:1.21\"\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn docker_compose_update_dependency_multiple_services() {
+        let content = "services:\n  web:\n    image: nginx:1.19\n  cache:\n    image: redis:6\n";
+        let updated = docker_compose_update_dependency(content, "redis:6", "7");
+        assert_eq!(
+            updated,
+            Some("services:\n  web:\n    image: nginx:1.19\n  cache:\n    image: redis:7\n".to_owned())
+        );
     }
 }

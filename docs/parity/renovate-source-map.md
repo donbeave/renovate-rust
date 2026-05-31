@@ -384,6 +384,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/docker-compose/extract.ts` | `extractors/docker_compose.rs` | full | `extract()` handles Docker image refs from compose files |
 | `lib/modules/manager/docker-compose/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/docker-compose/update.ts` | `extractors/docker_compose.rs` | partial | `docker_compose_update_dependency()` replaces tags in `image:` lines; missing: digest pinning |
 | `lib/modules/manager/docker-compose/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### dockerfile

@@ -597,6 +597,12 @@ async fn process_repo(
                                             &content, &bd.dep.name, current, &new_value,
                                         )
                                     }
+                                    "docker-compose" => {
+                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        renovate_core::extractors::docker_compose::docker_compose_update_dependency(
+                                            &content, &bd.dep.name, &new_value,
+                                        )
+                                    }
                                     _ => {
                                         tracing::debug!(
                                             repo = %repo_slug,
