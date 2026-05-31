@@ -317,7 +317,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `worker/global` | 11 | ? | 116/208 (56%) | — |
-| `worker/repository` | 103 | ? | 238/1675 (14%) | — |
+| `worker/repository` | 103 | partial | 238/1675 (14%) | branch-name, commit-message, PR body rendering; full lifecycle & artifacts not yet done |
 
 ## config  —  427/700 (61%)
 
