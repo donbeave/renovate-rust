@@ -5,7 +5,7 @@
 ## `lib/workers/repository/reconfigure/comment.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/comment.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 3 | **Status:** partial
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
 
 ### `workers/repository/reconfigure/comment › ensureReconfigurePrComment()`
 
@@ -19,9 +19,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty  | 87 | pending | — | — | Platform-specific PR comment operations |
-| returns a full list  | 92 | pending | — | — | Platform-specific PR comment operations |
-| adds schedule  | 115 | pending | — | — | Platform-specific PR comment operations |
+| returns empty  | 87 | pending | — | — | getConfigDesc markdown formatting not yet implemented in Rust reconfigure module |
+| returns a full list  | 92 | pending | — | — | getConfigDesc markdown formatting not yet implemented in Rust reconfigure module |
+| adds schedule  | 115 | pending | — | — | getConfigDesc markdown formatting not yet implemented in Rust reconfigure module |
 
 ---
 

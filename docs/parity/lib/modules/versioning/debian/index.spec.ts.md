@@ -5,7 +5,7 @@
 ## `lib/modules/versioning/debian/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/debian/index.spec.ts
-**Total tests:** 16 | **Ported:** 14 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 16 | **Ported:** 14 | **Actionable:** 15 | **Status:** partial
 
 ### `modules/versioning/debian/index`
 

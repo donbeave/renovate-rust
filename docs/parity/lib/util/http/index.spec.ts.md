@@ -5,7 +5,7 @@
 ## `lib/util/http/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/index.spec.ts
-**Total tests:** 52 | **Ported:** 20 | **Actionable:** 13 | **Status:** pending
+**Total tests:** 52 | **Ported:** 20 | **Actionable:** 33 | **Status:** partial
 
 ### `util/http/index`
 
@@ -24,10 +24,10 @@
 | patchJson | 181 | ported | `http.rs` | `patch_json_sends_body_and_returns_response` | — |
 | deleteJson | 196 | ported | `http.rs` | `delete_json_sends_request_and_parses_response` | — |
 | headJson | 211 | ported | `http.rs` | `head_json_sends_request_and_returns_response` | — |
-| stream | 226 | pending | — | — | —|
+| stream | 226 | pending | — | — | HTTP streaming response not yet implemented in Rust HTTP client |
 | disables hosts for stream | 251 | pending | — | — | Host disabling not implemented in Rust HTTP client |
 | limits concurrency by host | 259 | pending | — | — | Concurrency limiting not implemented in Rust HTTP client |
-| getBuffer | 349 | pending | — | — | —|
+| getBuffer | 349 | pending | — | — | getBuffer binary response method not yet implemented in Rust HTTP client |
 
 ### `util/http/index › retry`
 

@@ -5,13 +5,13 @@
 ## `test/other/validate-schemas.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/test/other/validate-schemas.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending-applicable
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `other/validate-schemas`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| validate json files in lib/data against their schemas | 8 | pending | — | — | project CI validation test — validates TypeScript repo's JSON schema files; not applicable to Rust implementation which has different data structures |
+| validate json files in lib/data against their schemas | 8 | not-applicable | — | — | project CI validation test for TypeScript repository; no Rust runtime equivalent |
 
 ---
 
