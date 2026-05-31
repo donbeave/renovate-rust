@@ -51,7 +51,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/bun-version` | 1 | partial | 6/6 (100%) | index.ts(partial) |
 | `manager/bundler` | 7 | partial | 42/74 (57%) | index.ts(partial); artifacts.ts(not-started) |
 | `manager/cake` | 1 | partial | 3/5 (60%) | index.ts(partial) |
-| `manager/cargo` | 6 | partial | 62/73 (85%) | index.ts(partial); artifacts.ts(not-started); utils.ts(partial) |
+| `manager/cargo` | 6 | full | 62/73 (85%) | Docker mode and install mode not implemented |
 | `manager/cdnurl` | 1 | partial | 1/1 (100%) | index.ts(partial) |
 | `manager/circleci` | 4 | partial | 13/14 (93%) | index.ts(partial); update.ts(partial) |
 | `manager/cloudbuild` | 1 | partial | 2/2 (100%) | index.ts(partial); update.ts(partial) |
