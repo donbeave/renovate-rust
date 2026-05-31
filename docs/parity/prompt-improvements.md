@@ -102,3 +102,51 @@ objectively achieved.
 **Follow-up work for the loop (not a prompt change):** execute Phase 0.5 to
 reclassify the existing 8,609 NA rows, then drive source rows to `full` and build
 out the differential harness fixtures.
+
+---
+
+## Applied 2026-05-31 — module ledger redesign (operator-authorized)
+
+**Audit findings:** Despite Phase 0.5 instructions to *reduce* NA, the agent
+loop flipped ~2,000 more tests from `pending` → `not-applicable` in the past
+week (`parity: reclassify N mock-based spec files as NA` commit pattern). NA
+share reached 53.7%, more than double the documented budget. Of 354K monthly
+insertions, 125K (37%) were inside `docs/parity/`. Per-`it()` accounting at
+11,658 rows was the single biggest source of wasted iteration time and
+gaming. The previous prompts (535 + 711 lines) were too large to be re-read
+honestly each iteration.
+
+**Changes applied:**
+
+1. New parity scheme:
+   - `docs/parity/modules.md` is the new (and only) ledger. ~292 rows, one
+     per upstream module. Two human-edited columns (Impl, Notes) owned by the
+     implementation agent. Coverage is computed.
+   - `scripts/parity_coverage.py` walks upstream spec files and Rust
+     `// Ported:` comments, deduplicates by `(spec, it() description)`, and
+     emits the ledger plus `gaps`/`orphans` reports.
+   - The `not-applicable` mechanism is removed entirely. Coverage = deduped
+     `ported / upstream_it()`. Per-module target ≥ 80%. No denominator
+     gaming surface.
+2. New prompts replace the old loop prompts:
+   - `prompts/implementation.md` (~110 lines) — implementation agent.
+   - `prompts/test-parity.md` (~110 lines) — test parity agent.
+   - Old files moved to `prompts/_archived-claude-loop-*.md` with banners.
+   - Single canonical invocation per agent (was four near-duplicates).
+3. Two agents stop colliding:
+   - Implementation owns `crates/**/src/*.rs` plus the Impl/Notes columns.
+   - Test parity owns `crates/**/tests/*.rs` + `mod tests` blocks plus
+     `// Ported:` comments. Never touches the ledger.
+   - Coverage column is owned by the script.
+4. New `docs/parity/milestones.md` gives ordered milestones (M0–M5) starting
+   with `cargo + crates.io + semver end-to-end`. Both agents always pick work
+   from the first incomplete milestone.
+5. `docs/parity/renovate-test-map.md` and `renovate-source-map.md` carry
+   deprecation banners and are no longer edited.
+6. `AGENTS.md` updated: removed `not-applicable` rules, pointed at the new
+   ledger and scripts.
+
+**Initial coverage numbers from the new script** (deduped, honest):
+5,004 / 11,667 = 42.9% (the old `47.3%` raw count inflated by 484 duplicate
+`// Ported:` comments). Strong areas: versioning 90%, managers 60%. Weakest:
+platforms 9%, workers 19%, util 39%.

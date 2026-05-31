@@ -1,3 +1,13 @@
+# ⚠️ DEPRECATED — rolled into `modules.md`
+
+This 3,128-row per-file source map is no longer the active tracking surface.
+The implementation agent now records per-module Impl status in
+[`modules.md`](modules.md). The current file's data was rolled up once into
+the new ledger (see `scripts/derive_module_impl.py`); it is kept here for
+historical reference and so that legacy links keep resolving.
+
+---
+
 # Renovate Source Map
 
 Maps Renovate TypeScript **source** files to their Rust counterparts.

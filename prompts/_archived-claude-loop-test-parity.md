@@ -1,3 +1,13 @@
+# ⚠️ ARCHIVED — superseded by test-parity.md
+
+This prompt is no longer active. The per-`it()` ledger and the
+`not-applicable` mechanism it relied on were being gamed (53% of tests were
+parked as NA). Use `test-parity.md` plus the auto-generated
+`docs/parity/modules.md` ledger instead. This file is kept only for
+historical reference.
+
+---
+
 # Renovate Rust Test Parity Prompt
 
 You are working on the renovate-rust repository.

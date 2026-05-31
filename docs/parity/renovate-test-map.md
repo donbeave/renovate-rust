@@ -1,3 +1,23 @@
+# ⚠️ DEPRECATED — replaced by `modules.md`
+
+This 936-row per-`it()` ledger is no longer maintained. Agents must not edit
+it. Use [`modules.md`](modules.md) (~292 rows, auto-generated coverage) for
+all parity tracking. The 53.7% `not-applicable` share visible below is the
+primary reason this file is being retired — the `not-applicable` mechanism
+was systematically gamed to shrink the denominator. The new ledger reports
+deduped `ported / upstream_it()` with no NA category.
+
+To find the real coverage today:
+
+```sh
+python3 scripts/parity_coverage.py
+```
+
+The file is kept on disk for historical reference only; future regenerations
+will not touch it.
+
+---
+
 # Renovate Test Map
 
 **Progress:** 5,385 / 11,658 total tests ported (46.2%) · pending 17 · not-applicable 6,256 (53.7% of total) — updated 2026-05-30

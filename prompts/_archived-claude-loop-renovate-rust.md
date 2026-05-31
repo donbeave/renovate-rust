@@ -1,3 +1,12 @@
+# ⚠️ ARCHIVED — superseded by implementation.md
+
+This prompt is no longer active. The per-`it()` accounting it required was
+producing more bookkeeping than code. Use `implementation.md` plus the
+`docs/parity/modules.md` module ledger instead. This file is kept only for
+historical reference.
+
+---
+
 # Renovate Rust Implementation Parity Prompt
 
 You are working on the renovate-rust repository. Your job is to compare the

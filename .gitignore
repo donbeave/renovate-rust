@@ -7,3 +7,4 @@ Cargo.lock.bak
 .vscode/
 *.swp
 .DS_Store
+__pycache__/
