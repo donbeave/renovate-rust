@@ -629,6 +629,32 @@ async fn process_repo(
                                             &content, &bd.dep.name, &new_value,
                                         )
                                     }
+                                    "travis" | "cloudbuild" | "droneci" | "woodpecker" | "bitbucket-pipelines" => {
+                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        renovate_core::extractors::dockerfile::dockerfile_update_dependency(
+                                            &content, &bd.dep.name, &new_value,
+                                        )
+                                    }
+                                    "azure-pipelines" => {
+                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        // Azure Pipelines references Docker images in container resources
+                                        // and task versions in `task:` references. For now, only Docker
+                                        // images are supported.
+                                        if bd.dep.name.contains(':') {
+                                            renovate_core::extractors::dockerfile::dockerfile_update_dependency(
+                                                &content, &bd.dep.name, &new_value,
+                                            )
+                                        } else {
+                                            tracing::debug!(
+                                                repo = %repo_slug,
+                                                branch = %branch,
+                                                file = %file_path,
+                                                dep = %bd.dep.name,
+                                                "azure-pipelines task update not yet supported"
+                                            );
+                                            None
+                                        }
+                                    }
                                     _ => {
                                         tracing::debug!(
                                             repo = %repo_slug,

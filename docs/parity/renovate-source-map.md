@@ -62,6 +62,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/azure-pipelines/extract.ts` | `extractors/azure_pipelines.rs` | full | `extract()` handles Docker images from Azure Pipelines YAML |
 | `lib/modules/manager/azure-pipelines/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/azure-pipelines/update.ts` | `renovate-cli/src/main.rs` | partial | Docker image updates via `dockerfile_update_dependency()`; task ref updates not yet implemented |
 | `lib/modules/manager/azure-pipelines/dep-types.ts` | `extractors/azure_pipelines.rs` | full | Dep types embedded in extractor |
 | `lib/modules/manager/azure-pipelines/schema.ts` | N/A | out-of-scope | Zod schema |
 
@@ -146,6 +147,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/bitbucket-pipelines/extract.ts` | `extractors/bitbucket_pipelines.rs` | full | `extract()` handles Docker images from Bitbucket pipelines |
 | `lib/modules/manager/bitbucket-pipelines/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/bitbucket-pipelines/update.ts` | `renovate-cli/src/main.rs` | partial | Updates via `dockerfile_update_dependency()` wired in CLI pipeline |
 | `lib/modules/manager/bitbucket-pipelines/dep-types.ts` | `extractors/bitbucket_pipelines.rs` | full | Dep types embedded |
 | `lib/modules/manager/bitbucket-pipelines/util.ts` | `extractors/bitbucket_pipelines.rs` | full | Utility functions inline |
 
@@ -246,6 +248,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/cloudbuild/extract.ts` | `extractors/cloudbuild.rs` | full | `extract()` handles Docker images from Cloud Build YAML |
 | `lib/modules/manager/cloudbuild/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/cloudbuild/update.ts` | `renovate-cli/src/main.rs` | partial | Updates via `dockerfile_update_dependency()` wired in CLI pipeline |
 | `lib/modules/manager/cloudbuild/schema.ts` | N/A | out-of-scope | Zod schema |
 
 ### cocoapods
@@ -404,6 +407,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/droneci/extract.ts` | `extractors/droneci.rs` | full | `extract()` handles Drone CI Docker image refs |
 | `lib/modules/manager/droneci/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/droneci/update.ts` | `renovate-cli/src/main.rs` | partial | Updates via `dockerfile_update_dependency()` wired in CLI pipeline |
 | `lib/modules/manager/droneci/dep-types.ts` | `extractors/droneci.rs` | full | Dep types embedded |
 
 ### fleet
@@ -1168,6 +1172,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/travis/extract.ts` | `extractors/travis.rs` | full | `extract()` handles .travis.yml node versions |
 | `lib/modules/manager/travis/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/travis/update.ts` | `renovate-cli/src/main.rs` | partial | Docker image updates via `dockerfile_update_dependency()` wired in CLI pipeline |
 | `lib/modules/manager/travis/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### typst
@@ -1208,6 +1213,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |---|---|---|---|
 | `lib/modules/manager/woodpecker/extract.ts` | `extractors/woodpecker.rs` | full | `extract()` handles Woodpecker CI Docker images |
 | `lib/modules/manager/woodpecker/index.ts` | `managers.rs` | partial | fileMatch pattern present |
+| `lib/modules/manager/woodpecker/update.ts` | `renovate-cli/src/main.rs` | partial | Updates via `dockerfile_update_dependency()` wired in CLI pipeline |
 | `lib/modules/manager/woodpecker/types.ts` | N/A | out-of-scope | Type-only file |
 
 ### xcodegen
