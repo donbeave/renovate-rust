@@ -393,6 +393,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/dockerfile/extract.ts` | `extractors/dockerfile.rs` | full | `extract()` handles FROM, COPY --from, RUN --mount with variables, escape char, parser directives |
 | `lib/modules/manager/dockerfile/index.ts` | `managers.rs` | partial | fileMatch pattern present |
 | `lib/modules/manager/dockerfile/dep-types.ts` | `extractors/dockerfile.rs` | full | Dep types embedded |
+| `lib/modules/manager/dockerfile/update.ts` | `extractors/dockerfile.rs` | partial | `dockerfile_update_dependency()` replaces tag; missing: digest pinning, multi-stage COPY --from |
 
 ### droneci
 

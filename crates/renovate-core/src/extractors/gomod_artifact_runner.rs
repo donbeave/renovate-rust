@@ -130,7 +130,6 @@ impl ArtifactRunner for GomodArtifactRunner {
 mod tests {
     use super::*;
     use crate::artifacts::{ArtifactConfig, UpdateArtifact, UpdatedDep};
-    use std::path::PathBuf;
 
     #[tokio::test]
     async fn gomod_artifact_runner_returns_error_when_go_missing() {
@@ -169,7 +168,7 @@ require github.com/foo/bar v1.1.0
     #[test]
     fn gomod_artifact_runner_new_and_default() {
         let r1 = GomodArtifactRunner::new();
-        let r2 = GomodArtifactRunner::default();
+        let r2 = GomodArtifactRunner;
         assert_eq!(format!("{:?}", r1), format!("{:?}", r2));
     }
 }

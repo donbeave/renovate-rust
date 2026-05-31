@@ -750,7 +750,41 @@ fn docker_versioning(dep_name: &str, current_value: Option<&str>) -> Option<&'st
     None
 }
 
-fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
+/// Update a single Docker image reference in a Dockerfile.
+///
+/// Mirrors `updateDependency()` from `lib/modules/manager/dockerfile/update.ts`.
+///
+/// Returns `Some(updated_content)` when the replacement was made, or `None`
+/// when the dep could not be found or matched.
+pub fn dockerfile_update_dependency(
+    file_content: &str,
+    dep_name: &str,
+    new_value: &str,
+) -> Option<String> {
+    let deps = extract(file_content).ok()?;
+    for dep in deps {
+        if dep.skip_reason.is_some() {
+            continue;
+        }
+        let dep_report_name = match &dep.tag {
+            Some(t) => format!("{}:{t}", dep.image),
+            None => dep.image.clone(),
+        };
+        if dep_report_name != dep_name {
+            continue;
+        }
+        let old_ref = image_ref(&dep.image, dep.tag.as_deref(), dep.digest.as_deref());
+        let new_ref = image_ref(&dep.image, Some(new_value), None);
+        let updated = file_content.replacen(&old_ref, &new_ref, 1);
+        if updated != file_content {
+            return Some(updated);
+        }
+    }
+    None
+}
+
+/// Build a Docker image reference string from components.
+pub fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
     let mut out = image.to_owned();
     if let Some(tag) = tag {
         out.push(':');
@@ -1813,5 +1847,57 @@ FROM $nginx_version as stage2
         assert_eq!(vars.get("${var1:-$var2}").map(String::as_str), Some("var1"));
         assert_eq!(vars.get("$version").map(String::as_str), Some("version"));
         assert_eq!(vars.len(), 2);
+    }
+
+    // Rust-specific: dockerfile update behavior tests
+    #[test]
+    fn dockerfile_update_dependency_replaces_tag() {
+        let content = "FROM node:14\nRUN echo hello\n";
+        let updated = dockerfile_update_dependency(content, "node:14", "18");
+        assert_eq!(updated, Some("FROM node:18\nRUN echo hello\n".to_owned()));
+    }
+
+    #[test]
+    fn dockerfile_update_dependency_no_match() {
+        let content = "FROM node:14\nRUN echo hello\n";
+        let updated = dockerfile_update_dependency(content, "python:3.9", "3.10");
+        assert_eq!(updated, None);
+    }
+
+    #[test]
+    fn dockerfile_update_dependency_with_digest() {
+        let content = "FROM node:14@sha256:abc123\nRUN echo hello\n";
+        let updated = dockerfile_update_dependency(content, "node:14", "18");
+        assert_eq!(
+            updated,
+            Some("FROM node:18\nRUN echo hello\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn dockerfile_update_dependency_multiple_from() {
+        let content = "FROM node:14 AS builder\nFROM nginx:1.19\n";
+        let updated = dockerfile_update_dependency(content, "nginx:1.19", "1.21");
+        assert_eq!(
+            updated,
+            Some("FROM node:14 AS builder\nFROM nginx:1.21\n".to_owned())
+        );
+    }
+
+    #[test]
+    fn dockerfile_update_dependency_no_tag() {
+        let content = "FROM node\nRUN echo hello\n";
+        let updated = dockerfile_update_dependency(content, "node", "18");
+        assert_eq!(updated, Some("FROM node:18\nRUN echo hello\n".to_owned()));
+    }
+
+    #[test]
+    fn dockerfile_update_dependency_replaces_first_only() {
+        let content = "FROM node:14\nFROM node:14\n";
+        let updated = dockerfile_update_dependency(content, "node:14", "18");
+        assert_eq!(
+            updated,
+            Some("FROM node:18\nFROM node:14\n".to_owned())
+        );
     }
 }

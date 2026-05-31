@@ -585,6 +585,12 @@ async fn process_repo(
                                             &content, &upgrade,
                                         )
                                     }
+                                    "dockerfile" => {
+                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        renovate_core::extractors::dockerfile::dockerfile_update_dependency(
+                                            &content, &bd.dep.name, &new_value,
+                                        )
+                                    }
                                     _ => {
                                         tracing::debug!(
                                             repo = %repo_slug,
