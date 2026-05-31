@@ -4,17 +4,12 @@
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum ErrorConfigAction {
+    #[default]
     RaiseIssue,
     UpdateOnboardingPr,
     Suppress,
-}
-
-impl Default for ErrorConfigAction {
-    fn default() -> Self {
-        Self::RaiseIssue
-    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

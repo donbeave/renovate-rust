@@ -10,23 +10,22 @@ use super::types::{CheckBaseBranchesArgs, ValidationMessage};
 pub fn check_match_base_branches(args: &CheckBaseBranchesArgs) -> Vec<ValidationMessage> {
     let mut warnings = Vec::new();
 
-    if let Some(rule) = args.resolved_rule.as_object() {
-        if let Some(match_base_branches) = rule.get("matchBaseBranches") {
-            if match_base_branches.is_array() {
-                let has_base_branches = args
-                    .base_branch_patterns
-                    .is_some_and(|patterns| !patterns.is_empty());
+    if let Some(rule) = args.resolved_rule.as_object()
+        && let Some(match_base_branches) = rule.get("matchBaseBranches")
+        && match_base_branches.is_array()
+    {
+        let has_base_branches = args
+            .base_branch_patterns
+            .is_some_and(|patterns| !patterns.is_empty());
 
-                if !has_base_branches {
-                    warnings.push(ValidationMessage {
-                        topic: "Configuration Error".to_owned(),
-                        message: format!(
-                            "{}: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.",
-                            args.current_path
-                        ),
-                    });
-                }
-            }
+        if !has_base_branches {
+            warnings.push(ValidationMessage {
+                topic: "Configuration Error".to_owned(),
+                message: format!(
+                    "{}: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.",
+                    args.current_path
+                ),
+            });
         }
     }
 

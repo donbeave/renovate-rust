@@ -116,10 +116,10 @@ pub fn parse_preset(input: &str) -> Result<PresetReference, String> {
         repo = parts[0].to_owned();
         preset_name = parts.get(1).unwrap_or(&"").to_string();
         preset_source = source.to_owned();
-    } else if str.starts_with(':') {
+    } else if let Some(rest) = str.strip_prefix(':') {
         preset_source = "internal".to_owned();
         repo = "default".to_owned();
-        preset_name = str[1..].to_owned();
+        preset_name = rest.to_owned();
     } else if str.starts_with('@') {
         let re = Regex::new(r"^(@[^:/]+)(?::?(.*))?$").unwrap();
         if let Some(caps) = re.captures(&str) {

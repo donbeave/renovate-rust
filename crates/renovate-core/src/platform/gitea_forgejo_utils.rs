@@ -100,6 +100,20 @@ pub enum ContentsType {
 /// Mirrors `ContentsListResponse` from forgejo/schema.ts and gitea/schema.ts.
 pub type ContentsListResponse = Vec<ContentsResponse>;
 
+/// Maximum body length for Gitea/Forgejo PR descriptions.
+///
+/// Mirrors `maxBodyLength` from `forgejo/index.ts` and `gitea/index.ts`.
+pub const MAX_BODY_LENGTH: usize = 1_000_000;
+
+/// Transform relative Markdown links to platform-native paths.
+///
+/// Replaces `](../issues/` with `](issues/` and `](../pull/` with `](pulls/`.
+/// Mirrors `smartLinks` from `forgejo/utils.ts` and `gitea/utils.ts`.
+pub fn smart_links(body: &str) -> String {
+    body.replace("](../issues/", "](issues/")
+        .replace("](../pull/", "](pulls/")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -189,6 +203,35 @@ mod tests {
     #[test]
     fn usable_repo_returns_false_without_pull_requests() {
         assert!(!usable_repo(false, &full_permissions(), false));
+    }
+
+    // Ported: "replaces pr links" — modules/platform/forgejo/index.spec.ts line 3009
+    // (same test exists in modules/platform/gitea/index.spec.ts line 2921)
+    #[test]
+    fn smart_links_replaces_pr_links() {
+        let body = "[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)";
+        assert_eq!(
+            smart_links(body),
+            "[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)"
+        );
+    }
+
+    // Ported: "replaces issue links" — modules/platform/forgejo/index.spec.ts line 3018
+    // (same test exists in modules/platform/gitea/index.spec.ts line 2930)
+    #[test]
+    fn smart_links_replaces_issue_links() {
+        let body = "[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)";
+        assert_eq!(
+            smart_links(body),
+            "[#123](issues/123) [#124](issues/124) [#125](issues/125)"
+        );
+    }
+
+    // Ported: "maxBodyLength" — modules/platform/forgejo/index.spec.ts line 3028
+    // (same test exists in modules/platform/gitea/index.spec.ts line 2940)
+    #[test]
+    fn max_body_length_is_1_000_000() {
+        assert_eq!(MAX_BODY_LENGTH, 1_000_000);
     }
 
     // Ported: "ContentsResponseSchema" — modules/platform/forgejo/schema.spec.ts line 4

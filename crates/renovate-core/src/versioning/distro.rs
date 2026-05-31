@@ -67,16 +67,16 @@ impl DistroVersion {
 
         if let Some((ver_part, codename)) = trimmed.split_once('/') {
             let mut dv = Self::parse(ver_part)?;
-            dv.codename = Some(codename.trim().to_string());
+            dv.codename = Some(codename.trim().to_owned());
             return Some(dv);
         }
 
-        if let Some((ver_part, codename)) = trimmed.split_once('-') {
-            if let Ok(_) = ver_part.parse::<u32>() {
-                let mut dv = Self::parse(ver_part)?;
-                dv.codename = Some(codename.trim().to_string());
-                return Some(dv);
-            }
+        if let Some((ver_part, codename)) = trimmed.split_once('-')
+            && ver_part.parse::<u32>().is_ok()
+        {
+            let mut dv = Self::parse(ver_part)?;
+            dv.codename = Some(codename.trim().to_owned());
+            return Some(dv);
         }
 
         Self::parse(trimmed)
@@ -124,13 +124,11 @@ pub fn compare_distro_versions(a: &DistroVersion, b: &DistroVersion) -> std::cmp
 }
 
 pub fn is_distro_version_gte(version: &str, minimum: &str) -> bool {
-    let v = match DistroVersion::parse(version) {
-        Some(v) => v,
-        None => return false,
+    let Some(v) = DistroVersion::parse(version) else {
+        return false;
     };
-    let m = match DistroVersion::parse(minimum) {
-        Some(m) => m,
-        None => return false,
+    let Some(m) = DistroVersion::parse(minimum) else {
+        return false;
     };
     compare_distro_versions(&v, &m) != std::cmp::Ordering::Less
 }

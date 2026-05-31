@@ -6,23 +6,19 @@ use serde::{Deserialize, Serialize};
 
 use crate::workers::types::RenovateConfig;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum ProcessStatus {
     Disabled,
     Onboarded,
     Activated,
     Onboarding,
+    #[default]
     Unknown,
 }
 
-impl Default for ProcessStatus {
-    fn default() -> Self {
-        Self::Unknown
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum RepositoryResult {
+    #[default]
     Done,
     Automerged,
     Error,
@@ -30,12 +26,6 @@ pub enum RepositoryResult {
     ConfigValidation,
     ExternalHostError,
     MissingApiCredentials,
-}
-
-impl Default for RepositoryResult {
-    fn default() -> Self {
-        Self::Done
-    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

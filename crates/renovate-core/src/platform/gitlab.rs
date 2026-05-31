@@ -417,6 +417,24 @@ pub fn extract_rules_from_code_owners_lines(lines: &[&str]) -> Vec<FileOwnerRule
     rules
 }
 
+/// Transform Markdown content for GitLab compatibility.
+///
+/// Replaces GitHub-style PR references and links with GitLab MR equivalents,
+/// strips unicode null characters, and applies `smartTruncate`.
+/// Mirrors `massageMarkdown` from `lib/modules/platform/gitlab/index.ts`.
+pub fn massage_markdown(input: &str) -> String {
+    use crate::platform::pr_body::smart_truncate;
+    let desc = input
+        .replace("Pull Request", "Merge Request")
+        .replace("PR: #", "MR: !")
+        .replace("PRs", "MRs")
+        .replace("PR", "MR")
+        .replace("](../pull/", "](!")
+        .replace("](../issues/", "](#")
+        .replace('\u{0000}', "");
+    smart_truncate(&desc, 1_000_000)
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{method, path, query_param};
@@ -776,5 +794,59 @@ mod tests {
         assert_eq!(rules[0].pattern, "filename");
         assert_eq!(rules[0].usernames, vec!["@backend-team"]);
         assert_eq!(rules[0].score, 8);
+    }
+
+    // Ported: "strips invalid unicode null characters" — modules/platform/gitlab/index.spec.ts line 3950
+    #[test]
+    fn massage_markdown_strips_null_chars() {
+        assert_eq!(
+            massage_markdown("The source contains 'Ruby\u{0000}' at: 2.7.6.219"),
+            "The source contains 'Ruby' at: 2.7.6.219"
+        );
+    }
+
+    // Ported: "replaces PR with MR including pluralization" — modules/platform/gitlab/index.spec.ts line 3958
+    #[test]
+    fn massage_markdown_replaces_pr_with_mr() {
+        assert_eq!(
+            massage_markdown(
+                "A Pull Request is a PR, multiple Pull Requests are PRs."
+            ),
+            "A Merge Request is a MR, multiple Merge Requests are MRs."
+        );
+    }
+
+    // Ported: "replaces PR reference with MR reference" — modules/platform/gitlab/index.spec.ts line 3966
+    #[test]
+    fn massage_markdown_replaces_pr_ref() {
+        assert_eq!(
+            massage_markdown("See the following PR: #123 for more details"),
+            "See the following MR: !123 for more details"
+        );
+    }
+
+    // Ported: "replaces PR relative link with MR reference" — modules/platform/gitlab/index.spec.ts line 3972
+    #[test]
+    fn massage_markdown_replaces_pr_link() {
+        assert_eq!(
+            massage_markdown("See the following PR: [abc](../pull/123) for more details"),
+            "See the following MR: [abc](!123) for more details"
+        );
+    }
+
+    // Ported: "replaces issues relative link with issue reference" — modules/platform/gitlab/index.spec.ts line 3980
+    #[test]
+    fn massage_markdown_replaces_issues_link() {
+        assert_eq!(
+            massage_markdown("Check the [Dependency Dashboard](../issues/123) for more information."),
+            "Check the [Dependency Dashboard](#123) for more information."
+        );
+    }
+
+    // Ported: "avoids false positives when replacing PR with MR" — modules/platform/gitlab/index.spec.ts line 3988
+    #[test]
+    fn massage_markdown_avoids_false_positives() {
+        let input = "PROCESSING APPROPRIATE SUPPRESS NOPR";
+        assert_eq!(massage_markdown(input), input);
     }
 }

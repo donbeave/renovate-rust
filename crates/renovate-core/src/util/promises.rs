@@ -40,12 +40,12 @@ mod tests {
         let tasks: Vec<_> = (0..10)
             .map(|_| {
                 let c = counter.clone();
-                (move || {
+                move || {
                     let c = c.clone();
                     async move {
                         c.fetch_add(1, Ordering::SeqCst);
                     }
-                })
+                }
             })
             .collect();
         let results = run_all_concurrent(tasks, 3).await;
@@ -54,6 +54,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[allow(clippy::type_complexity)]
     async fn run_all_concurrent_empty() {
         let tasks: Vec<Box<dyn FnOnce() -> std::pin::Pin<Box<dyn std::future::Future<Output = i32> + Send>> + Send>> =
             vec![];
@@ -83,12 +84,12 @@ mod tests {
         let tasks: Vec<_> = (0..3)
             .map(|_| {
                 let c = counter.clone();
-                (move || {
+                move || {
                     let c = c.clone();
                     async move {
                         c.fetch_add(1, Ordering::SeqCst);
                     }
-                })
+                }
             })
             .collect();
         let results = run_all_concurrent(tasks, 0).await;

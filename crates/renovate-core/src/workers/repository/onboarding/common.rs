@@ -50,10 +50,10 @@ pub fn get_onboarding_pr_body(
 
 pub fn get_default_config_file_name(global_config: &GlobalConfig) -> String {
     let config_file_names = get_config_file_names(global_config);
-    if let Some(name) = &global_config.onboarding_config_file_name {
-        if config_file_names.contains(&name.as_str()) {
-            return name.clone();
-        }
+    if let Some(name) = &global_config.onboarding_config_file_name
+        && config_file_names.contains(&name.as_str())
+    {
+        return name.clone();
     }
     config_file_names.first().unwrap_or(&"renovate.json").to_string()
 }

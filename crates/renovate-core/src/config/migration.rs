@@ -10,25 +10,44 @@ use self::migrations::automerge_migration::AutomergeMigration;
 use self::migrations::automerge_minor_migration::AutomergeMinorMigration;
 use self::migrations::automerge_patch_migration::AutomergePatchMigration;
 use self::migrations::automerge_type_migration::AutomergeTypeMigration;
+use self::migrations::azure_gitlab_automerge_migration::AzureGitlabAutomergeMigration;
 use self::migrations::base_branch_migration::BaseBranchMigration;
 use self::migrations::binary_source_migration::BinarySourceMigration;
 use self::migrations::branch_name_migration::BranchNameMigration;
 use self::migrations::branch_prefix_migration::BranchPrefixMigration;
 use self::migrations::compatibility_migration::CompatibilityMigration;
 use self::migrations::composer_ignore_platform_reqs_migration::ComposerIgnorePlatformReqsMigration;
+use self::migrations::custom_managers_migration::CustomManagersMigration;
 use self::migrations::datasource_migration::DatasourceMigration;
 use self::migrations::dry_run_migration::DryRunMigration;
 use self::migrations::enabled_managers_migration::EnabledManagersMigration;
+use self::migrations::extends_migration::ExtendsMigration;
+use self::migrations::file_match_migration::FileMatchMigration;
 use self::migrations::go_mod_tidy_migration::GoModTidyMigration;
+use self::migrations::host_rules_migration::HostRulesMigration;
 use self::migrations::ignore_node_modules_migration::IgnoreNodeModulesMigration;
 use self::migrations::include_forks_migration::IncludeForksMigration;
+use self::migrations::match_datasources_migration::MatchDatasourcesMigration;
+use self::migrations::match_managers_migration::MatchManagersMigration;
+use self::migrations::match_strings_migration::MatchStringsMigration;
+use self::migrations::node_migration::NodeMigration;
+use self::migrations::package_files_migration::PackageFilesMigration;
+use self::migrations::package_name_migration::PackageNameMigration;
+use self::migrations::package_pattern_migration::PackagePatternMigration;
+use self::migrations::package_rules_migration::PackageRulesMigration;
+use self::migrations::packages_migration::PackagesMigration;
+use self::migrations::path_rules_migration::PathRulesMigration;
 use self::migrations::pin_versions_migration::PinVersionsMigration;
 use self::migrations::platform_commit_migration::PlatformCommitMigration;
+use self::migrations::post_update_options_migration::PostUpdateOptionsMigration;
 use self::migrations::renovate_fork_migration::RenovateForkMigration;
 use self::migrations::rename_property_migration::RenamePropertyMigration;
 use self::migrations::require_config_migration::RequireConfigMigration;
+use self::migrations::required_status_checks_migration::RequiredStatusChecksMigration;
 use self::migrations::schedule_migration::ScheduleMigration;
+use self::migrations::semantic_commits_migration::SemanticCommitsMigration;
 use self::migrations::semantic_prefix_migration::SemanticPrefixMigration;
+use self::migrations::unpublish_safe_migration::UnpublishSafeMigration;
 
 pub trait Migration: Send + Sync {
     fn property_name(&self) -> &str;
@@ -142,24 +161,43 @@ impl MigrationService {
             Box::new(AutomergeMinorMigration::new()),
             Box::new(AutomergePatchMigration::new()),
             Box::new(AutomergeTypeMigration::new()),
+            Box::new(AzureGitlabAutomergeMigration::new()),
             Box::new(BaseBranchMigration::new()),
             Box::new(BinarySourceMigration::new()),
             Box::new(BranchNameMigration::new()),
             Box::new(BranchPrefixMigration::new()),
             Box::new(CompatibilityMigration::new()),
             Box::new(ComposerIgnorePlatformReqsMigration::new()),
+            Box::new(CustomManagersMigration::new()),
             Box::new(DatasourceMigration::new()),
             Box::new(DryRunMigration::new()),
             Box::new(EnabledManagersMigration::new()),
+            Box::new(ExtendsMigration::new()),
+            Box::new(FileMatchMigration::new()),
             Box::new(GoModTidyMigration::new()),
+            Box::new(HostRulesMigration::new()),
             Box::new(IgnoreNodeModulesMigration::new()),
             Box::new(IncludeForksMigration::new()),
+            Box::new(MatchDatasourcesMigration::new()),
+            Box::new(MatchManagersMigration::new()),
+            Box::new(MatchStringsMigration::new()),
+            Box::new(NodeMigration::new()),
+            Box::new(PackageFilesMigration::new()),
+            Box::new(PackageNameMigration::new()),
+            Box::new(PackagePatternMigration::new()),
+            Box::new(PackageRulesMigration::new()),
+            Box::new(PackagesMigration::new()),
+            Box::new(PathRulesMigration::new()),
             Box::new(PinVersionsMigration::new()),
             Box::new(PlatformCommitMigration::new()),
+            Box::new(PostUpdateOptionsMigration::new()),
             Box::new(RenovateForkMigration::new()),
             Box::new(RequireConfigMigration::new()),
+            Box::new(RequiredStatusChecksMigration::new()),
             Box::new(ScheduleMigration::new()),
+            Box::new(SemanticCommitsMigration::new()),
             Box::new(SemanticPrefixMigration::new()),
+            Box::new(UnpublishSafeMigration::new()),
         ]
     }
 
@@ -202,7 +240,7 @@ impl MigrationService {
         migrations: &'a [Box<dyn Migration>],
         key: &str,
     ) -> Option<&'a dyn Migration> {
-        migrations.iter().find(|m| m.property_name() == key).map(|b| b.as_ref())
+        migrations.iter().find(|m| m.matches(key)).map(|b| b.as_ref())
     }
 
     pub fn is_migrated(

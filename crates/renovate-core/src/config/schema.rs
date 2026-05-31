@@ -31,58 +31,50 @@ pub fn validate_config_schema(config: &Value) -> Result<(), Vec<ConfigSchemaErro
 
     let obj = config.as_object().unwrap();
 
-    if let Some(extends) = obj.get("extends") {
-        if !extends.is_array() && !extends.is_string() {
-            errors.push(ConfigSchemaError::InvalidValue {
-                key: "extends".to_owned(),
-                message: "must be an array or string".to_owned(),
-            });
-        }
+    if let Some(extends) = obj.get("extends")
+        && !extends.is_array() && !extends.is_string()
+    {
+        errors.push(ConfigSchemaError::InvalidValue {
+            key: "extends".to_owned(),
+            message: "must be an array or string".to_owned(),
+        });
     }
 
-    if let Some(enabled) = obj.get("enabled") {
-        if !enabled.is_boolean() {
-            errors.push(ConfigSchemaError::InvalidValue {
-                key: "enabled".to_owned(),
-                message: format!("must be a boolean, got {}", value_type(enabled)),
-            });
-        }
+    if let Some(enabled) = obj.get("enabled") && !enabled.is_boolean() {
+        errors.push(ConfigSchemaError::InvalidValue {
+            key: "enabled".to_owned(),
+            message: format!("must be a boolean, got {}", value_type(enabled)),
+        });
     }
 
-    if let Some(schedule) = obj.get("schedule") {
-        if !schedule.is_array() && !schedule.is_string() {
-            errors.push(ConfigSchemaError::InvalidValue {
-                key: "schedule".to_owned(),
-                message: "must be an array or string".to_owned(),
-            });
-        }
+    if let Some(schedule) = obj.get("schedule")
+        && !schedule.is_array() && !schedule.is_string()
+    {
+        errors.push(ConfigSchemaError::InvalidValue {
+            key: "schedule".to_owned(),
+            message: "must be an array or string".to_owned(),
+        });
     }
 
-    if let Some(package_rules) = obj.get("packageRules") {
-        if !package_rules.is_array() {
-            errors.push(ConfigSchemaError::InvalidValue {
-                key: "packageRules".to_owned(),
-                message: "must be an array".to_owned(),
-            });
-        }
+    if let Some(package_rules) = obj.get("packageRules") && !package_rules.is_array() {
+        errors.push(ConfigSchemaError::InvalidValue {
+            key: "packageRules".to_owned(),
+            message: "must be an array".to_owned(),
+        });
     }
 
-    if let Some(labels) = obj.get("labels") {
-        if !labels.is_array() {
-            errors.push(ConfigSchemaError::InvalidValue {
-                key: "labels".to_owned(),
-                message: "must be an array".to_owned(),
-            });
-        }
+    if let Some(labels) = obj.get("labels") && !labels.is_array() {
+        errors.push(ConfigSchemaError::InvalidValue {
+            key: "labels".to_owned(),
+            message: "must be an array".to_owned(),
+        });
     }
 
-    if let Some(pr_hourly_limit) = obj.get("prHourlyLimit") {
-        if !pr_hourly_limit.is_number() {
-            errors.push(ConfigSchemaError::InvalidValue {
-                key: "prHourlyLimit".to_owned(),
-                message: "must be a number".to_owned(),
-            });
-        }
+    if let Some(pr_hourly_limit) = obj.get("prHourlyLimit") && !pr_hourly_limit.is_number() {
+        errors.push(ConfigSchemaError::InvalidValue {
+            key: "prHourlyLimit".to_owned(),
+            message: "must be a number".to_owned(),
+        });
     }
 
     if errors.is_empty() {

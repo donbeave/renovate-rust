@@ -39,7 +39,7 @@ pub fn create_onboarding_branch(
     let commit_message = global_config
         .onboarding_commit_message
         .as_deref()
-        .unwrap_or_else(|| "Add Renovate configuration")
+        .unwrap_or("Add Renovate configuration")
         .to_owned();
 
     OnboardingBranchCreateResult {

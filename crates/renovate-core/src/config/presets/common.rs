@@ -144,7 +144,7 @@ const RENAMED_MONOREPOS: &[(&str, &str)] = &[
 /// Returns the full removed-presets map including renamed monorepo entries.
 pub fn all_removed_presets() -> BTreeMap<String, Option<String>> {
     let mut map = BTreeMap::new();
-    for (&k, &v) in removed_presets().iter() {
+    for (&k, &v) in removed_presets() {
         map.insert(k.to_owned(), v.map(str::to_owned));
     }
     for &(from, to) in RENAMED_MONOREPOS {

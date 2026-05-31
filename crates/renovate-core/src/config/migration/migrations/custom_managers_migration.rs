@@ -46,7 +46,7 @@ impl Migration for CustomManagersMigration {
                 if map.contains_key("customType") {
                     return mgr.clone();
                 }
-                let mut new_map = map.clone();
+                let new_map = map.clone();
                 // Insert customType at the top by creating a new ordered map
                 let mut ordered = Map::new();
                 ordered.insert("customType".into(), Value::String("regex".into()));

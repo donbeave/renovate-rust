@@ -116,16 +116,17 @@ pub fn convert_npmrc_to_rules(config: &NpmrcConfig) -> NpmrcRules {
                         .unwrap_or_default();
                 rule.password = Some(decoded);
             }
-            "registry" => {
-                if key_parts.len() > 1 && !entry.value.is_empty() {
-                    let scope = key_parts[1].to_owned();
-                    if is_http_url(&entry.value) {
-                        rules.package_rules.push(NpmrcPackageRule {
-                            match_package_names: Some(vec![format!("{}/**", scope)]),
-                            registry_urls: vec![entry.value.clone()],
-                        });
-                    }
-                }
+            "registry"
+                if key_parts.len() > 1
+                    && !entry.value.is_empty()
+                    && is_http_url(&entry.value)
+                =>
+            {
+                let scope = key_parts[1].to_owned();
+                rules.package_rules.push(NpmrcPackageRule {
+                    match_package_names: Some(vec![format!("{}/**", scope)]),
+                    registry_urls: vec![entry.value.clone()],
+                });
             }
             _ => {}
         }
@@ -133,13 +134,13 @@ pub fn convert_npmrc_to_rules(config: &NpmrcConfig) -> NpmrcRules {
 
     rules.host_rules = hosts.into_values().collect();
 
-    if let Some(ref registry) = config.registry {
-        if is_http_url(registry) {
-            rules.package_rules.push(NpmrcPackageRule {
-                match_package_names: None,
-                registry_urls: vec![registry.clone()],
-            });
-        }
+    if let Some(ref registry) = config.registry
+        && is_http_url(registry)
+    {
+        rules.package_rules.push(NpmrcPackageRule {
+            match_package_names: None,
+            registry_urls: vec![registry.clone()],
+        });
     }
 
     rules
@@ -173,10 +174,8 @@ pub fn resolve_registry_url(config: &NpmrcConfig, package_name: &str) -> String 
         if let Some(ref patterns) = rule.match_package_names {
             for pattern in patterns {
                 let prefix = pattern.trim_end_matches("/**");
-                if package_name.starts_with(prefix) {
-                    if !rule.registry_urls.is_empty() {
-                        return rule.registry_urls[0].clone();
-                    }
+                if package_name.starts_with(prefix) && !rule.registry_urls.is_empty() {
+                    return rule.registry_urls[0].clone();
                 }
             }
         }

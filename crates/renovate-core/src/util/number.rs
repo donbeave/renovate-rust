@@ -7,7 +7,7 @@ pub fn parse_number(input: &str) -> Option<f64> {
 }
 
 pub fn is_positive_number(value: Option<f64>) -> bool {
-    value.map_or(false, |v| v > 0.0)
+    value.is_some_and(|v| v > 0.0)
 }
 
 #[cfg(test)]
@@ -20,6 +20,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn parse_number_float() {
         assert_eq!(parse_number("3.14"), Some(3.14));
     }

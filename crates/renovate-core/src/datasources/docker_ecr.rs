@@ -52,18 +52,16 @@ pub async fn get_ecr_auth_token(
     access_key_id: Option<&str>,
     secret_access_key: Option<&str>,
 ) -> Result<EcrAuthToken, EcrError> {
-    if let (Some(key), Some(secret)) = (access_key_id, secret_access_key) {
-        if key == "AWS" {
-            let encoded =
-                base64::Engine::encode(&base64::engine::general_purpose::STANDARD, format!(
-                    "AWS:{}",
-                    secret
-                ));
-            return Ok(EcrAuthToken {
-                token: encoded,
-                endpoint: None,
-            });
-        }
+    if let (Some("AWS"), Some(secret)) = (access_key_id, secret_access_key) {
+        let encoded =
+            base64::Engine::encode(&base64::engine::general_purpose::STANDARD, format!(
+                "AWS:{}",
+                secret
+            ));
+        return Ok(EcrAuthToken {
+            token: encoded,
+            endpoint: None,
+        });
     }
 
     let url = format!(

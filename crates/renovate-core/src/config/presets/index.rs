@@ -121,7 +121,7 @@ fn fetch_preset_sync(preset: &str) -> Result<Value, String> {
         return Ok(json!({}));
     }
 
-    let parsed = parse_preset(preset).map_err(|e| e)?;
+    let parsed = parse_preset(preset)?;
 
     if parsed.preset_source == "internal" {
         let preset_config = super::internal::get_internal_preset(&parsed.repo, &parsed.preset_name);

@@ -160,6 +160,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn stddev_calculates() {
         let mut v = Variance::new();
         v.update(2.0);

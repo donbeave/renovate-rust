@@ -24,9 +24,11 @@ mod tests {
 
     #[test]
     fn matching_rule_returned() {
-        let mut rule = PackageRule::default();
-        rule.match_package_names = vec!["lodash".to_owned()];
-        rule.has_name_constraint = true;
+        let rule = PackageRule {
+            match_package_names: vec!["lodash".to_owned()],
+            has_name_constraint: true,
+            ..Default::default()
+        };
         let rules = [rule];
         let ctx = DepContext::for_dep("lodash");
         let matching = apply_package_rules(&rules, &ctx);
@@ -35,9 +37,11 @@ mod tests {
 
     #[test]
     fn non_matching_rule_excluded() {
-        let mut rule = PackageRule::default();
-        rule.match_package_names = vec!["express".to_owned()];
-        rule.has_name_constraint = true;
+        let rule = PackageRule {
+            match_package_names: vec!["express".to_owned()],
+            has_name_constraint: true,
+            ..Default::default()
+        };
         let rules = [rule];
         let ctx = DepContext::for_dep("lodash");
         let matching = apply_package_rules(&rules, &ctx);

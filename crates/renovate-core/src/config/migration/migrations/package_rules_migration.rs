@@ -220,13 +220,13 @@ impl Migration for PackageRulesMigration {
 
         let new_rules: Vec<Value> = arr
             .iter()
-            .filter_map(|rule| {
+            .map(|rule| {
                 let Value::Object(map) = rule else {
-                    return Some(rule.clone());
+                    return rule.clone();
                 };
                 let renamed = rename_keys(map);
                 let merged = merge_matchers(&renamed);
-                Some(Value::Object(merged))
+                Value::Object(merged)
             })
             .collect();
 

@@ -46,6 +46,7 @@ struct DescribeImagesResponse {
 #[serde(rename_all = "PascalCase")]
 struct AmiImage {
     image_id: Option<String>,
+    #[allow(dead_code)]
     name: Option<String>,
     creation_date: Option<String>,
     deprecation_time: Option<String>,

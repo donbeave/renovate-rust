@@ -24,12 +24,12 @@ pub fn sanitize_url(url: &str) -> String {
 }
 
 fn strip_credentials_from_url(url: &str) -> String {
-    if let Some(at_pos) = url.find('@') {
-        if let Some(scheme_end) = url.find("://") {
-            let after_scheme = scheme_end + 3;
-            if at_pos > after_scheme {
-                return format!("{}{}", &url[..after_scheme], &url[at_pos + 1..]);
-            }
+    if let Some(at_pos) = url.find('@')
+        && let Some(scheme_end) = url.find("://")
+    {
+        let after_scheme = scheme_end + 3;
+        if at_pos > after_scheme {
+            return format!("{}{}", &url[..after_scheme], &url[at_pos + 1..]);
         }
     }
     url.to_owned()

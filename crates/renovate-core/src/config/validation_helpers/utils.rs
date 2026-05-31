@@ -21,7 +21,7 @@ pub fn get_parent_name(parent_path: Option<&str>) -> String {
         .unwrap()
         .replace(&path, "");
     path.split('.')
-        .last()
+        .next_back()
         .unwrap_or(".")
         .to_owned()
 }
@@ -82,12 +82,11 @@ pub fn get_validation_message(topic: &str, message: &str) -> ValidationMessage {
 /// Check whether a global-only option is actually a "false global"
 /// (i.e., valid in hostRules context).
 pub fn is_false_global(option_name: &str, parent_path: Option<&str>) -> bool {
-    if let Some(path) = parent_path {
-        if path.contains("hostRules") {
-            if option_name == "token" || option_name == "username" || option_name == "password" {
-                return true;
-            }
-        }
+    if let Some(path) = parent_path
+        && path.contains("hostRules")
+        && (option_name == "token" || option_name == "username" || option_name == "password")
+    {
+        return true;
     }
     false
 }

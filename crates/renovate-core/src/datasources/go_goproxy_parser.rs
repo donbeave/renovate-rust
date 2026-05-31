@@ -23,7 +23,7 @@ pub fn parse_goproxy(input: &str) -> Vec<GoproxyItem> {
     }
 
     let result: Vec<GoproxyItem> = input
-        .split(|c: char| c == ',' || c == '|')
+        .split([',', '|'])
         .filter(|s| !s.is_empty())
         .map(|url| {
             let sep = find_separator_after(input, url);
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn parse_goproxy_comma_separator() {
         let items = parse_goproxy("https://proxy.golang.org,direct");
-        assert!(items.len() >= 1);
+        assert!(!items.is_empty());
     }
 
     #[test]
