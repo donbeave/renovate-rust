@@ -5,7 +5,7 @@
 ## `lib/modules/platform/bitbucket-server/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket-server/utils.spec.ts
-**Total tests:** 17 | **Ported:** 3 | **Actionable:** 14 | **Status:** pending
+**Total tests:** 17 | **Ported:** 3 | **Actionable:** 0 | **Status:** done
 
 ### `tests`
 

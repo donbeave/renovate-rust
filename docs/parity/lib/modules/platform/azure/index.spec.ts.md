@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/index.spec.ts
-**Total tests:** 79 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 79 | **Ported:** 2 | **Actionable:** 2 | **Status:** done
 
 ### `initPlatform()`
 
@@ -150,8 +150,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns updated pr body | 1621 | not-applicable | Mock framework internals — tests azure platform via vitest-mocked Azure DevOps API; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| returns updated comment content | 1630 | not-applicable | Mock framework internals — tests azure platform via vitest-mocked Azure DevOps API; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
+| returns updated pr body | 1621 | ported | `azure_utils.rs` | `massage_markdown_returns_updated_pr_body` | — |
+| returns updated comment content | 1630 | ported | `azure_utils.rs` | `massage_markdown_returns_updated_comment_content` | — |
 
 ### `setBranchStatus`
 

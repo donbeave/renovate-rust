@@ -5,7 +5,7 @@
 ## `lib/modules/platform/bitbucket-server/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket-server/index.spec.ts
-**Total tests:** 139 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 139 | **Ported:** 3 | **Actionable:** 3 | **Status:** done
 
 ### `endpoint with path › initPlatform()`
 
@@ -194,9 +194,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns diff files | 2507 | not-applicable | Mock framework internals — tests bitbucket-server platform via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
-| sanitizes HTML comments in the body | 2515 | not-applicable | Mock framework internals — tests bitbucket-server platform via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
-| resizes mend.io merge confidence badges | 2530 | not-applicable | Mock framework internals — tests bitbucket-server platform via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns diff files | 2507 | ported | `bitbucket_server.rs` | `massage_markdown_returns_diff_files` | — |
+| sanitizes HTML comments in the body | 2515 | ported | `bitbucket_server.rs` | `massage_markdown_sanitizes_html_comments` | — |
+| resizes mend.io merge confidence badges | 2530 | ported | `bitbucket_server.rs` | `massage_markdown_resizes_mend_badges` | — |
 
 ### `endpoint with path › getBranchStatus()`
 

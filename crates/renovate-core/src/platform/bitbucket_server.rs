@@ -438,6 +438,39 @@ impl PlatformClient for BitbucketServerClient {
     }
 }
 
+/// Bitbucket Server `maxBodyLength` constant.
+///
+/// Mirrors `maxBodyLength` from `lib/modules/platform/bitbucket-server/index.ts`.
+pub const BBS_MAX_BODY_LENGTH: usize = 30000;
+
+/// Transform Markdown content for Bitbucket Server compatibility.
+///
+/// Replaces HTML tags with Markdown equivalents, strips comments, resizes badges.
+/// Mirrors `massageMarkdown` from `lib/modules/platform/bitbucket-server/index.ts`.
+pub fn massage_markdown(input: &str) -> String {
+    use crate::platform::pr_body::smart_truncate;
+    let s = smart_truncate(input, BBS_MAX_BODY_LENGTH);
+    let s = s.replace(
+        "you tick the rebase/retry checkbox",
+        "PR is renamed to start with \"rebase!\"",
+    );
+    let s = s.replace(
+        "checking the rebase/retry box above",
+        "renaming the PR to start with \"rebase!\"",
+    );
+    let re = regex::Regex::new(r"</?summary>").unwrap();
+    let s = re.replace_all(&s, "**").into_owned();
+    let re = regex::Regex::new(r"</?details>").unwrap();
+    let s = re.replace_all(&s, "").into_owned();
+    let re = regex::Regex::new(r"\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)").unwrap();
+    let s = re.replace(&s, "").into_owned();
+    let re = regex::Regex::new(r"<!--.*?-->").unwrap();
+    let s = re.replace_all(&s, "").into_owned();
+    let re =
+        regex::Regex::new(r"(!\[.+?\]\(https://developer\.mend\.io/api/mc/badges/.+?\))").unwrap();
+    re.replace_all(&s, "$1{height=20}").into_owned()
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{method, path};
@@ -630,5 +663,37 @@ mod tests {
         let client = make_client(&server.uri());
         let result = merge_pr(&client, "PROJ", "myrepo", 5, None).await;
         assert!(result.is_err());
+    }
+
+    // Ported: "returns diff files" — modules/platform/bitbucket-server/index.spec.ts line 2507
+    #[test]
+    fn massage_markdown_returns_diff_files() {
+        let input = "<details><summary>foo</summary>bar</details>text<details>";
+        let result = massage_markdown(input);
+        assert!(result.contains("**foo**"));
+        assert!(result.contains("bar"));
+        assert!(result.contains("text"));
+        assert!(!result.contains("<details>"));
+        assert!(!result.contains("<summary>"));
+    }
+
+    // Ported: "sanitizes HTML comments in the body" — modules/platform/bitbucket-server/index.spec.ts line 2515
+    #[test]
+    fn massage_markdown_sanitizes_html_comments() {
+        let input = "---\n\n- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox\n- [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href=\"/some/link\">Update renovate/renovate to 16.1.2</a>\n\n---\n<!---->\nEmpty comment.\n<!-- This is another comment -->\nFollowed by some information.\n<!-- followed by some more comments -->";
+        let result = massage_markdown(input);
+        assert!(!result.contains("<!--"));
+        assert!(!result.contains("-->"));
+        assert!(result.contains("Empty comment."));
+        assert!(result.contains("Followed by some information."));
+    }
+
+    // Ported: "resizes mend.io merge confidence badges" — modules/platform/bitbucket-server/index.spec.ts line 2530
+    #[test]
+    fn massage_markdown_resizes_mend_badges() {
+        let badge_url = "https://developer.mend.io/api/mc/badges/age/npm/yargs/18.0.0?slim=true";
+        let input = format!("| ![age]({badge_url}) |");
+        let expected = format!("| ![age]({badge_url}){{height=20}} |");
+        assert_eq!(massage_markdown(&input), expected);
     }
 }

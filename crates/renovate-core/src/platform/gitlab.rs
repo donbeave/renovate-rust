@@ -425,10 +425,14 @@ pub fn extract_rules_from_code_owners_lines(lines: &[&str]) -> Vec<FileOwnerRule
 pub fn massage_markdown(input: &str) -> String {
     use crate::platform::pr_body::smart_truncate;
     let desc = input
-        .replace("Pull Request", "Merge Request")
-        .replace("PR: #", "MR: !")
-        .replace("PRs", "MRs")
-        .replace("PR", "MR")
+        .replace("Pull Request", "Merge Request");
+    let re_pr_hash = regex::Regex::new(r"\bPR: #").unwrap();
+    let desc = re_pr_hash.replace_all(&desc, "MR: !").into_owned();
+    let re_prs = regex::Regex::new(r"\bPRs\b").unwrap();
+    let desc = re_prs.replace_all(&desc, "MRs").into_owned();
+    let re_pr = regex::Regex::new(r"\bPR\b").unwrap();
+    let desc = re_pr.replace_all(&desc, "MR").into_owned();
+    let desc = desc
         .replace("](../pull/", "](!")
         .replace("](../issues/", "](#")
         .replace('\u{0000}', "");

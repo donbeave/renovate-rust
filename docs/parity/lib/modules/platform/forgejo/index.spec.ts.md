@@ -5,7 +5,7 @@
 ## `lib/modules/platform/forgejo/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/forgejo/index.spec.ts
-**Total tests:** 137 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 137 | **Ported:** 3 | **Actionable:** 3 | **Status:** done
 
 ### `initPlatform()`
 
@@ -253,9 +253,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| replaces pr links | 3008 | not-applicable | Mock framework internals — tests forgejo platform via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
-| replaces issue links | 3017 | not-applicable | Mock framework internals — tests forgejo platform via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
-| maxBodyLength | 3027 | not-applicable | Mock framework internals — tests forgejo platform via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| replaces pr links | 3009 | ported | `gitea_forgejo_utils.rs` | `smart_links_replaces_pr_links` | — |
+| replaces issue links | 3018 | ported | `gitea_forgejo_utils.rs` | `smart_links_replaces_issue_links` | — |
+| maxBodyLength | 3028 | ported | `gitea_forgejo_utils.rs` | `max_body_length_is_1_000_000` | — |
 
 ### `getJsonFile()`
 

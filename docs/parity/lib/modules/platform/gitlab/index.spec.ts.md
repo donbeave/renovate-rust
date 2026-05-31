@@ -5,7 +5,7 @@
 ## `lib/modules/platform/gitlab/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitlab/index.spec.ts
-**Total tests:** 163 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 163 | **Ported:** 6 | **Actionable:** 6 | **Status:** done
 
 ### `initPlatform()`
 
@@ -258,13 +258,13 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| strips invalid unicode null characters | 3941 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| replaces PR with MR including pluralization | 3949 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| replaces PR reference with MR reference | 3957 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| replaces PR relative link with MR reference | 3963 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| replaces issues relative link with issue reference | 3971 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| avoids false positives when replacing PR with MR | 3979 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| returns updated pr body | 3984 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
+| strips invalid unicode null characters | 3941 | ported | `gitlab.rs` | `massage_markdown_strips_null_chars` | — |
+| replaces PR with MR including pluralization | 3949 | ported | `gitlab.rs` | `massage_markdown_replaces_pr_with_mr` | — |
+| replaces PR reference with MR reference | 3957 | ported | `gitlab.rs` | `massage_markdown_replaces_pr_ref` | — |
+| replaces PR relative link with MR reference | 3963 | ported | `gitlab.rs` | `massage_markdown_replaces_pr_link` | — |
+| replaces issues relative link with issue reference | 3971 | ported | `gitlab.rs` | `massage_markdown_replaces_issues_link` | — |
+| avoids false positives when replacing PR with MR | 3979 | ported | `gitlab.rs` | `massage_markdown_avoids_false_positives` | — |
+| returns updated pr body | 3984 | not-applicable | Requires TS module state (gitLabVersion, smartTruncate mock) for snapshot testing | — | Snapshot test depends on TS test infrastructure |
 | truncates description if too low API version | 3993 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
 | truncates description for API version gt 13.4 | 4003 | not-applicable | Mock framework internals — tests gitlab platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
 

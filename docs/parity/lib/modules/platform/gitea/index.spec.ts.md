@@ -5,7 +5,7 @@
 ## `lib/modules/platform/gitea/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/index.spec.ts
-**Total tests:** 134 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
+**Total tests:** 134 | **Ported:** 3 | **Actionable:** 3 | **Status:** done
 
 ### `initPlatform()`
 
@@ -250,9 +250,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| replaces pr links | 2920 | not-applicable | Mock framework internals — tests gitea platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| replaces issue links | 2929 | not-applicable | Mock framework internals — tests gitea platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
-| maxBodyLength | 2939 | not-applicable | Mock framework internals — tests gitea platform via nock HTTP mocks; Rust tests this at different layer | — | Rust PlatformClient implements core methods; orchestration wrappers not in Rust |
+| replaces pr links | 2920 | ported | `gitea_forgejo_utils.rs` | `smart_links_replaces_pr_links` | — |
+| replaces issue links | 2929 | ported | `gitea_forgejo_utils.rs` | `smart_links_replaces_issue_links` | — |
+| maxBodyLength | 2939 | ported | `gitea_forgejo_utils.rs` | `max_body_length_is_1_000_000` | — |
 
 ### `getJsonFile()`
 
