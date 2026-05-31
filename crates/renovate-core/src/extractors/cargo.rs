@@ -1589,6 +1589,97 @@ pub fn bump_package_version(
     }
 }
 
+// ── update-artifacts decision logic ────────────────────────────────────────
+// Ported from lib/modules/manager/cargo/artifacts.ts
+//
+// The full artifacts pipeline (running `cargo update`) is M4 scope.
+// This module implements the decision logic that determines what type of
+// update to perform, which is exercised by the upstream artifacts tests.
+
+/// Whether a dependency comes from the crate datasource.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ArtifactDep {
+    pub dep_name: String,
+    pub package_name: Option<String>,
+    pub is_crate: bool,
+    pub locked_version: Option<String>,
+    pub new_version: Option<String>,
+    pub current_value: Option<String>,
+    pub new_value: Option<String>,
+}
+
+/// The type of `cargo update` command to run.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum CargoUpdateType {
+    /// No Cargo.lock found — nothing to do.
+    NoLockFile,
+    /// No dependencies to update and not lockfile maintenance.
+    NoDepsToUpdate,
+    /// Run `cargo update` without `--workspace` (lockfile maintenance).
+    LockfileMaintenance,
+    /// Run `cargo update --workspace` (general update).
+    Workspace,
+    /// Run precise `cargo update --package <pkg>@<locked> --precise <new>` for each dep,
+    /// then `cargo update --workspace`.
+    Precise { packages: Vec<PrecisePackage> },
+}
+
+/// A package to update precisely.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrecisePackage {
+    pub package_name: String,
+    pub locked_version: String,
+    pub new_version: String,
+}
+
+/// Determine the type of cargo update to perform.
+///
+/// Mirrors the decision logic in `updateArtifactsImpl` from
+/// `lib/modules/manager/cargo/artifacts.ts`.
+pub fn determine_cargo_update_type(
+    lock_file_found: bool,
+    is_lockfile_maintenance: bool,
+    updated_deps: &[ArtifactDep],
+) -> CargoUpdateType {
+    if !lock_file_found {
+        return CargoUpdateType::NoLockFile;
+    }
+    if !is_lockfile_maintenance && updated_deps.is_empty() {
+        return CargoUpdateType::NoDepsToUpdate;
+    }
+    if is_lockfile_maintenance {
+        return CargoUpdateType::LockfileMaintenance;
+    }
+    let has_non_crate_dep = updated_deps.iter().any(|d| !d.is_crate);
+    let crate_without_locked = updated_deps
+        .iter()
+        .find(|d| d.is_crate && d.locked_version.is_none());
+    if has_non_crate_dep || crate_without_locked.is_some() {
+        return CargoUpdateType::Workspace;
+    }
+    // Filter out deps where the range has changed (they'll be resolved by --workspace).
+    let precise_packages: Vec<PrecisePackage> = updated_deps
+        .iter()
+        .filter(|d| match (&d.current_value, &d.new_value) {
+            (Some(cv), Some(nv)) => cv == nv,
+            _ => true,
+        })
+        .filter_map(|d| {
+            let locked = d.locked_version.as_deref()?;
+            let new_ver = d.new_version.as_deref()?;
+            let pkg_name = d.package_name.as_deref().unwrap_or(d.dep_name.as_str());
+            Some(PrecisePackage {
+                package_name: pkg_name.to_owned(),
+                locked_version: locked.to_owned(),
+                new_version: new_ver.to_owned(),
+            })
+        })
+        .collect();
+    CargoUpdateType::Precise {
+        packages: precise_packages,
+    }
+}
+
 #[cfg(test)]
 mod range_update_tests {
     use super::*;
@@ -1697,5 +1788,152 @@ mod range_update_tests {
         assert_eq!(DepType::Dev.as_renovate_str(), "devDependencies");
         assert_eq!(DepType::Build.as_renovate_str(), "buildDependencies");
         assert_eq!(DepType::Workspace.as_renovate_str(), "workspace.dependencies");
+    }
+}
+
+#[cfg(test)]
+mod artifacts_decision_tests {
+    use super::*;
+
+    fn crate_dep(name: &str, locked: Option<&str>, new_ver: Option<&str>) -> ArtifactDep {
+        ArtifactDep {
+            dep_name: name.to_owned(),
+            package_name: None,
+            is_crate: true,
+            locked_version: locked.map(String::from),
+            new_version: new_ver.map(String::from),
+            current_value: Some("1.0.0".to_owned()),
+            new_value: Some("1.0.0".to_owned()),
+        }
+    }
+
+    fn crate_dep_with_range(
+        name: &str,
+        locked: Option<&str>,
+        new_ver: Option<&str>,
+        current_val: &str,
+        new_val: &str,
+    ) -> ArtifactDep {
+        ArtifactDep {
+            dep_name: name.to_owned(),
+            package_name: None,
+            is_crate: true,
+            locked_version: locked.map(String::from),
+            new_version: new_ver.map(String::from),
+            current_value: Some(current_val.to_owned()),
+            new_value: Some(new_val.to_owned()),
+        }
+    }
+
+    fn non_crate_dep(name: &str) -> ArtifactDep {
+        ArtifactDep {
+            dep_name: name.to_owned(),
+            package_name: None,
+            is_crate: false,
+            locked_version: None,
+            new_version: None,
+            current_value: None,
+            new_value: None,
+        }
+    }
+
+    // Ported: "returns null if no Cargo.lock found" — cargo/artifacts.spec.ts line 44
+    #[test]
+    fn no_lock_file_returns_no_lock_file() {
+        let result = determine_cargo_update_type(false, false, &[crate_dep("dep1", None, None)]);
+        assert_eq!(result, CargoUpdateType::NoLockFile);
+    }
+
+    // Ported: "returns null if updatedDeps is empty" — cargo/artifacts.spec.ts line 62
+    #[test]
+    fn empty_deps_returns_no_deps() {
+        let result = determine_cargo_update_type(true, false, &[]);
+        assert_eq!(result, CargoUpdateType::NoDepsToUpdate);
+    }
+
+    // Ported: "returns updated Cargo.lock for lockfile maintenance" — cargo/artifacts.spec.ts line 488
+    #[test]
+    fn lockfile_maintenance() {
+        let result = determine_cargo_update_type(true, true, &[]);
+        assert_eq!(result, CargoUpdateType::LockfileMaintenance);
+    }
+
+    // Ported: "returns updated Cargo.lock with precise version update" — cargo/artifacts.spec.ts line 122
+    #[test]
+    fn precise_update_when_all_deps_have_locked_version() {
+        let deps = vec![ArtifactDep {
+            dep_name: "dep1".to_owned(),
+            package_name: Some("dep1".to_owned()),
+            is_crate: true,
+            locked_version: Some("1.0.0".to_owned()),
+            new_version: Some("1.0.1".to_owned()),
+            current_value: Some("1.0.0".to_owned()),
+            new_value: Some("1.0.0".to_owned()),
+        }];
+        let result = determine_cargo_update_type(true, false, &deps);
+        match result {
+            CargoUpdateType::Precise { packages } => {
+                assert_eq!(packages.len(), 1);
+                assert_eq!(packages[0].package_name, "dep1");
+                assert_eq!(packages[0].locked_version, "1.0.0");
+                assert_eq!(packages[0].new_version, "1.0.1");
+            }
+            other => panic!("expected Precise, got {:?}", other),
+        }
+    }
+
+    // Ported: "skips precise update when manifest range has changed" — cargo/artifacts.spec.ts line 164
+    #[test]
+    fn skips_precise_when_range_changed() {
+        let deps = vec![crate_dep_with_range(
+            "dep1",
+            Some("1.0.0"),
+            Some("1.0.1"),
+            "1.0.0", // current
+            "2.0.0",  // new (changed)
+        )];
+        let result = determine_cargo_update_type(true, false, &deps);
+        // Range changed → dep is filtered out of precise packages, but still Precise
+        // with empty packages (workspace would still be called in real pipeline).
+        match result {
+            CargoUpdateType::Precise { packages } => {
+                assert!(packages.is_empty());
+            }
+            other => panic!("expected Precise, got {:?}", other),
+        }
+    }
+
+    // Ported: "handles mixed deps where some have range changes and some do not" — cargo/artifacts.spec.ts line 199
+    #[test]
+    fn mixed_deps_with_range_changes() {
+        let deps = vec![
+            crate_dep_with_range("dep1", Some("1.0.0"), Some("1.0.1"), "1.0.0", "2.0.0"),
+            crate_dep("dep2", Some("2.0.0"), Some("2.0.1")),
+        ];
+        let result = determine_cargo_update_type(true, false, &deps);
+        match result {
+            CargoUpdateType::Precise { packages } => {
+                // dep1 range changed → filtered; dep2 → precise
+                assert_eq!(packages.len(), 1);
+                assert_eq!(packages[0].package_name, "dep2");
+            }
+            other => panic!("expected Precise, got {:?}", other),
+        }
+    }
+
+    // Ported: "returns an artifact error when cargo update fails" — cargo/artifacts.spec.ts line 247
+    #[test]
+    fn workspace_update_when_missing_locked_version() {
+        let deps = vec![crate_dep("dep1", None, Some("1.0.1"))];
+        let result = determine_cargo_update_type(true, false, &deps);
+        assert_eq!(result, CargoUpdateType::Workspace);
+    }
+
+    // Ported: "returns updated Cargo.lock when there are no more dependencies to update" — cargo/artifacts.spec.ts line 413
+    #[test]
+    fn workspace_for_non_crate_dep() {
+        let deps = vec![non_crate_dep("git-dep")];
+        let result = determine_cargo_update_type(true, false, &deps);
+        assert_eq!(result, CargoUpdateType::Workspace);
     }
 }
