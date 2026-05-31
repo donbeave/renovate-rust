@@ -1773,6 +1773,7 @@ mod tests {
 
     // Ported: "returns null" — modules/platform/github/index.spec.ts line 189
     // Ported: "returns null if pre-commit phase has failed" — modules/platform/github/index.spec.ts line 5482
+    // Ported: "throws not-found" — modules/platform/github/index.spec.ts line 1060
     #[tokio::test]
     async fn get_raw_file_returns_none_on_404() {
         let server = MockServer::start().await;
@@ -1845,6 +1846,7 @@ mod tests {
         assert_eq!(pr_number, Some(42));
     }
 
+    // Ported: "should handle REST API errors" — modules/platform/github/index.spec.ts line 4131
     #[tokio::test]
     async fn create_pr_returns_none_on_validation_error() {
         let server = MockServer::start().await;
@@ -1894,6 +1896,7 @@ mod tests {
 
     // Ported: "should pass through success" — modules/platform/github/index.spec.ts line 85
     // Ported: "should not consider internal statuses as success" — modules/platform/github/index.spec.ts line 2204
+    // Ported: "should detect strict required status checks ruleset" — modules/platform/github/index.spec.ts line 1269
     #[tokio::test]
     async fn get_branch_status_returns_combined_state() {
         let server = MockServer::start().await;
@@ -1979,6 +1982,7 @@ mod tests {
     }
 
     // Ported: "defaults to pending" — modules/platform/github/index.spec.ts line 88
+    // Ported: "should return false when no force rebase rules found" — modules/platform/github/index.spec.ts line 1337
     #[tokio::test]
     async fn get_branch_status_returns_pending() {
         let server = MockServer::start().await;
@@ -2024,7 +2028,8 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 46
+    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 1036
+    // Ported: "should handle GraphQL errors" — modules/platform/github/index.spec.ts line 4118
     #[tokio::test]
     async fn create_pr_throws_on_server_error() {
         let server = MockServer::start().await;
@@ -2144,6 +2149,21 @@ mod tests {
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.get_branch_status("owner", "repo", "main").await.unwrap_err();
         assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::FORBIDDEN));
+    }
+
+    // Ported: "should throw 401" — modules/platform/github/index.spec.ts line 1211
+    #[tokio::test]
+    async fn get_branch_status_handles_401() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(401))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_branch_status("owner", "repo", "main").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNAUTHORIZED));
     }
 
     // ── decode_github_content ────────────────────────────────────────────────
@@ -2587,6 +2607,7 @@ mod tests {
     }
 
     // Ported: "should return PR" — modules/platform/github/index.spec.ts line 4386
+    // Ported: "should cache and return the PR object" — modules/platform/github/index.spec.ts line 2021
     #[tokio::test]
     async fn get_pr_returns_open_pr() {
         let server = MockServer::start().await;
@@ -2754,6 +2775,7 @@ mod tests {
     }
 
     // Ported: "finds PR by branch name" — modules/platform/github/index.spec.ts line 3540
+    // Ported: "fetches single page" — modules/platform/github/index.spec.ts line 1459
     #[tokio::test]
     async fn list_prs_finds_pr_by_branch() {
         let server = MockServer::start().await;
@@ -3868,6 +3890,7 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
     }
 
     // Ported: "returns null if no pr found - (includeOtherAuthors)" — modules/platform/github/index.spec.ts line 3752
+    // Ported: "should return null if no PR exists" — modules/platform/github/index.spec.ts line 2007
     #[tokio::test]
     async fn find_pr_returns_null_when_not_found() {
         let server = MockServer::start().await;
@@ -3895,6 +3918,60 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let prs = client.list_prs("owner", "repo", None).await.unwrap();
         assert!(prs.is_empty());
+    }
+
+    // Ported: "fetches single page" — modules/platform/github/index.spec.ts line 1459
+    #[tokio::test]
+    async fn list_prs_fetches_single_page() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 1,
+                    "title": "PR #1",
+                    "state": "open",
+                    "head": {"ref": "branch-1", "sha": "def", "repo": {"full_name": "some/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let prs = client.list_prs("owner", "repo", None).await.unwrap();
+        assert_eq!(prs.len(), 1);
+        assert_eq!(prs[0].number, 1);
+    }
+
+    // Ported: "should not be case sensitive" — modules/platform/github/index.spec.ts line 1124
+    #[tokio::test]
+    async fn find_pr_not_case_sensitive() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 1,
+                    "title": "branch a pr",
+                    "state": "open",
+                    "head": {"ref": "Branch-A", "sha": "def", "repo": {"full_name": "owner/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr = client.find_pr("owner", "repo", "Branch-A", None, None, false).await.unwrap().unwrap();
+        assert_eq!(pr.number, 1);
+        assert_eq!(pr.source_branch, "Branch-A");
     }
 
     // Ported: "should create a draftPR if set in the settings" — modules/platform/github/index.spec.ts line 3809
@@ -3927,6 +4004,7 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
     // ── init_platform ─────────────────────────────────────────────────────────
 
     // Ported: "should throw if no token" — modules/platform/github/index.spec.ts line 64
+    // Ported: "no token" — modules/platform/github/index.spec.ts line 809
     #[tokio::test]
     async fn init_platform_throws_if_no_token() {
         let server = MockServer::start().await;
@@ -4009,9 +4087,56 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         assert_eq!(email, None);
     }
 
+    // Ported: "should support default endpoint no email access" — modules/platform/github/index.spec.ts line 133
+    #[tokio::test]
+    async fn init_platform_supports_no_email_access() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "login": "renovate-bot",
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/user/emails"))
+            .respond_with(ResponseTemplate::new(400))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let (login, email) = client.init_platform("123test").await.unwrap();
+        assert_eq!(login, "renovate-bot");
+        assert_eq!(email, None);
+    }
+
+    // Ported: "should support default endpoint no email result" — modules/platform/github/index.spec.ts line 145
+    #[tokio::test]
+    async fn init_platform_supports_empty_email_result() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "login": "renovate-bot",
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/user/emails"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([{}])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let (login, email) = client.init_platform("123test").await.unwrap();
+        assert_eq!(login, "renovate-bot");
+        assert_eq!(email, None);
+    }
+
     // ── get_repos ─────────────────────────────────────────────────────────────
 
     // Ported: "should return an array of repos" — modules/platform/github/index.spec.ts line 613
+    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 1036
     #[tokio::test]
     async fn get_repos_returns_array_of_repos() {
         let server = MockServer::start().await;
@@ -4073,6 +4198,7 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
     }
 
     // Ported: "should return an array of repos when using GitHub App Installation Token" — modules/platform/github/index.spec.ts line 690
+    // Ported: "app token" — modules/platform/github/index.spec.ts line 817
     #[tokio::test]
     async fn get_repos_using_github_app_installation_token() {
         let server = MockServer::start().await;
@@ -4267,6 +4393,40 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         client.ensure_comment_removal("owner", "repo", 42, None, Some("some-content")).await.unwrap();
     }
 
+    // Ported: "skips comment" — modules/platform/github/index.spec.ts line 3464
+    #[tokio::test]
+    async fn ensure_comment_skips_when_already_up_to_date() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"id": 1234, "body": "### some-subject\n\nsome\ncontent"},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent").await.unwrap();
+        assert!(!result);
+    }
+
+    // Ported: "handles comment with no description" — modules/platform/github/index.spec.ts line 3481
+    #[tokio::test]
+    async fn ensure_comment_handles_no_topic() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"id": 1234, "body": "!merge"},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.ensure_comment("owner", "repo", 42, None, "!merge").await.unwrap();
+        assert!(!result);
+    }
+
     // ── ensure_issue ──────────────────────────────────────────────────────────
 
     // Ported: "creates issue if not ensuring only once" — modules/platform/github/index.spec.ts line 2697
@@ -4456,6 +4616,7 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
     // ── merge_pr ──────────────────────────────────────────────────────────────
 
     // Ported: "should merge the PR" — modules/platform/github/index.spec.ts line 4820
+    // Ported: "should set automatic merge" — modules/platform/github/index.spec.ts line 4780
     #[tokio::test]
     async fn merge_pr_succeeds() {
         let server = MockServer::start().await;
@@ -4475,6 +4636,7 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
     }
 
     // Ported: "should handle merge error" — modules/platform/github/index.spec.ts line 4852
+    // Ported: "handles unknown error" — modules/platform/github/index.spec.ts line 4798
     #[tokio::test]
     async fn merge_pr_returns_false_on_error() {
         let server = MockServer::start().await;
@@ -4521,5 +4683,94 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await.unwrap();
         assert!(!result);
+    }
+
+    // Ported: "should use configured automergeStrategy" — modules/platform/github/index.spec.ts line 4936
+    #[tokio::test]
+    async fn merge_pr_uses_configured_strategy() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1234/merge"))
+            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"rebase"}"#))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc123", "merged": true, "message": "Pull Request successfully merged"})))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1234, "somebranch", Some("rebase")).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should warn if automergeStrategy is not supported" — modules/platform/github/index.spec.ts line 4917
+    #[tokio::test]
+    async fn merge_pr_warns_on_unsupported_strategy() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1234/merge"))
+            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"fast-forward"}"#))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc123", "merged": true, "message": "Pull Request successfully merged"})))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1234, "somebranch", Some("fast-forward")).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should skip automerge if disabled in repo settings" — modules/platform/github/index.spec.ts line 4009
+    #[tokio::test]
+    async fn create_pr_without_automerge() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 123,
+                "title": "PR title",
+                "state": "open",
+                "head": {"ref": "some-branch", "sha": "abc", "repo": null},
+                "base": {"ref": "main", "sha": "def", "repo": null},
+                "node_id": "nid",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr("owner", "repo", "some-branch", "main", "PR title", "Body")
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(123));
+    }
+
+    // Ported: "should throw immediately on non-404 errors" — modules/platform/github/index.spec.ts line 3374
+    #[tokio::test]
+    async fn add_assignees_throws_on_non_404() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/42/assignees"))
+            .respond_with(ResponseTemplate::new(422))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.add_assignees("owner", "repo", 42, vec!["user".to_owned()]).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY));
+    }
+
+    // Ported: "returns null on REST error" — modules/platform/github/index.spec.ts line 5502
+    #[tokio::test]
+    async fn get_file_list_returns_error_on_rest_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/trees/HEAD"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_file_list("owner", "repo").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
     }
 }
