@@ -11,10 +11,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| platformCommit = disabled => delegate to git | 26 | pending | — | — |Tests GitHub SCM with vitest mocking; no Rust equivalent |
-| platformCommit = enabled => delegate to github | 39 | pending | — | — |Tests GitHub SCM with vitest mocking; no Rust equivalent |
-| platformCommit = auto => delegate to git | 52 | pending | — | — |Tests GitHub SCM with vitest mocking; no Rust equivalent |
-| platformCommit = auto and is a github app => delegate to github | 65 | pending | — | — |Tests GitHub SCM with vitest mocking; no Rust equivalent |
+| platformCommit = disabled => delegate to git | 26 | not-applicable | — | — |Tests GitHub SCM with vitest mocking; no Rust equivalent |
+| platformCommit = enabled => delegate to github | 39 | not-applicable | — | — |Tests GitHub SCM with vitest mocking; no Rust equivalent |
+| platformCommit = auto => delegate to git | 52 | not-applicable | — | — |Tests GitHub SCM with vitest mocking; no Rust equivalent |
+| platformCommit = auto and is a github app => delegate to github | 65 | not-applicable | — | — |Tests GitHub SCM with vitest mocking; no Rust equivalent |
 
 ---
 
