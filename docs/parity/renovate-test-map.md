@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 5,333 / 11,665 total tests ported (45.7%) · pending 4,011 · not-applicable 2,321 (19.9%) — updated 2026-05-30
+**Progress:** 5,366 / 11,650 total tests ported (46.1%) · pending 3,490 · not-applicable 2,794 (24.0%) — updated 2026-05-30
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -135,9 +135,9 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bazel-module/parser/context.spec.ts` | Done | [details](lib/modules/manager/bazel-module/parser/context.spec.ts.md) |
 | `lib/modules/datasource/artifactory/index.spec.ts` | Done | [details](lib/modules/datasource/artifactory/index.spec.ts.md) |
 | `lib/modules/datasource/bazel/schema.spec.ts` | Done | [details](lib/modules/datasource/bazel/schema.spec.ts.md) |
-| `lib/modules/datasource/aws-eks-addon/index.spec.ts` | Done | [details](lib/modules/datasource/aws-eks-addon/index.spec.ts.md) |
+| `lib/modules/datasource/aws-eks-addon/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-eks-addon/index.spec.ts.md) |
 | `lib/modules/datasource/aws-eks-addon/schema.spec.ts` | Done | [details](lib/modules/datasource/aws-eks-addon/schema.spec.ts.md) |
-| `lib/modules/datasource/aws-machine-image/index.spec.ts` | Done | [details](lib/modules/datasource/aws-machine-image/index.spec.ts.md) |
+| `lib/modules/datasource/aws-machine-image/index.spec.ts` | Not done | [details](lib/modules/datasource/aws-machine-image/index.spec.ts.md) |
 | `lib/modules/datasource/aws-rds/index.spec.ts` | Done | [details](lib/modules/datasource/aws-rds/index.spec.ts.md) |
 | `lib/modules/datasource/datasource.spec.ts` | Done | [details](lib/modules/datasource/datasource.spec.ts.md) |
 | `lib/modules/datasource/azure-tags/index.spec.ts` | Done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
@@ -146,9 +146,9 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/cpan/schema.spec.ts` | Done | [details](lib/modules/datasource/cpan/schema.spec.ts.md) |
 | `lib/modules/datasource/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/datasource/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/datasource/nextcloud/index.spec.ts` | Done | [details](lib/modules/datasource/nextcloud/index.spec.ts.md) |
-| `lib/modules/datasource/github-digest/index.spec.ts` | Done | [details](lib/modules/datasource/github-digest/index.spec.ts.md) |
+| `lib/modules/datasource/github-digest/index.spec.ts` | Not done | [details](lib/modules/datasource/github-digest/index.spec.ts.md) |
 | `lib/modules/datasource/github-release-attachments/index.spec.ts` | Done | [details](lib/modules/datasource/github-release-attachments/index.spec.ts.md) |
-| `lib/modules/datasource/github-release-attachments/digest.spec.ts` | Done | [details](lib/modules/datasource/github-release-attachments/digest.spec.ts.md) |
+| `lib/modules/datasource/github-release-attachments/digest.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/digest.spec.ts.md) |
 | `lib/modules/datasource/python-version/index.spec.ts` | Done | [details](lib/modules/datasource/python-version/index.spec.ts.md) |
 | `lib/modules/datasource/deno/index.spec.ts` | Done | [details](lib/modules/datasource/deno/index.spec.ts.md) |
 | `lib/modules/datasource/flutter-version/index.spec.ts` | Done | [details](lib/modules/datasource/flutter-version/index.spec.ts.md) |
@@ -221,17 +221,17 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/pypi/index.spec.ts` | Not done | [details](lib/modules/datasource/pypi/index.spec.ts.md) |
 | `lib/modules/datasource/docker/schema.spec.ts` | Done | [details](lib/modules/datasource/docker/schema.spec.ts.md) |
 | `lib/modules/datasource/docker/index.spec.ts` | Done | [details](lib/modules/datasource/docker/index.spec.ts.md) |
-| `lib/modules/datasource/docker/common.spec.ts` | Done | [details](lib/modules/datasource/docker/common.spec.ts.md) |
+| `lib/modules/datasource/docker/common.spec.ts` | Not done | [details](lib/modules/datasource/docker/common.spec.ts.md) |
 | `lib/modules/datasource/common.spec.ts` | Done | [details](lib/modules/datasource/common.spec.ts.md) |
 | `lib/modules/datasource/metadata.spec.ts` | Done | [details](lib/modules/datasource/metadata.spec.ts.md) |
-| `lib/modules/datasource/index.spec.ts` | Done | [details](lib/modules/datasource/index.spec.ts.md) |
+| `lib/modules/datasource/index.spec.ts` | Not done | [details](lib/modules/datasource/index.spec.ts.md) |
 | `lib/modules/datasource/npm/npmrc.spec.ts` | Not done | [details](lib/modules/datasource/npm/npmrc.spec.ts.md) |
 | `lib/modules/datasource/npm/get.spec.ts` | Not done | [details](lib/modules/datasource/npm/get.spec.ts.md) |
 | `lib/modules/datasource/npm/index.spec.ts` | Not done | [details](lib/modules/datasource/npm/index.spec.ts.md) |
 | `lib/modules/datasource/go/goproxy-parser.spec.ts` | Done | [details](lib/modules/datasource/go/goproxy-parser.spec.ts.md) |
 | `lib/modules/datasource/go/base.spec.ts` | Done | [details](lib/modules/datasource/go/base.spec.ts.md) |
-| `lib/modules/datasource/go/index.spec.ts` | Done | [details](lib/modules/datasource/go/index.spec.ts.md) |
-| `lib/modules/datasource/go/releases-direct.spec.ts` | Done | [details](lib/modules/datasource/go/releases-direct.spec.ts.md) |
+| `lib/modules/datasource/go/index.spec.ts` | Not done | [details](lib/modules/datasource/go/index.spec.ts.md) |
+| `lib/modules/datasource/go/releases-direct.spec.ts` | Not done | [details](lib/modules/datasource/go/releases-direct.spec.ts.md) |
 | `lib/modules/datasource/go/releases-goproxy.spec.ts` | Done | [details](lib/modules/datasource/go/releases-goproxy.spec.ts.md) |
 | `lib/modules/datasource/cdnjs/index.spec.ts` | Done | [details](lib/modules/datasource/cdnjs/index.spec.ts.md) |
 | `lib/modules/datasource/conda/index.spec.ts` | Done | [details](lib/modules/datasource/conda/index.spec.ts.md) |
@@ -248,7 +248,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | Done | [details](lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) |
 | `lib/modules/datasource/bitrise/index.spec.ts` | Done | [details](lib/modules/datasource/bitrise/index.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/base.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/base.spec.ts.md) |
-| `lib/modules/datasource/terraform-module/index.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/index.spec.ts.md) |
+| `lib/modules/datasource/terraform-module/index.spec.ts` | Not done | [details](lib/modules/datasource/terraform-module/index.spec.ts.md) |
 | `lib/modules/datasource/terraform-module/utils.spec.ts` | Done | [details](lib/modules/datasource/terraform-module/utils.spec.ts.md) |
 | `lib/modules/datasource/terraform-provider/index.spec.ts` | Done | [details](lib/modules/datasource/terraform-provider/index.spec.ts.md) |
 | `lib/modules/datasource/packagist/schema.spec.ts` | Done | [details](lib/modules/datasource/packagist/schema.spec.ts.md) |
@@ -708,8 +708,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/bitbucket/pr-cache.spec.ts` | Done | [details](lib/modules/platform/bitbucket/pr-cache.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/index.spec.ts` | Done | [details](lib/modules/platform/bitbucket-server/index.spec.ts.md) |
 | `lib/modules/platform/bitbucket-server/pr-cache.spec.ts` | Done | [details](lib/modules/platform/bitbucket-server/pr-cache.spec.ts.md) |
-| `lib/modules/platform/bitbucket-server/utils.spec.ts` | Done | [details](lib/modules/platform/bitbucket-server/utils.spec.ts.md) |
-| `lib/modules/platform/codecommit/index.spec.ts` | Done | [details](lib/modules/platform/codecommit/index.spec.ts.md) |
+| `lib/modules/platform/bitbucket-server/utils.spec.ts` | Not done | [details](lib/modules/platform/bitbucket-server/utils.spec.ts.md) |
+| `lib/modules/platform/codecommit/index.spec.ts` | Not done | [details](lib/modules/platform/codecommit/index.spec.ts.md) |
 | `lib/modules/platform/forgejo/forgejo-helper.spec.ts` | Done | [details](lib/modules/platform/forgejo/forgejo-helper.spec.ts.md) |
 | `lib/modules/platform/forgejo/index.spec.ts` | Done | [details](lib/modules/platform/forgejo/index.spec.ts.md) |
 | `lib/modules/platform/forgejo/pr-cache.spec.ts` | Done | [details](lib/modules/platform/forgejo/pr-cache.spec.ts.md) |
@@ -717,8 +717,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/forgejo/utils.spec.ts` | Done | [details](lib/modules/platform/forgejo/utils.spec.ts.md) |
 | `lib/modules/platform/gerrit/client.spec.ts` | Done | [details](lib/modules/platform/gerrit/client.spec.ts.md) |
 | `lib/modules/platform/gerrit/index.spec.ts` | Done | [details](lib/modules/platform/gerrit/index.spec.ts.md) |
-| `lib/modules/platform/gerrit/scm.spec.ts` | Done | [details](lib/modules/platform/gerrit/scm.spec.ts.md) |
-| `lib/modules/platform/gerrit/utils.spec.ts` | Done | [details](lib/modules/platform/gerrit/utils.spec.ts.md) |
+| `lib/modules/platform/gerrit/scm.spec.ts` | Not done | [details](lib/modules/platform/gerrit/scm.spec.ts.md) |
+| `lib/modules/platform/gerrit/utils.spec.ts` | Not done | [details](lib/modules/platform/gerrit/utils.spec.ts.md) |
 | `lib/modules/platform/gitea/gitea-helper.spec.ts` | Not done | [details](lib/modules/platform/gitea/gitea-helper.spec.ts.md) |
 | `lib/modules/platform/gitea/index.spec.ts` | Not done | [details](lib/modules/platform/gitea/index.spec.ts.md) |
 | `lib/modules/platform/gitea/pr-cache.spec.ts` | Done | [details](lib/modules/platform/gitea/pr-cache.spec.ts.md) |
@@ -803,7 +803,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/gitlab.spec.ts` | Done | [details](lib/util/http/gitlab.spec.ts.md) |
 | `lib/util/http/got.spec.ts` | Done | [details](lib/util/http/got.spec.ts.md) |
 | `lib/util/http/hooks.spec.ts` | Done | [details](lib/util/http/hooks.spec.ts.md) |
-| `lib/util/http/host-rules.spec.ts` | Done | [details](lib/util/http/host-rules.spec.ts.md) |
+| `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
 | `lib/util/http/index.spec.ts` | Not done | [details](lib/util/http/index.spec.ts.md) |
 | `lib/util/http/jira.spec.ts` | Done | [details](lib/util/http/jira.spec.ts.md) |
 | `lib/util/http/queue.spec.ts` | Done | [details](lib/util/http/queue.spec.ts.md) |
