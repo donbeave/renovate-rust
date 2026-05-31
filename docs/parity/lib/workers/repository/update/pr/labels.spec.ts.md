@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/labels.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/labels.spec.ts
-**Total tests:** 20 | **Ported:** 14 | **Actionable:** 6 | **Status:** partial
+**Total tests:** 20 | **Ported:** 14 | **Actionable:** 5 | **Status:** partial
 
 ### `workers/repository/update/pr/labels › prepareLabels(config)`
 
@@ -17,7 +17,7 @@
 | merge labels and addLabels | 30 | ported | `util.rs` | `test_prepare_labels_merge` | — |
 | deduplicate merged labels and addLabels | 39 | ported | `util.rs` | `test_prepare_labels_deduplicate` | — |
 | empty labels ignored | 48 | ported | `util.rs` | `test_prepare_labels_empty_strings_ignored` | — |
-| null labels ignored  | 57 | pending | — | — | Template rendering / platform label limits / TS null-type |
+| null labels ignored  | 57 | not-applicable | — | — | TypeScript type-system test; null vs empty string handling has no Rust equivalent |
 | template labels  | 68 | pending | — | — | Template rendering / platform label limits / TS null-type |
 | template labels with empty datasource  | 77 | pending | — | — | Template rendering / platform label limits / TS null-type |
 
