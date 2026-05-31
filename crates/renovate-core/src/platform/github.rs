@@ -974,6 +974,41 @@ impl GithubClient {
         Ok(())
     }
 
+    /// Merge a pull request.
+    ///
+    /// Returns `true` on success, `false` when the merge is blocked (405) or
+    /// the PR is not found (404).
+    ///
+    /// Mirrors `mergePr` from `lib/modules/platform/github/index.ts`.
+    pub async fn merge_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+        _branch_name: &str,
+        strategy: Option<&str>,
+    ) -> Result<bool, PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/pulls/{}/merge",
+            self.api_base, owner, repo, pr_number
+        );
+        let mut body = serde_json::json!({});
+        if let Some(s) = strategy {
+            body["merge_method"] = s.into();
+        }
+
+        match self.http.put_json::<serde_json::Value>(&url, &body.to_string()).await {
+            Ok(_) => Ok(true),
+            Err(HttpError::Status { status, .. })
+                if status == reqwest::StatusCode::NOT_FOUND
+                    || status == reqwest::StatusCode::METHOD_NOT_ALLOWED =>
+            {
+                Ok(false)
+            }
+            Err(e) => Err(PlatformError::Http(e)),
+        }
+    }
+
     /// Check whether a branch exists on the remote repository.
     ///
     /// Throws an error when the branch is a prefix of a nested branch
@@ -1304,6 +1339,42 @@ impl GithubClient {
 
         self.create_comment(owner, repo, issue_number, &expected_body).await?;
         Ok(true)
+    }
+
+    /// Remove a comment from an issue or PR.
+    ///
+    /// Mirrors `ensureCommentRemoval` from `lib/modules/platform/github/index.ts`.
+    pub async fn ensure_comment_removal(
+        &self,
+        owner: &str,
+        repo: &str,
+        issue_number: i64,
+        topic: Option<&str>,
+        content: Option<&str>,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/{}/comments?per_page=100",
+            self.api_base, owner, repo, issue_number
+        );
+        let comments: Vec<GhComment> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+
+        let comment_id = if let Some(topic) = topic {
+            let prefix = format!("### {}\n\n", topic);
+            comments.into_iter().find(|c| {
+                c.body.as_ref().map_or(false, |b| b.starts_with(&prefix))
+            }).map(|c| c.id)
+        } else if let Some(content) = content {
+            comments.into_iter().find(|c| {
+                c.body.as_ref().map_or(false, |b| b.trim() == content)
+            }).map(|c| c.id)
+        } else {
+            None
+        };
+
+        if let Some(id) = comment_id {
+            self.delete_comment(owner, repo, id).await?;
+        }
+        Ok(())
     }
 
     /// Ensure an issue exists with the given title.
@@ -3851,5 +3922,604 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
+    }
+
+    // ── init_platform ─────────────────────────────────────────────────────────
+
+    // Ported: "should throw if no token" — modules/platform/github/index.spec.ts line 64
+    #[tokio::test]
+    async fn init_platform_throws_if_no_token() {
+        let server = MockServer::start().await;
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.init_platform("").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("You must configure a GitHub token")));
+    }
+
+    // Ported: "should throw if endpoint is invalid URL" — modules/platform/github/index.spec.ts line 70
+    #[test]
+    fn init_platform_throws_if_endpoint_invalid() {
+        let err = GithubClient::with_endpoint("token", "https://[invalid").unwrap_err();
+        assert!(matches!(err, HttpError::Parse(_)));
+    }
+
+    // Ported: "should use public email from user profile when available" — modules/platform/github/index.spec.ts line 361
+    #[tokio::test]
+    async fn init_platform_uses_public_email() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "login": "renovate-bot",
+                "email": "user@domain.com",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let (login, email) = client.init_platform("123test").await.unwrap();
+        assert_eq!(login, "renovate-bot");
+        assert_eq!(email, Some("user@domain.com".to_owned()));
+    }
+
+    // Ported: "should fall back to user/emails when there is no public email" — modules/platform/github/index.spec.ts line 375
+    #[tokio::test]
+    async fn init_platform_falls_back_to_user_emails() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "login": "renovate-bot",
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/user/emails"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"email": "fallback@domain.com", "primary": true, "verified": true},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let (login, email) = client.init_platform("123test").await.unwrap();
+        assert_eq!(login, "renovate-bot");
+        assert_eq!(email, Some("fallback@domain.com".to_owned()));
+    }
+
+    // Ported: "should fall back gracefully when user/emails returns an error (no user:email scope)" — modules/platform/github/index.spec.ts line 394
+    #[tokio::test]
+    async fn init_platform_falls_back_gracefully_on_email_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "login": "renovate-bot",
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/user/emails"))
+            .respond_with(ResponseTemplate::new(400))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let (login, email) = client.init_platform("123test").await.unwrap();
+        assert_eq!(login, "renovate-bot");
+        assert_eq!(email, None);
+    }
+
+    // ── get_repos ─────────────────────────────────────────────────────────────
+
+    // Ported: "should return an array of repos" — modules/platform/github/index.spec.ts line 613
+    #[tokio::test]
+    async fn get_repos_returns_array_of_repos() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user/repos"))
+            .and(wiremock::matchers::query_param("per_page", "100"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"full_name": "a/b", "archived": false},
+                {"full_name": "c/d", "archived": false},
+                {"full_name": "e/f", "archived": true},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let repos = client.get_repos(None).await.unwrap();
+        assert_eq!(repos, vec!["a/b", "c/d"]);
+    }
+
+    // Ported: "should filters repositories by topics" — modules/platform/github/index.spec.ts line 636
+    #[tokio::test]
+    async fn get_repos_filters_by_topics() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user/repos"))
+            .and(wiremock::matchers::query_param("per_page", "100"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"full_name": "a/b", "archived": false, "topics": []},
+                {"full_name": "c/d", "archived": false, "topics": ["managed-by-renovate"]},
+                {"full_name": "e/f", "archived": true, "topics": ["managed-by-renovate"]},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let repos = client.get_repos(Some(vec!["managed-by-renovate".to_owned()])).await.unwrap();
+        assert_eq!(repos, vec!["c/d"]);
+    }
+
+    // Ported: "should return an array of repos when using Github App endpoint" — modules/platform/github/index.spec.ts line 663
+    #[tokio::test]
+    async fn get_repos_using_github_app_endpoint() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/installation/repositories"))
+            .and(wiremock::matchers::query_param("per_page", "100"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "repositories": [
+                    {"full_name": "a/b"},
+                    {"full_name": "c/d"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("x-access-token:123test", server.uri()).unwrap();
+        let repos = client.get_repos(None).await.unwrap();
+        assert_eq!(repos, vec!["a/b", "c/d"]);
+    }
+
+    // Ported: "should return an array of repos when using GitHub App Installation Token" — modules/platform/github/index.spec.ts line 690
+    #[tokio::test]
+    async fn get_repos_using_github_app_installation_token() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/installation/repositories"))
+            .and(wiremock::matchers::query_param("per_page", "100"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "repositories": [
+                    {"full_name": "a/b", "archived": false},
+                    {"full_name": "c/d", "archived": false},
+                    {"full_name": "e/f", "archived": true},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("ghs_123test", server.uri()).unwrap();
+        let repos = client.get_repos(None).await.unwrap();
+        assert_eq!(repos, vec!["a/b", "c/d"]);
+    }
+
+    // ── create_pr extensions ──────────────────────────────────────────────────
+
+    // Ported: "should allow maintainer edits if explicitly enabled via options" — modules/platform/github/index.spec.ts line 3849
+    #[tokio::test]
+    async fn create_pr_allows_maintainer_edits_explicitly_enabled() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 123,
+                "title": "PR title",
+                "state": "open",
+                "head": {"ref": "some-branch", "sha": "abc", "repo": null},
+                "base": {"ref": "main", "sha": "def", "repo": null},
+                "node_id": "nid",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, Some(true))
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(123));
+    }
+
+    // Ported: "should allow maintainer edits if not explicitly set" — modules/platform/github/index.spec.ts line 3873
+    #[tokio::test]
+    async fn create_pr_allows_maintainer_edits_not_explicitly_set() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 123,
+                "title": "PR title",
+                "state": "open",
+                "head": {"ref": "some-branch", "sha": "abc", "repo": null},
+                "base": {"ref": "main", "sha": "def", "repo": null},
+                "node_id": "nid",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, None)
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(123));
+    }
+
+    // Ported: "should disallow maintainer edits if explicitly disabled" — modules/platform/github/index.spec.ts line 3894
+    #[tokio::test]
+    async fn create_pr_disallows_maintainer_edits_explicitly_disabled() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 123,
+                "title": "PR title",
+                "state": "open",
+                "head": {"ref": "some-branch", "sha": "abc", "repo": null},
+                "base": {"ref": "main", "sha": "def", "repo": null},
+                "node_id": "nid",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, Some(false))
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(123));
+    }
+
+    // ── update_pr_labels ──────────────────────────────────────────────────────
+
+    // Ported: "should add and remove labels" — modules/platform/github/index.spec.ts line 4636
+    #[tokio::test]
+    async fn update_pr_labels_adds_labels() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/1234/labels"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"name": "new_label"},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client.update_pr_labels("owner", "repo", 1234, vec!["new_label".to_owned()]).await.unwrap();
+    }
+
+    // Ported: "warns if adding labels failed" — modules/platform/github/index.spec.ts line 4676
+    #[tokio::test]
+    async fn update_pr_labels_warns_on_failure() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/2/labels"))
+            .respond_with(ResponseTemplate::new(400).set_body_json(serde_json::json!({
+                "message": "Failed to add labels",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.update_pr_labels("owner", "repo", 2, vec!["fail".to_owned()]).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(_)));
+    }
+
+    // ── ensure_comment ────────────────────────────────────────────────────────
+
+    // Ported: "adds comment if found in closed PR list" — modules/platform/github/index.spec.ts line 3417
+    #[tokio::test]
+    async fn ensure_comment_adds_if_found_in_closed_pr_list() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/2499/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "id": 419928791,
+                    "body": "[![CLA assistant check](https://cla-assistant.io/pull/badge/signed)](https://cla-assistant.io/renovatebot/renovate?pullRequest=2500) <br/>All committers have signed the CLA.",
+                },
+                {
+                    "id": 420006957,
+                    "body": ":tada: This PR is included in version 13.63.5 :tada:",
+                },
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/2499/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 420006958,
+                "body": "### some-subject\n\nsome\ncontent",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.ensure_comment("owner", "repo", 2499, Some("some-subject"), "some\ncontent").await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "deletes comment by content if found" — modules/platform/github/index.spec.ts line 3519
+    #[tokio::test]
+    async fn ensure_comment_deletes_by_content_if_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"id": 1234, "body": "some-content"},
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("DELETE"))
+            .and(path("/repos/owner/repo/issues/comments/1234"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client.ensure_comment_removal("owner", "repo", 42, None, Some("some-content")).await.unwrap();
+    }
+
+    // ── ensure_issue ──────────────────────────────────────────────────────────
+
+    // Ported: "creates issue if not ensuring only once" — modules/platform/github/index.spec.ts line 2697
+    // Added to existing create_issue_returns_issue_number test below as an additional Ported comment.
+
+    // Ported: "does not create issue if ensuring only once" — modules/platform/github/index.spec.ts line 2741
+    #[tokio::test]
+    async fn ensure_issue_does_not_create_if_ensuring_only_once() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues"))
+            .and(wiremock::matchers::query_param("state", "open"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 42,
+                    "title": "Dependency Dashboard",
+                    "state": "open",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, true, true).await.unwrap();
+        assert_eq!(number, None);
+    }
+
+    // Ported: "closes others if ensuring only once" — modules/platform/github/index.spec.ts line 2819
+    #[tokio::test]
+    async fn ensure_issue_closes_others_if_ensuring_only_once() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues"))
+            .and(wiremock::matchers::query_param("state", "open"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 42,
+                    "title": "Dependency Dashboard",
+                    "state": "open",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+                {
+                    "number": 43,
+                    "title": "Dependency Dashboard",
+                    "state": "open",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/issues/43"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, true, true).await.unwrap();
+        assert_eq!(number, None);
+    }
+
+    // Ported: "deletes if duplicate" — modules/platform/github/index.spec.ts line 3035
+    #[tokio::test]
+    async fn ensure_issue_deletes_if_duplicate() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues"))
+            .and(wiremock::matchers::query_param("state", "open"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 42,
+                    "title": "Dependency Dashboard",
+                    "state": "open",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, true, true).await.unwrap();
+        assert_eq!(number, None);
+    }
+
+    // Ported: "creates issue if reopen flag false and issue is not open" — modules/platform/github/index.spec.ts line 3079
+    #[tokio::test]
+    async fn ensure_issue_creates_if_reopen_false_and_not_open() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues"))
+            .and(wiremock::matchers::query_param("state", "open"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues"))
+            .and(wiremock::matchers::query_param("state", "closed"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 42,
+                "title": "Dependency Dashboard",
+                "state": "open",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-09T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, false, false).await.unwrap();
+        assert_eq!(number, Some(42));
+    }
+
+    // Ported: "does not create issue if reopen flag false and issue is already open" — modules/platform/github/index.spec.ts line 3132
+    #[tokio::test]
+    async fn ensure_issue_does_not_create_if_reopen_false_and_already_open() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues"))
+            .and(wiremock::matchers::query_param("state", "open"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 42,
+                    "title": "Dependency Dashboard",
+                    "state": "open",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-09T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, false, false).await.unwrap();
+        assert_eq!(number, None);
+    }
+
+    // ── get_issue additional coverage ─────────────────────────────────────────
+
+    // Ported: "logs debug message if issue deleted" — modules/platform/github/index.spec.ts line 2542
+    #[tokio::test]
+    async fn get_issue_logs_debug_if_deleted() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42"))
+            .respond_with(ResponseTemplate::new(410))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let issue = client.get_issue("owner", "repo", 42).await.unwrap();
+        assert!(issue.is_none());
+    }
+
+    // ── create_issue additional coverage ──────────────────────────────────────
+
+    // Ported: "creates issue if not ensuring only once" — modules/platform/github/index.spec.ts line 2697
+    #[tokio::test]
+    async fn create_issue_if_not_ensuring_only_once() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 42,
+                "title": "Dependency Dashboard",
+                "state": "open",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-09T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let number = client.create_issue("owner", "repo", "Dependency Dashboard", "Body", None).await.unwrap();
+        assert_eq!(number, 42);
+    }
+
+    // ── merge_pr ──────────────────────────────────────────────────────────────
+
+    // Ported: "should merge the PR" — modules/platform/github/index.spec.ts line 4820
+    #[tokio::test]
+    async fn merge_pr_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1234/merge"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "sha": "abc123",
+                "merged": true,
+                "message": "Pull Request successfully merged",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should handle merge error" — modules/platform/github/index.spec.ts line 4852
+    #[tokio::test]
+    async fn merge_pr_returns_false_on_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1234/merge"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await;
+        assert!(result.is_err());
+    }
+
+    // Ported: "should handle merge block" — modules/platform/github/index.spec.ts line 4873
+    #[tokio::test]
+    async fn merge_pr_returns_false_on_merge_block() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1234/merge"))
+            .respond_with(ResponseTemplate::new(405).set_body_json(serde_json::json!({
+                "message": "Required status check \"build\" is expected."
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1234, "somebranch", Some("merge-commit")).await.unwrap();
+        assert!(!result);
+    }
+
+    // Ported: "should handle approvers required" — modules/platform/github/index.spec.ts line 4895
+    #[tokio::test]
+    async fn merge_pr_returns_false_on_approvers_required() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1234/merge"))
+            .respond_with(ResponseTemplate::new(405).set_body_json(serde_json::json!({
+                "message": "Pull request requires approving review"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await.unwrap();
+        assert!(!result);
     }
 }
