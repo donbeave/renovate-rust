@@ -128,6 +128,12 @@ pub struct ReleaseResult {
     pub homepage: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<std::collections::HashMap<String, String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecation_message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_private: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub registry_url: Option<String>,
 }
 
 /// A single release entry.
@@ -144,9 +150,19 @@ pub struct Release {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_directory: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_deprecated: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_stable: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub git_ref: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dependencies: Option<std::collections::HashMap<String, String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dev_dependencies: Option<std::collections::HashMap<String, String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attestation: Option<bool>,
 }
 
 /// Add metadata (changelog URL, source URL, source directory) to a release result.
