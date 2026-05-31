@@ -21,11 +21,12 @@ pick work from the **first incomplete milestone**. The current first one is
 
 ```sh
 # Run anywhere in renovate-rust/
-python3 scripts/parity_coverage.py            # summary by group, worst modules
-python3 scripts/parity_coverage.py ledger     # regenerate docs/parity/modules.md
-python3 scripts/parity_coverage.py gaps <mod> # list missing upstream tests for a module
-python3 scripts/parity_coverage.py orphans    # list malformed // Ported: comments
-python3 scripts/parity_coverage.py json       # machine-readable
+python3 scripts/parity_coverage.py             # summary by group, worst modules
+python3 scripts/parity_coverage.py ledger      # regenerate docs/parity/modules.md
+python3 scripts/parity_coverage.py gaps <mod>  # list missing upstream tests for a module
+python3 scripts/parity_coverage.py verify      # audit every // Ported: against upstream
+python3 scripts/parity_coverage.py orphans     # list malformed // Ported: comments
+python3 scripts/parity_coverage.py json        # machine-readable
 ```
 
 ## Invocations

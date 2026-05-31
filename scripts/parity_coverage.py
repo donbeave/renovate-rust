@@ -12,6 +12,9 @@ Modes:
                                        # a // Ported: counterpart
     parity_coverage.py orphans         # // Ported: comments that resolve to
                                        # no upstream spec file
+    parity_coverage.py verify          # check every // Ported: comment's
+                                       # description and line number against
+                                       # the actual upstream it() call
     parity_coverage.py json            # raw JSON dump of the analysis
 
 The script is read-only. It never edits Rust source, spec files, or markdown.
@@ -138,40 +141,111 @@ def scan_specs() -> list[SpecFile]:
 PORTED_RE = re.compile(
     r"""
     //\s*Ported:\s*
-    (?P<desc>".*?"|'[^']*?')      # the original it() description (quoted)
-    \s*[—–-]\s*                   # separator (em, en, or hyphen)
-    (?P<ref>[^\s][^\n]*)          # the spec reference (greedy, normalized later)
+    (?P<desc>
+        "(?:\\.|[^"\\])*"           # double-quoted, allow \" escapes
+      | '(?:\\.|[^'\\])*'           # single-quoted, allow \' escapes
+    )
+    \s*[—–-]\s*                     # separator (em, en, or hyphen)
+    (?P<ref>[^\s][^\n]*)            # the spec reference (greedy, normalized later)
     """,
     re.VERBOSE,
 )
 
+# Permissive fallback. Triggers when:
+#  - the description has unescaped inner quotes, e.g. `"equals("$x", "$y")"`,
+#    so PORTED_RE stops at the first inner ", or
+#  - the reference is on a continuation line (`// ─ <ref>` on the next line).
+# Captures everything between the first quote after "Ported:" and the em dash.
+PORTED_RE_LOOSE = re.compile(
+    r"""
+    //\s*Ported:\s*
+    (?P<q>["'])
+    (?P<desc>.*?)               # any chars up to...
+    (?P=q)                      # ...the same quote
+    (?:\s*\([^)]*\))?           # optional ` (parenthetical)` after the desc
+    \s*[—–-]\s*
+    (?P<ref>[^\n]*)
+    """,
+    re.VERBOSE | re.DOTALL,
+)
 
-def _normalize_ref(ref: str) -> str:
-    """Strip trailing ` line N`, ` lines N-M`, parenthetical commentary, etc."""
+# Continuation marker on a separate line: `//   — <ref>` or `//   - <ref>`.
+PORTED_CONT_RE = re.compile(r"^\s*//\s*[—–-]\s*(?P<ref>\S.*)$")
+
+LINE_NO_RE = re.compile(r"\s+lines?\s+(\d+)")
+
+
+def _normalize_ref(ref: str) -> tuple[str, int | None]:
+    """Return (path, cited_line). Strips trailing ` line N` and any
+    parenthetical commentary."""
     ref = ref.strip()
-    # Cut at first ` line ` / ` lines `.
-    ref = re.split(r"\s+lines?\s+\d", ref, maxsplit=1)[0]
+    cited_line: int | None = None
+    m = LINE_NO_RE.search(ref)
+    if m:
+        cited_line = int(m.group(1))
+        ref = ref[:m.start()] + ref[m.end():]
     # Cut at parenthetical commentary like ` (parse modules with phases)`.
     ref = re.split(r"\s+\(", ref, maxsplit=1)[0]
-    return ref.strip().rstrip(",").rstrip()
+    return ref.strip().rstrip(",").rstrip(), cited_line
 
 
-def scan_ported() -> list[tuple[Path, int, str, str]]:
-    """Return [(rust_file, line_no, description, normalized_ref)] for each
-    `// Ported:` comment. `description` includes its quotes for display.
-    """
+def _unquote(s: str) -> str:
+    """Strip surrounding single or double quotes from a captured token."""
+    if len(s) >= 2 and s[0] == s[-1] and s[0] in {'"', "'"}:
+        return s[1:-1]
+    return s
+
+
+@dataclass
+class PortedComment:
+    rust_path: Path
+    rust_line: int
+    description: str            # includes the surrounding quotes for display
+    spec_ref: str               # normalized spec reference (no `line N` tail)
+    cited_line: int | None      # line number written into the comment, if any
+
+
+def scan_ported() -> list[PortedComment]:
     crates = RUST_ROOT / "crates"
-    out: list[tuple[Path, int, str, str]] = []
+    out: list[PortedComment] = []
     for path in sorted(crates.rglob("*.rs")):
-        with path.open(encoding="utf-8", errors="replace") as fh:
-            for i, line in enumerate(fh, start=1):
-                if "// Ported:" not in line:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        for i, line in enumerate(lines, start=1):
+            if "// Ported:" not in line:
+                continue
+
+            # 1. Strict same-line match.
+            m = PORTED_RE.search(line)
+            if m:
+                ref, cited = _normalize_ref(m.group("ref"))
+                out.append(PortedComment(path, i, m.group("desc"), ref, cited))
+                continue
+
+            # 2. Same line, but the description has unescaped inner quotes
+            # or the ref is on this line via the loose pattern.
+            m = PORTED_RE_LOOSE.search(line)
+            if m:
+                desc = m.group("q") + m.group("desc") + m.group("q")
+                ref, cited = _normalize_ref(m.group("ref"))
+                out.append(PortedComment(path, i, desc, ref, cited))
+                continue
+
+            # 3. Two-line form: this line has the description; the next line
+            # has the `//  — <ref>` continuation.
+            m = re.search(
+                r'//\s*Ported:\s*(?P<q>["\'])(?P<desc>.*?)(?P=q)\s*$',
+                line,
+            )
+            if m and i < len(lines):
+                cont = PORTED_CONT_RE.match(lines[i])     # i is 1-based, lines is 0-based
+                if cont:
+                    desc = m.group("q") + m.group("desc") + m.group("q")
+                    ref, cited = _normalize_ref(cont.group("ref"))
+                    out.append(PortedComment(path, i, desc, ref, cited))
                     continue
-                m = PORTED_RE.search(line)
-                if not m:
-                    out.append((path, i, "", ""))
-                    continue
-                out.append((path, i, m.group("desc"), _normalize_ref(m.group("ref"))))
+
+            # 4. Could not parse at all.
+            out.append(PortedComment(path, i, "", "", None))
     return out
 
 
@@ -282,18 +356,18 @@ def analyze() -> Analysis:
     orphans: list[tuple[Path, int, str]] = []
     malformed: list[tuple[Path, int]] = []
     total_comments = 0
-    for rust_file, line_no, desc, ref in ported:
-        if not ref:
-            malformed.append((rust_file, line_no))
+    for c in ported:
+        if not c.spec_ref:
+            malformed.append((c.rust_path, c.rust_line))
             continue
-        spec = resolve(ref)
+        spec = resolve(c.spec_ref)
         if spec is None:
-            orphans.append((rust_file, line_no, ref))
+            orphans.append((c.rust_path, c.rust_line, c.spec_ref))
             continue
         total_comments += 1
         mod = modules[spec.module_id]
         mod.comment_count += 1
-        mod.covered.add((spec.rel_path, desc))
+        mod.covered.add((spec.rel_path, c.description))
 
     total_ported = sum(m.ported_count for m in modules.values())
     return Analysis(
@@ -469,6 +543,220 @@ def orphans_report(a: Analysis) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Verify: spec-line/description match
+# ---------------------------------------------------------------------------
+
+# Capture the first quoted argument of an it(...) / test(...) / it.each(...)(...)
+# / it.skip(...) / xit(...) call. Handles single/double/template quotes.
+IT_DESC_RE = re.compile(
+    r"""
+    \b
+    (?:it|test|xit|xtest)
+    (?:\.(?:each|skip|only|failing|concurrent|todo))?
+    (?:\.(?:each|skip|only|failing|concurrent|todo))?
+    \s*
+    (?:
+        \(\s*\[[^\]]*\]\s*\)\s*   # it.each([...]) followed by (...)
+    )?
+    [\(\`]?                        # opening ( or backtick (tagged each)
+    \s*
+    (?P<q>['"`])                   # opening quote
+    (?P<desc>.*?)                  # description body (non-greedy)
+    (?P=q)                         # matching closing quote
+    """,
+    re.VERBOSE,
+)
+
+
+EACH_OPENER_RE = re.compile(
+    r"^[ \t]+(?:it|test|xit|xtest)\.each\s*[\(\`]"
+)
+
+
+def _spec_it_at(spec_path: Path, line_no: int) -> str | None:
+    r"""Return the it()/test() description for the test call site whose
+    *opener* is at line_no. For single-line ``it('desc', ...)`` calls this
+    is the same as reading line_no. For multi-line ``it.each`...`('desc', ...)``
+    or ``it.each([...])('desc', ...)`` calls, this scans forward until it
+    finds the description argument.
+
+    Returns None if line_no is not a recognizable test opener.
+    """
+    lines = _read_spec_lines(spec_path)
+    if lines is None or line_no < 1 or line_no > len(lines):
+        return None
+    line = lines[line_no - 1]
+
+    # Fast path: description on the same line.
+    m = IT_DESC_RE.search(line)
+    if m:
+        return m.group("desc")
+
+    # Multi-line form: it.each`...`(desc, fn) or it.each([...])(desc, fn).
+    if not EACH_OPENER_RE.match(line):
+        return None
+
+    # Read up to 80 lines forward as one chunk and scan for the description.
+    end = min(line_no + 80, len(lines))
+    chunk = "\n".join(lines[line_no - 1:end])
+
+    # Backtick form: find the closing backtick that precedes `(`.
+    m2 = re.search(
+        r"`\s*\(\s*(?P<q>['\"`])(?P<desc>(?:\\.|(?!(?P=q)).)*)(?P=q)",
+        chunk, re.DOTALL,
+    )
+    if m2:
+        return m2.group("desc")
+    # Array form: find `)(quote ... quote)` after the it.each(.
+    m2 = re.search(
+        r"\)\s*\(\s*(?P<q>['\"`])(?P<desc>(?:\\.|(?!(?P=q)).)*)(?P=q)",
+        chunk, re.DOTALL,
+    )
+    if m2:
+        return m2.group("desc")
+    return None
+
+
+def _spec_all_its(spec_path: Path) -> list[tuple[int, str]]:
+    """Return [(line_no, description)] for every it()/test() call in the
+    file. Includes single-line and multi-line `it.each` openers."""
+    lines = _read_spec_lines(spec_path)
+    if lines is None:
+        return []
+    out: list[tuple[int, str]] = []
+    for i, line in enumerate(lines, start=1):
+        if IT_CALL_RE.match(line) or XIT_RE.match(line):
+            desc = _spec_it_at(spec_path, i)
+            if desc is not None:
+                out.append((i, desc))
+    return out
+
+
+_SPEC_LINE_CACHE: dict[Path, list[str] | None] = {}
+
+
+def _read_spec_lines(spec_path: Path) -> list[str] | None:
+    if spec_path in _SPEC_LINE_CACHE:
+        return _SPEC_LINE_CACHE[spec_path]
+    try:
+        lines = spec_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        lines = None
+    _SPEC_LINE_CACHE[spec_path] = lines
+    return lines
+
+
+def _normalize_desc(s: str) -> str:
+    """Lowercase, collapse whitespace, undo source-level escaping (so
+    Rust's `\\"` and TS's `"` compare equal). Does NOT strip surrounding
+    quotes; callers must pass an already-unquoted string."""
+    s = s.strip()
+    # Source-level escape unification.
+    s = s.replace(r"\\", "\\")        # double-backslash → single
+    s = s.replace(r'\"', '"')          # escaped double quote
+    s = s.replace(r"\'", "'")          # escaped single quote
+    s = s.replace(r"\`", "`")          # escaped backtick
+    s = re.sub(r"\s+", " ", s)
+    return s.lower()
+
+
+@dataclass
+class VerifyIssue:
+    severity: str          # "error" or "warn"
+    rust_path: Path
+    rust_line: int
+    kind: str              # short tag (missing-line, wrong-line, wrong-desc, ...)
+    detail: str
+
+
+def verify(a: Analysis | None = None) -> list[VerifyIssue]:
+    """Walk every // Ported: comment and check its line and description
+    against the upstream spec. Returns issues, severity ordered."""
+    specs = scan_specs()
+    resolve = build_resolver(specs)
+    ported = scan_ported()
+    issues: list[VerifyIssue] = []
+
+    for c in ported:
+        if not c.spec_ref:
+            issues.append(VerifyIssue("error", c.rust_path, c.rust_line,
+                                      "malformed",
+                                      "comment is missing the spec reference"))
+            continue
+        spec = resolve(c.spec_ref)
+        if spec is None:
+            issues.append(VerifyIssue("error", c.rust_path, c.rust_line,
+                                      "orphan",
+                                      f"spec ref does not resolve: {c.spec_ref}"))
+            continue
+        if c.cited_line is None:
+            issues.append(VerifyIssue("warn", c.rust_path, c.rust_line,
+                                      "no-line",
+                                      f"comment has no `line N` suffix "
+                                      f"({spec.rel_path})"))
+            continue
+
+        spec_full = RENOVATE_LIB / spec.rel_path
+        cited_desc = _spec_it_at(spec_full, c.cited_line)
+        commented = _normalize_desc(_unquote(c.description))
+
+        if cited_desc is not None and _normalize_desc(cited_desc) == commented:
+            continue                       # exact line + description match — OK
+
+        # Walk the whole spec file for the commented description.
+        spec_descs = _spec_all_its(spec_full)
+        matches = [ln for ln, d in spec_descs if _normalize_desc(d) == commented]
+
+        if matches:
+            # Description exists upstream — pick the line closest to the cited.
+            nearest = min(matches, key=lambda ln: abs(ln - c.cited_line))
+            issues.append(VerifyIssue("warn", c.rust_path, c.rust_line,
+                                      "off-by-line",
+                                      f"{spec.rel_path}: cited line "
+                                      f"{c.cited_line}, actual it() at line "
+                                      f"{nearest}"))
+        elif cited_desc is None:
+            issues.append(VerifyIssue("error", c.rust_path, c.rust_line,
+                                      "missing-line",
+                                      f"{spec.rel_path}:{c.cited_line} is "
+                                      f"not an it()/test() call site and the "
+                                      f"description does not match any it() "
+                                      f"in the file"))
+        else:
+            issues.append(VerifyIssue("error", c.rust_path, c.rust_line,
+                                      "wrong-desc",
+                                      f"{spec.rel_path}:{c.cited_line} says "
+                                      f"`{cited_desc}` but comment says "
+                                      f"{c.description}; no it() in the file "
+                                      f"matches either"))
+
+    issues.sort(key=lambda x: (0 if x.severity == "error" else 1,
+                               str(x.rust_path), x.rust_line))
+    return issues
+
+
+def verify_report(issues: list[VerifyIssue]) -> str:
+    errors = [i for i in issues if i.severity == "error"]
+    warns = [i for i in issues if i.severity == "warn"]
+    by_kind: dict[str, int] = defaultdict(int)
+    for i in issues:
+        by_kind[i.kind] += 1
+    out: list[str] = []
+    out.append("# // Ported: comment verification\n")
+    out.append(f"Errors:   {len(errors)}")
+    out.append(f"Warnings: {len(warns)}")
+    out.append("")
+    out.append("By kind:")
+    for k in sorted(by_kind, key=lambda k: -by_kind[k]):
+        out.append(f"  {k:14s} {by_kind[k]}")
+    out.append("")
+    for i in issues:
+        rel = i.rust_path.relative_to(RUST_ROOT)
+        out.append(f"  [{i.severity:5s}] {rel}:{i.rust_line}  {i.kind}: {i.detail}")
+    return "\n".join(out) + "\n"
+
+
+# ---------------------------------------------------------------------------
 # Prior-impl carry-forward parser
 # ---------------------------------------------------------------------------
 
@@ -504,6 +792,9 @@ def main(argv: list[str] | None = None) -> int:
     p_gaps = sub.add_parser("gaps", help="list missing upstream tests for a module")
     p_gaps.add_argument("module")
     sub.add_parser("orphans", help="list unresolved // Ported: comments")
+    p_verify = sub.add_parser("verify", help="check every // Ported: against upstream")
+    p_verify.add_argument("--errors-only", action="store_true",
+                          help="suppress warnings")
     sub.add_parser("json", help="emit raw analysis as JSON")
     args = parser.parse_args(argv)
 
@@ -527,6 +818,13 @@ def main(argv: list[str] | None = None) -> int:
         print(gaps(a, args.module))
     elif cmd == "orphans":
         print(orphans_report(a))
+    elif cmd == "verify":
+        issues = verify(a)
+        if getattr(args, "errors_only", False):
+            issues = [i for i in issues if i.severity == "error"]
+        print(verify_report(issues))
+        if any(i.severity == "error" for i in issues):
+            return 1
     elif cmd == "json":
         payload = {
             "total_specs": a.total_specs,

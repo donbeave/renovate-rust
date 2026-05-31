@@ -238,10 +238,13 @@ async fn returns_latest_release() {
    canonical form is `—`.
 5. **Verify your work** before committing:
    ```sh
-   rg "// Ported:" crates/ -g "*.rs"          # see all attributions
-   python3 scripts/parity_coverage.py orphans # comments whose ref doesn't resolve
+   python3 scripts/parity_coverage.py verify  # check every // Ported: against upstream
+   python3 scripts/parity_coverage.py orphans # refs that don't resolve
    python3 scripts/parity_coverage.py         # see duplicate count drop
    ```
+   `verify` opens the cited upstream spec at the cited line and confirms the
+   `it()` description matches exactly. It exits non-zero if any error
+   remains.
 
 ## Shared Conventions
 

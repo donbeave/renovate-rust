@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5004 / 11667 distinct upstream it() tests ported (42.9%) across 292 modules.
-**Quality:** 5516 `// Ported:` comments → 484 duplicate, 25 orphan, 108 malformed.
+**Total:** 5060 / 11667 distinct upstream it() tests ported (43.4%) across 292 modules.
+**Quality:** 5597 `// Ported:` comments → 510 duplicate, 26 orphan, 26 malformed.
 
-## managers  —  2198/3642 (60%)
+## managers  —  2217/3642 (61%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -35,12 +35,12 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/ansible-galaxy` | 1 | partial | 14/14 (100%) | index.ts(partial); collections-metadata.ts(partial); collections.ts(partial) +2 more |
 | `manager/ant` | 3 | partial | 65/65 (100%) | index.ts(partial) |
 | `manager/argocd` | 1 | partial | 8/8 (100%) | index.ts(partial); util.ts(partial) |
-| `manager/asdf` | 2 | partial | 13/14 (93%) | index.ts(partial) |
+| `manager/asdf` | 2 | partial | 14/14 (100%) | index.ts(partial) |
 | `manager/azure-pipelines` | 1 | partial | 27/29 (93%) | index.ts(partial); update.ts(partial) |
 | `manager/batect` | 1 | partial | 4/4 (100%) | index.ts(partial) |
 | `manager/batect-wrapper` | 2 | partial | 4/7 (57%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/bazel` | 5 | partial | 23/46 (50%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/bazel-module` | 10 | partial | 77/110 (70%) | index.ts(partial); lockfile.ts(partial); artifacts.ts(not-started) |
+| `manager/bazel` | 5 | partial | 24/46 (52%) | index.ts(partial); artifacts.ts(not-started) |
+| `manager/bazel-module` | 10 | partial | 79/110 (72%) | index.ts(partial); lockfile.ts(partial); artifacts.ts(not-started) |
 | `manager/bazelisk` | 2 | partial | 4/10 (40%) | index.ts(partial); artifacts.ts(not-started) |
 | `manager/bicep` | 1 | partial | 9/9 (100%) | index.ts(partial) |
 | `manager/bitbucket-pipelines` | 1 | partial | 4/4 (100%) | index.ts(partial); update.ts(partial) |
@@ -70,7 +70,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/docker-compose` | 1 | partial | 13/13 (100%) | index.ts(partial); update.ts(partial) |
 | `manager/dockerfile` | 1 | partial | 76/76 (100%) | index.ts(partial); update.ts(partial) |
 | `manager/droneci` | 1 | partial | 5/5 (100%) | index.ts(partial); update.ts(partial) |
-| `manager/fleet` | 1 | partial | 8/10 (80%) | index.ts(partial) |
+| `manager/fleet` | 1 | partial | 9/10 (90%) | index.ts(partial) |
 | `manager/flux` | 2 | partial | 59/66 (89%) | index.ts(partial); artifacts.ts(not-started) |
 | `manager/fvm` | 1 | partial | 7/7 (100%) | index.ts(partial) |
 | `manager/git-submodules` | 3 | partial | 10/16 (62%) | index.ts(partial); artifacts.ts(partial) |
@@ -79,15 +79,15 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/gitlabci-include` | 1 | partial | 8/8 (100%) | index.ts(partial); update.ts(partial) |
 | `manager/glasskube` | 1 | partial | 3/5 (60%) | index.ts(partial) |
 | `manager/gleam` | 4 | partial | 18/30 (60%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/gomod` | 6 | partial | 95/155 (61%) | index.ts(partial); artifacts.ts(partial) |
-| `manager/gradle` | 8 | partial | 41/143 (29%) | index.ts(partial); artifacts.ts(not-started); parser.ts(partial) +10 more |
+| `manager/gomod` | 6 | partial | 97/155 (63%) | index.ts(partial); artifacts.ts(partial) |
+| `manager/gradle` | 8 | partial | 42/143 (29%) | index.ts(partial); artifacts.ts(not-started); parser.ts(partial) +10 more |
 | `manager/gradle-wrapper` | 3 | partial | 20/36 (56%) | index.ts(partial); artifacts.ts(not-started) |
-| `manager/haskell-cabal` | 2 | partial | 2/8 (25%) | index.ts(partial) |
+| `manager/haskell-cabal` | 2 | partial | 8/8 (100%) | index.ts(partial) |
 | `manager/helm-requirements` | 1 | partial | 11/11 (100%) | index.ts(partial) |
 | `manager/helm-values` | 1 | partial | 6/6 (100%) | index.ts(partial); update.ts(partial); util.ts(partial) |
 | `manager/helmfile` | 2 | partial | 20/29 (69%) | index.ts(partial); artifacts.ts(not-started); utils.ts(partial) |
 | `manager/helmsman` | 1 | partial | 4/4 (100%) | index.ts(partial) |
-| `manager/helmv3` | 5 | partial | 24/52 (46%) | index.ts(partial); artifacts.ts(not-started); oci.ts(partial) +1 more |
+| `manager/helmv3` | 5 | partial | 26/52 (50%) | index.ts(partial); artifacts.ts(not-started); oci.ts(partial) +1 more |
 | `manager/hermit` | 4 | partial | 6/14 (43%) | index.ts(partial); artifacts.ts(not-started); default-config.ts(partial) |
 | `manager/homeassistant-manifest` | 1 | partial | 16/16 (100%) | index.ts(partial) |
 | `manager/homebrew` | 5 | partial | 44/64 (69%) | index.ts(partial); update.ts(not-started); utils.ts(partial) |
@@ -96,7 +96,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/jsonnet-bundler` | 2 | partial | 7/12 (58%) | index.ts(partial); artifacts.ts(not-started) |
 | `manager/kotlin-script` | 2 | partial | 5/5 (100%) | index.ts(partial) |
 | `manager/kubernetes` | 1 | partial | 14/15 (93%) | index.ts(partial) |
-| `manager/kustomize` | 3 | partial | 44/68 (65%) | index.ts(partial); artifacts.ts(not-started); common.ts(partial) |
+| `manager/kustomize` | 3 | partial | 45/68 (66%) | index.ts(partial); artifacts.ts(not-started); common.ts(partial) |
 | `manager/leiningen` | 1 | partial | 4/4 (100%) | index.ts(partial) |
 | `manager/maven` | 3 | partial | 56/56 (100%) | index.ts(partial) |
 | `manager/maven-wrapper` | 2 | partial | 9/39 (23%) | index.ts(partial); artifacts.ts(not-started) |
@@ -113,7 +113,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/osgi` | 1 | partial | 14/14 (100%) | index.ts(partial) |
 | `manager/pep621` | 6 | partial | 19/48 (40%) | index.ts(partial); artifacts.ts(not-started); abstract.ts(partial) +5 more |
 | `manager/pep723` | 2 | partial | 6/6 (100%) | index.ts(partial); utils.ts(partial) |
-| `manager/pip-compile` | 4 | partial | 12/90 (13%) | extract.ts(partial); index.ts(partial); artifacts.ts(not-started) +2 more |
+| `manager/pip-compile` | 4 | partial | 13/90 (14%) | extract.ts(partial); index.ts(partial); artifacts.ts(not-started) +2 more |
 | `manager/pip_requirements` | 4 | partial | 28/36 (78%) | index.ts(partial); artifacts.ts(not-started); common.ts(partial) |
 | `manager/pip_setup` | 1 | partial | 2/2 (100%) | index.ts(partial) |
 | `manager/pipenv` | 2 | partial | 15/37 (41%) | index.ts(partial); artifacts.ts(not-started) |
@@ -125,7 +125,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/puppet` | 3 | partial | 13/21 (62%) | index.ts(partial); common.ts(partial); puppetfile-parser.ts(partial) |
 | `manager/pyenv` | 1 | partial | 3/3 (100%) | index.ts(partial) |
 | `manager/quadlet` | 1 | partial | 10/11 (91%) | index.ts(partial) |
-| `manager/renovate-config` | 1 | partial | 17/20 (85%) | index.ts(partial) |
+| `manager/renovate-config` | 1 | partial | 18/20 (90%) | index.ts(partial) |
 | `manager/ruby-version` | 1 | partial | 3/3 (100%) | index.ts(partial) |
 | `manager/runtime-version` | 1 | partial | 2/2 (100%) | index.ts(partial) |
 | `manager/rust-toolchain` | 2 | partial | 23/23 (100%) | index.ts(partial) |
@@ -148,11 +148,11 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | partial | 11/11 (100%) | index.ts(partial); update.ts(partial) |
 | `manager/xcodegen` | 1 | partial | 24/24 (100%) | index.ts(partial) |
 
-## datasources  —  539/1379 (39%)
+## datasources  —  545/1379 (40%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `datasource/_common` | 7 | ? | 46/125 (37%) | — |
+| `datasource/_common` | 7 | ? | 49/125 (39%) | — |
 | `datasource/artifactory` | 1 | ? | 8/8 (100%) | — |
 | `datasource/aws-eks-addon` | 2 | ? | 1/8 (12%) | — |
 | `datasource/aws-machine-image` | 1 | ? | 0/14 (0%) | — |
@@ -184,7 +184,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/flutter-version` | 1 | ? | 2/4 (50%) | — |
 | `datasource/forgejo-releases` | 1 | ? | 5/5 (100%) | — |
 | `datasource/forgejo-tags` | 1 | ? | 5/5 (100%) | — |
-| `datasource/galaxy` | 1 | ? | 9/11 (82%) | — |
+| `datasource/galaxy` | 1 | ? | 11/11 (100%) | — |
 | `datasource/galaxy-collection` | 1 | ? | 12/15 (80%) | — |
 | `datasource/git-refs` | 1 | ? | 8/11 (73%) | — |
 | `datasource/git-tags` | 1 | ? | 7/8 (88%) | — |
@@ -227,7 +227,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/ruby-version` | 1 | ? | 3/3 (100%) | — |
 | `datasource/rubygems` | 4 | ? | 3/35 (9%) | — |
 | `datasource/rust-version` | 2 | ? | 16/18 (89%) | — |
-| `datasource/sbt-package` | 2 | ? | 11/14 (79%) | — |
+| `datasource/sbt-package` | 2 | ? | 12/14 (86%) | — |
 | `datasource/sbt-plugin` | 1 | ? | 7/8 (88%) | — |
 | `datasource/terraform-module` | 3 | ? | 9/23 (39%) | — |
 | `datasource/terraform-provider` | 1 | ? | 0/18 (0%) | — |
@@ -235,12 +235,12 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/unity3d` | 1 | ? | 9/9 (100%) | — |
 | `datasource/unity3d-packages` | 1 | ? | 5/5 (100%) | — |
 
-## platforms  —  146/1581 (9%)
+## platforms  —  156/1581 (10%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `platform/_common` | 7 | ? | 13/48 (27%) | — |
-| `platform/azure` | 4 | ? | 22/131 (17%) | — |
+| `platform/azure` | 4 | ? | 27/131 (21%) | — |
 | `platform/bitbucket` | 3 | ? | 0/109 (0%) | — |
 | `platform/bitbucket-server` | 3 | ? | 6/160 (4%) | — |
 | `platform/codecommit` | 1 | ? | 0/58 (0%) | — |
@@ -249,11 +249,11 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/gitea` | 5 | ? | 0/183 (0%) | — |
 | `platform/github` | 7 | ? | 31/245 (13%) | — |
 | `platform/gitlab` | 4 | ? | 17/182 (9%) | — |
-| `platform/local` | 2 | ? | 26/41 (63%) | — |
-| `platform/scm-manager` | 4 | ? | 7/65 (11%) | — |
+| `platform/local` | 2 | ? | 28/41 (68%) | — |
+| `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
 | `platform/utils` | 2 | ? | 14/14 (100%) | — |
 
-## versioning  —  683/759 (90%)
+## versioning  —  688/759 (91%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -265,7 +265,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/bazel-module` | 2 | ? | 26/30 (87%) | — |
 | `versioning/cargo` | 1 | ? | 10/10 (100%) | — |
 | `versioning/composer` | 1 | ? | 18/18 (100%) | — |
-| `versioning/conan` | 1 | ? | 14/16 (88%) | — |
+| `versioning/conan` | 1 | ? | 16/16 (100%) | — |
 | `versioning/conda` | 1 | ? | 15/15 (100%) | — |
 | `versioning/deb` | 1 | ? | 7/7 (100%) | — |
 | `versioning/debian` | 2 | ? | 20/21 (95%) | — |
@@ -298,10 +298,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/pvp` | 3 | ? | 23/23 (100%) | — |
 | `versioning/python` | 1 | ? | 6/6 (100%) | — |
 | `versioning/redhat` | 1 | ? | 2/2 (100%) | — |
-| `versioning/regex` | 1 | ? | 18/24 (75%) | — |
+| `versioning/regex` | 1 | ? | 20/24 (83%) | — |
 | `versioning/rez` | 1 | ? | 16/16 (100%) | — |
 | `versioning/rpm` | 1 | ? | 6/6 (100%) | — |
-| `versioning/ruby` | 1 | ? | 13/15 (87%) | — |
+| `versioning/ruby` | 1 | ? | 14/15 (93%) | — |
 | `versioning/rust-release-channel` | 2 | ? | 17/23 (74%) | — |
 | `versioning/same-major` | 1 | ? | 8/10 (80%) | — |
 | `versioning/semver` | 2 | ? | 6/6 (100%) | — |
@@ -312,12 +312,12 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/unity3d` | 1 | ? | 4/4 (100%) | — |
 | `versioning/unity3d-packages` | 1 | ? | 4/4 (100%) | — |
 
-## workers  —  349/1883 (19%)
+## workers  —  353/1883 (19%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `worker/global` | 11 | ? | 113/208 (54%) | — |
-| `worker/repository` | 103 | ? | 236/1675 (14%) | — |
+| `worker/global` | 11 | ? | 116/208 (56%) | — |
+| `worker/repository` | 103 | ? | 237/1675 (14%) | — |
 
 ## config  —  427/700 (61%)
 
@@ -330,23 +330,23 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `config/presets` | 17 | ? | 52/271 (19%) | — |
 | `config/validation-helpers` | 3 | ? | 8/8 (100%) | — |
 
-## util  —  617/1597 (39%)
+## util  —  629/1597 (39%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `util/_root` | 45 | ? | 223/403 (55%) | — |
-| `util/cache` | 13 | ? | 52/151 (34%) | — |
-| `util/exec` | 7 | ? | 9/138 (7%) | — |
+| `util/_root` | 45 | ? | 225/403 (56%) | — |
+| `util/cache` | 13 | ? | 58/151 (38%) | — |
+| `util/exec` | 7 | ? | 11/138 (8%) | — |
 | `util/fs` | 2 | ? | 29/61 (48%) | — |
 | `util/git` | 15 | ? | 70/242 (29%) | — |
 | `util/github` | 10 | ? | 17/45 (38%) | — |
-| `util/http` | 22 | ? | 42/251 (17%) | — |
+| `util/http` | 22 | ? | 43/251 (17%) | — |
 | `util/json-writer` | 2 | ? | 4/9 (44%) | — |
 | `util/merge-confidence` | 1 | ? | 7/28 (25%) | — |
 | `util/package-rules` | 11 | ? | 129/143 (90%) | — |
 | `util/schema-utils` | 2 | ? | 12/47 (26%) | — |
 | `util/template` | 1 | ? | 0/54 (0%) | — |
-| `util/vulnerability` | 2 | ? | 23/25 (92%) | — |
+| `util/vulnerability` | 2 | ? | 24/25 (96%) | — |
 
 ## infra  —  40/120 (33%)
 

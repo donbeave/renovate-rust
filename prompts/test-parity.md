@@ -137,9 +137,30 @@ examples live in `AGENTS.md` → **Ported Test Attribution**.
 
 ## Quality signals you should fix
 
-Run `python3 scripts/parity_coverage.py orphans` periodically. Each line is a
-`// Ported:` comment whose spec reference does not resolve to any upstream
-file — usually a typo. Fix the comment so it resolves, or remove it.
+Two read-only audit commands surface real defects. Run them periodically — at
+minimum before any large batch commit:
+
+```sh
+python3 scripts/parity_coverage.py orphans   # // Ported: refs that don't resolve
+python3 scripts/parity_coverage.py verify    # description + line-number audit
+```
+
+`verify` opens every upstream spec at the cited line and confirms the `it()`
+call there has the exact description the Rust comment claims. It reports:
+
+- **error / orphan** — spec path doesn't resolve. Typo in the path.
+- **error / malformed** — the `// Ported:` line couldn't be parsed.
+- **error / missing-line** — cited line isn't an `it()` and the description
+  doesn't match any `it()` anywhere in the file. The comment is fabricated.
+- **error / wrong-desc** — cited line is an `it()` but with a different
+  description, and no `it()` in the file matches. Almost always fabricated.
+- **warn / off-by-line** — description is correct but the line number is
+  wrong. Fix the `line N` value.
+- **warn / no-line** — comment is missing the `line N` suffix.
+
+Treat **all errors as defects you must fix before adding new ports**.
+Warnings are cleanup work to do opportunistically. The script exits non-zero
+when any error is present, so it can be wired into CI.
 
 ## What is NOT completion
 
