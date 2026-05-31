@@ -11,38 +11,38 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null if @types  | 56 | pending | — | — | No corresponding Rust source|
-| returns null if currentVersion equals newVersion  | 65 | pending | — | — | No corresponding Rust source|
-| skips invalid repos  | 75 | pending | — | — | No corresponding Rust source|
-| works without gitea  | 84 | pending | — | — | No corresponding Rust source|
-| uses gitea tags  | 111 | pending | — | — | No corresponding Rust source|
-| handles empty gitea tags response  | 224 | pending | — | — | No corresponding Rust source|
-| uses gitea tags with error  | 259 | pending | — | — | No corresponding Rust source|
-| handles no sourceUrl  | 294 | pending | — | — | No corresponding Rust source|
-| handles invalid sourceUrl  | 303 | pending | — | — | No corresponding Rust source|
-| handles no releases  | 312 | pending | — | — | No corresponding Rust source|
-| handles not enough releases  | 321 | pending | — | — | No corresponding Rust source|
-| supports gitea enterprise and gitea enterprise changelog  | 330 | pending | — | — | No corresponding Rust source|
-| supports self-hosted gitea changelog  | 364 | pending | — | — | No corresponding Rust source|
+| returns null if @types  | 56 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| returns null if currentVersion equals newVersion  | 65 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| skips invalid repos  | 75 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| works without gitea  | 84 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| uses gitea tags  | 111 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| handles empty gitea tags response  | 224 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| uses gitea tags with error  | 259 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| handles no sourceUrl  | 294 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| handles invalid sourceUrl  | 303 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| handles no releases  | 312 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| handles not enough releases  | 321 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| supports gitea enterprise and gitea enterprise changelog  | 330 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| supports self-hosted gitea changelog  | 364 | pending | — | — | Gitea changelog integration not implemented in Rust |
 
 ### `workers/repository/update/pr/changelog/gitea/index › hasValidRepository`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles invalid repository  | 401 | pending | — | — | No corresponding Rust source|
-| handles valid repository  | 406 | pending | — | — | No corresponding Rust source|
+| handles invalid repository  | 401 | pending | — | — | Gitea changelog integration not implemented in Rust |
+| handles valid repository  | 406 | pending | — | — | Gitea changelog integration not implemented in Rust |
 
 ### `workers/repository/update/pr/changelog/gitea/index › getAllTags`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles endpoint  | 412 | pending | — | — | No corresponding Rust source|
+| handles endpoint  | 412 | pending | — | — | Gitea changelog integration not implemented in Rust |
 
 ### `workers/repository/update/pr/changelog/gitea/index › getReleaseNotesMd`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works  | 428 | pending | — | — | No corresponding Rust source|
+| works  | 428 | pending | — | — | Gitea changelog integration not implemented in Rust |
 
 ---
 

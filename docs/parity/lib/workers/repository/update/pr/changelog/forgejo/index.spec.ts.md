@@ -11,37 +11,37 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null if @types  | 56 | pending | — | — | No corresponding Rust source|
-| returns null if currentVersion equals newVersion  | 65 | pending | — | — | No corresponding Rust source|
-| skips invalid repos  | 75 | pending | — | — | No corresponding Rust source|
-| works without forgejo  | 84 | pending | — | — | No corresponding Rust source|
-| uses forgejo tags  | 111 | pending | — | — | No corresponding Rust source|
-| handles empty forgejo tags response  | 224 | pending | — | — | No corresponding Rust source|
-| uses forgejo tags with error  | 259 | pending | — | — | No corresponding Rust source|
-| handles no sourceUrl  | 294 | pending | — | — | No corresponding Rust source|
-| handles invalid sourceUrl  | 303 | pending | — | — | No corresponding Rust source|
-| handles no releases  | 312 | pending | — | — | No corresponding Rust source|
-| handles not enough releases  | 321 | pending | — | — | No corresponding Rust source|
-| supports self-hosted forgejo changelog  | 330 | pending | — | — | No corresponding Rust source|
+| returns null if @types  | 56 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| returns null if currentVersion equals newVersion  | 65 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| skips invalid repos  | 75 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| works without forgejo  | 84 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| uses forgejo tags  | 111 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| handles empty forgejo tags response  | 224 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| uses forgejo tags with error  | 259 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| handles no sourceUrl  | 294 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| handles invalid sourceUrl  | 303 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| handles no releases  | 312 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| handles not enough releases  | 321 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| supports self-hosted forgejo changelog  | 330 | pending | — | — | Forgejo changelog integration not implemented in Rust |
 
 ### `workers/repository/update/pr/changelog/forgejo/index › hasValidRepository`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles invalid repository  | 367 | pending | — | — | No corresponding Rust source|
-| handles valid repository  | 372 | pending | — | — | No corresponding Rust source|
+| handles invalid repository  | 367 | pending | — | — | Forgejo changelog integration not implemented in Rust |
+| handles valid repository  | 372 | pending | — | — | Forgejo changelog integration not implemented in Rust |
 
 ### `workers/repository/update/pr/changelog/forgejo/index › getAllTags`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles endpoint  | 378 | pending | — | — | No corresponding Rust source|
+| handles endpoint  | 378 | pending | — | — | Forgejo changelog integration not implemented in Rust |
 
 ### `workers/repository/update/pr/changelog/forgejo/index › getReleaseNotesMd`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works  | 394 | pending | — | — | No corresponding Rust source|
+| works  | 394 | pending | — | — | Forgejo changelog integration not implemented in Rust |
 
 ---
 
