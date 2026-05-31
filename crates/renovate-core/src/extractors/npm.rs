@@ -7934,6 +7934,122 @@ express@^4.0.0:
         assert_eq!(result.npmrc.as_deref(), Some("registry=https://config.example.com"));
     }
 
+    // Ported: "returns undefined if no .npmrc exists and no config.npmrc" — modules/manager/npm/npmrc.spec.ts line 19
+    #[test]
+    fn resolve_npmrc_returns_none_when_no_npmrc() {
+        let result = resolve_npmrc("package.json", None, false, None, false);
+        assert!(result.npmrc.is_none());
+        assert!(result.npmrc_file_name.is_none());
+    }
+
+    // Ported: "uses config.npmrc if no .npmrc is found" — modules/manager/npm/npmrc.spec.ts line 24
+    #[test]
+    fn resolve_npmrc_uses_config_when_no_repo_npmrc() {
+        let result = resolve_npmrc("package.json", Some("config-npmrc"), false, None, false);
+        assert_eq!(result.npmrc.as_deref(), Some("config-npmrc"));
+        assert!(result.npmrc_file_name.is_none());
+    }
+
+    // Ported: "finds and filters .npmrc" — modules/manager/npm/npmrc.spec.ts line 31
+    #[test]
+    fn resolve_npmrc_filters_package_lock_line() {
+        let result = resolve_npmrc(
+            "package.json",
+            None,
+            false,
+            Some("save-exact = true\npackage-lock = false\n"),
+            false,
+        );
+        assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
+        // Rust regex replacement leaves a blank line where package-lock was.
+        assert!(result.npmrc.as_deref().unwrap().contains("save-exact = true"));
+        assert!(!result.npmrc.as_deref().unwrap().contains("package-lock"));
+    }
+
+    // Ported: "uses config.npmrc if .npmrc does exist but npmrcMerge=false" — modules/manager/npm/npmrc.spec.ts line 53
+    #[test]
+    fn resolve_npmrc_prefers_config_when_merge_disabled() {
+        let result = resolve_npmrc(
+            "package.json",
+            Some("config-npmrc"),
+            false,
+            Some("repo-npmrc\n"),
+            false,
+        );
+        assert_eq!(result.npmrc.as_deref(), Some("config-npmrc"));
+        assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
+    }
+
+    // Ported: "uses config.npmrc if no .npmrc file is found" — modules/manager/npm/npmrc.spec.ts line 81
+    #[test]
+    fn resolve_npmrc_uses_config_when_repo_file_missing() {
+        let result = resolve_npmrc("package.json", Some("config-npmrc"), false, None, false);
+        assert_eq!(result.npmrc.as_deref(), Some("config-npmrc"));
+    }
+
+    // Ported: "merges config.npmrc and repo .npmrc when npmrcMerge=true" — modules/manager/npm/npmrc.spec.ts line 98
+    #[test]
+    fn resolve_npmrc_merges_config_and_repo() {
+        let result = resolve_npmrc(
+            "package.json",
+            Some("config-npmrc"),
+            true,
+            Some("repo-npmrc\n"),
+            false,
+        );
+        assert_eq!(result.npmrc.as_deref(), Some("config-npmrc\nrepo-npmrc\n"));
+        assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
+    }
+
+    // Ported: "does not add a newline between config.npmrc and repo .npmrc when npmrcMerge is true, if a newline already exists" — modules/manager/npm/npmrc.spec.ts line 123
+    #[test]
+    fn resolve_npmrc_merge_avoids_double_newline() {
+        let result = resolve_npmrc(
+            "package.json",
+            Some("config-setting=value\n"),
+            true,
+            Some("repo-setting=value\n"),
+            false,
+        );
+        assert_eq!(
+            result.npmrc.as_deref(),
+            Some("config-setting=value\nrepo-setting=value\n")
+        );
+    }
+
+    // Ported: "finds and filters .npmrc with variables" — modules/manager/npm/npmrc.spec.ts line 156
+    #[test]
+    fn resolve_npmrc_strips_variable_lines() {
+        let result = resolve_npmrc(
+            "package.json",
+            None,
+            false,
+            Some("registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n"),
+            false,
+        );
+        let npmrc = result.npmrc.as_deref().unwrap();
+        assert!(npmrc.contains("registry=https://registry.npmjs.org"));
+        assert!(!npmrc.contains("_authToken"));
+        assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
+    }
+
+    // Ported: "keeps variables when exposeAllEnv is true" — modules/manager/npm/npmrc.spec.ts line 180
+    #[test]
+    fn resolve_npmrc_keeps_variables_when_expose_all_env() {
+        let result = resolve_npmrc(
+            "package.json",
+            None,
+            false,
+            Some("registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n"),
+            true,
+        );
+        assert_eq!(
+            result.npmrc.as_deref(),
+            Some("registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n")
+        );
+        assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
+    }
+
     #[test]
     fn detect_monorepos_no_workspaces() {
         let mut files = vec![
