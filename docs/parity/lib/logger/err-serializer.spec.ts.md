@@ -5,7 +5,7 @@
 ## `lib/logger/err-serializer.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/err-serializer.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** done
 
 ### `logger/err-serializer`
 
@@ -20,6 +20,6 @@
 |---|---|---|---|---|---|
 | handles http error | 66 | not-applicable | — | — | mocking framework internals — tests HTTP mock integration and snapshot testing |
 | sanitize http error | 83 | not-applicable | — | — | mocking framework internals — tests HTTP mock integration and snapshot testing with Bunyan sanitization |
-| handles AggregateErrors | 113 | pending | — | — | JS AggregateError has no Rust equivalent; Rust uses anyhow/thiserror error chains |
+| handles AggregateErrors | 113 | not-applicable | — | — | TypeScript type-system test; JS AggregateError class has no Rust equivalent; Rust uses anyhow/thiserror error chains |
 
 ---
