@@ -170,7 +170,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/conan` | 1 | ? | 0/22 (0%) | — |
 | `datasource/conda` | 1 | ? | 9/9 (100%) | — |
 | `datasource/cpan` | 2 | ? | 8/8 (100%) | — |
-| `datasource/crate` | 1 | ? | 22/27 (81%) | — |
+| `datasource/crate` | 1 | full | 22/27 (81%) | Git-clone private registries not implemented (sparse-only) |
 | `datasource/custom` | 1 | ? | 1/30 (3%) | — |
 | `datasource/dart` | 1 | ? | 6/6 (100%) | — |
 | `datasource/dart-version` | 1 | ? | 2/4 (50%) | — |
@@ -304,7 +304,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/ruby` | 1 | ? | 14/15 (93%) | — |
 | `versioning/rust-release-channel` | 2 | ? | 17/23 (74%) | — |
 | `versioning/same-major` | 1 | ? | 8/10 (80%) | — |
-| `versioning/semver` | 2 | ? | 6/6 (100%) | — |
+| `versioning/semver` | 2 | full | 6/6 (100%) | — |
 | `versioning/semver-coerced` | 1 | ? | 48/53 (91%) | — |
 | `versioning/semver-partial` | 1 | ? | 18/18 (100%) | — |
 | `versioning/swift` | 1 | ? | 7/7 (100%) | — |
