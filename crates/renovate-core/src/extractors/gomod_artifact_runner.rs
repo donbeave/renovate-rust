@@ -139,8 +139,11 @@ mod tests {
             package_file_name: "go.mod".to_owned(),
             updated_deps: vec![UpdatedDep {
                 dep_name: "github.com/foo/bar".to_owned(),
+                package_name: None,
                 current_value: Some("v1.0.0".to_owned()),
                 new_value: Some("v1.1.0".to_owned()),
+                locked_version: None,
+                new_version: None,
                 package_file: "go.mod".to_owned(),
                 manager: "gomod".to_owned(),
                 datasource: None,

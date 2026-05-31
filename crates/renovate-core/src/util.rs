@@ -1596,7 +1596,7 @@ pub fn get_remapped_level<'a>(
 const MODULE_LABEL_COLOR: &str = "C5DEF5";
 
 /// Quote a string for safe shell use (mirrors Python/Node shlex.quote).
-fn shlex_quote(s: &str) -> String {
+pub fn shlex_quote(s: &str) -> String {
     if s.is_empty() {
         return "''".to_owned();
     }

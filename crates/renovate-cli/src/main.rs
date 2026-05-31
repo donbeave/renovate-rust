@@ -33,6 +33,7 @@ use renovate_core::config::Platform;
 use renovate_core::config::{DryRun, GlobalConfig, file as config_file};
 use renovate_core::http::HttpClient;
 use renovate_core::artifacts::{ArtifactConfig, ArtifactRegistry, UpdateArtifact, UpdatedDep};
+use renovate_core::extractors::cargo_artifact_runner::CargoArtifactRunner;
 use renovate_core::extractors::gomod_artifact_runner::GomodArtifactRunner;
 use renovate_core::extractors::npm_post_update::artifact_runner::NpmArtifactRunner;
 use renovate_core::managers;
@@ -489,6 +490,7 @@ async fn process_repo(
     let mut artifact_registry = ArtifactRegistry::new();
     artifact_registry.register("npm", Box::new(NpmArtifactRunner));
     artifact_registry.register("gomod", Box::new(GomodArtifactRunner));
+    artifact_registry.register("cargo", Box::new(CargoArtifactRunner));
 
     // Manifest editing: apply newValue constraints to source files.
     // Only npm/package.json is supported in this slice; other managers
@@ -710,7 +712,7 @@ async fn process_repo(
                                 "updated manifest"
                             );
                             // Run artifact update (lockfile regeneration) for supported managers.
-                            if manager == "npm" || manager == "gomod" {
+                            if manager == "npm" || manager == "gomod" || manager == "cargo" {
                                 if let Some(lock_file_dir) = client.local_working_dir() {
                                     let updated_deps: Vec<UpdatedDep> = file_deps
                                         .iter()
@@ -720,11 +722,18 @@ async fn process_repo(
                                             {
                                                 Some(UpdatedDep {
                                                     dep_name: bd.dep.name.clone(),
+                                                    package_name: bd.dep.package_name.clone(),
                                                     current_value: Some(current.clone()),
                                                     new_value: bd.dep.new_value.clone(),
+                                                    locked_version: None,
+                                                    new_version: None,
                                                     package_file: file_path.to_owned(),
                                                     manager: manager.to_owned(),
-                                                    datasource: None,
+                                                    datasource: if manager == "cargo" {
+                                                        Some("crate".to_owned())
+                                                    } else {
+                                                        None
+                                                    },
                                                 })
                                             } else {
                                                 None

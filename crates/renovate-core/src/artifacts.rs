@@ -15,8 +15,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct UpdatedDep {
     pub dep_name: String,
+    pub package_name: Option<String>,
     pub current_value: Option<String>,
     pub new_value: Option<String>,
+    pub locked_version: Option<String>,
+    pub new_version: Option<String>,
     pub package_file: String,
     pub manager: String,
     pub datasource: Option<String>,
@@ -31,6 +34,7 @@ pub struct ArtifactConfig {
     pub npmrc: Option<String>,
     pub post_update_options: Vec<String>,
     pub skip_installs: bool,
+    pub is_lockfile_maintenance: bool,
 }
 
 /// A file change resulting from artifact update.
@@ -222,7 +226,7 @@ mod tests {
     #[test]
     fn registry_register_and_get() {
         let mut reg = ArtifactRegistry::new();
-        reg.register("cargo", Box::new(NoOpArtifactRunner));
+        reg.register("cargo", Box::new(crate::extractors::cargo_artifact_runner::CargoArtifactRunner::new()));
         assert!(reg.get("cargo").is_some());
         assert!(reg.get("npm").is_none());
     }
@@ -232,8 +236,11 @@ mod tests {
     fn updated_dep_serialization() {
         let dep = UpdatedDep {
             dep_name: "serde".to_owned(),
+            package_name: None,
             current_value: Some("1.0.0".to_owned()),
             new_value: Some("1.0.100".to_owned()),
+            locked_version: None,
+            new_version: None,
             package_file: "Cargo.toml".to_owned(),
             manager: "cargo".to_owned(),
             datasource: Some("crate".to_owned()),

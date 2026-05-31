@@ -25,6 +25,7 @@ pub mod bundler;
 pub mod cabal;
 pub mod cake;
 pub mod cargo;
+pub mod cargo_artifact_runner;
 pub mod cdnurl;
 pub mod circleci;
 pub mod cloudbuild;

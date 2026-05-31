@@ -224,8 +224,11 @@ mod tests {
             package_file_name: "package.json".to_owned(),
             updated_deps: vec![UpdatedDep {
                 dep_name: "lodash".to_owned(),
+                package_name: None,
                 current_value: Some("^4.0.0".to_owned()),
                 new_value: Some("^4.17.21".to_owned()),
+                locked_version: None,
+                new_version: None,
                 package_file: "package.json".to_owned(),
                 manager: "npm".to_owned(),
                 datasource: Some("npm".to_owned()),
