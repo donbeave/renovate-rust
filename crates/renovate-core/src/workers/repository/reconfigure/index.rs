@@ -15,7 +15,7 @@ pub struct ReconfigureResult {
 }
 
 pub fn reconfigure_repository(
-    config: &RenovateConfig,
+    _config: &RenovateConfig,
     branch_prefix: &str,
 ) -> ReconfigureResult {
     let reconfigure_branch = format!("{branch_prefix}reconfigure");

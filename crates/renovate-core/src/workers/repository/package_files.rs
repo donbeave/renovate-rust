@@ -106,6 +106,7 @@ pub fn collect_package_files(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::workers::types::Upgrade;
 
     #[test]
     fn package_files_new() {

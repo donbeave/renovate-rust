@@ -23,7 +23,7 @@ pub fn get_inherited_config(repository: &str, platform: &str) -> InheritedConfig
 
     let org = parts[0];
 
-    let org_config_repo = format!("{org}/renovate-config");
+    let _org_config_repo = format!("{org}/renovate-config");
     let platform_config_repo = format!("{org}/.{platform}");
 
     InheritedConfigResult {

@@ -15,7 +15,7 @@ pub struct ErrorsWarnings {
     pub dep_warning_files: Vec<String>,
 }
 
-pub fn collect_errors_warnings(config: &RenovateConfig) -> ErrorsWarnings {
+pub fn collect_errors_warnings(_config: &RenovateConfig) -> ErrorsWarnings {
     ErrorsWarnings {
         errors: Vec::new(),
         warnings: Vec::new(),

@@ -16,7 +16,7 @@ pub struct OnboardingBranchCreateResult {
 }
 
 pub fn create_onboarding_branch(
-    config: &RenovateConfig,
+    _config: &RenovateConfig,
     global_config: &GlobalConfig,
     config_file_name: &str,
     _config_contents: &str,

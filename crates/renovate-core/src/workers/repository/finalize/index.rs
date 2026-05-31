@@ -14,8 +14,8 @@ pub struct FinalizeResult {
 }
 
 pub fn finalize_repository(
-    config: &RenovateConfig,
-    branch_list: &[String],
+    _config: &RenovateConfig,
+    _branch_list: &[String],
 ) -> FinalizeResult {
     FinalizeResult {
         pruned_branches: Vec::new(),

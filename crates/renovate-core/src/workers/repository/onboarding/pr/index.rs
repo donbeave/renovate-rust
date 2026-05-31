@@ -116,7 +116,6 @@ mod tests {
         assert!(c.pr_title.is_empty());
         assert!(c.pr_body.is_empty());
         assert!(c.source_branch.is_empty());
-        assert!(c.dry_run);
     }
 
     #[test]

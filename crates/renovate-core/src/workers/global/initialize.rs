@@ -20,7 +20,7 @@ pub struct GlobalInitResult {
     pub warnings: Vec<String>,
 }
 
-pub fn initialize_global(global_config: &GlobalConfig) -> GlobalInitResult {
+pub fn initialize_global(_global_config: &GlobalConfig) -> GlobalInitResult {
     GlobalInitResult {
         initialized: true,
         errors: Vec::new(),

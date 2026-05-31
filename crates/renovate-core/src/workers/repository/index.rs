@@ -2,39 +2,32 @@
 //!
 //! Mirrors `lib/workers/repository/index.ts`.
 
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
 use crate::config::GlobalConfig;
-use crate::workers::repository::common::PackageFile;
 use crate::workers::repository::result::{ProcessResult, ProcessStatus, RepositoryResult, process_result};
 use crate::workers::types::RenovateConfig;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RepositoryWorker {
     pub repository: String,
-    pub config: RenovateConfig,
-    pub global_config: GlobalConfig,
 }
 
 impl RepositoryWorker {
-    pub fn new(repository: &str, config: RenovateConfig, global_config: GlobalConfig) -> Self {
+    pub fn new(repository: &str) -> Self {
         Self {
             repository: repository.to_owned(),
-            config,
-            global_config,
         }
     }
 
-    pub fn process(&self) -> ProcessResult {
-        process_repository(&self.config, &self.global_config)
+    pub fn process(&self, config: &RenovateConfig, global_config: &GlobalConfig) -> ProcessResult {
+        process_repository(config, global_config)
     }
 }
 
 pub fn process_repository(
     config: &RenovateConfig,
-    global_config: &GlobalConfig,
+    _global_config: &GlobalConfig,
 ) -> ProcessResult {
     if config.enabled == Some(false) {
         return ProcessResult {
@@ -60,22 +53,14 @@ mod tests {
 
     #[test]
     fn repository_worker_new() {
-        let w = RepositoryWorker::new(
-            "org/repo",
-            RenovateConfig::default(),
-            GlobalConfig::default(),
-        );
+        let w = RepositoryWorker::new("org/repo");
         assert_eq!(w.repository, "org/repo");
     }
 
     #[test]
     fn repository_worker_process() {
-        let w = RepositoryWorker::new(
-            "org/repo",
-            RenovateConfig::default(),
-            GlobalConfig::default(),
-        );
-        let result = w.process();
+        let w = RepositoryWorker::new("org/repo");
+        let result = w.process(&RenovateConfig::default(), &GlobalConfig::default());
         assert_eq!(result.result, RepositoryResult::Done);
     }
 
@@ -102,8 +87,6 @@ mod tests {
     fn repository_worker_serialization_roundtrip() {
         let w = RepositoryWorker {
             repository: "org/repo".into(),
-            config: RenovateConfig::default(),
-            global_config: GlobalConfig::default(),
         };
         let json = serde_json::to_string(&w).unwrap();
         let back: RepositoryWorker = serde_json::from_str(&json).unwrap();

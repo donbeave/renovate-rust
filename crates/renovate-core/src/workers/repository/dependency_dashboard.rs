@@ -95,7 +95,6 @@ pub fn format_dashboard(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::workers::types::Upgrade;
 
     #[test]
     fn dashboard_entry_default() {

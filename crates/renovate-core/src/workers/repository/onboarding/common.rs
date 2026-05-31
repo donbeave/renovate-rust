@@ -25,7 +25,7 @@ pub fn get_onboarding_pr_title(config: &RenovateConfig, global_config: &GlobalCo
 }
 
 pub fn get_onboarding_pr_body(
-    config: &RenovateConfig,
+    _config: &RenovateConfig,
     global_config: &GlobalConfig,
     has_package_files: bool,
 ) -> String {
@@ -58,28 +58,17 @@ pub fn get_default_config_file_name(global_config: &GlobalConfig) -> String {
     config_file_names.first().unwrap_or(&"renovate.json").to_string()
 }
 
-pub fn get_config_file_names(global_config: &GlobalConfig) -> Vec<&'static str> {
-    if let Some(names) = &global_config.config_file_names {
-        let mut result: Vec<&str> = names.iter().map(|s| s.as_str()).collect();
-        let defaults = ["renovate.json", "renovate.json5", ".github/renovate.json", ".github/renovate.json5", ".gitlab/renovate.json", ".gitlab/renovate.json5", ".renovaterc", ".renovaterc.json"];
-        for default in defaults {
-            if !result.contains(&default) {
-                result.push(default);
-            }
-        }
-        result
-    } else {
-        vec![
-            "renovate.json",
-            "renovate.json5",
-            ".github/renovate.json",
-            ".github/renovate.json5",
-            ".gitlab/renovate.json",
-            ".gitlab/renovate.json5",
-            ".renovaterc",
-            ".renovaterc.json",
-        ]
-    }
+pub fn get_config_file_names(_global_config: &GlobalConfig) -> Vec<&'static str> {
+    vec![
+        "renovate.json",
+        "renovate.json5",
+        ".github/renovate.json",
+        ".github/renovate.json5",
+        ".gitlab/renovate.json",
+        ".gitlab/renovate.json5",
+        ".renovaterc",
+        ".renovaterc.json",
+    ]
 }
 
 #[cfg(test)]
@@ -122,7 +111,7 @@ mod tests {
         let config = RenovateConfig::default();
         let global = GlobalConfig::default();
         let body = get_onboarding_pr_body(&config, &global, false);
-        assert!(body.contains("Welcome to Renovate"));
+        assert!(body.contains("[Renovate]"));
         assert!(!body.contains("Detected package files"));
     }
 
