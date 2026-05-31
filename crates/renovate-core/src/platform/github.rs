@@ -284,6 +284,13 @@ pub struct GhIssue {
     pub closed_at: Option<String>,
 }
 
+/// GitHub REST API comment representation.
+#[derive(Debug, Clone, Deserialize)]
+pub struct GhComment {
+    pub id: i64,
+    pub body: Option<String>,
+}
+
 /// Request body for creating a GitHub PR.
 #[derive(Debug, Serialize)]
 struct CreatePrRequest {
@@ -637,6 +644,147 @@ impl GithubClient {
             .get_json::<Vec<GhIssue>>(&url)
             .await
             .map_err(PlatformError::Http)
+    }
+
+    /// Create a new issue.
+    ///
+    /// Mirrors `createIssue` from `lib/modules/platform/github/index.ts`.
+    pub async fn create_issue(
+        &self,
+        owner: &str,
+        repo: &str,
+        title: &str,
+        body: &str,
+        labels: Option<Vec<String>>,
+    ) -> Result<i64, PlatformError> {
+        let url = format!("{}/repos/{}/{}/issues", self.api_base, owner, repo);
+        let request = serde_json::json!({
+            "title": title,
+            "body": body,
+            "labels": labels.unwrap_or_default(),
+        });
+        let request_json = serde_json::to_string(&request)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+        let issue: GhIssue = self
+            .http
+            .post_json(&url, &request_json)
+            .await
+            .map_err(PlatformError::Http)?;
+        Ok(issue.number)
+    }
+
+    /// Update an existing issue.
+    ///
+    /// Mirrors `updateIssue` from `lib/modules/platform/github/index.ts`.
+    pub async fn update_issue(
+        &self,
+        owner: &str,
+        repo: &str,
+        issue_number: i64,
+        title: Option<&str>,
+        body: Option<&str>,
+        state: Option<&str>,
+        labels: Option<Vec<String>>,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/{}",
+            self.api_base, owner, repo, issue_number
+        );
+        let mut request = serde_json::Map::new();
+        if let Some(t) = title {
+            request.insert("title".to_owned(), serde_json::Value::String(t.to_owned()));
+        }
+        if let Some(b) = body {
+            request.insert("body".to_owned(), serde_json::Value::String(b.to_owned()));
+        }
+        if let Some(s) = state {
+            request.insert("state".to_owned(), serde_json::Value::String(s.to_owned()));
+        }
+        if let Some(l) = labels {
+            request.insert(
+                "labels".to_owned(),
+                serde_json::Value::Array(l.into_iter().map(serde_json::Value::String).collect()),
+            );
+        }
+        let request_json = serde_json::to_string(&request)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+        self.http
+            .patch_json(&url, &request_json)
+            .await
+            .map_err(PlatformError::Http)?;
+        Ok(())
+    }
+
+    /// Add a comment to an issue or PR.
+    ///
+    /// Mirrors `ensureComment` from `lib/modules/platform/github/index.ts`.
+    pub async fn create_comment(
+        &self,
+        owner: &str,
+        repo: &str,
+        issue_number: i64,
+        body: &str,
+    ) -> Result<i64, PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/{}/comments",
+            self.api_base, owner, repo, issue_number
+        );
+        let request = serde_json::json!({ "body": body });
+        let request_json = serde_json::to_string(&request)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+        let comment: GhComment = self
+            .http
+            .post_json(&url, &request_json)
+            .await
+            .map_err(PlatformError::Http)?;
+        Ok(comment.id)
+    }
+
+    /// Update an existing comment.
+    ///
+    /// Mirrors `updateComment` from `lib/modules/platform/github/index.ts`.
+    pub async fn update_comment(
+        &self,
+        owner: &str,
+        repo: &str,
+        comment_id: i64,
+        body: &str,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/comments/{}",
+            self.api_base, owner, repo, comment_id
+        );
+        let request = serde_json::json!({ "body": body });
+        let request_json = serde_json::to_string(&request)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+        self.http
+            .patch_json(&url, &request_json)
+            .await
+            .map_err(PlatformError::Http)?;
+        Ok(())
+    }
+
+    /// Delete a comment.
+    ///
+    /// Mirrors `deleteComment` from `lib/modules/platform/github/index.ts`.
+    pub async fn delete_comment(
+        &self,
+        owner: &str,
+        repo: &str,
+        comment_id: i64,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/comments/{}",
+            self.api_base, owner, repo, comment_id
+        );
+        let resp = self.http.delete(&url).await.map_err(PlatformError::Http)?;
+        if !resp.status().is_success() {
+            return Err(PlatformError::Http(HttpError::Status {
+                status: resp.status(),
+                url,
+            }));
+        }
+        Ok(())
     }
 
     /// Check whether a branch exists on the remote repository.
@@ -2410,6 +2558,201 @@ mod tests {
         let issues = client.list_issues("owner", "repo", None).await.unwrap();
         assert_eq!(issues.len(), 1);
         assert_eq!(issues[0].number, 1);
+    }
+
+    // ── create_issue / update_issue ───────────────────────────────────────────
+
+    // Ported: "creates issue" — modules/platform/github/index.spec.ts line 2647
+    #[tokio::test]
+    async fn create_issue_returns_issue_number() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 42,
+                "title": "Dependency Dashboard",
+                "state": "open",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-09T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let number = client
+            .create_issue("owner", "repo", "Dependency Dashboard", "Body", None)
+            .await
+            .unwrap();
+        assert_eq!(number, 42);
+    }
+
+    // Ported: "creates issue with labels" — modules/platform/github/index.spec.ts line 2783
+    #[tokio::test]
+    async fn create_issue_with_labels() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 42,
+                "title": "Dependency Dashboard",
+                "state": "open",
+                "labels": [{"name": "renovate"}],
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-09T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let number = client
+            .create_issue("owner", "repo", "Dependency Dashboard", "Body", Some(vec!["renovate".to_owned()]))
+            .await
+            .unwrap();
+        assert_eq!(number, 42);
+    }
+
+    // Ported: "updates issue" — modules/platform/github/index.spec.ts line 2872
+    #[tokio::test]
+    async fn update_issue_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/issues/42"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .update_issue("owner", "repo", 42, Some("New title"), Some("New body"), None, None)
+            .await
+            .unwrap();
+    }
+
+    // Ported: "updates issue with labels" — modules/platform/github/index.spec.ts line 2931
+    #[tokio::test]
+    async fn update_issue_with_labels() {
+        let server = MockServer::start().await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/issues/42"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .update_issue("owner", "repo", 42, None, None, None, Some(vec!["bug".to_owned()]))
+            .await
+            .unwrap();
+    }
+
+    // Ported: "closes issue" — modules/platform/github/index.spec.ts line 3179
+    #[tokio::test]
+    async fn update_issue_closes_issue() {
+        let server = MockServer::start().await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/issues/42"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .update_issue("owner", "repo", 42, None, None, Some("closed"), None)
+            .await
+            .unwrap();
+    }
+
+    // Ported: "swallows 404 Not Found when the issue was deleted on the platform" — modules/platform/github/index.spec.ts line 3254
+    #[tokio::test]
+    async fn get_issue_swallows_404() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let issue = client.get_issue("owner", "repo", 42).await.unwrap();
+        assert!(issue.is_none());
+    }
+
+    // Ported: "swallows 410 Gone when the issue was deleted on the platform" — modules/platform/github/index.spec.ts line 3223
+    #[tokio::test]
+    async fn get_issue_swallows_410() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42"))
+            .respond_with(ResponseTemplate::new(410))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let issue = client.get_issue("owner", "repo", 42).await.unwrap();
+        assert!(issue.is_none());
+    }
+
+    // Ported: "rethrows non-deletion errors" — modules/platform/github/index.spec.ts line 3285
+    #[tokio::test]
+    async fn get_issue_rethrows_non_deletion_errors() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_issue("owner", "repo", 42).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    // ── create_comment / update_comment / delete_comment ──────────────────────
+
+    // Ported: "add comment if not found" — modules/platform/github/index.spec.ts line 3398
+    #[tokio::test]
+    async fn create_comment_adds_comment() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/42/comments"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "id": 123,
+                "body": "A comment",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let id = client.create_comment("owner", "repo", 42, "A comment").await.unwrap();
+        assert_eq!(id, 123);
+    }
+
+    // Ported: "add updates comment if necessary" — modules/platform/github/index.spec.ts line 3445
+    #[tokio::test]
+    async fn update_comment_updates_body() {
+        let server = MockServer::start().await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/issues/comments/123"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client.update_comment("owner", "repo", 123, "Updated comment").await.unwrap();
+    }
+
+    // Ported: "deletes comment by topic if found" — modules/platform/github/index.spec.ts line 3500
+    #[tokio::test]
+    async fn delete_comment_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("DELETE"))
+            .and(path("/repos/owner/repo/issues/comments/123"))
+            .respond_with(ResponseTemplate::new(204))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client.delete_comment("owner", "repo", 123).await.unwrap();
     }
 
     // ── remote_branch_exists ──────────────────────────────────────────────────

@@ -311,6 +311,19 @@ impl HttpClient {
         Ok(resp)
     }
 
+    /// Send a DELETE request and return the response.
+    ///
+    /// Returns the raw response; callers must check the status code.
+    pub async fn delete(&self, url: &str) -> Result<reqwest::Response, HttpError> {
+        let rb = self.inner.delete(url);
+        let rb = match &self.token {
+            Some(t) => rb.bearer_auth(t),
+            None => rb,
+        };
+        let resp = rb.send().await.map_err(HttpError::Request)?;
+        Ok(resp)
+    }
+
     /// Send a DELETE request and deserialize the JSON response.
     pub async fn delete_json<T: serde::de::DeserializeOwned>(
         &self,
