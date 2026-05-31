@@ -14,6 +14,8 @@ pub mod azure;
 pub mod azure_utils;
 pub mod bitbucket;
 pub mod bitbucket_server;
+pub mod comment;
+pub mod default_scm;
 pub mod forgejo;
 pub mod gerrit;
 pub mod gitea;
@@ -23,6 +25,7 @@ pub mod github_api_cache;
 pub mod gitlab;
 pub mod local;
 pub mod pr_body;
+pub mod scm;
 pub mod scm_manager;
 pub mod util;
 
