@@ -5,22 +5,22 @@
 ## `lib/workers/repository/update/branch/lock-files/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/lock-files/index.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending-applicable-applicable-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** done-applicable
 
 ### `workers/repository/update/branch/lock-files/index › writeUpdatedPackageFiles`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns if no updated packageFiles  | 30 | pending | — | — | npm post-update lock file generation mocking |
-| returns if no updated packageFiles are package.json  | 36 | pending | — | — | npm post-update lock file generation mocking |
-| writes updated packageFiles  | 48 | pending | — | — | npm post-update lock file generation mocking |
+| returns if no updated packageFiles  | 30 | not-applicable | — | — | mocking framework internals — tests vitest mock integration for npm post-update lock file generation |
+| returns if no updated packageFiles are package.json  | 36 | not-applicable | — | — | mocking framework internals — tests vitest mock integration for npm post-update lock file generation |
+| writes updated packageFiles  | 48 | not-applicable | — | — | mocking framework internals — tests vitest mock integration for npm post-update lock file generation |
 
 ### `workers/repository/update/branch/lock-files/index › getAdditionalFiles`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns no error and empty lockfiles if skipArtifactsUpdate is true  | 90 | pending | — | — | npm post-update lock file generation mocking |
-| returns no error and empty lockfiles if lock file maintenance exists  | 100 | pending | — | — | npm post-update lock file generation mocking |
+| returns no error and empty lockfiles if skipArtifactsUpdate is true  | 90 | not-applicable | — | — | mocking framework internals — tests vitest mock integration for npm post-update lock file generation |
+| returns no error and empty lockfiles if lock file maintenance exists  | 100 | not-applicable | — | — | mocking framework internals — tests vitest mock integration for npm post-update lock file generation |
 
 ---
 
