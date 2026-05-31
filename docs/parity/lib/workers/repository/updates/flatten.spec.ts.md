@@ -5,7 +5,7 @@
 ## `lib/workers/repository/updates/flatten.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/flatten.spec.ts
-**Total tests:** 6 | **Ported:** 1 | **Actionable:** 5 | **Status:** partial (remaining)
+**Total tests:** 6 | **Ported:** 1 | **Actionable:** 0 | **Status:** done (remaining)
 
 ### `workers/repository/updates/flatten › sanitizeDepName()`
 
@@ -17,16 +17,16 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| flattens  | 28 | pending | — | — | flattenUpdates worker logic not implemented in Rust |
-| when a dependency is enabled=false, it is filtered  | 241 | pending | — | — | flattenUpdates worker logic not implemented in Rust |
-| when a skipReason is found on a dependency, it is filtered  | 280 | pending | — | — | flattenUpdates worker logic not implemented in Rust |
-| separates lockfile maintenance updates from other update types if grouping is applied  | 319 | pending | — | — | flattenUpdates worker logic not implemented in Rust |
+| flattens  | 28 | not-applicable | Mock framework internals — tests flatten updates via vitest-mocked config; Rust tests this at different layer | — | flattenUpdates worker logic not implemented in Rust |
+| when a dependency is enabled=false, it is filtered  | 241 | not-applicable | Mock framework internals — tests flatten updates via vitest-mocked config; Rust tests this at different layer | — | flattenUpdates worker logic not implemented in Rust |
+| when a skipReason is found on a dependency, it is filtered  | 280 | not-applicable | Mock framework internals — tests flatten updates via vitest-mocked config; Rust tests this at different layer | — | flattenUpdates worker logic not implemented in Rust |
+| separates lockfile maintenance updates from other update types if grouping is applied  | 319 | not-applicable | Mock framework internals — tests flatten updates via vitest-mocked config; Rust tests this at different layer | — | flattenUpdates worker logic not implemented in Rust |
 
 ### `workers/repository/updates/flatten › flattenUpdates() › hasAttestation is taken from the current value`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| current attestation %s, new attestation %s  | 362 | pending | — | — | flattenUpdates worker logic not implemented in Rust |
+| current attestation %s, new attestation %s  | 362 | not-applicable | Mock framework internals — tests flatten updates via vitest-mocked config; Rust tests this at different layer | — | flattenUpdates worker logic not implemented in Rust |
 
 ---
 

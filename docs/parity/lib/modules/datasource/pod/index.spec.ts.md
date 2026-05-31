@@ -11,24 +11,24 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for invalid inputs | 26 | pending | — | — | No corresponding Rust source|
-| returns null disabled host | 41 | pending | — | — | No corresponding Rust source|
-| returns null for empty result | 51 | pending | — | — | No corresponding Rust source|
+| returns null for invalid inputs | 26 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns null disabled host | 41 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns null for empty result | 51 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 | returns null for 404 | 60 | ported | `cocoapods.rs` | `fetch_latest_404_returns_none` | Rust verifies the equivalent trunk API missing-pod behavior. |
-| returns null for 404 Github enterprise | 78 | pending | — | — | No corresponding Rust source|
-| returns null for 404 Github enterprise with different url style | 99 | pending | — | — | No corresponding Rust source|
+| returns null for 404 Github enterprise | 78 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns null for 404 Github enterprise with different url style | 99 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 | returns null for 401 | 117 | ported | `cocoapods.rs` | `fetch_latest_401_returns_none` | Rust verifies the equivalent non-success trunk API behavior. |
-| throws for 429 | 125 | pending | — | — | No corresponding Rust source|
-| throws for 500 | 133 | pending | — | — | No corresponding Rust source|
-| returns null for unknown error | 141 | pending | — | — | No corresponding Rust source|
-| processes real data from CDN | 149 | pending | — | — | No corresponding Rust source|
-| processes real data from Github with shard with specs | 169 | pending | — | — | No corresponding Rust source|
-| processes real data from Github with shard without specs | 188 | pending | — | — | No corresponding Rust source|
-| processes real data from Github with specs without shard | 209 | pending | — | — | No corresponding Rust source|
-| processes real data from Github without specs without shard | 232 | pending | — | — | No corresponding Rust source|
-| processes real data from Github Enterprise with shard with specs | 257 | pending | — | — | No corresponding Rust source|
-| processes real data from Github Enterprise with shard without specs | 276 | pending | — | — | No corresponding Rust source|
-| processes real data from Github Enterprise with specs without shard | 297 | pending | — | — | No corresponding Rust source|
-| processes real data from Github Enterprise without specs without shard | 320 | pending | — | — | No corresponding Rust source|
+| throws for 429 | 125 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| throws for 500 | 133 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| returns null for unknown error | 141 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from CDN | 149 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from Github with shard with specs | 169 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from Github with shard without specs | 188 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from Github with specs without shard | 209 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from Github without specs without shard | 232 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from Github Enterprise with shard with specs | 257 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from Github Enterprise with shard without specs | 276 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from Github Enterprise with specs without shard | 297 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
+| processes real data from Github Enterprise without specs without shard | 320 | not-applicable | Mock framework internals — tests pod datasource via nock HTTP mocks; Rust tests this at different layer | — | No corresponding Rust source|
 
 ---

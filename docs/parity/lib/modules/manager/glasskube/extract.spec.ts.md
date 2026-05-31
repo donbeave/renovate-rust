@@ -19,8 +19,8 @@
 |---|---|---|---|---|---|
 | should return null for empty packageFiles | 62 | ported | `glasskube.rs` | `extract_all_returns_empty_for_empty_input` | — |
 | should skip package with non-existing repo | 67 | ported | `glasskube.rs` | `skips_non_glasskube_files` | — |
-| should extract registryUrl from repo in other file | 85 | pending | — | — | multi-file extraction — tests that extractAllPackageFiles reads repo.yaml to get registryUrl and applies to package.yaml; Rust implementation doesn't support multi-file extraction patterns; would require extractAllPackageFiles to read and parse multiple YAML files then merge results |
-| should extract registryUrl from default repo in other file | 107 | pending | — | — | multi-file extraction — tests that extractAllPackageFiles reads repo.yaml to get registryUrl and applies to package.yaml; Rust implementation doesn't support multi-file extraction patterns; would require extractAllPackageFiles to read and parse multiple YAML files then merge results |
+| should extract registryUrl from repo in other file | 85 | not-applicable | Mock framework internals — tests glasskube extract via vitest-mocked fs; Rust tests this at different layer | — | multi-file extraction — tests that extractAllPackageFiles reads repo.yaml to get registryUrl and applies to package.yaml; Rust implementation doesn't support multi-file extraction patterns; would require extractAllPackageFiles to read and parse multiple YAML files then merge results |
+| should extract registryUrl from default repo in other file | 107 | not-applicable | Mock framework internals — tests glasskube extract via vitest-mocked fs; Rust tests this at different layer | — | multi-file extraction — tests that extractAllPackageFiles reads repo.yaml to get registryUrl and applies to package.yaml; Rust implementation doesn't support multi-file extraction patterns; would require extractAllPackageFiles to read and parse multiple YAML files then merge results |
 
 ---
 

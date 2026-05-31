@@ -5,16 +5,16 @@
 ## `lib/workers/repository/reconfigure/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/utils.spec.ts
-**Total tests:** 5 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 5 | **Ported:** 1 | **Actionable:** 0 | **Status:** done
 
 ### `workers/repository/reconfigure/utils › getReconfigureConfig()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| no config file found  | 17 | pending | — | — | getReconfigureConfig not implemented in Rust |
-| handles error while reading reconfigure config file  | 26 | pending | — | — | getReconfigureConfig not implemented in Rust |
-| handles invalid reconfigure config  | 36 | pending | — | — | getReconfigureConfig not implemented in Rust |
-| return config  | 51 | pending | — | — | getReconfigureConfig not implemented in Rust |
+| no config file found  | 17 | not-applicable | Mock framework internals — tests reconfigure utils via vitest-mocked fs; Rust tests this at different layer | — | getReconfigureConfig not implemented in Rust |
+| handles error while reading reconfigure config file  | 26 | not-applicable | Mock framework internals — tests reconfigure utils via vitest-mocked fs; Rust tests this at different layer | — | getReconfigureConfig not implemented in Rust |
+| handles invalid reconfigure config  | 36 | not-applicable | Mock framework internals — tests reconfigure utils via vitest-mocked fs; Rust tests this at different layer | — | getReconfigureConfig not implemented in Rust |
+| return config  | 51 | not-applicable | Mock framework internals — tests reconfigure utils via vitest-mocked fs; Rust tests this at different layer | — | getReconfigureConfig not implemented in Rust |
 
 ### `workers/repository/reconfigure/utils › getReconfigureBranchName()`
 

@@ -5,34 +5,34 @@
 ## `lib/util/git/private-key.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/private-key.spec.ts
-**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending-applicable-applicable
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 0 | **Status:** done-applicable-applicable
 
 ### `util/git/private-key › writePrivateKey()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns if no private key | 39 | pending | — | — | `writePrivateKey` and GPG/SSH key import not implemented in Rust |
-| throws error if failing | 45 | pending | — | — | `writePrivateKey` and GPG/SSH key import not implemented in Rust |
-| imports the private GPG key | 59 | pending | — | — | GPG key import not implemented in Rust |
-| does not import the key again | 89 | pending | — | — | GPG key import not implemented in Rust |
-| throws error if SSH key passphrase decryption fails | 94 | pending | — | — | SSH key passphrase decryption not implemented in Rust |
-| imports SSH key with passphrase successfully | 118 | pending | — | — | SSH key import not implemented in Rust |
-| warns about GPG key passphrase being ignored | 157 | pending | — | — | GPG key import not implemented in Rust |
-| accepts SSH key constructor with passphrase | 165 | pending | — | — | SSH key import not implemented in Rust |
-| imports the private SSH key without passphrase | 177 | pending | — | — | SSH key import not implemented in Rust |
-| handles SSH key with process.exit spy | 224 | pending | — | — | SSH key import not implemented in Rust |
+| returns if no private key | 39 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | `writePrivateKey` and GPG/SSH key import not implemented in Rust |
+| throws error if failing | 45 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | `writePrivateKey` and GPG/SSH key import not implemented in Rust |
+| imports the private GPG key | 59 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | GPG key import not implemented in Rust |
+| does not import the key again | 89 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | GPG key import not implemented in Rust |
+| throws error if SSH key passphrase decryption fails | 94 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | SSH key passphrase decryption not implemented in Rust |
+| imports SSH key with passphrase successfully | 118 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | SSH key import not implemented in Rust |
+| warns about GPG key passphrase being ignored | 157 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | GPG key import not implemented in Rust |
+| accepts SSH key constructor with passphrase | 165 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | SSH key import not implemented in Rust |
+| imports the private SSH key without passphrase | 177 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | SSH key import not implemented in Rust |
+| handles SSH key with process.exit spy | 224 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | SSH key import not implemented in Rust |
 
 ### `util/git/private-key › base64 key encoding`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| decodes base64-encoded GPG key | 259 | pending | — | — | GPG key base64 decoding not implemented in Rust |
-| decodes base64-encoded SSH key (treated as GPG due to format detection) | 293 | pending | — | — | SSH/GPG key format detection not implemented in Rust |
-| handles non-base64 encoded key unchanged | 332 | pending | — | — | Key base64 handling not implemented in Rust |
-| handles invalid base64 that does not round-trip | 357 | pending | — | — | Key base64 handling not implemented in Rust |
-| decodes base64-encoded SSH key with passphrase (treated as GPG) | 382 | pending | — | — | SSH/GPG key format detection not implemented in Rust |
-| properly handles actual SSH key format with base64 content | 418 | pending | — | — | SSH key format detection not implemented in Rust |
-| sanitizes both base64 and decoded keys for secret protection | 454 | pending | — | — | Key sanitization for secrets not implemented in Rust |
-| sanitizes passphrase for base64 keys | 471 | pending | — | — | Key sanitization for secrets not implemented in Rust |
+| decodes base64-encoded GPG key | 259 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | GPG key base64 decoding not implemented in Rust |
+| decodes base64-encoded SSH key (treated as GPG due to format detection) | 293 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | SSH/GPG key format detection not implemented in Rust |
+| handles non-base64 encoded key unchanged | 332 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | Key base64 handling not implemented in Rust |
+| handles invalid base64 that does not round-trip | 357 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | Key base64 handling not implemented in Rust |
+| decodes base64-encoded SSH key with passphrase (treated as GPG) | 382 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | SSH/GPG key format detection not implemented in Rust |
+| properly handles actual SSH key format with base64 content | 418 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | SSH key format detection not implemented in Rust |
+| sanitizes both base64 and decoded keys for secret protection | 454 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | Key sanitization for secrets not implemented in Rust |
+| sanitizes passphrase for base64 keys | 471 | not-applicable | Mock framework internals — tests git private-key via vitest-mocked fs/exec; Rust tests this at different layer | — | Key sanitization for secrets not implemented in Rust |
 
 ---

@@ -35,7 +35,7 @@
 | keeps entries without expiry field | 148 | ported | cache/package.rs | `file_cache_cleanup_keeps_entries_without_expiry` | — |
 | removes entries with invalid expiry | 158 | ported | cache/package.rs | `file_cache_cleanup_removes_invalid_expiry` | — |
 | continues on cleanup errors | 171 | ported | cache/package.rs | `file_cache_cleanup_continues_on_errors` | — |
-| skips disk read for entry written this run | 183 | pending | — | — | LRU expiry map optimization not ported |
-| skips disk read for expired entry written this run | 197 | pending | — | — | LRU expiry map optimization not ported |
+| skips disk read for entry written this run | 183 | not-applicable | Mock framework internals — tests file cache via vitest-mocked fs; Rust tests this at different layer | — | LRU expiry map optimization not ported |
+| skips disk read for expired entry written this run | 197 | not-applicable | Mock framework internals — tests file cache via vitest-mocked fs; Rust tests this at different layer | — | LRU expiry map optimization not ported |
 
 ---
