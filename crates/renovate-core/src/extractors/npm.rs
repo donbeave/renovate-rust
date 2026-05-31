@@ -7315,4 +7315,649 @@ chalk@^2.4.1:
         let lock = YarnLock { is_yarn1: false, lockfile_version: Some(12), locked_versions: BTreeMap::new() };
         assert_eq!(get_yarn_version_from_lock(&lock), ">=4.0.0");
     }
+
+    #[test]
+    fn extract_catalog_deps_yarn_prefix() {
+        let catalogs = vec![Catalog {
+            name: "default".into(),
+            dependencies: vec![("lodash".into(), "^4.0.0".into())],
+        }];
+        let deps = extract_catalog_deps(&catalogs, "yarn");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "lodash");
+        assert_eq!(deps[0].current_value, "^4.0.0");
+        assert_eq!(deps[0].dep_type, "yarn.catalog.default");
+    }
+
+    #[test]
+    fn extract_catalog_deps_pnpm_prefix() {
+        let catalogs = vec![
+            Catalog {
+                name: "default".into(),
+                dependencies: vec![("lodash".into(), "^4.0.0".into())],
+            },
+            Catalog {
+                name: "server".into(),
+                dependencies: vec![("express".into(), "^5.0.0".into())],
+            },
+        ];
+        let deps = extract_catalog_deps(&catalogs, "pnpm");
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_type, "pnpm.catalog.default");
+        assert_eq!(deps[1].dep_type, "pnpm.catalog.server");
+        assert_eq!(deps[1].dep_name, "express");
+    }
+
+    #[test]
+    fn extract_catalog_deps_empty() {
+        let deps = extract_catalog_deps(&[], "yarn");
+        assert!(deps.is_empty());
+    }
+
+    #[test]
+    fn bump_npm_package_version_patch() {
+        let content = r#"{"version": "1.2.3"}"#;
+        let result = bump_npm_package_version(content, "1.2.3", "patch");
+        assert!(result.contains("\"version\": \"1.2.4\""));
+    }
+
+    #[test]
+    fn bump_npm_package_version_minor() {
+        let content = r#"{"version": "1.2.3"}"#;
+        let result = bump_npm_package_version(content, "1.2.3", "minor");
+        assert!(result.contains("\"version\": \"1.3.0\""));
+    }
+
+    #[test]
+    fn bump_npm_package_version_major() {
+        let content = r#"{"version": "1.2.3"}"#;
+        let result = bump_npm_package_version(content, "1.2.3", "major");
+        assert!(result.contains("\"version\": \"2.0.0\""));
+    }
+
+    #[test]
+    fn bump_npm_package_version_mirror() {
+        let content = r#"{"version": "1.0.0", "dependencies": {"lodash": "4.17.21"}}"#;
+        let result = bump_npm_package_version(content, "1.0.0", "mirror:lodash");
+        assert!(result.contains("\"version\": \"4.17.21\""));
+    }
+
+    #[test]
+    fn bump_npm_package_version_mirror_missing() {
+        let content = r#"{"version": "1.0.0"}"#;
+        let result = bump_npm_package_version(content, "1.0.0", "mirror:lodash");
+        assert_eq!(result, content);
+    }
+
+    #[test]
+    fn bump_npm_package_version_invalid_bump() {
+        let content = r#"{"version": "1.0.0"}"#;
+        let result = bump_npm_package_version(content, "1.0.0", "invalid");
+        assert_eq!(result, content);
+    }
+
+    #[test]
+    fn get_range_strategy_explicit() {
+        assert_eq!(get_range_strategy("pin", None, None), "pin");
+        assert_eq!(get_range_strategy("bump", None, None), "bump");
+    }
+
+    #[test]
+    fn get_range_strategy_complex_bump_becomes_widen() {
+        assert_eq!(get_range_strategy("bump", None, Some("^1.0.0 || ^2.0.0")), "widen");
+    }
+
+    #[test]
+    fn get_range_strategy_peer_deps() {
+        assert_eq!(get_range_strategy("auto", Some("peerDependencies"), None), "widen");
+    }
+
+    #[test]
+    fn get_range_strategy_complex_auto() {
+        assert_eq!(get_range_strategy("auto", None, Some("^1.0.0 || ^2.0.0")), "widen");
+    }
+
+    #[test]
+    fn get_range_strategy_default() {
+        assert_eq!(get_range_strategy("auto", Some("dependencies"), Some("^1.0.0")), "update-lockfile");
+    }
+
+    #[test]
+    fn get_node_update_finds_node() {
+        let upgrades = [("lodash", "4.17.21"), ("node", "18.0.0")];
+        assert_eq!(get_node_update(&upgrades), Some("18.0.0"));
+    }
+
+    #[test]
+    fn get_node_update_no_node() {
+        let upgrades = [("lodash", "4.17.21")];
+        assert_eq!(get_node_update(&upgrades), None);
+    }
+
+    #[test]
+    fn get_node_update_empty() {
+        let upgrades: &[(&str, &str)] = &[];
+        assert_eq!(get_node_update(upgrades), None);
+    }
+
+    #[test]
+    fn load_package_json_content_basic() {
+        let json = r#"{"dependencies":{"lodash":"^4.0.0"},"devDependencies":{"jest":"^29.0.0"},"engines":{"node":">=18"},"volta":{"node":"18.0.0"},"packageManager":"pnpm@8.0.0"}"#;
+        let parsed = load_package_json_content(json).unwrap();
+        assert_eq!(parsed.dependencies.get("lodash"), Some(&"^4.0.0".into()));
+        assert_eq!(parsed.dev_dependencies.get("jest"), Some(&"^29.0.0".into()));
+        assert_eq!(parsed.engines.get("node"), Some(&">=18".into()));
+        assert_eq!(parsed.volta.get("node"), Some(&"18.0.0".into()));
+        assert_eq!(parsed.package_manager.as_ref().unwrap().name, "pnpm");
+        assert_eq!(parsed.package_manager.as_ref().unwrap().version, "8.0.0");
+    }
+
+    #[test]
+    fn load_package_json_content_invalid() {
+        assert!(load_package_json_content("not json").is_none());
+    }
+
+    #[test]
+    fn load_package_json_content_empty_object() {
+        let parsed = load_package_json_content("{}").unwrap();
+        assert!(parsed.dependencies.is_empty());
+        assert!(parsed.package_manager.is_none());
+    }
+
+    #[test]
+    fn npm_get_new_git_value_with_digest() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "foo".into(),
+            current_raw_value: Some("github:owner/repo#abc123".into()),
+            current_digest: Some("abc123".into()),
+            new_digest: Some("def456".into()),
+            current_value: None,
+            new_value: None,
+            new_name: None,
+            package_name: None,
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        assert_eq!(npm_get_new_git_value(&upgrade), Some("github:owner/repo#def456".into()));
+    }
+
+    #[test]
+    fn npm_get_new_git_value_with_version() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "foo".into(),
+            current_raw_value: Some("github:owner/repo#v1.0.0".into()),
+            current_digest: None,
+            new_digest: None,
+            current_value: Some("v1.0.0".into()),
+            new_value: Some("v2.0.0".into()),
+            new_name: None,
+            package_name: None,
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        assert_eq!(npm_get_new_git_value(&upgrade), Some("github:owner/repo#v2.0.0".into()));
+    }
+
+    #[test]
+    fn npm_get_new_git_value_no_raw() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "foo".into(),
+            current_raw_value: None,
+            current_digest: None,
+            new_digest: None,
+            current_value: None,
+            new_value: None,
+            new_name: None,
+            package_name: None,
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        assert_eq!(npm_get_new_git_value(&upgrade), None);
+    }
+
+    #[test]
+    fn npm_get_new_alias_value_returns_alias() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "foo".into(),
+            current_raw_value: None,
+            current_digest: None,
+            new_digest: None,
+            current_value: None,
+            new_value: Some("2.0.0".into()),
+            new_name: None,
+            package_name: Some("real-package".into()),
+            npm_package_alias: true,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        assert_eq!(npm_get_new_alias_value(Some("2.0.0"), &upgrade), Some("npm:real-package@2.0.0".into()));
+    }
+
+    #[test]
+    fn npm_get_new_alias_value_not_alias() {
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "foo".into(),
+            current_raw_value: None,
+            current_digest: None,
+            new_digest: None,
+            current_value: None,
+            new_value: Some("2.0.0".into()),
+            new_name: None,
+            package_name: Some("real-package".into()),
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        assert_eq!(npm_get_new_alias_value(Some("2.0.0"), &upgrade), None);
+    }
+
+    #[test]
+    fn extract_yarn_catalogs_basic() {
+        let mut default_cat = BTreeMap::new();
+        default_cat.insert("lodash".into(), "^4.0.0".into());
+        let mut named = BTreeMap::new();
+        let mut server = BTreeMap::new();
+        server.insert("express".into(), "^5.0.0".into());
+        named.insert("server".into(), server);
+        let result = extract_yarn_catalogs(&default_cat, &named, Some("yarn.lock"), true);
+        assert_eq!(result.deps.len(), 2);
+        assert_eq!(result.deps[0].dep_type, "yarn.catalog.default");
+        assert_eq!(result.deps[1].dep_type, "yarn.catalog.server");
+        assert_eq!(result.yarn_lock, Some("yarn.lock".into()));
+        assert!(result.has_package_manager);
+    }
+
+    #[test]
+    fn extract_yarn_catalogs_empty() {
+        let result = extract_yarn_catalogs(&BTreeMap::new(), &BTreeMap::new(), None, false);
+        assert!(result.deps.is_empty());
+        assert_eq!(result.yarn_lock, None);
+        assert!(!result.has_package_manager);
+    }
+
+    #[test]
+    fn get_yarn_locked_dependencies_yarn1() {
+        let content = r#"lodash@^4.0.0:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz"
+
+express@^4.0.0:
+  version "4.18.2"
+  resolved "https://registry.yarnpkg.com/express/-/express-4.18.2.tgz"
+"#;
+        let results = get_yarn_locked_dependencies(content, "lodash", "4.17.21");
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].dep_name, "lodash");
+        assert_eq!(results[0].constraint, "^4.0.0");
+        assert_eq!(results[0].version, "4.17.21");
+    }
+
+    #[test]
+    fn get_yarn_locked_dependencies_yarn1_no_match() {
+        let content = r#"lodash@^4.0.0:
+  version "4.17.21"
+"#;
+        let results = get_yarn_locked_dependencies(content, "lodash", "5.0.0");
+        assert!(results.is_empty());
+    }
+
+    #[test]
+    fn get_yarn_locked_dependencies_yarn2() {
+        let content = r#"__metadata:
+  version: 6
+
+"lodash@npm:^4.0.0":
+  version: 4.17.21
+  resolution: "lodash@npm:4.17.21"
+"#;
+        let results = get_yarn_locked_dependencies(content, "lodash", "4.17.21");
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].dep_name, "lodash");
+        assert_eq!(results[0].constraint, "npm:^4.0.0");
+    }
+
+    #[test]
+    fn get_yarn_locked_dependencies_yarn2_comma_constraints() {
+        let content = r#"__metadata:
+  version: 6
+
+"lodash@npm:^4.0.0, lodash@npm:^4.17.0":
+  version: 4.17.21
+  resolution: "lodash@npm:4.17.21"
+"#;
+        let results = get_yarn_locked_dependencies(content, "lodash", "4.17.21");
+        assert_eq!(results.len(), 2);
+    }
+
+    #[test]
+    fn get_yarn_locked_dependencies_scoped() {
+        let content = r#"@types/lodash@^4.0.0:
+  version "4.17.21"
+"#;
+        let results = get_yarn_locked_dependencies(content, "@types/lodash", "4.17.21");
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].dep_name, "@types/lodash");
+    }
+
+    #[test]
+    fn replace_constraint_version_yarn1() {
+        let content = r#"lodash@^4.0.0:
+  version "4.17.21"
+  resolved "..."
+
+express@^4.0.0:
+  version "4.18.2"
+"#;
+        let result = replace_constraint_version(content, "lodash", "^4.0.0", "4.17.22", None);
+        assert!(result.contains("lodash@^4.0.0:\n  version \"4.17.22\""));
+    }
+
+    #[test]
+    fn replace_constraint_version_yarn2_skipped() {
+        let content = r#"__metadata:
+  version: 6
+lodash@npm:^4.0.0:
+  version: 4.17.21
+"#;
+        let result = replace_constraint_version(content, "lodash", "^4.0.0", "4.17.22", None);
+        assert_eq!(result, content);
+    }
+
+    #[test]
+    fn replace_constraint_version_new_constraint() {
+        let content = r#"lodash@^4.0.0:
+  version "4.17.21"
+  resolved "..."
+
+express@^4.0.0:
+  version "4.18.2"
+"#;
+        let result = replace_constraint_version(content, "lodash", "^4.0.0", "4.17.22", Some("^4.17.0"));
+        assert!(result.contains("lodash@^4.17.0:"));
+        assert!(result.contains("  version \"4.17.22\""));
+    }
+
+    #[test]
+    fn package_lock_find_dep_constraints_direct() {
+        let package_json = serde_json::json!({"dependencies": {"lodash": "^4.0.0"}});
+        let lock_entry = serde_json::json!({"version": "4.17.21"});
+        let result = package_lock_find_dep_constraints(&package_json, &lock_entry, "lodash", "4.17.21", "4.18.0", None);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].constraint, "^4.0.0");
+        assert_eq!(result[0].dep_type, Some("dependencies".into()));
+    }
+
+    #[test]
+    fn package_lock_find_dep_constraints_dev() {
+        let package_json = serde_json::json!({"devDependencies": {"jest": "^29.0.0"}});
+        let lock_entry = serde_json::json!({"version": "29.7.0"});
+        let result = package_lock_find_dep_constraints(&package_json, &lock_entry, "jest", "29.7.0", "30.0.0", None);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].constraint, "^29.0.0");
+    }
+
+    #[test]
+    fn package_lock_find_dep_constraints_no_match() {
+        let package_json = serde_json::json!({});
+        let lock_entry = serde_json::json!({"version": "4.17.21"});
+        let result = package_lock_find_dep_constraints(&package_json, &lock_entry, "lodash", "4.17.21", "4.18.0", None);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn package_lock_find_dep_constraints_transitive() {
+        let package_json = serde_json::json!({});
+        let lock_entry = serde_json::json!({
+            "version": "1.0.0",
+            "requires": {"lodash": "^4.0.0"}
+        });
+        let result = package_lock_find_dep_constraints(&package_json, &lock_entry, "lodash", "4.17.21", "4.18.0", Some("parent-pkg"));
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].parent_dep_name, Some("parent-pkg".into()));
+    }
+
+    #[test]
+    fn package_lock_get_locked_dependencies_direct() {
+        let entry = serde_json::json!({
+            "dependencies": {
+                "lodash": {"version": "4.17.21"}
+            }
+        });
+        let result = package_lock_get_locked_dependencies(&entry, "lodash", Some("4.17.21"), false);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0]["version"], "4.17.21");
+    }
+
+    #[test]
+    fn package_lock_get_locked_dependencies_any_version() {
+        let entry = serde_json::json!({
+            "dependencies": {
+                "lodash": {"version": "4.17.21"}
+            }
+        });
+        let result = package_lock_get_locked_dependencies(&entry, "lodash", None, false);
+        assert_eq!(result.len(), 1);
+    }
+
+    #[test]
+    fn package_lock_get_locked_dependencies_nested() {
+        let entry = serde_json::json!({
+            "dependencies": {
+                "parent": {
+                    "version": "1.0.0",
+                    "dependencies": {
+                        "lodash": {"version": "4.17.21"}
+                    }
+                }
+            }
+        });
+        let result = package_lock_get_locked_dependencies(&entry, "lodash", Some("4.17.21"), false);
+        assert_eq!(result.len(), 1);
+    }
+
+    #[test]
+    fn package_lock_get_locked_dependencies_bundled() {
+        let entry = serde_json::json!({
+            "dependencies": {
+                "lodash": {"version": "4.17.21", "bundled": true}
+            }
+        });
+        let result = package_lock_get_locked_dependencies(&entry, "lodash", Some("4.17.21"), false);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0]["bundled"], true);
+    }
+
+    #[test]
+    fn package_lock_get_locked_dependencies_no_deps() {
+        let entry = serde_json::json!({"version": "1.0.0"});
+        let result = package_lock_get_locked_dependencies(&entry, "lodash", None, false);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn update_pnpm_workspace_dependency_overrides() {
+        let content = "overrides:\n  lodash: ^4.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm-workspace.overrides".into(),
+            dep_name: "lodash".into(),
+            new_value: Some("^4.17.0".into()),
+            current_value: Some("^4.0.0".into()),
+            current_raw_value: None,
+            current_digest: None,
+            new_digest: None,
+            new_name: None,
+            package_name: None,
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        let result = update_pnpm_workspace_dependency(content, &upgrade);
+        assert!(result.is_some());
+        assert!(result.unwrap().contains("lodash: ^4.17.0"));
+    }
+
+    #[test]
+    fn update_pnpm_workspace_dependency_catalog_default() {
+        let content = "catalog:\n  lodash: ^4.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.default".into(),
+            dep_name: "lodash".into(),
+            new_value: Some("^4.17.0".into()),
+            current_value: Some("^4.0.0".into()),
+            current_raw_value: None,
+            current_digest: None,
+            new_digest: None,
+            new_name: None,
+            package_name: None,
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        let result = update_pnpm_workspace_dependency(content, &upgrade);
+        assert!(result.is_some());
+        assert!(result.unwrap().contains("lodash: ^4.17.0"));
+    }
+
+    #[test]
+    fn update_pnpm_workspace_dependency_catalog_named() {
+        let content = "catalogs:\n  server:\n    express: ^4.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "pnpm.catalog.server".into(),
+            dep_name: "express".into(),
+            new_value: Some("^4.18.0".into()),
+            current_value: Some("^4.0.0".into()),
+            current_raw_value: None,
+            current_digest: None,
+            new_digest: None,
+            new_name: None,
+            package_name: None,
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        let result = update_pnpm_workspace_dependency(content, &upgrade);
+        assert!(result.is_some());
+        assert!(result.unwrap().contains("express: ^4.18.0"));
+    }
+
+    #[test]
+    fn update_yarnrc_catalog_dependency_basic() {
+        let content = "catalog:\n  lodash: ^4.0.0\n";
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "yarn.catalog.default".into(),
+            dep_name: "lodash".into(),
+            new_value: Some("^4.17.0".into()),
+            current_value: Some("^4.0.0".into()),
+            current_raw_value: None,
+            current_digest: None,
+            new_digest: None,
+            new_name: None,
+            package_name: None,
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        let result = update_yarnrc_catalog_dependency(content, &upgrade);
+        assert!(result.is_some());
+        assert!(result.unwrap().contains("lodash: ^4.17.0"));
+    }
+
+    #[test]
+    fn npm_update_dependency_regular_dep() {
+        let content = r#"{"dependencies":{"lodash":"^4.0.0"}}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "lodash".into(),
+            new_value: Some("^4.17.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(content, &upgrade);
+        assert!(result.is_some());
+        let parsed: serde_json::Value = serde_json::from_str(&result.unwrap()).unwrap();
+        assert_eq!(parsed["dependencies"]["lodash"], "^4.17.0");
+    }
+
+    #[test]
+    fn npm_update_dependency_dev_dep() {
+        let content = r#"{"devDependencies":{"jest":"^29.0.0"}}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "devDependencies".into(),
+            dep_name: "jest".into(),
+            new_value: Some("^29.7.0".into()),
+            ..Default::default()
+        };
+        let result = npm_update_dependency(content, &upgrade);
+        assert!(result.is_some());
+        let parsed: serde_json::Value = serde_json::from_str(&result.unwrap()).unwrap();
+        assert_eq!(parsed["devDependencies"]["jest"], "^29.7.0");
+    }
+
+    #[test]
+    fn npm_update_dependency_not_found() {
+        let content = r#"{"dependencies":{"other":"^1.0.0"}}"#;
+        let upgrade = NpmUpdateUpgrade {
+            dep_type: "dependencies".into(),
+            dep_name: "lodash".into(),
+            new_value: Some("^4.17.0".into()),
+            current_value: Some("^4.0.0".into()),
+            current_raw_value: None,
+            current_digest: None,
+            new_digest: None,
+            new_name: None,
+            package_name: None,
+            npm_package_alias: false,
+            replacement_approach: None,
+            manager_data: None,
+        };
+        let result = npm_update_dependency(content, &upgrade);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn resolve_npmrc_with_repo_content() {
+        let result = resolve_npmrc("package.json", None, false, Some("registry=https://registry.example.com"), false);
+        assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
+        assert!(result.npmrc.as_deref().unwrap().contains("registry=https://registry.example.com"));
+    }
+
+    #[test]
+    fn resolve_npmrc_with_config_only() {
+        let result = resolve_npmrc("package.json", Some("registry=https://config.example.com"), false, None, false);
+        assert_eq!(result.npmrc.as_deref(), Some("registry=https://config.example.com"));
+    }
+
+    #[test]
+    fn detect_monorepos_no_workspaces() {
+        let mut files = vec![
+            NpmPackageFile {
+                package_file: "package.json".to_owned(),
+                ..Default::default()
+            },
+        ];
+        detect_monorepos(&mut files);
+        assert!(files[0].deps.is_empty());
+    }
+
+    #[test]
+    fn post_extract_empty_files() {
+        let mut files: Vec<NpmPackageFile> = vec![];
+        post_extract(&mut files);
+        assert!(files.is_empty());
+    }
+
+    #[test]
+    fn npm_dep_type_as_renovate_str() {
+        assert_eq!(NpmDepType::Regular.as_renovate_str(), "dependencies");
+        assert_eq!(NpmDepType::Dev.as_renovate_str(), "devDependencies");
+        assert_eq!(NpmDepType::Peer.as_renovate_str(), "peerDependencies");
+        assert_eq!(NpmDepType::Optional.as_renovate_str(), "optionalDependencies");
+    }
 }

@@ -1300,4 +1300,19 @@ mod tests {
         });
         assert_eq!(result.as_deref(), Some("1.2.3"));
     }
+
+    #[test]
+    fn is_greater_than_pep440() {
+        assert!(is_greater_than("2.0.0", "1.0.0"));
+        assert!(!is_greater_than("1.0.0", "2.0.0"));
+        assert!(!is_greater_than("1.0.0", "1.0.0"));
+    }
+
+    #[test]
+    fn sort_versions_pep440() {
+        use std::cmp::Ordering;
+        assert_eq!(sort_versions("1.0.0", "1.0.0"), Ordering::Equal);
+        assert_eq!(sort_versions("2.0.0", "1.0.0"), Ordering::Greater);
+        assert_eq!(sort_versions("1.0.0", "2.0.0"), Ordering::Less);
+    }
 }

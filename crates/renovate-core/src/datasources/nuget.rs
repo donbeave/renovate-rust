@@ -328,4 +328,87 @@ mod tests {
             .unwrap();
         assert_eq!(result, Some("1.1.3".to_owned()));
     }
+
+    #[tokio::test]
+    async fn fetch_latest_empty_versions_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/empty/index.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"versions":[]}"#))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("Empty", &http, &server.uri()).await.unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    async fn fetch_latest_invalid_json_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/bad/index.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("not json"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("Bad", &http, &server.uri()).await;
+        assert!(matches!(result, Err(NuGetError::Json(_))));
+    }
+
+    #[tokio::test]
+    async fn fetch_updates_concurrent_fetches_all() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/pkg.a/index.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"versions":["1.0.0","1.1.0"]}"#))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/pkg.b/index.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"versions":["2.0.0","2.1.0"]}"#))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let deps = vec![
+            NuGetDepInput { package_id: "Pkg.A".into(), current_value: "1.0.0".into() },
+            NuGetDepInput { package_id: "Pkg.B".into(), current_value: "2.0.0".into() },
+        ];
+        let results = fetch_updates_concurrent(&http, &deps, &server.uri(), 10).await;
+        assert_eq!(results.len(), 2);
+
+        let a = results.iter().find(|r| r.package_id == "Pkg.A").unwrap();
+        assert!(a.summary.as_ref().unwrap().update_available);
+        assert_eq!(a.summary.as_ref().unwrap().latest.as_deref(), Some("1.1.0"));
+
+        let b = results.iter().find(|r| r.package_id == "Pkg.B").unwrap();
+        assert!(b.summary.as_ref().unwrap().update_available);
+        assert_eq!(b.summary.as_ref().unwrap().latest.as_deref(), Some("2.1.0"));
+    }
+
+    #[test]
+    fn summary_from_cache_update_available() {
+        let entry: NuGetLatestEntry = Some("2.0.0".into());
+        let summary = summary_from_cache("1.0.0", &entry);
+        assert!(summary.update_available);
+        assert_eq!(summary.latest, Some("2.0.0".into()));
+        assert_eq!(summary.current_value, "1.0.0");
+    }
+
+    #[test]
+    fn summary_from_cache_no_update() {
+        let entry: NuGetLatestEntry = Some("1.0.0".into());
+        let summary = summary_from_cache("1.0.0", &entry);
+        assert!(!summary.update_available);
+    }
+
+    #[test]
+    fn summary_from_cache_no_latest() {
+        let entry: NuGetLatestEntry = None;
+        let summary = summary_from_cache("1.0.0", &entry);
+        assert!(!summary.update_available);
+        assert_eq!(summary.latest, None);
+    }
 }

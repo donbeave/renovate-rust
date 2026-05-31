@@ -1291,4 +1291,10 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
     fn sbt_normalize_scala_3_current() {
         assert_eq!(normalize_scala_version("3.4.2"), "3");
     }
+
+    #[test]
+    fn sbt_dep_type_as_renovate_str() {
+        assert_eq!(SbtDepType::Library.as_renovate_str(), "library");
+        assert_eq!(SbtDepType::Plugin.as_renovate_str(), "plugin");
+    }
 }

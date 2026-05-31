@@ -501,4 +501,10 @@ mod tests {
         assert!(deps.iter().any(|d| d.dep_name == "org.clojure:clojure"));
         assert!(deps.iter().any(|d| d.dep_name == "ring:ring"));
     }
+
+    #[test]
+    fn leiningen_dep_type_as_renovate_str() {
+        assert_eq!(LeinDepType::Dependencies.as_renovate_str(), "dependencies");
+        assert_eq!(LeinDepType::Plugins.as_renovate_str(), "plugins");
+    }
 }

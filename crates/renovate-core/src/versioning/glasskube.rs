@@ -154,4 +154,29 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn get_components_invalid_returns_none() {
+        assert_eq!(get_major("invalid"), None);
+        assert_eq!(get_minor("invalid"), None);
+        assert_eq!(get_patch("invalid"), None);
+    }
+
+    #[test]
+    fn is_greater_than_invalid_returns_false() {
+        assert!(!is_greater_than("invalid", "v1.2.3"));
+        assert!(!is_greater_than("v1.2.3", "invalid"));
+        assert!(!is_greater_than("invalid", "invalid"));
+    }
+
+    #[test]
+    fn is_stable_invalid_returns_false() {
+        assert!(!is_stable("invalid"));
+    }
+
+    #[test]
+    fn is_valid_invalid_returns_false() {
+        assert!(!is_valid(""));
+        assert!(!is_valid("not-a-version"));
+    }
 }

@@ -773,4 +773,26 @@ mod tests {
             Some("2021-01-01T00:00:00Z")
         );
     }
+
+    #[test]
+    fn api_base_from_endpoint_default() {
+        assert_eq!(api_base_from_endpoint(None), "https://api.github.com");
+        assert_eq!(api_base_from_endpoint(Some("")), "https://api.github.com");
+    }
+
+    #[test]
+    fn api_base_from_endpoint_custom() {
+        assert_eq!(
+            api_base_from_endpoint(Some("https://github.example.com/api/v3")),
+            "https://github.example.com/api/v3"
+        );
+    }
+
+    #[test]
+    fn api_base_from_endpoint_strips_trailing_slash() {
+        assert_eq!(
+            api_base_from_endpoint(Some("https://github.example.com/api/v3/")),
+            "https://github.example.com/api/v3"
+        );
+    }
 }

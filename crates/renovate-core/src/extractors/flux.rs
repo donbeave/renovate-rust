@@ -2021,4 +2021,36 @@ spec:
     tag: v1.8.2
     digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
 "#;
+
+    #[test]
+    fn extract_package_file_with_registry_aliases_basic() {
+        let content = r#"
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: example
+  namespace: flux-system
+spec:
+  url: https://charts.example.com
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: my-release
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: nginx
+      sourceRef:
+        kind: HelmRepository
+        name: example
+  values:
+    image:
+      repository: nginx
+      tag: "1.20"
+"#;
+        let deps = extract_package_file_with_registry_aliases(content, &[]);
+        assert!(!deps.is_empty());
+    }
 }

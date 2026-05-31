@@ -1264,4 +1264,27 @@ mod tests {
             None
         );
     }
+
+    #[test]
+    fn massage_host_url_adds_https() {
+        assert_eq!(massage_host_url("github.com/owner"), "https://github.com/owner");
+        assert_eq!(massage_host_url("https://github.com"), "https://github.com");
+    }
+
+    #[test]
+    fn matches_host_basic() {
+        assert!(matches_host("https://github.com/owner/repo", "github.com"));
+        assert!(!matches_host("https://gitlab.com/owner/repo", "github.com"));
+    }
+
+    #[test]
+    fn migrate_rule_basic() {
+        let rule = HostRule::default();
+        let legacy = LegacyHostRule {
+            host_name: Some("github.com".to_owned()),
+            ..Default::default()
+        };
+        let result = migrate_rule(rule, &legacy).unwrap();
+        assert_eq!(result.match_host, Some("github.com".to_owned()));
+    }
 }

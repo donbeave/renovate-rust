@@ -1416,4 +1416,10 @@ end
         let bar = pkg.deps.iter().find(|d| d.name == "bar").unwrap();
         assert!(bar.skip_reason.is_none());
     }
+
+    #[test]
+    fn bundler_dep_type_as_renovate_str() {
+        assert_eq!(BundlerDepType::Regular.as_renovate_str(), "dependencies");
+        assert_eq!(BundlerDepType::Dev.as_renovate_str(), "devDependencies");
+    }
 }

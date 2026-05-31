@@ -376,4 +376,16 @@ mod tests {
         assert!(is_version("1.2.0"));
         assert!(!is_version("^1.2.0")); // ^ not a valid Maven version char
     }
+
+    #[test]
+    fn ivy_min_satisfying_version() {
+        assert_eq!(
+            min_satisfying_version(&["0", "1", "2"], "[1,2)"),
+            Some("1".to_owned())
+        );
+        assert_eq!(
+            min_satisfying_version(&["0", "1", "2"], "(,1)"),
+            Some("0".to_owned())
+        );
+    }
 }

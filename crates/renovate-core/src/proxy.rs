@@ -101,4 +101,14 @@ mod tests {
         let mut e = env(&[("no_proxy", "http://example.org/no-proxy")]);
         assert!(!bootstrap(&mut e));
     }
+
+    #[test]
+    fn has_proxy_in_env_detects() {
+        let mut e = HashMap::new();
+        e.insert("HTTP_PROXY".to_owned(), "http://proxy".to_owned());
+        assert!(has_proxy_in_env(&e));
+        let mut e2 = HashMap::new();
+        e2.insert("NO_PROXY".to_owned(), "http://noproxy".to_owned());
+        assert!(!has_proxy_in_env(&e2));
+    }
 }

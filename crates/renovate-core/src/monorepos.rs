@@ -313,4 +313,10 @@ mod tests {
             names.len()
         );
     }
+
+    #[test]
+    fn all_monorepo_rules_non_empty() {
+        let rules = all_monorepo_rules();
+        assert!(!rules.is_empty());
+    }
 }

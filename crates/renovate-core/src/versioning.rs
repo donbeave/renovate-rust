@@ -182,4 +182,10 @@ mod tests {
         let result = get_versioning_id(Some("semver:test"));
         assert_eq!(result, "semver");
     }
+
+    #[test]
+    fn gradle_version_matches_basic() {
+        assert!(gradle_version_matches("1.2.3", "1.+"));
+        assert!(!gradle_version_matches("2.0.0", "1.+"));
+    }
 }

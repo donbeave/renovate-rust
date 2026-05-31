@@ -548,4 +548,46 @@ mod tests {
         let err = get_change(&client, "999").await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(_)));
     }
+
+    #[tokio::test]
+    async fn submit_change_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/a/changes/123/submit"))
+            .respond_with(ResponseTemplate::new(409))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = submit_change(&client, "123").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn list_changes_empty() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/a/changes/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(")]}'\n[]"))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let changes = list_changes(&client, "myproject", Some("status:open")).await.unwrap();
+        assert!(changes.is_empty());
+    }
+
+    #[tokio::test]
+    async fn add_reviewer_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/a/changes/123/reviewers"))
+            .respond_with(ResponseTemplate::new(422))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = add_reviewer(&client, "123", "user@example.com").await;
+        assert!(result.is_err());
+    }
 }

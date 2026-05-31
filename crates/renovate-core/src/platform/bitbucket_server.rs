@@ -589,4 +589,46 @@ mod tests {
         let err = get_pr(&client, "PROJ", "myrepo", 999).await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(_)));
     }
+
+    #[tokio::test]
+    async fn create_pr_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = create_pr(&client, "PROJ", "myrepo", "title", "body", "src", "dst").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn list_prs_empty() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"values": []})))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let prs = list_prs(&client, "PROJ", "myrepo", None).await.unwrap();
+        assert!(prs.is_empty());
+    }
+
+    #[tokio::test]
+    async fn merge_pr_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/5/merge"))
+            .respond_with(ResponseTemplate::new(409))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = merge_pr(&client, "PROJ", "myrepo", 5, None).await;
+        assert!(result.is_err());
+    }
 }

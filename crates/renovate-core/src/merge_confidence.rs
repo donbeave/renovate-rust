@@ -83,4 +83,10 @@ mod tests {
     fn satisfies_confidence_level_more_returns_true() {
         assert!(satisfies_confidence_level("very high", "high"));
     }
+
+    #[test]
+    fn is_merge_confidence_valid() {
+        assert!(is_merge_confidence("high"));
+        assert!(!is_merge_confidence("unknown"));
+    }
 }

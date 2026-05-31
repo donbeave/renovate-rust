@@ -293,4 +293,14 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
     // "calls simpleGit with git envs if hostrules exist for datasource type git-refs" (line 162)
     // → not-applicable: test mocks TypeScript-internal simpleGit infrastructure;
     //   Rust subprocess auth env is wired differently and has no equivalent mock surface.
+
+    #[test]
+    fn parse_ls_remote_basic() {
+        let output = "a9920c014aebc28dc1b23e7efcc006d0455cc710\trefs/heads/master\n";
+        let refs = parse_ls_remote(output);
+        assert_eq!(refs.len(), 1);
+        assert_eq!(refs[0].value, "master");
+        assert_eq!(refs[0].type_, "heads");
+        assert_eq!(refs[0].hash, "a9920c014aebc28dc1b23e7efcc006d0455cc710");
+    }
 }

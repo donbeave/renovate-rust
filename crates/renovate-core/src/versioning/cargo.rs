@@ -1619,4 +1619,20 @@ mod renovate_compat_tests {
         let result = bump_package_version(content, "1", "patch");
         assert_eq!(result.bumped_content, content);
     }
+
+    #[test]
+    fn update_summary_basic() {
+        let versions = vec!["1.0.0".into(), "1.1.0".into(), "2.0.0".into()];
+        let summary = update_summary("^1.0.0", &versions);
+        assert_eq!(summary.latest.as_deref(), Some("2.0.0"));
+        assert_eq!(summary.latest_compatible.as_deref(), Some("1.1.0"));
+    }
+
+    #[test]
+    fn update_summary_pinned() {
+        let versions = vec!["1.0.0".into(), "1.1.0".into(), "2.0.0".into()];
+        let summary = update_summary("=1.0.0", &versions);
+        assert!(summary.update_available);
+        assert_eq!(summary.latest.as_deref(), Some("2.0.0"));
+    }
 }

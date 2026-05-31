@@ -981,4 +981,70 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn get_major_minor_patch_npm() {
+        assert_eq!(get_major("1.2.3"), Some(1));
+        assert_eq!(get_minor("1.2.3"), Some(2));
+        assert_eq!(get_patch("1.2.3"), Some(3));
+    }
+
+    #[test]
+    fn is_stable_npm() {
+        assert!(is_stable("1.2.3"));
+        assert!(!is_stable("1.2.3-alpha"));
+        assert!(!is_stable("1.2.3-beta"));
+    }
+
+    #[test]
+    fn is_greater_than_npm() {
+        assert!(is_greater_than("2.0.0", "1.0.0"));
+        assert!(!is_greater_than("1.0.0", "1.0.0"));
+        assert!(!is_greater_than("1.0.0", "2.0.0"));
+    }
+
+    #[test]
+    fn sort_versions_npm() {
+        use std::cmp::Ordering;
+        assert_eq!(sort_versions("1.0.0", "1.0.0"), Ordering::Equal);
+        assert_eq!(sort_versions("2.0.0", "1.0.0"), Ordering::Greater);
+        assert_eq!(sort_versions("1.0.0", "2.0.0"), Ordering::Less);
+    }
+
+    #[test]
+    fn matches_range_npm() {
+        assert!(matches_range("1.2.3", "^1.0.0"));
+        assert!(!matches_range("2.0.0", "^1.0.0"));
+    }
+
+    #[test]
+    fn min_satisfying_version_npm() {
+        assert_eq!(min_satisfying_version(&["1.0.0", "1.2.0", "2.0.0"], "^1.0.0"), Some("1.0.0"));
+    }
+
+    #[test]
+    fn is_less_than_range_npm() {
+        assert!(is_less_than_range("0.9.0", ">=1.0.0"));
+        assert!(!is_less_than_range("1.2.0", "^1.0.0"));
+    }
+
+    #[test]
+    fn is_version_npm() {
+        assert!(is_version("1.2.3"));
+        assert!(!is_version("not-a-version"));
+    }
+
+    #[test]
+    fn parse_constraint_npm() {
+        assert!(parse_constraint("^1.0.0").is_some());
+        assert!(parse_constraint(">=1.0.0").is_some());
+        assert!(parse_constraint("invalid").is_none());
+    }
+
+    #[test]
+    fn equals_npm() {
+        assert!(equals("1.2.3", "1.2.3"));
+        assert!(!equals("1.2.3", "1.2.4"));
+        assert!(!equals("invalid", "1.2.3"));
+    }
 }

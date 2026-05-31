@@ -1307,4 +1307,11 @@ mod registry_tests {
         assert!(result.is_some());
         assert_eq!(result.unwrap().version, "1.0.0");
     }
+
+    #[test]
+    fn get_datasource_list_non_empty() {
+        let list = get_datasource_list();
+        assert!(!list.is_empty());
+        assert!(list.contains(&"npm"));
+    }
 }

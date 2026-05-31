@@ -5,11 +5,30 @@ use serde_json::Value;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
+use self::migrations::automerge_major_migration::AutomergeMajorMigration;
 use self::migrations::automerge_migration::AutomergeMigration;
+use self::migrations::automerge_minor_migration::AutomergeMinorMigration;
+use self::migrations::automerge_patch_migration::AutomergePatchMigration;
+use self::migrations::automerge_type_migration::AutomergeTypeMigration;
+use self::migrations::base_branch_migration::BaseBranchMigration;
 use self::migrations::binary_source_migration::BinarySourceMigration;
 use self::migrations::branch_name_migration::BranchNameMigration;
+use self::migrations::branch_prefix_migration::BranchPrefixMigration;
+use self::migrations::compatibility_migration::CompatibilityMigration;
+use self::migrations::composer_ignore_platform_reqs_migration::ComposerIgnorePlatformReqsMigration;
+use self::migrations::datasource_migration::DatasourceMigration;
+use self::migrations::dry_run_migration::DryRunMigration;
+use self::migrations::enabled_managers_migration::EnabledManagersMigration;
+use self::migrations::go_mod_tidy_migration::GoModTidyMigration;
+use self::migrations::ignore_node_modules_migration::IgnoreNodeModulesMigration;
+use self::migrations::include_forks_migration::IncludeForksMigration;
+use self::migrations::pin_versions_migration::PinVersionsMigration;
+use self::migrations::platform_commit_migration::PlatformCommitMigration;
+use self::migrations::renovate_fork_migration::RenovateForkMigration;
 use self::migrations::rename_property_migration::RenamePropertyMigration;
+use self::migrations::require_config_migration::RequireConfigMigration;
 use self::migrations::schedule_migration::ScheduleMigration;
+use self::migrations::semantic_prefix_migration::SemanticPrefixMigration;
 
 pub trait Migration: Send + Sync {
     fn property_name(&self) -> &str;
@@ -116,9 +135,28 @@ impl MigrationService {
     fn default_custom_migrations() -> Vec<Box<dyn Migration>> {
         vec![
             Box::new(AutomergeMigration::new()),
+            Box::new(AutomergeMajorMigration::new()),
+            Box::new(AutomergeMinorMigration::new()),
+            Box::new(AutomergePatchMigration::new()),
+            Box::new(AutomergeTypeMigration::new()),
+            Box::new(BaseBranchMigration::new()),
             Box::new(BinarySourceMigration::new()),
             Box::new(BranchNameMigration::new()),
+            Box::new(BranchPrefixMigration::new()),
+            Box::new(CompatibilityMigration::new()),
+            Box::new(ComposerIgnorePlatformReqsMigration::new()),
+            Box::new(DatasourceMigration::new()),
+            Box::new(DryRunMigration::new()),
+            Box::new(EnabledManagersMigration::new()),
+            Box::new(GoModTidyMigration::new()),
+            Box::new(IgnoreNodeModulesMigration::new()),
+            Box::new(IncludeForksMigration::new()),
+            Box::new(PinVersionsMigration::new()),
+            Box::new(PlatformCommitMigration::new()),
+            Box::new(RenovateForkMigration::new()),
+            Box::new(RequireConfigMigration::new()),
             Box::new(ScheduleMigration::new()),
+            Box::new(SemanticPrefixMigration::new()),
         ]
     }
 

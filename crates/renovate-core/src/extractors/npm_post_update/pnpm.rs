@@ -188,4 +188,16 @@ mod tests {
     fn detect_pnpm_workspace_false() {
         assert!(!detect_pnpm_workspace(false));
     }
+
+    #[test]
+    fn build_pnpm_store_env_basic() {
+        let env = build_pnpm_store_env(Some("8.0.0"));
+        assert!(env.contains_key("PNPM_HOME"));
+    }
+
+    #[test]
+    fn build_pnpm_store_env_none() {
+        let env = build_pnpm_store_env(None);
+        assert!(env.is_empty());
+    }
 }

@@ -436,4 +436,51 @@ mod tests {
         let entry = fetch_versions(&http, "pkg", &server.uri()).await.unwrap();
         assert_eq!(entry.versions, vec!["2.0.0"]);
     }
+
+    #[test]
+    fn summary_from_cache_basic() {
+        let mut timestamps = HashMap::new();
+        timestamps.insert("1.0.0".into(), "2024-01-01T00:00:00Z".into());
+        timestamps.insert("2.0.0".into(), "2024-06-01T00:00:00Z".into());
+        let entry = PypiVersionsEntry {
+            versions: vec!["1.0.0".into(), "2.0.0".into()],
+            latest: "2.0.0".into(),
+            latest_timestamp: Some("2024-06-01T00:00:00Z".into()),
+            version_timestamps: timestamps,
+        };
+        let summary = summary_from_cache(">=1.0.0", &entry);
+        assert_eq!(summary.latest, Some("2.0.0".into()));
+        assert_eq!(summary.latest_timestamp, Some("2024-06-01T00:00:00Z".into()));
+        assert!(!summary.update_available);
+    }
+
+    #[test]
+    fn summary_from_cache_exact_pin_update_available() {
+        let mut timestamps = HashMap::new();
+        timestamps.insert("1.0.0".into(), "2024-01-01T00:00:00Z".into());
+        timestamps.insert("2.0.0".into(), "2024-06-01T00:00:00Z".into());
+        let entry = PypiVersionsEntry {
+            versions: vec!["1.0.0".into(), "2.0.0".into()],
+            latest: "2.0.0".into(),
+            latest_timestamp: Some("2024-06-01T00:00:00Z".into()),
+            version_timestamps: timestamps,
+        };
+        let summary = summary_from_cache("==1.0.0", &entry);
+        assert!(summary.update_available);
+        assert_eq!(summary.current_version_timestamp, Some("2024-01-01T00:00:00Z".into()));
+    }
+
+    #[test]
+    fn summary_from_cache_exact_pin_no_update() {
+        let mut timestamps = HashMap::new();
+        timestamps.insert("2.0.0".into(), "2024-06-01T00:00:00Z".into());
+        let entry = PypiVersionsEntry {
+            versions: vec!["2.0.0".into()],
+            latest: "2.0.0".into(),
+            latest_timestamp: Some("2024-06-01T00:00:00Z".into()),
+            version_timestamps: timestamps,
+        };
+        let summary = summary_from_cache("==2.0.0", &entry);
+        assert!(!summary.update_available);
+    }
 }

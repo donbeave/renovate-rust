@@ -1802,4 +1802,37 @@ mod tests {
     fn nix_range_defaults_to_update_lockfile() {
         assert_eq!(get_range_strategy(None), "update-lockfile");
     }
+
+    #[test]
+    fn extract_package_file_with_config_basic() {
+        let flake_nix = r#"{ inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; }"#;
+        let flake_lock = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "8eb28adfa3dc4de28e792e3bf49fcf9007ca8ac9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract_package_file_with_config(Some(flake_nix), Some(flake_lock), Default::default()).unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+    }
 }

@@ -239,4 +239,11 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn compare_direct() {
+        assert_eq!(compare("2023-01-01", "2023-01-01"), 0);
+        assert_eq!(compare("2023-01-02", "2023-01-01"), 1);
+        assert_eq!(compare("2023-01-01", "2023-01-02"), -1);
+    }
 }

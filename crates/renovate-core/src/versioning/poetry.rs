@@ -1225,4 +1225,82 @@ mod tests {
         assert_eq!(sort_versions("1.9", "1.9b"), 1);
         assert_eq!(sort_versions("1.9", "1.9rc0"), 1);
     }
+
+    #[test]
+    fn semver2poetry_basic() {
+        assert_eq!(semver2poetry("1.2.3"), Some("1.2.3".into()));
+    }
+
+    #[test]
+    fn semver2poetry_prerelease() {
+        assert_eq!(semver2poetry("1.2.3-alpha.1"), Some("1.2.3-alpha.1".into()));
+        assert_eq!(semver2poetry("1.2.3-beta.0"), Some("1.2.3-beta.0".into()));
+    }
+
+    #[test]
+    fn poetry2npm_caret_passes_through() {
+        assert_eq!(poetry2npm("^1.2.3"), Some("^1.2.3".into()));
+    }
+
+    #[test]
+    fn poetry2npm_tilde_passes_through() {
+        assert_eq!(poetry2npm("~1.2.3"), Some("~1.2.3".into()));
+    }
+
+    #[test]
+    fn poetry2npm_wildcard() {
+        assert_eq!(poetry2npm("*"), Some("*".into()));
+    }
+
+    #[test]
+    fn poetry2npm_bare_version_pin() {
+        assert_eq!(poetry2npm("1.2.3"), Some("=1.2.3".into()));
+    }
+
+    #[test]
+    fn npm2poetry_caret() {
+        assert_eq!(npm2poetry("^1.2.3"), "^1.2.3");
+    }
+
+    #[test]
+    fn npm2poetry_range() {
+        assert_eq!(npm2poetry(">=1.0.0 <2.0.0"), ">=1.0.0, <2.0.0");
+    }
+
+    #[test]
+    fn get_major_minor_patch_poetry() {
+        assert_eq!(get_major("1.2.3"), Some(1));
+        assert_eq!(get_minor("1.2.3"), Some(2));
+        assert_eq!(get_patch("1.2.3"), Some(3));
+    }
+
+    #[test]
+    fn range_subset_same() {
+        assert!(range_subset("^1.0.0", "^1.0.0"));
+        assert!(range_subset(">=1.0.0", ">=1.0.0"));
+    }
+
+    #[test]
+    fn range_subset_caret() {
+        assert!(range_subset("^1.2.3", "^1.0.0"));
+        assert!(!range_subset("^2.0.0", "^1.0.0"));
+    }
+
+    #[test]
+    fn range_subset_tilde() {
+        assert!(range_subset("~1.2.3", "~1.2.0"));
+        assert!(!range_subset("~2.0.0", "~1.0.0"));
+    }
+
+    #[test]
+    fn range_subset_exact() {
+        assert!(range_subset("=1.2.3", ">=1.0.0"));
+        assert!(!range_subset("=1.2.3", ">=2.0.0"));
+    }
+
+    #[test]
+    fn range_subset_or() {
+        assert!(range_subset(">=1.0.0 || >=2.0.0", ">=1.0.0"));
+        assert!(!range_subset(">=3.0.0 || >=4.0.0", "^1.0.0"));
+    }
 }

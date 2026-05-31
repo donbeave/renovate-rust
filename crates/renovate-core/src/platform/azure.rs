@@ -713,4 +713,60 @@ mod tests {
         let err = get_pr(&client, "myrepo", 999).await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(_)));
     }
+
+    #[tokio::test]
+    async fn create_pr_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned()))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = create_pr(&client, "myrepo", "title", "body", "source", "target").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn list_prs_empty() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned()))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"value": []})))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let prs = list_prs(&client, "myrepo", None).await.unwrap();
+        assert!(prs.is_empty());
+    }
+
+    #[tokio::test]
+    async fn merge_pr_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("PATCH"))
+            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/5".to_owned()))
+            .respond_with(ResponseTemplate::new(409))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = merge_pr(&client, "myrepo", 5).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn add_comment_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/1/threads".to_owned()))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = add_comment(&client, "myrepo", 1, "hello").await;
+        assert!(result.is_err());
+    }
 }

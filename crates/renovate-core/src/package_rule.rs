@@ -1782,4 +1782,100 @@ mod tests {
         let rule = rule_with_current_version("6.0.100");
         assert!(!rule.current_version_matches("6.0.300", None, None));
     }
+
+    #[test]
+    fn datasource_matches_empty() {
+        let rule = PackageRule::default();
+        assert!(rule.datasource_matches("npm"));
+    }
+
+    #[test]
+    fn datasource_matches_specific() {
+        let rule = PackageRule {
+            match_datasources: vec!["npm".to_owned()],
+            ..Default::default()
+        };
+        assert!(rule.datasource_matches("npm"));
+        assert!(!rule.datasource_matches("pypi"));
+    }
+
+    #[test]
+    fn source_url_matches_empty() {
+        let rule = PackageRule::default();
+        assert!(rule.source_url_matches("https://github.com/owner/repo"));
+    }
+
+    #[test]
+    fn version_is_ignored_basic() {
+        let rule = PackageRule {
+            ignore_versions: vec!["1.0.0".to_owned()],
+            ..Default::default()
+        };
+        assert!(rule.version_is_ignored("1.0.0"));
+        assert!(!rule.version_is_ignored("2.0.0"));
+    }
+
+    #[test]
+    fn dep_type_matches_empty() {
+        let rule = PackageRule::default();
+        assert!(rule.dep_type_matches("dependencies"));
+    }
+
+    #[test]
+    fn dep_type_matches_specific() {
+        let rule = PackageRule {
+            match_dep_types: vec!["devDependencies".to_owned()],
+            ..Default::default()
+        };
+        assert!(rule.dep_type_matches("devDependencies"));
+        assert!(!rule.dep_type_matches("dependencies"));
+    }
+
+    #[test]
+    fn file_name_matches_empty() {
+        let rule = PackageRule::default();
+        assert!(rule.file_name_matches("package.json"));
+    }
+
+    #[test]
+    fn registry_url_matches_empty() {
+        let rule = PackageRule::default();
+        assert!(rule.registry_url_matches(&["https://registry.npmjs.org"]));
+    }
+
+    #[test]
+    fn categories_match_empty() {
+        let rule = PackageRule::default();
+        assert!(rule.categories_match(&["js"]));
+    }
+
+    #[test]
+    fn base_branch_matches_empty() {
+        let rule = PackageRule::default();
+        assert!(rule.base_branch_matches("main"));
+    }
+
+    #[test]
+    fn confidence_matches_empty() {
+        let rule = PackageRule::default();
+        assert!(rule.confidence_matches(Some("high")));
+    }
+
+    #[test]
+    fn is_ignored_basic() {
+        let filter = PathMatcher::new(&["node_modules/**".to_owned()]);
+        assert!(filter.is_ignored("node_modules/foo/package.json"));
+        assert!(!filter.is_ignored("src/main.rs"));
+    }
+
+    #[test]
+    fn update_type_config_apply_to_effects() {
+        let cfg = UpdateTypeConfig {
+            automerge: Some(true),
+            ..Default::default()
+        };
+        let mut effects = RuleEffects::default();
+        cfg.apply_to_effects(&mut effects);
+        assert_eq!(effects.automerge, Some(true));
+    }
 }

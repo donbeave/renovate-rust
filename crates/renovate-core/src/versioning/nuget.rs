@@ -2371,4 +2371,31 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn matches_range_exact() {
+        let v = parse_version("1.2.3").unwrap();
+        let r = parse_range("[1.2.3]").unwrap();
+        assert!(matches_range(&v, &r));
+        let r2 = parse_range("[1.2.4]").unwrap();
+        assert!(!matches_range(&v, &r2));
+    }
+
+    #[test]
+    fn matches_range_floating() {
+        let v = parse_version("1.2.3").unwrap();
+        let r = parse_range("1.*").unwrap();
+        assert!(matches_range(&v, &r));
+        let r2 = parse_range("2.*").unwrap();
+        assert!(!matches_range(&v, &r2));
+    }
+
+    #[test]
+    fn matches_range_bracket() {
+        let v = parse_version("1.2.3").unwrap();
+        let r = parse_range("[1.0,2.0)").unwrap();
+        assert!(matches_range(&v, &r));
+        let r2 = parse_range("[2.0,3.0)").unwrap();
+        assert!(!matches_range(&v, &r2));
+    }
 }

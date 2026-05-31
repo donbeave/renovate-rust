@@ -170,4 +170,26 @@ mod tests {
             Some("lts/iron".to_owned())
         );
     }
+
+    #[test]
+    fn get_node_update_finds_node() {
+        let upgrades = vec![Upgrade {
+            dep_name: "node".to_owned(),
+            new_value: Some("18.0.0".to_owned()),
+            ..Default::default()
+        }];
+        assert_eq!(get_node_update(&upgrades), Some("18.0.0"));
+    }
+
+    #[test]
+    fn get_node_tool_constraint_basic() {
+        let upgrades = vec![Upgrade {
+            dep_name: "node".to_owned(),
+            new_value: Some("18.0.0".to_owned()),
+            ..Default::default()
+        }];
+        let tc = get_node_tool_constraint(&upgrades, None, None, None, None);
+        assert_eq!(tc.tool_name, "node");
+        assert_eq!(tc.constraint, Some("18.0.0".to_owned()));
+    }
 }

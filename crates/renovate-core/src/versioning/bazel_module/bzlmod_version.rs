@@ -533,4 +533,12 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn is_prerelease_detects() {
+        let v = BzlmodVersion::new("1.0-pre").unwrap();
+        assert!(v.is_prerelease());
+        let v2 = BzlmodVersion::new("1.0").unwrap();
+        assert!(!v2.is_prerelease());
+    }
 }

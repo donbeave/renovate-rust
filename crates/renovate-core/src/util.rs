@@ -11946,3 +11946,79 @@ dep1 = "^1.0.0"
         let decompressed = decompress_from_base64(&compressed).unwrap();
         assert_eq!(decompressed, "foobar");
     }
+
+    #[test]
+    fn trim_leading_slash_basic() {
+        assert_eq!(trim_leading_slash("/foo/bar"), "foo/bar");
+        assert_eq!(trim_leading_slash("foo/bar"), "foo/bar");
+        assert_eq!(trim_leading_slash("/"), "");
+    }
+
+    #[test]
+    fn uniq_eq_removes_duplicates() {
+        assert_eq!(uniq_eq(vec![1, 2, 2, 3]), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn is_binary_content_detects_binary() {
+        assert!(is_binary_content(b"\x00\x01\x02"));
+        assert!(!is_binary_content(b"hello world"));
+    }
+
+    #[test]
+    fn hash_data_consistent() {
+        let h1 = hash_data(b"test", None);
+        let h2 = hash_data(b"test", None);
+        assert_eq!(h1, h2);
+        let h3 = hash_data(b"different", None);
+        assert_ne!(h1, h3);
+    }
+
+    #[test]
+    fn sanitize_str_empty() {
+        assert_eq!(sanitize_str(Some("")), Some("".into()));
+    }
+
+    #[test]
+    fn parse_git_url_basic() {
+        let parsed = parse_git_url("https://github.com/owner/repo.git").unwrap();
+        assert_eq!(parsed.host, "github.com");
+        assert_eq!(parsed.pathname, "/owner/repo.git");
+    }
+
+    #[test]
+    fn is_github_fine_grained_personal_access_token_detects() {
+        assert!(is_github_fine_grained_personal_access_token("github_pat_xxx"));
+        assert!(!is_github_fine_grained_personal_access_token("ghp_xxx"));
+    }
+
+    #[test]
+    fn pretty_stdout_indent_basic() {
+        assert_eq!(pretty_stdout_indent("line1\nline2", true), "       line1\n       line2");
+        assert_eq!(pretty_stdout_indent("line1", false), "line1");
+    }
+
+    #[test]
+    fn get_label_description_basic() {
+        assert_eq!(get_label_description("manager", "npm"), "Related to the npm manager");
+    }
+
+    #[test]
+    fn parse_git_url_host_and_name_basic() {
+        assert_eq!(
+            parse_git_url_host_and_name("https://github.com/owner/repo.git"),
+            Some(("github.com".to_owned(), "owner/repo".to_owned()))
+        );
+        assert_eq!(
+            parse_git_url_host_and_name("git@github.com:owner/repo.git"),
+            Some(("github.com".to_owned(), "owner/repo".to_owned()))
+        );
+    }
+
+    #[test]
+    fn exec_command_to_raw() {
+        let cmd = ExecCommand::Str("echo hello".to_owned());
+        assert_eq!(cmd.to_raw(), "echo hello");
+        let cmd2 = ExecCommand::WithOpts { command: vec!["echo".to_owned(), "hello".to_owned()] };
+        assert_eq!(cmd2.to_raw(), "echo hello");
+    }

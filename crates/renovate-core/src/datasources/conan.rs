@@ -129,4 +129,32 @@ mod tests {
         assert_eq!(cmp_semver("1.2.11", "1.3.0"), Less);
         assert_eq!(cmp_semver("1.0.0", "1.0.0"), Equal);
     }
+
+    #[test]
+    fn cmp_semver_different_lengths() {
+        use std::cmp::Ordering::*;
+        assert_eq!(cmp_semver("2.0", "1.9.9"), Greater);
+        assert_eq!(cmp_semver("1.0", "1.0.0"), Equal);
+        assert_eq!(cmp_semver("1.0.1", "1.0"), Greater);
+    }
+
+    #[test]
+    fn parses_config_yml_unquoted_versions() {
+        let yaml = "versions:\n  1.0.0:\n    folder: all\n  2.0.0:\n    folder: all\n";
+        let versions: Vec<String> = VERSION_LINE
+            .captures_iter(yaml)
+            .map(|c| c[1].to_owned())
+            .collect();
+        assert_eq!(versions, vec!["1.0.0", "2.0.0"]);
+    }
+
+    #[test]
+    fn parses_config_yml_empty_returns_empty() {
+        let yaml = "versions:\n";
+        let versions: Vec<String> = VERSION_LINE
+            .captures_iter(yaml)
+            .map(|c| c[1].to_owned())
+            .collect();
+        assert!(versions.is_empty());
+    }
 }

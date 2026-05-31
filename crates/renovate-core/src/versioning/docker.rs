@@ -403,4 +403,36 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn compare_docker_versions() {
+        assert_eq!(compare("1.2.3", "1.2.3"), 0);
+        assert_eq!(compare("1.2.3", "1.2"), -1);
+        assert_eq!(compare("18.04", "18.1"), 1);
+        assert_eq!(compare("3", "2"), 1);
+    }
+
+    #[test]
+    fn get_satisfying_version_finds_match() {
+        let versions = &["1.0.0", "1.2.3", "2.0.0"];
+        assert_eq!(get_satisfying_version(versions, "1.2.3"), Some("1.2.3"));
+    }
+
+    #[test]
+    fn get_satisfying_version_no_match() {
+        let versions = &["1.0.0", "2.0.0"];
+        assert_eq!(get_satisfying_version(versions, "3.0.0"), None);
+    }
+
+    #[test]
+    fn min_satisfying_version_finds_match() {
+        let versions = &["1.0.0", "1.2.3", "2.0.0"];
+        assert_eq!(min_satisfying_version(versions, "1.2.3"), Some("1.2.3"));
+    }
+
+    #[test]
+    fn min_satisfying_version_no_match() {
+        let versions = &["1.0.0", "2.0.0"];
+        assert_eq!(min_satisfying_version(versions, "3.0.0"), None);
+    }
 }

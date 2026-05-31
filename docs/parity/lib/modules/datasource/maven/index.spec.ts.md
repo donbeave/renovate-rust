@@ -1,11 +1,11 @@
 # Renovate Test Detail
 
-[Back to test map](../../../../renovate-test-map.md)
+[Back to test map](../../../../../../renovate-test-map.md)
 
 ## `lib/modules/datasource/maven/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/index.spec.ts
-**Total tests:** 46 | **Ported:** 8 | **Actionable:** 38 | **Status:** pending
+**Total tests:** 46 | **Ported:** 20 | **Actionable:** 26 | **Status:** partial
 
 ### `modules/datasource/maven/index`
 
@@ -23,7 +23,7 @@
 | skips registry with invalid XML | 286 | ported | `maven.rs` | `fetch_releases_invalid_xml_returns_none` | —|
 | handles optional slash at the end of registry url | 302 | pending | — | — | —|
 | returns null for invalid registryUrls | 312 | ported | `maven.rs` | `fetch_releases_invalid_dep_name_returns_none` | —|
-| supports scm.url values prefixed with "scm:" | 321 | pending | — | — | —|
+| supports scm.url values prefixed with "scm:" | 321 | ported | `maven.rs` | `process_scm_url_strips_scm_prefix` | —|
 | with only groupId present | 331 | pending | — | — | —|
 | with only artifactId present | 351 | pending | — | — | —|
 | with all elments present | 371 | pending | — | — | —|
@@ -35,9 +35,9 @@
 | should deal with circular hierarchy | 592 | pending | — | — | —|
 | should get source from own pom and homepage from parent | 627 | pending | — | — | —|
 | should get homepage from own pom and source from parent | 643 | pending | — | — | —|
-| should get homepage and source from own pom | 659 | pending | — | — | —|
-| should be able to detect git@github.com:child-scm as valid sourceUrl | 674 | pending | — | — | —|
-| should be able to detect git@github.com/child-scm as valid sourceUrl | 688 | pending | — | — | —|
+| should get homepage and source from own pom | 659 | ported | `maven.rs` | `parse_pom_info_extracts_homepage_and_source_url` | Tests POM homepage/scm extraction. |
+| should be able to detect git@github.com:child-scm as valid sourceUrl | 674 | ported | `maven.rs` | `process_scm_url_converts_git_at_github` | — |
+| should be able to detect git@github.com/child-scm as valid sourceUrl | 688 | ported | `maven.rs` | `process_scm_url_converts_git_at_github` | — |
 | should be able to detect git://@github.com/child-scm as valid sourceUrl | 702 | pending | — | — | —|
 | returns null for 404 | 718 | ported | `maven.rs` | `fetch_releases_404_returns_none` | —|
 | returns original value for unknown error | 729 | pending | — | — | —|

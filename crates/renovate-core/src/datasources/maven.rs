@@ -775,4 +775,93 @@ mod tests {
         let result = fetch_releases_from_registry("nocolon", &server.uri(), &http, &[&server.uri()]).await;
         assert!(result.is_none());
     }
+
+    #[test]
+    fn parse_all_versions_extracts_versions_and_tags() {
+        let xml = r#"<metadata>
+  <versioning>
+    <latest>2.0.0</latest>
+    <release>2.0.0</release>
+    <versions>
+      <version>1.0.0</version>
+      <version>1.1.0</version>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#;
+        let result = parse_all_versions(xml).unwrap();
+        assert_eq!(result.versions, vec!["1.0.0", "1.1.0", "2.0.0"]);
+        assert_eq!(result.tags.get("latest"), Some(&"2.0.0".to_owned()));
+        assert_eq!(result.tags.get("release"), Some(&"2.0.0".to_owned()));
+    }
+
+    #[test]
+    fn parse_all_versions_empty_returns_none() {
+        let xml = r#"<metadata><versioning></versioning></metadata>"#;
+        assert!(parse_all_versions(xml).is_none());
+    }
+
+    #[test]
+    fn parse_pom_info_extracts_homepage_and_source_url() {
+        let xml = r#"<project>
+  <url>https://example.com</url>
+  <scm>
+    <url>https://github.com/example/project</url>
+  </scm>
+</project>"#;
+        let info = parse_pom_info(xml);
+        assert_eq!(info.homepage, Some("https://example.com".to_owned()));
+        assert_eq!(info.source_url, Some("https://github.com/example/project".to_owned()));
+    }
+
+    #[test]
+    fn parse_pom_info_skips_placeholder_url() {
+        let xml = r#"<project>
+  <url>${project.url}</url>
+</project>"#;
+        let info = parse_pom_info(xml);
+        assert_eq!(info.homepage, None);
+    }
+
+    #[test]
+    fn process_scm_url_strips_scm_prefix() {
+        assert_eq!(process_scm_url("scm:git:https://github.com/foo/bar"), Some("https://github.com/foo/bar".to_owned()));
+    }
+
+    #[test]
+    fn process_scm_url_converts_git_at_github() {
+        assert_eq!(process_scm_url("git@github.com:foo/bar"), Some("https://github.com/foo/bar".to_owned()));
+        assert_eq!(process_scm_url("git@github.com/foo/bar"), Some("https://github.com/foo/bar".to_owned()));
+    }
+
+    #[test]
+    fn process_scm_url_skips_remaining_placeholders() {
+        assert_eq!(process_scm_url("https://github.com/foo/bar/tree/${branch}"), Some("https://github.com/foo/bar".to_owned()));
+        assert_eq!(process_scm_url("https://github.com/foo/bar/${tag}"), None);
+    }
+
+    #[test]
+    fn find_latest_suitable_prefers_stable() {
+        let versions = vec!["1.0.0".into(), "1.1.0-SNAPSHOT".into(), "2.0.0".into()];
+        assert_eq!(find_latest_suitable(&versions), Some("2.0.0"));
+    }
+
+    #[test]
+    fn find_latest_suitable_falls_back_to_unstable() {
+        let versions = vec!["1.0.0-SNAPSHOT".into(), "1.1.0-SNAPSHOT".into()];
+        assert_eq!(find_latest_suitable(&versions), Some("1.1.0-SNAPSHOT"));
+    }
+
+    #[test]
+    fn find_latest_suitable_empty_returns_none() {
+        let versions: Vec<String> = vec![];
+        assert_eq!(find_latest_suitable(&versions), None);
+    }
+
+    #[test]
+    fn summary_from_cache_basic() {
+        let summary = summary_from_cache("1.0.0", &Some("2.0.0".into()));
+        assert_eq!(summary.latest.as_deref(), Some("2.0.0"));
+        assert!(summary.update_available);
+    }
 }

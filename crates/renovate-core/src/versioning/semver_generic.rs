@@ -360,4 +360,11 @@ mod tests {
         assert_eq!(classify_semver_update("latest", "2.0.0"), None);
         assert_eq!(classify_semver_update("1.0.0", "next"), None);
     }
+
+    #[test]
+    fn update_type_as_str() {
+        assert_eq!(UpdateType::Major.as_str(), "major");
+        assert_eq!(UpdateType::Minor.as_str(), "minor");
+        assert_eq!(UpdateType::Patch.as_str(), "patch");
+    }
 }

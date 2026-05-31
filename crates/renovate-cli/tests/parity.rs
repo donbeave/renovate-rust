@@ -1877,3 +1877,81 @@ fn parity_puppet_skipped() {
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for puppet-skipped fixture");
 }
+
+// Rust-specific: parity behavior test
+#[test]
+fn parity_tekton_skipped() {
+    let actual = run_fixture("tekton-skipped");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 0,
+                "skipped": 1,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "tekton/task.yml",
+                    "manager": "tekton",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 0,
+                        "skipped": 1,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "alpine",
+                            "status": "skipped",
+                            "reason": "digest-pinned"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for tekton-skipped fixture");
+}
+
+// Rust-specific: parity behavior test
+#[test]
+fn parity_crossplane_scratch() {
+    let actual = run_fixture("crossplane-scratch");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 1,
+                "skipped": 0,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "crossplane/provider.yml",
+                    "manager": "crossplane",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 1,
+                        "skipped": 0,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "Provider: scratch",
+                            "status": "upToDate",
+                            "latest": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for crossplane-scratch fixture");
+}

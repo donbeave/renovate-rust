@@ -2165,4 +2165,22 @@ mod tests {
             ],
         );
     }
+
+    #[test]
+    fn text_schedule_matches_any_time() {
+        assert!(text_schedule_matches("at any time", 12, 15, 3));
+        assert!(text_schedule_matches("", 12, 15, 3));
+    }
+
+    #[test]
+    fn text_schedule_matches_weekday() {
+        assert!(text_schedule_matches("before 3am on Monday", 2, 1, 1));
+        assert!(!text_schedule_matches("before 3am on Monday", 2, 1, 2));
+    }
+
+    #[test]
+    fn text_schedule_matches_month_basic() {
+        assert!(text_schedule_matches_month("before 3am on Monday", 2, 1, 1, 1));
+        assert!(!text_schedule_matches_month("before 3am on Monday", 2, 1, 2, 1));
+    }
 }

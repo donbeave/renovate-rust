@@ -1897,4 +1897,18 @@ unknowntool 9.9.9
         );
         assert_eq!(tag_strip_from_extract_version(None), "");
     }
+
+    #[test]
+    fn parse_java_dep_basic() {
+        let dep = parse_java_dep("java", "adoptopenjdk-11.0.0+28");
+        assert_eq!(dep.dep_name, "java");
+        assert_eq!(dep.current_value, "11.0.0+28");
+    }
+
+    #[test]
+    fn parse_scala_dep_basic() {
+        let dep = parse_scala_dep("scala", "2.13.6");
+        assert_eq!(dep.dep_name, "scala");
+        assert_eq!(dep.current_value, "2.13.6");
+    }
 }

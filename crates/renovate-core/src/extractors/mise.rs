@@ -3083,4 +3083,87 @@ version = "3.11.12"
         let python = result.deps.iter().find(|d| d.dep_name == "python").unwrap();
         assert_eq!(python.locked_version.as_deref(), Some("3.10.17"));
     }
+
+    #[test]
+    fn create_aqua_tool_config_basic() {
+        let cfg = create_aqua_tool_config("node", "20");
+        assert_eq!(cfg.package_name, "node");
+        assert_eq!(cfg.datasource, Some("github-tags"));
+    }
+
+    #[test]
+    fn create_cargo_tool_config_basic() {
+        let cfg = create_cargo_tool_config("ripgrep", "14");
+        assert_eq!(cfg.package_name, "ripgrep");
+        assert_eq!(cfg.datasource, Some("crate"));
+    }
+
+    #[test]
+    fn create_dotnet_tool_config_basic() {
+        let cfg = create_dotnet_tool_config("dotnet-format");
+        assert_eq!(cfg.package_name, "dotnet-format");
+        assert_eq!(cfg.datasource, Some("nuget"));
+    }
+
+    #[test]
+    fn create_gem_tool_config_basic() {
+        let cfg = create_gem_tool_config("bundler");
+        assert_eq!(cfg.package_name, "bundler");
+        assert_eq!(cfg.datasource, Some("rubygems"));
+    }
+
+    #[test]
+    fn create_go_tool_config_basic() {
+        let cfg = create_go_tool_config("golangci-lint");
+        assert_eq!(cfg.package_name, "golangci-lint");
+        assert_eq!(cfg.datasource, Some("go"));
+    }
+
+    #[test]
+    fn create_npm_tool_config_basic() {
+        let cfg = create_npm_tool_config("typescript");
+        assert_eq!(cfg.package_name, "typescript");
+        assert_eq!(cfg.datasource, Some("npm"));
+    }
+
+    #[test]
+    fn create_pipx_tool_config_basic() {
+        let cfg = create_pipx_tool_config("black");
+        assert_eq!(cfg.package_name, "black");
+        assert_eq!(cfg.datasource, Some("pypi"));
+    }
+
+    #[test]
+    fn get_config_type_detects() {
+        let cfg = get_config_type("mise.toml");
+        assert!(!cfg.is_local);
+        assert_eq!(cfg.env, None);
+        let cfg2 = get_config_type(".mise.toml");
+        assert!(!cfg2.is_local);
+        let cfg3 = get_config_type("mise.lock");
+        assert!(!cfg3.is_local);
+        assert_eq!(cfg3.env, None);
+    }
+
+    #[test]
+    fn get_lock_file_name_basic() {
+        assert_eq!(get_lock_file_name("mise.toml"), "mise.lock");
+    }
+
+    #[test]
+    fn parse_mise_lock_file_basic() {
+        let content = r#"
+[tools]
+node = [{ version = "18.0.0" }]
+rust = [{ version = "1.70.0" }]
+"#;
+        let lock = parse_mise_lock_file(content).unwrap();
+        assert_eq!(lock.tools.get("node"), Some(&vec!["18.0.0".to_owned()]));
+        assert_eq!(lock.tools.get("rust"), Some(&vec!["1.70.0".to_owned()]));
+    }
+
+    #[test]
+    fn parse_mise_lock_file_invalid() {
+        assert!(parse_mise_lock_file("not toml").is_none());
+    }
 }

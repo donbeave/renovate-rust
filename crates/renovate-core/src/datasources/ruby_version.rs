@@ -239,4 +239,10 @@ mod tests {
         let result = fetch_releases(&server.uri(), &http).await;
         assert!(result.is_err(), "expected Err for 404, got: {:?}", result);
     }
+
+    #[test]
+    fn parse_releases_empty() {
+        let releases = parse_releases("<html></html>");
+        assert!(releases.is_empty());
+    }
 }

@@ -205,4 +205,11 @@ mod tests {
         assert_eq!(sort_versions("1.0", "2.0"), Ordering::Equal);
         assert_eq!(sort_versions("a", "b"), Ordering::Equal);
     }
+
+    #[test]
+    fn get_major_minor_patch_exact() {
+        assert_eq!(get_major("1.2.3"), None);
+        assert_eq!(get_minor("1.2.3"), None);
+        assert_eq!(get_patch("1.2.3"), None);
+    }
 }

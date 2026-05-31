@@ -1,0 +1,8 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: example
+spec:
+  steps:
+    - name: build
+      image: alpine@sha256:abc123

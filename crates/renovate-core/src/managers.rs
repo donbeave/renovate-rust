@@ -2133,4 +2133,145 @@ mod tests {
         let result = detect_all_global_config();
         assert!(result.is_empty());
     }
+
+    #[test]
+    fn is_disabled_by_default_known() {
+        assert!(is_disabled_by_default("azure-pipelines"));
+        assert!(is_disabled_by_default("git-submodules"));
+    }
+
+    #[test]
+    fn is_disabled_by_default_unknown() {
+        assert!(!is_disabled_by_default("npm"));
+        assert!(!is_disabled_by_default("cargo"));
+    }
+
+    #[test]
+    fn manager_categories_known() {
+        assert_eq!(manager_categories("npm"), &["js"]);
+        assert_eq!(manager_categories("cargo"), &["rust"]);
+        assert_eq!(manager_categories("maven"), &["java"]);
+    }
+
+    #[test]
+    fn manager_categories_unknown() {
+        assert!(manager_categories("unknown").is_empty());
+    }
+
+    #[test]
+    fn manager_default_datasource_known() {
+        assert_eq!(manager_default_datasource("npm"), Some("npm"));
+        assert_eq!(manager_default_datasource("cargo"), Some("crate"));
+        assert_eq!(manager_default_datasource("maven"), Some("maven"));
+    }
+
+    #[test]
+    fn manager_default_datasource_unknown() {
+        assert_eq!(manager_default_datasource("unknown"), None);
+    }
+
+    #[test]
+    fn manager_default_registry_urls_known() {
+        assert_eq!(
+            manager_default_registry_urls("npm"),
+            &["https://registry.npmjs.org"]
+        );
+        assert_eq!(
+            manager_default_registry_urls("cargo"),
+            &["https://crates.io/"]
+        );
+    }
+
+    #[test]
+    fn manager_default_registry_urls_unknown() {
+        assert!(manager_default_registry_urls("unknown").is_empty());
+    }
+
+    #[test]
+    fn all_manager_ids_non_empty() {
+        let ids = all_manager_ids();
+        assert!(!ids.is_empty());
+        assert!(ids.contains(&"npm"));
+        assert!(ids.contains(&"cargo"));
+    }
+
+    #[test]
+    fn all_managers_list_non_empty() {
+        let list = all_managers_list();
+        assert!(!list.is_empty());
+    }
+
+    #[test]
+    fn get_enabled_managers_list_none() {
+        let list = get_enabled_managers_list(None);
+        assert!(!list.is_empty());
+    }
+
+    #[test]
+    fn get_enabled_managers_list_some() {
+        let list = get_enabled_managers_list(Some(&["npm".into(), "cargo".into()]));
+        assert!(list.contains(&"npm"));
+        assert!(list.contains(&"cargo"));
+    }
+
+    #[test]
+    fn manager_exists_known() {
+        assert!(manager_exists("npm"));
+        assert!(manager_exists("cargo"));
+    }
+
+    #[test]
+    fn manager_exists_unknown() {
+        assert!(!manager_exists("unknown-manager"));
+    }
+
+    #[test]
+    fn is_custom_manager_true() {
+        assert!(is_custom_manager("regex"));
+        assert!(is_custom_manager("jsonata"));
+    }
+
+    #[test]
+    fn is_custom_manager_false() {
+        assert!(!is_custom_manager("npm"));
+        assert!(!is_custom_manager("custom.regex"));
+    }
+
+    #[test]
+    fn get_pretty_dep_type_known() {
+        assert_eq!(get_pretty_dep_type("npm", "dependencies"), Some("dependency"));
+        assert_eq!(get_pretty_dep_type("npm", "devDependencies"), Some("devDependency"));
+    }
+
+    #[test]
+    fn get_pretty_dep_type_unknown() {
+        assert_eq!(get_pretty_dep_type("npm", "foo-bar-baz"), None);
+        assert_eq!(get_pretty_dep_type("unknown", "dependencies"), None);
+    }
+
+    #[test]
+    fn supersedes_managers_known() {
+        assert_eq!(supersedes_managers("bun"), &["npm"]);
+        assert_eq!(supersedes_managers("deno"), &["npm"]);
+        assert_eq!(supersedes_managers("poetry"), &["pep621"]);
+    }
+
+    #[test]
+    fn supersedes_managers_unknown() {
+        assert!(supersedes_managers("unknown").is_empty());
+    }
+
+    #[test]
+    fn get_included_files_basic() {
+        let files = vec!["a.txt".into(), "b.txt".into(), "c.txt".into()];
+        let included = get_included_files(&files, &["a.txt", "b.txt"]);
+        assert_eq!(included, vec!["a.txt", "b.txt"]);
+    }
+
+    #[test]
+    fn filter_ignored_files_basic() {
+        let files = vec!["a.txt".into(), "b.txt".into(), "c.txt".into()];
+        let filtered = filter_ignored_files(&files, &["b.txt"]);
+        assert_eq!(filtered, vec!["a.txt", "c.txt"]);
+    }
 }

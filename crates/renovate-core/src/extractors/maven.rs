@@ -3004,4 +3004,23 @@ mod tests {
         let updated = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
         assert_eq!(updated, SIMPLE_POM_FULL);
     }
+
+    #[test]
+    fn maven_update_at_position_basic() {
+        let content = r#"<dependency>
+  <groupId>com.example</groupId>
+  <artifactId>lib</artifactId>
+  <version>1.0.0</version>
+</dependency>"#;
+        let pos = content.find("1.0.0").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some("com.example:lib".to_owned()),
+            current_value: Some("1.0.0".to_owned()),
+            new_value: Some("2.0.0".to_owned()),
+            file_replace_position: pos,
+            ..Default::default()
+        };
+        let updated = maven_update_at_position(content, &upgrade, "</version>").unwrap();
+        assert!(updated.contains("2.0.0"));
+    }
 }

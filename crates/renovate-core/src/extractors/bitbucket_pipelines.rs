@@ -504,4 +504,15 @@ pipelines:
             )
         }));
     }
+
+    #[test]
+    fn extract_docker_basic() {
+        let content = r#"
+image: node:18
+"#;
+        let deps = extract_docker(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "node");
+        assert_eq!(deps[0].tag, Some("18".to_owned()));
+    }
 }

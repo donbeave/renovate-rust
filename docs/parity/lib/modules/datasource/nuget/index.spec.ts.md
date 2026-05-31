@@ -1,11 +1,11 @@
 # Renovate Test Detail
 
-[Back to test map](../../../../renovate-test-map.md)
+[Back to test map](../../../../../../renovate-test-map.md)
 
 ## `lib/modules/datasource/nuget/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/nuget/index.spec.ts
-**Total tests:** 36 | **Ported:** 1 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 36 | **Ported:** 5 | **Actionable:** 31 | **Status:** partial
 
 ### `modules/datasource/nuget/index › parseRegistryUrl`
 
@@ -41,7 +41,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for non 200 (v3v2) | 479 | pending | — | — | —|
-| returns null for non 200 (v3) | 494 | ported | `nuget.rs` | `fetch_latest_non_success_returns_none` | Rust verifies the equivalent flat-container non-success response behavior. |
+| returns null for non 200 (v3) | 494 | ported | `nuget.rs` | `fetch_latest_non_success_returns_none` | — |
 | returns null for non 200 (v2) | 503 | pending | — | — | —|
 | returns null for unknown error (v3v2) | 517 | pending | — | — | —|
 | returns deduplicated results | 535 | pending | — | — | —|

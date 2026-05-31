@@ -923,4 +923,10 @@ dev_dependencies:
         );
         assert_eq!(deps.len(), 14);
     }
+
+    #[test]
+    fn pubspec_dep_type_as_renovate_str() {
+        assert_eq!(PubspecDepType::Regular.as_renovate_str(), "dependencies");
+        assert_eq!(PubspecDepType::Dev.as_renovate_str(), "dev_dependencies");
+    }
 }

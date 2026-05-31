@@ -987,4 +987,16 @@ mod tests {
     fn npm2hashicorp_throws_on_unsupported_matches_renovate_hashicorp_convertor_spec() {
         assert_eq!(npm2hashicorp("4.x.x"), None);
     }
+
+    #[test]
+    fn get_excluded_versions_simple() {
+        assert_eq!(get_excluded_versions(">= 1.0.0, != 1.2.0"), vec!["1.2.0"]);
+        assert!(get_excluded_versions(">= 1.0.0").is_empty());
+    }
+
+    #[test]
+    fn get_filtered_range_simple() {
+        assert_eq!(get_filtered_range(">= 1.0.0, != 1.2.0"), ">= 1.0.0");
+        assert_eq!(get_filtered_range(">= 1.0.0"), ">= 1.0.0");
+    }
 }

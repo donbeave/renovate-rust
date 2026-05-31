@@ -432,4 +432,13 @@ mod tests {
             Some("2024-07-03T15:24:28.000Z")
         );
     }
+
+    #[test]
+    fn is_stable_version_detects_preview() {
+        assert!(!is_stable_version("1.0.0-exp.1"));
+        assert!(!is_stable_version("1.0.0-pre.1"));
+        assert!(!is_stable_version("1.0.0-preview.1"));
+        assert!(is_stable_version("1.0.0"));
+        assert!(is_stable_version("1.0.0-rc1"));
+    }
 }

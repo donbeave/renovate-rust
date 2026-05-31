@@ -1659,4 +1659,24 @@ werkzeug = ">=0.14"
         let result = update_locked_poetry_dependency(Some("urllib3"), Some("1.26.4"), None);
         assert_eq!(result.as_str(), "unsupported");
     }
+
+    #[test]
+    fn extract_package_file_with_lockfile_basic() {
+        let content = r#"
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.25.1"
+"#;
+        let result = extract_package_file_with_lockfile(content, None).unwrap();
+        assert!(!result.deps.is_empty());
+        let requests = result.deps.iter().find(|d| d.name == "requests");
+        assert!(requests.is_some());
+    }
+
+    #[test]
+    fn poetry_dep_type_as_renovate_str() {
+        assert_eq!(PoetryDepType::Regular.as_renovate_str(), "dependencies");
+        assert_eq!(PoetryDepType::Dev.as_renovate_str(), "dev-dependencies");
+        assert_eq!(PoetryDepType::Group.as_renovate_str(), "group");
+    }
 }

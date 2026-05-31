@@ -2556,4 +2556,101 @@ mod tests {
     fn get_pr_header_renders_header() {
         assert_eq!(get_pr_header(Some("HEADER")), "HEADER\n\n");
     }
+
+    #[test]
+    fn sanitize_dep_name_basic() {
+        assert_eq!(sanitize_dep_name("react"), "react");
+        assert_eq!(sanitize_dep_name("@angular/core"), "angular-core");
+        assert_eq!(sanitize_dep_name("@types/lodash"), "lodash");
+    }
+
+    #[test]
+    fn sanitize_dep_name_special_chars() {
+        assert_eq!(sanitize_dep_name("foo/bar"), "foo-bar");
+        assert_eq!(sanitize_dep_name("foo:bar"), "foo-bar");
+        assert_eq!(sanitize_dep_name("foo bar"), "foo-bar");
+    }
+
+    #[test]
+    fn major_group_slug_basic() {
+        assert_eq!(major_group_slug("deps", false, false, false, 1), "deps");
+        assert_eq!(major_group_slug("deps", true, true, true, 2), "major-2-deps");
+        assert_eq!(major_group_slug("deps", true, false, true, 2), "major-deps");
+    }
+
+    #[test]
+    fn branch_name_with_strict_under_limit() {
+        let name = branch_name_with_strict("renovate/", "", "react-18.x", false);
+        assert_eq!(name, "renovate/react-18.x");
+    }
+
+    #[test]
+    fn semantic_commit_message_title_basic() {
+        assert_eq!(
+            semantic_commit_message_title("feat", "scope", "add feature"),
+            "feat(scope): add feature"
+        );
+    }
+
+    #[test]
+    fn semantic_commit_message_title_no_scope() {
+        assert_eq!(
+            semantic_commit_message_title("chore", "", "update deps"),
+            "chore: update deps"
+        );
+    }
+
+    #[test]
+    fn parse_semantic_commit_message_basic() {
+        let parsed = parse_semantic_commit_message("feat(scope): add feature").unwrap();
+        assert_eq!(parsed.r#type, "feat");
+        assert_eq!(parsed.scope, "scope");
+        assert_eq!(parsed.subject, "add feature");
+    }
+
+    #[test]
+    fn parse_semantic_commit_message_no_scope() {
+        let parsed = parse_semantic_commit_message("chore: update deps").unwrap();
+        assert_eq!(parsed.r#type, "chore");
+        assert_eq!(parsed.scope, "");
+        assert_eq!(parsed.subject, "update deps");
+    }
+
+    #[test]
+    fn custom_commit_message_title_basic() {
+        assert_eq!(
+            custom_commit_message_title("[BOT]", "update dependencies"),
+            "[BOT]: update dependencies"
+        );
+    }
+
+    #[test]
+    fn detect_semantic_commits_detects() {
+        assert!(detect_semantic_commits(&["feat: add feature", "chore: update deps"]));
+    }
+
+    #[test]
+    fn detect_semantic_commits_no_detect() {
+        assert!(!detect_semantic_commits(&["add feature", "update deps"]));
+    }
+
+    #[test]
+    fn get_base_branch_desc_empty() {
+        assert_eq!(get_base_branch_desc(&[]), "");
+    }
+
+    #[test]
+    fn get_base_branch_desc_some() {
+        assert_eq!(
+            get_base_branch_desc(&["main", "master"]),
+            "You have configured Renovate to use the following baseBranchPatterns: `main`, `master`."
+        );
+    }
+
+    #[test]
+    fn config_migration_commit_message_default() {
+        let msg = config_migration_commit_message("enabled", "renovate.json");
+        assert!(msg.contains("chore(config)"));
+        assert!(msg.contains("renovate.json"));
+    }
 }

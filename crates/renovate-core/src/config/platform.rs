@@ -37,3 +37,35 @@ impl std::fmt::Display for Platform {
         f.write_str(s)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn platform_display_github() {
+        assert_eq!(Platform::Github.to_string(), "github");
+    }
+
+    #[test]
+    fn platform_display_gitlab() {
+        assert_eq!(Platform::Gitlab.to_string(), "gitlab");
+    }
+
+    #[test]
+    fn platform_display_bitbucket_server() {
+        assert_eq!(Platform::BitbucketServer.to_string(), "bitbucket-server");
+    }
+
+    #[test]
+    fn platform_display_all_variants() {
+        assert_eq!(Platform::Azure.to_string(), "azure");
+        assert_eq!(Platform::Bitbucket.to_string(), "bitbucket");
+        assert_eq!(Platform::Codecommit.to_string(), "codecommit");
+        assert_eq!(Platform::Forgejo.to_string(), "forgejo");
+        assert_eq!(Platform::Gerrit.to_string(), "gerrit");
+        assert_eq!(Platform::Gitea.to_string(), "gitea");
+        assert_eq!(Platform::Local.to_string(), "local");
+        assert_eq!(Platform::ScmManager.to_string(), "scm-manager");
+    }
+}

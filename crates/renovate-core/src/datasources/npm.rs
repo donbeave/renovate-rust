@@ -578,4 +578,17 @@ mod tests {
         assert!(!react_s.update_available);
         assert_eq!(react_s.latest_compatible.as_deref(), Some("18.2.0"));
     }
+
+    #[test]
+    fn summary_from_cache_basic() {
+        let entry = NpmVersionsEntry {
+            versions: vec!["1.0.0".into(), "1.1.0".into(), "2.0.0".into()],
+            latest_tag: Some("2.0.0".into()),
+            latest_timestamp: Some("2024-01-01T00:00:00Z".into()),
+            version_timestamps: HashMap::new(),
+        };
+        let summary = summary_from_cache("^1.0.0", &entry);
+        assert_eq!(summary.latest.as_deref(), Some("2.0.0"));
+        assert_eq!(summary.latest_timestamp.as_deref(), Some("2024-01-01T00:00:00Z"));
+    }
 }

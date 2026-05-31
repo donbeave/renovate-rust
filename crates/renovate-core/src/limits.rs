@@ -646,4 +646,40 @@ mod tests {
             assert!(!is_count_limit_reached("ConcurrentPRs", &config));
         });
     }
+
+    #[test]
+    fn set_count_and_get_count_works() {
+        clean(|| {
+            set_count("test-key", 5);
+            assert_eq!(get_count("test-key"), 5);
+        });
+    }
+
+    #[test]
+    fn inc_count_value_works() {
+        clean(|| {
+            set_count("test-key", 3);
+            inc_count_value("test-key");
+            assert_eq!(get_count("test-key"), 4);
+        });
+    }
+
+    #[test]
+    fn get_count_missing_returns_zero() {
+        clean(|| {
+            assert_eq!(get_count("missing-key"), 0);
+        });
+    }
+
+    #[test]
+    fn reset_all_limits_clears_everything() {
+        clean(|| {
+            set_max_limit("Commits", Some(5));
+            inc_limited_value("Commits", 3);
+            set_count("Branches", 2);
+            reset_all_limits();
+            assert!(!is_commits_limit_reached());
+            assert_eq!(get_count("Branches"), 0);
+        });
+    }
 }

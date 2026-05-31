@@ -3204,3 +3204,156 @@ fn gcv_supports_multiple_glob_levels() {
         Some("org.apache.foo*:*")
     );
 }
+
+#[test]
+fn version_like_substring_extracts_version() {
+    assert_eq!(version_like_substring("1.2.3"), Some("1.2.3".into()));
+    assert_eq!(version_like_substring("v1.2.3"), Some("v1.2.3".into()));
+    assert_eq!(version_like_substring("release-1.2.3"), Some("release-1.2.3".into()));
+}
+
+#[test]
+fn version_like_substring_no_version() {
+    assert_eq!(version_like_substring("noversion"), None);
+    assert_eq!(version_like_substring(""), None);
+}
+
+#[test]
+fn is_gradle_dependency_string_valid() {
+    assert!(is_gradle_dependency_string("com.example:lib:1.0.0"));
+    assert!(is_gradle_dependency_string("org.jetbrains.kotlin:kotlin-stdlib:1.9.0"));
+}
+
+#[test]
+fn is_gradle_dependency_string_invalid() {
+    assert!(!is_gradle_dependency_string("not-a-dep"));
+    assert!(!is_gradle_dependency_string(""));
+}
+
+#[test]
+fn is_gradle_script_file_matches() {
+    assert!(is_gradle_script_file("build.gradle"));
+    assert!(is_gradle_script_file("settings.gradle.kts"));
+    assert!(!is_gradle_script_file("gradle.properties"));
+}
+
+#[test]
+fn is_gradle_script_file_non_match() {
+    assert!(!is_gradle_script_file("pom.xml"));
+    assert!(!is_gradle_script_file("README.md"));
+}
+
+#[test]
+fn is_gradle_versions_file_matches() {
+    assert!(is_gradle_versions_file("versions.gradle"));
+    assert!(is_gradle_versions_file("versions.gradle.kts"));
+    assert!(!is_gradle_versions_file("versions.props"));
+}
+
+#[test]
+fn is_gradle_versions_file_non_match() {
+    assert!(!is_gradle_versions_file("build.gradle"));
+}
+
+#[test]
+fn is_gradle_build_file_matches() {
+    assert!(is_gradle_build_file("build.gradle"));
+    assert!(is_gradle_build_file("build.gradle.kts"));
+}
+
+#[test]
+fn is_gradle_build_file_non_match() {
+    assert!(!is_gradle_build_file("settings.gradle"));
+}
+
+#[test]
+fn is_gradle_settings_file_matches() {
+    assert!(is_gradle_settings_file("settings.gradle"));
+    assert!(is_gradle_settings_file("settings.gradle.kts"));
+}
+
+#[test]
+fn is_gradle_settings_file_non_match() {
+    assert!(!is_gradle_settings_file("build.gradle"));
+}
+
+#[test]
+fn is_gradle_default_catalog_file_matches() {
+    assert!(is_gradle_default_catalog_file("project/gradle/libs.versions.toml"));
+}
+
+#[test]
+fn is_gradle_default_catalog_file_non_match() {
+    assert!(!is_gradle_default_catalog_file("gradle/libs.versions.toml"));
+    assert!(!is_gradle_default_catalog_file("other.toml"));
+}
+
+#[test]
+fn is_props_file_matches() {
+    assert!(is_props_file("gradle.properties"));
+    assert!(!is_props_file("versions.props"));
+}
+
+#[test]
+fn is_kotlin_source_file_matches() {
+    assert!(!is_kotlin_source_file("build.gradle.kts"));
+    assert!(is_kotlin_source_file("Utils.kt"));
+}
+
+#[test]
+fn is_toml_file_matches() {
+    assert!(is_toml_file("libs.versions.toml"));
+    assert!(is_toml_file("gradle/libs.versions.toml"));
+}
+
+#[test]
+fn to_absolute_path_already_absolute() {
+    assert_eq!(to_absolute_path("/foo/bar.gradle"), "/foo/bar.gradle");
+}
+
+#[test]
+fn to_absolute_path_relative() {
+    let result = to_absolute_path("foo/bar.gradle");
+    assert!(result.ends_with("foo/bar.gradle"));
+    assert!(result.starts_with('/'));
+}
+
+#[test]
+fn reorder_files_prioritizes_build_files_last() {
+    let files = vec!["settings.gradle", "build.gradle", "foo.gradle"];
+    let ordered = reorder_files(&files);
+    // build has highest rank (5), settings has rank 1
+    assert_eq!(ordered[0], "settings.gradle");
+    assert_eq!(ordered[2], "build.gradle");
+}
+
+#[test]
+fn reorder_files_keeps_others() {
+    let files = vec!["a.gradle", "b.gradle"];
+    let ordered = reorder_files(&files);
+    assert_eq!(ordered, vec!["a.gradle", "b.gradle"]);
+}
+
+#[test]
+fn get_vars_returns_empty() {
+    let registry = VariableRegistry::new();
+    let vars = get_vars(&registry, "foo");
+    assert!(vars.is_empty());
+}
+
+#[test]
+fn update_vars_sets_values() {
+    let mut registry = VariableRegistry::new();
+    let mut vars = PackageVariables::new();
+    vars.insert("key".into(), PackageVariable {
+        key: "key".into(),
+        value: "value".into(),
+        file_replace_position: None,
+        package_file: None,
+    });
+    // Use absolute path so update_vars and get_vars agree
+    let abs_path = to_absolute_path("/project");
+    update_vars(&mut registry, &abs_path, vars);
+    let retrieved = get_vars(&registry, &abs_path);
+    assert_eq!(retrieved.get("key").map(|v| v.value.as_str()), Some("value"));
+}

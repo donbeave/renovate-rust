@@ -1242,3 +1242,9 @@ fn repos_parses_with_packagist_disabled() {
     assert!(urls.contains(&"https://wpackagist.org".to_owned()));
     assert!(!urls.contains(&"https://repo.packagist.org".to_owned()));
 }
+
+#[test]
+fn composer_dep_type_as_renovate_str() {
+    assert_eq!(ComposerDepType::Regular.as_renovate_str(), "require");
+    assert_eq!(ComposerDepType::Dev.as_renovate_str(), "require-dev");
+}

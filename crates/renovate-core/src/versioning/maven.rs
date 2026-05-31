@@ -1644,4 +1644,12 @@ mod tests {
         assert_eq!(t.len(), 1);
         assert_eq!(t[0], Token { prefix: none_prefix, value: TokenValue::Number(0), is_transition: false });
     }
+
+    #[test]
+    fn last_qualifier_simple() {
+        assert_eq!(last_qualifier("1.0.0-alpha"), Some("alpha".to_owned()));
+        assert_eq!(last_qualifier("1.0.0-SNAPSHOT"), Some("snapshot".to_owned()));
+        assert_eq!(last_qualifier("1.0.0"), None);
+        assert_eq!(last_qualifier("1.0.0-rc"), Some("rc".to_owned()));
+    }
 }

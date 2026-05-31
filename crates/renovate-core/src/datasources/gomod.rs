@@ -366,4 +366,147 @@ mod tests {
             None
         );
     }
+
+    #[tokio::test]
+    async fn fetch_latest_410_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/github.com/missing/pkg/@latest"))
+            .respond_with(ResponseTemplate::new(410))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("github.com/missing/pkg", &http, &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    async fn fetch_latest_non_success_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/github.com/bad/pkg/@latest"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("github.com/bad/pkg", &http, &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    async fn fetch_updates_concurrent_fetches_all() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/github.com/pkg/a/@latest"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"Version":"v1.1.0","Time":"2023-09-01T00:00:00Z"}"#))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/github.com/pkg/b/@latest"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"Version":"v2.1.0","Time":"2023-09-02T00:00:00Z"}"#))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let deps = vec![
+            GoModDepInput { module_path: "github.com/pkg/a".into(), current_value: "v1.0.0".into() },
+            GoModDepInput { module_path: "github.com/pkg/b".into(), current_value: "v2.0.0".into() },
+        ];
+        let results = fetch_updates_concurrent(&http, &deps, &server.uri(), 10).await;
+        assert_eq!(results.len(), 2);
+
+        let a = results.iter().find(|r| r.module_path == "github.com/pkg/a").unwrap();
+        assert!(a.summary.as_ref().unwrap().update_available);
+        assert_eq!(a.summary.as_ref().unwrap().latest.as_deref(), Some("v1.1.0"));
+
+        let b = results.iter().find(|r| r.module_path == "github.com/pkg/b").unwrap();
+        assert!(b.summary.as_ref().unwrap().update_available);
+        assert_eq!(b.summary.as_ref().unwrap().latest.as_deref(), Some("v2.1.0"));
+    }
+
+    #[test]
+    fn summary_from_cache_exact_match() {
+        let cache = Some("v1.2.3".into());
+        let summary = summary_from_cache("v1.2.3", cache);
+        assert!(!summary.update_available);
+        assert_eq!(summary.latest.as_deref(), Some("v1.2.3"));
+    }
+
+    #[test]
+    fn summary_from_cache_update_available() {
+        let cache = Some("v1.3.0".into());
+        let summary = summary_from_cache("v1.2.3", cache);
+        assert!(summary.update_available);
+        assert_eq!(summary.latest.as_deref(), Some("v1.3.0"));
+    }
+
+    #[test]
+    fn summary_from_cache_no_latest() {
+        let summary = summary_from_cache("v1.2.3", None);
+        assert!(!summary.update_available);
+        assert_eq!(summary.latest, None);
+    }
+
+    #[test]
+    fn get_source_url_github_default() {
+        assert_eq!(
+            get_source_url("github-tags", "owner/repo", None),
+            Some("https://github.com/owner/repo".into())
+        );
+    }
+
+    #[test]
+    fn get_source_url_gitlab_custom_registry() {
+        assert_eq!(
+            get_source_url("gitlab-tags", "owner/repo", Some("https://gitlab.example.com")),
+            Some("https://gitlab.example.com/owner/repo".into())
+        );
+    }
+
+    #[test]
+    fn get_source_url_bitbucket_default() {
+        assert_eq!(
+            get_source_url("bitbucket-tags", "owner/repo", None),
+            Some("https://bitbucket.org/owner/repo".into())
+        );
+    }
+
+    #[test]
+    fn get_source_url_gitea_default() {
+        assert_eq!(
+            get_source_url("gitea-tags", "owner/repo", None),
+            Some("https://gitea.com/owner/repo".into())
+        );
+    }
+
+    #[test]
+    fn get_source_url_forgejo_default() {
+        assert_eq!(
+            get_source_url("forgejo-tags", "owner/repo", None),
+            Some("https://code.forgejo.org/owner/repo".into())
+        );
+    }
+
+    #[test]
+    fn get_source_url_unknown_datasource() {
+        assert_eq!(get_source_url("unknown", "owner/repo", None), None);
+    }
+
+    #[test]
+    fn encode_module_path_empty() {
+        assert_eq!(encode_module_path(""), "");
+    }
+
+    #[tokio::test]
+    async fn fetch_latest_batch_empty() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest_batch(&http, &[], "https://proxy.golang.org", 10).await;
+        assert!(result.is_empty());
+    }
 }

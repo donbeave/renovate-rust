@@ -68,6 +68,17 @@ pub enum RequireConfig {
     Ignored,
 }
 
+impl std::fmt::Display for RequireConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Required => "required",
+            Self::Optional => "optional",
+            Self::Ignored => "ignored",
+        };
+        f.write_str(s)
+    }
+}
+
 /// Whether to process forked repositories.
 ///
 /// Source: `forkProcessing` option.
@@ -82,6 +93,17 @@ pub enum ForkProcessing {
     Disabled,
 }
 
+impl std::fmt::Display for ForkProcessing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Auto => "auto",
+            Self::Enabled => "enabled",
+            Self::Disabled => "disabled",
+        };
+        f.write_str(s)
+    }
+}
+
 /// When to recreate closed PRs.
 ///
 /// Source: `recreateWhen` option.
@@ -94,4 +116,56 @@ pub enum RecreateWhen {
     Always,
     /// Never recreate closed PRs.
     Never,
+}
+
+impl std::fmt::Display for RecreateWhen {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Auto => "auto",
+            Self::Always => "always",
+            Self::Never => "never",
+        };
+        f.write_str(s)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn binary_source_display() {
+        assert_eq!(BinarySource::Global.to_string(), "global");
+        assert_eq!(BinarySource::Docker.to_string(), "docker");
+        assert_eq!(BinarySource::Install.to_string(), "install");
+        assert_eq!(BinarySource::Hermit.to_string(), "hermit");
+    }
+
+    #[test]
+    fn dry_run_display() {
+        assert_eq!(DryRun::Extract.to_string(), "extract");
+        assert_eq!(DryRun::Lookup.to_string(), "lookup");
+        assert_eq!(DryRun::Full.to_string(), "full");
+    }
+
+    #[test]
+    fn require_config_display() {
+        assert_eq!(RequireConfig::Required.to_string(), "required");
+        assert_eq!(RequireConfig::Optional.to_string(), "optional");
+        assert_eq!(RequireConfig::Ignored.to_string(), "ignored");
+    }
+
+    #[test]
+    fn fork_processing_display() {
+        assert_eq!(ForkProcessing::Auto.to_string(), "auto");
+        assert_eq!(ForkProcessing::Enabled.to_string(), "enabled");
+        assert_eq!(ForkProcessing::Disabled.to_string(), "disabled");
+    }
+
+    #[test]
+    fn recreate_when_display() {
+        assert_eq!(RecreateWhen::Auto.to_string(), "auto");
+        assert_eq!(RecreateWhen::Always.to_string(), "always");
+        assert_eq!(RecreateWhen::Never.to_string(), "never");
+    }
 }

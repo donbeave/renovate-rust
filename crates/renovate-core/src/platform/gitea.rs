@@ -643,4 +643,32 @@ mod tests {
         let files = client.get_file_list("owner", "repo").await.unwrap();
         assert_eq!(files, vec!["README.md", "main.rs"]);
     }
+
+    #[tokio::test]
+    async fn get_raw_file_not_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/api/v1/repos/owner/repo/contents/missing.txt"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let file = client.get_raw_file("owner", "repo", "missing.txt").await.unwrap();
+        assert!(file.is_none());
+    }
+
+    #[tokio::test]
+    async fn get_file_list_not_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/api/v1/repos/owner/repo/contents"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client.get_file_list("owner", "repo").await;
+        assert!(result.is_err());
+    }
 }

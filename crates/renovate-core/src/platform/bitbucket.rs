@@ -741,4 +741,46 @@ mod tests {
             .await
             .unwrap();
     }
+
+    #[tokio::test]
+    async fn create_pr_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repositories/owner/repo/pullrequests"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = create_pr(&client, "owner", "repo", "title", "body", "src", "dst").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn list_prs_empty() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repositories/owner/repo/pullrequests"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"values": []})))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let prs = list_prs(&client, "owner", "repo", None).await.unwrap();
+        assert!(prs.is_empty());
+    }
+
+    #[tokio::test]
+    async fn merge_pr_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repositories/owner/repo/pullrequests/5/merge"))
+            .respond_with(ResponseTemplate::new(409))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = merge_pr(&client, "owner", "repo", 5).await;
+        assert!(result.is_err());
+    }
 }

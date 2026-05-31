@@ -3302,4 +3302,11 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
                 .contains("Invalid Starlark boolean string: bad")
         );
     }
+
+    #[test]
+    fn bazel_ctx_prepare_extension_tag() {
+        let mut ctx = BazelCtx::new("");
+        ctx.prepare_extension_tag("my_ext", "raw_ext", 0);
+        assert_eq!(ctx.stack.len(), 1);
+    }
 }

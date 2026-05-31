@@ -269,4 +269,107 @@ mod tests {
             .unwrap();
         assert_eq!(result.map(|(v, _)| v), Some("v7.1.0".to_owned()));
     }
+
+    #[tokio::test]
+    async fn fetch_latest_non_success_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/p2/bad/pkg.json"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("bad/pkg", &http, &server.uri()).await.unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    async fn fetch_latest_invalid_json_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/p2/bad/pkg.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("not json"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("bad/pkg", &http, &server.uri()).await;
+        assert!(matches!(result, Err(PackagistError::Json(_))));
+    }
+
+    #[tokio::test]
+    async fn fetch_latest_package_not_in_response_returns_none() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "packages": {
+                "other/pkg": [{"version": "v1.0.0"}]
+            }
+        })
+        .to_string();
+        Mock::given(method("GET"))
+            .and(path("/p2/wanted/pkg.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("wanted/pkg", &http, &server.uri()).await.unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    async fn fetch_latest_empty_versions_returns_none() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "packages": {
+                "empty/pkg": []
+            }
+        })
+        .to_string();
+        Mock::given(method("GET"))
+            .and(path("/p2/empty/pkg.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("empty/pkg", &http, &server.uri()).await.unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    async fn fetch_updates_concurrent_fetches_all() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/p2/pkg/a.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                serde_json::json!({"packages": {"pkg/a": [{"version": "v1.1.0"}, {"version": "v1.0.0"}]}}).to_string()
+            ))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/p2/pkg/b.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                serde_json::json!({"packages": {"pkg/b": [{"version": "v2.1.0"}, {"version": "v2.0.0"}]}}).to_string()
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let deps = vec![
+            PackagistDepInput { package_name: "pkg/a".into(), current_value: "1.0.0".into() },
+            PackagistDepInput { package_name: "pkg/b".into(), current_value: "2.0.0".into() },
+        ];
+        let results = fetch_updates_concurrent(&http, &deps, &server.uri(), 10).await;
+        assert_eq!(results.len(), 2);
+
+        let a = results.iter().find(|r| r.package_name == "pkg/a").unwrap();
+        assert!(a.summary.as_ref().unwrap().update_available);
+        assert_eq!(a.summary.as_ref().unwrap().latest.as_deref(), Some("v1.1.0"));
+
+        let b = results.iter().find(|r| r.package_name == "pkg/b").unwrap();
+        assert!(b.summary.as_ref().unwrap().update_available);
+        assert_eq!(b.summary.as_ref().unwrap().latest.as_deref(), Some("v2.1.0"));
+    }
 }

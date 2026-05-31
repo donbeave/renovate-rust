@@ -58,6 +58,7 @@ pub struct BranchConfig {
     pub branch_sha: Option<String>,
     pub base_branch_sha: Option<String>,
     pub automerge: Option<bool>,
+    pub is_vulnerability_alert: Option<bool>,
     pub config: RenovateConfig,
 }
 

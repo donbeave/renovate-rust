@@ -346,4 +346,17 @@ mod tests {
         let cmd = get_optimize_command();
         assert_eq!(cmd[0], "sed");
     }
+
+    #[test]
+    fn fuzzy_match_additional_yarnrc_yml_basic() {
+        let additional = r#"
+"npmRegistryServer": "https://registry.example.com"
+"#;
+        let existing = r#"
+"npmRegistryServer": "https://registry.example.com/"
+"#;
+        let result = fuzzy_match_additional_yarnrc_yml(additional, existing);
+        // Keys are identical, so no replacement occurs
+        assert!(result.contains("npmRegistryServer"));
+    }
 }

@@ -497,4 +497,11 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn compare_direct() {
+        assert_eq!(compare("1.2.3", "1.2.3"), 0);
+        assert!(compare("1.2.3", "1.2.2") > 0);
+        assert!(compare("1.2.2", "1.2.3") < 0);
+    }
 }

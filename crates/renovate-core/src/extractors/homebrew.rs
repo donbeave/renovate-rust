@@ -1211,4 +1211,63 @@ end"#;
         assert_eq!(parsed.repo_name, "aide");
         assert_eq!(parsed.url_type, GitHubUrlType::Release);
     }
+
+    #[test]
+    fn extract_ruby_string_finds_double_quoted() {
+        let content = r#"url "https://example.com/foo-1.0.tar.gz""#;
+        assert_eq!(extract_ruby_string(content, "url"), Some("https://example.com/foo-1.0.tar.gz".to_owned()));
+    }
+
+    #[test]
+    fn extract_ruby_string_finds_single_quoted() {
+        let content = r#"url 'https://example.com/foo-1.0.tar.gz'"#;
+        assert_eq!(extract_ruby_string(content, "url"), Some("https://example.com/foo-1.0.tar.gz".to_owned()));
+    }
+
+    #[test]
+    fn update_ruby_string_replaces_double_quoted() {
+        let content = r#"url "https://example.com/foo-1.0.tar.gz""#;
+        let result = update_ruby_string(content, "url", "https://example.com/foo-1.0.tar.gz", "https://example.com/foo-2.0.tar.gz");
+        assert_eq!(result, Some(r#"url "https://example.com/foo-2.0.tar.gz""#.to_owned()));
+    }
+
+    #[test]
+    fn update_ruby_string_replaces_single_quoted() {
+        let content = r#"url 'https://example.com/foo-1.0.tar.gz'"#;
+        let result = update_ruby_string(content, "url", "https://example.com/foo-1.0.tar.gz", "https://example.com/foo-2.0.tar.gz");
+        assert_eq!(result, Some(r#"url 'https://example.com/foo-2.0.tar.gz'"#.to_owned()));
+    }
+
+    #[test]
+    fn update_dependency_with_hash_basic() {
+        let content = r#"
+url "https://example.com/foo-1.0.tar.gz"
+sha256 "oldhash"
+"#;
+        let result = update_dependency_with_hash(
+            content,
+            "https://example.com/foo-1.0.tar.gz",
+            "oldhash",
+            "https://example.com/foo-2.0.tar.gz",
+            "newhash",
+        );
+        let updated = result.unwrap();
+        assert!(updated.contains("https://example.com/foo-2.0.tar.gz"));
+        assert!(updated.contains("newhash"));
+    }
+
+    #[test]
+    fn update_dependency_empty_returns_no_change() {
+        let config = HomebrewUpdateConfig {
+            file_content: "url \"https://example.com/foo.tar.gz\"\n".to_owned(),
+            manager_data_url: "".to_owned(),
+            manager_data_sha256: "abc".to_owned(),
+            manager_data_type: "github".to_owned(),
+            new_value: "2.0.0".to_owned(),
+            package_file: "foo.rb".to_owned(),
+            dep_name: "foo".to_owned(),
+        };
+        let result = update_dependency(&config);
+        assert!(matches!(result, HomebrewUpdateResult::NoChange));
+    }
 }

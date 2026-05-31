@@ -398,4 +398,6 @@ mod tests {
             fetch_releases(&format!("{}/", server.uri()), "@scope/package-name", &http).await;
         assert!(result.is_err());
     }
+
+
 }

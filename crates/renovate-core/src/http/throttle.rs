@@ -162,4 +162,63 @@ mod tests {
         clear();
         apply_throttle("https://unknown-host.example.com/api").await;
     }
+
+    #[test]
+    fn set_and_get_throttle_rules() {
+        let rules = vec![ThrottleLimitRule {
+            match_host: "example.com".to_owned(),
+            throttle_ms: 200,
+        }];
+        set_http_rate_limits(vec![], rules);
+        let retrieved = get_throttle_rules();
+        assert_eq!(retrieved.len(), 1);
+        assert_eq!(retrieved[0].throttle_ms, 200);
+        // Restore empty state for other tests
+        set_http_rate_limits(vec![], vec![]);
+    }
+
+    #[tokio::test]
+    async fn get_throttle_for_known_host() {
+        clear();
+        set_http_rate_limits(
+            vec![],
+            vec![ThrottleLimitRule {
+                match_host: "api.github.com".to_owned(),
+                throttle_ms: 100,
+            }],
+        );
+        let throttle = get_throttle("https://api.github.com/repos").await;
+        assert!(throttle.is_some());
+        // Restore empty state
+        set_http_rate_limits(vec![], vec![]);
+    }
+
+    #[tokio::test]
+    async fn get_throttle_unknown_host() {
+        clear();
+        let throttle = get_throttle("https://unknown.example.com").await;
+        assert!(throttle.is_none());
+    }
+
+    #[tokio::test]
+    async fn clear_removes_runtime_queues_and_throttles() {
+        set_http_rate_limits(
+            vec![ConcurrencyLimitRule {
+                match_host: "example.com".to_owned(),
+                concurrency: 2,
+            }],
+            vec![ThrottleLimitRule {
+                match_host: "example.com".to_owned(),
+                throttle_ms: 100,
+            }],
+        );
+        // Prime the queue and throttle
+        let _ = get_queue("https://example.com/api").await;
+        let _ = get_throttle("https://example.com/api").await;
+        clear();
+        // After clear, the runtime state is gone but rules remain.
+        // The queue should be recreated on next access because rules are still there.
+        let queue = get_queue("https://example.com/api").await;
+        assert!(queue.is_some());
+    }
 }

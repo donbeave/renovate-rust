@@ -970,4 +970,26 @@ mod tests {
         assert!(!is_breaking("2.0.0", "2.0.1"));
         assert!(!is_breaking("2.0.0", "2.1.0"));
     }
+
+    #[test]
+    fn composer2npm_caret_passes_through() {
+        assert_eq!(composer2npm("^1.2.3"), "^1.2.3");
+    }
+
+    #[test]
+    fn composer2npm_tilde_passes_through() {
+        assert_eq!(composer2npm("~1.2.3"), "~1.2.3");
+    }
+
+    #[test]
+    fn is_version_composer() {
+        assert!(is_version("1.2.3"));
+        assert!(!is_version("not-a-version"));
+    }
+
+    #[test]
+    fn matches_range_composer() {
+        assert!(matches_range("1.2.3", ">=1.0.0"));
+        assert!(!matches_range("0.9.0", ">=1.0.0"));
+    }
 }

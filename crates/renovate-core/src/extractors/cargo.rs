@@ -1690,4 +1690,12 @@ mod range_update_tests {
         let result = bump_package_version(content, "not-semver", &BumpVersion::Patch);
         assert_eq!(result.bumped_content, content);
     }
+
+    #[test]
+    fn cargo_dep_type_as_renovate_str() {
+        assert_eq!(DepType::Regular.as_renovate_str(), "dependencies");
+        assert_eq!(DepType::Dev.as_renovate_str(), "devDependencies");
+        assert_eq!(DepType::Build.as_renovate_str(), "buildDependencies");
+        assert_eq!(DepType::Workspace.as_renovate_str(), "workspace.dependencies");
+    }
 }

@@ -1291,4 +1291,11 @@ mod tests {
             assert_eq!(got, expected, "get_new_value({cv:?}, {strat:?}, {cur:?}, {nv:?})");
         }
     }
+
+    #[test]
+    fn get_major_minor_patch_ruby() {
+        assert_eq!(get_major("1.2.3"), Some(1));
+        assert_eq!(get_minor("1.2.3"), Some(2));
+        assert_eq!(get_patch("1.2.3"), Some(3));
+    }
 }

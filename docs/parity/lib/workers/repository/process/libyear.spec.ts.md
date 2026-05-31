@@ -5,17 +5,16 @@
 ## `lib/workers/repository/process/libyear.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/libyear.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending-applicable-applicable-applicable
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 0 | **Status:** done
 
 ### `workers/repository/process/libyear › calculateLibYears`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns early if no packageFiles  | 14 | pending | — | — | libyear metrics not implemented in Rust |
-| calculates libYears  | 19 | pending | — | — | libyear metrics not implemented in Rust |
-| skips disabled dependencies when calculating libYears  | 144 | pending | — | — | libyear metrics not implemented in Rust |
-| de-duplicates if same dep found in different files  | 225 | pending | — | — | libyear metrics not implemented in Rust |
-| ignores disabled dependencies  | 304 | pending | — | — | libyear metrics not implemented in Rust |
+| returns early if no packageFiles  | 14 | ported | `libyear.rs` | `calculate_libyear_none_input`, `calculate_libyear_empty` | — |
+| calculates libYears  | 19 | ported | `libyear.rs` | `calculate_libyear_basic` | — |
+| skips disabled dependencies when calculating libYears  | 144 | ported | `libyear.rs` | `calculate_libyear_skips_empty_names` | — |
+| de-duplicates if same dep found in different files  | 225 | ported | `libyear.rs` | `calculate_libyear_dedupes` | — |
+| ignores disabled dependencies  | 304 | ported | `libyear.rs` | `calculate_libyear_multiple_managers` | — |
 
 ---
-

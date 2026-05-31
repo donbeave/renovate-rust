@@ -839,4 +839,30 @@ mod tests {
             Some("2023-09-05T13:24:19.046Z")
         );
     }
+
+    #[test]
+    fn parse_all_versions_with_registry_basic() {
+        let index_yaml = r#"
+entries:
+  nginx:
+    - version: 1.0.0
+      created: "2024-01-01T00:00:00Z"
+    - version: 1.1.0
+      created: "2024-02-01T00:00:00Z"
+"#;
+        let result = parse_all_versions_with_registry(index_yaml, "nginx", "https://charts.example.com").unwrap();
+        assert_eq!(result.releases.len(), 2);
+        assert_eq!(result.releases[0].version, "1.0.0");
+        assert_eq!(result.releases[1].version, "1.1.0");
+    }
+
+    #[test]
+    fn parse_all_versions_with_registry_missing_chart() {
+        let index_yaml = r#"
+entries:
+  nginx:
+    - version: 1.0.0
+"#;
+        assert!(parse_all_versions_with_registry(index_yaml, "missing", "https://charts.example.com").is_none());
+    }
 }

@@ -1443,4 +1443,11 @@ readme = "README.md"
         assert_eq!(r.extras, Some(vec!["test-feature".to_owned()]));
         assert_eq!(r.marker.as_deref(), Some("python_version < \"3.8\""));
     }
+
+    #[test]
+    fn pep621_dep_type_as_renovate_str() {
+        assert_eq!(Pep621DepType::Regular.as_renovate_str(), "dependencies");
+        assert_eq!(Pep621DepType::Optional.as_renovate_str(), "optional-dependencies");
+        assert_eq!(Pep621DepType::Group.as_renovate_str(), "dependency-groups");
+    }
 }

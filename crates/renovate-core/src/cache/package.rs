@@ -1611,4 +1611,14 @@ mod tests {
         // Exact match for empty string
         assert_eq!(get_ttl_override(&cfg, ""), Some(30));
     }
+
+    #[tokio::test]
+    async fn reset_mem_clears_cache() {
+        let cache = PackageCache::new();
+        let ns: &str = "global";
+        cache.set(ns, "key", "value", 60).await;
+        cache.reset_mem();
+        let result: Option<String> = cache.get(ns, "key").await;
+        assert!(result.is_none());
+    }
 }

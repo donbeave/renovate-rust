@@ -192,4 +192,10 @@ mod tests {
             names.len()
         );
     }
+
+    #[test]
+    fn all_replacement_rules_non_empty() {
+        let rules = all_replacement_rules();
+        assert!(!rules.is_empty());
+    }
 }

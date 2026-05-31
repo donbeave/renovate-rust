@@ -53,3 +53,55 @@ impl std::error::Error for ExecError {
         self.source.as_ref().map(|e| e.as_ref() as &dyn std::error::Error)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn exec_error_new() {
+        let err = ExecError::new("failed", "cmd");
+        assert_eq!(err.message, "failed");
+        assert_eq!(err.cmd, "cmd");
+        assert!(err.stderr.is_empty());
+        assert!(err.stdout.is_empty());
+        assert_eq!(err.exit_code, None);
+    }
+
+    #[test]
+    fn exec_error_with_output() {
+        let err = ExecError::new("failed", "cmd")
+            .with_output("out".into(), "err".into(), Some(1));
+        assert_eq!(err.stdout, "out");
+        assert_eq!(err.stderr, "err");
+        assert_eq!(err.exit_code, Some(1));
+    }
+
+    #[test]
+    fn exec_error_display_includes_message_and_cmd() {
+        let err = ExecError::new("failed", "cmd");
+        let s = format!("{}", err);
+        assert!(s.contains("failed"));
+        assert!(s.contains("cmd"));
+    }
+
+    #[test]
+    fn exec_error_display_includes_exit_code() {
+        let err = ExecError::new("failed", "cmd").with_output("".into(), "".into(), Some(42));
+        let s = format!("{}", err);
+        assert!(s.contains("42"));
+    }
+
+    #[test]
+    fn exec_error_display_includes_stderr() {
+        let err = ExecError::new("failed", "cmd").with_output("".into(), "stderr content".into(), None);
+        let s = format!("{}", err);
+        assert!(s.contains("stderr content"));
+    }
+
+    #[test]
+    fn exec_error_with_source() {
+        let err = ExecError::new("failed", "cmd").with_source(Box::new(std::io::Error::other("source")));
+        assert!(err.source.is_some());
+    }
+}

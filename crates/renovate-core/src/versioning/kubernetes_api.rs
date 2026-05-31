@@ -268,4 +268,38 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn get_minor_patch_always_zero_for_valid() {
+        assert_eq!(get_minor("v1"), Some(0));
+        assert_eq!(get_patch("v1"), Some(0));
+        assert_eq!(get_minor("v1alpha1"), Some(0));
+        assert_eq!(get_patch("v1alpha1"), Some(0));
+    }
+
+    #[test]
+    fn get_minor_patch_none_for_invalid() {
+        assert_eq!(get_minor("invalid"), None);
+        assert_eq!(get_patch("invalid"), None);
+    }
+
+    #[test]
+    fn equals_invalid_returns_false() {
+        assert!(!equals("invalid", "v1"));
+        assert!(!equals("v1", "invalid"));
+        assert!(!equals("invalid", "invalid"));
+    }
+
+    #[test]
+    fn is_greater_than_invalid_returns_false() {
+        assert!(!is_greater_than("invalid", "v1"));
+        assert!(!is_greater_than("v1", "invalid"));
+        assert!(!is_greater_than("invalid", "invalid"));
+    }
+
+    #[test]
+    fn is_valid_invalid_returns_false() {
+        assert!(!is_valid(""));
+        assert!(!is_valid("not-a-version"));
+    }
 }

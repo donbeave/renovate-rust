@@ -1,4 +1,16 @@
+pub mod cache;
+pub mod changelog;
 pub mod common;
+pub mod configured;
+pub mod dependency_dashboard;
+pub mod error_config;
+pub mod errors_warnings;
 pub mod extract;
+pub mod finalize;
+pub mod init;
+pub mod onboarding;
+pub mod package_files;
 pub mod process;
+pub mod reconfigure;
+pub mod result;
 pub mod update;

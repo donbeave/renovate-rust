@@ -411,6 +411,56 @@ mod tests {
         assert!(!matches_range("v1.2.4", ""));
     }
 
+    #[test]
+    fn swift_is_stable() {
+        assert!(is_stable("1.2.3"));
+        assert!(is_stable("v1.2.3"));
+        assert!(!is_stable("1.2.3-alpha"));
+        assert!(!is_stable("1.2.3-beta.1"));
+    }
+
+    #[test]
+    fn swift_get_major_minor_patch() {
+        assert_eq!(get_major("1.2.3"), Some(1));
+        assert_eq!(get_minor("1.2.3"), Some(2));
+        assert_eq!(get_patch("1.2.3"), Some(3));
+        assert_eq!(get_major("v2.0.0"), Some(2));
+        assert_eq!(get_minor("v2.0.0"), Some(0));
+        assert_eq!(get_patch("v2.0.0"), Some(0));
+    }
+
+    #[test]
+    fn swift_equals() {
+        assert!(equals("1.2.3", "1.2.3"));
+        assert!(equals("1.2.3", "v1.2.3"));
+        assert!(!equals("1.2.3", "1.2.4"));
+    }
+
+    #[test]
+    fn swift_is_greater_than() {
+        assert!(is_greater_than("1.2.4", "1.2.3"));
+        assert!(!is_greater_than("1.2.3", "1.2.4"));
+        assert!(!is_greater_than("1.2.3", "1.2.3"));
+    }
+
+    #[test]
+    fn swift_sort_versions() {
+        assert_eq!(sort_versions("1.2.3", "1.2.4"), -1);
+        assert_eq!(sort_versions("1.2.4", "1.2.3"), 1);
+        assert_eq!(sort_versions("1.2.3", "1.2.3"), 0);
+    }
+
+    #[test]
+    fn swift_to_semver_range() {
+        assert_eq!(to_semver_range(r#"from: "1.2.3""#), Some(">=1.2.3, <2.0.0".to_owned()));
+        assert_eq!(to_semver_range(r#""1.2.3"..."#), Some(">=1.2.3".to_owned()));
+        assert_eq!(to_semver_range(r#""1.2.3"..."1.2.4""#), Some(">=1.2.3, <=1.2.4".to_owned()));
+        assert_eq!(to_semver_range(r#""1.2.3"..<"1.2.4""#), Some(">=1.2.3, <1.2.4".to_owned()));
+        assert_eq!(to_semver_range(r#"..."1.2.4""#), Some("<=1.2.4".to_owned()));
+        assert_eq!(to_semver_range(r#"..<"1.2.4""#), Some("<1.2.4".to_owned()));
+        assert_eq!(to_semver_range("invalid"), None);
+    }
+
     // Ported: 'getNewValue("$currentValue", ...) === "$expected"' — versioning/swift/index.spec.ts line 117
     #[test]
     fn swift_get_new_value() {

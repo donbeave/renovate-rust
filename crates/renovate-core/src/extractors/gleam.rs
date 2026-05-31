@@ -467,4 +467,16 @@ foo = { version = ">= 1.0.0 and < 2.0.0" }
     fn gleam_lock_handles_invalid_lockfile() {
         assert!(parse_gleam_lock_file("foo").is_none());
     }
+
+    #[test]
+    fn hex_version_satisfies_tilde() {
+        assert!(hex_version_satisfies("1.2.3", "~> 1.2"));
+        assert!(!hex_version_satisfies("2.0.0", "~> 1.2"));
+    }
+
+    #[test]
+    fn hex_version_satisfies_exact() {
+        assert!(hex_version_satisfies("1.2.3", "1.2.3"));
+        assert!(!hex_version_satisfies("1.2.4", "1.2.3"));
+    }
 }

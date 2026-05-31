@@ -1156,4 +1156,11 @@ mod tests {
         let ts = postprocess_release_timestamp("clap", "4.5.17", Some(&server.uri()), &http).await;
         assert_eq!(ts.as_deref(), Some("2024-09-04T19:16:41.355243+00:00"));
     }
+
+    #[test]
+    fn summary_from_cache_basic() {
+        let versions = vec!["1.0.0".into(), "1.1.0".into(), "2.0.0".into()];
+        let summary = summary_from_cache("^1.0.0", &versions);
+        assert_eq!(summary.latest.as_deref(), Some("2.0.0"));
+    }
 }

@@ -918,6 +918,35 @@ mod tests {
         assert_eq!(get_n_latest(-1, now), None);
         assert_eq!(get_n_latest(100, now), None);
     }
+
+    #[test]
+    fn get_major_returns_major() {
+        assert_eq!(get_major(Some("20.04")), Some(20));
+        assert_eq!(get_major(Some("18.04")), Some(18));
+    }
+
+    #[test]
+    fn get_minor_returns_minor() {
+        assert_eq!(get_minor(Some("20.04")), Some(4));
+        assert_eq!(get_minor(Some("18.10")), Some(10));
+    }
+
+    #[test]
+    fn get_patch_returns_none() {
+        assert_eq!(get_patch(Some("20.04")), None);
+    }
+
+    #[test]
+    fn is_stable_lts() {
+        assert!(is_stable_at(Some("20.04"), "2021-03-20"));
+        assert!(is_stable_at(Some("18.04"), "2021-03-20"));
+    }
+
+    #[test]
+    fn is_stable_non_lts() {
+        assert!(!is_stable_at(Some("20.10"), "2021-03-20"));
+        assert!(!is_stable_at(Some("19.04"), "2021-03-20"));
+    }
 }
 
 // Ported: "isEolLts(\"$version\") === $expected" — versioning/distro.spec.ts line 80

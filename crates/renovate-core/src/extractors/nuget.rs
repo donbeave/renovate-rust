@@ -2080,4 +2080,24 @@ Console.WriteLine("Hello World!");
         assert!(xml.contains("my_x0020_very_x003f__x0020_weird_x0021_-regi_x0024_try_name"));
         assert!(xml.contains(r#"<add key="Username" value="some-username" />"#));
     }
+
+    #[test]
+    fn parse_nuget_registry_url_default() {
+        let parsed = parse_nuget_registry_url("https://nuget.org");
+        assert_eq!(parsed.feed_url, "https://nuget.org/");
+        assert_eq!(parsed.protocol_version, 2);
+    }
+
+    #[test]
+    fn parse_nuget_registry_url_v3() {
+        let parsed = parse_nuget_registry_url("https://nuget.org/index.json");
+        assert_eq!(parsed.protocol_version, 3);
+    }
+
+    #[test]
+    fn parse_nuget_registry_url_fragment() {
+        let parsed = parse_nuget_registry_url("https://nuget.org#protocolVersion=3");
+        assert_eq!(parsed.feed_url, "https://nuget.org/");
+        assert_eq!(parsed.protocol_version, 3);
+    }
 }

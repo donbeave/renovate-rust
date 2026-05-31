@@ -1003,4 +1003,10 @@ mod tests {
     // Ported: 'checks runtime date handling & refresh rolling release data' — versioning/debian/index.spec.ts line 441
     // Not applicable: tests dynamic time-based refresh of rolling release data.
     // Our implementation uses a fixed snapshot at 2023-07-10.
+
+    #[test]
+    fn debian_is_compatible_validity() {
+        assert!(super::debian_is_compatible("11"));
+        assert!(!super::debian_is_compatible("not-a-version"));
+    }
 }
