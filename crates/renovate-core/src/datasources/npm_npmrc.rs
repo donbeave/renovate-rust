@@ -405,6 +405,37 @@ pub fn resolve_registry_url(config: &NpmrcConfig, package_name: &str) -> String 
     default.to_owned()
 }
 
+/// Look up the Authorization header value for a given registry URL from
+/// converted npmrc rules.
+///
+/// Returns `Some("Bearer <token>")` for `_authToken` entries,
+/// `Some("Basic <base64>")` for `_auth` / username+password entries.
+pub fn auth_header_for_registry(registry: &str, rules: &NpmrcRules) -> Option<String> {
+    // Normalize registry URL for matching.
+    let registry = registry.trim_end_matches('/');
+
+    for rule in &rules.host_rules {
+        let match_host = rule.match_host.trim_end_matches('/');
+        // Match by exact host, or by prefix for https://host/path rules.
+        if match_host.is_empty() || registry.starts_with(match_host) || match_host.starts_with(registry)
+        {
+            if let Some(ref token) = rule.token {
+                if rule.auth_type.as_deref() == Some("Basic") {
+                    return Some(format!("Basic {}", token));
+                }
+                return Some(format!("Bearer {}", token));
+            }
+            if let (Some(username), Some(password)) = (&rule.username, &rule.password) {
+                let combined = format!("{}:{}", username, password);
+                let b64 = base64::engine::general_purpose::STANDARD.encode(combined.as_bytes());
+                return Some(format!("Basic {}", b64));
+            }
+        }
+    }
+
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -732,5 +763,79 @@ mod tests {
         let result = set_npmrc("registry=http://localhost\n", false, &env).unwrap();
         assert!(result.rejected);
         assert!(result.secrets.is_empty());
+    }
+
+    // ── auth_header_for_registry ──────────────────────────────────────────────
+
+    #[test]
+    fn auth_header_bearer_from_auth_token() {
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: "https://registry.example.com".to_owned(),
+                token: Some("abc123".to_owned()),
+                auth_type: None,
+                username: None,
+                password: None,
+            }],
+            package_rules: vec![],
+        };
+        assert_eq!(
+            auth_header_for_registry("https://registry.example.com/", &rules),
+            Some("Bearer abc123".to_owned())
+        );
+    }
+
+    #[test]
+    fn auth_header_basic_from_auth() {
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: "https://registry.example.com".to_owned(),
+                token: Some("dXNlcjpwYXNz".to_owned()),
+                auth_type: Some("Basic".to_owned()),
+                username: None,
+                password: None,
+            }],
+            package_rules: vec![],
+        };
+        assert_eq!(
+            auth_header_for_registry("https://registry.example.com/", &rules),
+            Some("Basic dXNlcjpwYXNz".to_owned())
+        );
+    }
+
+    #[test]
+    fn auth_header_basic_from_username_password() {
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: "https://registry.example.com".to_owned(),
+                token: None,
+                auth_type: None,
+                username: Some("bot".to_owned()),
+                password: Some("secret".to_owned()),
+            }],
+            package_rules: vec![],
+        };
+        assert_eq!(
+            auth_header_for_registry("https://registry.example.com/", &rules),
+            Some("Basic Ym90OnNlY3JldA==".to_owned())
+        );
+    }
+
+    #[test]
+    fn auth_header_no_match_returns_none() {
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: "https://other.example.com".to_owned(),
+                token: Some("abc123".to_owned()),
+                auth_type: None,
+                username: None,
+                password: None,
+            }],
+            package_rules: vec![],
+        };
+        assert_eq!(
+            auth_header_for_registry("https://registry.example.com/", &rules),
+            None
+        );
     }
 }

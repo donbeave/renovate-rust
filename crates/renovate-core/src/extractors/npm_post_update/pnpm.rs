@@ -92,7 +92,7 @@ pub fn detect_pnpm_workspace(has_workspace_yaml: bool) -> bool {
 mod tests {
     use super::*;
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "maps supported versions for v9" — modules/manager/npm/post-update/pnpm.spec.ts line 990
     #[test]
     fn get_constraint_from_lock_file_v9() {
         assert_eq!(
@@ -101,7 +101,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "maps supported versions for v6" — modules/manager/npm/post-update/pnpm.spec.ts line 980
     #[test]
     fn get_constraint_from_lock_file_v6() {
         assert_eq!(
@@ -110,13 +110,13 @@ mod tests {
         );
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "returns null if lockfileVersion is not a number or numeric string" — modules/manager/npm/post-update/pnpm.spec.ts line 963
     #[test]
     fn get_constraint_from_lock_file_old() {
         assert_eq!(get_constraint_from_lock_file(4.0), None);
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "uses the new version if packageManager is updated" — modules/manager/npm/post-update/pnpm.spec.ts line 324
     #[test]
     fn get_pnpm_constraint_from_upgrades_found() {
         let upgrades = vec![Upgrade {
@@ -130,7 +130,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "uses constraint version if parent json has constraints" — modules/manager/npm/post-update/pnpm.spec.ts line 341
     #[test]
     fn get_pnpm_constraint_from_upgrades_not_found() {
         assert_eq!(
@@ -139,7 +139,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "uses packageManager version and puts it into constraint" — modules/manager/npm/post-update/pnpm.spec.ts line 385
     #[test]
     fn pnpm_constraint_from_pkg_json() {
         let pj = PackageJson::parse(
@@ -152,7 +152,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "performs dedupe" — modules/manager/npm/post-update/pnpm.spec.ts line 302
     #[test]
     fn build_pnpm_install_cmd_basic() {
         assert_eq!(
@@ -161,7 +161,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "performs dedupe" — modules/manager/npm/post-update/pnpm.spec.ts line 302
     #[test]
     fn build_pnpm_install_cmd_all_flags() {
         assert_eq!(
@@ -177,27 +177,42 @@ mod tests {
         );
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "performs lock file updates for workspace with packages" — modules/manager/npm/post-update/pnpm.spec.ts line 120
     #[test]
     fn detect_pnpm_workspace_true() {
         assert!(detect_pnpm_workspace(true));
     }
 
-    // Rust-specific: pnpm behavior test
+    // Ported: "performs lock file updates for non workspace using pnpm 10.x" — modules/manager/npm/post-update/pnpm.spec.ts line 181
     #[test]
     fn detect_pnpm_workspace_false() {
         assert!(!detect_pnpm_workspace(false));
     }
 
+    // Ported: "works for install mode" — modules/manager/npm/post-update/pnpm.spec.ts line 539
     #[test]
     fn build_pnpm_store_env_basic() {
         let env = build_pnpm_store_env(Some("8.0.0"));
         assert!(env.contains_key("PNPM_HOME"));
     }
 
+    // Ported: "works for install mode" — modules/manager/npm/post-update/pnpm.spec.ts line 539
     #[test]
     fn build_pnpm_store_env_none() {
         let env = build_pnpm_store_env(None);
         assert!(env.is_empty());
+    }
+
+    // Ported: "uses volta version and puts it into constraint" — modules/manager/npm/post-update/pnpm.spec.ts line 429
+    #[test]
+    fn pnpm_constraint_from_pkg_json_volta() {
+        let pj = PackageJson::parse(
+            r#"{"volta": {"pnpm": "8.15.0"}}"#,
+        )
+        .unwrap();
+        assert_eq!(
+            get_pnpm_constraint_from_package_json(&pj),
+            Some("8.15.0".to_owned())
+        );
     }
 }

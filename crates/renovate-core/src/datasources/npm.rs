@@ -400,11 +400,12 @@ pub async fn get_npm_releases(
     http: &HttpClient,
     package_name: &str,
     registry: &str,
+    auth: Option<&str>,
 ) -> Result<Option<crate::datasources::ReleaseResult>, NpmError> {
     let encoded = encode_package_name(package_name);
     let url = format!("{}/{}", registry.trim_end_matches('/'), encoded);
 
-    let resp = http.get_retrying(&url).await?;
+    let resp = http.get_retrying_with_auth(&url, auth).await?;
     if !resp.status().is_success() {
         let status = resp.status().as_u16();
         // 401/402/403/404 → return None (package not accessible/found)
@@ -735,6 +736,7 @@ mod tests {
         assert!(matches!(result, Err(NpmError::Parse(_))));
     }
 
+    // Ported: "should throw error for 429" — datasource/npm/index.spec.ts line 229
     // Ported: "should throw error for 5xx" — datasource/npm/index.spec.ts line 236
     // Ported: "should throw error for 408" — datasource/npm/index.spec.ts line 243
     // Ported: "should throw error for others" — datasource/npm/index.spec.ts line 250
@@ -986,7 +988,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri())
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1023,7 +1025,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri())
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1061,7 +1063,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri())
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1097,7 +1099,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri())
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1120,7 +1122,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri()).await.unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await.unwrap();
         assert!(result.is_none());
     }
 
@@ -1140,7 +1142,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri()).await.unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await.unwrap();
         assert!(result.is_none());
     }
 
@@ -1167,7 +1169,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "vue", &server.uri())
+        let result = get_npm_releases(&http, "vue", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1202,7 +1204,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "vue", &server.uri())
+        let result = get_npm_releases(&http, "vue", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1240,7 +1242,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "some-package", &server.uri())
+        let result = get_npm_releases(&http, "some-package", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1269,7 +1271,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "@neutrinojs/react", &server.uri())
+        let result = get_npm_releases(&http, "@neutrinojs/react", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1297,7 +1299,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "@neutrinojs/react", &server.uri())
+        let result = get_npm_releases(&http, "@neutrinojs/react", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1326,7 +1328,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "@neutrinojs/react", &server.uri())
+        let result = get_npm_releases(&http, "@neutrinojs/react", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1345,7 +1347,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1360,7 +1362,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1375,7 +1377,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1390,7 +1392,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1419,7 +1421,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri()).await;
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await;
         assert!(result.is_ok());
         let r = result.unwrap().unwrap();
         assert_eq!(r.releases.len(), 1);
@@ -1441,7 +1443,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &format!("{}/", server.uri())).await;
+        let result = get_npm_releases(&http, "foobar", &format!("{}/", server.uri()), None).await;
         assert!(result.is_ok());
         let r = result.unwrap().unwrap();
         assert_eq!(r.registry_url.as_deref(), Some(format!("{}/", server.uri()).as_str()));
@@ -1515,7 +1517,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "some-package", &server.uri())
+        let result = get_npm_releases(&http, "some-package", &server.uri(), None)
             .await
             .unwrap()
             .unwrap();
@@ -1594,7 +1596,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        let result = get_npm_releases(&http, "pkg", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1609,7 +1611,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "none", &server.uri()).await;
+        let result = get_npm_releases(&http, "none", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1630,7 +1632,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "@myco/test", &server.uri()).await;
+        let result = get_npm_releases(&http, "@myco/test", &server.uri(), None).await;
         assert!(result.unwrap().is_some());
     }
 
@@ -1650,7 +1652,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "@myco/test2", &server.uri()).await;
+        let result = get_npm_releases(&http, "@myco/test2", &server.uri(), None).await;
         assert!(result.unwrap().is_some());
     }
 
@@ -1665,7 +1667,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        let result = get_npm_releases(&http, "pkg", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1680,7 +1682,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        let result = get_npm_releases(&http, "pkg", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1695,7 +1697,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        let result = get_npm_releases(&http, "pkg", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
@@ -1710,14 +1712,175 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "pkg", &server.uri()).await;
+        let result = get_npm_releases(&http, "pkg", &server.uri(), None).await;
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "throw ExternalHostError when error happens on registry.npmjs.org" — lib/modules/datasource/npm/get.spec.ts line 249
-    #[test]
-    fn get_npm_releases_default_registry_invalid_json_returns_error() {
-        // Unit-test the branch logic: default registry parse errors become Err.
-        assert!(is_default_registry("https://registry.npmjs.org"));
+    // Ported: "should send an authorization header if provided" — lib/modules/datasource/npm/index.spec.ts line 268
+    #[tokio::test]
+    async fn get_npm_releases_sends_auth_header_from_npmrc() {
+        use crate::datasources::npm_npmrc::{NpmrcHostRule, NpmrcRules, auth_header_for_registry};
+
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "name": "@foobar/core",
+            "versions": { "1.0.0": {} },
+            "dist-tags": { "latest": "1.0.0" }
+        });
+        Mock::given(method("GET"))
+            .and(path("/@foobar%2Fcore"))
+            .and(wiremock::matchers::header("authorization", "Basic 1234"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: server.uri().trim_end_matches('/').to_owned(),
+                token: Some("1234".to_owned()),
+                auth_type: Some("Basic".to_owned()),
+                username: None,
+                password: None,
+            }],
+            package_rules: vec![],
+        };
+        let auth = auth_header_for_registry(&server.uri(), &rules);
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "@foobar/core", &server.uri(), auth.as_deref()).await;
+        assert!(result.unwrap().is_some());
+    }
+
+    // Ported: "should not send an authorization header if public package" — lib/modules/datasource/npm/index.spec.ts line 257
+    #[tokio::test]
+    async fn get_npm_releases_no_auth_header_for_public_package() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({
+            "name": "foobar",
+            "versions": { "1.0.0": {} },
+            "dist-tags": { "latest": "1.0.0" }
+        });
+        Mock::given(method("GET"))
+            .and(path("/foobar"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await;
+        assert!(result.unwrap().is_some());
+    }
+
+    // Ported: "has bearer auth" — lib/modules/datasource/npm/get.spec.ts line 43
+    #[tokio::test]
+    async fn get_npm_releases_bearer_auth_from_npmrc() {
+        use crate::datasources::npm_npmrc::{NpmrcHostRule, NpmrcRules, auth_header_for_registry};
+
+        let server = MockServer::start().await;
+        let body = serde_json::json!({ "name": "pkg", "versions": { "1.0.0": {} }, "dist-tags": { "latest": "1.0.0" } });
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .and(wiremock::matchers::header("authorization", "Bearer XXX"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: server.uri().trim_end_matches('/').to_owned(),
+                token: Some("XXX".to_owned()),
+                auth_type: None,
+                username: None,
+                password: None,
+            }],
+            package_rules: vec![],
+        };
+        let auth = auth_header_for_registry(&server.uri(), &rules);
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri(), auth.as_deref()).await;
+        assert!(result.unwrap().is_some());
+    }
+
+    // Ported: "no auth" — lib/modules/datasource/npm/get.spec.ts line 103
+    #[tokio::test]
+    async fn get_npm_releases_no_auth_when_host_mismatched() {
+        let server = MockServer::start().await;
+        let body = serde_json::json!({ "name": "pkg", "versions": { "1.0.0": {} }, "dist-tags": { "latest": "1.0.0" } });
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        // No auth rules for this host
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri(), None).await;
+        assert!(result.unwrap().is_some());
+    }
+
+    // Ported: "should use host rules by hostName if provided" — lib/modules/datasource/npm/index.spec.ts line 283
+    #[tokio::test]
+    async fn get_npm_releases_uses_host_rules_by_hostname() {
+        use crate::datasources::npm_npmrc::{NpmrcHostRule, NpmrcRules, auth_header_for_registry};
+
+        let server = MockServer::start().await;
+        let body = serde_json::json!({ "name": "pkg", "versions": { "1.0.0": {} }, "dist-tags": { "latest": "1.0.0" } });
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .and(wiremock::matchers::header("authorization", "Bearer tok"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let uri = server.uri();
+        let host = uri.trim_end_matches('/');
+        let hostname = host.strip_prefix("http://").or_else(|| host.strip_prefix("https://")).unwrap_or(host);
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: hostname.to_owned(),
+                token: Some("tok".to_owned()),
+                auth_type: None,
+                username: None,
+                password: None,
+            }],
+            package_rules: vec![],
+        };
+        let auth = auth_header_for_registry(&server.uri(), &rules);
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri(), auth.as_deref()).await;
+        assert!(result.unwrap().is_some());
+    }
+
+    // Ported: "should use host rules by baseUrl if provided" — lib/modules/datasource/npm/index.spec.ts line 304
+    #[tokio::test]
+    async fn get_npm_releases_uses_host_rules_by_base_url() {
+        use crate::datasources::npm_npmrc::{NpmrcHostRule, NpmrcRules, auth_header_for_registry};
+
+        let server = MockServer::start().await;
+        let body = serde_json::json!({ "name": "pkg", "versions": { "1.0.0": {} }, "dist-tags": { "latest": "1.0.0" } });
+        Mock::given(method("GET"))
+            .and(path("/pkg"))
+            .and(wiremock::matchers::header("authorization", "Basic dXNlcjpwYXNz"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: server.uri().trim_end_matches('/').to_owned(),
+                token: None,
+                auth_type: None,
+                username: Some("user".to_owned()),
+                password: Some("pass".to_owned()),
+            }],
+            package_rules: vec![],
+        };
+        let auth = auth_header_for_registry(&server.uri(), &rules);
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "pkg", &server.uri(), auth.as_deref()).await;
+        assert!(result.unwrap().is_some());
     }
 }

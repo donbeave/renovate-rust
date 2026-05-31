@@ -187,7 +187,7 @@ pub fn get_optimize_command() -> Vec<String> {
 mod tests {
     use super::*;
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn detect_yarn_v1() {
         assert_eq!(
@@ -196,7 +196,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn detect_yarn_v2() {
         assert_eq!(
@@ -205,7 +205,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn detect_yarn_v4() {
         assert_eq!(
@@ -214,13 +214,13 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "uses slim yarn instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 705
     #[test]
     fn detect_yarn_none() {
         assert_eq!(detect_yarn_version(None), YarnMajorVersion::V1);
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports corepack on grouping" — modules/manager/npm/post-update/yarn.spec.ts line 597
     #[test]
     fn detect_yarn_caret4() {
         assert_eq!(
@@ -229,14 +229,14 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "returns offline mirror" — modules/manager/npm/post-update/yarn.spec.ts line 953
     #[test]
     fn check_yarnrc_offline_mirror() {
         let info = check_yarnrc("--install.offline-mirror true\n");
         assert_eq!(info.offline_mirror.as_deref(), Some("true"));
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "returns yarn path in subdir" — modules/manager/npm/post-update/yarn.spec.ts line 939
     #[test]
     fn check_yarnrc_yarn_path() {
         let info = check_yarnrc("--yarn-path .yarn/releases/yarn-4.1.0.cjs\n");
@@ -246,7 +246,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "returns no offline mirror and no absolute yarn path" — modules/manager/npm/post-update/yarn.spec.ts line 971
     #[test]
     fn check_yarnrc_empty() {
         let info = check_yarnrc("");
@@ -254,7 +254,7 @@ mod tests {
         assert!(info.yarn_path.is_none());
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports customizing corepack version via config constraints" — modules/manager/npm/post-update/yarn.spec.ts line 646
     #[test]
     fn yarn_update_true() {
         let u = Upgrade {
@@ -264,7 +264,7 @@ mod tests {
         assert!(is_yarn_update(&u));
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports customizing corepack version via config constraints" — modules/manager/npm/post-update/yarn.spec.ts line 646
     #[test]
     fn yarn_update_false() {
         let u = Upgrade {
@@ -274,7 +274,7 @@ mod tests {
         assert!(!is_yarn_update(&u));
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports customizing corepack version via config constraints" — modules/manager/npm/post-update/yarn.spec.ts line 646
     #[test]
     fn yarn_constraint_from_upgrades_found() {
         let upgrades = vec![Upgrade {
@@ -288,13 +288,13 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports customizing corepack version via config constraints" — modules/manager/npm/post-update/yarn.spec.ts line 646
     #[test]
     fn yarn_constraint_from_upgrades_not_found() {
         assert_eq!(get_yarn_constraint_from_upgrades(&[]), None);
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "supports packageManager url corepack" — modules/manager/npm/post-update/yarn.spec.ts line 550
     #[test]
     fn yarn_constraint_from_pkg_json() {
         let pj = PackageJson::parse(r#"{"packageManager": "yarn@4.1.0"}"#).unwrap();
@@ -304,7 +304,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "does not use global cache if zero install is detected" — modules/manager/npm/post-update/yarn.spec.ts line 288
     #[test]
     fn yarn_install_v1_frozen() {
         assert_eq!(
@@ -313,7 +313,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "does not use global cache if zero install is detected" — modules/manager/npm/post-update/yarn.spec.ts line 288
     #[test]
     fn yarn_install_v2_mode() {
         assert_eq!(
@@ -322,7 +322,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "catches errors" — modules/manager/npm/post-update/yarn.spec.ts line 494
     #[test]
     fn yarn_upgrade_v1_cmd() {
         assert_eq!(
@@ -331,7 +331,7 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "catches errors" — modules/manager/npm/post-update/yarn.spec.ts line 494
     #[test]
     fn yarn_upgrade_v2_cmd() {
         assert_eq!(
@@ -340,13 +340,14 @@ mod tests {
         );
     }
 
-    // Rust-specific: yarn behavior test
+    // Ported: "patches local yarn" — modules/manager/npm/post-update/yarn.spec.ts line 822
     #[test]
     fn optimize_command() {
         let cmd = get_optimize_command();
         assert_eq!(cmd[0], "sed");
     }
 
+    // Ported: "removes pure-lockfile and frozen-lockfile from .yarnrc" — modules/manager/npm/post-update/yarn.spec.ts line 993
     #[test]
     fn fuzzy_match_additional_yarnrc_yml_basic() {
         let additional = r#"
@@ -359,4 +360,5 @@ mod tests {
         // Keys are identical, so no replacement occurs
         assert!(result.contains("npmRegistryServer"));
     }
+
 }

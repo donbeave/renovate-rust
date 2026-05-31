@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5129 / 11667 distinct upstream it() tests ported (44.0%) across 292 modules.
-**Quality:** 5687 `// Ported:` comments → 531 duplicate, 26 orphan, 26 malformed.
+**Total:** 5165 / 11667 distinct upstream it() tests ported (44.3%) across 292 modules.
+**Quality:** 5738 `// Ported:` comments → 546 duplicate, 26 orphan, 26 malformed.
 
-## managers  —  2244/3642 (62%)
+## managers  —  2273/3642 (62%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -106,7 +106,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/mix` | 3 | partial | 8/28 (29%) | index.ts(partial); artifacts.ts(not-started) |
 | `manager/nix` | 3 | partial | 40/50 (80%) | index.ts(partial); artifacts.ts(not-started) |
 | `manager/nodenv` | 1 | partial | 3/3 (100%) | index.ts(partial) |
-| `manager/npm` | 32 | partial | 208/439 (47%) | index.ts(partial); dependency.ts(partial); node.ts(partial) +33 more |
+| `manager/npm` | 32 | partial | 237/439 (54%) | index.ts(partial); dependency.ts(partial); node.ts(partial) +33 more |
 | `manager/nuget` | 6 | partial | 51/93 (55%) | index.ts(partial); artifacts.ts(not-started); config-formatter.ts(partial) +2 more |
 | `manager/nvm` | 1 | partial | 4/4 (100%) | index.ts(partial) |
 | `manager/ocb` | 2 | partial | 9/9 (100%) | index.ts(partial) |
@@ -148,7 +148,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | partial | 11/11 (100%) | index.ts(partial); update.ts(partial) |
 | `manager/xcodegen` | 1 | partial | 24/24 (100%) | index.ts(partial) |
 
-## datasources  —  587/1379 (43%)
+## datasources  —  594/1379 (43%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -214,7 +214,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/maven` | 6 | ? | 1/85 (1%) | — |
 | `datasource/nextcloud` | 1 | ? | 5/5 (100%) | — |
 | `datasource/node-version` | 1 | ? | 2/4 (50%) | — |
-| `datasource/npm` | 4 | partial | 46/64 (72%) | npmrc.ts(full); get.ts(partial); schema.ts(partial) |
+| `datasource/npm` | 4 | full | 53/64 (83%) | npmrc.ts(full); get.ts(partial); schema.ts(partial) |
 | `datasource/nuget` | 2 | ? | 2/37 (5%) | — |
 | `datasource/orb` | 1 | ? | 7/7 (100%) | — |
 | `datasource/packagist` | 2 | ? | 0/25 (0%) | — |

@@ -99,6 +99,23 @@ impl HttpClient {
         }
     }
 
+    /// Build a GET request with an explicit Authorization header override.
+    ///
+    /// The `auth` value (e.g. `"Bearer abc123"` or `"Basic dXNlcjpwYXNz"`)
+    /// is sent as the `Authorization` header.  When `auth` is `None` the
+    /// behaviour is identical to [`get`][Self::get].
+    pub fn get_with_auth(&self, url: &str, auth: Option<&str>) -> RequestBuilder {
+        let rb = self.inner.get(url);
+        let rb = match auth {
+            Some(a) => rb.header("Authorization", a),
+            None => match &self.token {
+                Some(t) => rb.bearer_auth(t),
+                None => rb,
+            },
+        };
+        rb
+    }
+
     /// Send a GET request with automatic retry on transient failures.
     ///
     /// Retries up to [`MAX_RETRIES`] times on 429/503/504.  Respects the
@@ -106,9 +123,23 @@ impl HttpClient {
     /// the header is absent.  Returns the final `Response` regardless of
     /// status — callers must check `resp.status().is_success()`.
     pub async fn get_retrying(&self, url: &str) -> Result<Response, HttpError> {
+        self.get_retrying_with_auth(url, None).await
+    }
+
+    /// Send a GET request with an explicit Authorization header and automatic
+    /// retry on transient failures.
+    pub async fn get_retrying_with_auth(
+        &self,
+        url: &str,
+        auth: Option<&str>,
+    ) -> Result<Response, HttpError> {
         let mut attempt: u32 = 0;
         loop {
-            let resp = self.get(url).send().await.map_err(HttpError::Request)?;
+            let resp = self
+                .get_with_auth(url, auth)
+                .send()
+                .await
+                .map_err(HttpError::Request)?;
             let status = resp.status();
 
             if !is_retryable(status) || attempt >= MAX_RETRIES {
