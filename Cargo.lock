@@ -1555,6 +1555,7 @@ dependencies = [
  "json5",
  "pep440_rs",
  "quick-xml",
+ "rand",
  "regex",
  "reqwest",
  "semver",

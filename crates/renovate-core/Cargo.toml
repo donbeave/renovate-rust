@@ -36,6 +36,7 @@ chrono-tz = "0.10.4"
 sha2 = "0.11.0"
 hcl-rs.workspace = true
 flate2.workspace = true
+rand.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
