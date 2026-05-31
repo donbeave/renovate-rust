@@ -5,13 +5,13 @@
 ## `lib/modules/versioning/maven/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/maven/index.spec.ts
-**Total tests:** 13 | **Ported:** 12 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 13 | **Ported:** 12 | **Actionable:** 0 | **Status:** done
 
 ### `modules/versioning/maven/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses same function module export and api object | 7 | pending | — | — | TypeScript module system test; verifies re-export identity (toBe same reference) which has no Rust equivalent |
+| uses same function module export and api object | 7 | not-applicable | — | — | TypeScript module system test; verifies re-export identity (toBe same reference) which has no Rust equivalent |
 | isValid("$version") === $expected | 11 | ported | crates/renovate-core/src/versioning/maven.rs | is_valid_matches_renovate_maven_index_spec | — |
 | isVersion("$version") === $expected | 32 | ported | crates/renovate-core/src/versioning/maven.rs | is_version_matches_renovate_maven_index_spec | — |
 | isStable("$version") === $expected | 60 | ported | crates/renovate-core/src/versioning/maven.rs | is_stable_index_matches_renovate_maven_index_spec | — |

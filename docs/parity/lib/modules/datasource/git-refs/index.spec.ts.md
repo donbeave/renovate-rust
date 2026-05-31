@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/git-refs/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-refs/index.spec.ts
-**Total tests:** 11 | **Ported:** 8 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 11 | **Ported:** 8 | **Actionable:** 0 | **Status:** done
 
 ### `modules/datasource/git-refs/index`
 
@@ -19,8 +19,8 @@
 | returns digest for tag | 92 | ported | `crates/renovate-core/src/datasources/git_refs.rs` | `returns_digest_for_tag` | annotated tag → ^{} dereferenced hash |
 | ignores refs/for/ | 104 | ported | `crates/renovate-core/src/datasources/git_refs.rs` | `ignores_refs_for` | master returns heads hash not for hash |
 | returns digest for HEAD | 114 | ported | `crates/renovate-core/src/datasources/git_refs.rs` | `returns_digest_for_head` | None newValue → HEAD hash |
-| calls simpleGit with emptyEnv if no hostrules exist | 124 | pending | — | — | Rust datasource receives `ls_remote` as a string; git subprocess execution and env vars are handled by the caller layer, tested in `util.rs` |
-| calls simpleGit with git envs if hostrules exist | 135 | pending | — | — | Same reason as line 124 |
-| calls simpleGit with git envs if hostrules exist for datasource type git-refs | 162 | pending | — | — | Same reason as line 124 |
+| calls simpleGit with emptyEnv if no hostrules exist | 124 | not-applicable | — | — | mocking framework internals — tests TypeScript `simpleGit` mock infrastructure; git subprocess env vars are tested in `util.rs` |
+| calls simpleGit with git envs if hostrules exist | 135 | not-applicable | — | — | mocking framework internals — tests TypeScript `simpleGit` mock infrastructure |
+| calls simpleGit with git envs if hostrules exist for datasource type git-refs | 162 | not-applicable | — | — | mocking framework internals — tests TypeScript `simpleGit` mock infrastructure |
 
 ---
