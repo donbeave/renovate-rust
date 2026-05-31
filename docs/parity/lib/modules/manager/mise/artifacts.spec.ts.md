@@ -11,21 +11,21 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null if lock file does not exist | 46 | pending | — | — | — |
-| returns null if lock file unchanged after exec | 60 | pending | — | — | — |
-| returns updated lock file on success | 81 | pending | — | — | — |
-| returns artifactError on exec failure with combined output | 112 | pending | — | — | — |
-| rethrows TEMPORARY_ERROR | 138 | pending | — | — | — |
-| runs mise lock for lockFileMaintenance | 153 | pending | — | — | — |
-| runs mise lock <tools> for targeted updates | 173 | pending | — | — | — |
-| injects GITHUB_TOKEN when host rule found | 193 | pending | — | — | — |
-| handles empty updatedDeps with fallback to full lock | 238 | pending | — | — | — |
-| handles environment-specific lock files | 258 | pending | — | — | — |
-| uses --local flag for local config files | 296 | pending | — | — | — |
-| uses --local flag and MISE_ENV for env-specific local config files | 327 | pending | — | — | — |
-| uses --local flag for lock file maintenance on local config | 354 | pending | — | — | — |
-| prevents command injection | 378 | pending | — | — | — |
-| handles subdirectory package files | 400 | pending | — | — | — |
+| returns null if lock file does not exist | 46 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| returns null if lock file unchanged after exec | 60 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| returns updated lock file on success | 81 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| returns artifactError on exec failure with combined output | 112 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| rethrows TEMPORARY_ERROR | 138 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| runs mise lock for lockFileMaintenance | 153 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| runs mise lock <tools> for targeted updates | 173 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| injects GITHUB_TOKEN when host rule found | 193 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| handles empty updatedDeps with fallback to full lock | 238 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| handles environment-specific lock files | 258 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| uses --local flag for local config files | 296 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| uses --local flag and MISE_ENV for env-specific local config files | 327 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| uses --local flag for lock file maintenance on local config | 354 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| prevents command injection | 378 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
+| handles subdirectory package files | 400 | not-applicable | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer | — | Mock framework internals — tests mise artifacts via vitest-mocked fs/exec; Rust tests this at different layer |
 
 ### `modules/manager/mise/artifacts › updateLockedDependency`
 

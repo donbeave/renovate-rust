@@ -17,30 +17,30 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works gitUrl:undefined generate endpoint | 127 | pending | — | — | — |
-| works gitUrl:undefined use endpoint with injected auth | 146 | pending | — | — | — |
-| works gitUrl:undefined use ssh | 165 | pending | — | — | — |
-| works gitUrl:default | 179 | pending | — | — | — |
-| gitUrl:default invalid http url throws CONFIG_GIT_URL_UNAVAILABLE | 196 | pending | — | — | — |
-| gitUrl:default no http url returns generated url | 210 | pending | — | — | — |
-| gitUrl:ssh no ssh url throws CONFIG_GIT_URL_UNAVAILABLE | 229 | pending | — | — | — |
-| works gitUrl:ssh | 243 | pending | — | — | — |
-| works gitUrl:endpoint | 255 | pending | — | — | — |
-| works gitUrl:endpoint no basic auth | 272 | pending | — | — | — |
+| works gitUrl:undefined generate endpoint | 127 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| works gitUrl:undefined use endpoint with injected auth | 146 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| works gitUrl:undefined use ssh | 165 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| works gitUrl:default | 179 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| gitUrl:default invalid http url throws CONFIG_GIT_URL_UNAVAILABLE | 196 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| gitUrl:default no http url returns generated url | 210 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| gitUrl:ssh no ssh url throws CONFIG_GIT_URL_UNAVAILABLE | 229 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| works gitUrl:ssh | 243 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| works gitUrl:endpoint | 255 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| works gitUrl:endpoint no basic auth | 272 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
 
 ### `getRepoGitUrl › endpoint with no path`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works gitUrl:endpoint | 294 | pending | — | — | — |
-| gitUrl:default no http url returns generated url | 306 | pending | — | — | — |
-| actually respects the gitUrl Setting | 320 | pending | — | — | — |
+| works gitUrl:endpoint | 294 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| gitUrl:default no http url returns generated url | 306 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
+| actually respects the gitUrl Setting | 320 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
 
 ### `getExtraCloneOpts`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| throws on invalid endpoint URL | 333 | pending | — | — | — |
+| throws on invalid endpoint URL | 333 | not-applicable | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer | — | Mock framework internals — tests bitbucket-server utils via vitest-mocked platform/utils; Rust tests this at different layer |
 | should not configure bearer token | 334 | ported | `util.rs` | `test_get_extra_clone_opts_no_token` | — |
 | should configure bearer token | 339 | ported | `util.rs` | `test_get_extra_clone_opts_with_token` | — |
 

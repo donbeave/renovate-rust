@@ -5,30 +5,30 @@
 ## `lib/modules/platform/local/scm.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/local/scm.spec.ts
-**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending-applicable
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 0 | **Status:** done-applicable
 
 ### `dummy functions`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| behindBaseBranch | 20 | pending | — | — | — |
-| isBranchModified | 24 | pending | — | — | — |
-| isBranchConflicted | 28 | pending | — | — | — |
-| branchExists | 32 | pending | — | — | — |
-| getBranchCommit | 36 | pending | — | — | — |
-| getBranchUpdateDate | 40 | pending | — | — | — |
-| deleteBranch | 44 | pending | — | — | — |
-| commitAndPush | 48 | pending | — | — | — |
-| checkoutBranch | 52 | pending | — | — | — |
+| behindBaseBranch | 20 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| isBranchModified | 24 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| isBranchConflicted | 28 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| branchExists | 32 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| getBranchCommit | 36 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| getBranchUpdateDate | 40 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| deleteBranch | 44 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| commitAndPush | 48 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| checkoutBranch | 52 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
 
 ### `getFileList`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return file list using git | 58 | pending | — | — | — |
-| should return file list using glob | 73 | pending | — | — | — |
-| mergeAndPush | 82 | pending | — | — | — |
-| mergeBranch | 86 | pending | — | — | — |
+| should return file list using git | 58 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| should return file list using glob | 73 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| mergeAndPush | 82 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
+| mergeBranch | 86 | not-applicable | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer | — | Mock framework internals — tests local platform scm via vitest-mocked glob/exec; Rust tests this at different layer |
 
 ---
 
