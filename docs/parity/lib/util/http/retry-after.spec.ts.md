@@ -5,7 +5,7 @@
 ## `lib/util/http/retry-after.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/retry-after.spec.ts
-**Total tests:** 13 | **Ported:** 10 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 13 | **Ported:** 10 | **Actionable:** 0 | **Status:** done
 
 ### `util/http/retry-after › wrapWithRetry`
 
@@ -21,7 +21,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for non-RequestError | 89 | pending | — | — | TypeScript error-class hierarchy test; getRetryAfter dispatches on RequestError instanceof check which has no Rust equivalent; covered by wrapWithRetry integration tests |
+| returns null for non-RequestError | 89 | not-applicable | — | — | TypeScript type-system test; getRetryAfter dispatches on RequestError instanceof check which has no Rust equivalent; covered by wrapWithRetry integration tests |
 | returns null for RequestError without response | 93 | not-applicable | — | — | TypeScript error class hierarchy test; TypeScript-specific RequestError dispatch has no Rust equivalent |
 | returns null for status other than 429 | 97 | not-applicable | — | — | TypeScript error class hierarchy test; TypeScript-specific RequestError dispatch has no Rust equivalent |
 | returns null missing "retry-after" header | 103 | ported | `http.rs` | `retry_after_missing_header_returns_none` | — |
