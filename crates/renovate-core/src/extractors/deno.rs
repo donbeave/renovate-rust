@@ -1005,6 +1005,48 @@ mod tests {
         assert!(get_locked_version(&dep, &lock).is_none());
     }
 
+    // Ported: "get exact lockedVersion" — deno/post.spec.ts line 139
+    #[test]
+    fn get_locked_version_jsr_exact() {
+        let lock = DenoLockFile {
+            locked_versions: {
+                let mut m = HashMap::new();
+                m.insert("jsr:@scope/name@1.2.3".to_owned(), "1.2.3".to_owned());
+                m
+            },
+            ..Default::default()
+        };
+        let dep = DenoDepPost {
+            datasource: Some("jsr".to_owned()),
+            dep_name: Some("@scope/name".to_owned()),
+            current_value: None,
+            current_raw_value: Some("jsr:@scope/name@1.2.3".to_owned()),
+            locked_version: None,
+        };
+        assert_eq!(get_locked_version(&dep, &lock), Some("1.2.3".to_owned()));
+    }
+
+    // Ported: "get latest lockedVersion" — deno/post.spec.ts line 155
+    #[test]
+    fn get_locked_version_jsr_wildcard() {
+        let lock = DenoLockFile {
+            locked_versions: {
+                let mut m = HashMap::new();
+                m.insert("jsr:@scope/name@*".to_owned(), "1.2.3".to_owned());
+                m
+            },
+            ..Default::default()
+        };
+        let dep = DenoDepPost {
+            datasource: Some("jsr".to_owned()),
+            dep_name: Some("@scope/name".to_owned()),
+            current_value: None,
+            current_raw_value: Some("jsr:@scope/name".to_owned()),
+            locked_version: None,
+        };
+        assert_eq!(get_locked_version(&dep, &lock), Some("1.2.3".to_owned()));
+    }
+
     // Rust-specific: deno behavior test
     #[test]
     fn normalize_workspace_distributes_lock_files() {

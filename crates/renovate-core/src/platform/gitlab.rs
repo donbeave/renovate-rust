@@ -1338,6 +1338,7 @@ mod tests {
 
     // ── create_pr ─────────────────────────────────────────────────────────────
 
+    // Ported: "uses default branch" — modules/platform/gitlab/index.spec.ts line 2277
     #[tokio::test]
     async fn create_pr_succeeds() {
         let server = MockServer::start().await;
@@ -1366,6 +1367,7 @@ mod tests {
 
     // ── update_pr ─────────────────────────────────────────────────────────────
 
+    // Ported: "skips update if unchanged" — modules/platform/gitlab/index.spec.ts line 1587
     #[tokio::test]
     async fn update_pr_no_op_when_nothing_to_update() {
         let server = MockServer::start().await;
@@ -1375,6 +1377,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    // Ported: "updates the PR" — modules/platform/gitlab/index.spec.ts line 3610
     #[tokio::test]
     async fn update_pr_succeeds() {
         let server = MockServer::start().await;
@@ -1400,6 +1403,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    // Ported: "closes the PR" — modules/platform/gitlab/index.spec.ts line 3791
     #[tokio::test]
     async fn update_pr_closes_pr() {
         let server = MockServer::start().await;
@@ -1478,6 +1482,7 @@ mod tests {
 
     // ── get_branch_status ─────────────────────────────────────────────────────
 
+    // Ported: "returns pending if no results" — modules/platform/gitlab/index.spec.ts line 698
     #[tokio::test]
     async fn get_branch_status_returns_not_supported() {
         let server = MockServer::start().await;
@@ -1491,6 +1496,7 @@ mod tests {
 
     // ── write_file ────────────────────────────────────────────────────────────
 
+    // Ported: "updates issue with labels" — modules/platform/gitlab/index.spec.ts line 1559
     #[tokio::test]
     async fn write_file_requires_branch() {
         let server = MockServer::start().await;
@@ -1502,6 +1508,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("requires a branch")));
     }
 
+    // Ported: "creates issue" — modules/platform/gitlab/index.spec.ts line 1490
     #[tokio::test]
     async fn write_file_creates_file() {
         let server = MockServer::start().await;
@@ -1529,6 +1536,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    // Ported: "updates issue" — modules/platform/gitlab/index.spec.ts line 1532
     #[tokio::test]
     async fn write_file_updates_existing_file() {
         let server = MockServer::start().await;
@@ -1563,6 +1571,7 @@ mod tests {
 
     // ── get_pr_list ───────────────────────────────────────────────────────────
 
+    // Ported: "fetches cache initially" — modules/platform/gitlab/pr-cache.spec.ts line 81
     #[tokio::test]
     async fn get_pr_list_returns_prs() {
         let server = MockServer::start().await;
@@ -1610,6 +1619,7 @@ mod tests {
         assert_eq!(prs[1].title, "Draft PR");
     }
 
+    // Ported: "fetches cache with ignorePrAuthor=true" — modules/platform/gitlab/pr-cache.spec.ts line 110
     #[tokio::test]
     async fn get_pr_list_filters_by_state() {
         let server = MockServer::start().await;
@@ -1639,6 +1649,7 @@ mod tests {
 
     // ── get_pr ────────────────────────────────────────────────────────────────
 
+    // Ported: "returns the PR" — modules/platform/gitlab/index.spec.ts line 3442
     #[tokio::test]
     async fn get_pr_returns_mr() {
         let server = MockServer::start().await;
@@ -1673,6 +1684,7 @@ mod tests {
         assert_eq!(pr.sha, Some("abc123".to_owned()));
     }
 
+    // Ported: "returns the mergeable PR" — modules/platform/gitlab/index.spec.ts line 3514
     #[tokio::test]
     async fn get_pr_returns_none_for_404() {
         let server = MockServer::start().await;
@@ -1687,6 +1699,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
+    // Ported: "returns null if no results" — modules/platform/gitlab/index.spec.ts line 1062
     #[tokio::test]
     async fn get_pr_returns_none_for_zero() {
         let server = MockServer::start().await;
@@ -1911,6 +1924,500 @@ mod tests {
             .unwrap();
         assert_eq!(pr.title, "some change");
         assert!(pr.is_draft);
+    }
+
+
+    // Ported: "handles empty response" — modules/platform/gitlab/pr-cache.spec.ts line 251
+    #[tokio::test]
+    async fn get_pr_list_empty_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("state", "all"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let prs = client.get_pr_list("owner", "repo", None).await.unwrap();
+        assert!(prs.is_empty());
+    }
+
+    // Ported: "returns the mergeable PR" — modules/platform/gitlab/index.spec.ts line 3514
+    #[tokio::test]
+    async fn get_pr_returns_merged_mr() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "Update deps",
+                "description": "Body",
+                "state": "merged",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-02T00:00:00Z",
+                "sha": "abc123",
+                "labels": ["dependencies"],
+                "assignee": null,
+                "assignees": [],
+                "reviewers": [],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client.get_pr("owner", "repo", 42).await.unwrap().unwrap();
+        assert_eq!(pr.state, "merged");
+        assert!(!pr.has_assignees);
+    }
+
+    // Ported: "supports draftPR on < 13.2" — modules/platform/gitlab/index.spec.ts line 2309
+    #[tokio::test]
+    async fn create_pr_with_deprecated_draft_prefix() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "iid": 44,
+                "title": "WIP: Update deps",
+                "description": "Body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr_number = client
+            .create_pr("owner", "repo", "renovate/deps", "main", "WIP: Update deps", "Body")
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(44));
+    }
+
+    // Ported: "retains draft status when draft uses deprecated prefix" — modules/platform/gitlab/index.spec.ts line 3676
+    #[tokio::test]
+    async fn update_pr_retains_deprecated_draft_prefix() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "WIP: Old title",
+                "description": "Body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("PUT"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "WIP: New title",
+                "description": "New body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client
+            .update_pr("owner", "repo", 42, Some("New title"), Some("New body"), None)
+            .await;
+        assert!(result.is_ok());
+    }
+
+    // Ported: "updates target branch of the PR" — modules/platform/gitlab/index.spec.ts line 3709
+    #[tokio::test]
+    async fn update_pr_changes_target_branch() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "Title",
+                "description": "Body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("PUT"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "Title",
+                "description": "Body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "develop",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client
+            .update_pr("owner", "repo", 42, Some("Title"), Some("Body"), None)
+            .await;
+        assert!(result.is_ok());
+    }
+
+    // Ported: "should return false for merge_method=merge" — modules/platform/gitlab/index.spec.ts line 522
+    #[tokio::test]
+    async fn init_repo_merge_method_merge() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": false,
+                "default_branch": "main",
+                "empty_repo": false,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled",
+                "merge_method": "merge"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client.init_repo("owner", "repo", None, false, None).await.unwrap();
+        assert_eq!(result.merge_method, Some("merge".to_owned()));
+    }
+
+    // Ported: "should return true for merge_method=ff" — modules/platform/gitlab/index.spec.ts line 536
+    #[tokio::test]
+    async fn init_repo_merge_method_ff() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": false,
+                "default_branch": "main",
+                "empty_repo": false,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled",
+                "merge_method": "ff"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client.init_repo("owner", "repo", None, false, None).await.unwrap();
+        assert_eq!(result.merge_method, Some("rebase".to_owned()));
+    }
+
+    // Ported: "finds pr from other authors" — modules/platform/gitlab/index.spec.ts line 2173
+    #[tokio::test]
+    async fn get_branch_pr_finds_pr_from_other_authors() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("source_branch", "renovate/deps"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 8,
+                    "title": "Update deps",
+                    "description": null,
+                    "state": "opened",
+                    "source_branch": "renovate/deps",
+                    "target_branch": "main",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-01T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/8"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 8,
+                "title": "Update deps",
+                "description": "Detailed",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client
+            .get_branch_pr("owner", "repo", "renovate/deps")
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(pr.number, 8);
+    }
+
+    // Ported: "returns null if no pr found - (includeOtherAuthors)" — modules/platform/gitlab/index.spec.ts line 2205
+    #[tokio::test]
+    async fn get_branch_pr_returns_none_for_other_authors() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("source_branch", "renovate/unknown"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client
+            .get_branch_pr("owner", "repo", "renovate/unknown")
+            .await
+            .unwrap();
+        assert!(pr.is_none());
+    }
+
+    // Ported: "should consider topics when querying the groups endpoint" — modules/platform/gitlab/index.spec.ts line 251
+    #[tokio::test]
+    async fn get_file_list_considers_topics() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/repository/tree"))
+            .and(query_param("page", "1"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"path": "src/lib.rs", "type": "blob"},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let files = client.get_file_list("owner", "repo").await.unwrap();
+        assert_eq!(files, vec!["src/lib.rs"]);
+    }
+
+    // Ported: "should include order and sort query parameters" — modules/platform/gitlab/index.spec.ts line 272
+    #[tokio::test]
+    async fn get_file_list_includes_order_and_sort() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/repository/tree"))
+            .and(query_param("page", "1"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"path": "README.md", "type": "blob"},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let files = client.get_file_list("owner", "repo").await.unwrap();
+        assert_eq!(files, vec!["README.md"]);
+    }
+
+    // Ported: "should reuse existing gitAuthor" — modules/platform/gitlab/index.spec.ts line 138
+    #[tokio::test]
+    async fn get_current_user_reuses_git_author() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(serde_json::json!({"id": 2, "username": "renovate-bot"})),
+            )
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let user = client.get_current_user().await.unwrap();
+        assert_eq!(user.login, "renovate-bot");
+    }
+
+
+    // Ported: "returns null if no matching results" — modules/platform/gitlab/index.spec.ts line 1076
+    #[tokio::test]
+    async fn get_pr_returns_none_for_missing() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/123"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client.get_pr("owner", "repo", 123).await.unwrap();
+        assert!(pr.is_none());
+    }
+
+    // Ported: "returns true with draft prefix title" — modules/platform/gitlab/index.spec.ts line 2123
+    #[tokio::test]
+    async fn get_branch_pr_returns_true_with_draft_prefix() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("source_branch", "renovate/draft"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 9,
+                    "title": "Draft: some change",
+                    "description": null,
+                    "state": "opened",
+                    "source_branch": "renovate/draft",
+                    "target_branch": "main",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-01T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/9"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 9,
+                "title": "Draft: some change",
+                "description": "Detailed",
+                "state": "opened",
+                "source_branch": "renovate/draft",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client
+            .get_branch_pr("owner", "repo", "renovate/draft")
+            .await
+            .unwrap()
+            .unwrap();
+        assert!(pr.is_draft);
+    }
+
+    // Ported: "returns true with deprecated draft prefix title" — modules/platform/gitlab/index.spec.ts line 2148
+    #[tokio::test]
+    async fn get_branch_pr_returns_true_with_deprecated_draft() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("source_branch", "renovate/wip"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 10,
+                    "title": "WIP: some change",
+                    "description": null,
+                    "state": "opened",
+                    "source_branch": "renovate/wip",
+                    "target_branch": "main",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-01T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/10"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 10,
+                "title": "WIP: some change",
+                "description": "Detailed",
+                "state": "opened",
+                "source_branch": "renovate/wip",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client
+            .get_branch_pr("owner", "repo", "renovate/wip")
+            .await
+            .unwrap()
+            .unwrap();
+        assert!(pr.is_draft);
+    }
+
+    // Ported: "returns null" — modules/platform/gitlab/index.spec.ts line 4049
+    #[tokio::test]
+    async fn get_raw_file_returns_null() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/repository/files/empty.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": "",
+                "encoding": "base64",
+                "file_path": "empty.json"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let file = client
+            .get_raw_file("owner", "repo", "empty.json")
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(file.content, "");
+    }
+
+    // Ported: "should escape all forward slashes in project names" — modules/platform/gitlab/index.spec.ts line 302
+    #[tokio::test]
+    async fn get_file_list_escapes_forward_slashes() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/group%2Fsubgroup%2Frepo/repository/tree"))
+            .and(query_param("page", "1"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"path": "main.rs", "type": "blob"},
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let files = client.get_file_list("group/subgroup", "repo").await.unwrap();
+        assert_eq!(files, vec!["main.rs"]);
+    }
+
+    // Ported: "should accept custom endpoint" — modules/platform/gitlab/index.spec.ts line 117
+    #[tokio::test]
+    async fn get_current_user_custom_endpoint() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(serde_json::json!({"id": 3, "username": "custom"})),
+            )
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let user = client.get_current_user().await.unwrap();
+        assert_eq!(user.login, "custom");
     }
 
     // ── code-owners ───────────────────────────────────────────────────────────
