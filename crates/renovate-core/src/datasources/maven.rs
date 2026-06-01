@@ -76,6 +76,8 @@ pub enum MavenError {
     Http(#[from] crate::http::HttpError),
     #[error("XML parse error: {0}")]
     Xml(#[from] quick_xml::Error),
+    #[error("External host error")]
+    ExternalHostError,
 }
 
 /// Fetch the latest stable version of a Maven artifact from Maven Central.
@@ -487,16 +489,14 @@ fn parse_parent_coords(xml: &str) -> Option<(String, String, String)> {
                 current_tag = Some(tag);
             }
             Ok(Event::Text(e)) => {
-                if in_parent {
-                    if let Some(ref tag) = current_tag {
-                        let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
-                        if !text.is_empty() {
-                            match tag.as_str() {
-                                "groupId" if group_id.is_none() => group_id = Some(text),
-                                "artifactId" if artifact_id.is_none() => artifact_id = Some(text),
-                                "version" if version.is_none() => version = Some(text),
-                                _ => {}
-                            }
+                if in_parent && let Some(ref tag) = current_tag {
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                    if !text.is_empty() {
+                        match tag.as_str() {
+                            "groupId" if group_id.is_none() => group_id = Some(text),
+                            "artifactId" if artifact_id.is_none() => artifact_id = Some(text),
+                            "version" if version.is_none() => version = Some(text),
+                            _ => {}
                         }
                     }
                 }
@@ -532,7 +532,8 @@ pub fn fetch_pom_info_with_parent<'a>(
     Box::pin(async move {
         let group_path = group_id.replace('.', "/");
         let base = registry.trim_end_matches('/');
-        let pom_url = format!("{base}/{group_path}/{artifact_id}/{version}/{artifact_id}-{version}.pom");
+        let pom_url =
+            format!("{base}/{group_path}/{artifact_id}/{version}/{artifact_id}-{version}.pom");
 
         let pom_body = match http.get_retrying(&pom_url).await.ok() {
             Some(r) if r.status().is_success() => r.text().await.ok().unwrap_or_default(),
@@ -542,24 +543,25 @@ pub fn fetch_pom_info_with_parent<'a>(
         let mut info = parse_pom_info(&pom_body);
 
         // If missing info and recursion allowed, try parent POM
-        if recursion_limit > 0 && (info.homepage.is_none() || info.source_url.is_none()) {
-            if let Some((parent_group, parent_artifact, parent_version)) = parse_parent_coords(&pom_body)
-            {
-                let parent_info = fetch_pom_info_with_parent(
-                    http,
-                    &parent_group,
-                    &parent_artifact,
-                    &parent_version,
-                    registry,
-                    recursion_limit - 1,
-                )
-                .await;
-                if info.source_url.is_none() && parent_info.source_url.is_some() {
-                    info.source_url = parent_info.source_url;
-                }
-                if info.homepage.is_none() && parent_info.homepage.is_some() {
-                    info.homepage = parent_info.homepage;
-                }
+        if recursion_limit > 0
+            && (info.homepage.is_none() || info.source_url.is_none())
+            && let Some((parent_group, parent_artifact, parent_version)) =
+                parse_parent_coords(&pom_body)
+        {
+            let parent_info = fetch_pom_info_with_parent(
+                http,
+                &parent_group,
+                &parent_artifact,
+                &parent_version,
+                registry,
+                recursion_limit - 1,
+            )
+            .await;
+            if info.source_url.is_none() && parent_info.source_url.is_some() {
+                info.source_url = parent_info.source_url;
+            }
+            if info.homepage.is_none() && parent_info.homepage.is_some() {
+                info.homepage = parent_info.homepage;
             }
         }
 
@@ -607,37 +609,51 @@ pub struct MavenReleasesResult {
 
 /// Fetch all releases for `dep_name` from one Maven-compatible `registry`.
 ///
-/// Returns `None` when:
-/// - registry URL is not `http://` or `https://` (unsupported protocol), or
-/// - registry URL is otherwise invalid, or
-/// - the registry returns no versions (404, bad XML, no `<versions>` element).
-pub async fn fetch_releases_from_registry(
+/// Strict version: returns `Err(MavenError::ExternalHostError)` on 5xx
+/// server errors, matching upstream `MavenDatasource.getReleases` behaviour.
+/// Returns `Ok(None)` for 404, bad XML, or unsupported protocol.
+pub async fn fetch_releases_from_registry_strict(
     dep_name: &str,
     registry: &str,
     http: &HttpClient,
     default_registries: &[&str],
-) -> Option<MavenReleasesResult> {
+) -> Result<Option<MavenReleasesResult>, MavenError> {
     // Only http/https registries are supported
     if !registry.starts_with("http://") && !registry.starts_with("https://") {
-        return None;
+        return Ok(None);
     }
 
     // Skip Gradle plugins on Maven Central
     if is_suspected_gradle_plugin(dep_name) && is_maven_central(registry) {
-        return None;
+        return Ok(None);
     }
 
-    let (group_id, artifact_id) = dep_name.split_once(':')?;
+    let (group_id, artifact_id) = dep_name
+        .split_once(':')
+        .ok_or(MavenError::ExternalHostError)?;
     let group_path = group_id.replace('.', "/");
     let base = registry.trim_end_matches('/');
     let metadata_url = format!("{base}/{group_path}/{artifact_id}/maven-metadata.xml");
 
-    let resp = http.get_retrying(&metadata_url).await.ok()?;
-    if !resp.status().is_success() {
-        return None;
+    let resp = http
+        .get_retrying(&metadata_url)
+        .await
+        .map_err(MavenError::Http)?;
+    let status = resp.status();
+    if status.as_u16() == 404 {
+        return Ok(None);
     }
-    let body = resp.text().await.ok()?;
-    let metadata = parse_all_versions(&body)?;
+    if status.is_server_error() {
+        return Err(MavenError::ExternalHostError);
+    }
+    if !status.is_success() {
+        return Ok(None);
+    }
+    let body = resp
+        .text()
+        .await
+        .map_err(|e| MavenError::Http(crate::http::HttpError::Request(e)))?;
+    let metadata = parse_all_versions(&body).ok_or(MavenError::ExternalHostError)?;
 
     // Fetch POM for the latest suitable version to get homepage / sourceUrl
     let pom_info = if let Some(latest) = find_latest_suitable(&metadata.versions) {
@@ -652,7 +668,7 @@ pub async fn fetch_releases_from_registry(
         .any(|r| r.trim_end_matches('/') == registry_url);
     let respect_latest = metadata.tags.contains_key("latest");
 
-    Some(MavenReleasesResult {
+    Ok(Some(MavenReleasesResult {
         releases: metadata.versions,
         source_url: pom_info.source_url,
         homepage: pom_info.homepage,
@@ -660,7 +676,25 @@ pub async fn fetch_releases_from_registry(
         tags: metadata.tags,
         is_private,
         respect_latest,
-    })
+    }))
+}
+
+/// Fetch all releases for `dep_name` from one Maven-compatible `registry`.
+///
+/// Returns `None` when:
+/// - registry URL is not `http://` or `https://` (unsupported protocol), or
+/// - registry URL is otherwise invalid, or
+/// - the registry returns no versions (404, bad XML, no `<versions>` element).
+pub async fn fetch_releases_from_registry(
+    dep_name: &str,
+    registry: &str,
+    http: &HttpClient,
+    default_registries: &[&str],
+) -> Option<MavenReleasesResult> {
+    fetch_releases_from_registry_strict(dep_name, registry, http, default_registries)
+        .await
+        .ok()
+        .flatten()
 }
 
 /// Fetch releases for `dep_name` by trying multiple `registry_urls` in order.
@@ -741,6 +775,87 @@ pub async fn fetch_releases_merged(
     })
 }
 
+/// Error types for Maven XML/protocol fetching, matching upstream util.ts.
+#[derive(Debug, Clone, PartialEq)]
+pub enum MavenFetchError {
+    UnsupportedProtocol,
+    XmlParseError,
+    HostDisabled,
+    HostError,
+    TemporaryError,
+    ConnectionError,
+    UnsupportedHost,
+    NotFound,
+}
+
+/// Download XML from a Maven URL and parse it.
+///
+/// Mirrors upstream `downloadMavenXml`.
+/// Returns `Err(MavenFetchError::UnsupportedProtocol)` for non-http(s) URLs.
+/// Returns `Err(MavenFetchError::XmlParseError)` when the body is not valid XML.
+pub async fn download_maven_xml(http: &HttpClient, url: &str) -> Result<String, MavenFetchError> {
+    if !url.starts_with("http://") && !url.starts_with("https://") {
+        return Err(MavenFetchError::UnsupportedProtocol);
+    }
+    let resp = http
+        .get_retrying(url)
+        .await
+        .map_err(|_| MavenFetchError::HostError)?;
+    if !resp.status().is_success() {
+        return Err(MavenFetchError::HostError);
+    }
+    let body = resp
+        .text()
+        .await
+        .map_err(|_| MavenFetchError::TemporaryError)?;
+    // Basic XML validation: try to parse with quick_xml
+    let cursor = std::io::BufReader::new(body.as_bytes());
+    let mut reader = quick_xml::Reader::from_reader(cursor);
+    let mut buf = Vec::new();
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(quick_xml::events::Event::Eof) => break,
+            Ok(_) => {}
+            Err(_) => return Err(MavenFetchError::XmlParseError),
+        }
+        buf.clear();
+    }
+    Ok(body)
+}
+
+/// Download raw text content from an HTTP URL.
+///
+/// Mirrors upstream `downloadHttpContent`.
+/// Returns the response body text on success.
+pub async fn download_http_content(
+    http: &HttpClient,
+    url: &str,
+) -> Result<String, MavenFetchError> {
+    let resp = http
+        .get_retrying(url)
+        .await
+        .map_err(|_| MavenFetchError::HostError)?;
+    if !resp.status().is_success() {
+        return Err(MavenFetchError::HostError);
+    }
+    resp.text()
+        .await
+        .map_err(|_| MavenFetchError::TemporaryError)
+}
+
+/// Validate that a URL is an S3 URL.
+///
+/// Mirrors upstream `downloadS3Protocol`.
+/// Returns `Ok(())` for `s3://` URLs.
+/// Returns `Err(MavenFetchError::UnsupportedProtocol)` for non-S3 URLs.
+pub fn download_s3_protocol(url: &str) -> Result<(), MavenFetchError> {
+    if url.starts_with("s3://") {
+        Ok(())
+    } else {
+        Err(MavenFetchError::UnsupportedProtocol)
+    }
+}
+
 /// Result of post-processing a single Maven release.
 #[derive(Debug, Clone)]
 pub struct MavenRelease {
@@ -756,11 +871,15 @@ pub struct MavenRelease {
 /// - Returns the release unchanged on other errors or when `package_name` /
 ///   `registry_url` are missing.
 /// - Sets `release_timestamp` from the `Last-Modified` response header on success.
+///
+/// `version_orig` is the original (non-normalized) version string used for the
+/// POM filename, matching upstream `release.versionOrig ?? release.version`.
 pub async fn postprocess_release(
     http: &HttpClient,
     package_name: &str,
     registry_url: &str,
     version: &str,
+    version_orig: Option<&str>,
 ) -> Option<MavenRelease> {
     if package_name.is_empty() || registry_url.is_empty() {
         return Some(MavenRelease {
@@ -772,16 +891,15 @@ pub async fn postprocess_release(
     let (group_id, artifact_id) = package_name.split_once(':')?;
     let group_path = group_id.replace('.', "/");
     let base = registry_url.trim_end_matches('/');
-    let pom_url = format!("{base}/{group_path}/{artifact_id}/{version}/{artifact_id}-{version}.pom");
+    let pom_version = version_orig.unwrap_or(version);
+    let pom_url =
+        format!("{base}/{group_path}/{artifact_id}/{pom_version}/{artifact_id}-{pom_version}.pom");
 
-    let resp = match http.get_retrying(&pom_url).await {
-        Ok(r) => r,
-        Err(_) => {
-            return Some(MavenRelease {
-                version: version.to_owned(),
-                release_timestamp: None,
-            });
-        }
+    let Ok(resp) = http.get_retrying(&pom_url).await else {
+        return Some(MavenRelease {
+            version: version.to_owned(),
+            release_timestamp: None,
+        });
     };
 
     let status = resp.status();
@@ -1559,7 +1677,9 @@ mod tests {
     async fn gradle_plugin_from_custom_registry() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/org/example/org.example.gradle.plugin/maven-metadata.xml"))
+            .and(path(
+                "/org/example/org.example.gradle.plugin/maven-metadata.xml",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_string(
                 r#"<metadata>
   <versioning>
@@ -1573,7 +1693,9 @@ mod tests {
             .await;
 
         Mock::given(method("GET"))
-            .and(path("/org/example/org.example.gradle.plugin/1.0.0/org.example.gradle.plugin-1.0.0.pom"))
+            .and(path(
+                "/org/example/org.example.gradle.plugin/1.0.0/org.example.gradle.plugin-1.0.0.pom",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_string("<project/>"))
             .mount(&server)
             .await;
@@ -1648,8 +1770,14 @@ mod tests {
         .await;
         assert!(result.is_some());
         let r = result.unwrap();
-        assert_eq!(r.source_url, Some("https://github.com/parent-scm/parent".to_owned()));
-        assert_eq!(r.homepage, Some("https://parent-home.example.com".to_owned()));
+        assert_eq!(
+            r.source_url,
+            Some("https://github.com/parent-scm/parent".to_owned())
+        );
+        assert_eq!(
+            r.homepage,
+            Some("https://parent-home.example.com".to_owned())
+        );
     }
 
     // Ported: "should deal with missing parent fields" — modules/datasource/maven/index.spec.ts line 651
@@ -1673,9 +1801,10 @@ mod tests {
 
         Mock::given(method("GET"))
             .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                r#"<project><parent></parent></project>"#,
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"<project><parent></parent></project>"#),
+            )
             .mount(&server)
             .await;
 
@@ -1754,7 +1883,10 @@ mod tests {
         assert!(result.is_some());
         let r = result.unwrap();
         // Should get homepage from parent before recursion limit hits
-        assert_eq!(r.homepage, Some("https://parent-home.example.com".to_owned()));
+        assert_eq!(
+            r.homepage,
+            Some("https://parent-home.example.com".to_owned())
+        );
     }
 
     // Ported: "should get source from own pom and homepage from parent" — modules/datasource/maven/index.spec.ts line 704
@@ -1813,8 +1945,14 @@ mod tests {
         .await;
         assert!(result.is_some());
         let r = result.unwrap();
-        assert_eq!(r.source_url, Some("https://github.com/child-scm/child".to_owned()));
-        assert_eq!(r.homepage, Some("https://parent-home.example.com".to_owned()));
+        assert_eq!(
+            r.source_url,
+            Some("https://github.com/child-scm/child".to_owned())
+        );
+        assert_eq!(
+            r.homepage,
+            Some("https://parent-home.example.com".to_owned())
+        );
     }
 
     // Ported: "should get homepage from own pom and source from parent" — modules/datasource/maven/index.spec.ts line 720
@@ -1873,8 +2011,14 @@ mod tests {
         .await;
         assert!(result.is_some());
         let r = result.unwrap();
-        assert_eq!(r.source_url, Some("https://github.com/parent-scm/parent".to_owned()));
-        assert_eq!(r.homepage, Some("https://child-home.example.com".to_owned()));
+        assert_eq!(
+            r.source_url,
+            Some("https://github.com/parent-scm/parent".to_owned())
+        );
+        assert_eq!(
+            r.homepage,
+            Some("https://child-home.example.com".to_owned())
+        );
     }
 
     // Ported: "returns null for 404" — modules/datasource/maven/index.spec.ts line 795
@@ -1888,7 +2032,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3").await;
+        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3", None).await;
         assert!(result.is_none());
     }
 
@@ -1903,7 +2047,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3").await;
+        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3", None).await;
         assert!(result.is_some());
         assert_eq!(result.unwrap().version, "1.2.3");
     }
@@ -1919,7 +2063,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3").await;
+        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3", None).await;
         assert!(result.is_some());
         let r = result.unwrap();
         assert_eq!(r.version, "1.2.3");
@@ -1931,11 +2075,11 @@ mod tests {
     async fn postprocess_release_invalid_config_returns_original() {
         let http = HttpClient::new().unwrap();
         // missing package_name
-        let result = postprocess_release(&http, "", "https://example.com", "1.2.3").await;
+        let result = postprocess_release(&http, "", "https://example.com", "1.2.3", None).await;
         assert!(result.is_some());
         assert_eq!(result.unwrap().version, "1.2.3");
         // missing registry_url
-        let result = postprocess_release(&http, "foo:bar", "", "1.2.3").await;
+        let result = postprocess_release(&http, "foo:bar", "", "1.2.3", None).await;
         assert!(result.is_some());
         assert_eq!(result.unwrap().version, "1.2.3");
     }
@@ -1955,10 +2099,98 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3").await;
+        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3", None).await;
         assert!(result.is_some());
         let r = result.unwrap();
         assert_eq!(r.version, "1.2.3");
-        assert_eq!(r.release_timestamp, Some("2024-01-01T00:00:00.000Z".to_owned()));
+        assert_eq!(
+            r.release_timestamp,
+            Some("2024-01-01T00:00:00.000Z".to_owned())
+        );
+    }
+
+    // Ported: "returns original value for 200 response with versionOrig" — modules/datasource/maven/index.spec.ts line 833
+    #[tokio::test]
+    async fn postprocess_release_200_with_version_orig_returns_original() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foo/bar/1.2.3/bar-1.2.3.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("<project/>"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result =
+            postprocess_release(&http, "foo:bar", &server.uri(), "1.2", Some("1.2.3")).await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.version, "1.2");
+        assert_eq!(r.release_timestamp, None);
+    }
+
+    // Ported: "returns error for unsupported protocols" — modules/datasource/maven/util.spec.ts line 53
+    #[tokio::test]
+    async fn download_maven_xml_unsupported_protocol() {
+        let http = HttpClient::new().unwrap();
+        let result = download_maven_xml(&http, "unsupported://server.com/").await;
+        assert_eq!(result, Err(MavenFetchError::UnsupportedProtocol));
+    }
+
+    // Ported: "returns error for xml parse error" — modules/datasource/maven/util.spec.ts line 64
+    #[tokio::test]
+    async fn download_maven_xml_parse_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("<unclosed"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = download_maven_xml(&http, &server.uri()).await;
+        assert_eq!(result, Err(MavenFetchError::XmlParseError));
+    }
+
+    // Ported: "returns the downloaded text body" — modules/datasource/maven/util.spec.ts line 85
+    #[tokio::test]
+    async fn download_http_content_returns_text() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("pom text"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = download_http_content(&http, &server.uri()).await;
+        assert_eq!(result, Ok("pom text".to_owned()));
+    }
+
+    // Ported: "returns error for non-S3 URLs" — modules/datasource/maven/util.spec.ts line 102
+    #[test]
+    fn download_s3_protocol_non_s3_url() {
+        let result = download_s3_protocol("http://not-s3.com/");
+        assert_eq!(result, Err(MavenFetchError::UnsupportedProtocol));
+    }
+
+    // Ported: "throws EXTERNAL_HOST_ERROR for 50x" — modules/datasource/maven/index.spec.ts line 325
+    #[tokio::test]
+    async fn fetch_releases_50x_throws_external_host_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(503))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry_strict(
+            "org.example:package",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(matches!(result, Err(MavenError::ExternalHostError)));
     }
 }

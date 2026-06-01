@@ -8700,7 +8700,7 @@ express@^4.0.0:
         assert_eq!(files[2].skip_installs, Some(false));
     }
 
-    // Ported: "warns for invalid pnpm workspace yaml files" — npm/extract/index.spec.ts line 1277
+    // Ported: "runs" — npm/extract/index.spec.ts line 1227
     #[test]
     fn post_extract_empty_files() {
         let mut files: Vec<NpmPackageFile> = vec![];

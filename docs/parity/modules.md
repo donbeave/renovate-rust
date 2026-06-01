@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5748 / 11670 distinct upstream it() tests ported (49.3%) across 292 modules.
-**Quality:** 6466 `// Ported:` comments → 718 duplicate, 0 orphan, 0 malformed.
+**Total:** 5755 / 11670 distinct upstream it() tests ported (49.3%) across 292 modules.
+**Quality:** 6468 `// Ported:` comments → 713 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2535/3642 (70%)
+## managers  —  2536/3642 (70%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -106,7 +106,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/mix` | 3 | ? | 8/28 (29%) | — |
 | `manager/nix` | 3 | ? | 40/50 (80%) | — |
 | `manager/nodenv` | 1 | ? | 3/3 (100%) | — |
-| `manager/npm` | 32 | full | 352/439 (80%) | M2 complete |
+| `manager/npm` | 32 | full | 353/439 (80%) | M2 complete |
 | `manager/nuget` | 6 | full | 80/93 (86%) | Extractor complete; artifact gaps are lockfile restore via external dotnet invocation. |
 | `manager/nvm` | 1 | ? | 4/4 (100%) | — |
 | `manager/ocb` | 2 | ? | 9/9 (100%) | — |
@@ -148,7 +148,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | ? | 11/11 (100%) | — |
 | `manager/xcodegen` | 1 | ? | 24/24 (100%) | — |
 
-## datasources  —  639/1379 (46%)
+## datasources  —  645/1379 (47%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -211,7 +211,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/jenkins-plugins` | 1 | full | 5/5 (100%) |  |
 | `datasource/jsr` | 2 | full | 15/15 (100%) |  |
 | `datasource/kubernetes-api` | 1 | full | 3/3 (100%) |  |
-| `datasource/maven` | 6 | partial | 34/85 (40%) | Core fetching, multi-registry fallback/merging, parent POM resolution, postprocessRelease, Gradle plugin detection implemented. Missing: caching, S3 support, auth/redirect handling. |
+| `datasource/maven` | 6 | partial | 40/85 (47%) | Core fetching, multi-registry fallback/merging, parent POM resolution, postprocessRelease, Gradle plugin detection implemented. Missing: caching, S3 support, auth/redirect handling. |
 | `datasource/nextcloud` | 1 | full | 5/5 (100%) |  |
 | `datasource/node-version` | 1 | ? | 2/4 (50%) | — |
 | `datasource/npm` | 4 | full | 52/64 (81%) | M2 complete |
