@@ -11,7 +11,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
+use crate::platform::{
+    CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult,
+};
 
 #[derive(Debug, Clone)]
 pub struct BitbucketServerClient {
@@ -264,11 +266,7 @@ pub async fn get_pr(
 }
 
 impl PlatformClient for BitbucketServerClient {
-    async fn init_repo(
-        &self,
-        _owner: &str,
-        _repo: &str,
-    ) -> Result<RepoInitResult, PlatformError> {
+    async fn init_repo(&self, _owner: &str, _repo: &str) -> Result<RepoInitResult, PlatformError> {
         Ok(RepoInitResult {
             default_branch: "main".to_owned(),
             is_fork: false,

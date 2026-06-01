@@ -11,7 +11,9 @@
 use std::path::{Path, PathBuf};
 
 use crate::platform::scm::{CommitConfig, Scm, ScmResult};
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
+use crate::platform::{
+    CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult,
+};
 
 /// Platform client that reads from the local filesystem.
 #[derive(Debug, Clone)]
@@ -179,11 +181,7 @@ fn walk_dir_inner(base: &Path, current: &Path, files: &mut Vec<String>) {
 }
 
 impl PlatformClient for LocalClient {
-    async fn init_repo(
-        &self,
-        _owner: &str,
-        _repo: &str,
-    ) -> Result<RepoInitResult, PlatformError> {
+    async fn init_repo(&self, _owner: &str, _repo: &str) -> Result<RepoInitResult, PlatformError> {
         // Try to read the default branch from git config.
         let default_branch = std::process::Command::new("git")
             .args(["config", "--get", "init.defaultBranch"])
@@ -307,7 +305,9 @@ impl PlatformClient for LocalClient {
         _repo: &str,
         _state: Option<&str>,
     ) -> Result<Vec<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported("Local platform PR list".to_owned()))
+        Err(PlatformError::NotSupported(
+            "Local platform PR list".to_owned(),
+        ))
     }
 
     async fn get_pr(
@@ -316,7 +316,9 @@ impl PlatformClient for LocalClient {
         _repo: &str,
         _pr_number: i64,
     ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported("Local platform get PR".to_owned()))
+        Err(PlatformError::NotSupported(
+            "Local platform get PR".to_owned(),
+        ))
     }
 
     async fn get_branch_pr(
@@ -325,7 +327,9 @@ impl PlatformClient for LocalClient {
         _repo: &str,
         _branch: &str,
     ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported("Local platform get branch PR".to_owned()))
+        Err(PlatformError::NotSupported(
+            "Local platform get branch PR".to_owned(),
+        ))
     }
 }
 

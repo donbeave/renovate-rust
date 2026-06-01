@@ -4104,7 +4104,10 @@ provider "registry.opentofu.org/carlpett/sops" {
         .await;
         let results = result.unwrap().unwrap();
         assert!(results[0].file.is_some());
-        assert_eq!(results[0].file.as_ref().unwrap().path, "test/.terraform.lock.hcl");
+        assert_eq!(
+            results[0].file.as_ref().unwrap().path,
+            "test/.terraform.lock.hcl"
+        );
     }
 
     // Ported: "update multiple dependencies which are not ordered" — terraform/lockfile/index.spec.ts line 484

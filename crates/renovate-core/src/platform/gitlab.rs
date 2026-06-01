@@ -21,7 +21,9 @@ use base64::Engine as _;
 use serde::Deserialize;
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
+use crate::platform::{
+    CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult,
+};
 
 /// Default GitLab API base URL.
 pub const GITLAB_API_BASE: &str = "https://gitlab.com/api/v4";
@@ -161,11 +163,7 @@ struct GitlabTreeEntry {
 // ── PlatformClient impl ───────────────────────────────────────────────────────
 
 impl PlatformClient for GitlabClient {
-    async fn init_repo(
-        &self,
-        _owner: &str,
-        _repo: &str,
-    ) -> Result<RepoInitResult, PlatformError> {
+    async fn init_repo(&self, _owner: &str, _repo: &str) -> Result<RepoInitResult, PlatformError> {
         // TODO: Implement GitLab-specific init_repo (fetch project metadata via REST API).
         Ok(RepoInitResult {
             default_branch: "main".to_owned(),
@@ -385,7 +383,9 @@ impl PlatformClient for GitlabClient {
         _repo: &str,
         _branch: &str,
     ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported("GitLab get branch PR".to_owned()))
+        Err(PlatformError::NotSupported(
+            "GitLab get branch PR".to_owned(),
+        ))
     }
 }
 

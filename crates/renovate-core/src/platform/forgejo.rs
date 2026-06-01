@@ -14,7 +14,9 @@ use crate::http::{HttpClient, HttpError};
 use crate::platform::gitea_forgejo_utils::{
     ContentsListResponse, ContentsResponse, get_merge_method,
 };
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
+use crate::platform::{
+    CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult,
+};
 
 pub const FORGEJO_API_VERSION: &str = "api/v1";
 
@@ -250,11 +252,7 @@ pub async fn get_pr(
 }
 
 impl PlatformClient for ForgejoClient {
-    async fn init_repo(
-        &self,
-        _owner: &str,
-        _repo: &str,
-    ) -> Result<RepoInitResult, PlatformError> {
+    async fn init_repo(&self, _owner: &str, _repo: &str) -> Result<RepoInitResult, PlatformError> {
         Ok(RepoInitResult {
             default_branch: "main".to_owned(),
             is_fork: false,
@@ -445,7 +443,9 @@ impl PlatformClient for ForgejoClient {
         _repo: &str,
         _branch: &str,
     ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported("Forgejo get branch PR".to_owned()))
+        Err(PlatformError::NotSupported(
+            "Forgejo get branch PR".to_owned(),
+        ))
     }
 }
 

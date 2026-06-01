@@ -12,7 +12,9 @@ use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
+use crate::platform::{
+    CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult,
+};
 
 #[derive(Debug, Clone)]
 pub struct AzureClient {
@@ -335,11 +337,7 @@ pub async fn get_pr(
 }
 
 impl PlatformClient for AzureClient {
-    async fn init_repo(
-        &self,
-        _owner: &str,
-        _repo: &str,
-    ) -> Result<RepoInitResult, PlatformError> {
+    async fn init_repo(&self, _owner: &str, _repo: &str) -> Result<RepoInitResult, PlatformError> {
         Ok(RepoInitResult {
             default_branch: "main".to_owned(),
             is_fork: false,
@@ -572,7 +570,9 @@ impl PlatformClient for AzureClient {
         _repo: &str,
         _branch: &str,
     ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported("Azure get branch PR".to_owned()))
+        Err(PlatformError::NotSupported(
+            "Azure get branch PR".to_owned(),
+        ))
     }
 }
 

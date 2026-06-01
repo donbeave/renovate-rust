@@ -1976,7 +1976,10 @@ mod tests {
         let body = serde_json::json!({ "name": "@myco/test" });
         Mock::given(method("GET"))
             .and(path("/@myco%2Ftest"))
-            .and(wiremock::matchers::header("authorization", "Basic dGVzdDp0ZXN0"))
+            .and(wiremock::matchers::header(
+                "authorization",
+                "Basic dGVzdDp0ZXN0",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(body))
             .mount(&server)
             .await;

@@ -1129,10 +1129,12 @@ mod tests {
     #[test]
     fn build_pr_body_rewrites_github_links() {
         let deps = vec![];
-        let mut cfg = renovate_core::repo_config::RepoConfig::default();
-        cfg.pr_header = Some(
-            "See https://github.com/owner/repo/issues/42 for details.".to_owned(),
-        );
+        let cfg = renovate_core::repo_config::RepoConfig {
+            pr_header: Some(
+                "See https://github.com/owner/repo/issues/42 for details.".to_owned(),
+            ),
+            ..Default::default()
+        };
         let body = build_pr_body(&deps, &cfg);
         // The bare URL should be wrapped in a markdown link with redirect.github.com.
         assert!(

@@ -748,11 +748,7 @@ struct SetStatusRequest {
 }
 
 impl PlatformClient for GithubClient {
-    async fn init_repo(
-        &self,
-        owner: &str,
-        repo: &str,
-    ) -> Result<RepoInitResult, PlatformError> {
+    async fn init_repo(&self, owner: &str, repo: &str) -> Result<RepoInitResult, PlatformError> {
         self.init_repo(owner, repo).await
     }
 
@@ -941,7 +937,8 @@ impl PlatformClient for GithubClient {
 
             if any_failure {
                 combined.state = CombinedBranchState::Failure;
-            } else if (combined.state == CombinedBranchState::Success || combined.statuses.is_empty())
+            } else if (combined.state == CombinedBranchState::Success
+                || combined.statuses.is_empty())
                 && all_good
             {
                 combined.state = CombinedBranchState::Success;
@@ -1008,12 +1005,7 @@ impl GithubClient {
     /// Returns an empty vector if the API is unavailable (403, 404) or if no
     /// check-runs exist. Mirrors the check-runs fetch in upstream
     /// `getBranchStatus`.
-    async fn fetch_check_runs(
-        &self,
-        owner: &str,
-        repo: &str,
-        sha: &str,
-    ) -> Vec<CheckRun> {
+    async fn fetch_check_runs(&self, owner: &str, repo: &str, sha: &str) -> Vec<CheckRun> {
         let url = format!(
             "{}/repos/{}/{}/commits/{}/check-runs?per_page=100",
             self.api_base, owner, repo, sha
@@ -7164,9 +7156,7 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.init_repo("owner", "repo").await.unwrap_err();
-        assert!(
-            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED")
-        );
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED"));
     }
 
     // Ported: "should throw error if renamed" — modules/platform/github/index.spec.ts line 1101
@@ -7200,9 +7190,7 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.init_repo("owner", "repo").await.unwrap_err();
-        assert!(
-            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_RENAMED")
-        );
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_RENAMED"));
     }
 
     // Ported: "throws not-found" — modules/platform/github/index.spec.ts line 1060
@@ -7219,9 +7207,7 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.init_repo("owner", "repo").await.unwrap_err();
-        assert!(
-            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND")
-        );
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND"));
     }
 
     // Tests init_repo throwing when repository is empty
@@ -7252,9 +7238,7 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.init_repo("owner", "repo").await.unwrap_err();
-        assert!(
-            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY")
-        );
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
     }
 
     // Tests init_repo throwing when repository access is blocked
@@ -7290,8 +7274,6 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.init_repo("owner", "repo").await.unwrap_err();
-        assert!(
-            matches!(err, PlatformError::Unexpected(msg) if msg == "PLATFORM_UNKNOWN_ERROR")
-        );
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "PLATFORM_UNKNOWN_ERROR"));
     }
 }
