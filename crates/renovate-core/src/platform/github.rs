@@ -221,10 +221,7 @@ impl GithubClient {
             return Ok(());
         }
 
-        let resp = match self.http.head_json(&self.api_base).await {
-            Ok(r) => r,
-            Err(_) => return Ok(()),
-        };
+        let Ok(resp) = self.http.head_json(&self.api_base).await else { return Ok(()) };
 
         let ghe_version = resp
             .headers()
@@ -896,6 +893,7 @@ impl GithubClient {
     /// Update an existing issue.
     ///
     /// Mirrors `updateIssue` from `lib/modules/platform/github/index.ts`.
+    #[allow(clippy::too_many_arguments)]
     pub async fn update_issue(
         &self,
         owner: &str,
@@ -1354,6 +1352,7 @@ impl GithubClient {
     /// Skips the API call when the existing status already matches.
     ///
     /// Mirrors `setBranchStatus` from `lib/modules/platform/github/index.ts`.
+    #[allow(clippy::too_many_arguments)]
     pub async fn set_branch_status(
         &self,
         owner: &str,
@@ -1521,6 +1520,7 @@ impl GithubClient {
     /// Create a pull request with extended options.
     ///
     /// Mirrors the extended `createPr` from `lib/modules/platform/github/index.ts`.
+    #[allow(clippy::too_many_arguments)]
     pub async fn create_pr_with_options(
         &self,
         owner: &str,
@@ -1741,6 +1741,7 @@ impl GithubClient {
     /// exists, no new issue is created and others are closed.
     ///
     /// Mirrors `ensureIssue` from `lib/modules/platform/github/index.ts`.
+    #[allow(clippy::too_many_arguments)]
     pub async fn ensure_issue(
         &self,
         owner: &str,
@@ -3422,11 +3423,10 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let prs = client.list_prs("owner", "repo", None).await.unwrap();
-        let matching: Vec<_> = prs
+        assert_eq!(prs
             .into_iter()
             .filter(|p| p.title == "Update deps")
-            .collect();
-        assert_eq!(matching.len(), 1);
+            .count(), 1);
     }
 
     // Ported: "caches pr list" — modules/platform/github/index.spec.ts line 3687

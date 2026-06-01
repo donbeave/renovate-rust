@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5707 / 11670 distinct upstream it() tests ported (48.9%) across 292 modules.
-**Quality:** 6417 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
+**Total:** 5722 / 11670 distinct upstream it() tests ported (49.0%) across 292 modules.
+**Quality:** 6432 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2530/3642 (69%)
+## managers  —  2535/3642 (70%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -135,9 +135,9 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/sveltos` | 1 | ? | 14/14 (100%) | — |
 | `manager/swift` | 4 | ? | 28/59 (47%) | — |
 | `manager/tekton` | 1 | ? | 5/5 (100%) | — |
-| `manager/terraform` | 13 | full | 71/88 (81%) | Lockfile maintenance (updateAllLocks) implemented. |
+| `manager/terraform` | 13 | full | 74/88 (84%) | Lockfile maintenance (updateAllLocks) implemented. |
 | `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
-| `manager/terragrunt` | 4 | full | 15/18 (83%) | Artifact delegation to terraform implemented. One apparent gap is a duplicate upstream test description. |
+| `manager/terragrunt` | 4 | full | 17/18 (94%) | Artifact delegation to terraform implemented. One apparent gap is a duplicate upstream test description. |
 | `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |
 | `manager/tflint-plugin` | 1 | ? | 6/6 (100%) | — |
 | `manager/travis` | 1 | ? | 8/8 (100%) | — |
@@ -148,7 +148,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | ? | 11/11 (100%) | — |
 | `manager/xcodegen` | 1 | ? | 24/24 (100%) | — |
 
-## datasources  —  606/1379 (44%)
+## datasources  —  613/1379 (44%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -177,7 +177,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/deb` | 5 | ? | 8/26 (31%) | — |
 | `datasource/deno` | 1 | ? | 6/6 (100%) | — |
 | `datasource/devbox` | 1 | ? | 9/9 (100%) | — |
-| `datasource/docker` | 4 | ? | 4/119 (3%) | — |
+| `datasource/docker` | 4 | partial | 4/119 (3%) | Basic Docker Hub/ECR/Google implementations exist. Missing: registry auth, manifest parsing, tag filtering, pagination. |
 | `datasource/dotnet-version` | 1 | ? | 3/9 (33%) | — |
 | `datasource/elm-package` | 1 | ? | 4/10 (40%) | — |
 | `datasource/endoflife-date` | 1 | ? | 7/7 (100%) | — |
@@ -211,7 +211,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/jenkins-plugins` | 1 | ? | 5/5 (100%) | — |
 | `datasource/jsr` | 2 | ? | 15/15 (100%) | — |
 | `datasource/kubernetes-api` | 1 | ? | 3/3 (100%) | — |
-| `datasource/maven` | 6 | ? | 1/85 (1%) | — |
+| `datasource/maven` | 6 | partial | 8/85 (9%) | Core fetching implemented (latest, releases, POM parsing). Missing: multi-registry fallback/merging, snapshot handling, caching, S3 support. |
 | `datasource/nextcloud` | 1 | ? | 5/5 (100%) | — |
 | `datasource/node-version` | 1 | ? | 2/4 (50%) | — |
 | `datasource/npm` | 4 | full | 52/64 (81%) | M2 complete |
@@ -235,7 +235,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/unity3d` | 1 | ? | 9/9 (100%) | — |
 | `datasource/unity3d-packages` | 1 | ? | 5/5 (100%) | — |
 
-## platforms  —  333/1581 (21%)
+## platforms  —  336/1581 (21%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -249,7 +249,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/gitea` | 5 | ? | 0/183 (0%) | — |
 | `platform/github` | 7 | full | 197/245 (80%) | M3 complete (dry-run write surface) |
 | `platform/gitlab` | 4 | ? | 17/182 (9%) | — |
-| `platform/local` | 2 | full | 38/41 (93%) | — |
+| `platform/local` | 2 | full | 41/41 (100%) | — |
 | `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
 | `platform/utils` | 2 | ? | 14/14 (100%) | — |
 

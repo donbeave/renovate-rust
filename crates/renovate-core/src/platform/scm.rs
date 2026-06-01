@@ -39,7 +39,7 @@ pub enum PlatformCommit {
 }
 
 impl PlatformCommit {
-    pub fn from_str(s: &str) -> Self {
+    pub fn parse(s: &str) -> Self {
         match s {
             "enabled" => PlatformCommit::Enabled,
             "disabled" => PlatformCommit::Disabled,

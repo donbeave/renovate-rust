@@ -1021,14 +1021,14 @@ images:
   - name: foo
 "#,
         );
-        let images: Vec<_> = deps
+        assert!(deps
             .into_iter()
             .filter_map(|d| match d {
                 KustomizeDep::Image(img) => Some(img),
                 _ => None,
             })
-            .collect();
-        assert!(images.is_empty());
+            .next()
+            .is_none());
     }
 
     // Ported: "extracts from newTag" — kustomize/extract.spec.ts line 680

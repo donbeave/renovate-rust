@@ -562,8 +562,7 @@ pub async fn get_npm_releases(
     // Detect isPrivate from cache-control header.
     let is_private = {
         let cache_control = cache_control_header.as_deref().unwrap_or("");
-        let directives: Vec<&str> = cache_control.split(',').map(|s| s.trim()).collect();
-        !directives.contains(&"public")
+        !cache_control.split(',').map(|s| s.trim()).any(|x| x == "public")
     };
 
     let result = crate::datasources::ReleaseResult {

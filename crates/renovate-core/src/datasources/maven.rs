@@ -709,6 +709,7 @@ mod tests {
         assert!(!is_maven_central("https://some-artifactory.local/maven2"));
     }
 
+    // Ported: "returns releases" — modules/datasource/maven/index.spec.ts line 190
     #[tokio::test]
     async fn fetch_releases_returns_versions() {
         let server = MockServer::start().await;
@@ -737,6 +738,7 @@ mod tests {
         assert_eq!(releases.releases, vec!["1.0.0", "1.1.0", "2.0.0"]);
     }
 
+    // Ported: "returns null when metadata is not found" — modules/datasource/maven/index.spec.ts line 123
     #[tokio::test]
     async fn fetch_releases_404_returns_none() {
         let server = MockServer::start().await;
@@ -753,6 +755,7 @@ mod tests {
         assert!(result.is_none());
     }
 
+    // Ported: "ignores unsupported protocols" — modules/datasource/maven/index.spec.ts line 334
     #[tokio::test]
     async fn fetch_releases_unsupported_protocol_returns_none() {
         let http = HttpClient::new().unwrap();
@@ -766,6 +769,7 @@ mod tests {
         assert!(result.is_none());
     }
 
+    // Ported: "skips registry with invalid XML" — modules/datasource/maven/index.spec.ts line 363
     #[tokio::test]
     async fn fetch_releases_invalid_xml_returns_none() {
         let server = MockServer::start().await;
@@ -816,6 +820,7 @@ mod tests {
         assert!(parse_all_versions(xml).is_none());
     }
 
+    // Ported: "with all elments present" — modules/datasource/maven/index.spec.ts line 448
     #[test]
     fn parse_pom_info_extracts_homepage_and_source_url() {
         let xml = r#"<project>
@@ -841,6 +846,7 @@ mod tests {
         assert_eq!(info.homepage, None);
     }
 
+    // Ported: "supports scm.url values prefixed with "scm:"" — modules/datasource/maven/index.spec.ts line 398
     #[test]
     fn process_scm_url_strips_scm_prefix() {
         assert_eq!(
@@ -849,6 +855,7 @@ mod tests {
         );
     }
 
+    // Ported: "should be able to detect git@github.com:child-scm as valid sourceUrl" — modules/datasource/maven/index.spec.ts line 751
     #[test]
     fn process_scm_url_converts_git_at_github() {
         assert_eq!(

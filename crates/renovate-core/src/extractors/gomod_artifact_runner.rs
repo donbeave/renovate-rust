@@ -65,11 +65,8 @@ impl ArtifactRunner for GomodArtifactRunner {
             let go_sum_path = package_dir.join(&sum_file_name);
 
             // If there is no go.sum, there is nothing to update.
-            let existing_go_sum = match tokio::fs::read_to_string(&go_sum_path).await {
-                Ok(content) => content,
-                Err(_) => {
-                    return Ok(None);
-                }
+            let Ok(existing_go_sum) = tokio::fs::read_to_string(&go_sum_path).await else {
+                return Ok(None);
             };
 
             // Write updated go.mod.

@@ -1651,10 +1651,7 @@ pub async fn update_terraform_artifacts(
         return Ok(None);
     }
 
-    let locks = match extract_terraform_locks(&lock_content) {
-        Some(l) => l,
-        None => return Ok(None),
-    };
+    let Some(locks) = extract_terraform_locks(&lock_content) else { return Ok(None) };
 
     // Lockfile maintenance: update ALL locks, not just the ones with dep updates.
     let updates: Vec<TerraformProviderLockUpdate> = if _config.is_lock_file_maintenance {

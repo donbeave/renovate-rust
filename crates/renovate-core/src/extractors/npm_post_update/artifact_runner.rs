@@ -391,6 +391,7 @@ mod tests {
         assert!(result.is_err());
 
         // Restore permissions for cleanup.
+        #[allow(clippy::permissions_set_readonly_false)]
         let mut perms = std::fs::metadata(dir.path()).unwrap().permissions();
         perms.set_readonly(false);
         std::fs::set_permissions(dir.path(), perms).unwrap();

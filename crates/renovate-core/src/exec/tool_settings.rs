@@ -24,7 +24,7 @@ impl RawToolSettings {
             map.get(key).and_then(|v| {
                 if let Some(n) = v.as_u64() {
                     Some(n as f64)
-                } else { v.as_f64().map(|n| n) }
+                } else { v.as_f64() }
             })
         };
         Self {

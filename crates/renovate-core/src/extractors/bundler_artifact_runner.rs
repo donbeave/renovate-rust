@@ -136,22 +136,15 @@ impl ArtifactRunner for BundlerArtifactRunner {
                 .unwrap_or_else(|| lock_file_dir.clone());
 
             // 1. Determine lock file path.
-            let lock_path = match crate::extractors::bundler::get_lock_file_path(
+            let Ok(lock_path) = crate::extractors::bundler::get_lock_file_path(
                 &package_file_name,
                 lock_file_dir,
             )
-            .await
-            {
-                Ok(p) => p,
-                Err(_) => return Ok(None),
-            };
+            .await else { return Ok(None) };
 
             // 2. Read existing lock file.
-            let original_lock = match tokio::fs::read_to_string(&lock_path).await {
-                Ok(c) => c,
-                Err(_) => {
-                    return Ok(None);
-                }
+            let Ok(original_lock) = tokio::fs::read_to_string(&lock_path).await else {
+                return Ok(None);
             };
 
             // 3. Write updated Gemfile.

@@ -81,11 +81,8 @@ impl ArtifactRunner for PixiArtifactRunner {
             };
 
             // 3. Read existing lock file.
-            let original_lock = match tokio::fs::read_to_string(&lock_path).await {
-                Ok(c) => c,
-                Err(_) => {
-                    return Ok(None);
-                }
+            let Ok(original_lock) = tokio::fs::read_to_string(&lock_path).await else {
+                return Ok(None);
             };
 
             // 4. Write updated package file.
