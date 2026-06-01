@@ -1425,6 +1425,57 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    // Ported: "retains draft status when draft uses current prefix" — modules/platform/gitlab/index.spec.ts line 3643
+    #[tokio::test]
+    async fn update_pr_preserves_draft_prefix() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "Draft: old title",
+                "description": "Body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("PUT"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .and(wiremock::matchers::body_json_string(
+                r#"{"title":"Draft: New title","description":"New body"}"#,
+            ))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "Draft: New title",
+                "description": "New body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client
+            .update_pr(
+                "owner",
+                "repo",
+                42,
+                Some("New title"),
+                Some("New body"),
+                None,
+            )
+            .await;
+        assert!(result.is_ok());
+    }
+
     // ── get_branch_status ─────────────────────────────────────────────────────
 
     #[tokio::test]
