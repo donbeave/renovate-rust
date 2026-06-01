@@ -607,6 +607,16 @@ pub struct CombinedBranchStatus {
     pub statuses: Vec<GhBranchStatus>,
 }
 
+/// Single check-run returned by the GitHub check-runs API.
+#[derive(Debug, Clone, Deserialize)]
+struct CheckRun {
+    #[allow(dead_code)]
+    name: String,
+    #[allow(dead_code)]
+    status: String,
+    conclusion: Option<String>,
+}
+
 /// GitHub REST API PR representation.
 #[derive(Debug, Clone, Deserialize)]
 pub struct GhRestPr {
@@ -909,10 +919,38 @@ impl PlatformClient for GithubClient {
             self.api_base, owner, repo, sha
         );
 
-        self.http
+        let mut combined: CombinedBranchStatus = self
+            .http
             .get_json::<CombinedBranchStatus>(&status_url)
             .await
-            .map_err(PlatformError::Http)
+            .map_err(PlatformError::Http)?;
+
+        // Fetch check-runs and merge their conclusions into the combined state.
+        // Upstream: lib/modules/platform/github/index.ts getBranchStatus.
+        let check_runs = self.fetch_check_runs(owner, repo, &sha).await;
+        if !check_runs.is_empty() {
+            let any_failure = check_runs
+                .iter()
+                .any(|r| r.conclusion.as_deref() == Some("failure"));
+            let all_good = check_runs.iter().all(|r| {
+                matches!(
+                    r.conclusion.as_deref(),
+                    Some("success") | Some("neutral") | Some("skipped")
+                )
+            });
+
+            if any_failure {
+                combined.state = CombinedBranchState::Failure;
+            } else if (combined.state == CombinedBranchState::Success || combined.statuses.is_empty())
+                && all_good
+            {
+                combined.state = CombinedBranchState::Success;
+            } else {
+                combined.state = CombinedBranchState::Pending;
+            }
+        }
+
+        Ok(combined)
     }
 
     async fn write_file(
@@ -930,6 +968,57 @@ impl PlatformClient for GithubClient {
 }
 
 impl GithubClient {
+    /// Fetch check-runs for a commit.
+    ///
+    /// Returns an empty vector if the API is unavailable (403, 404) or if no
+    /// check-runs exist. Mirrors the check-runs fetch in upstream
+    /// `getBranchStatus`.
+    async fn fetch_check_runs(
+        &self,
+        owner: &str,
+        repo: &str,
+        sha: &str,
+    ) -> Vec<CheckRun> {
+        let url = format!(
+            "{}/repos/{}/{}/commits/{}/check-runs?per_page=100",
+            self.api_base, owner, repo, sha
+        );
+
+        #[derive(Deserialize)]
+        struct CheckRunsResponse {
+            check_runs: Vec<CheckRun>,
+        }
+
+        match self
+            .http
+            .get(&url)
+            .header("Accept", "application/vnd.github.antiope-preview+json")
+            .send()
+            .await
+        {
+            Ok(resp) => {
+                if !resp.status().is_success() {
+                    tracing::debug!(
+                        status = %resp.status(),
+                        "check-runs API returned non-success status"
+                    );
+                    return Vec::new();
+                }
+                match resp.json::<CheckRunsResponse>().await {
+                    Ok(body) => body.check_runs,
+                    Err(e) => {
+                        tracing::debug!(%e, "failed to parse check-runs response");
+                        Vec::new()
+                    }
+                }
+            }
+            Err(e) => {
+                tracing::debug!(%e, "failed to fetch check-runs");
+                Vec::new()
+            }
+        }
+    }
+
     /// Fetch and parse a JSON (or JSON5) file from the repository.
     ///
     /// Returns `Ok(None)` when the file does not exist or has empty content,
@@ -2950,6 +3039,203 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(status.state, CombinedBranchState::Pending);
+    }
+
+    // ── check-runs integration tests ────────────────────────────────────────────
+
+    #[tokio::test]
+    async fn get_branch_status_check_runs_failure() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "success",
+                "statuses": [],
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/check-runs"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "check_runs": [
+                    {"name": "ci/test", "status": "completed", "conclusion": "success"},
+                    {"name": "ci/lint", "status": "completed", "conclusion": "failure"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
+        assert_eq!(status.state, CombinedBranchState::Failure);
+    }
+
+    #[tokio::test]
+    async fn get_branch_status_check_runs_success() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "success",
+                "statuses": [],
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/check-runs"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "check_runs": [
+                    {"name": "ci/test", "status": "completed", "conclusion": "success"},
+                    {"name": "ci/build", "status": "completed", "conclusion": "neutral"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
+        assert_eq!(status.state, CombinedBranchState::Success);
+    }
+
+    #[tokio::test]
+    async fn get_branch_status_check_runs_pending() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "success",
+                "statuses": [],
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/check-runs"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "check_runs": [
+                    {"name": "ci/test", "status": "in_progress", "conclusion": null},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
+        assert_eq!(status.state, CombinedBranchState::Pending);
+    }
+
+    #[tokio::test]
+    async fn get_branch_status_check_runs_403_ignored() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "success",
+                "statuses": [
+                    {"context": "ci/build", "state": "success"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/check-runs"))
+            .respond_with(ResponseTemplate::new(403))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
+        // check-runs 403 should be silently ignored; combined status wins
+        assert_eq!(status.state, CombinedBranchState::Success);
+    }
+
+    #[tokio::test]
+    async fn get_branch_status_check_runs_mixed_with_status() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/git/refs/heads/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "object": {"sha": "abc123"},
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/status"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "state": "success",
+                "statuses": [
+                    {"context": "ci/build", "state": "success"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/commits/abc123/check-runs"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "check_runs": [
+                    {"name": "ci/build", "status": "completed", "conclusion": "success"},
+                    {"name": "ci/security", "status": "completed", "conclusion": "failure"},
+                ],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
+        // Check-run failure should override combined status success
+        assert_eq!(status.state, CombinedBranchState::Failure);
     }
 
     // Ported: "should return an array of repos when using GitHub App Installation Token" — modules/platform/github/index.spec.ts line 690
