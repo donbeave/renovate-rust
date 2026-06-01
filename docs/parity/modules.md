@@ -36,7 +36,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/ant` | 3 | full | 65/65 (100%) | — |
 | `manager/argocd` | 1 | full | 8/8 (100%) | — |
 | `manager/asdf` | 2 | full | 14/14 (100%) | — |
-| `manager/azure-pipelines` | 1 | ? | 28/29 (97%) | — |
+| `manager/azure-pipelines` | 1 | full | 28/29 (97%) | — |
 | `manager/batect` | 1 | full | 4/4 (100%) | — |
 | `manager/batect-wrapper` | 2 | ? | 4/7 (57%) | — |
 | `manager/bazel` | 5 | ? | 24/46 (52%) | — |
@@ -53,7 +53,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/cake` | 1 | ? | 3/5 (60%) | — |
 | `manager/cargo` | 6 | full | 62/73 (85%) | Extract full; artifacts: missing docker mode, install mode, mixed-dep edge cases |
 | `manager/cdnurl` | 1 | full | 1/1 (100%) | — |
-| `manager/circleci` | 4 | ? | 13/14 (93%) | — |
+| `manager/circleci` | 4 | full | 13/14 (93%) | — |
 | `manager/cloudbuild` | 1 | full | 2/2 (100%) | — |
 | `manager/cocoapods` | 2 | ? | 2/13 (15%) | — |
 | `manager/composer` | 6 | ? | 22/89 (25%) | — |
@@ -75,7 +75,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/fvm` | 1 | full | 7/7 (100%) | — |
 | `manager/git-submodules` | 3 | ? | 10/16 (62%) | — |
 | `manager/github-actions` | 3 | full | 81/98 (83%) | — |
-| `manager/gitlabci` | 2 | ? | 17/18 (94%) | — |
+| `manager/gitlabci` | 2 | full | 17/18 (94%) | — |
 | `manager/gitlabci-include` | 1 | full | 8/8 (100%) | — |
 | `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
 | `manager/gleam` | 4 | ? | 18/30 (60%) | — |
@@ -125,14 +125,14 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/puppet` | 3 | ? | 13/21 (62%) | — |
 | `manager/pyenv` | 1 | full | 3/3 (100%) | — |
 | `manager/quadlet` | 1 | full | 11/11 (100%) | — |
-| `manager/renovate-config` | 1 | ? | 18/20 (90%) | — |
+| `manager/renovate-config` | 1 | full | 18/20 (90%) | — |
 | `manager/ruby-version` | 1 | full | 3/3 (100%) | — |
 | `manager/runtime-version` | 1 | full | 2/2 (100%) | — |
 | `manager/rust-toolchain` | 2 | full | 23/23 (100%) | — |
 | `manager/sbt` | 3 | full | 38/38 (100%) | — |
 | `manager/scalafmt` | 1 | full | 4/4 (100%) | — |
 | `manager/setup-cfg` | 1 | full | 2/2 (100%) | — |
-| `manager/sveltos` | 1 | ? | 13/14 (93%) | — |
+| `manager/sveltos` | 1 | full | 13/14 (93%) | — |
 | `manager/swift` | 4 | ? | 28/59 (47%) | — |
 | `manager/tekton` | 1 | full | 5/5 (100%) | — |
 | `manager/terraform` | 13 | ? | 43/88 (49%) | — |
@@ -162,10 +162,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/azure-tags` | 1 | ? | 2/5 (40%) | — |
 | `datasource/bazel` | 2 | full | 11/11 (100%) | — |
 | `datasource/bitbucket-server-tags` | 2 | ? | 10/13 (77%) | — |
-| `datasource/bitbucket-tags` | 1 | ? | 4/5 (80%) | — |
+| `datasource/bitbucket-tags` | 1 | full | 4/5 (80%) | — |
 | `datasource/bitrise` | 1 | full | 7/7 (100%) | — |
 | `datasource/buildpacks-registry` | 2 | full | 4/4 (100%) | — |
-| `datasource/cdnjs` | 1 | ? | 13/14 (93%) | — |
+| `datasource/cdnjs` | 1 | full | 13/14 (93%) | — |
 | `datasource/clojure` | 1 | full | 9/9 (100%) | — |
 | `datasource/conan` | 1 | ? | 0/22 (0%) | — |
 | `datasource/conda` | 1 | full | 9/9 (100%) | — |
@@ -185,9 +185,9 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/forgejo-releases` | 1 | full | 5/5 (100%) | — |
 | `datasource/forgejo-tags` | 1 | full | 5/5 (100%) | — |
 | `datasource/galaxy` | 1 | full | 11/11 (100%) | — |
-| `datasource/galaxy-collection` | 1 | ? | 12/15 (80%) | — |
+| `datasource/galaxy-collection` | 1 | full | 12/15 (80%) | — |
 | `datasource/git-refs` | 1 | ? | 8/11 (73%) | — |
-| `datasource/git-tags` | 1 | ? | 7/8 (88%) | — |
+| `datasource/git-tags` | 1 | full | 7/8 (88%) | — |
 | `datasource/gitea-releases` | 1 | full | 5/5 (100%) | — |
 | `datasource/gitea-tags` | 1 | full | 5/5 (100%) | — |
 | `datasource/github-digest` | 1 | ? | 0/10 (0%) | — |
@@ -222,13 +222,13 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/puppet-forge` | 1 | full | 8/8 (100%) | — |
 | `datasource/pypi` | 1 | ? | 2/39 (5%) | — |
 | `datasource/python-version` | 1 | full | 10/10 (100%) | — |
-| `datasource/repology` | 1 | ? | 18/19 (95%) | — |
+| `datasource/repology` | 1 | full | 18/19 (95%) | — |
 | `datasource/rpm` | 1 | ? | 0/28 (0%) | — |
 | `datasource/ruby-version` | 1 | full | 3/3 (100%) | — |
 | `datasource/rubygems` | 4 | ? | 3/35 (9%) | — |
 | `datasource/rust-version` | 2 | full | 18/18 (100%) | — |
-| `datasource/sbt-package` | 2 | ? | 12/14 (86%) | — |
-| `datasource/sbt-plugin` | 1 | ? | 7/8 (88%) | — |
+| `datasource/sbt-package` | 2 | full | 12/14 (86%) | — |
+| `datasource/sbt-plugin` | 1 | full | 7/8 (88%) | — |
 | `datasource/terraform-module` | 3 | ? | 9/23 (39%) | — |
 | `datasource/terraform-provider` | 1 | ? | 0/18 (0%) | — |
 | `datasource/typst` | 1 | full | 6/6 (100%) | — |
@@ -323,9 +323,9 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `config/_root` | 12 | ? | 212/228 (93%) | — |
+| `config/_root` | 12 | full | 212/228 (93%) | — |
 | `config/decrypt` | 2 | ? | 0/16 (0%) | — |
-| `config/migrations` | 58 | ? | 155/161 (96%) | — |
+| `config/migrations` | 58 | full | 155/161 (96%) | — |
 | `config/options` | 2 | ? | 0/16 (0%) | — |
 | `config/presets` | 17 | ? | 52/271 (19%) | — |
 | `config/validation-helpers` | 3 | full | 8/8 (100%) | — |
@@ -343,10 +343,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `util/http` | 22 | ? | 43/251 (17%) | — |
 | `util/json-writer` | 2 | ? | 4/9 (44%) | — |
 | `util/merge-confidence` | 1 | ? | 7/28 (25%) | — |
-| `util/package-rules` | 11 | ? | 129/143 (90%) | — |
+| `util/package-rules` | 11 | full | 129/143 (90%) | — |
 | `util/schema-utils` | 2 | ? | 12/47 (26%) | — |
 | `util/template` | 1 | ? | 0/54 (0%) | — |
-| `util/vulnerability` | 2 | ? | 24/25 (96%) | — |
+| `util/vulnerability` | 2 | full | 24/25 (96%) | — |
 
 ## infra  —  40/120 (33%)
 
@@ -361,4 +361,4 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `cli/_root` | 2 | ? | 5/6 (83%) | — |
+| `cli/_root` | 2 | full | 5/6 (83%) | — |
