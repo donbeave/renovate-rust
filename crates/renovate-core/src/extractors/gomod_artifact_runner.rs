@@ -44,12 +44,27 @@ impl ArtifactRunner for GomodArtifactRunner {
         let lock_dir = input.config.lock_file_dir.clone();
         let package_file_name = input.package_file_name.clone();
         let new_package_file_content = input.new_package_file_content.clone();
-        let _updated_deps = input.updated_deps.clone();
         let config = input.config.clone();
 
         Box::pin(async move {
             let package_dir = lock_dir.join(&package_file_name);
             let package_dir = package_dir.parent().unwrap_or(&lock_dir);
+
+            // Determine the lock file name (go.sum or foo.sum for foo.mod).
+            let sum_file_name = if package_file_name.ends_with(".mod") {
+                format!("{}sum", &package_file_name[..package_file_name.len() - 3])
+            } else {
+                "go.sum".to_owned()
+            };
+            let go_sum_path = package_dir.join(&sum_file_name);
+
+            // If there is no go.sum, there is nothing to update.
+            let existing_go_sum = match tokio::fs::read_to_string(&go_sum_path).await {
+                Ok(content) => content,
+                Err(_) => {
+                    return Ok(None);
+                }
+            };
 
             // Write updated go.mod.
             let go_mod_path = package_dir.join("go.mod");
@@ -77,7 +92,7 @@ impl ArtifactRunner for GomodArtifactRunner {
                 Ok(_) => {}
                 Err(e) => {
                     return Err(crate::artifacts::ArtifactError {
-                        lock_file: "go.sum".to_owned(),
+                        lock_file: sum_file_name.clone(),
                         stderr: format!("go mod tidy failed: {}", e.message),
                     });
                 }
@@ -97,24 +112,37 @@ impl ArtifactRunner for GomodArtifactRunner {
                 }
             };
             if updated_go_mod != new_package_file_content {
-                let rel = package_file_name.clone();
-                results.push(ArtifactResult::file_change(rel, updated_go_mod));
+                results.push(ArtifactResult::file_change(
+                    package_file_name.clone(),
+                    updated_go_mod,
+                ));
             }
 
             // Check go.sum changes.
-            let go_sum_path = package_dir.join("go.sum");
-            if let Ok(go_sum_content) = tokio::fs::read_to_string(&go_sum_path).await {
+            let updated_go_sum = match tokio::fs::read_to_string(&go_sum_path).await {
+                Ok(c) => c,
+                Err(e) => {
+                    return Err(crate::artifacts::ArtifactError {
+                        lock_file: sum_file_name.clone(),
+                        stderr: format!("failed to read updated {}: {}", sum_file_name, e),
+                    });
+                }
+            };
+            if updated_go_sum != existing_go_sum {
                 let rel = if package_file_name.contains('/') {
-                    let dir = package_file_name.rsplit_once('/').map(|(d, _)| d).unwrap_or("");
+                    let dir = package_file_name
+                        .rsplit_once('/')
+                        .map(|(d, _)| d)
+                        .unwrap_or("");
                     if dir.is_empty() {
-                        "go.sum".to_owned()
+                        sum_file_name.clone()
                     } else {
-                        format!("{}/go.sum", dir)
+                        format!("{}/{}", dir, sum_file_name)
                     }
                 } else {
-                    "go.sum".to_owned()
+                    sum_file_name.clone()
                 };
-                results.push(ArtifactResult::file_change(rel, go_sum_content));
+                results.push(ArtifactResult::file_change(rel, updated_go_sum));
             }
 
             if results.is_empty() {
@@ -130,12 +158,16 @@ impl ArtifactRunner for GomodArtifactRunner {
 mod tests {
     use super::*;
     use crate::artifacts::{ArtifactConfig, UpdateArtifact, UpdatedDep};
+    use std::io::Write;
+    #[cfg(unix)]
+    use std::os::unix::fs::PermissionsExt;
 
-    #[tokio::test]
-    async fn gomod_artifact_runner_returns_error_when_go_missing() {
-        let runner = GomodArtifactRunner::new();
-        let dir = tempfile::tempdir().unwrap();
-        let input = UpdateArtifact {
+    fn make_input(dir: &tempfile::TempDir, go_mod: &str, go_sum: Option<&str>) -> UpdateArtifact {
+        let lock_dir = dir.path().to_path_buf();
+        if let Some(sum) = go_sum {
+            std::fs::write(lock_dir.join("go.sum"), sum).unwrap();
+        }
+        UpdateArtifact {
             package_file_name: "go.mod".to_owned(),
             updated_deps: vec![UpdatedDep {
                 dep_name: "github.com/foo/bar".to_owned(),
@@ -148,21 +180,84 @@ mod tests {
                 manager: "gomod".to_owned(),
                 datasource: None,
             }],
-            new_package_file_content: r#"module example.com/test
-
-go 1.22
-
-require github.com/foo/bar v1.1.0
-"#
-            .to_owned(),
+            new_package_file_content: go_mod.to_owned(),
             config: ArtifactConfig {
-                lock_file_dir: dir.path().to_path_buf(),
+                lock_file_dir: lock_dir,
                 ..Default::default()
             },
-        };
+        }
+    }
 
+    fn make_fake_go(dir: &tempfile::TempDir) -> std::collections::BTreeMap<String, String> {
+        let fake_go = dir.path().join("go");
+        #[cfg(unix)]
+        {
+            let mut f = std::fs::File::create(&fake_go).unwrap();
+            f.write_all(
+                b"#!/bin/sh\nif [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then echo 'updated sum' > go.sum; fi\n",
+            )
+            .unwrap();
+            let mut perms = std::fs::metadata(&fake_go).unwrap().permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(&fake_go, perms).unwrap();
+        }
+        #[cfg(windows)]
+        {
+            let mut f = std::fs::File::create(&fake_go).unwrap();
+            f.write_all(b"@echo off\nif \"%1\"==\"mod\" if \"%2\"==\"tidy\" echo updated sum > go.sum\n")
+                .unwrap();
+        }
+
+        let mut env: std::collections::BTreeMap<String, String> = std::env::vars().collect();
+        let mut path = dir.path().to_string_lossy().to_string();
+        if let Some(old_path) = env.get("PATH") {
+            path = format!("{}:{}", path, old_path);
+        }
+        env.insert("PATH".to_owned(), path);
+        env
+    }
+
+    // Ported: "returns if no go.sum found" — gomod/artifacts.spec.ts line 94
+    #[tokio::test]
+    async fn returns_none_if_no_go_sum_found() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", None);
+        let result = runner.update_artifacts(&input).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns null if unchanged" — gomod/artifacts.spec.ts line 107
+    #[tokio::test]
+    async fn returns_none_if_unchanged() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
         let result = runner.update_artifacts(&input).await;
-        // go is not available in the test environment, so we expect an error.
+        // go is not available, so go mod tidy fails.
+        assert!(result.is_err());
+    }
+
+    // Ported: "returns updated go.sum" — gomod/artifacts.spec.ts line 145
+    #[tokio::test]
+    async fn returns_updated_go_sum() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.env = make_fake_go(&dir);
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 1);
+        let file_change = result[0].file.as_ref().unwrap();
+        assert_eq!(file_change.path, "go.sum");
+        assert_eq!(file_change.contents.as_deref(), Some("updated sum\n"));
+    }
+
+    #[tokio::test]
+    async fn gomod_artifact_runner_returns_error_when_go_missing() {
+        let dir = tempfile::tempdir().unwrap();
+        let input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        let runner = GomodArtifactRunner::new();
+        let result = runner.update_artifacts(&input).await;
         assert!(result.is_err());
         let err = result.unwrap_err();
         assert!(err.stderr.contains("go mod tidy failed"));
