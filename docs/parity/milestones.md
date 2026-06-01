@@ -154,9 +154,9 @@ Acceptance:
 
 - [x] CLI auto-replace verifies replacements by re-extracting and checking the
       updated dep's `current_value` matches `new_value`.
-- [ ] GitHub platform has TTL-based PR caching.
-- [ ] Cargo artifact runner injects git auth env vars.
-- [ ] `platform/gitlab` `init_repo` fetches real project metadata via REST API.
+- [x] GitHub platform has TTL-based PR caching.
+- [x] Cargo artifact runner injects git auth env vars.
+- [x] `platform/gitlab` `init_repo` fetches real project metadata via REST API.
 
 ---
 

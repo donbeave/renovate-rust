@@ -24,6 +24,7 @@ use crate::http::{HttpClient, HttpError};
 use crate::platform::{
     CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult,
 };
+use crate::platform::util::repo_fingerprint;
 
 /// Default GitLab API base URL.
 pub const GITLAB_API_BASE: &str = "https://gitlab.com/api/v4";
@@ -160,18 +161,103 @@ struct GitlabTreeEntry {
     entry_type: String,
 }
 
+/// GitLab project metadata response.
+/// `GET /projects/{id}`
+#[derive(Debug, Deserialize)]
+struct GitlabProject {
+    id: i64,
+    archived: bool,
+    mirror: bool,
+    default_branch: Option<String>,
+    empty_repo: bool,
+    forked_from_project: Option<serde_json::Value>,
+    repository_access_level: Option<String>,
+    merge_requests_access_level: Option<String>,
+    merge_method: Option<String>,
+    issues_enabled: Option<bool>,
+    squash_option: Option<String>,
+    path_with_namespace: Option<String>,
+}
+
 // ── PlatformClient impl ───────────────────────────────────────────────────────
 
 impl PlatformClient for GitlabClient {
-    async fn init_repo(&self, _owner: &str, _repo: &str) -> Result<RepoInitResult, PlatformError> {
-        // TODO: Implement GitLab-specific init_repo (fetch project metadata via REST API).
+    async fn init_repo(
+        &self,
+        owner: &str,
+        repo: &str,
+        _fork_token: Option<&str>,
+        _fork_creation: bool,
+        _fork_org: Option<&str>,
+    ) -> Result<RepoInitResult, PlatformError> {
+        let project_id = encode_project(owner, repo);
+        let url = format!("{}/projects/{project_id}", self.api_base);
+
+        let resp = self
+            .http
+            .get_retrying(&url)
+            .await
+            .map_err(PlatformError::Http)?;
+
+        match resp.status() {
+            s if s.is_success() => {}
+            s if s == reqwest::StatusCode::FORBIDDEN => {
+                return Err(PlatformError::Unexpected(
+                    "REPOSITORY_ACCESS_FORBIDDEN".to_owned(),
+                ));
+            }
+            s if s == reqwest::StatusCode::NOT_FOUND => {
+                return Err(PlatformError::Unexpected(
+                    "REPOSITORY_NOT_FOUND".to_owned(),
+                ));
+            }
+            s => return Err(PlatformError::Http(HttpError::Status { status: s, url })),
+        }
+
+        let project: GitlabProject = resp
+            .json()
+            .await
+            .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+
+        if project.archived {
+            return Err(PlatformError::Unexpected(
+                "REPOSITORY_ARCHIVED".to_owned(),
+            ));
+        }
+
+        if project.repository_access_level.as_deref() == Some("disabled")
+            || project.merge_requests_access_level.as_deref() == Some("disabled")
+        {
+            return Err(PlatformError::Unexpected(
+                "REPOSITORY_DISABLED".to_owned(),
+            ));
+        }
+
+        let default_branch = project
+            .default_branch
+            .filter(|b| !b.is_empty())
+            .ok_or_else(|| PlatformError::Unexpected("REPOSITORY_EMPTY".to_owned()))?;
+
+        if project.empty_repo {
+            return Err(PlatformError::Unexpected("REPOSITORY_EMPTY".to_owned()));
+        }
+
+        let merge_method = project.merge_method.as_deref().map(|m| match m {
+            "merge" => "merge".to_owned(),
+            "rebase_merge" => "rebase".to_owned(),
+            "ff" => "rebase".to_owned(),
+            other => other.to_owned(),
+        });
+
+        let fingerprint = repo_fingerprint(&project.id.to_string(), Some(&self.api_base));
+
         Ok(RepoInitResult {
-            default_branch: "main".to_owned(),
-            is_fork: false,
-            repo_fingerprint: String::new(),
-            merge_method: None,
-            auto_merge_allowed: false,
-            has_issues_enabled: true,
+            default_branch,
+            is_fork: project.forked_from_project.is_some(),
+            repo_fingerprint: fingerprint,
+            merge_method,
+            auto_merge_allowed: project.merge_requests_access_level.as_deref() != Some("disabled"),
+            has_issues_enabled: project.issues_enabled.unwrap_or(true),
             has_vulnerability_alerts_enabled: false,
         })
     }
@@ -352,6 +438,8 @@ impl PlatformClient for GitlabClient {
         _repo: &str,
         _path: &str,
         _content: &str,
+        _branch: Option<&str>,
+        _message: Option<&str>,
     ) -> Result<(), PlatformError> {
         tracing::debug!("gitlab platform: write_file is not yet implemented");
         Err(PlatformError::NotSupported(
@@ -512,6 +600,135 @@ mod tests {
     #[test]
     fn encode_project_formats_correctly() {
         assert_eq!(encode_project("owner", "repo"), "owner%2Frepo");
+    }
+
+    // ── init_repo ─────────────────────────────────────────────────────────────
+
+    #[tokio::test]
+    async fn init_repo_returns_real_metadata() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 42,
+                "archived": false,
+                "mirror": false,
+                "default_branch": "master",
+                "empty_repo": false,
+                "forked_from_project": {"id": 1},
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled",
+                "merge_method": "rebase_merge",
+                "issues_enabled": true,
+                "squash_option": "default_on",
+                "path_with_namespace": "owner/repo"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client.init_repo("owner", "repo", None, false, None).await.unwrap();
+        assert_eq!(result.default_branch, "master");
+        assert!(result.is_fork);
+        assert!(!result.repo_fingerprint.is_empty());
+        assert_eq!(result.merge_method, Some("rebase".to_owned()));
+        assert!(result.auto_merge_allowed);
+        assert!(result.has_issues_enabled);
+        assert!(!result.has_vulnerability_alerts_enabled);
+    }
+
+    #[tokio::test]
+    async fn init_repo_archived_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": true,
+                "mirror": false,
+                "default_branch": "main",
+                "empty_repo": false,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED"));
+    }
+
+    #[tokio::test]
+    async fn init_repo_empty_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": false,
+                "default_branch": null,
+                "empty_repo": true,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
+    }
+
+    #[tokio::test]
+    async fn init_repo_not_found_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND"));
+    }
+
+    #[tokio::test]
+    async fn init_repo_forbidden_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(403))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ACCESS_FORBIDDEN"));
+    }
+
+    #[tokio::test]
+    async fn init_repo_disabled_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": false,
+                "default_branch": "main",
+                "empty_repo": false,
+                "repository_access_level": "disabled",
+                "merge_requests_access_level": "enabled"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_DISABLED"));
     }
 
     // ── get_current_user ──────────────────────────────────────────────────────
@@ -717,7 +934,7 @@ mod tests {
         let server = MockServer::start().await;
         let client = make_client(&server.uri());
         let err = client
-            .write_file("owner", "repo", "path", "content")
+            .write_file("owner", "repo", "path", "content", None, None)
             .await
             .unwrap_err();
         assert!(matches!(err, PlatformError::NotSupported(_)));
@@ -907,5 +1124,44 @@ mod tests {
     fn massage_markdown_avoids_false_positives() {
         let input = "PROCESSING APPROPRIATE SUPPRESS NOPR";
         assert_eq!(massage_markdown(input), input);
+    }
+
+    // Ported: "should use ssh_url_to_repo if gitUrl is set to ssh" — modules/platform/gitlab/index.spec.ts line 456
+    #[test]
+    fn get_repo_url_uses_ssh_when_git_url_is_ssh() {
+        let result = get_repo_url(
+            "some/repo/project",
+            Some("ssh"),
+            Some("ssh://git@gitlab.com/some%2Frepo%2Fproject.git"),
+            Some("https://gitlab.com/some%2Frepo%2Fproject.git"),
+            "https://gitlab.com/api/v4",
+            None,
+        );
+        assert_eq!(
+            result.unwrap(),
+            "ssh://git@gitlab.com/some%2Frepo%2Fproject.git"
+        );
+    }
+
+    // Ported: "should throw if ssh_url_to_repo is not present but gitUrl is set to ssh" — modules/platform/gitlab/index.spec.ts line 473
+    #[test]
+    fn get_repo_url_throws_when_ssh_missing_and_git_url_is_ssh() {
+        let result = get_repo_url(
+            "some/repo/project",
+            Some("ssh"),
+            None,
+            Some("https://gitlab.com/some%2Frepo%2Fproject.git"),
+            "https://gitlab.com/api/v4",
+            None,
+        );
+        assert!(matches!(result, Err(GetRepoUrlError::SshUrlUnavailable)));
+    }
+
+    // Ported: "returns updated pr body" — modules/platform/gitlab/index.spec.ts line 3993
+    #[test]
+    fn massage_markdown_returns_updated_pr_body() {
+        let input = "https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5\n\n  Pull Requests are the best, here are some PRs.\n\n  ## Open\n\nThese updates have all been created already. To force a retry/rebase of any, click on a checkbox below.\n\n - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\\`gh-got\\`, \\`gl-got\\`, \\`got\\`)\n";
+        let expected = "https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5\n\n  Merge Requests are the best, here are some MRs.\n\n  ## Open\n\nThese updates have all been created already. To force a retry/rebase of any, click on a checkbox below.\n\n - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\\`gh-got\\`, \\`gl-got\\`, \\`got\\`)\n";
+        assert_eq!(massage_markdown(input), expected);
     }
 }
