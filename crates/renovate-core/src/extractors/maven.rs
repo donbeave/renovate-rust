@@ -3118,4 +3118,84 @@ mod tests {
         let updated = maven_update_at_position(content, &upgrade, "</version>").unwrap();
         assert!(updated.contains("2.0.0"));
     }
+
+    // Ported: "should update existing dependency defined via properties" — maven/index.spec.ts line 43
+    #[test]
+    fn maven_index_update_property_based_dependency() {
+        let parent = include_str!("../../tests/fixtures/maven/parent.pom.xml");
+        let prop_pos = parent.find("1.2.3.4").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some("org.example:quux".into()),
+            current_value: Some("1.2.3.4".into()),
+            new_value: Some("9.9.9.9-final".into()),
+            shared_variable_name: Some("quuxVersion".into()),
+            file_replace_position: prop_pos,
+            ..Default::default()
+        };
+        let updated = maven_update_dependency(parent, &upgrade).unwrap();
+        assert!(updated.contains("9.9.9.9-final"));
+    }
+
+    // Ported: "should update to version of the latest dep in implicit group" — maven/index.spec.ts line 79
+    #[test]
+    fn maven_index_update_implicit_group_latest_version() {
+        let grouping = include_str!("../../tests/fixtures/maven/grouping.pom.xml");
+        let prop_pos = grouping.find("1.0.0</foo.version>").unwrap();
+        let upgrade1 = MavenUpdateUpgrade {
+            dep_name: Some("org.example:foo-1".into()),
+            current_value: Some("1.0.0".into()),
+            new_value: Some("1.0.2".into()),
+            shared_variable_name: Some("foo.version".into()),
+            file_replace_position: prop_pos,
+            ..Default::default()
+        };
+        let upgrade2 = MavenUpdateUpgrade {
+            dep_name: Some("org.example:foo-2".into()),
+            current_value: Some("1.0.0".into()),
+            new_value: Some("1.0.3".into()),
+            shared_variable_name: Some("foo.version".into()),
+            file_replace_position: prop_pos,
+            ..Default::default()
+        };
+
+        // Update on original content.
+        let updated1 = maven_update_dependency(grouping, &upgrade1).unwrap();
+        assert!(updated1.contains("<foo.version>1.0.2</foo.version>"));
+
+        // Update on content modified outside still works because shared_variable_name bypasses
+        // the version-match check.
+        let updated_outside = grouping.replacen("1.0.0", "1.0.1", 1);
+        let updated1_outside = maven_update_dependency(&updated_outside, &upgrade1).unwrap();
+        assert!(updated1_outside.contains("<foo.version>1.0.2</foo.version>"));
+
+        // Second update on already-updated content.
+        let updated2 = maven_update_dependency(&updated1, &upgrade2).unwrap();
+        assert!(updated2.contains("<foo.version>1.0.3</foo.version>"));
+
+        // Second update on outside-modified content.
+        let updated2_outside = maven_update_dependency(&updated_outside, &upgrade2).unwrap();
+        assert!(updated2_outside.contains("<foo.version>1.0.3</foo.version>"));
+
+        // Second update on original content.
+        let updated2_orig = maven_update_dependency(grouping, &upgrade2).unwrap();
+        assert!(updated2_orig.contains("<foo.version>1.0.3</foo.version>"));
+    }
+
+    // Ported: "should return null for ungrouped deps if content was updated outside" — maven/index.spec.ts line 135
+    #[test]
+    fn maven_index_returns_none_when_ungrouped_dep_updated_outside() {
+        let grouping = include_str!("../../tests/fixtures/maven/grouping.pom.xml");
+        let bar_pos = grouping.find("2.0.0</version>").unwrap();
+        let upgrade = MavenUpdateUpgrade {
+            dep_name: Some("org.example:bar".into()),
+            current_value: Some("2.0.0".into()),
+            new_value: Some("2.0.2".into()),
+            file_replace_position: bar_pos,
+            ..Default::default()
+        };
+        // Simulate external edit changing bar's version from 2.0.0 to 2.0.1.
+        let updated_outside = grouping.replacen("2.0.0", "2.0.1", 1);
+        let result = maven_update_dependency(&updated_outside, &upgrade);
+        assert!(result.is_none());
+    }
 }

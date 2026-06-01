@@ -625,6 +625,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::UnresolvableAlias));
     }
 
+    // Ported: "validates ${params.fieldName} is required" — helm-requirements/extract.spec.ts line 279
     #[test]
     fn no_repository_skipped() {
         let content = r#"
@@ -768,6 +769,13 @@ dependencies:
         let content = "Invalid requirements.yaml content.\ndependencies:\n[\n";
         let deps = extract(content);
         // Invalid YAML with no parseable dependencies block → empty.
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "parses simple requirements.yaml but skips if necessary fields missing" — helm-requirements/extract.spec.ts line 96
+    #[test]
+    fn empty_requirements_returns_empty() {
+        let deps = extract("");
         assert!(deps.is_empty());
     }
 

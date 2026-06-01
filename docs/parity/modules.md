@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5702 / 11670 distinct upstream it() tests ported (48.9%) across 292 modules.
-**Quality:** 6412 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
+**Total:** 5707 / 11670 distinct upstream it() tests ported (48.9%) across 292 modules.
+**Quality:** 6417 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2525/3642 (69%)
+## managers  —  2530/3642 (69%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -83,7 +83,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/gradle` | 8 | ? | 42/143 (29%) | — |
 | `manager/gradle-wrapper` | 3 | ? | 20/36 (56%) | — |
 | `manager/haskell-cabal` | 2 | ? | 8/8 (100%) | — |
-| `manager/helm-requirements` | 1 | ? | 9/11 (82%) | — |
+| `manager/helm-requirements` | 1 | full | 11/11 (100%) | — |
 | `manager/helm-values` | 1 | ? | 6/6 (100%) | — |
 | `manager/helmfile` | 2 | ? | 20/29 (69%) | — |
 | `manager/helmsman` | 1 | ? | 4/4 (100%) | — |
@@ -98,7 +98,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/kubernetes` | 1 | ? | 15/15 (100%) | — |
 | `manager/kustomize` | 3 | ? | 47/68 (69%) | — |
 | `manager/leiningen` | 1 | ? | 4/4 (100%) | — |
-| `manager/maven` | 3 | partial | 52/56 (93%) | Coverage OK, needs audit |
+| `manager/maven` | 3 | partial | 55/56 (98%) | Missing: cross-file property resolution (resolveParents) |
 | `manager/maven-wrapper` | 2 | ? | 9/39 (23%) | — |
 | `manager/meteor` | 1 | ? | 2/2 (100%) | — |
 | `manager/mint` | 1 | ? | 5/5 (100%) | — |
@@ -122,7 +122,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/pre-commit` | 1 | ? | 12/12 (100%) | — |
 | `manager/proto` | 2 | ? | 16/16 (100%) | — |
 | `manager/pub` | 3 | ? | 6/21 (29%) | — |
-| `manager/puppet` | 3 | ? | 21/21 (100%) | — |
+| `manager/puppet` | 3 | full | 21/21 (100%) | — |
 | `manager/pyenv` | 1 | ? | 3/3 (100%) | — |
 | `manager/quadlet` | 1 | ? | 11/11 (100%) | — |
 | `manager/renovate-config` | 1 | ? | 18/20 (90%) | — |
