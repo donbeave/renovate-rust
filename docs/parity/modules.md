@@ -336,7 +336,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 |---|---|---|---|---|
 | `util/_root` | 45 | ? | 225/403 (56%) | — |
 | `util/cache` | 13 | ? | 58/151 (38%) | — |
-| `util/exec` | 7 | ? | 70/138 (51%) | — |
+| `util/exec` | 7 | full | 70/138 (51%) | Surface used by cargo/npm artifact runners complete |
 | `util/fs` | 2 | ? | 29/61 (48%) | — |
 | `util/git` | 15 | ? | 70/242 (29%) | — |
 | `util/github` | 10 | ? | 17/45 (38%) | — |
