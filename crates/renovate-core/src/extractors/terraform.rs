@@ -2934,7 +2934,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "v1.0.0");
     }
 
-    // Ported: "should extract hostname from source url" — terraform/extractors/others/modules.spec.ts line 331
+    // Ported: "should extact hostname from source url" — terraform/extractors/others/modules.spec.ts line 326
     #[test]
     fn hostname_match_re_extracts_hostname() {
         let m1 = HOSTNAME_MATCH_RE
