@@ -17,7 +17,7 @@ fixture.
 
 Acceptance:
 
-- [x] `scripts/parity_coverage.py report` produces a single, deduped,
+- [x] `cargo run -p parity-cli -- report` produces a single, deduped,
       module-grouped coverage number.
 - [x] `docs/parity/modules.md` is the only ledger the agents maintain.
 - [x] `docs/parity/renovate-test-map.md` carries a deprecation banner pointing
@@ -117,7 +117,7 @@ self-hosted relevance):
 | 7 | `datasource/maven` | datasource | full, 86% |
 | 8 | `versioning/semver` | versioning | full, 100% |
 | 9 | `platform/local` | platform | full, 100% |
-| 10 | `manager/terraform` | manager | full, 94% |
+| 10 | `manager/terraform` | manager | full, 95% |
 
 Acceptance:
 
@@ -129,19 +129,51 @@ Acceptance:
 
 ---
 
+## M5a — Terraform ArtifactRunner + CLI auto-replace fallback ✅
+
+Goal: complete M5 by wiring terraform artifacts and enabling manifest updates
+for all managers without explicit `updateDependency` functions.
+
+Acceptance:
+
+- [x] `manager/terraform` has `TerraformArtifactRunner` implementing
+      `ArtifactRunner`, registered in CLI `ArtifactRegistry`.
+- [x] CLI `_ =>` branch in manifest editing calls `auto_replace` as fallback
+      for managers without explicit update functions.
+- [x] `cargo build --workspace --all-features` and
+      `cargo test --workspace --all-features` pass.
+
+---
+
+## M6 — Robust auto-replace + medium gap fixes
+
+Goal: make auto-replace safe (with re-extraction verification) and fix the
+remaining medium gaps from PARITY_AUDIT.
+
+Acceptance:
+
+- [ ] CLI auto-replace verifies replacements by re-extracting and checking the
+      updated dep's `current_value` matches `new_value`.
+- [ ] GitHub platform has TTL-based PR caching.
+- [ ] Cargo artifact runner injects git auth env vars.
+- [ ] `platform/gitlab` `init_repo` fetches real project metadata via REST API.
+
+---
+
 ## What "full parity" means now
 
 Full parity is **the union of all milestones**, not a single number. There is
-no global "100% done" gate. The two agents stop when M5 is complete; long-tail
-modules beyond M5 are tracked in the ledger but worked on opportunistically.
+no global "100% done" gate. Agents stop when the active milestone is complete;
+long-tail modules beyond the active milestone are tracked in the ledger but
+worked on opportunistically.
 
 ## How to pick the next thing to do
 
 1. Open this file. Find the first incomplete milestone.
-2. Run `python3 scripts/parity_coverage.py report` and find the worst-covered
+2. Run `cargo run -p parity-cli -- report` and find the worst-covered
    module **inside the active milestone's scope**.
 3. Implementation agent: work on the worst-covered module whose `Impl` is
    below the milestone's threshold.
-4. Test parity agent: run `python3 scripts/parity_coverage.py gaps <module>`
+4. Test parity agent: run `cargo run -p parity-cli -- gaps <module>`
    on a module that is `Impl=partial` or `Impl=full` but below the coverage
    threshold, and port the listed upstream tests.

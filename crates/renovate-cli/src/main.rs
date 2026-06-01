@@ -38,10 +38,12 @@ use renovate_core::extractors::gomod_artifact_runner::GomodArtifactRunner;
 use renovate_core::extractors::npm_post_update::artifact_runner::NpmArtifactRunner;
 use renovate_core::extractors::pip_artifact_runner::PipArtifactRunner;
 use renovate_core::extractors::pixi_artifact_runner::PixiArtifactRunner;
+use renovate_core::extractors::terraform_artifact_runner::TerraformArtifactRunner;
 use renovate_core::http::HttpClient;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
+use renovate_core::workers::repository::update::branch::auto_replace::auto_replace;
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
 
@@ -359,7 +361,16 @@ async fn process_repo(
     // Initialize the repository on the platform: fetch metadata (default branch,
     // merge methods, fork status, etc.). This is the first platform call for
     // every repository — mirrors upstream `initRepo`.
-    let repo_init = match client.init_repo(owner, repo).await {
+    let repo_init = match client
+        .init_repo(
+            owner,
+            repo,
+            config.fork_token.as_deref(),
+            config.fork_creation.unwrap_or(false),
+            config.fork_org.as_deref(),
+        )
+        .await
+    {
         Ok(init) => {
             tracing::info!(
                 repo = %repo_slug,
@@ -524,6 +535,7 @@ async fn process_repo(
     artifact_registry.register("pip_requirements", Box::new(PipArtifactRunner));
     artifact_registry.register("bundler", Box::new(BundlerArtifactRunner));
     artifact_registry.register("pixi", Box::new(PixiArtifactRunner));
+    artifact_registry.register("terraform", Box::new(TerraformArtifactRunner));
 
     // Manifest editing: apply newValue constraints to source files.
     // Only npm/package.json is supported in this slice; other managers
@@ -769,14 +781,44 @@ async fn process_repo(
                                         }
                                     }
                                     _ => {
-                                        tracing::debug!(
-                                            repo = %repo_slug,
-                                            branch = %branch,
-                                            file = %file_path,
-                                            manager = %manager,
-                                            "manifest editing not yet supported for this manager"
+                                        // Fallback to naive auto-replace for managers
+                                        // without an explicit updateDependency function.
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .as_deref()
+                                            .unwrap_or(latest);
+                                        let result = auto_replace(
+                                            &content,
+                                            Some(current),
+                                            Some(new_value),
+                                            None,
+                                            None,
+                                            Some(&bd.dep.name),
+                                            bd.dep.replacement_name.as_deref(),
+                                            None,
                                         );
-                                        None
+                                        if result.success {
+                                            tracing::debug!(
+                                                repo = %repo_slug,
+                                                branch = %branch,
+                                                file = %file_path,
+                                                dep = %bd.dep.name,
+                                                manager = %manager,
+                                                "applied auto-replace fallback"
+                                            );
+                                            result.content
+                                        } else {
+                                            tracing::debug!(
+                                                repo = %repo_slug,
+                                                branch = %branch,
+                                                file = %file_path,
+                                                dep = %bd.dep.name,
+                                                manager = %manager,
+                                                "auto-replace fallback failed (value not found)"
+                                            );
+                                            None
+                                        }
                                     }
                                 };
                                 match updated {
@@ -793,7 +835,10 @@ async fn process_repo(
                                 }
                             }
                         }
-                        if let Err(err) = client.write_file(owner, repo, file_path, &content).await
+                        let msg = format!("Update {file_path}");
+                        if let Err(err) = client
+                            .write_file(owner, repo, file_path, &content, Some(branch), Some(&msg))
+                            .await
                         {
                             tracing::error!(
                                 repo = %repo_slug,
@@ -857,6 +902,10 @@ async fn process_repo(
                                                 Ok(Some(results)) => {
                                                     for result in results {
                                                         if let Some(ref file_change) = result.file {
+                                                            let msg = format!(
+                                                                "Update {}",
+                                                                file_change.path
+                                                            );
                                                             if let Err(err) = client
                                                                 .write_file(
                                                                     owner,
@@ -866,6 +915,8 @@ async fn process_repo(
                                                                         .contents
                                                                         .as_deref()
                                                                         .unwrap_or_default(),
+                                                                    Some(branch),
+                                                                    Some(&msg),
                                                                 )
                                                                 .await
                                                             {
@@ -1130,9 +1181,7 @@ mod tests {
     fn build_pr_body_rewrites_github_links() {
         let deps = vec![];
         let cfg = renovate_core::repo_config::RepoConfig {
-            pr_header: Some(
-                "See https://github.com/owner/repo/issues/42 for details.".to_owned(),
-            ),
+            pr_header: Some("See https://github.com/owner/repo/issues/42 for details.".to_owned()),
             ..Default::default()
         };
         let body = build_pr_body(&deps, &cfg);
