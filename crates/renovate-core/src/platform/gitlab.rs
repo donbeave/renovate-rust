@@ -725,8 +725,10 @@ fn encode_path(path: &str) -> String {
 /// Encode a `owner/repo` pair as a GitLab project identifier.
 ///
 /// GitLab accepts `{namespace}%2F{project}` as the project ID in REST URLs.
+/// All slashes in both owner and repo are encoded as `%2F` to support nested
+/// namespaces (e.g. `group/subgroup/project`).
 fn encode_project(owner: &str, repo: &str) -> String {
-    format!("{owner}%2F{repo}")
+    format!("{}%2F{}", owner.replace('/', "%2F"), repo.replace('/', "%2F"))
 }
 
 const DRAFT_PREFIX: &str = "Draft: ";
@@ -891,6 +893,10 @@ mod tests {
     #[test]
     fn encode_project_formats_correctly() {
         assert_eq!(encode_project("owner", "repo"), "owner%2Frepo");
+        assert_eq!(
+            encode_project("group/subgroup", "repo"),
+            "group%2Fsubgroup%2Frepo"
+        );
     }
 
     // ── init_repo ─────────────────────────────────────────────────────────────

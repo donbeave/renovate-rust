@@ -1097,4 +1097,80 @@ mod tests {
         });
         assert_eq!(pkgs[0].deps[0].locked_version, Some("4.18.2".to_owned()));
     }
+
+    // Ported: "should handle lock file with no lockFiles" — deno/post.spec.ts line 506
+    #[test]
+    fn apply_locked_versions_no_lock_files() {
+        let mut pkgs = vec![DenoPackageFilePost {
+            package_file: "deno.json".to_owned(),
+            deps: vec![DenoDepPost {
+                datasource: Some("jsr".to_owned()),
+                dep_name: Some("@scope/name".to_owned()),
+                current_value: None,
+                current_raw_value: Some("jsr:@scope/name@1.2.3".to_owned()),
+                locked_version: None,
+            }],
+            lock_files: vec![],
+            manager_data: DenoManagerDataPost::default(),
+        }];
+        let mut cache = HashMap::new();
+        apply_locked_versions(&mut pkgs, &mut cache, &|_path| unreachable!());
+        assert!(pkgs[0].deps[0].locked_version.is_none());
+    }
+
+    // Ported: "should use lock file cache for multiple packages" — deno/post.spec.ts line 532
+    #[test]
+    fn apply_locked_versions_uses_cache() {
+        let _lock = DenoLockFile {
+            lockfile_version: Some(5),
+            locked_versions: {
+                let mut m = HashMap::new();
+                m.insert("jsr:@scope/name@1.2.3".to_owned(), "1.2.3".to_owned());
+                m
+            },
+            ..Default::default()
+        };
+
+        let mut pkgs = vec![
+            DenoPackageFilePost {
+                package_file: "pkg1/deno.json".to_owned(),
+                deps: vec![DenoDepPost {
+                    datasource: Some("jsr".to_owned()),
+                    dep_name: Some("@scope/name".to_owned()),
+                    current_value: None,
+                    current_raw_value: Some("jsr:@scope/name@1.2.3".to_owned()),
+                    locked_version: None,
+                }],
+                lock_files: vec!["deno.lock".to_owned()],
+                manager_data: DenoManagerDataPost::default(),
+            },
+            DenoPackageFilePost {
+                package_file: "pkg2/deno.json".to_owned(),
+                deps: vec![DenoDepPost {
+                    datasource: Some("jsr".to_owned()),
+                    dep_name: Some("@scope/name".to_owned()),
+                    current_value: None,
+                    current_raw_value: Some("jsr:@scope/name@1.2.3".to_owned()),
+                    locked_version: None,
+                }],
+                lock_files: vec!["deno.lock".to_owned()],
+                manager_data: DenoManagerDataPost::default(),
+            },
+        ];
+
+        let mut cache = HashMap::new();
+        let read_count = std::cell::Cell::new(0);
+        apply_locked_versions(&mut pkgs, &mut cache, &|path| {
+            if path == "deno.lock" {
+                read_count.set(read_count.get() + 1);
+                Some(r#"{"version":5,"packages":{"jsr:@scope/name@1.2.3":"1.2.3"}}"#.to_owned())
+            } else {
+                None
+            }
+        });
+
+        assert_eq!(read_count.get(), 1); // cache hit on second package
+        assert_eq!(pkgs[0].deps[0].locked_version, Some("1.2.3".to_owned()));
+        assert_eq!(pkgs[1].deps[0].locked_version, Some("1.2.3".to_owned()));
+    }
 }
