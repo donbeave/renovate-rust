@@ -181,7 +181,14 @@ fn walk_dir_inner(base: &Path, current: &Path, files: &mut Vec<String>) {
 }
 
 impl PlatformClient for LocalClient {
-    async fn init_repo(&self, _owner: &str, _repo: &str) -> Result<RepoInitResult, PlatformError> {
+    async fn init_repo(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _fork_token: Option<&str>,
+        _fork_creation: bool,
+        _fork_org: Option<&str>,
+    ) -> Result<RepoInitResult, PlatformError> {
         // Try to read the default branch from git config.
         let default_branch = std::process::Command::new("git")
             .args(["config", "--get", "init.defaultBranch"])
@@ -288,6 +295,8 @@ impl PlatformClient for LocalClient {
         _repo: &str,
         path: &str,
         content: &str,
+        _branch: Option<&str>,
+        _message: Option<&str>,
     ) -> Result<(), PlatformError> {
         let full = self.base_dir.join(path);
         if let Some(parent) = full.parent() {

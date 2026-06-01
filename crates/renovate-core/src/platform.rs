@@ -112,6 +112,9 @@ pub trait PlatformClient: Send + Sync {
         &self,
         owner: &str,
         repo: &str,
+        fork_token: Option<&str>,
+        fork_creation: bool,
+        fork_org: Option<&str>,
     ) -> impl std::future::Future<Output = Result<RepoInitResult, PlatformError>> + Send;
 
     /// Verify authentication and return the currently-authenticated user.
@@ -190,6 +193,8 @@ pub trait PlatformClient: Send + Sync {
         repo: &str,
         path: &str,
         content: &str,
+        branch: Option<&str>,
+        message: Option<&str>,
     ) -> impl std::future::Future<Output = Result<(), PlatformError>> + Send;
 
     /// List pull requests for a repository.
@@ -281,11 +286,14 @@ impl AnyPlatformClient {
         &self,
         owner: &str,
         repo: &str,
+        fork_token: Option<&str>,
+        fork_creation: bool,
+        fork_org: Option<&str>,
     ) -> Result<RepoInitResult, PlatformError> {
         match self {
-            Self::Github(c) => c.init_repo(owner, repo).await,
-            Self::Gitlab(c) => c.init_repo(owner, repo).await,
-            Self::Local(c) => c.init_repo(owner, repo).await,
+            Self::Github(c) => c.init_repo(owner, repo, fork_token, fork_creation, fork_org).await,
+            Self::Gitlab(c) => c.init_repo(owner, repo, fork_token, fork_creation, fork_org).await,
+            Self::Local(c) => c.init_repo(owner, repo, fork_token, fork_creation, fork_org).await,
         }
     }
 
@@ -398,11 +406,13 @@ impl AnyPlatformClient {
         repo: &str,
         path: &str,
         content: &str,
+        branch: Option<&str>,
+        message: Option<&str>,
     ) -> Result<(), PlatformError> {
         match self {
-            Self::Github(c) => c.write_file(owner, repo, path, content).await,
-            Self::Gitlab(c) => c.write_file(owner, repo, path, content).await,
-            Self::Local(c) => c.write_file(owner, repo, path, content).await,
+            Self::Github(c) => c.write_file(owner, repo, path, content, branch, message).await,
+            Self::Gitlab(c) => c.write_file(owner, repo, path, content, branch, message).await,
+            Self::Local(c) => c.write_file(owner, repo, path, content, branch, message).await,
         }
     }
 

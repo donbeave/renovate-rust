@@ -252,7 +252,14 @@ pub async fn get_pr(
 }
 
 impl PlatformClient for ForgejoClient {
-    async fn init_repo(&self, _owner: &str, _repo: &str) -> Result<RepoInitResult, PlatformError> {
+    async fn init_repo(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _fork_token: Option<&str>,
+        _fork_creation: bool,
+        _fork_org: Option<&str>,
+    ) -> Result<RepoInitResult, PlatformError> {
         Ok(RepoInitResult {
             default_branch: "main".to_owned(),
             is_fork: false,
@@ -413,6 +420,8 @@ impl PlatformClient for ForgejoClient {
         _repo: &str,
         _path: &str,
         _content: &str,
+        _branch: Option<&str>,
+        _message: Option<&str>,
     ) -> Result<(), PlatformError> {
         Err(PlatformError::NotSupported(
             "Forgejo write_file not yet implemented".to_owned(),
