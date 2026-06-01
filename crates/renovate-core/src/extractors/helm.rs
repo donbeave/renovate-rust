@@ -625,6 +625,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::UnresolvableAlias));
     }
 
+    // Ported: "validates required fields" — helm-requirements/extract.spec.ts line 278
     #[test]
     fn no_repository_skipped() {
         let content = r#"
@@ -636,6 +637,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::NoRepository));
     }
 
+    // Ported: "validates required fields" — helm-requirements/extract.spec.ts line 278
     #[test]
     fn missing_version_dep_skipped() {
         let content = r#"
@@ -778,6 +780,7 @@ dependencies:
         assert!(deps.is_empty());
     }
 
+    // Ported: "validates required fields" — helm-requirements/extract.spec.ts line 278
     #[test]
     fn dep_without_name_is_silently_skipped() {
         // A dependency entry with no name field — emit_dep skips it.

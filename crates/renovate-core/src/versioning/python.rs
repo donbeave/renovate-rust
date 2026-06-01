@@ -226,6 +226,7 @@ mod tests {
         }
     }
 
+    // Ported: "subset("$a", "$b") === $expected" — versioning/python/index.spec.ts line 160
     #[test]
     fn subset_cases() {
         assert_eq!(subset("1.0.0", "1.0.0"), Some(true));
@@ -246,6 +247,7 @@ mod tests {
         assert_eq!(subset("1.2.3foo", "~1.1.0"), None);
     }
 
+    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — versioning/python/index.spec.ts line 182
     #[test]
     fn is_breaking_cases() {
         assert!(is_breaking("3.7", "3.8"));

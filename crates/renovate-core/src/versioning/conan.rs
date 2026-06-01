@@ -1159,6 +1159,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
+    // Ported: "isValid("$version") === $result" — lib/modules/versioning/conan/index.spec.ts line 5
     #[test]
     fn is_valid_matches_renovate_conan_index_spec() {
         let cases = vec![
@@ -1320,6 +1321,7 @@ mod tests {
         }
     }
 
+    // Ported: "isCompatible("$version", "$range") === $result" — lib/modules/versioning/conan/index.spec.ts line 163
     #[test]
     fn is_compatible_matches_renovate_conan_index_spec() {
         // Sample of the test cases (the spec has ~200 rows, we test a representative subset)
@@ -1400,6 +1402,7 @@ mod tests {
         }
     }
 
+    // Ported: "matches("$version", "$range") === $result" — lib/modules/versioning/conan/index.spec.ts line 358
     #[test]
     fn matches_matches_renovate_conan_index_spec() {
         let cases: Vec<(&str, &str, bool)> = vec![

@@ -1803,6 +1803,7 @@ mod tests {
 
     // ── nuget_is_version ──────────────────────────────────────────────────────
 
+    // Ported: "isVersion(\"$input\") === $expected" — versioning/nuget/index.spec.ts line 118
     #[test]
     fn nuget_is_version_parametrized() {
         let cases: &[(&str, bool)] = &[

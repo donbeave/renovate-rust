@@ -983,6 +983,7 @@ mod tests {
         }
     }
 
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/rez/index.spec.ts line 193
     #[test]
     fn get_new_value_table() {
         let cases: &[(&str, &str, &str, &str, Option<&str>)] = &[
