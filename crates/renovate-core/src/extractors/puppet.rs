@@ -216,7 +216,7 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
         };
         let trimmed = line.trim();
 
-        if trimmed.is_empty() {
+        if trimmed.is_empty() || trimmed.starts_with('#') {
             continue;
         }
 
@@ -336,6 +336,7 @@ mod tests {
     use super::*;
 
     // Ported: "extracts multiple modules from Puppetfile without a forge" — puppet/extract.spec.ts line 14
+    // Ported: "get default forge with null or undefined returns the same" — puppet/puppetfile-parser.spec.ts line 74
     #[test]
     fn extracts_forge_module_with_version() {
         let content = "mod 'puppetlabs/apache', '5.5.0'\n";
@@ -456,6 +457,7 @@ mod 'puppetlabs/concat', '7.1.1'
         assert!(matches!(deps[0].source, PuppetSource::Git(_)));
     }
 
+    // Ported: "Puppetfile with an invalid module creates PuppetfileModule with skipReason "invalid-config"" — puppet/puppetfile-parser.spec.ts line 58
     // Ported: "Skip reason should be overwritten by parser" — puppet/extract.spec.ts line 181
     #[test]
     fn malformed_mod_with_three_positional_args_is_invalid_config() {
@@ -544,5 +546,170 @@ mod 'invalid_url',
     fn puppet_parse_git_owner_repo_parses_https_url() {
         let result = parse_git_owner_repo("https://gitlab.com/example/example", false);
         assert_eq!(result.as_deref(), Some("example/example"));
+    }
+
+    // Ported: "Puppetfile_github_tag" — puppet/puppetfile-parser.spec.ts line 9
+    #[test]
+    fn puppetfile_github_tag_extracts_two_git_modules() {
+        let content = r#"
+mod 'apache',
+  :git => 'https://github.com/puppetlabs/puppetlabs-apache',
+  :tag => '0.9.0'
+
+mod 'stdlib',
+  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',
+  :tag => '5.0.0'
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].name, "apache");
+        assert_eq!(deps[0].current_value, "0.9.0");
+        assert_eq!(
+            deps[0].source,
+            PuppetSource::GitHub("puppetlabs/puppetlabs-apache".to_owned())
+        );
+        assert_eq!(deps[1].name, "stdlib");
+        assert_eq!(deps[1].current_value, "5.0.0");
+        assert_eq!(
+            deps[1].source,
+            PuppetSource::GitHub("puppetlabs/puppetlabs-stdlib".to_owned())
+        );
+    }
+
+    // Ported: "Puppetfile_github_tag_single_line" — puppet/puppetfile-parser.spec.ts line 31
+    #[test]
+    fn puppetfile_github_tag_single_line_extracts_two_git_modules() {
+        let content = "mod 'apache', :git => 'https://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'\nmod 'stdlib', :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git', :tag => '5.0.0'\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].name, "apache");
+        assert_eq!(deps[0].current_value, "0.9.0");
+        assert_eq!(
+            deps[0].source,
+            PuppetSource::GitHub("puppetlabs/puppetlabs-apache".to_owned())
+        );
+        assert_eq!(deps[1].name, "stdlib");
+        assert_eq!(deps[1].current_value, "5.0.0");
+        assert_eq!(
+            deps[1].source,
+            PuppetSource::GitHub("puppetlabs/puppetlabs-stdlib".to_owned())
+        );
+    }
+
+    // Ported: "Puppetfile_multiple_forges" — puppet/puppetfile-parser.spec.ts line 88
+    #[test]
+    fn puppetfile_multiple_forges() {
+        let content = r#"forge "https://forgeapi.puppetlabs.com"
+
+#########################
+## Puppetforge Modules ##
+#########################
+
+mod 'puppetlabs/stdlib', '8.0.0'
+mod 'puppetlabs/apache', '6.5.1'
+mod 'puppetlabs/puppetdb', '7.9.0'
+
+forge "https://some-other-puppet-forge.com"
+
+###########################
+## Some Other Mock Forge ##
+###########################
+
+mod 'mock/mockstdlib', '10.0.0'
+mod 'mock/mockapache', '2.5.1'
+mod 'mock/mockpuppetdb', '1.9.0'
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 6);
+
+        let default_mods: Vec<_> = deps
+            .iter()
+            .filter(|d| matches!(&d.source, PuppetSource::PuppetForge { forge_url: Some(u) } if u == "https://forgeapi.puppetlabs.com"))
+            .collect();
+        assert_eq!(default_mods.len(), 3);
+
+        let other_mods: Vec<_> = deps
+            .iter()
+            .filter(|d| matches!(&d.source, PuppetSource::PuppetForge { forge_url: Some(u) } if u == "https://some-other-puppet-forge.com"))
+            .collect();
+        assert_eq!(other_mods.len(), 3);
+    }
+
+    // Ported: "Puppetfile_no_forge" — puppet/puppetfile-parser.spec.ts line 133
+    #[test]
+    fn puppetfile_no_forge() {
+        let content = "mod 'puppetlabs/stdlib', '8.0.0'\nmod 'puppetlabs/apache', '6.5.1'\nmod 'puppetlabs/puppetdb', '7.9.0'\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert_eq!(deps[0].name, "puppetlabs/stdlib");
+        assert_eq!(deps[0].current_value, "8.0.0");
+        assert_eq!(deps[1].name, "puppetlabs/apache");
+        assert_eq!(deps[1].current_value, "6.5.1");
+        assert_eq!(deps[2].name, "puppetlabs/puppetdb");
+        assert_eq!(deps[2].current_value, "7.9.0");
+    }
+
+    // Ported: "Puppetfile_single_forge" — puppet/puppetfile-parser.spec.ts line 161
+    #[test]
+    fn puppetfile_single_forge() {
+        let content = r#"forge "https://forgeapi.puppetlabs.com"
+mod 'puppetlabs/stdlib', '8.0.0'
+mod 'puppetlabs/apache', '6.5.1'
+mod 'puppetlabs/puppetdb', '7.9.0'
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        for dep in &deps {
+            assert_eq!(
+                dep.source,
+                PuppetSource::PuppetForge {
+                    forge_url: Some("https://forgeapi.puppetlabs.com".to_owned())
+                }
+            );
+        }
+    }
+
+    // Ported: "Puppetfile_with_comments" — puppet/puppetfile-parser.spec.ts line 192
+    #[test]
+    fn puppetfile_with_comments() {
+        let content = r#"mod 'puppetlabs/stdlib', '8.0.0'
+mod 'puppetlabs/apache', '6.5.1' # This is a "comment"
+# mod 'puppetlabs/puppetdb', '7.9.0'
+
+mod 'apache',
+  :git => 'https://github.com/puppetlabs/puppetlabs-apache',
+#  :tag => '0.9.0'
+
+mod 'stdlib',
+#  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',
+  :tag => '5.0.0'
+
+mod 'stdlib2', :git => 'git@github.com:puppetlabs/puppetlabs-stdlib2.git' # This is a "comment"
+  # :tag => '5.0.0'
+"#;
+        let deps = extract(content);
+        // stdlib and apache forge modules extracted; puppetdb fully commented out skipped
+        let stdlib = deps.iter().find(|d| d.name == "puppetlabs/stdlib");
+        assert!(stdlib.is_some());
+        assert_eq!(stdlib.unwrap().current_value, "8.0.0");
+
+        let apache_forge = deps.iter().find(|d| d.name == "puppetlabs/apache");
+        assert!(apache_forge.is_some());
+        assert_eq!(apache_forge.unwrap().current_value, "6.5.1");
+
+        // apache git module — git present but tag commented out → GitNoTag
+        let apache_git = deps.iter().find(|d| d.name == "apache");
+        assert!(apache_git.is_some());
+        assert_eq!(apache_git.unwrap().skip_reason, Some(PuppetSkipReason::GitNoTag));
+
+        // stdlib — only tag, no git → UnspecifiedVersion
+        let stdlib_git = deps.iter().find(|d| d.name == "stdlib");
+        assert!(stdlib_git.is_some());
+        assert_eq!(stdlib_git.unwrap().skip_reason, Some(PuppetSkipReason::UnspecifiedVersion));
+
+        // stdlib2 — git present but tag commented out → GitNoTag
+        let stdlib2 = deps.iter().find(|d| d.name == "stdlib2");
+        assert!(stdlib2.is_some());
+        assert_eq!(stdlib2.unwrap().skip_reason, Some(PuppetSkipReason::GitNoTag));
     }
 }

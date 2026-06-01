@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5694 / 11670 distinct upstream it() tests ported (48.8%) across 292 modules.
-**Quality:** 6404 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
+**Total:** 5702 / 11670 distinct upstream it() tests ported (48.9%) across 292 modules.
+**Quality:** 6412 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2517/3642 (69%)
+## managers  —  2525/3642 (69%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -122,7 +122,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/pre-commit` | 1 | ? | 12/12 (100%) | — |
 | `manager/proto` | 2 | ? | 16/16 (100%) | — |
 | `manager/pub` | 3 | ? | 6/21 (29%) | — |
-| `manager/puppet` | 3 | ? | 13/21 (62%) | — |
+| `manager/puppet` | 3 | ? | 21/21 (100%) | — |
 | `manager/pyenv` | 1 | ? | 3/3 (100%) | — |
 | `manager/quadlet` | 1 | ? | 11/11 (100%) | — |
 | `manager/renovate-config` | 1 | ? | 18/20 (90%) | — |
