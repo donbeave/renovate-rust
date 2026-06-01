@@ -339,6 +339,62 @@ fn build_pr_body(
     renovate_core::platform::github::massage_markdown_links(&body)
 }
 
+/// Verify that an auto-replaced file content actually updated the intended
+/// dependency.  Re-extracts using the manager's extract function when available
+/// and checks that at least one dep with the given name now carries the
+/// expected value.  Falls back to a string heuristic for unknown managers.
+///
+/// Mirrors `lib/workers/repository/update/branch/auto-replace.ts`
+/// `confirmIfDepUpdated`.
+fn verify_auto_replace(manager: &str, content: &str, dep_name: &str, expected_value: &str) -> bool {
+    match manager {
+        "terraform" => {
+            let deps = renovate_core::extractors::terraform::extract(content);
+            deps.iter()
+                .any(|d| d.name == dep_name && d.current_value == expected_value)
+        }
+        "terragrunt" => {
+            let deps = renovate_core::extractors::terragrunt::extract(content);
+            deps.iter().any(|d| {
+                d.dep_name == dep_name && d.current_value == expected_value
+            })
+        }
+        "bicep" => {
+            let deps = renovate_core::extractors::bicep::extract(content);
+            deps.iter().any(|d| {
+                d.dep_name == dep_name && d.current_value == expected_value
+            })
+        }
+        "ansible" | "ansible-galaxy" => {
+            let deps = renovate_core::extractors::ansible::extract(content);
+            deps.iter().any(|d| {
+                d.image == dep_name && d.tag.as_deref() == Some(expected_value)
+            })
+        }
+        "kubernetes" | "kustomize" => {
+            let deps = renovate_core::extractors::kubernetes::extract(content);
+            deps.iter().any(|d| {
+                d.image_name == dep_name
+                    && d.current_value == expected_value
+            })
+        }
+        "pre-commit" => {
+            let deps = renovate_core::extractors::pre_commit::extract(content);
+            deps.iter().any(|d| {
+                d.dep_name == dep_name && d.current_value == expected_value
+            })
+        }
+        _ => {
+            // Fallback heuristic: expected_value appears on a line that also
+            // contains dep_name.  This is weaker than re-extraction but still
+            // catches the most common corruption / missed-replacement cases.
+            content.lines().any(|line| {
+                line.contains(dep_name) && line.contains(expected_value)
+            })
+        }
+    }
+}
+
 /// Process a single repository and return its update report.
 ///
 /// Returns `(Option<RepoReport>, had_error)`:
@@ -799,15 +855,36 @@ async fn process_repo(
                                             None,
                                         );
                                         if result.success {
-                                            tracing::debug!(
-                                                repo = %repo_slug,
-                                                branch = %branch,
-                                                file = %file_path,
-                                                dep = %bd.dep.name,
-                                                manager = %manager,
-                                                "applied auto-replace fallback"
-                                            );
-                                            result.content
+                                            if let Some(ref new_content) = result.content {
+                                                if verify_auto_replace(
+                                                    manager,
+                                                    new_content,
+                                                    &bd.dep.name,
+                                                    new_value,
+                                                ) {
+                                                    tracing::debug!(
+                                                        repo = %repo_slug,
+                                                        branch = %branch,
+                                                        file = %file_path,
+                                                        dep = %bd.dep.name,
+                                                        manager = %manager,
+                                                        "applied auto-replace fallback"
+                                                    );
+                                                    result.content
+                                                } else {
+                                                    tracing::warn!(
+                                                        repo = %repo_slug,
+                                                        branch = %branch,
+                                                        file = %file_path,
+                                                        dep = %bd.dep.name,
+                                                        manager = %manager,
+                                                        "auto-replace produced content that failed verification"
+                                                    );
+                                                    None
+                                                }
+                                            } else {
+                                                None
+                                            }
                                         } else {
                                             tracing::debug!(
                                                 repo = %repo_slug,
