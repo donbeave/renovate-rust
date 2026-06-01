@@ -56,6 +56,8 @@ pub struct TerraformModule {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TerraformResources {
+    #[serde(flatten)]
+    pub other: BTreeMap<String, serde_json::Value>,
     #[serde(rename = "helm_release", skip_serializing_if = "Option::is_none")]
     pub helm_release: Option<BTreeMap<String, TerraformHelmRelease>>,
     #[serde(rename = "tfe_workspace", skip_serializing_if = "Option::is_none")]
@@ -319,5 +321,144 @@ mod tests {
         let ws = resources.tfe_workspace.unwrap();
         assert!(ws.contains_key("test"));
         assert_eq!(ws["test"].terraform_version.as_deref(), Some("1.6.0"));
+    }
+
+    // Ported: "should return flat modules" — terraform/hcl/index.spec.ts line 11
+    #[test]
+    fn parse_hcl_returns_flat_modules() {
+        let hcl = r#"
+module "foo" {
+  source = "github.com/hashicorp/example?ref=v1.0.0"
+}
+
+module "bar" {
+  source = "github.com/hashicorp/example?ref=next"
+}
+
+module "repo-with-non-semver-ref" {
+  source = "github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9"
+}
+
+module "repo-with-dot" {
+  source = "github.com/hashicorp/example.2.3?ref=v1.0.0"
+}
+
+module "repo-with-dot-and-git-suffix" {
+  source = "github.com/hashicorp/example.2.3.git?ref=v1.0.0"
+}
+
+module "consul" {
+  source  = "hashicorp/consul/aws"
+  version = "0.1.0"
+}
+        "#;
+        let def = parse_hcl(hcl).unwrap();
+        let modules = def.module.unwrap();
+        assert_eq!(modules.len(), 6);
+        assert_eq!(
+            modules["foo"][0].source.as_deref(),
+            Some("github.com/hashicorp/example?ref=v1.0.0")
+        );
+        assert_eq!(
+            modules["bar"][0].source.as_deref(),
+            Some("github.com/hashicorp/example?ref=next")
+        );
+        assert_eq!(
+            modules["consul"][0].source.as_deref(),
+            Some("hashicorp/consul/aws")
+        );
+        assert_eq!(modules["consul"][0].version.as_deref(), Some("0.1.0"));
+    }
+
+    // Ported: "should return nested terraform block" — terraform/hcl/index.spec.ts line 53
+    #[test]
+    fn parse_hcl_returns_nested_terraform_block() {
+        let hcl = r#"
+terraform {
+  required_providers {
+    aws = {
+      source  = "aws"
+      version = "~> 3.0"
+    }
+    azurerm = {
+      version = "~> 2.50.0"
+    }
+    kubernetes = {
+      source  = "terraform.example.com/example/kubernetes"
+      version = ">= 1.0"
+    }
+  }
+}
+        "#;
+        let def = parse_hcl(hcl).unwrap();
+        let blocks = def.terraform.unwrap();
+        assert_eq!(blocks.len(), 1);
+        let rp = blocks[0].required_providers.as_ref().unwrap();
+        assert!(rp.contains_key("aws"));
+        assert!(rp.contains_key("azurerm"));
+        assert!(rp.contains_key("kubernetes"));
+    }
+
+    // Ported: "should return resource blocks" — terraform/hcl/index.spec.ts line 70
+    #[test]
+    fn parse_hcl_returns_resource_blocks() {
+        let hcl = r#"
+# docker_container resources
+resource "docker_container" "foo" {
+  name  = "foo"
+  image = "nginx:1.7.8"
+}
+
+resource "docker_container" "invalid" {
+  name = "foo"
+}
+
+# docker_service resources
+resource "docker_service" "foo" {
+  name = "foo-service"
+
+  task_spec {
+    container_spec {
+      image = "repo.mycompany.com:8080/foo-service:v1"
+    }
+  }
+
+  endpoint_spec {
+    ports {
+      target_port = "8080"
+    }
+  }
+}
+        "#;
+        let def = parse_hcl(hcl).unwrap();
+        let resources = def.resource.unwrap();
+        let docker = resources.other.get("docker_container").unwrap();
+        assert!(docker.get("foo").is_some());
+        assert!(docker.get("invalid").is_some());
+        let svc = resources.other.get("docker_service").unwrap();
+        assert!(svc.get("foo").is_some());
+    }
+
+    // Ported: "should parse json" — terraform/hcl/index.spec.ts line 101
+    #[test]
+    fn parse_json_returns_resources() {
+        let json = r#"{
+  "resource": {
+    "aws_instance": {
+      "example": {
+        "provisioner": [
+          {
+            "local-exec": {
+              "command": "echo 'Hello World' >example.txt"
+            }
+          }
+        ]
+      }
+    }
+  }
+}"#;
+        let def = parse_json(json).unwrap();
+        let resources = def.resource.unwrap();
+        assert!(resources.other.contains_key("aws_instance"));
     }
 }

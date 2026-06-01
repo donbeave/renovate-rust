@@ -1282,6 +1282,98 @@ pub fn update_locked_terraform_dependency(
     }
 }
 
+// ── Lockfile update helpers ───────────────────────────────────────────────────
+
+/// Mirrors `lib/modules/manager/terraform/lockfile/util.ts` `massageNewValue()`.
+fn massage_new_value(value: Option<&str>) -> Option<String> {
+    let value = value?;
+    let elements: Vec<&str> = value.split(',').collect();
+    let mut massaged = Vec::with_capacity(elements.len());
+    for element in elements {
+        let element = element.trim();
+        if element.contains("~>") {
+            massaged.push(element.to_owned());
+            continue;
+        }
+        let parts = element.split('.').count();
+        let missing_0s = 3usize.saturating_sub(parts);
+        let mut massaged_element = element.to_owned();
+        for _ in 0..missing_0s {
+            massaged_element.push_str(".0");
+        }
+        massaged.push(massaged_element);
+    }
+    Some(massaged.join(","))
+}
+
+/// Mirrors `lib/modules/manager/terraform/lockfile/util.ts` `isPinnedVersion()`.
+fn is_pinned_version(value: &str) -> bool {
+    if value.is_empty() {
+        return false;
+    }
+    let trimmed = value.trim();
+    // Any range operator means not a single pinned version.
+    if trimmed.contains("~>")
+        || trimmed.contains(">=")
+        || trimmed.contains("<=")
+        || trimmed.contains("!=")
+        || trimmed.contains(',')
+        || trimmed.contains('>')
+        || trimmed.contains('<')
+    {
+        return false;
+    }
+    true
+}
+
+/// Mirrors `lib/modules/manager/terraform/lockfile/index.ts` `getNewConstraint()`.
+pub fn get_new_constraint(
+    current_value: Option<&str>,
+    current_version: Option<&str>,
+    new_value_raw: Option<&str>,
+    new_version: Option<&str>,
+    _package_name: Option<&str>,
+    old_constraint: Option<&str>,
+) -> Option<String> {
+    let new_value = massage_new_value(new_value_raw);
+    let old_constraint = old_constraint?;
+
+    // If current and new values are the same, preserve the old constraint.
+    if let (Some(cv), Some(nv)) = (current_value, new_value.as_deref()) {
+        if cv == nv {
+            return Some(old_constraint.to_owned());
+        }
+    }
+
+    // Replace currentValue inside oldConstraint.
+    if let (Some(cv), Some(nv)) = (current_value, new_value.as_deref()) {
+        if old_constraint.contains(cv) {
+            let pattern = format!(r"(,\s|^){}(\.0)*", regex::escape(cv));
+            let re = regex::Regex::new(&pattern).ok()?;
+            return Some(
+                re.replace(old_constraint, |caps: &regex::Captures| {
+                    format!("{}{}", &caps[1], nv)
+                })
+                .into_owned(),
+            );
+        }
+    }
+
+    // Replace currentVersion inside oldConstraint.
+    if let (Some(cv), Some(nv)) = (current_version, new_version) {
+        if old_constraint.contains(cv) {
+            return Some(old_constraint.replace(cv, nv));
+        }
+    }
+
+    // If the new value is a pinned exact version, return newVersion.
+    if new_value.as_deref().is_some_and(is_pinned_version) {
+        return new_version.map(|s| s.to_owned());
+    }
+
+    new_value
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /// Parse a Terraform `.tf` file and extract all provider and module deps.
@@ -2955,6 +3047,137 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(
             TerraformDepType::TfeWorkspace.as_renovate_str(),
             "tfe_workspace"
+        );
+    }
+
+    // ── get_new_constraint (lockfile/index.spec.ts) ───────────────────────────
+
+    // Ported: "correctly calculate new constraint on pinning" — terraform/lockfile/index.spec.ts line 1217
+    #[test]
+    fn get_new_constraint_pins_to_exact_version() {
+        assert_eq!(
+            get_new_constraint(
+                Some(">= 4.3"),
+                None,
+                Some("5.26.0"),
+                Some("5.26.0"),
+                Some("aws"),
+                Some(">= 4.3.0"),
+            ),
+            Some("5.26.0".to_owned())
+        );
+    }
+
+    // Ported: "update constraint with multiple elements" — terraform/lockfile/index.spec.ts line 1230
+    #[test]
+    fn get_new_constraint_updates_multi_element_constraint() {
+        assert_eq!(
+            get_new_constraint(
+                Some("2.41.0"),
+                None,
+                Some("2.46.0"),
+                Some("2.46.0"),
+                Some("aws"),
+                Some(">= 2.36.0, 2.41.0"),
+            ),
+            Some(">= 2.36.0, 2.46.0".to_owned())
+        );
+    }
+
+    // Ported: "update constraint when current version is matched multiple times" — terraform/lockfile/index.spec.ts line 1243
+    #[test]
+    fn get_new_constraint_updates_first_match_only() {
+        assert_eq!(
+            get_new_constraint(
+                Some("2.41.0"),
+                None,
+                Some("2.46.0"),
+                Some("2.46.0"),
+                Some("aws"),
+                Some(">= 2.41.0, 2.41.0"),
+            ),
+            Some(">= 2.41.0, 2.46.0".to_owned())
+        );
+    }
+
+    // Ported: "update constraint when current version is in a complicated constraint" — terraform/lockfile/index.spec.ts line 1256
+    #[test]
+    fn get_new_constraint_updates_in_complicated_constraint() {
+        assert_eq!(
+            get_new_constraint(
+                Some("<= 2.41.0"),
+                None,
+                Some("<= 2.46.0"),
+                Some("2.46.0"),
+                Some("aws"),
+                Some(">= 2.41.0, <= 2.41.0, >= 2.0.0"),
+            ),
+            Some(">= 2.41.0, <= 2.46.0, >= 2.0.0".to_owned())
+        );
+    }
+
+    // Ported: "create constraint with full version" — terraform/lockfile/index.spec.ts line 1269
+    #[test]
+    fn get_new_constraint_creates_full_version_constraint() {
+        assert_eq!(
+            get_new_constraint(
+                Some(">= 4.0, <4.12"),
+                None,
+                Some("< 4.21"),
+                Some("4.20.0"),
+                Some("aws"),
+                Some(">= 4.0.0, < 4.12.0"),
+            ),
+            Some("< 4.21.0".to_owned())
+        );
+    }
+
+    // Additional unit tests covering the preserve-constraint and replace-currentVersion branches
+    // Ported: "preserves constraints when current value and new value are same" — terraform/lockfile/index.spec.ts line 1037
+    #[test]
+    fn get_new_constraint_preserves_when_same() {
+        assert_eq!(
+            get_new_constraint(
+                Some("~> 3.36"),
+                None,
+                Some("~> 3.36"),
+                Some("3.36.1"),
+                Some("aws"),
+                Some("~> 3.0.0"),
+            ),
+            Some("~> 3.0.0".to_owned())
+        );
+    }
+
+    // Ported: "replaces current value to new version within a constraint" — terraform/lockfile/index.spec.ts line 1097
+    #[test]
+    fn get_new_constraint_replaces_current_value() {
+        assert_eq!(
+            get_new_constraint(
+                Some("~> 3.0.0"),
+                None,
+                Some("~> 3.37.0"),
+                Some("3.37.0"),
+                Some("aws"),
+                Some("~> 3.0.0"),
+            ),
+            Some("~> 3.37.0".to_owned())
+        );
+    }
+
+    // Ported: "replaces current version to new version within a constraint" — terraform/lockfile/index.spec.ts line 1157
+    #[test]
+    fn get_new_constraint_replaces_current_version() {
+        assert_eq!(
+            get_new_constraint(
+                None,
+                Some("3.0.0"),
+                None,
+                Some("3.37.0"),
+                Some("aws"),
+                Some("~> 3.0.0"),
+            ),
+            Some("~> 3.37.0".to_owned())
         );
     }
 }
