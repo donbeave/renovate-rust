@@ -331,7 +331,10 @@ fn build_pr_body(
     // Footer
     body.push_str(&branch::get_pr_footer(Some(&repo_cfg.pr_footer)));
 
-    body
+    // Rewrite GitHub links to use redirect.github.com (avoids PR reference
+    // spam when Renovate includes changelogs / release notes).
+    // Mirrors upstream `massageMarkdownLinks`.
+    renovate_core::platform::github::massage_markdown_links(&body)
 }
 
 /// Process a single repository and return its update report.
@@ -1083,6 +1086,21 @@ mod tests {
         assert!(
             body.contains("4.17.21"),
             "body should mention latest version; got: {body}"
+        );
+    }
+
+    #[test]
+    fn build_pr_body_rewrites_github_links() {
+        let deps = vec![];
+        let mut cfg = renovate_core::repo_config::RepoConfig::default();
+        cfg.pr_header = Some(
+            "See https://github.com/owner/repo/issues/42 for details.".to_owned(),
+        );
+        let body = build_pr_body(&deps, &cfg);
+        // The bare URL should be wrapped in a markdown link with redirect.github.com.
+        assert!(
+            body.contains("https://redirect.github.com/owner/repo/issues/42"),
+            "body should rewrite link target to redirect.github.com; got: {body}"
         );
     }
 }
