@@ -2761,7 +2761,7 @@ mod tests {
 
     // ── get_json_file ─────────────────────────────────────────────────────────
 
-    // Ported: "returns null" — modules/platform/github/index.spec.ts line 189
+    // Ported: "returns null" — modules/platform/github/index.spec.ts line 5382
     #[tokio::test]
     async fn get_json_file_returns_null_for_empty_content() {
         let server = MockServer::start().await;
@@ -2779,7 +2779,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns file content" — modules/platform/github/index.spec.ts line 190
+    // Ported: "returns file content" — modules/platform/github/index.spec.ts line 5393
     #[tokio::test]
     async fn get_json_file_returns_parsed_content() {
         let server = MockServer::start().await;
@@ -2799,7 +2799,7 @@ mod tests {
         assert_eq!(result, Some(data));
     }
 
-    // Ported: "returns file content in json5 format" — modules/platform/github/index.spec.ts line 191
+    // Ported: "returns file content in json5 format" — modules/platform/github/index.spec.ts line 5405
     #[tokio::test]
     async fn get_json_file_parses_json5() {
         let server = MockServer::start().await;
@@ -2819,7 +2819,7 @@ mod tests {
         assert_eq!(result, Some(serde_json::json!({"foo": "bar"})));
     }
 
-    // Ported: "returns file content from given repo" — modules/platform/github/index.spec.ts line 192
+    // Ported: "returns file content from given repo" — modules/platform/github/index.spec.ts line 5422
     #[tokio::test]
     async fn get_json_file_from_given_repo() {
         let server = MockServer::start().await;
@@ -2839,7 +2839,7 @@ mod tests {
         assert_eq!(result, Some(data));
     }
 
-    // Ported: "returns file content from branch or tag" — modules/platform/github/index.spec.ts line 193
+    // Ported: "returns file content from branch or tag" — modules/platform/github/index.spec.ts line 5434
     #[tokio::test]
     async fn get_json_file_from_branch_or_tag() {
         let server = MockServer::start().await;
@@ -2860,7 +2860,7 @@ mod tests {
         assert_eq!(result, Some(data));
     }
 
-    // Ported: "throws on malformed JSON" — modules/platform/github/index.spec.ts line 194
+    // Ported: "throws on malformed JSON" — modules/platform/github/index.spec.ts line 5446
     #[tokio::test]
     async fn get_json_file_throws_on_malformed_json() {
         let server = MockServer::start().await;
@@ -2879,7 +2879,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(_)));
     }
 
-    // Ported: "throws on errors" — modules/platform/github/index.spec.ts line 195
+    // Ported: "throws on errors" — modules/platform/github/index.spec.ts line 5456
     #[tokio::test]
     async fn get_json_file_throws_on_http_error() {
         let server = MockServer::start().await;
