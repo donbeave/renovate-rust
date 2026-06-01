@@ -164,11 +164,9 @@ struct GitlabTreeEntry {
 /// GitLab project metadata response.
 /// `GET /projects/{id}`
 #[derive(Debug, Deserialize)]
-#[allow(dead_code)]
 struct GitlabProject {
     id: i64,
     archived: bool,
-    mirror: bool,
     default_branch: Option<String>,
     empty_repo: bool,
     forked_from_project: Option<serde_json::Value>,
@@ -176,8 +174,6 @@ struct GitlabProject {
     merge_requests_access_level: Option<String>,
     merge_method: Option<String>,
     issues_enabled: Option<bool>,
-    squash_option: Option<String>,
-    path_with_namespace: Option<String>,
 }
 
 // ── PlatformClient impl ───────────────────────────────────────────────────────

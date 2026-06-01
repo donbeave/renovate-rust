@@ -135,7 +135,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/sveltos` | 1 | ? | 14/14 (100%) | — |
 | `manager/swift` | 4 | ? | 28/59 (47%) | — |
 | `manager/tekton` | 1 | ? | 5/5 (100%) | — |
-| `manager/terraform` | 13 | full | 83/88 (94%) | Extractor + lockfile update (`write_lock_updates`, `create_hashes`) + `TerraformArtifactRunner` wired into CLI. CLI manifest editing falls back to `auto_replace` (naive). |
+| `manager/terraform` | 13 | full | 83/88 (94%) | Extractor + lockfile update + TerraformArtifactRunner wired into CLI. |
 | `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
 | `manager/terragrunt` | 4 | ? | 17/18 (94%) | — |
 | `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |
@@ -247,7 +247,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/forgejo` | 5 | ? | 10/187 (5%) | — |
 | `platform/gerrit` | 4 | ? | 0/158 (0%) | — |
 | `platform/gitea` | 5 | ? | 0/183 (0%) | — |
-| `platform/github` | 7 | full | 197/245 (80%) | Read (get raw file, file list, PR list), write (`write_file` via Contents API), PR ops, fork handling all implemented. |
+| `platform/github` | 7 | full | 197/245 (80%) | Read, write, PR ops, fork handling all implemented. |
 | `platform/gitlab` | 4 | ? | 20/182 (11%) | — |
 | `platform/local` | 2 | full | 41/41 (100%) | Self-hosted platform stubs complete. |
 | `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
