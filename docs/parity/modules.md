@@ -23,8 +23,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5862 / 11670 distinct upstream it() tests ported (50.2%) across 292 modules.
-**Quality:** 6584 `// Ported:` comments → 722 duplicate, 0 orphan, 0 malformed.
+**Total:** 5865 / 11670 distinct upstream it() tests ported (50.3%) across 292 modules.
+**Quality:** 6593 `// Ported:` comments → 728 duplicate, 0 orphan, 8 malformed.
 
 ## managers  —  2549/3642 (70%)
 
@@ -248,7 +248,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/gerrit` | 4 | ? | 0/158 (0%) | — |
 | `platform/gitea` | 5 | ? | 0/183 (0%) | — |
 | `platform/github` | 7 | full | 197/245 (80%) | Read, write, PR ops, fork handling all implemented. |
-| `platform/gitlab` | 4 | ? | 73/182 (40%) | — |
+| `platform/gitlab` | 4 | full | 73/182 (40%) | PR read/write surface complete: get_pr_list, get_pr, get_branch_pr, create_pr, update_pr, write_file. |
 | `platform/local` | 2 | full | 41/41 (100%) | Self-hosted platform stubs complete. |
 | `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
 | `platform/utils` | 2 | ? | 14/14 (100%) | — |
@@ -312,12 +312,12 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/unity3d` | 1 | ? | 4/4 (100%) | — |
 | `versioning/unity3d-packages` | 1 | ? | 4/4 (100%) | — |
 
-## workers  —  366/1883 (19%)
+## workers  —  369/1883 (20%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `worker/global` | 11 | ? | 116/208 (56%) | — |
-| `worker/repository` | 103 | ? | 250/1675 (15%) | — |
+| `worker/repository` | 103 | partial | 253/1675 (15%) | Branch names, commit messages, PR body rendering complete. Main orchestrator (process_repository) is still a stub. |
 
 ## config  —  426/700 (61%)
 
@@ -336,7 +336,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 |---|---|---|---|---|
 | `util/_root` | 45 | ? | 227/403 (56%) | — |
 | `util/cache` | 13 | ? | 58/151 (38%) | — |
-| `util/exec` | 7 | ? | 70/138 (51%) | — |
+| `util/exec` | 7 | full | 70/138 (51%) | Raw exec, orchestrator, docker, containerbase, hermit, env handling all implemented. |
 | `util/fs` | 2 | ? | 29/61 (48%) | — |
 | `util/git` | 15 | ? | 70/242 (29%) | — |
 | `util/github` | 10 | ? | 17/45 (38%) | — |

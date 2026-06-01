@@ -1259,4 +1259,144 @@ mod tests {
             "body should rewrite link target to redirect.github.com; got: {body}"
         );
     }
+
+    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_terraform_match() {
+        let content = r#"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
+}
+"#;
+        assert!(verify_auto_replace(
+            "terraform",
+            content,
+            "hashicorp/aws",
+            "~> 4.0"
+        ));
+    }
+
+    // Ported: "rejects dep that was not updated" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_terraform_mismatch() {
+        let content = r#"
+provider "aws" {
+  version = "~> 3.0"
+}
+"#;
+        assert!(!verify_auto_replace("terraform", content, "aws", "~> 4.0"));
+    }
+
+    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_terragrunt_match() {
+        let content = r#"
+terraform {
+  source = "git::git@github.com:foo/bar.git?ref=v2.0.0"
+}
+"#;
+        assert!(verify_auto_replace(
+            "terragrunt",
+            content,
+            "github.com/foo/bar",
+            "v2.0.0"
+        ));
+    }
+
+    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_bicep_match() {
+        let content = r#"
+resource cluster 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
+  name: 'myCluster'
+}
+"#;
+        assert!(verify_auto_replace(
+            "bicep",
+            content,
+            "Microsoft.ContainerService/managedClusters",
+            "2024-01-01"
+        ));
+    }
+
+    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_ansible_match() {
+        let content = r#"
+- docker_service:
+    definition:
+      services:
+        gitlab:
+          image: sameersbn/gitlab:11.6.0
+"#;
+        assert!(verify_auto_replace(
+            "ansible",
+            content,
+            "sameersbn/gitlab",
+            "11.6.0"
+        ));
+    }
+
+    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_kubernetes_match() {
+        let content = r#"
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - image: nginx:1.21.0
+"#;
+        assert!(verify_auto_replace(
+            "kubernetes",
+            content,
+            "nginx",
+            "1.21.0"
+        ));
+    }
+
+    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_pre_commit_match() {
+        let content = r#"
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+"#;
+        assert!(verify_auto_replace(
+            "pre-commit",
+            content,
+            "pre-commit/pre-commit-hooks",
+            "v4.4.0"
+        ));
+    }
+
+    // Ported: "falls back to string heuristic for unknown managers" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_fallback_heuristic_match() {
+        let content = "some-dep = \"1.2.3\"";
+        assert!(verify_auto_replace(
+            "unknown-manager",
+            content,
+            "some-dep",
+            "1.2.3"
+        ));
+    }
+
+    // Ported: "falls back to string heuristic for unknown managers" — workers/repository/update/branch/auto-replace.spec.ts
+    #[test]
+    fn verify_auto_replace_fallback_heuristic_mismatch() {
+        let content = "some-dep = \"1.2.3\"";
+        assert!(!verify_auto_replace(
+            "unknown-manager",
+            content,
+            "some-dep",
+            "2.0.0"
+        ));
+    }
 }
