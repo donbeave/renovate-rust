@@ -185,6 +185,14 @@ impl Scm for DefaultScm {
             Err(e) => ScmResult::Error(e.to_string()),
         }
     }
+
+    async fn get_branch_update_date(&self, _branch_name: &str) -> Option<String> {
+        None
+    }
+
+    async fn merge_branch(&self, _branch_name: &str) -> ScmResult {
+        ScmResult::Ok(String::new())
+    }
 }
 
 #[cfg(test)]

@@ -93,6 +93,13 @@ pub trait Scm: Send + Sync {
     fn checkout_branch(&self, branch_name: &str) -> impl Future<Output = ScmResult> + Send;
 
     fn merge_and_push(&self, branch_name: &str) -> impl Future<Output = ScmResult> + Send;
+
+    fn get_branch_update_date(
+        &self,
+        branch_name: &str,
+    ) -> impl Future<Output = Option<String>> + Send;
+
+    fn merge_branch(&self, branch_name: &str) -> impl Future<Output = ScmResult> + Send;
 }
 
 #[cfg(test)]

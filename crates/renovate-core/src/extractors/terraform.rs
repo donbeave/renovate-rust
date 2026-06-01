@@ -1462,15 +1462,14 @@ pub fn get_new_constraint(
     let old_constraint = old_constraint?;
 
     // If current and new values are the same, preserve the old constraint.
-    if let (Some(cv), Some(nv)) = (current_value, new_value.as_deref()) {
-        if cv == nv {
+    if let (Some(cv), Some(nv)) = (current_value, new_value.as_deref())
+        && cv == nv {
             return Some(old_constraint.to_owned());
         }
-    }
 
     // Replace currentValue inside oldConstraint.
-    if let (Some(cv), Some(nv)) = (current_value, new_value.as_deref()) {
-        if old_constraint.contains(cv) {
+    if let (Some(cv), Some(nv)) = (current_value, new_value.as_deref())
+        && old_constraint.contains(cv) {
             let pattern = format!(r"(,\s|^){}(\.0)*", regex::escape(cv));
             let re = regex::Regex::new(&pattern).ok()?;
             return Some(
@@ -1480,14 +1479,12 @@ pub fn get_new_constraint(
                 .into_owned(),
             );
         }
-    }
 
     // Replace currentVersion inside oldConstraint.
-    if let (Some(cv), Some(nv)) = (current_version, new_version) {
-        if old_constraint.contains(cv) {
+    if let (Some(cv), Some(nv)) = (current_version, new_version)
+        && old_constraint.contains(cv) {
             return Some(old_constraint.replace(cv, nv));
         }
-    }
 
     // If the new value is a pinned exact version, return newVersion.
     if new_value.as_deref().is_some_and(is_pinned_version) {
@@ -1614,11 +1611,10 @@ pub async fn update_terraform_artifacts(
             continue;
         };
 
-        if dep.is_lockfile_update {
-            if let (Some(new_ver), Some(ver_scheme)) =
+        if dep.is_lockfile_update
+            && let (Some(new_ver), Some(ver_scheme)) =
                 (dep.new_version.as_deref(), dep.versioning.as_deref())
-            {
-                if ver_scheme == "hashicorp" {
+                && ver_scheme == "hashicorp" {
                     let satisfies = crate::versioning::hashicorp::get_satisfying_version(
                         &[new_ver],
                         &update_lock.constraints,
@@ -1627,8 +1623,6 @@ pub async fn update_terraform_artifacts(
                         continue;
                     }
                 }
-            }
-        }
 
         let registry_url = dep
             .registry_urls

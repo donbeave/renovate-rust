@@ -106,14 +106,14 @@ impl HttpClient {
     /// behaviour is identical to [`get`][Self::get].
     pub fn get_with_auth(&self, url: &str, auth: Option<&str>) -> RequestBuilder {
         let rb = self.inner.get(url);
-        let rb = match auth {
+        
+        match auth {
             Some(a) => rb.header("Authorization", a),
             None => match &self.token {
                 Some(t) => rb.bearer_auth(t),
                 None => rb,
             },
-        };
-        rb
+        }
     }
 
     /// Send a GET request with automatic retry on transient failures.

@@ -249,7 +249,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/gitea` | 5 | ? | 0/183 (0%) | — |
 | `platform/github` | 7 | full | 197/245 (80%) | M3 complete (dry-run write surface) |
 | `platform/gitlab` | 4 | ? | 17/182 (9%) | — |
-| `platform/local` | 2 | ? | 38/41 (93%) | — |
+| `platform/local` | 2 | full | 38/41 (93%) | — |
 | `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
 | `platform/utils` | 2 | ? | 14/14 (100%) | — |
 

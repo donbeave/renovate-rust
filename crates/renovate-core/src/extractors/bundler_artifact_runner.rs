@@ -69,7 +69,7 @@ impl BundlerArtifactRunner {
                     flags.push("--conservative");
                 }
                 let prefix = if flags.is_empty() {
-                    "".to_string()
+                    "".to_owned()
                 } else {
                     format!("{} ", flags.join(" "))
                 };

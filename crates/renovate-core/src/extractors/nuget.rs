@@ -908,19 +908,17 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
                             let mut key = String::new();
                             let mut value = String::new();
                             let mut protocol_version = String::new();
-                            for attr in e.attributes() {
-                                if let Ok(a) = attr {
-                                    let attr_name =
-                                        String::from_utf8_lossy(a.key.as_ref()).into_owned();
-                                    if let Ok(val) = a.unescape_value() {
-                                        match attr_name.as_str() {
-                                            "key" => key = val.into_owned(),
-                                            "value" => value = val.into_owned(),
-                                            "protocolVersion" => {
-                                                protocol_version = val.into_owned()
-                                            }
-                                            _ => {}
+                            for a in e.attributes().flatten() {
+                                let attr_name =
+                                    String::from_utf8_lossy(a.key.as_ref()).into_owned();
+                                if let Ok(val) = a.unescape_value() {
+                                    match attr_name.as_str() {
+                                        "key" => key = val.into_owned(),
+                                        "value" => value = val.into_owned(),
+                                        "protocolVersion" => {
+                                            protocol_version = val.into_owned()
                                         }
+                                        _ => {}
                                     }
                                 }
                             }
@@ -940,16 +938,14 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
                         if in_disabled_sources {
                             let mut key = String::new();
                             let mut value = String::new();
-                            for attr in e.attributes() {
-                                if let Ok(a) = attr {
-                                    let attr_name =
-                                        String::from_utf8_lossy(a.key.as_ref()).into_owned();
-                                    if let Ok(val) = a.unescape_value() {
-                                        match attr_name.as_str() {
-                                            "key" => key = val.into_owned(),
-                                            "value" => value = val.into_owned(),
-                                            _ => {}
-                                        }
+                            for a in e.attributes().flatten() {
+                                let attr_name =
+                                    String::from_utf8_lossy(a.key.as_ref()).into_owned();
+                                if let Ok(val) = a.unescape_value() {
+                                    match attr_name.as_str() {
+                                        "key" => key = val.into_owned(),
+                                        "value" => value = val.into_owned(),
+                                        _ => {}
                                     }
                                 }
                             }
@@ -961,32 +957,27 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
                     "packageSource" => {
                         if in_package_source_mapping {
                             for attr in e.attributes() {
-                                if let Ok(a) = attr {
-                                    if String::from_utf8_lossy(a.key.as_ref()) == "key" {
-                                        if let Ok(val) = a.unescape_value() {
+                                if let Ok(a) = attr
+                                    && String::from_utf8_lossy(a.key.as_ref()) == "key"
+                                        && let Ok(val) = a.unescape_value() {
                                             current_mapping_key = val.into_owned();
                                         }
-                                    }
-                                }
                             }
                         }
                     }
-                    "package" => {
-                        if in_package_source_mapping {
+                    "package"
+                        if in_package_source_mapping => {
                             for attr in e.attributes() {
-                                if let Ok(a) = attr {
-                                    if String::from_utf8_lossy(a.key.as_ref()) == "pattern" {
-                                        if let Ok(val) = a.unescape_value() {
+                                if let Ok(a) = attr
+                                    && String::from_utf8_lossy(a.key.as_ref()) == "pattern"
+                                        && let Ok(val) = a.unescape_value() {
                                             source_mapping
                                                 .entry(current_mapping_key.clone())
                                                 .or_default()
                                                 .push(val.into_owned());
                                         }
-                                    }
-                                }
                             }
                         }
-                    }
                     _ => {}
                 }
             }
@@ -1010,18 +1001,16 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
         registries.retain(|r| {
             r.name
                 .as_ref()
-                .map_or(true, |n| !disabled_sources.contains(n))
+                .is_none_or(|n| !disabled_sources.contains(n))
         });
     }
 
     // Apply source mapping to default registries
     for reg in &mut registries {
         if reg.name.as_deref() == Some("nuget.org") && reg.source_mapped_package_patterns.is_none()
-        {
-            if let Some(patterns) = source_mapping.get("nuget.org") {
+            && let Some(patterns) = source_mapping.get("nuget.org") {
                 reg.source_mapped_package_patterns = Some(patterns.clone());
             }
-        }
     }
 
     // Deduplicate registries with #protocolVersion=3
@@ -1227,16 +1216,14 @@ fn extract_project_references(content: &str) -> Vec<String> {
                     in_item_group = true;
                 } else if in_item_group && name == "ProjectReference" {
                     for attr in e.attributes() {
-                        if let Ok(a) = attr {
-                            if String::from_utf8_lossy(a.key.as_ref()) == "Include" {
-                                if let Ok(val) = a.unescape_value() {
+                        if let Ok(a) = attr
+                            && String::from_utf8_lossy(a.key.as_ref()) == "Include"
+                                && let Ok(val) = a.unescape_value() {
                                     let v = val.into_owned();
                                     if !v.is_empty() {
                                         refs.push(v);
                                     }
                                 }
-                            }
-                        }
                     }
                 }
             }
@@ -1289,11 +1276,10 @@ fn has_cycle(graph: &std::collections::HashMap<String, Vec<String>>) -> bool {
     let mut stack = std::collections::HashSet::new();
 
     for node in graph.keys() {
-        if !visited.contains(node) {
-            if dfs_cycle(node, graph, &mut visited, &mut stack) {
+        if !visited.contains(node)
+            && dfs_cycle(node, graph, &mut visited, &mut stack) {
                 return true;
             }
-        }
     }
     false
 }

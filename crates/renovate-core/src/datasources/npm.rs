@@ -408,7 +408,7 @@ pub async fn get_npm_releases(
     if !resp.status().is_success() {
         let status = resp.status().as_u16();
         // 401/402/403/404 → return None (package not accessible/found)
-        if matches!(status, 401 | 402 | 403 | 404) {
+        if matches!(status, 401..=404) {
             return Ok(None);
         }
         // On the default registry, non-ignored errors abort the run
@@ -463,15 +463,14 @@ pub async fn get_npm_releases(
         .unwrap_or((None, None));
 
     // If latest version has a repository, use it as fallback.
-    if source_url.is_none() {
-        if let Some(ref entry) = latest_version_entry
+    if source_url.is_none()
+        && let Some(entry) = latest_version_entry
             && let Some(ref repo) = entry.repository
         {
             let (su, sd) = parse_source(repo);
             source_url = su;
             source_directory = sd;
         }
-    }
 
     // Deprecation message when the latest version is deprecated.
     let deprecation_message = latest_version_entry
@@ -502,7 +501,7 @@ pub async fn get_npm_releases(
         }
 
         // Is deprecated.
-        if entry.deprecated.as_ref().map_or(false, |v| match v {
+        if entry.deprecated.as_ref().is_some_and(|v| match v {
             serde_json::Value::String(s) => !s.is_empty(),
             serde_json::Value::Null | serde_json::Value::Bool(false) => false,
             _ => true,
@@ -912,7 +911,7 @@ mod tests {
         let (source_url, _) = parse_source(&repo);
         assert_eq!(
             source_url,
-            Some("git:github.com/renovateapp/dummy".to_string())
+            Some("git:github.com/renovateapp/dummy".to_owned())
         );
     }
 
@@ -923,7 +922,7 @@ mod tests {
         let (source_url, _) = parse_source(&repo);
         assert_eq!(
             source_url,
-            Some("git:github.com/renovateapp/dummy".to_string())
+            Some("git:github.com/renovateapp/dummy".to_owned())
         );
     }
 
@@ -933,7 +932,7 @@ mod tests {
         let (source_url, _) = parse_source(&repo);
         assert_eq!(
             source_url,
-            Some("https://github.com/vuejs/vue-next".to_string())
+            Some("https://github.com/vuejs/vue-next".to_owned())
         );
     }
 
@@ -943,7 +942,7 @@ mod tests {
         let (source_url, _) = parse_source(&repo);
         assert_eq!(
             source_url,
-            Some("https://github.com/vuejs/vue-next".to_string())
+            Some("https://github.com/vuejs/vue-next".to_owned())
         );
     }
 
@@ -951,7 +950,7 @@ mod tests {
     fn parse_source_short_repo_gitlab() {
         let repo = serde_json::json!("gitlab:vuejs/vue");
         let (source_url, _) = parse_source(&repo);
-        assert_eq!(source_url, Some("https://gitlab.com/vuejs/vue".to_string()));
+        assert_eq!(source_url, Some("https://gitlab.com/vuejs/vue".to_owned()));
     }
 
     #[test]
@@ -960,7 +959,7 @@ mod tests {
         let (source_url, _) = parse_source(&repo);
         assert_eq!(
             source_url,
-            Some("https://bitbucket.org/vuejs/vue".to_string())
+            Some("https://bitbucket.org/vuejs/vue".to_owned())
         );
     }
 
@@ -973,9 +972,9 @@ mod tests {
         let (source_url, source_directory) = parse_source(&repo);
         assert_eq!(
             source_url,
-            Some("https://github.com/octocat/repo".to_string())
+            Some("https://github.com/octocat/repo".to_owned())
         );
-        assert_eq!(source_directory, Some("packages/foo".to_string()));
+        assert_eq!(source_directory, Some("packages/foo".to_owned()));
     }
 
     #[test]
@@ -1655,9 +1654,9 @@ mod tests {
         let (source_url, source_directory) = parse_source(&repo);
         assert_eq!(
             source_url,
-            Some("https://github.com/vuejs/vue.git".to_string())
+            Some("https://github.com/vuejs/vue.git".to_owned())
         );
-        assert_eq!(source_directory, Some("packages/core".to_string()));
+        assert_eq!(source_directory, Some("packages/core".to_owned()));
 
         // Null repository returns None
         let (su, sd) = parse_source(&serde_json::Value::Null);

@@ -523,11 +523,10 @@ pub fn extract_all_package_file_infos(files: &[(&str, &str)]) -> Vec<MavenPackag
             continue;
         }
 
-        if path.ends_with(".xml") && !is_settings_xml_path(path) && !content.is_empty() {
-            if let Ok(pkg) = extract_package_file(content, path) {
+        if path.ends_with(".xml") && !is_settings_xml_path(path) && !content.is_empty()
+            && let Ok(pkg) = extract_package_file(content, path) {
                 package_files.push(pkg);
             }
-        }
     }
 
     // Cross-file property / registry resolution.

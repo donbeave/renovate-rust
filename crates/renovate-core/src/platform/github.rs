@@ -45,15 +45,12 @@ fn parse_link_header_next(header: &str) -> Option<String> {
     // Link: <url>; rel="next", <url>; rel="last"
     for part in header.split(',') {
         let part = part.trim();
-        if part.contains(r#"rel="next""#) || part.contains("rel='next'") {
-            if let Some(start) = part.find('<') {
-                if let Some(end) = part.find('>') {
-                    if start < end {
+        if (part.contains(r#"rel="next""#) || part.contains("rel='next'"))
+            && let Some(start) = part.find('<')
+                && let Some(end) = part.find('>')
+                    && start < end {
                         return Some(part[start + 1..end].to_owned());
                     }
-                }
-            }
-        }
     }
     None
 }
@@ -182,9 +179,7 @@ impl GithubClient {
         }
 
         // Detect GHE and validate fine-grained token compatibility
-        if let Err(e) = self.check_fine_grained_token(token).await {
-            return Err(e);
-        }
+        self.check_fine_grained_token(token).await?;
 
         let user: GithubUser = self
             .http
@@ -1303,10 +1298,10 @@ impl GithubClient {
             Ok(rulesets) => {
                 if let Some(rules) = rulesets.as_array() {
                     for rule in rules {
-                        if let Some(t) = rule.get("type").and_then(|v| v.as_str()) {
-                            if t == "required_status_checks" {
-                                if let Some(params) = rule.get("parameters") {
-                                    if params.get("strict_required_status_checks_policy")
+                        if let Some(t) = rule.get("type").and_then(|v| v.as_str())
+                            && t == "required_status_checks"
+                                && let Some(params) = rule.get("parameters")
+                                    && params.get("strict_required_status_checks_policy")
                                         == Some(&serde_json::Value::Bool(true))
                                     {
                                         let mut cache =
@@ -1314,9 +1309,6 @@ impl GithubClient {
                                         cache.insert(cache_key, true);
                                         return Ok(true);
                                     }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -1478,11 +1470,10 @@ impl GithubClient {
             if pr.source_branch != branch_name {
                 return false;
             }
-            if let Some(title) = pr_title {
-                if title.to_uppercase() != pr.title.to_uppercase() {
+            if let Some(title) = pr_title
+                && title.to_uppercase() != pr.title.to_uppercase() {
                     return false;
                 }
-            }
             if !matches_state(&pr.state, state) {
                 return false;
             }
@@ -1563,11 +1554,10 @@ impl GithubClient {
                     branch = source_branch,
                     "PR created successfully"
                 );
-                if let Some(ms) = milestone {
-                    if let Err(e) = self.add_milestone(owner, repo, pr.number, ms).await {
+                if let Some(ms) = milestone
+                    && let Err(e) = self.add_milestone(owner, repo, pr.number, ms).await {
                         tracing::warn!(err = %e, pr = pr.number, milestone = ms, "Unable to add milestone to PR");
                     }
-                }
                 Ok(Some(pr.number))
             }
             Err(HttpError::Status { status, .. })
@@ -1728,12 +1718,12 @@ impl GithubClient {
             let prefix = format!("### {}\n\n", topic);
             comments
                 .into_iter()
-                .find(|c| c.body.as_ref().map_or(false, |b| b.starts_with(&prefix)))
+                .find(|c| c.body.as_ref().is_some_and(|b| b.starts_with(&prefix)))
                 .map(|c| c.id)
         } else if let Some(content) = content {
             comments
                 .into_iter()
-                .find(|c| c.body.as_ref().map_or(false, |b| b.trim() == content))
+                .find(|c| c.body.as_ref().is_some_and(|b| b.trim() == content))
                 .map(|c| c.id)
         } else {
             None
@@ -1861,7 +1851,7 @@ fn coerce_rest_pr(pr: GhRestPr) -> GhPr {
             .map(|l| l.name)
             .collect(),
         has_assignees: pr.assignee.is_some()
-            || pr.assignees.as_ref().map_or(false, |a| !a.is_empty()),
+            || pr.assignees.as_ref().is_some_and(|a| !a.is_empty()),
         reviewers: pr
             .requested_reviewers
             .unwrap_or_default()

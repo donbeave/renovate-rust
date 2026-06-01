@@ -332,6 +332,14 @@ impl Scm for LocalScm {
     async fn merge_and_push(&self, _branch_name: &str) -> ScmResult {
         ScmResult::Ok(String::new())
     }
+
+    async fn get_branch_update_date(&self, _branch_name: &str) -> Option<String> {
+        None
+    }
+
+    async fn merge_branch(&self, _branch_name: &str) -> ScmResult {
+        ScmResult::Ok(String::new())
+    }
 }
 
 #[cfg(test)]
@@ -420,6 +428,36 @@ mod tests {
         let scm = LocalScm::new(".");
         assert!(matches!(
             scm.merge_and_push("branchName").await,
+            ScmResult::Ok(_)
+        ));
+    }
+
+    // Ported: "getBranchUpdateDate" — platform/local/scm.spec.ts line 40
+    #[tokio::test]
+    async fn local_scm_get_branch_update_date_returns_null() {
+        let scm = LocalScm::new(".");
+        assert!(scm.get_branch_update_date("main").await.is_none());
+    }
+
+    // Ported: "should return file list using glob" — platform/local/scm.spec.ts line 73
+    #[tokio::test]
+    async fn local_scm_get_file_list_uses_glob_in_non_git_dir() {
+        let tmp = tempfile::tempdir().unwrap();
+        let base = tmp.path();
+        std::fs::write(base.join("foo.txt"), b"hello").unwrap();
+        std::fs::write(base.join("bar.txt"), b"world").unwrap();
+        let scm = LocalScm::new(base);
+        let files = scm.get_file_list().await;
+        assert!(files.contains(&"foo.txt".to_owned()));
+        assert!(files.contains(&"bar.txt".to_owned()));
+    }
+
+    // Ported: "mergeBranch" — platform/local/scm.spec.ts line 86
+    #[tokio::test]
+    async fn local_scm_merge_branch_returns_ok() {
+        let scm = LocalScm::new(".");
+        assert!(matches!(
+            scm.merge_branch("branchName").await,
             ScmResult::Ok(_)
         ));
     }

@@ -276,11 +276,7 @@ impl ArtifactRunner for CargoArtifactRunner {
                                 config.is_lockfile_maintenance,
                             );
                             for retry_cmd in &retry_cmds {
-                                if let Err(retry_err) =
-                                    self.run_command(retry_cmd, &package_dir, &env).await
-                                {
-                                    return Err(retry_err);
-                                }
+                                self.run_command(retry_cmd, &package_dir, &env).await?;
                             }
                             break;
                         }
