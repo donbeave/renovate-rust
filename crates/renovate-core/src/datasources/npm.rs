@@ -1880,7 +1880,7 @@ mod tests {
         assert!(result.unwrap().is_some());
     }
 
-    // Ported: "has bearer auth" — lib/modules/datasource/npm/get.spec.ts line 43
+    // Ported: "%p" — lib/modules/datasource/npm/get.spec.ts line 43
     #[tokio::test]
     async fn get_npm_releases_bearer_auth_from_npmrc() {
         use crate::datasources::npm_npmrc::{NpmrcHostRule, NpmrcRules, auth_header_for_registry};
@@ -1911,7 +1911,7 @@ mod tests {
         assert!(result.unwrap().is_some());
     }
 
-    // Ported: "no auth" — lib/modules/datasource/npm/get.spec.ts line 103
+    // Ported: "%p" — lib/modules/datasource/npm/get.spec.ts line 103
     #[tokio::test]
     async fn get_npm_releases_no_auth_when_host_mismatched() {
         let server = MockServer::start().await;

@@ -117,8 +117,7 @@ pub fn validate_decrypted_value(decrypted_obj_str: &str, repository: &str) -> Op
 mod tests {
     use super::*;
 
-    // Ported: "equals("$str", "$repo") === $expected" (platforms non azure)
-    //        — config/decrypt.spec.ts line 68
+    // Ported: "equals("$str", "$repo") === $expected" (platforms non azure) — config/decrypt.spec.ts line 68
     #[test]
     fn validate_decrypted_value_platforms_non_azure() {
         let cases: &[(&str, &str, Option<&str>)] = &[
@@ -230,8 +229,7 @@ mod tests {
     }
 }
 
-// Ported: "equals("$str", "$repo") === $expected" (azure with dev.azure.com)
-//        — config/decrypt.spec.ts line 93
+// Ported: "equals("$str", "$repo") === $expected" (azure with dev.azure.com) — config/decrypt.spec.ts line 93
 #[test]
 fn validate_decrypted_value_azure_dev() {
     let endpoint = "https://dev.azure.com/az123";
@@ -300,8 +298,7 @@ fn validate_decrypted_value_azure_dev() {
     }
 }
 
-// Ported: "equals("$str", "$repo") === $expected" (azure with tfs self-hosted)
-//        — config/decrypt.spec.ts line 129
+// Ported: "equals("$str", "$repo") === $expected" (azure with tfs self-hosted) — config/decrypt.spec.ts line 129
 #[test]
 fn validate_decrypted_value_azure_tfs() {
     let endpoint = "http://your-server-name:8080/tfs/az123";

@@ -205,7 +205,7 @@ mod tests {
         );
     }
 
-    // Ported: "getNewValue(...) === "$expected"" — versioning/python/index.spec.ts line 97
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — versioning/python/index.spec.ts line 97
     // Delegates entirely to poetry::get_new_value; same cases as poetry spec.
     #[test]
     #[allow(clippy::type_complexity)]

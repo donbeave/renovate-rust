@@ -1299,8 +1299,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         assert!(result.is_some(), "expected Some result (maven fallback)");
     }
 
-    // Ported: "extracts URL from Maven POM file" (postprocessRelease)
-    //         — datasource/sbt-package/index.spec.ts line 364
+    // Ported: "extracts URL from Maven POM file" (postprocessRelease) — datasource/sbt-package/index.spec.ts line 364
     #[tokio::test]
     async fn postprocess_extracts_release_timestamp() {
         let server = MockServer::start().await;

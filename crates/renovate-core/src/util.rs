@@ -6630,22 +6630,22 @@ mod tests {
             take_personal_access_token_if_possible(Some("ghs_github"), Some("github_pat_gitTags")),
             Some("github_pat_gitTags")
         );
-        // Ported: "take fine grained token over server to server token" — line 272
+        // Ported: "take fine grained token over server to server token" — util/check-token.spec.ts line 272
         assert_eq!(
             take_personal_access_token_if_possible(Some("github_pat_github"), Some("ghs_gitTags")),
             Some("github_pat_github")
         );
-        // Ported: "take git-tags fine grained token" — line 280
+        // Ported: "take git-tags fine grained token" — util/check-token.spec.ts line 280
         assert_eq!(
             take_personal_access_token_if_possible(None, Some("github_pat_gitTags")),
             Some("github_pat_gitTags")
         );
-        // Ported: "take git-tags unknown token type when no other token is set" — line 288
+        // Ported: "take git-tags unknown token type when no other token is set" — util/check-token.spec.ts line 288
         assert_eq!(
             take_personal_access_token_if_possible(None, Some("unknownTokenType_gitTags")),
             Some("unknownTokenType_gitTags")
         );
-        // Ported: "take github unknown token type when no other token is set" — line 296
+        // Ported: "take github unknown token type when no other token is set" — util/check-token.spec.ts line 296
         assert_eq!(
             take_personal_access_token_if_possible(Some("unknownTokenType"), None),
             Some("unknownTokenType")
@@ -8157,7 +8157,6 @@ mod tests {
 
     // ── module label utilities ────────────────────────────────────────────────
 
-    // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
     // ── changelog source ─────────────────────────────────────────────────────
 
     // Ported: "handles unsupported sourceUrl" (getBaseUrl) — changelog/source.spec.ts line 13
@@ -8196,14 +8195,14 @@ mod tests {
     // Fixed "now" for abandonment tests: 2023-01-01T00:00:00.000Z
     const MOCK_NOW_MS: i64 = 1672531200000; // 2023-01-01T00:00:00Z
 
-    // Ported: "returns None when no abandonment threshold is provided" — lookup/abandonment.spec.ts line 27
+    // Ported: "returns the original release result when no abandonment threshold is provided" — lookup/abandonment.spec.ts line 27
     #[test]
     fn test_abandonment_no_threshold() {
         let result = calculate_abandonment(Some("2022-01-01T00:00:00.000Z"), None, MOCK_NOW_MS);
         assert_eq!(result, None);
     }
 
-    // Ported: "returns None when abandonment threshold is invalid" — lookup/abandonment.spec.ts line 39
+    // Ported: "returns the original release result when abandonment threshold is invalid" — lookup/abandonment.spec.ts line 39
     #[test]
     fn test_abandonment_invalid_threshold() {
         let result = calculate_abandonment(
@@ -8214,7 +8213,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns None when no mostRecentTimestamp is available" — lookup/abandonment.spec.ts line 54
+    // Ported: "returns the original release result when no mostRecentTimestamp timestamp is available" — lookup/abandonment.spec.ts line 54
     #[test]
     fn test_abandonment_no_timestamp() {
         let result = calculate_abandonment(None, Some("1 year"), MOCK_NOW_MS);
@@ -8233,7 +8232,7 @@ mod tests {
         assert_eq!(result, Some(true));
     }
 
-    // Ported: "does not mark as abandoned when mostRecentTimestamp plus threshold is after now" — lookup/abandonment.spec.ts line 83
+    // Ported: "does not mark a package as abandoned when mostRecentTimestamp plus threshold is after now" — lookup/abandonment.spec.ts line 83
     #[test]
     fn test_abandonment_recent_package_not_abandoned() {
         // Package from 6 months ago, threshold 1 year → not abandoned
@@ -8400,7 +8399,6 @@ mod tests {
         ));
     }
 
-    // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
     #[test]
     fn test_create_module_label() {
         let label = create_module_label("manager", "jsonata");
@@ -8409,7 +8407,6 @@ mod tests {
         assert_eq!(label.name, "manager:jsonata");
     }
 
-    // Ported: "reports missing labels without flagging existing ones" — test/other/sync-module-labels.spec.ts line 19
     #[test]
     fn test_get_missing_module_labels() {
         let expected = vec![
@@ -8426,7 +8423,6 @@ mod tests {
         assert_eq!(missing[0].name, "manager:jsonata");
     }
 
-    // Ported: "renders stable label creation commands for missing labels" — test/other/sync-module-labels.spec.ts line 36
     #[test]
     fn test_format_create_label_commands() {
         let labels = vec![
@@ -8449,7 +8445,6 @@ mod tests {
         assert!(lines[1].contains("Bob"));
     }
 
-    // Ported: "includes labels for known runtime module ids" — test/other/sync-module-labels.spec.ts line 62
     #[test]
     fn test_get_expected_module_labels_contains_known_ids() {
         // Build labels from all known managers (same as getExpectedModuleLabels but just managers)
@@ -9960,7 +9955,6 @@ dep1 = "^1.0.0"
         assert!(found.is_empty());
     }
 
-    // Ported: "logs a trace message (not warning) for binary files with hidden unicode" — util/unicode.spec.ts line 183
     #[test]
     fn binary_content_with_hidden_unicode_detected() {
         // 0xe2 0x80 0x8b = UTF-8 encoding of U+200B (zero-width space)
@@ -10572,7 +10566,6 @@ dep1 = "^1.0.0"
 
     // ── shouldDeleteHomepage ─────────────────────────────────────────────────
 
-    // Ported: "shouldDeleteHomepage($sourceUrl, $homepage) -> $expected" — metadata.spec.ts line 618
     #[test]
     fn test_should_delete_homepage() {
         let cases: &[(&str, &str, bool)] = &[
@@ -10721,7 +10714,6 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "Should massage github git@ url to valid https url" — metadata.spec.ts line 429
     #[test]
     fn test_massage_github_url_git_at() {
         assert!(
@@ -10729,7 +10721,6 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "Should massage github http url to valid https url" — metadata.spec.ts line 435
     #[test]
     fn test_massage_github_url_http() {
         assert!(
@@ -10738,7 +10729,6 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "Should massage github http and git url to valid https url" — metadata.spec.ts line 441
     #[test]
     fn test_massage_github_url_http_git() {
         assert!(
@@ -10747,7 +10737,6 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "Should massage github ssh git@ url to valid https url" — metadata.spec.ts line 447
     #[test]
     fn test_massage_github_url_ssh() {
         assert!(
@@ -10756,7 +10745,6 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "Should massage github git url to valid https url" — metadata.spec.ts line 453
     #[test]
     fn test_massage_github_url_git() {
         assert!(
@@ -10764,7 +10752,6 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "Should massage gitlab git url to valid https url" — metadata.spec.ts line 460
     #[test]
     fn test_massage_gitlab_url_git() {
         assert!(
@@ -10968,7 +10955,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
     }
 
-    // Ported: "renders rebaseWhen=\"never\"" — config-description.spec.ts line 24
+    // Ported: "renders rebaseWhen=\"never\"" — workers/repository/update/pr/body/config-description.spec.ts line 24
     #[test]
     fn test_config_desc_rebase_when_never() {
         let res = get_pr_config_description(
@@ -10986,7 +10973,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
     }
 
-    // Ported: "renders rebaseWhen=\"behind-base-branch\"" — config-description.spec.ts line 34
+    // Ported: "renders rebaseWhen=\"behind-base-branch\"" — workers/repository/update/pr/body/config-description.spec.ts line 34
     #[test]
     fn test_config_desc_rebase_when_behind() {
         let res = get_pr_config_description(
@@ -11004,7 +10991,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("Whenever PR is behind base branch"));
     }
 
-    // Ported: "renders timezone" — config-description.spec.ts line 43
+    // Ported: "renders timezone" — workers/repository/update/pr/body/config-description.spec.ts line 43
     #[test]
     fn test_config_desc_timezone() {
         let schedule = vec!["* 1 * * * *".to_owned()];
@@ -11023,7 +11010,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("(in timezone Europe/Istanbul)"));
     }
 
-    // Ported: "renders UTC as the default timezone" — config-description.spec.ts line 54
+    // Ported: "renders UTC as the default timezone" — workers/repository/update/pr/body/config-description.spec.ts line 54
     #[test]
     fn test_config_desc_utc_default() {
         let schedule = vec!["* 1 * * *".to_owned()];
@@ -11043,7 +11030,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("`* 1 * * *`"));
     }
 
-    // Ported: "displays later schedules" — config-description.spec.ts line 67
+    // Ported: "displays later schedules" — workers/repository/update/pr/body/config-description.spec.ts line 67
     #[test]
     fn test_config_desc_later_schedules() {
         let schedule = vec![
@@ -11065,7 +11052,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("\"before 6am on Monday,after 3pm on Tuesday\""));
     }
 
-    // Ported: "renders undefined schedule" — config-description.spec.ts line 76
+    // Ported: "renders undefined schedule" — workers/repository/update/pr/body/config-description.spec.ts line 76
     #[test]
     fn test_config_desc_undefined_schedule() {
         let res =
@@ -11073,7 +11060,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("At any time (no schedule defined)"));
     }
 
-    // Ported: "renders recreateClosed=true" — config-description.spec.ts line 100
+    // Ported: "renders recreateClosed=true" — workers/repository/update/pr/body/config-description.spec.ts line 100
     #[test]
     fn test_config_desc_recreate_closed_true() {
         let res = get_pr_config_description(
@@ -11091,7 +11078,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Immortal**"));
     }
 
-    // Ported: "does not render recreateClosed=false" — config-description.spec.ts line 109
+    // Ported: "does not render recreateClosed=false" — workers/repository/update/pr/body/config-description.spec.ts line 109
     #[test]
     fn test_config_desc_recreate_closed_false() {
         let res =
@@ -11099,7 +11086,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("**Immortal**"));
     }
 
-    // Ported: "does not render recreateClosed=undefined" — config-description.spec.ts line 118
+    // Ported: "does not render recreateClosed=undefined" — workers/repository/update/pr/body/config-description.spec.ts line 118
     #[test]
     fn test_config_desc_recreate_closed_undefined() {
         let res =
@@ -11107,7 +11094,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("**Immortal**"));
     }
 
-    // Ported: "renders singular" — config-description.spec.ts line 125
+    // Ported: "renders singular" — workers/repository/update/pr/body/config-description.spec.ts line 125
     #[test]
     fn test_config_desc_singular_upgrade() {
         let res =
@@ -11116,7 +11103,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("these updates"));
     }
 
-    // Ported: "renders automerge" — config-description.spec.ts line 133
+    // Ported: "renders automerge" — workers/repository/update/pr/body/config-description.spec.ts line 133
     #[test]
     fn test_config_desc_automerge_enabled() {
         let res =
@@ -11124,7 +11111,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Automerge**: Enabled."));
     }
 
-    // Ported: "renders blocked automerge" — config-description.spec.ts line 140
+    // Ported: "renders blocked automerge" — workers/repository/update/pr/body/config-description.spec.ts line 140
     #[test]
     fn test_config_desc_automerge_blocked() {
         let res =

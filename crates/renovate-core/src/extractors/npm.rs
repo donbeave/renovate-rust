@@ -3389,7 +3389,7 @@ mod tests {
         }
     }
 
-    // Ported: "produces expected config (%s) from legacy yarnrc" — npm/extract/yarnrc.spec.ts line 117
+    // Ported: "produces expected config (%s)" — npm/extract/yarnrc.spec.ts line 117
     #[test]
     fn load_config_from_legacy_yarnrc_produces_expected_config() {
         let cases = [

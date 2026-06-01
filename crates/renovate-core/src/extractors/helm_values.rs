@@ -290,7 +290,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("7.0"));
     }
 
-    // Ported: "extracts from complex values file correctly" — helm-values/extract.spec.ts line 52
+    // Ported: "extracts from complex values file correctly"" — helm-values/extract.spec.ts line 52
     #[test]
     fn inline_string_form() {
         let content = "busyboxImage: busybox:1.36\n";
@@ -300,7 +300,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("1.36"));
     }
 
-    // Ported: "extracts from complex values file correctly" — helm-values/extract.spec.ts line 52
+    // Ported: "extracts from complex values file correctly"" — helm-values/extract.spec.ts line 52
     #[test]
     fn multiple_images() {
         let content = r#"

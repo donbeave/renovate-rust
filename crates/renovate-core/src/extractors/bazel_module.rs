@@ -171,6 +171,17 @@ pub enum BazelFragment {
         value: Option<Box<BazelFragment>>,
         is_complete: bool,
     },
+    UseRepoRule {
+        variable_name: String,
+        bzl_file: String,
+        rule_name: String,
+        is_complete: bool,
+    },
+    RepoRuleCall {
+        function_name: String,
+        children: BTreeMap<String, BazelFragment>,
+        is_complete: bool,
+    },
 }
 
 impl BazelFragment {
@@ -183,6 +194,8 @@ impl BazelFragment {
             BazelFragment::PreparedExtensionTag { .. } => "preparedExtensionTag",
             BazelFragment::ExtensionTag { .. } => "extensionTag",
             BazelFragment::Attribute { .. } => "attribute",
+            BazelFragment::UseRepoRule { .. } => "useRepoRule",
+            BazelFragment::RepoRuleCall { .. } => "repoRuleCall",
         }
     }
 
@@ -194,7 +207,9 @@ impl BazelFragment {
             | BazelFragment::Rule { is_complete, .. }
             | BazelFragment::PreparedExtensionTag { is_complete, .. }
             | BazelFragment::ExtensionTag { is_complete, .. }
-            | BazelFragment::Attribute { is_complete, .. } => *is_complete,
+            | BazelFragment::Attribute { is_complete, .. }
+            | BazelFragment::UseRepoRule { is_complete, .. }
+            | BazelFragment::RepoRuleCall { is_complete, .. } => *is_complete,
         }
     }
 }
@@ -524,6 +539,32 @@ pub fn fragment_array(items: Vec<BazelFragment>, is_complete: bool) -> BazelFrag
     BazelFragment::Array { items, is_complete }
 }
 
+pub fn fragment_use_repo_rule(
+    variable_name: &str,
+    bzl_file: &str,
+    rule_name: &str,
+    is_complete: bool,
+) -> BazelFragment {
+    BazelFragment::UseRepoRule {
+        variable_name: variable_name.to_owned(),
+        bzl_file: bzl_file.to_owned(),
+        rule_name: rule_name.to_owned(),
+        is_complete,
+    }
+}
+
+pub fn fragment_repo_rule_call(
+    function_name: &str,
+    children: BTreeMap<String, BazelFragment>,
+    is_complete: bool,
+) -> BazelFragment {
+    BazelFragment::RepoRuleCall {
+        function_name: function_name.to_owned(),
+        children,
+        is_complete,
+    }
+}
+
 pub fn fragment_is_primitive(fragment: &BazelFragment) -> bool {
     matches!(
         fragment,
@@ -536,6 +577,347 @@ pub fn fragment_is_value(fragment: &BazelFragment) -> bool {
         fragment,
         BazelFragment::String { .. } | BazelFragment::Boolean { .. } | BazelFragment::Array { .. }
     )
+}
+
+/// Parse a MODULE.bazel file into a vector of [`BazelFragment`]s.
+///
+/// This is a lightweight recognizer (not a full Starlark parser) that handles
+/// the constructs Renovate cares about: rule calls, extension tags,
+/// `use_repo_rule` assignments, and repo rule calls.
+///
+/// Renovate reference: `lib/modules/manager/bazel-module/parser/index.ts`
+pub fn parse_module_bazel(input: &str) -> Vec<BazelFragment> {
+    let mut results = Vec::new();
+    let lines: Vec<&str> = input.lines().collect();
+    let mut i = 0;
+
+    while i < lines.len() {
+        let line = lines[i].trim();
+
+        // Skip empty lines and comments
+        if line.is_empty() || line.starts_with("//") {
+            i += 1;
+            continue;
+        }
+
+        // Try use_repo_rule assignment: var = use_repo_rule("...", "...")
+        if let Some(fragment) = try_parse_use_repo_rule(line) {
+            results.push(fragment);
+            i += 1;
+            continue;
+        }
+
+        // Try repo rule call: function_name(key = value, ...)
+        // Only match if it looks like a simple rule call (not an extension tag or known rule)
+        if let Some(rule_name) = extract_rule_name(line) {
+            if !rule_name.contains('.')
+                && rule_name != "bazel_dep"
+                && rule_name != "git_override"
+                && rule_name != "archive_override"
+                && rule_name != "local_path_override"
+                && rule_name != "single_version_override"
+                && rule_name != "git_repository"
+            {
+                if let Some((_fragment, consumed)) = try_parse_rule_block(&lines[i..]) {
+                    // Could be a repo rule call
+                    if let Some(children) =
+                        parse_rule_children(&extract_rule_body(&lines[i..]).unwrap_or_default())
+                    {
+                        results.push(BazelFragment::RepoRuleCall {
+                            function_name: rule_name.to_owned(),
+                            children,
+                            is_complete: true,
+                        });
+                        i += consumed;
+                        continue;
+                    }
+                }
+            }
+        }
+
+        // Try extension tag: ext.tag(...)
+        if line.contains('.') && line.contains('(') {
+            if let Some((fragment, consumed)) = try_parse_extension_tag_block(&lines[i..]) {
+                results.push(fragment);
+                i += consumed;
+                continue;
+            }
+        }
+
+        // Try regular rule call
+        if line.contains('(') {
+            if let Some((fragment, consumed)) = try_parse_rule_block(&lines[i..]) {
+                results.push(fragment);
+                i += consumed;
+                continue;
+            }
+        }
+
+        i += 1;
+    }
+
+    results
+}
+
+/// Try to parse a `use_repo_rule` assignment.
+fn try_parse_use_repo_rule(line: &str) -> Option<BazelFragment> {
+    let trimmed = line.trim();
+    // Pattern: var = use_repo_rule("bzl_file", "rule_name")
+    let re = regex::Regex::new(r#"^(\w+)\s*=\s*use_repo_rule\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*\)$"#).ok()?;
+    let cap = re.captures(trimmed)?;
+    let variable_name = cap.get(1)?.as_str();
+    let bzl_file = cap.get(2)?.as_str();
+    let rule_name = cap.get(3)?.as_str();
+    Some(BazelFragment::UseRepoRule {
+        variable_name: variable_name.to_owned(),
+        bzl_file: bzl_file.to_owned(),
+        rule_name: rule_name.to_owned(),
+        is_complete: true,
+    })
+}
+
+/// Extract the rule name from the start of a line like `rule_name(...)`.
+fn extract_rule_name(line: &str) -> Option<&str> {
+    let trimmed = line.trim();
+    let idx = trimmed.find('(')?;
+    let name = trimmed[..idx].trim();
+    if name.is_empty() || name.contains(' ') {
+        return None;
+    }
+    Some(name)
+}
+
+/// Extract the full body of a rule call (including multi-line) by matching parentheses.
+fn extract_rule_body(lines: &[&str]) -> Option<String> {
+    let first = lines.first()?;
+    let start_idx = first.find('(')?;
+    let mut body = String::new();
+    let mut depth = 0;
+    let mut started = false;
+
+    for line in lines {
+        for (i, ch) in line.chars().enumerate() {
+            if !started {
+                if i >= start_idx {
+                    started = true;
+                    if ch == '(' {
+                        depth += 1;
+                    }
+                    body.push(ch);
+                }
+                continue;
+            }
+            body.push(ch);
+            if ch == '(' {
+                depth += 1;
+            } else if ch == ')' {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(body);
+                }
+            }
+        }
+    }
+
+    None
+}
+
+/// Parse the children of a rule from its body string (the content inside outer parentheses).
+fn parse_rule_children(body: &str) -> Option<BTreeMap<String, BazelFragment>> {
+    let mut children = BTreeMap::new();
+    // Remove outer parentheses if present
+    let inner = body.strip_prefix('(')?.strip_suffix(')')?;
+    let inner = inner.trim();
+    if inner.is_empty() {
+        return Some(children);
+    }
+
+    // Split by top-level commas
+    for arg in split_top_level_args(inner) {
+        let arg = arg.trim();
+        if arg.is_empty() {
+            continue;
+        }
+        // Pattern: key = value
+        let eq_idx = arg.find('=')?;
+        let key = arg[..eq_idx].trim();
+        let value_str = arg[eq_idx + 1..].trim();
+
+        if let Some(value) = parse_value(value_str) {
+            children.insert(key.to_owned(), value);
+        }
+    }
+
+    Some(children)
+}
+
+/// Split arguments by top-level commas (not inside brackets or parentheses).
+fn split_top_level_args(s: &str) -> Vec<&str> {
+    let mut args = Vec::new();
+    let mut start = 0;
+    let mut depth_paren = 0;
+    let mut depth_bracket = 0;
+
+    for (i, ch) in s.char_indices() {
+        match ch {
+            '(' => depth_paren += 1,
+            ')' => depth_paren -= 1,
+            '[' => depth_bracket += 1,
+            ']' => depth_bracket -= 1,
+            ',' if depth_paren == 0 && depth_bracket == 0 => {
+                args.push(&s[start..i]);
+                start = i + 1;
+            }
+            _ => {}
+        }
+    }
+
+    if start < s.len() {
+        args.push(&s[start..]);
+    }
+
+    args
+}
+
+/// Parse a single value string into a `BazelFragment`.
+fn parse_value(s: &str) -> Option<BazelFragment> {
+    let trimmed = s.trim();
+
+    // String literal
+    if (trimmed.starts_with('"') && trimmed.ends_with('"'))
+        || (trimmed.starts_with('\'') && trimmed.ends_with('\''))
+    {
+        let value = &trimmed[1..trimmed.len() - 1];
+        return Some(BazelFragment::String {
+            value: value.to_owned(),
+            is_complete: true,
+        });
+    }
+
+    // Boolean
+    if trimmed.eq_ignore_ascii_case("true") {
+        return Some(BazelFragment::Boolean {
+            value: true,
+            is_complete: true,
+        });
+    }
+    if trimmed.eq_ignore_ascii_case("false") {
+        return Some(BazelFragment::Boolean {
+            value: false,
+            is_complete: true,
+        });
+    }
+
+    // Array
+    if trimmed.starts_with('[') && trimmed.ends_with(']') {
+        let inner = &trimmed[1..trimmed.len() - 1];
+        let items: Vec<BazelFragment> = split_top_level_args(inner)
+            .into_iter()
+            .filter_map(|item| {
+                let item = item.trim();
+                if item.is_empty() {
+                    return None;
+                }
+                parse_value(item)
+            })
+            .collect();
+        return Some(BazelFragment::Array {
+            items,
+            is_complete: true,
+        });
+    }
+
+    None
+}
+
+/// Try to parse a rule call block (potentially multi-line).
+fn try_parse_rule_block(lines: &[&str]) -> Option<(BazelFragment, usize)> {
+    let rule_name = extract_rule_name(lines.first()?)?;
+    let body = extract_rule_body(lines)?;
+    let consumed = count_consumed_lines(lines, &body)?;
+    let children = parse_rule_children(&body)?;
+
+    Some((
+        BazelFragment::Rule {
+            rule: rule_name.to_owned(),
+            children,
+            is_complete: true,
+        },
+        consumed,
+    ))
+}
+
+/// Try to parse an extension tag block (potentially multi-line).
+fn try_parse_extension_tag_block(lines: &[&str]) -> Option<(BazelFragment, usize)> {
+    let first = lines.first()?.trim();
+    let dot_idx = first.find('.')?;
+    let paren_idx = first.find('(')?;
+    if dot_idx >= paren_idx {
+        return None;
+    }
+
+    let raw_extension = first[..dot_idx].trim();
+    let tag = first[dot_idx + 1..paren_idx].trim();
+
+    let body = extract_rule_body(lines)?;
+    let consumed = count_consumed_lines(lines, &body)?;
+    let children = parse_rule_children(&body)?;
+
+    // Compute offset (character position in first line)
+    let offset = first.find(raw_extension)?;
+
+    // Build raw_string from consumed lines
+    let raw_string = lines[..consumed].join("\n");
+
+    Some((
+        BazelFragment::ExtensionTag {
+            extension: raw_extension.to_owned(),
+            raw_extension: raw_extension.to_owned(),
+            tag: tag.to_owned(),
+            offset,
+            children,
+            raw_string: Some(raw_string),
+            is_complete: true,
+        },
+        consumed,
+    ))
+}
+
+/// Count how many lines were consumed to form the rule body.
+fn count_consumed_lines(lines: &[&str], _body: &str) -> Option<usize> {
+    let first = lines.first()?;
+    let start_idx = first.find('(')?;
+    let mut consumed = 0;
+    let mut depth = 0;
+    let mut started = false;
+
+    for line in lines {
+        consumed += 1;
+        for (i, ch) in line.chars().enumerate() {
+            if !started {
+                if i >= start_idx {
+                    started = true;
+                    if ch == '(' {
+                        depth += 1;
+                    }
+                    if depth == 0 && ch == ')' {
+                        return Some(consumed);
+                    }
+                }
+                continue;
+            }
+            if ch == '(' {
+                depth += 1;
+            } else if ch == ')' {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(consumed);
+                }
+            }
+        }
+    }
+
+    None
 }
 
 /// Which Bazel module declaration produced the dep.
@@ -3208,7 +3590,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert!(result.is_empty());
     }
 
-    // Ported: "handles valid rules_img pull call" — modules/manager/bazel-module/rules-img.spec.ts line 37
+    // Ported: "handles valid rules_img pull call" — modules/manager/bazel-module/rules-img.spec.ts line 32
     #[test]
     fn rules_img_handles_valid_pull_call() {
         let frags = vec![
@@ -3241,7 +3623,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert_eq!(result[0].dep_type, "rules_img_pull");
     }
 
-    // Ported: "skips repo rule calls without corresponding use_repo_rule" — modules/manager/bazel-module/rules-img.spec.ts line 74
+    // Ported: "skips repo rule calls without corresponding use_repo_rule" — modules/manager/bazel-module/rules-img.spec.ts line 72
     #[test]
     fn rules_img_skips_unknown_function() {
         let frags = vec![serde_json::json!({
@@ -3258,7 +3640,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert!(result.is_empty());
     }
 
-    // Ported: "skips malformed repo rule calls" — modules/manager/bazel-module/rules-img.spec.ts line 92
+    // Ported: "skips malformed repo rule calls" — modules/manager/bazel-module/rules-img.spec.ts line 91
     #[test]
     fn rules_img_skips_malformed_call() {
         let frags = vec![
@@ -3291,7 +3673,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert_eq!(starlark_as_boolean("False"), Ok(false));
     }
 
-    // Ported: "asBoolean" (throws) — modules/manager/bazel-module/parser/starlark.spec.ts line 10
+    // Ported: "asBoolean" (throws) — modules/manager/bazel-module/parser/starlark.spec.ts line 12
     #[test]
     fn starlark_boolean_invalid_throws() {
         let result = starlark_as_boolean("bad");
@@ -3308,5 +3690,171 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         let mut ctx = BazelCtx::new("");
         ctx.prepare_extension_tag("my_ext", "raw_ext", 0);
         assert_eq!(ctx.stack.len(), 1);
+    }
+
+    // ── bazel-module/parser/index.spec.ts ───────────────────────────────────
+
+    // Ported: "returns empty string if invalid content" — bazel-module/parser/index.spec.ts line 7
+    #[test]
+    fn parse_module_bazel_invalid_content_returns_empty() {
+        let input = "// This is invalid\na + 1\n<<<<<<<";
+        let res = parse_module_bazel(input);
+        assert!(res.is_empty());
+    }
+
+    // Ported: "finds simple bazel_dep" — bazel-module/parser/index.spec.ts line 17
+    #[test]
+    fn parse_module_bazel_finds_simple_bazel_dep() {
+        let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
+bazel_dep(name = "rules_bar", version = "1.0.0", dev_dependency = True)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 2);
+        assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
+        assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
+    }
+
+    // Ported: "finds the git_override" — bazel-module/parser/index.spec.ts line 44
+    #[test]
+    fn parse_module_bazel_finds_git_override() {
+        let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
+git_override(
+  module_name = "rules_foo",
+  remote = "https://github.com/example/rules_foo.git",
+  commit = "6a2c2e22849b3e6b33d5ea9aa72222d4803a986a",
+)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 2);
+        assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
+        assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "git_override"));
+    }
+
+    // Ported: "finds archive_override" — bazel-module/parser/index.spec.ts line 85
+    #[test]
+    fn parse_module_bazel_finds_archive_override() {
+        let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
+archive_override(
+  module_name = "rules_foo",
+  urls = [
+    "https://example.com/archive.tar.gz",
+  ],
+)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 2);
+        assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
+        assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "archive_override"));
+    }
+
+    // Ported: "finds local_path_override" — bazel-module/parser/index.spec.ts line 119
+    #[test]
+    fn parse_module_bazel_finds_local_path_override() {
+        let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
+local_path_override(
+  module_name = "rules_foo",
+  path = "/path/to/repo",
+)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 2);
+        assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
+        assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "local_path_override"));
+    }
+
+    // Ported: "finds single_version_override" — bazel-module/parser/index.spec.ts line 148
+    #[test]
+    fn parse_module_bazel_finds_single_version_override() {
+        let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
+single_version_override(
+  module_name = "rules_foo",
+  version = "1.2.3",
+  registry = "https://example.com/custom_registry",
+)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 2);
+        assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
+        assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "single_version_override"));
+    }
+
+    // Ported: "finds maven.artifact" — bazel-module/parser/index.spec.ts line 179
+    #[test]
+    fn parse_module_bazel_finds_maven_artifact() {
+        let input = r#"maven.artifact(
+    artifact = "core.specs.alpha",
+    exclusions = ["org.clojure:clojure"],
+    group = "org.clojure",
+    version = "0.2.56",
+)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 1);
+        assert!(matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "artifact"));
+    }
+
+    // Ported: "finds maven.install and maven.artifact" — bazel-module/parser/index.spec.ts line 248
+    #[test]
+    fn parse_module_bazel_finds_maven_install_and_artifact() {
+        let input = r#"maven.install(
+    artifacts = [
+        "junit:junit:4.13.2",
+        "com.google.guava:guava:31.1-jre",
+    ],
+    repositories = [
+        "https://repo1.maven.org/maven2/"
+    ]
+)
+
+maven.artifact(
+    artifact = "core.specs.alpha",
+    group = "org.clojure",
+    version = "0.2.56",
+)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 2);
+        assert!(matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "install"));
+        assert!(matches!(&res[1], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "artifact"));
+    }
+
+    // Ported: "finds oci.pull" — bazel-module/parser/index.spec.ts line 335
+    #[test]
+    fn parse_module_bazel_finds_oci_pull() {
+        let input = r#"oci.pull(
+  name = "nginx_image",
+  digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+  image = "index.docker.io/library/nginx",
+  platforms = ["linux/amd64"],
+  tag = "1.27.1",
+)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 1);
+        assert!(matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "oci" && tag == "pull"));
+    }
+
+    // Ported: "finds the git_repository" — bazel-module/parser/index.spec.ts line 376
+    #[test]
+    fn parse_module_bazel_finds_git_repository() {
+        let input = r#"git_repository(
+  name = "rules_foo",
+  remote = "https://github.com/example/rules_foo.git",
+  commit = "6a2c2e22849b3e6b33d5ea9aa72222d4803a986a",
+)"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 1);
+        assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "git_repository"));
+    }
+
+    // Ported: "finds use_repo_rule and repo rule call" — bazel-module/parser/index.spec.ts line 408
+    #[test]
+    fn parse_module_bazel_finds_use_repo_rule_and_repo_rule_call() {
+        let input = r#"pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+pull(name = "nginx", tag = "1.27.1")"#;
+        let res = parse_module_bazel(input);
+        assert_eq!(res.len(), 2);
+        assert!(matches!(&res[0], BazelFragment::UseRepoRule { variable_name, .. } if variable_name == "pull"));
+        assert!(matches!(&res[1], BazelFragment::RepoRuleCall { function_name, .. } if function_name == "pull"));
+    }
+
+    // Ported: "ignores use_repo_rule with insufficient args" — bazel-module/parser/index.spec.ts line 420
+    #[test]
+    fn parse_module_bazel_ignores_use_repo_rule_with_insufficient_args() {
+        let input = r#"pull = use_repo_rule("only_one_arg")"#;
+        let res = parse_module_bazel(input);
+        assert!(res.is_empty());
     }
 }

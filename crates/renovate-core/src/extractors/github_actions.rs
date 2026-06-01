@@ -3023,7 +3023,7 @@ runs:
         assert_eq!(deps[1].current_value.as_deref(), Some("1.23"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_trivy_unspecified_version() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: aquasecurity/setup-trivy@v0.2.6\n        with: {}\n";
@@ -3037,7 +3037,7 @@ runs:
         assert_eq!(deps[0].skip_stage, Some("extract"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_trivy_with_version() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: aquasecurity/setup-trivy@v0.2.6\n        with:\n          version: latest\n";
@@ -3049,7 +3049,7 @@ runs:
         assert_eq!(deps[0].skip_reason, None);
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_pnpm_with_version() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: pnpm/action-setup@v4\n        with:\n          version: latest\n";
@@ -3061,7 +3061,7 @@ runs:
         assert_eq!(deps[0].current_value.as_deref(), Some("latest"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_pnpm_numeric_version() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: pnpm/action-setup@v4\n        with:\n          version: '10'\n";
@@ -3070,7 +3070,7 @@ runs:
         assert_eq!(deps[0].current_value.as_deref(), Some("10"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_bun_with_bun_version_key() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: oven-sh/setup-bun@v2\n        with:\n          bun-version: '1.2.0'\n";
@@ -3081,7 +3081,7 @@ runs:
         assert_eq!(deps[0].current_value.as_deref(), Some("1.2.0"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_bun_unspecified_version() {
         let content =
@@ -3091,7 +3091,7 @@ runs:
         assert_eq!(deps[0].skip_reason, Some("unspecified-version"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_ruby_with_ruby_version_key() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: ruby/setup-ruby@v1\n        with:\n          ruby-version: '3.4'\n";
@@ -3102,7 +3102,7 @@ runs:
         assert_eq!(deps[0].current_value.as_deref(), Some("3.4"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_pyright_invalid_version() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: jakebailey/pyright-action@v2\n        with:\n          version: PATH\n";
@@ -3114,7 +3114,7 @@ runs:
         assert_eq!(deps[0].skip_stage, Some("extract"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_jaxxstorm_repo_tag() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: jaxxstorm/action-install-gh-release@v1.10.0\n        with:\n          repo: gotestyourself/gotestsum\n          tag: v1.12.1\n";
@@ -3126,7 +3126,7 @@ runs:
         assert_eq!(deps[0].datasource, "github-releases");
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_pixi_with_pixi_version_key() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: prefix-dev/setup-pixi@v0.8.3\n        with:\n          pixi-version: v0.41.4\n";
@@ -3138,7 +3138,7 @@ runs:
         assert_eq!(deps[0].current_value.as_deref(), Some("v0.41.4"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_zizmor_with_version() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: zizmorcore/zizmor-action@v0.5.2\n        with:\n          version: v1.23.1\n";
@@ -3149,7 +3149,7 @@ runs:
         assert_eq!(deps[0].current_value.as_deref(), Some("v1.23.1"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_docker_setup_docker_action() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: docker/setup-docker-action@v4\n        with:\n          version: v27.1.0\n";
@@ -3162,7 +3162,7 @@ runs:
         assert_eq!(deps[0].datasource, "github-releases");
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_setup_uv_fqdn() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: https://github.com/astral-sh/setup-uv@v5\n        with:\n          version: 0.4.x\n";
@@ -3174,7 +3174,7 @@ runs:
         assert_eq!(deps[0].current_value.as_deref(), Some("0.4.x"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1630
     #[test]
     fn community_setup_uv_fqdn_empty_with() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: https://github.com/astral-sh/setup-uv@v5\n        with: {}\n";

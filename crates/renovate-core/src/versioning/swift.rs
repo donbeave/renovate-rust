@@ -470,7 +470,7 @@ mod tests {
         assert_eq!(to_semver_range("invalid"), None);
     }
 
-    // Ported: 'getNewValue("$currentValue", ...) === "$expected"' — versioning/swift/index.spec.ts line 117
+    // Ported: 'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"' — versioning/swift/index.spec.ts line 117
     #[test]
     fn swift_get_new_value() {
         assert_eq!(get_new_value("1.2.3", "1.2.4"), "1.2.4");

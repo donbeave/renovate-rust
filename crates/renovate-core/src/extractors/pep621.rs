@@ -1334,7 +1334,7 @@ readme = "README.md"
 
     // --- parse_pep508_str tests ---
 
-    // Ported: "(parse $value" — pep621/utils.spec.ts line 6
+    // Ported: "(parse $value"" — pep621/utils.spec.ts line 6
     #[test]
     fn parse_pep508_empty_returns_none() {
         assert!(parse_pep508_str("").is_none());

@@ -198,7 +198,7 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "does not extract a build file reference" — quadlet/extract.spec.ts line 129
+    // Ported: "does not extract an build file reference" — quadlet/extract.spec.ts line 129
     #[test]
     fn build_file_reference_skipped() {
         let content = "[Container]\nImage=foo.build\n";

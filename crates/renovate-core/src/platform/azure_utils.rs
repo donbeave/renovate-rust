@@ -193,8 +193,7 @@ mod tests {
         assert_eq!(get_azure_pr_state(0), "open"); // unknown → open
     }
 
-    // Ported: "should return undefined if null context passed" (getGitStatusContextCombinedName)
-    //         — modules/platform/azure/util.spec.ts line 17
+    // Ported: "should return undefined if null context passed" (getGitStatusContextCombinedName) — modules/platform/azure/util.spec.ts line 17
     #[test]
     fn git_status_context_combined_name_none_genre_empty_name() {
         // null → treated as None genre
@@ -218,8 +217,7 @@ mod tests {
         assert_eq!(result, "status-name");
     }
 
-    // Ported: "should return undefined if null context passed" (getGitStatusContextFromCombinedName)
-    //         — modules/platform/azure/util.spec.ts line 40
+    // Ported: "should return undefined if null context passed" (getGitStatusContextFromCombinedName) — modules/platform/azure/util.spec.ts line 40
     #[test]
     fn git_status_context_from_combined_name_empty_returns_none() {
         assert!(get_git_status_context_from_combined_name("").is_none());

@@ -2046,7 +2046,6 @@ mod tests {
         assert_eq!(branch_name("", "", "dep"), "dep");
     }
 
-    // Ported: "parents row header should be a td block" — tools/docs/test/utils.spec.ts line 4
     #[test]
     fn format_cell_header_returns_td() {
         assert_eq!(
@@ -2055,7 +2054,6 @@ mod tests {
         );
     }
 
-    // Ported: "parents content should be multiple code blocks, and . be display with '(the root document)'" — tools/docs/test/utils.spec.ts line 12
     #[test]
     fn format_cell_parents_sorted_and_root_replaced() {
         let result = format_cell(&["parents", ".,packageRules,argocd,ansible"], 1);
@@ -2065,7 +2063,6 @@ mod tests {
         );
     }
 
-    // Ported: "parent named '.foo' should be not display with '.foo (the root document)'" — tools/docs/test/utils.spec.ts line 19
     #[test]
     fn format_cell_dotfoo_not_replaced() {
         let result = format_cell(&["parents", ".foo,packageRules,argocd,ansible"], 1);

@@ -1166,13 +1166,13 @@ end"#;
 
     // --- handler dispatch tests ---
 
-    // Ported: "returns null for handler type \"unknown\"" — homebrew/handlers/index.spec.ts line 5
+    // Ported: "returns null for handler type \"%s\"" — homebrew/handlers/index.spec.ts line 5
     #[test]
     fn find_handler_by_type_unknown_returns_none() {
         assert!(find_handler_by_type("unknown").is_none());
     }
 
-    // Ported: "returns null for handler type \"\"" — homebrew/handlers/index.spec.ts line 5
+    // Ported: "returns null for handler type \"%s\"" — homebrew/handlers/index.spec.ts line 5
     #[test]
     fn find_handler_by_type_empty_returns_none() {
         assert!(find_handler_by_type("").is_none());

@@ -1482,7 +1482,7 @@ mod tests {
         }
     }
 
-    // Ported: 'matches("$version", "[2.164.0,2.165.0)") === $expected' — versioning/maven/index.spec.ts line 228
+    // Ported: 'matches("$version", "${range}") === $expected' — versioning/maven/index.spec.ts line 228
     #[test]
     fn matches_jenkins_range_excl_matches_renovate_maven_index_spec() {
         let range = "[2.164.0,2.165.0)";
@@ -1494,7 +1494,7 @@ mod tests {
         assert!(!matches_range("2.164.0-SNAPSHOT", range));
     }
 
-    // Ported: 'matches("$version", "[2.164.0,2.165.0]") === $expected' — versioning/maven/index.spec.ts line 247
+    // Ported: 'matches("$version", "${range}") === $expected' — versioning/maven/index.spec.ts line 247
     #[test]
     fn matches_jenkins_range_incl_matches_renovate_maven_index_spec() {
         let range = "[2.164.0,2.165.0]";
@@ -1506,7 +1506,7 @@ mod tests {
         assert!(!matches_range("2.164.0-SNAPSHOT", range));
     }
 
-    // Ported: 'matches("$version", "(,2.164.0)") === $expected' — versioning/maven/index.spec.ts line 266
+    // Ported: 'matches("$version", "${range}") === $expected' — versioning/maven/index.spec.ts line 266
     #[test]
     fn matches_jenkins_range_lt_matches_renovate_maven_index_spec() {
         let range = "(,2.164.0)";

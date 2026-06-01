@@ -730,7 +730,7 @@ mod tests {
         );
     }
 
-    // Ported: "when a major version exists" / "when a minor version exists" / "when a patch version exists" — versioning/github-actions/index.spec.ts line 532
+    // Ported: "%s" — versioning/github-actions/index.spec.ts line 532
     #[test]
     fn get_new_value_uses_shortest_existing_matching_version() {
         assert_eq!(

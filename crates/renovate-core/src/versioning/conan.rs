@@ -1495,7 +1495,7 @@ mod tests {
         assert!(is_stable("1.0.7-prerelease.1, include_prerelease=True"));
     }
 
-    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion) === $result"
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$result""
     //         — lib/modules/versioning/conan/index.spec.ts line 565
     #[test]
     fn get_new_value_matches_renovate_conan_index_spec() {
@@ -1893,7 +1893,7 @@ mod tests {
         assert_eq!(get_major("4.1.33.2"), Some(4));
     }
 
-    // Ported: "getMinor($a) === $expected" — lib/modules/versioning/conan/index.spec.ts line 752
+    // Ported: "getMinor("$version") === "$result"" — lib/modules/versioning/conan/index.spec.ts line 752
     #[test]
     fn get_minor_matches_renovate_conan_index_spec() {
         assert_eq!(get_minor("1.2.3"), Some(2));
@@ -1901,7 +1901,7 @@ mod tests {
         assert_eq!(get_minor("4.1.33.2"), Some(1));
     }
 
-    // Ported: "getPatch("$a") === $expected" — lib/modules/versioning/conan/index.spec.ts line 763
+    // Ported: "getPatch("$version") === "$result"" — lib/modules/versioning/conan/index.spec.ts line 763
     #[test]
     fn get_patch_matches_renovate_conan_index_spec() {
         assert_eq!(get_patch("1.2.3"), Some(3));

@@ -520,7 +520,7 @@ mod tests {
         );
     }
 
-    // Ported: constructBaseUrl "returns ansible url with artifactory URL" — galaxy-collection/index.spec.ts line 206
+    // Ported: "returns ansible url with artifactory URL" — galaxy-collection/index.spec.ts line 206
     #[test]
     fn construct_base_url_artifactory() {
         let url = construct_base_url(
@@ -534,7 +534,7 @@ mod tests {
         );
     }
 
-    // Ported: constructBaseUrl "returns galaxy url with automation hub URL" — galaxy-collection/index.spec.ts line 214
+    // Ported: "returns galaxy url with automation hub URL" — galaxy-collection/index.spec.ts line 214
     #[test]
     fn construct_base_url_automation_hub() {
         let url = construct_base_url(
@@ -548,7 +548,7 @@ mod tests {
         );
     }
 
-    // Ported: constructBaseUrl "returns galaxy url with other url" — galaxy-collection/index.spec.ts line 222
+    // Ported: "returns galaxy url with other url" — galaxy-collection/index.spec.ts line 222
     #[test]
     fn construct_base_url_other() {
         let url = construct_base_url(

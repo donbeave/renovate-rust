@@ -2169,8 +2169,8 @@ mod tests {
     }
 
     // Ported: "when no manager found, returns undefined" — modules/manager/index.spec.ts line 265
-    // Ported: "when manager found, but no prettyDepType found, returns undefined" — modules/manager/index.spec.ts line 271, 275
-    // Ported: "when manager found, and a prettyDepType found, returns the defined prettyDepType" — modules/manager/index.spec.ts line 279
+    // Ported: "when manager found, but no prettyDepType found, returns undefined" — modules/manager/index.spec.ts line 271
+    // Ported: "when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType" — modules/manager/index.spec.ts line 279
     #[test]
     fn manager_get_pretty_dep_type() {
         // Unknown manager → None

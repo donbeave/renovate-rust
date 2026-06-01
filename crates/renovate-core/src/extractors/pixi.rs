@@ -552,7 +552,7 @@ dependencies = { numpy = "==1.15.1" }
         assert_eq!(numpy.channels, vec!["conda-forge", "conda-not-forge"]);
     }
 
-    // Ported: "set registryStrategy='merge' for channel-priority='disabled'" — pixi/extract.spec.ts line 685
+    // Ported: "set registryStrategy='merge' for channel-priority='disabled'"" — pixi/extract.spec.ts line 685
     #[test]
     fn disabled_channel_priority_sets_merge_registry_strategy() {
         let content = r#"
@@ -570,7 +570,7 @@ python = "3.12.*"
         assert_eq!(deps[0].registry_strategy, Some("merge"));
     }
 
-    // Ported: "use default registryStrategy for channel-priority='strict'" — pixi/extract.spec.ts line 706
+    // Ported: "use default registryStrategy for channel-priority='strict'"" — pixi/extract.spec.ts line 706
     #[test]
     fn strict_channel_priority_uses_default_registry_strategy() {
         let content = r#"

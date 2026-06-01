@@ -342,7 +342,7 @@ mod tests {
         }
     }
 
-    // Ported: 'getNewValue("$currentValue", ...) === "$expected"' — versioning/ivy/index.spec.ts line 143
+    // Ported: 'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"' — versioning/ivy/index.spec.ts line 143
     #[test]
     fn ivy_get_new_value() {
         assert_eq!(

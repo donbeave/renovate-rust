@@ -7158,7 +7158,7 @@ mod tests {
         assert!(filenames.iter().any(|filename| filename == "def"));
     }
 
-    // Ported: "expands brace patterns for json and json5 filenames" — config/app-strings.spec.ts line 20
+    // Ported: "expands brace patterns for json, jsonc and json5 filenames" — config/app-strings.spec.ts line 20
     #[test]
     fn config_file_names_expand_json_and_json5_patterns() {
         let filenames = config_file_names(None, &[]);
@@ -7815,8 +7815,7 @@ mod tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn force_enabled_true_also_overrides_config_level_disabled() {
-        // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false)"
-        // index.spec.ts line 223 — config-level enabled:false + force.enabled:true
+        // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false)" — util/package-rules/index.spec.ts line 223
         let c = RepoConfig::parse(
             r#"{
             "packageRules": [
@@ -8286,8 +8285,7 @@ mod tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_renovate_config_presets_migrated_to_renovate_config() {
-        // Ported: "migrates old custom manager syntax to new one" (renovate-config-presets → renovate-config)
-        // match-managers-migration.spec.ts
+        // Ported: "migrates old custom manager syntax to new one" — config/migrations/custom/match-managers-migration.spec.ts line 4
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchManagers": ["renovate-config-presets"], "automerge": true}]}"#,
         );
@@ -8300,8 +8298,7 @@ mod tests {
 
     #[test]
     fn extend_whitesource_merge_confidence_preset_normalized() {
-        // Ported: "migrate merge confidence config preset to internal preset"
-        // extends-migration.spec.ts — github>whitesource/merge-confidence:beta → mergeConfidence:all-badges
+        // Ported: "migrate merge confidence config preset to internal preset" — config/migrations/custom/extends-migration.spec.ts line 76
         let c = RepoConfig::parse(r#"{"extends": ["github>whitesource/merge-confidence:beta"]}"#);
         // The preset should be normalized (and since we don't expand mergeConfidence:all-badges
         // further, it should remain in extends)
@@ -9234,7 +9231,7 @@ mod tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_regex_prefers_locked_version() {
-        // Ported: "return true for regex version match" test from current-version.spec.ts.
+        // Ported: "return true for regex version match" — util/package-rules/current-version.spec.ts line 93
         // When lockedVersion is set, regex matchCurrentVersion tests against it.
         // ruby: currentValue='"~> 0.1.0"', lockedVersion='0.1.0'
         // Pattern: /^v?[~ -]?0/ → tests against "0.1.0" → matches (starts with "0").
@@ -9248,7 +9245,7 @@ mod tests {
 
     #[test]
     fn match_current_version_regex_false_without_locked_version() {
-        // Ported: "return false for regex value match" from current-version.spec.ts.
+        // Ported: "return false for regex value match" — util/package-rules/current-version.spec.ts line 107
         // When lockedVersion is absent, falls back to currentValue='"~> 0.1.0"'.
         // Pattern: /^v?[~ -]?0/ against '"~> 0.1.0"' → doesn't match (starts with '"').
         let c = RepoConfig::parse(
@@ -9683,8 +9680,7 @@ mod tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_undefined_dep_name_does_not_fire() {
-        // Ported: "should return false if packageFile is not defined" (depName: undefined).
-        // When dep_name is absent/empty and matchDepNames is set → rule doesn't fire.
+        // Ported: "should return false if packageFile is not defined" — util/package-rules/dep-names.spec.ts line 7
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchDepNames": ["@opentelemetry/http"], "automerge": true}]}"#,
         );
@@ -11697,8 +11693,7 @@ mod schedule_preset_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn extends_js_app_shorthand_normalized() {
-        // Ported: extends: ':js-app' → config:js-app (via removedPresets map).
-        // :js-app is normalized to config:js-app which then expands to config:recommended + pin rule.
+        // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
         let c = RepoConfig::parse(r#"{"extends": [":js-app"]}"#);
         // config:js-app injects a rangeStrategy:pin rule — verify that preset was recognized.
         let has_pin_rule = c
@@ -11713,7 +11708,7 @@ mod schedule_preset_tests {
 
     #[test]
     fn extends_base_shorthand_normalized() {
-        // Ported: extends: ':base' → config:recommended (via removedPresets).
+        // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
         let c = RepoConfig::parse(r#"{"extends": [":base"]}"#);
         // config:recommended injects workarounds and other rules — just verify it was recognized.
         assert!(
@@ -11724,7 +11719,7 @@ mod schedule_preset_tests {
 
     #[test]
     fn extends_master_issue_normalized() {
-        // Ported: extends: ':masterIssue' → ':dependencyDashboard'
+        // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
         let c = RepoConfig::parse(r#"{"extends": [":masterIssue"]}"#);
         assert!(
             c.dependency_dashboard,
@@ -12314,8 +12309,7 @@ mod source_url_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_current_value_undefined_returns_false() {
-        // Ported: "return false for now value" test.
-        // When currentValue is absent (None), matchCurrentValue constraint → false.
+        // Ported: "return false for now value" — util/package-rules/current-value.spec.ts line 79
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchCurrentValue": "/^v?[~ -]?0/", "enabled": false}]}"#,
         );
@@ -12326,7 +12320,7 @@ mod source_url_tests {
 
     #[test]
     fn match_current_value_glob_match() {
-        // Ported: "return true for glob match" + "return false for glob non match"
+        // Ported: "return true for glob match" — util/package-rules/current-value.spec.ts line 19
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchCurrentValue": "1.2.*", "enabled": false}]}"#,
         );
@@ -12350,7 +12344,7 @@ mod source_url_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_new_value_glob_match() {
-        // Ported: "return true for glob match" + "return false for glob non match"
+        // Ported: "return true for glob match" — util/package-rules/new-value.spec.ts line 19
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchNewValue": "1.2.*", "enabled": false}]}"#,
         );
@@ -13531,8 +13525,7 @@ mod rule_effects_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn deprecated_path_rules_field_merged_into_package_rules() {
-        // Ported: "should migrate to packageRules" from path-rules-migration.spec.ts
-        // Old `pathRules: [{paths: ["examples/**"], extends: ["foo"]}]` → merged into `packageRules`
+        // Ported: "should migrate to packageRules" — config/migrations/custom/path-rules-migration.spec.ts line 4
         let c = RepoConfig::parse(
             r#"{
                 "pathRules": [
@@ -13553,7 +13546,7 @@ mod rule_effects_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn path_rules_concat_with_existing_package_rules() {
-        // Ported: "should concat with existing package rules" from path-rules-migration.spec.ts
+        // Ported: "should concat with existing package rules" — config/migrations/custom/path-rules-migration.spec.ts line 56
         let c = RepoConfig::parse(
             r#"{
                 "packageRules": [{"matchPackageNames": ["guava"], "enabled": false}],

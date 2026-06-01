@@ -1014,7 +1014,6 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should split the sourceDirectory out of sourceUrl for known platforms" — metadata.spec.ts line 113
     #[test]
     fn add_metadata_extracts_source_directory() {
         let mut dep = ReleaseResult {
@@ -1035,7 +1034,6 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should not overwrite any existing sourceDirectory" — metadata.spec.ts line 180
     #[test]
     fn add_metadata_preserves_existing_source_directory() {
         let mut dep = ReleaseResult {
@@ -1050,7 +1048,6 @@ mod registry_tests {
         assert_eq!(dep.source_directory.as_deref(), Some("existing-dir"));
     }
 
-    // Ported: "Should not split a sourceDirectory when one cannot be detected" — metadata.spec.ts line 158
     #[test]
     fn add_metadata_no_source_directory_for_simple_urls() {
         for url in &[
@@ -1072,7 +1069,6 @@ mod registry_tests {
         }
     }
 
-    // Ported: "Should handle non-url" — metadata.spec.ts line 297
     #[test]
     fn add_metadata_removes_non_url_source() {
         let mut dep = ReleaseResult {
@@ -1085,7 +1081,6 @@ mod registry_tests {
         assert!(dep.source_url.is_none());
     }
 
-    // Ported: "Should handle failed parsing of sourceUrls for other" — metadata.spec.ts line 274
     #[test]
     fn add_metadata_invalid_url_stays() {
         let mut dep = ReleaseResult {
@@ -1100,7 +1095,6 @@ mod registry_tests {
         assert!(dep.source_url.is_some() || dep.source_url.is_none()); // either is fine
     }
 
-    // Ported: "Should handle parsing of sourceUrls correctly for GitLab also" — metadata.spec.ts line 228
     #[test]
     fn add_metadata_gitlab_tree_url() {
         let mut dep = ReleaseResult {
@@ -1115,7 +1109,6 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should normalize releaseTimestamp" — metadata.spec.ts line 357
     #[test]
     fn add_metadata_github_tree_no_subdir() {
         // GitHub tree URL without subdirectory should just strip the /tree/master part
@@ -1132,7 +1125,7 @@ mod registry_tests {
         assert!(dep.source_directory.is_none());
     }
 
-    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts"
+    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl"
     //         — modules/datasource/metadata.spec.ts line 134
     // Note: only GitLab cases tested here; "somehost.com" sub-path truncation is a known
     // limitation of the current massage_github_url implementation (5-segment limit).
@@ -1166,7 +1159,6 @@ mod registry_tests {
 
     // ── add_metadata homepage and timestamp tests ───────────────────────────
 
-    // Ported: "Should move github homepage to sourceUrl" — metadata.spec.ts line 331
     #[test]
     fn add_metadata_github_homepage_to_source_url() {
         let mut dep = ReleaseResult {
@@ -1185,7 +1177,6 @@ mod registry_tests {
         assert!(dep.homepage.is_none());
     }
 
-    // Ported: "Should handle parsing/converting of GitLab sourceUrls with http and www correctly" — metadata.spec.ts line 345
     #[test]
     fn add_metadata_gitlab_http_source_url() {
         let mut dep = ReleaseResult {
@@ -1203,7 +1194,6 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should remove homepage when homepage and sourceUrl are same" — metadata.spec.ts line 464
     #[test]
     fn add_metadata_removes_duplicate_homepage() {
         let mut dep = ReleaseResult {
@@ -1249,7 +1239,6 @@ mod registry_tests {
         );
     }
 
-    // Ported: "does not set homepage to sourceUrl when undefined" — metadata.spec.ts line 542
     #[test]
     fn add_metadata_no_homepage_promotion_without_homepage() {
         let mut dep = ReleaseResult {
@@ -1273,7 +1262,6 @@ mod registry_tests {
         );
     }
 
-    // Ported: "does not set homepage to sourceUrl when not github or gitlab" — metadata.spec.ts line 580
     #[test]
     fn add_metadata_non_github_homepage_not_promoted() {
         let mut dep = ReleaseResult {
@@ -1289,7 +1277,6 @@ mod registry_tests {
         assert!(dep.source_url.is_none());
     }
 
-    // Ported: "Should delete gitlab homepage if its same as sourceUrl" — metadata.spec.ts line 503
     #[test]
     fn add_metadata_removes_duplicate_gitlab_homepage() {
         let mut dep = ReleaseResult {
@@ -1314,7 +1301,6 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should normalize releaseTimestamp" — metadata.spec.ts line 357
     #[test]
     fn add_metadata_normalizes_timestamps() {
         let mut dep = ReleaseResult {
@@ -1376,7 +1362,6 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should handle failed parsing of sourceUrls for GitLab" — metadata.spec.ts line 251
     #[test]
     fn add_metadata_gitlab_invalid_url_unchanged() {
         let mut dep = ReleaseResult {
@@ -1389,7 +1374,6 @@ mod registry_tests {
         assert_eq!(dep.source_url.as_deref(), Some("https://gitlab-nope"));
     }
 
-    // Ported: "should handle dep with no releases" — metadata.spec.ts line 638
     #[test]
     fn add_metadata_no_releases() {
         let mut dep = ReleaseResult {
