@@ -49,7 +49,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/buildpacks` | 1 | ? | 3/3 (100%) | — |
 | `manager/bun` | 3 | ? | 3/34 (9%) | — |
 | `manager/bun-version` | 1 | ? | 6/6 (100%) | — |
-| `manager/bundler` | 7 | ? | 60/74 (81%) | — |
+| `manager/bundler` | 7 | full | 60/74 (81%) | — |
 | `manager/cake` | 1 | ? | 3/5 (60%) | — |
 | `manager/cargo` | 6 | ? | 62/73 (85%) | — |
 | `manager/cdnurl` | 1 | ? | 1/1 (100%) | — |
