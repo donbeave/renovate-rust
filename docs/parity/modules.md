@@ -114,7 +114,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/pep621` | 6 | ? | 19/48 (40%) | — |
 | `manager/pep723` | 2 | full | 6/6 (100%) | — |
 | `manager/pip-compile` | 4 | ? | 13/90 (14%) | — |
-| `manager/pip_requirements` | 4 | ? | 28/36 (78%) | — |
+| `manager/pip_requirements` | 4 | full | 28/36 (78%) | Extract full; artifacts: missing lockfile update tests |
 | `manager/pip_setup` | 1 | full | 2/2 (100%) | — |
 | `manager/pipenv` | 2 | ? | 15/37 (41%) | — |
 | `manager/pixi` | 2 | ? | 16/26 (62%) | — |
@@ -161,7 +161,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/azure-pipelines-tasks` | 1 | full | 10/10 (100%) | — |
 | `datasource/azure-tags` | 1 | ? | 2/5 (40%) | — |
 | `datasource/bazel` | 2 | full | 11/11 (100%) | — |
-| `datasource/bitbucket-server-tags` | 2 | ? | 10/13 (77%) | — |
+| `datasource/bitbucket-server-tags` | 2 | full | 10/13 (77%) | All tests ported (dedup undercount) |
 | `datasource/bitbucket-tags` | 1 | full | 4/5 (80%) | — |
 | `datasource/bitrise` | 1 | full | 7/7 (100%) | — |
 | `datasource/buildpacks-registry` | 2 | full | 4/4 (100%) | — |
@@ -276,7 +276,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/exact` | 1 | full | 13/14 (93%) | — |
 | `versioning/git` | 1 | full | 3/3 (100%) | — |
 | `versioning/github-actions` | 1 | full | 29/29 (100%) | — |
-| `versioning/glasskube` | 1 | ? | 3/4 (75%) | — |
+| `versioning/glasskube` | 1 | full | 3/4 (75%) | All tests ported (dedup undercount) |
 | `versioning/go-mod-directive` | 1 | full | 7/7 (100%) | — |
 | `versioning/gradle` | 1 | full | 12/12 (100%) | — |
 | `versioning/hashicorp` | 2 | full | 13/13 (100%) | — |
