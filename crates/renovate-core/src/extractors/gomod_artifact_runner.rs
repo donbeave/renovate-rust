@@ -188,15 +188,13 @@ mod tests {
         }
     }
 
-    fn make_fake_go(dir: &tempfile::TempDir) -> std::collections::BTreeMap<String, String> {
+    fn make_fake_go(dir: &tempfile::TempDir, script: &[u8]) -> std::collections::BTreeMap<String, String> {
         let fake_go = dir.path().join("go");
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_go).unwrap();
-            f.write_all(
-                b"#!/bin/sh\nif [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then echo 'updated sum' > go.sum; fi\n",
-            )
-            .unwrap();
+            f.write_all(b"#!/bin/sh\n").unwrap();
+            f.write_all(script).unwrap();
             let mut perms = std::fs::metadata(&fake_go).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_go, perms).unwrap();
@@ -204,8 +202,8 @@ mod tests {
         #[cfg(windows)]
         {
             let mut f = std::fs::File::create(&fake_go).unwrap();
-            f.write_all(b"@echo off\nif \"%1\"==\"mod\" if \"%2\"==\"tidy\" echo updated sum > go.sum\n")
-                .unwrap();
+            f.write_all(b"@echo off\n").unwrap();
+            f.write_all(script).unwrap();
         }
 
         let mut env: std::collections::BTreeMap<String, String> = std::env::vars().collect();
@@ -232,10 +230,11 @@ mod tests {
     async fn returns_none_if_unchanged() {
         let dir = tempfile::tempdir().unwrap();
         let runner = GomodArtifactRunner::new();
-        let input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
-        let result = runner.update_artifacts(&input).await;
-        // go is not available, so go mod tidy fails.
-        assert!(result.is_err());
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        // fake go that exits successfully but does nothing
+        input.config.env = make_fake_go(&dir, b"exit 0\n");
+        let result = runner.update_artifacts(&input).await.unwrap();
+        assert!(result.is_none());
     }
 
     // Ported: "returns updated go.sum" — gomod/artifacts.spec.ts line 145
@@ -244,12 +243,35 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let runner = GomodArtifactRunner::new();
         let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
-        input.config.env = make_fake_go(&dir);
+        input.config.env = make_fake_go(&dir, b"if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then echo 'updated sum' > go.sum; fi\n");
         let result = runner.update_artifacts(&input).await.unwrap().unwrap();
         assert_eq!(result.len(), 1);
         let file_change = result[0].file.as_ref().unwrap();
         assert_eq!(file_change.path, "go.sum");
         assert_eq!(file_change.contents.as_deref(), Some("updated sum\n"));
+    }
+
+    // Rust-specific: verifies go.mod is returned when go mod tidy reformats it.
+    #[tokio::test]
+    async fn returns_updated_go_mod_when_reformatted() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let go_mod_input = "module example.com/test\n\ngo 1.22\n\nrequire github.com/foo/bar v1.1.0\n";
+        let mut input = make_input(&dir, go_mod_input, Some("old sum\n"));
+        // Write a reference go.mod with extra trailing newline.
+        let ref_go_mod = dir.path().join("ref_go.mod");
+        std::fs::write(&ref_go_mod, "module example.com/test\n\ngo 1.22\n\nrequire github.com/foo/bar v1.1.0\n\n").unwrap();
+        // fake go that copies the reference go.mod and updates go.sum
+        let script = format!(
+            "if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then cp '{}' go.mod; echo 'new sum' > go.sum; fi\n",
+            ref_go_mod.to_string_lossy()
+        );
+        input.config.env = make_fake_go(&dir, script.as_bytes());
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.mod".to_owned()));
+        assert!(paths.contains(&"go.sum".to_owned()));
     }
 
     #[tokio::test]
