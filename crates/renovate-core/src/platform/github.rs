@@ -150,9 +150,7 @@ pub struct GithubClient {
         std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, bool>>>,
     fork_state: std::sync::Arc<std::sync::Mutex<Option<GithubForkState>>>,
     /// TTL cache for `list_prs` results. Key is `"owner/repo/state"`.
-    pr_cache: std::sync::Arc<
-        std::sync::Mutex<std::collections::HashMap<String, PrCacheEntry>>,
-    >,
+    pr_cache: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, PrCacheEntry>>>,
 }
 
 impl GithubClient {
@@ -181,9 +179,7 @@ impl GithubClient {
                 std::collections::HashMap::new(),
             )),
             fork_state: std::sync::Arc::new(std::sync::Mutex::new(None)),
-            pr_cache: std::sync::Arc::new(std::sync::Mutex::new(
-                std::collections::HashMap::new(),
-            )),
+            pr_cache: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())),
         })
     }
 
@@ -375,9 +371,7 @@ query($owner: String!, $name: String!, $user: String) {
         // Fork-mode handling.
         if let Some(token) = fork_token {
             if is_fork {
-                return Err(PlatformError::Unexpected(
-                    "REPOSITORY_FORKED".to_owned(),
-                ));
+                return Err(PlatformError::Unexpected("REPOSITORY_FORKED".to_owned()));
             }
             let repository = format!("{owner}/{repo}");
             let existing_fork = self.find_fork(token, &repository, fork_org).await?;
@@ -470,7 +464,10 @@ query($owner: String!, $name: String!, $user: String) {
             user.login
         };
 
-        let repo_name = repository.rsplit_once('/').map(|(_, r)| r).unwrap_or(repository);
+        let repo_name = repository
+            .rsplit_once('/')
+            .map(|(_, r)| r)
+            .unwrap_or(repository);
         let url = format!("{}/repos/{owner}/{repo_name}", self.api_base);
         match fork_http.get_json::<serde_json::Value>(&url).await {
             Ok(repo_json) => {
@@ -517,9 +514,7 @@ query($owner: String!, $name: String!, $user: String) {
             .and_then(|n| n.as_str())
             .map(|s| s.to_owned())
             .ok_or_else(|| {
-                PlatformError::Unexpected(
-                    "FORK creation response missing full_name".to_owned(),
-                )
+                PlatformError::Unexpected("FORK creation response missing full_name".to_owned())
             })
     }
 
@@ -1098,7 +1093,10 @@ impl PlatformClient for GithubClient {
         message: Option<&str>,
     ) -> Result<(), PlatformError> {
         let get_url = if let Some(b) = branch {
-            format!("{}/repos/{owner}/{repo}/contents/{path}?ref={b}", self.api_base)
+            format!(
+                "{}/repos/{owner}/{repo}/contents/{path}?ref={b}",
+                self.api_base
+            )
         } else {
             format!("{}/repos/{owner}/{repo}/contents/{path}", self.api_base)
         };
@@ -1111,7 +1109,9 @@ impl PlatformClient for GithubClient {
                     .json()
                     .await
                     .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
-                json.get("sha").and_then(|s| s.as_str()).map(|s| s.to_owned())
+                json.get("sha")
+                    .and_then(|s| s.as_str())
+                    .map(|s| s.to_owned())
             }
             _ => None,
         };
@@ -1276,17 +1276,17 @@ impl GithubClient {
         // Check cache first.
         {
             let cache = self.pr_cache.lock().unwrap();
-            if let Some(entry) = cache.get(&cache_key) {
-                if entry.fetched_at.elapsed() < PR_CACHE_TTL {
-                    tracing::debug!(
-                        owner = %owner,
-                        repo = %repo,
-                        state = %state,
-                        count = entry.prs.len(),
-                        "returning cached PR list"
-                    );
-                    return Ok(entry.prs.clone());
-                }
+            if let Some(entry) = cache.get(&cache_key)
+                && entry.fetched_at.elapsed() < PR_CACHE_TTL
+            {
+                tracing::debug!(
+                    owner = %owner,
+                    repo = %repo,
+                    state = %state,
+                    count = entry.prs.len(),
+                    "returning cached PR list"
+                );
+                return Ok(entry.prs.clone());
             }
         }
 
@@ -2890,7 +2890,14 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         client
-            .write_file("owner", "repo", "path", "content", Some("main"), Some("test commit"))
+            .write_file(
+                "owner",
+                "repo",
+                "path",
+                "content",
+                Some("main"),
+                Some("test commit"),
+            )
             .await
             .unwrap();
     }
@@ -2916,7 +2923,14 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         client
-            .write_file("owner", "repo", "path", "content", Some("main"), Some("test commit"))
+            .write_file(
+                "owner",
+                "repo",
+                "path",
+                "content",
+                Some("main"),
+                Some("test commit"),
+            )
             .await
             .unwrap();
     }
@@ -7353,7 +7367,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.init_repo("owner", "repo", None, false, None).await.unwrap();
+        let result = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap();
         assert_eq!(result.default_branch, "main");
         assert!(!result.is_fork);
         assert_eq!(result.merge_method, Some("squash".to_owned()));
@@ -7393,7 +7410,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED"));
     }
 
@@ -7427,7 +7447,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_RENAMED"));
     }
 
@@ -7444,7 +7467,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND"));
     }
 
@@ -7475,7 +7501,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
     }
 
@@ -7492,7 +7521,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(
             matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ACCESS_FORBIDDEN")
         );
@@ -7511,7 +7543,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "PLATFORM_UNKNOWN_ERROR"));
     }
 }

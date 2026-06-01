@@ -21,10 +21,10 @@ use base64::Engine as _;
 use serde::Deserialize;
 
 use crate::http::{HttpClient, HttpError};
+use crate::platform::util::repo_fingerprint;
 use crate::platform::{
     CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult,
 };
-use crate::platform::util::repo_fingerprint;
 
 /// Default GitLab API base URL.
 pub const GITLAB_API_BASE: &str = "https://gitlab.com/api/v4";
@@ -164,6 +164,7 @@ struct GitlabTreeEntry {
 /// GitLab project metadata response.
 /// `GET /projects/{id}`
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct GitlabProject {
     id: i64,
     archived: bool,
@@ -207,9 +208,7 @@ impl PlatformClient for GitlabClient {
                 ));
             }
             s if s == reqwest::StatusCode::NOT_FOUND => {
-                return Err(PlatformError::Unexpected(
-                    "REPOSITORY_NOT_FOUND".to_owned(),
-                ));
+                return Err(PlatformError::Unexpected("REPOSITORY_NOT_FOUND".to_owned()));
             }
             s => return Err(PlatformError::Http(HttpError::Status { status: s, url })),
         }
@@ -220,17 +219,13 @@ impl PlatformClient for GitlabClient {
             .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
 
         if project.archived {
-            return Err(PlatformError::Unexpected(
-                "REPOSITORY_ARCHIVED".to_owned(),
-            ));
+            return Err(PlatformError::Unexpected("REPOSITORY_ARCHIVED".to_owned()));
         }
 
         if project.repository_access_level.as_deref() == Some("disabled")
             || project.merge_requests_access_level.as_deref() == Some("disabled")
         {
-            return Err(PlatformError::Unexpected(
-                "REPOSITORY_DISABLED".to_owned(),
-            ));
+            return Err(PlatformError::Unexpected("REPOSITORY_DISABLED".to_owned()));
         }
 
         let default_branch = project
@@ -627,7 +622,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let result = client.init_repo("owner", "repo", None, false, None).await.unwrap();
+        let result = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap();
         assert_eq!(result.default_branch, "master");
         assert!(result.is_fork);
         assert!(!result.repo_fingerprint.is_empty());
@@ -655,7 +653,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED"));
     }
 
@@ -677,7 +678,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
     }
 
@@ -691,7 +695,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND"));
     }
 
@@ -705,8 +712,13 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
-        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ACCESS_FORBIDDEN"));
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ACCESS_FORBIDDEN")
+        );
     }
 
     #[tokio::test]
@@ -727,7 +739,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_DISABLED"));
     }
 

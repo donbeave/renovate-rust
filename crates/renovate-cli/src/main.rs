@@ -355,42 +355,36 @@ fn verify_auto_replace(manager: &str, content: &str, dep_name: &str, expected_va
         }
         "terragrunt" => {
             let deps = renovate_core::extractors::terragrunt::extract(content);
-            deps.iter().any(|d| {
-                d.dep_name == dep_name && d.current_value == expected_value
-            })
+            deps.iter()
+                .any(|d| d.dep_name == dep_name && d.current_value == expected_value)
         }
         "bicep" => {
             let deps = renovate_core::extractors::bicep::extract(content);
-            deps.iter().any(|d| {
-                d.dep_name == dep_name && d.current_value == expected_value
-            })
+            deps.iter()
+                .any(|d| d.dep_name == dep_name && d.current_value == expected_value)
         }
         "ansible" | "ansible-galaxy" => {
             let deps = renovate_core::extractors::ansible::extract(content);
-            deps.iter().any(|d| {
-                d.image == dep_name && d.tag.as_deref() == Some(expected_value)
-            })
+            deps.iter()
+                .any(|d| d.image == dep_name && d.tag.as_deref() == Some(expected_value))
         }
         "kubernetes" | "kustomize" => {
             let deps = renovate_core::extractors::kubernetes::extract(content);
-            deps.iter().any(|d| {
-                d.image_name == dep_name
-                    && d.current_value == expected_value
-            })
+            deps.iter()
+                .any(|d| d.image_name == dep_name && d.current_value == expected_value)
         }
         "pre-commit" => {
             let deps = renovate_core::extractors::pre_commit::extract(content);
-            deps.iter().any(|d| {
-                d.dep_name == dep_name && d.current_value == expected_value
-            })
+            deps.iter()
+                .any(|d| d.dep_name == dep_name && d.current_value == expected_value)
         }
         _ => {
             // Fallback heuristic: expected_value appears on a line that also
             // contains dep_name.  This is weaker than re-extraction but still
             // catches the most common corruption / missed-replacement cases.
-            content.lines().any(|line| {
-                line.contains(dep_name) && line.contains(expected_value)
-            })
+            content
+                .lines()
+                .any(|line| line.contains(dep_name) && line.contains(expected_value))
         }
     }
 }
@@ -839,11 +833,8 @@ async fn process_repo(
                                     _ => {
                                         // Fallback to naive auto-replace for managers
                                         // without an explicit updateDependency function.
-                                        let new_value = bd
-                                            .dep
-                                            .new_value
-                                            .as_deref()
-                                            .unwrap_or(latest);
+                                        let new_value =
+                                            bd.dep.new_value.as_deref().unwrap_or(latest);
                                         let result = auto_replace(
                                             &content,
                                             Some(current),

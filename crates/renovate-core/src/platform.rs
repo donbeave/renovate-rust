@@ -291,9 +291,18 @@ impl AnyPlatformClient {
         fork_org: Option<&str>,
     ) -> Result<RepoInitResult, PlatformError> {
         match self {
-            Self::Github(c) => c.init_repo(owner, repo, fork_token, fork_creation, fork_org).await,
-            Self::Gitlab(c) => c.init_repo(owner, repo, fork_token, fork_creation, fork_org).await,
-            Self::Local(c) => c.init_repo(owner, repo, fork_token, fork_creation, fork_org).await,
+            Self::Github(c) => {
+                c.init_repo(owner, repo, fork_token, fork_creation, fork_org)
+                    .await
+            }
+            Self::Gitlab(c) => {
+                c.init_repo(owner, repo, fork_token, fork_creation, fork_org)
+                    .await
+            }
+            Self::Local(c) => {
+                c.init_repo(owner, repo, fork_token, fork_creation, fork_org)
+                    .await
+            }
         }
     }
 
@@ -410,9 +419,18 @@ impl AnyPlatformClient {
         message: Option<&str>,
     ) -> Result<(), PlatformError> {
         match self {
-            Self::Github(c) => c.write_file(owner, repo, path, content, branch, message).await,
-            Self::Gitlab(c) => c.write_file(owner, repo, path, content, branch, message).await,
-            Self::Local(c) => c.write_file(owner, repo, path, content, branch, message).await,
+            Self::Github(c) => {
+                c.write_file(owner, repo, path, content, branch, message)
+                    .await
+            }
+            Self::Gitlab(c) => {
+                c.write_file(owner, repo, path, content, branch, message)
+                    .await
+            }
+            Self::Local(c) => {
+                c.write_file(owner, repo, path, content, branch, message)
+                    .await
+            }
         }
     }
 
