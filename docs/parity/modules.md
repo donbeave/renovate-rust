@@ -79,7 +79,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/gitlabci-include` | 1 | ? | 8/8 (100%) | — |
 | `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
 | `manager/gleam` | 4 | ? | 18/30 (60%) | — |
-| `manager/gomod` | 6 | ? | 102/155 (66%) | — |
+| `manager/gomod` | 6 | ? | 101/155 (65%) | — |
 | `manager/gradle` | 8 | ? | 42/143 (29%) | — |
 | `manager/gradle-wrapper` | 3 | ? | 20/36 (56%) | — |
 | `manager/haskell-cabal` | 2 | ? | 8/8 (100%) | — |
@@ -102,7 +102,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/maven-wrapper` | 2 | ? | 9/39 (23%) | — |
 | `manager/meteor` | 1 | ? | 2/2 (100%) | — |
 | `manager/mint` | 1 | ? | 5/5 (100%) | — |
-| `manager/mise` | 7 | ? | 89/113 (79%) | — |
+| `manager/mise` | 7 | ? | 90/113 (80%) | — |
 | `manager/mix` | 3 | ? | 8/28 (29%) | — |
 | `manager/nix` | 3 | ? | 40/50 (80%) | — |
 | `manager/nodenv` | 1 | ? | 3/3 (100%) | — |

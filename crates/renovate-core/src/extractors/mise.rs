@@ -1008,6 +1008,17 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
             out.push(asdf::parse_scala_dep(tool_name, version));
             continue;
         }
+        // Kafka versions must start with "apache-" to be valid.
+        if tool_name == "kafka" && !version.starts_with("apache-") {
+            out.push(AsdfDep {
+                tool_name: tool_name.to_owned(),
+                dep_name: tool_name.to_owned(),
+                current_value: version.to_owned(),
+                skip_reason: Some(AsdfSkipReason::UnsupportedDatasource),
+                ..Default::default()
+            });
+            continue;
+        }
 
         // Mise core tooling.
         if let Some((_, def)) = MISE_CORE_TABLE.iter().find(|(k, _)| *k == tool_name) {
@@ -2228,6 +2239,19 @@ usage = "2.1.1"
         assert_eq!(
             deps[1].skip_reason,
             Some(AsdfSkipReason::UnspecifiedVersion)
+        );
+    }
+
+    // Ported: "skips kafka tool when version has no apache- prefix" — mise/extract.spec.ts line 1297
+    #[test]
+    fn kafka_without_apache_prefix_skipped() {
+        let content = "[tools]\nkafka = \"3.5.0\"\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].tool_name, "kafka");
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(AsdfSkipReason::UnsupportedDatasource)
         );
     }
 

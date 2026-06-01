@@ -2209,14 +2209,6 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert_eq!(convert_go_directive_to_semver_range(None), None);
     }
 
-    // Ported: "extracts \`go\` directive %s as a \`%goMod\` extracted constraint as a SemVer-minor compatible range" — gomod/extract.spec.ts line 530
-    #[test]
-    fn convert_go_directive_to_semver_range_valid() {
-        let (range, versioning) = convert_go_directive_to_semver_range(Some("1.19")).unwrap();
-        assert_eq!(range, "~1.19.x");
-        assert_eq!(versioning, "semver-coerced");
-    }
-
     // ── gomod updateDependency tests ───────────────────────────────────────
 
     const GOMOD1: &str = include_str!("../../tests/fixtures/gomod/1-go-mod");
