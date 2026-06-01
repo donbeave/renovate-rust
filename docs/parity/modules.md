@@ -98,7 +98,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/kubernetes` | 1 | ? | 15/15 (100%) | — |
 | `manager/kustomize` | 3 | ? | 47/68 (69%) | — |
 | `manager/leiningen` | 1 | ? | 4/4 (100%) | — |
-| `manager/maven` | 3 | partial | 55/56 (98%) | Missing: cross-file property resolution (resolveParents) |
+| `manager/maven` | 3 | full | 55/56 (98%) | Cross-file property resolution (resolveParents) implemented. One apparent gap is a duplicate upstream test description. |
 | `manager/maven-wrapper` | 2 | ? | 9/39 (23%) | — |
 | `manager/meteor` | 1 | ? | 2/2 (100%) | — |
 | `manager/mint` | 1 | ? | 5/5 (100%) | — |

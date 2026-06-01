@@ -87,6 +87,18 @@ pub enum MavenSkipReason {
     PropertyRef,
 }
 
+/// A single Maven `<properties>` entry with its file position.
+///
+/// Mirrors upstream `MavenProp`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MavenProp {
+    /// Resolved property value.
+    pub val: String,
+    /// Byte offset of the property text content, relative to the first `<`
+    /// in the file (matching `maven_update_dependency` expectations).
+    pub file_replace_position: usize,
+}
+
 /// A single extracted Maven dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MavenExtractedDep {
@@ -143,6 +155,10 @@ pub struct MavenPackageFile {
     pub deps: Vec<MavenExtractedDep>,
     /// Top-level `<project><version>` value, when present.
     pub package_file_version: Option<String>,
+    /// Properties declared in this POM's `<properties>` section.
+    pub maven_props: HashMap<String, MavenProp>,
+    /// Path to the parent POM file, if this POM declares a `<parent>`.
+    pub parent: Option<String>,
 }
 
 /// Errors from parsing a `pom.xml`.
@@ -150,6 +166,8 @@ pub struct MavenPackageFile {
 pub enum MavenExtractError {
     #[error("XML parse error: {0}")]
     Xml(#[from] quick_xml::Error),
+    #[error("Not a valid Maven POM: {0}")]
+    InvalidPom(String),
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────
@@ -160,7 +178,13 @@ pub enum MavenExtractError {
 /// resolved against the POM's own `<properties>` section.  Unresolvable
 /// references remain marked with [`MavenSkipReason::PropertyRef`].
 pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractError> {
-    let (mut deps, properties) = parse_pom(content)?;
+    let (mut deps, prop_map, _parent) = parse_pom(content, "")?;
+
+    // Flatten MavenProp values into plain strings for local resolution.
+    let properties: HashMap<String, String> = prop_map
+        .into_iter()
+        .map(|(k, v)| (k, v.val))
+        .collect();
 
     // Adjust file_replace_position to be relative to the first '<' in content,
     // matching what maven_update_dependency expects.
@@ -196,6 +220,164 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
     }
 
     Ok(deps)
+}
+
+/// Extract a single Maven package file, returning raw deps, properties, and
+/// parent path without cross-file resolution.
+/// Mirrors upstream `extractPackageFile`.
+pub fn extract_package_file(content: &str, package_file: &str) -> Result<MavenPackageFile, MavenExtractError> {
+    let (mut deps, properties, parent) = parse_pom(content, package_file)?;
+
+    // Adjust file_replace_position to be relative to the first '<' in content.
+    let offset = content.find('<').unwrap_or(0);
+    for dep in &mut deps {
+        if let Some(pos) = dep.file_replace_position {
+            dep.file_replace_position = Some(pos - offset);
+        }
+    }
+
+    Ok(MavenPackageFile {
+        package_file: package_file.to_owned(),
+        deps,
+        package_file_version: project_version(content),
+        maven_props: properties,
+        parent,
+    })
+}
+
+/// Resolve cross-file properties and registry URLs for Maven multi-module
+/// projects.  Mirrors upstream `resolveParents`.
+pub fn resolve_parents(package_files: &mut [MavenPackageFile]) {
+    if package_files.is_empty() {
+        return;
+    }
+
+    // Map package file path -> index.
+    let path_to_index: std::collections::HashMap<String, usize> = package_files
+        .iter()
+        .enumerate()
+        .map(|(i, pkg)| (pkg.package_file.clone(), i))
+        .collect();
+
+    // For each package, build merged properties by walking up the parent chain.
+    // Child properties override parent properties.
+    let mut merged_props: Vec<HashMap<String, MavenProp>> = Vec::with_capacity(package_files.len());
+    let mut merged_registry_urls: Vec<Vec<String>> = Vec::with_capacity(package_files.len());
+
+    for pkg in package_files.iter() {
+        let mut props = HashMap::new();
+        let mut registry_urls = Vec::new();
+        let mut visited = std::collections::HashSet::new();
+        let mut current = Some(pkg);
+
+        while let Some(current_pkg) = current {
+            // Insert parent props first (they get overridden by child props).
+            for (key, prop) in &current_pkg.maven_props {
+                props.entry(key.clone()).or_insert_with(|| prop.clone());
+            }
+
+            // Collect registry URLs from parent deps.
+            for dep in &current_pkg.deps {
+                for url in &dep.registry_urls {
+                    if !registry_urls.contains(url) {
+                        registry_urls.push(url.clone());
+                    }
+                }
+            }
+
+            let parent_path = current_pkg.parent.as_deref();
+            if let Some(parent_path) = parent_path {
+                if visited.insert(parent_path) {
+                    current = path_to_index
+                        .get(parent_path)
+                        .and_then(|&idx| package_files.get(idx));
+                } else {
+                    break; // Cycle detected.
+                }
+            } else {
+                break;
+            }
+        }
+
+        merged_props.push(props);
+        merged_registry_urls.push(registry_urls);
+    }
+
+    // Apply merged properties to each dep and merge registry URLs.
+    for (i, pkg) in package_files.iter_mut().enumerate() {
+        let props = &merged_props[i];
+        let parent_registry_urls = &merged_registry_urls[i];
+
+        for dep in &mut pkg.deps {
+            // Merge registry URLs (prepend parent URLs, keep unique).
+            let mut new_urls = parent_registry_urls.clone();
+            for url in &dep.registry_urls {
+                if !new_urls.contains(url) {
+                    new_urls.push(url.clone());
+                }
+            }
+            dep.registry_urls = new_urls;
+
+            // Resolve dep_name property references.
+            if dep.dep_name.contains("${") {
+                dep.dep_name = substitute_props(&dep.dep_name, &string_props(props));
+            }
+
+            // Resolve version property references.
+            if dep.skip_reason == Some(MavenSkipReason::PropertyRef) {
+                let prop_key = exact_property_ref(&dep.current_value);
+                let prop_value = prop_key.and_then(|key| props.get(key));
+
+                if let (Some(key), Some(prop)) = (prop_key, prop_value) {
+                    dep.shared_variable_name = Some(key.to_owned());
+                    dep.file_replace_position = Some(prop.file_replace_position);
+                    dep.current_value = prop.val.clone();
+                    // Go template expressions ({{...}}) are unresolvable version placeholders.
+                    if dep.current_value.contains("{{") {
+                        dep.skip_reason = Some(MavenSkipReason::PropertyRef);
+                    } else {
+                        dep.skip_reason = None;
+                    }
+                }
+            }
+        }
+    }
+
+    // Mark parent-root deps.
+    // A parent dep is "root" when its parent POM either has no parent, or
+    // its parent is not in the current file set.
+    let root_dep_names: std::collections::HashSet<String> = package_files
+        .iter()
+        .filter_map(|pkg| {
+            let parent_path = pkg.parent.as_deref()?;
+            let parent_idx = path_to_index.get(parent_path)?;
+            let parent_pkg = package_files.get(*parent_idx)?;
+            let is_root = parent_pkg.parent.is_none()
+                || path_to_index.get(parent_pkg.parent.as_deref()?).is_none();
+            if is_root {
+                pkg.deps
+                    .iter()
+                    .find(|d| d.dep_type == MavenDepType::Parent)
+                    .map(|d| d.dep_name.clone())
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    for pkg in package_files.iter_mut() {
+        for dep in &mut pkg.deps {
+            if dep.dep_type == MavenDepType::Parent && root_dep_names.contains(&dep.dep_name) {
+                dep.dep_type = MavenDepType::ParentRoot;
+            }
+        }
+    }
+}
+
+/// Convert a `HashMap<String, MavenProp>` to `HashMap<String, String>`
+/// for use with `substitute_props`.
+fn string_props(props: &HashMap<String, MavenProp>) -> HashMap<String, String> {
+    props.iter().map(|(k, v)| (k.clone(), v.val.clone())).collect()
 }
 
 /// Extract Maven registry URLs from a `settings.xml` file.
@@ -314,23 +496,24 @@ pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtract
 }
 
 /// Extract Maven package-file data from already-read path/content pairs.
+///
+/// This function performs cross-file parent resolution (`resolve_parents`),
+/// merging properties and registry URLs from parent POMs into child POMs.
 pub fn extract_all_package_file_infos(files: &[(&str, &str)]) -> Vec<MavenPackageFile> {
     let mut package_files = Vec::new();
-    let registry_urls = extract_package_registry_urls(files);
-    let root_coordinates = files
-        .iter()
-        .find_map(|(path, content)| (*path == "pom.xml").then(|| project_coordinates(content)))
-        .flatten();
+
+    // Extract raw package files (no cross-file resolution yet).
     for (path, content) in files {
         if path.ends_with(".mvn/extensions.xml") || *path == ".mvn/extensions.xml" {
-            if let Some(mut deps) = extract_extensions(content)
+            if let Some(deps) = extract_extensions(content)
                 && !deps.is_empty()
             {
-                apply_registry_urls(&mut deps, &registry_urls);
                 package_files.push(MavenPackageFile {
                     package_file: (*path).to_owned(),
                     deps,
                     package_file_version: None,
+                    maven_props: HashMap::new(),
+                    parent: None,
                 });
             }
             continue;
@@ -338,18 +521,23 @@ pub fn extract_all_package_file_infos(files: &[(&str, &str)]) -> Vec<MavenPackag
 
         if path.ends_with(".xml")
             && !is_settings_xml_path(path)
-            && let Ok(mut deps) = extract(content)
-            && !deps.is_empty()
+            && !content.is_empty()
         {
-            mark_parent_root_deps(&mut deps, &root_coordinates);
-            apply_registry_urls(&mut deps, &registry_urls);
-            package_files.push(MavenPackageFile {
-                package_file: (*path).to_owned(),
-                deps,
-                package_file_version: project_version(content),
-            });
+            if let Ok(pkg) = extract_package_file(content, path) {
+                package_files.push(pkg);
+            }
         }
     }
+
+    // Cross-file property / registry resolution.
+    resolve_parents(&mut package_files);
+
+    // Apply settings-level registry URLs to all packages.
+    let settings_registry_urls = extract_package_registry_urls(files);
+    for pkg in &mut package_files {
+        apply_registry_urls(&mut pkg.deps, &settings_registry_urls);
+    }
+
     package_files
 }
 
@@ -387,10 +575,10 @@ fn package_file_properties(files: &[(&str, &str)]) -> HashMap<String, String> {
         if path.ends_with(".xml")
             && !is_settings_xml_path(path)
             && !path.ends_with(".mvn/extensions.xml")
-            && let Ok((_, pom_properties)) = parse_pom(content)
+            && let Ok((_, pom_properties, _)) = parse_pom(content, path)
         {
-            for (key, value) in pom_properties {
-                properties.entry(key).or_insert(value);
+            for (key, prop) in pom_properties {
+                properties.entry(key).or_insert(prop.val);
             }
         }
     }
@@ -459,31 +647,72 @@ fn apply_registry_urls(deps: &mut [MavenExtractedDep], registry_urls: &[String])
     }
 }
 
-fn mark_parent_root_deps(deps: &mut [MavenExtractedDep], root_coordinates: &Option<ProjectCoords>) {
-    let Some(root) = root_coordinates else {
-        return;
+/// Resolve a parent POM file path from a `<relativePath>` value.
+/// Mirrors upstream `resolveParentFile`.
+fn resolve_parent_file(package_file: &str, parent_path: &str) -> String {
+    let (parent_file, parent_dir) = if parent_path.ends_with("pom.xml")
+        || parent_path.ends_with(".pom.xml")
+    {
+        let file_name = std::path::Path::new(parent_path)
+            .file_name()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_else(|| "pom.xml".to_owned());
+        let dir = std::path::Path::new(parent_path)
+            .parent()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_default();
+        (file_name, dir)
+    } else {
+        ("pom.xml".to_owned(), parent_path.to_owned())
     };
-    let root_dep_name = format!("{}:{}", root.group_id, root.artifact_id);
-    for dep in deps {
-        if dep.dep_type == MavenDepType::Parent
-            && dep.dep_name == root_dep_name
-            && dep.current_value == root.version
-        {
-            dep.dep_type = MavenDepType::ParentRoot;
-        }
-    }
+
+    let dir = std::path::Path::new(package_file)
+        .parent()
+        .map(|s| s.to_string_lossy().to_string())
+        .unwrap_or_default();
+
+    let raw = if dir.is_empty() {
+        format!("{}/{}", parent_dir, parent_file)
+    } else {
+        format!("{}/{}/{}", dir, parent_dir, parent_file)
+    };
+    normalize_path(&raw)
 }
 
-/// SAX parse a POM and return (deps, properties).
+/// Normalize a path by resolving `.` and `..` components.
+fn normalize_path(path: &str) -> String {
+    use std::path::Component;
+    let mut comps = Vec::new();
+    for comp in std::path::Path::new(path).components() {
+        match comp {
+            Component::Normal(c) => comps.push(c.to_string_lossy().into_owned()),
+            Component::ParentDir if !comps.is_empty() => {
+                comps.pop();
+            }
+            Component::ParentDir => comps.push("..".to_owned()),
+            Component::CurDir => {}
+            Component::RootDir | Component::Prefix(_) => {
+                comps.clear();
+                comps.push(comp.as_os_str().to_string_lossy().into_owned());
+            }
+        }
+    }
+    comps.join("/")
+}
+
+/// SAX parse a POM and return (deps, properties, parent_file_path).
 fn parse_pom(
     content: &str,
-) -> Result<(Vec<MavenExtractedDep>, HashMap<String, String>), MavenExtractError> {
+    package_file: &str,
+) -> Result<(Vec<MavenExtractedDep>, HashMap<String, MavenProp>, Option<String>), MavenExtractError>
+{
+    let offset = content.find('<').unwrap_or(0);
     let cursor = BufReader::new(content.as_bytes());
     let mut reader = Reader::from_reader(cursor);
     reader.config_mut().trim_text(true);
 
     let mut deps: Vec<MavenExtractedDep> = Vec::new();
-    let mut properties: HashMap<String, String> = HashMap::new();
+    let mut properties: HashMap<String, MavenProp> = HashMap::new();
 
     // Element name stack — tracks current XML path.
     let mut stack: Vec<String> = Vec::new();
@@ -496,13 +725,25 @@ fn parse_pom(
     // `Some(key)` when we are inside <project><properties><key>.
     let mut prop_key: Option<String> = None;
 
+    // Tracks <relativePath> text when inside <parent>.
+    let mut parent_relative_path: Option<String> = None;
+    let mut inside_parent: bool = false;
+
     let mut buf = Vec::new();
+    let mut saw_project_root = false;
 
     loop {
         let pos_before = reader.buffer_position() as usize;
         match reader.read_event_into(&mut buf)? {
             Event::Start(e) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if stack.is_empty() && name != "project" {
+                    // Root element is not <project> → not a valid Maven POM.
+                    return Err(MavenExtractError::InvalidPom(format!(
+                        "root element is <{name}>, expected <project>"
+                    )));
+                }
+                saw_project_root = true;
                 stack.push(name.clone());
 
                 // Detect entry into a <properties> child element.
@@ -534,6 +775,7 @@ fn parse_pom(
                         "parent" if stack.len() == 2 => {
                             current = Some(CurrentDep::new(MavenDepType::Parent));
                             collect_start_depth = stack.len();
+                            inside_parent = true;
                         }
                         _ => {}
                     }
@@ -564,6 +806,9 @@ fn parse_pom(
                     {
                         deps.push(d);
                     }
+                    if dep.dep_type == MavenDepType::Parent {
+                        inside_parent = false;
+                    }
                     current = None;
                 }
 
@@ -578,7 +823,15 @@ fn parse_pom(
 
                 // Capture a <properties><key>value</key> entry.
                 if let Some(ref key) = prop_key {
-                    properties.insert(key.clone(), text.clone());
+                    // Position relative to first '<' (matching extract/update expectations).
+                    let file_replace_position = pos_before.saturating_sub(offset);
+                    properties.insert(
+                        key.clone(),
+                        MavenProp {
+                            val: text.clone(),
+                            file_replace_position,
+                        },
+                    );
                 }
 
                 // Capture dep fields.
@@ -593,6 +846,12 @@ fn parse_pom(
                             dep.file_replace_position = Some(pos_before);
                         }
                         Some("scope") => dep.scope = Some(text.clone()),
+                        Some("relativePath") => {
+                            dep.relative_path = Some(text.clone());
+                            if inside_parent {
+                                parent_relative_path = Some(text.clone());
+                            }
+                        }
                         _ => {}
                     }
                 }
@@ -613,7 +872,24 @@ fn parse_pom(
         buf.clear();
     }
 
-    Ok((deps, properties))
+    // If we never saw a <project> start, this isn't a valid Maven POM.
+    if !saw_project_root {
+        return Err(MavenExtractError::InvalidPom(
+            "no <project> element found".to_owned(),
+        ));
+    }
+
+    // Compute parent file path from the parent dep's relativePath.
+    // Default to ../pom.xml when <parent> exists but <relativePath> is absent.
+    let parent = deps
+        .iter()
+        .find(|d| d.dep_type == MavenDepType::Parent)
+        .map(|_| {
+            let relative_path = parent_relative_path.as_deref().unwrap_or("../pom.xml");
+            resolve_parent_file(package_file, relative_path)
+        });
+
+    Ok((deps, properties, parent))
 }
 
 /// Substitute `${key}` references in `value` using `properties`.
@@ -675,6 +951,8 @@ struct CurrentDep {
     scope: Option<String>,
     /// Byte offset of the `<version>` text content in the XML file.
     file_replace_position: Option<usize>,
+    /// `<relativePath>` text when this is a `<parent>` element.
+    relative_path: Option<String>,
 }
 
 impl CurrentDep {
@@ -686,6 +964,7 @@ impl CurrentDep {
             version: String::new(),
             scope: None,
             file_replace_position: None,
+            relative_path: None,
         }
     }
 }
@@ -838,59 +1117,6 @@ fn stack_ends_with(stack: &[String], suffix: &[&str]) -> bool {
             .iter()
             .map(String::as_str)
             .eq(suffix.iter().copied())
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct ProjectCoords {
-    group_id: String,
-    artifact_id: String,
-    version: String,
-}
-
-fn project_coordinates(content: &str) -> Option<ProjectCoords> {
-    let cursor = BufReader::new(content.as_bytes());
-    let mut reader = Reader::from_reader(cursor);
-    reader.config_mut().trim_text(true);
-
-    let mut stack: Vec<String> = Vec::new();
-    let mut group_id = String::new();
-    let mut artifact_id = String::new();
-    let mut version = String::new();
-    let mut buf = Vec::new();
-
-    loop {
-        match reader.read_event_into(&mut buf) {
-            Ok(Event::Start(e)) => {
-                stack.push(String::from_utf8_lossy(e.name().as_ref()).into_owned());
-            }
-            Ok(Event::End(_)) => {
-                stack.pop();
-            }
-            Ok(Event::Text(e)) => {
-                if stack.len() == 2 && stack[0] == "project" {
-                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
-                    match stack.last().map(String::as_str) {
-                        Some("groupId") => group_id = text,
-                        Some("artifactId") => artifact_id = text,
-                        Some("version") => version = text,
-                        _ => {}
-                    }
-                }
-            }
-            Ok(Event::Eof) => break,
-            Ok(_) => {}
-            Err(_) => return None,
-        }
-        buf.clear();
-    }
-
-    (!group_id.is_empty() && !artifact_id.is_empty() && !version.is_empty()).then_some(
-        ProjectCoords {
-            group_id,
-            artifact_id,
-            version,
-        },
-    )
 }
 
 fn project_version(content: &str) -> Option<String> {
@@ -1910,10 +2136,12 @@ mod tests {
 </project>"#;
 
         let packages = extract_all_package_files(&[("pom.xml", root), ("foo.bar/pom.xml", child)]);
-        assert_eq!(packages.len(), 1);
-        assert_eq!(packages[0][0].dep_name, "org.example:root");
-        assert_eq!(packages[0][0].dep_type, MavenDepType::ParentRoot);
-        assert_eq!(packages[0][0].renovate_dep_type(), "parent-root");
+        // Upstream returns both packages; root has empty deps, child has parent-root dep.
+        assert_eq!(packages.len(), 2);
+        assert!(packages[0].is_empty());
+        assert_eq!(packages[1][0].dep_name, "org.example:root");
+        assert_eq!(packages[1][0].dep_type, MavenDepType::ParentRoot);
+        assert_eq!(packages[1][0].renovate_dep_type(), "parent-root");
     }
 
     // Ported: "should skip root pom.xml when it has an external parent" — maven/extract.spec.ts line 1045
@@ -2490,10 +2718,10 @@ mod tests {
     #[test]
     fn invalid_xml_returns_empty() {
         // Empty string, invalid XML, and documents with wrong root element all
-        // return no dependencies (mirrors extractPackage returning null).
-        assert!(extract_ok("").is_empty());
-        assert!(extract_ok("invalid xml content").is_empty());
-        assert!(extract_ok("<foobar></foobar>").is_empty());
+        // return Err (mirrors extractPackage returning null).
+        assert!(extract("").is_err());
+        assert!(extract("invalid xml content").is_err());
+        assert!(extract("<foobar></foobar>").is_err());
         assert!(extract_ok("<project></project>").is_empty());
     }
 

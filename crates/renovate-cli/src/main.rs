@@ -812,6 +812,7 @@ async fn process_repo(
                                                     } else {
                                                         None
                                                     },
+                                                    update_type: None,
                                                 })
                                             } else {
                                                 None
