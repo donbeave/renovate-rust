@@ -969,21 +969,21 @@ end
         assert_eq!(result.as_str(), "already-updated");
     }
 
-    // Ported: "returns unsupported for empty lockfile" — modules/manager/bundler/update-locked.spec.ts line 20
+    // Ported: "returns unsupported for empty lockfile" — modules/manager/bundler/update-locked.spec.ts line 21
     #[test]
     fn bundler_update_locked_unsupported_for_no_content() {
         let result = update_locked_bundler_dependency(Some("activejob"), Some("5.2.3"), None);
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported for empty depName" — modules/manager/bundler/update-locked.spec.ts line 31
+    // Ported: "returns unsupported for empty depName" — modules/manager/bundler/update-locked.spec.ts line 32
     #[test]
     fn bundler_update_locked_unsupported_for_no_dep_name() {
         let result = update_locked_bundler_dependency(None, Some("5.2.3"), Some(GEMFILE_LOCK));
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported" — modules/manager/bundler/update-locked.spec.ts line 43
+    // Ported: "returns unsupported" — modules/manager/bundler/update-locked.spec.ts line 44
     #[test]
     fn bundler_update_locked_unsupported_version_not_in_lock() {
         let result =
@@ -991,7 +991,7 @@ end
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns update-failed in case of errors" — modules/manager/bundler/update-locked.spec.ts line 55
+    // Ported: "returns update-failed in case of errors" — modules/manager/bundler/update-locked.spec.ts line 56
     #[test]
     fn bundler_update_locked_update_failed_on_invalid_lock() {
         let result = update_locked_bundler_dependency(
@@ -1072,13 +1072,13 @@ end
         assert!(extract_lock_file_entries("").is_empty());
     }
 
-    // Ported: "returns empty map when errors occur" — modules/manager/bundler/locked-version.spec.ts line 47
+    // Ported: "returns empty map when errors occur" — modules/manager/bundler/locked-version.spec.ts line 48
     #[test]
     fn bundler_locked_version_invalid_input_empty() {
         assert!(extract_lock_file_entries("not a gemfile lock").is_empty());
     }
 
-    // Ported: "strips platform suffixes from dependencies" — modules/manager/bundler/locked-version.spec.ts line 53
+    // Ported: "strips platform suffixes from dependencies" — modules/manager/bundler/locked-version.spec.ts line 54
     #[test]
     fn bundler_locked_version_strips_platform_suffix() {
         let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    sqlite3 (2.7.4-aarch64-linux-gnu)\n    sqlite3 (2.7.4-arm64-darwin)\n    sqlite3 (2.7.4-x86_64-darwin)\n    nokogiri (1.18.10-aarch64-linux-gnu)\n      racc (~> 1.4)\n    nokogiri (1.18.10-x86_64-darwin)\n      racc (~> 1.4)\n    regular_gem (1.0.0)\n\nPLATFORMS\n  aarch64-linux-gnu\n  arm64-darwin\n  x86_64-darwin\n\nDEPENDENCIES\n  sqlite3 (>= 2.1)\n";

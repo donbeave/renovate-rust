@@ -285,19 +285,19 @@ plugins:
         );
     }
 
-    // Ported: "returns empty list for an empty yaml file" — jenkins/extract.spec.ts line 21
+    // Ported: "returns empty list for an empty yaml file" — jenkins/extract.spec.ts line 19
     #[test]
     fn yml_empty_returns_empty() {
         assert!(extract_yml("").is_empty());
     }
 
-    // Ported: "returns empty list for an empty text file" — jenkins/extract.spec.ts line 15
+    // Ported: "returns empty list for an empty text file" — jenkins/extract.spec.ts line 14
     #[test]
     fn txt_empty_file_returns_empty() {
         assert!(extract_txt("").is_empty());
     }
 
-    // Ported: "returns empty list for an invalid yaml file" — jenkins/extract.spec.ts line 27
+    // Ported: "returns empty list for an invalid yaml file" — jenkins/extract.spec.ts line 24
     #[test]
     fn yml_invalid_yaml_returns_empty() {
         let content = "this: is: invalid: yaml: content\n";
@@ -305,7 +305,7 @@ plugins:
         assert!(deps.is_empty());
     }
 
-    // Ported: "extracts multiple image lines in text format" — jenkins/extract.spec.ts line 33
+    // Ported: "extracts multiple image lines in text format" — jenkins/extract.spec.ts line 29
     #[test]
     fn txt_plugins_fixture_six_deps() {
         // Mirrors jenkins/__fixtures__/plugins.txt; 4 valid + 2 renovate:ignore = 6 total
@@ -335,7 +335,7 @@ plugins:
         assert_eq!(git_client.skip_reason, Some(JenkinsSkipReason::Ignored));
     }
 
-    // Ported: "extracts multiple image lines in yaml format" — jenkins/extract.spec.ts line 40
+    // Ported: "extracts multiple image lines in yaml format" — jenkins/extract.spec.ts line 35
     #[test]
     fn yml_plugins_fixture_eight_deps() {
         // Mirrors jenkins/__fixtures__/plugins.yaml; 8 total including skipped

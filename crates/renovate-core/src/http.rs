@@ -866,7 +866,7 @@ mod tests {
         assert_eq!(val["test"], true);
     }
 
-    // Ported: "gets plain text with correct headers" — util/http/index.spec.ts line 402
+    // Ported: "gets plain text with correct headers" — util/http/index.spec.ts line 484
     #[tokio::test]
     async fn get_raw_with_accept_returns_body() {
         let server = MockServer::start().await;
@@ -899,7 +899,7 @@ mod tests {
         assert_eq!(val["id"], 123);
     }
 
-    // Ported: "get" — util/http/index.spec.ts line 29
+    // Ported: "get" — util/http/index.spec.ts line 111
     #[tokio::test]
     async fn get_sends_request_and_receives_response() {
         let server = MockServer::start().await;
@@ -920,7 +920,7 @@ mod tests {
         assert_eq!(body, "hello");
     }
 
-    // Ported: "returns 429 error" — util/http/index.spec.ts line 40
+    // Ported: "returns 429 error" — util/http/index.spec.ts line 122
     #[tokio::test]
     async fn get_returns_429_error_after_retries_exhausted() {
         let server = MockServer::start().await;
@@ -935,7 +935,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
     }
 
-    // Ported: "returns 401 error" — util/http/index.spec.ts line 48
+    // Ported: "returns 401 error" — util/http/index.spec.ts line 130
     #[tokio::test]
     async fn get_returns_401_error() {
         let server = MockServer::start().await;
@@ -964,7 +964,7 @@ mod tests {
         assert!(header.contains("Bearer"));
     }
 
-    // Ported: "putJson" — util/http/index.spec.ts line 166
+    // Ported: "putJson" — util/http/index.spec.ts line 248
     #[tokio::test]
     async fn put_json_sends_body_and_parses_response() {
         let server = MockServer::start().await;
@@ -981,7 +981,7 @@ mod tests {
         assert_eq!(val["updated"], true);
     }
 
-    // Ported: "patchJson" — util/http/index.spec.ts line 181
+    // Ported: "patchJson" — util/http/index.spec.ts line 263
     #[tokio::test]
     async fn patch_json_sends_body_and_returns_response() {
         let server = MockServer::start().await;
@@ -998,7 +998,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
-    // Ported: "deleteJson" — util/http/index.spec.ts line 196
+    // Ported: "deleteJson" — util/http/index.spec.ts line 278
     #[tokio::test]
     async fn delete_json_sends_request_and_parses_response() {
         let server = MockServer::start().await;
@@ -1015,7 +1015,7 @@ mod tests {
         assert_eq!(val["deleted"], true);
     }
 
-    // Ported: "headJson" — util/http/index.spec.ts line 211
+    // Ported: "headJson" — util/http/index.spec.ts line 293
     #[tokio::test]
     async fn head_json_sends_request_and_returns_response() {
         let server = MockServer::start().await;
@@ -1031,7 +1031,7 @@ mod tests {
         assert_eq!(resp.headers().get("x-custom").unwrap(), "value");
     }
 
-    // Ported: "sets default user-agent" — util/http/index.spec.ts line 36
+    // Ported: "sets default user-agent" — util/http/index.spec.ts line 37
     #[tokio::test]
     async fn default_user_agent_is_set_on_requests() {
         let server = MockServer::start().await;
@@ -1046,7 +1046,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
-    // Ported: "preserves existing headers" — util/http/index.spec.ts line 100
+    // Ported: "preserves existing headers" — util/http/index.spec.ts line 101
     #[tokio::test]
     async fn get_preserves_existing_headers() {
         let server = MockServer::start().await;
@@ -1066,7 +1066,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
-    // Ported: "parses yaml response without schema" — util/http/index.spec.ts line 427
+    // Ported: "parses yaml response without schema" — util/http/index.spec.ts line 509
     #[tokio::test]
     async fn get_yaml_parses_response_body() {
         let server = MockServer::start().await;
@@ -1082,7 +1082,7 @@ mod tests {
         assert_eq!(val["version"], 1);
     }
 
-    // Ported: "throws on invalid yaml" — util/http/index.spec.ts line 447
+    // Ported: "throws on invalid yaml" — util/http/index.spec.ts line 529
     #[tokio::test]
     async fn get_yaml_throws_on_invalid_yaml() {
         let server = MockServer::start().await;
@@ -1097,7 +1097,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns error result for invalid yaml" — util/http/index.spec.ts line 522
+    // Ported: "returns error result for invalid yaml" — util/http/index.spec.ts line 604
     #[tokio::test]
     async fn get_yaml_returns_error_for_invalid_yaml() {
         let server = MockServer::start().await;
@@ -1112,7 +1112,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns error result for network errors" — util/http/index.spec.ts line 533
+    // Ported: "returns error result for network errors" — util/http/index.spec.ts line 615
     #[tokio::test]
     async fn get_yaml_returns_error_for_network_errors() {
         let server = MockServer::start().await;
@@ -1127,7 +1127,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws on invalid toml" — util/http/index.spec.ts line 752
+    // Ported: "throws on invalid toml" — util/http/index.spec.ts line 834
     #[tokio::test]
     async fn get_toml_throws_on_invalid_toml() {
         let server = MockServer::start().await;
@@ -1142,7 +1142,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "parses toml with schema validation" — util/http/index.spec.ts line 711
+    // Ported: "parses toml with schema validation" — util/http/index.spec.ts line 793
     #[tokio::test]
     async fn get_toml_parses_valid_toml_response() {
         let server = MockServer::start().await;
@@ -1395,7 +1395,7 @@ mod www_auth_tests {
 
     // ── apply_authorization ───────────────────────────────────────────────────
 
-    // Ported: "does nothing" — util/http/auth.spec.ts line 3
+    // Ported: "does nothing" — util/http/auth.spec.ts line 6
     #[test]
     fn auth_does_nothing_with_existing_header() {
         let opts = AuthOptions {
@@ -1405,7 +1405,7 @@ mod www_auth_tests {
         assert_eq!(apply_authorization(&opts), AppliedAuth::default());
     }
 
-    // Ported: "gitea password" — util/http/auth.spec.ts line 15
+    // Ported: "gitea password" — util/http/auth.spec.ts line 24
     #[test]
     fn auth_gitea_password_basic() {
         let opts = AuthOptions {
@@ -1417,7 +1417,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("Basic OlhYWFg="));
     }
 
-    // Ported: "gittea token" — util/http/auth.spec.ts line 28
+    // Ported: "gittea token" — util/http/auth.spec.ts line 44
     #[test]
     fn auth_gitea_token_bearer() {
         let opts = AuthOptions {
@@ -1429,7 +1429,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("Bearer XXXX"));
     }
 
-    // Ported: "github token" — util/http/auth.spec.ts line 41
+    // Ported: "github token" — util/http/auth.spec.ts line 64
     #[test]
     fn auth_github_token_prefix() {
         let opts = AuthOptions {
@@ -1441,7 +1441,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("token XXX"));
     }
 
-    // Ported: "github token for datasource using github api" — util/http/auth.spec.ts line 56
+    // Ported: "github token for datasource using github api" — util/http/auth.spec.ts line 82
     #[test]
     fn auth_github_releases_token_prefix() {
         let opts = AuthOptions {
@@ -1453,7 +1453,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("token ZZZZ"));
     }
 
-    // Ported: "github app token with hostType not in GITHUB_API_USING_HOST_TYPES" — util/http/auth.spec.ts line 71
+    // Ported: "github app token with hostType not in GITHUB_API_USING_HOST_TYPES" — util/http/auth.spec.ts line 101
     #[test]
     fn auth_github_app_token_bearer() {
         let opts = AuthOptions {
@@ -1465,7 +1465,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("Bearer ghs_123test"));
     }
 
-    // Ported: "gitlab personal access token" — util/http/auth.spec.ts line 85
+    // Ported: "gitlab personal access token" — util/http/auth.spec.ts line 115
     #[test]
     fn auth_gitlab_personal_access_token() {
         let opts = AuthOptions {
@@ -1481,7 +1481,7 @@ mod www_auth_tests {
         );
     }
 
-    // Ported: "gitlab oauth token" — util/http/auth.spec.ts line 101
+    // Ported: "gitlab oauth token" — util/http/auth.spec.ts line 136
     #[test]
     fn auth_gitlab_oauth_token_bearer() {
         let token = "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test";
@@ -1497,7 +1497,7 @@ mod www_auth_tests {
         );
     }
 
-    // Ported: "npm basic token" — util/http/auth.spec.ts line 117
+    // Ported: "npm basic token" — util/http/auth.spec.ts line 157
     #[test]
     fn auth_npm_basic_auth_type() {
         let opts = AuthOptions {
@@ -1510,7 +1510,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("Basic test"));
     }
 
-    // Ported: "bare token" — util/http/auth.spec.ts line 132
+    // Ported: "bare token" — util/http/auth.spec.ts line 181
     #[test]
     fn auth_token_only_auth_type() {
         let opts = AuthOptions {
@@ -1522,7 +1522,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("test"));
     }
 
-    // Ported: "honors authType" — util/http/auth.spec.ts line 146
+    // Ported: "honors authType" — util/http/auth.spec.ts line 203
     #[test]
     fn auth_honors_auth_type() {
         let opts = AuthOptions {

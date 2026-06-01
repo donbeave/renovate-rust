@@ -446,7 +446,7 @@ mod tests {
         assert_eq!(dep.datasource, "node-version");
     }
 
-    // Ported: "supports ranges" — modules/manager/nodenv/extract.spec.ts line 14
+    // Ported: "supports ranges" — modules/manager/nodenv/extract.spec.ts line 16
     #[test]
     fn nodenv_supports_partial_version() {
         let dep = extract_nodenv("8.4\n");
@@ -455,7 +455,7 @@ mod tests {
         assert_eq!(dep.datasource, "node-version");
     }
 
-    // Ported: "skips non ranges" — modules/manager/nodenv/extract.spec.ts line 23
+    // Ported: "skips non ranges" — modules/manager/nodenv/extract.spec.ts line 27
     #[test]
     fn nodenv_passes_through_non_version_string() {
         let dep = extract_nodenv("latestn");
@@ -474,21 +474,21 @@ mod tests {
         assert_eq!(dep.package_name, "bazelbuild/bazel");
     }
 
-    // Ported: "supports ranges" — modules/manager/bazelisk/extract.spec.ts line 14
+    // Ported: "supports ranges" — modules/manager/bazelisk/extract.spec.ts line 17
     #[test]
     fn bazelisk_supports_partial_version() {
         let dep = extract_bazelisk("5.2");
         assert_eq!(dep.current_value, "5.2");
     }
 
-    // Ported: "skips non ranges" — modules/manager/bazelisk/extract.spec.ts line 23
+    // Ported: "skips non ranges" — modules/manager/bazelisk/extract.spec.ts line 29
     #[test]
     fn bazelisk_passes_through_non_version_string() {
         let dep = extract_bazelisk("latestn");
         assert_eq!(dep.current_value, "latestn");
     }
 
-    // Ported: "ignores comments past the first line" — modules/manager/bazelisk/extract.spec.ts line 32
+    // Ported: "ignores comments past the first line" — modules/manager/bazelisk/extract.spec.ts line 41
     #[test]
     fn bazelisk_ignores_comments_past_first_line() {
         let dep = extract_bazelisk("5.2.0\n# comment1\n\n# comment2");

@@ -240,21 +240,21 @@ dev = [
         }
     }
 
-    // Ported: "returns object on correct options" (case 1) — modules/manager/pip-compile/utils.spec.ts line 6
+    // Ported: "returns object on correct options" (case 1) — modules/manager/pip-compile/utils.spec.ts line 5
     #[test]
     fn infer_exec_dir_same_subdir() {
         let result = infer_command_exec_dir("subdir/reqs.txt", Some("subdir/reqs.txt")).unwrap();
         assert_eq!(result, ".");
     }
 
-    // Ported: "returns object on correct options" (case 2) — modules/manager/pip-compile/utils.spec.ts line 12
+    // Ported: "returns object on correct options" (case 2) — modules/manager/pip-compile/utils.spec.ts line 5
     #[test]
     fn infer_exec_dir_output_in_parent() {
         let result = infer_command_exec_dir("subdir/reqs.txt", Some("reqs.txt")).unwrap();
         assert_eq!(result, "subdir");
     }
 
-    // Ported: "throw if --output-file basename differs from path" — modules/manager/pip-compile/utils.spec.ts line 20
+    // Ported: "throw if --output-file basename differs from path" — modules/manager/pip-compile/utils.spec.ts line 23
     #[test]
     fn infer_exec_dir_throws_on_basename_mismatch() {
         let result = infer_command_exec_dir("subdir/requirements.txt", Some("hey.txt"));
@@ -264,32 +264,32 @@ dev = [
 
     // --- matchManager tests ---
 
-    // Ported: "matches pip_setup setup.py" — pip-compile/common.spec.ts line 370
+    // Ported: "matches pip_setup setup.py" — pip-compile/common.spec.ts line 373
     #[test]
     fn match_manager_setup_py() {
         assert_eq!(match_manager("setup.py"), "pip_setup");
     }
 
-    // Ported: "matches setup-cfg setup.cfg" — pip-compile/common.spec.ts line 374
+    // Ported: "matches setup-cfg setup.cfg" — pip-compile/common.spec.ts line 377
     #[test]
     fn match_manager_setup_cfg() {
         assert_eq!(match_manager("setup.cfg"), "setup-cfg");
     }
 
-    // Ported: "matches pep621 pyproject.toml" — pip-compile/common.spec.ts line 378
+    // Ported: "matches pep621 pyproject.toml" — pip-compile/common.spec.ts line 381
     #[test]
     fn match_manager_pyproject_toml() {
         assert_eq!(match_manager("pyproject.toml"), "pep621");
     }
 
-    // Ported: "matches pip_requirements any .in file" — pip-compile/common.spec.ts line 382
+    // Ported: "matches pip_requirements any .in file" — pip-compile/common.spec.ts line 385
     #[test]
     fn match_manager_in_file() {
         assert_eq!(match_manager("file.in"), "pip_requirements");
         assert_eq!(match_manager("another_file.in"), "pip_requirements");
     }
 
-    // Ported: "matches pip_requirements any .txt file" — pip-compile/common.spec.ts line 387
+    // Ported: "matches pip_requirements any .txt file" — pip-compile/common.spec.ts line 390
     #[test]
     fn match_manager_txt_file() {
         assert_eq!(match_manager("file.txt"), "pip_requirements");
@@ -304,14 +304,14 @@ dev = [
         )
     }
 
-    // Ported: "extracts Python version from valid header" — pip-compile/common.spec.ts line 217
+    // Ported: "extracts Python version from valid header" — pip-compile/common.spec.ts line 220
     #[test]
     fn extract_python_version_valid_header() {
         let header = pip_compile_header("3.11");
         assert_eq!(extract_python_version(&header).as_deref(), Some("3.11"));
     }
 
-    // Ported: "returns undefined if version cannot be extracted" — pip-compile/common.spec.ts line 226
+    // Ported: "returns undefined if version cannot be extracted" — pip-compile/common.spec.ts line 229
     #[test]
     fn extract_python_version_empty_content() {
         assert!(extract_python_version("").is_none());

@@ -105,7 +105,7 @@ mod tests {
     }
 
     // Ported: "match scm pr state $pr.state to renovate pr state $state"
-    //         — modules/platform/scm-manager/utils.spec.ts line 60
+    //         — modules/platform/scm-manager/utils.spec.ts line 61
     #[test]
     fn match_pr_state_all_cases() {
         // filter = 'all' → always true

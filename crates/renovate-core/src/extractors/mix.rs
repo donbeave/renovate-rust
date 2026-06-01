@@ -444,35 +444,35 @@ end
         assert_eq!(deps[0].name, "cowboy");
     }
 
-    // Ported: "returns same if not auto" — modules/manager/mix/range.spec.ts line 4
+    // Ported: "returns same if not auto" — modules/manager/mix/range.spec.ts line 5
     #[test]
     fn mix_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("pin", None), "pin");
         assert_eq!(get_range_strategy("widen", None), "widen");
     }
 
-    // Ported: "widens complex bump" — modules/manager/mix/range.spec.ts line 11
+    // Ported: "widens complex bump" — modules/manager/mix/range.spec.ts line 13
     #[test]
     fn mix_range_widens_complex_bump() {
         let result = get_range_strategy("bump", Some(">= 1.6.0 and < 2.0.0"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "bumps non-complex bump" — modules/manager/mix/range.spec.ts line 20
+    // Ported: "bumps non-complex bump" — modules/manager/mix/range.spec.ts line 22
     #[test]
     fn mix_range_bumps_non_complex() {
         let result = get_range_strategy("bump", Some("~>1.0.0"));
         assert_eq!(result, "bump");
     }
 
-    // Ported: "widens complex auto" — modules/manager/mix/range.spec.ts line 29
+    // Ported: "widens complex auto" — modules/manager/mix/range.spec.ts line 31
     #[test]
     fn mix_range_widens_complex_auto() {
         let result = get_range_strategy("auto", Some("<1.7.0 or ~>1.7.1"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/mix/range.spec.ts line 37
+    // Ported: "defaults to update-lockfile" — modules/manager/mix/range.spec.ts line 40
     #[test]
     fn mix_range_defaults_to_update_lockfile() {
         let result = get_range_strategy("auto", None);

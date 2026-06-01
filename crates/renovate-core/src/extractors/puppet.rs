@@ -515,7 +515,7 @@ mod 'invalid_url',
         assert_eq!(invalid.skip_reason, Some(PuppetSkipReason::InvalidUrl));
     }
 
-    // Ported: "access by index" — modules/manager/puppet/common.spec.ts line 10
+    // Ported: "access by index" — modules/manager/puppet/common.spec.ts line 8
     #[test]
     fn puppet_git_ssh_regex_captures_repository() {
         let cap = GIT_SSH_RE
@@ -524,7 +524,7 @@ mod 'invalid_url',
         assert_eq!(&cap["repository"], "dir1/dir2/project.git");
     }
 
-    // Ported: "access by named group" — modules/manager/puppet/common.spec.ts line 21
+    // Ported: "access by named group" — modules/manager/puppet/common.spec.ts line 18
     #[test]
     fn puppet_git_ssh_regex_captures_named_group() {
         let cap = GIT_SSH_RE
@@ -533,13 +533,13 @@ mod 'invalid_url',
         assert_eq!(&cap["repository"], "dir1/dir2/project.git");
     }
 
-    // Ported: "unable to parse url" — modules/manager/puppet/common.spec.ts line 34
+    // Ported: "unable to parse url" — modules/manager/puppet/common.spec.ts line 32
     #[test]
     fn puppet_parse_git_owner_repo_returns_none_for_invalid() {
         assert!(parse_git_owner_repo("invalid-url-example", false).is_none());
     }
 
-    // Ported: "parseable url" — modules/manager/puppet/common.spec.ts line 38
+    // Ported: "parseable url" — modules/manager/puppet/common.spec.ts line 36
     #[test]
     fn puppet_parse_git_owner_repo_parses_https_url() {
         let result = parse_git_owner_repo("https://gitlab.com/example/example", false);

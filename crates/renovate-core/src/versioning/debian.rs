@@ -563,7 +563,7 @@ mod tests {
         assert!(debian_is_version("1.1"));
     }
 
-    // Ported: 'isValid("$version") === $expected' — versioning/debian/index.spec.ts line 78
+    // Ported: 'isValid("$version") === $expected' — versioning/debian/index.spec.ts line 22
     #[test]
     fn test_debian_is_valid() {
         let valid = [
@@ -627,7 +627,7 @@ mod tests {
         }
     }
 
-    // Ported: 'isCompatible("$version") === $expected' — versioning/debian/index.spec.ts line 98
+    // Ported: 'isCompatible("$version") === $expected' — versioning/debian/index.spec.ts line 82
     #[test]
     fn debian_is_compatible() {
         let compatible = [
@@ -656,7 +656,7 @@ mod tests {
         }
     }
 
-    // Ported: 'isSingleVersion("$version") === $expected' — versioning/debian/index.spec.ts line 111
+    // Ported: 'isSingleVersion("$version") === $expected' — versioning/debian/index.spec.ts line 104
     #[test]
     fn test_debian_is_single_version() {
         assert!(!debian_is_single_version(""));
@@ -664,7 +664,7 @@ mod tests {
         assert!(!debian_is_single_version(">=6"));
     }
 
-    // Ported: 'isStable("$version") === $expected' — versioning/debian/index.spec.ts line 165
+    // Ported: 'isStable("$version") === $expected' — versioning/debian/index.spec.ts line 115
     #[test]
     fn test_debian_is_stable() {
         let stable = [
@@ -723,11 +723,11 @@ mod tests {
         }
     }
 
-    // Ported: 'ensures that rolling release is not refreshed within frame time window: $version' — versioning/debian/index.spec.ts line 181
+    // Ported: 'ensures that rolling release is not refreshed within frame time window: $version' — versioning/debian/index.spec.ts line 169
     // Not applicable: tests logging/debug infrastructure for cache refresh behavior.
     // Our implementation uses a fixed snapshot without dynamic refresh.
 
-    // Ported: 'isVersion("$version") === $expected' — versioning/debian/index.spec.ts line 244
+    // Ported: 'isVersion("$version") === $expected' — versioning/debian/index.spec.ts line 188
     #[test]
     fn test_debian_is_version() {
         let valid = [
@@ -786,7 +786,7 @@ mod tests {
         }
     }
 
-    // Ported: 'getMajor, getMinor, getPatch for "$version"' — versioning/debian/index.spec.ts line 265
+    // Ported: 'getMajor, getMinor, getPatch for "$version"' — versioning/debian/index.spec.ts line 248
     #[test]
     #[allow(clippy::type_complexity)]
     fn debian_get_major_minor_patch() {
@@ -811,7 +811,7 @@ mod tests {
         assert_eq!(debian_get_major("2020.04"), None);
     }
 
-    // Ported: 'equals($a, $b) === $expected' — versioning/debian/index.spec.ts line 293
+    // Ported: 'equals($a, $b) === $expected' — versioning/debian/index.spec.ts line 273
     #[test]
     fn test_debian_equals() {
         let cases: &[(&str, &str, bool)] = &[
@@ -839,7 +839,7 @@ mod tests {
         }
     }
 
-    // Ported: 'isGreaterThan("$a", "$b") === $expected' — versioning/debian/index.spec.ts line 336
+    // Ported: 'isGreaterThan("$a", "$b") === $expected' — versioning/debian/index.spec.ts line 297
     #[test]
     fn test_debian_is_greater_than() {
         let cases: &[(&str, &str, bool)] = &[
@@ -890,7 +890,7 @@ mod tests {
         }
     }
 
-    // Ported: 'getSatisfyingVersion($versions, "$range") === "$expected"' — versioning/debian/index.spec.ts line 355
+    // Ported: 'getSatisfyingVersion($versions, "$range") === "$expected"' — versioning/debian/index.spec.ts line 340
     #[test]
     fn test_debian_get_satisfying_version() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
@@ -940,7 +940,7 @@ mod tests {
         }
     }
 
-    // Ported: 'minSatisfyingVersion($versions, "$range") === "$expected"' — versioning/debian/index.spec.ts line 377
+    // Ported: 'minSatisfyingVersion($versions, "$range") === "$expected"' — versioning/debian/index.spec.ts line 361
     #[test]
     fn test_debian_min_satisfying_version() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
@@ -991,7 +991,7 @@ mod tests {
         }
     }
 
-    // Ported: 'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"' — versioning/debian/index.spec.ts line 396
+    // Ported: 'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"' — versioning/debian/index.spec.ts line 383
     #[test]
     fn test_debian_get_new_value() {
         let cases: &[(Option<&str>, &str, Option<&str>)] = &[
@@ -1015,7 +1015,7 @@ mod tests {
         }
     }
 
-    // Ported: 'debian.sortVersions($a, $b) === $expected' — versioning/debian/index.spec.ts line 425
+    // Ported: 'debian.sortVersions($a, $b) === $expected' — versioning/debian/index.spec.ts line 409
     #[test]
     fn test_debian_sort_versions() {
         let cases: &[(&str, &str, i32)] = &[

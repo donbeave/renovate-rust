@@ -921,7 +921,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — ruby/index.spec.ts line 21
+    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — ruby/index.spec.ts line 18
     #[test]
     fn ruby_get_components() {
         assert_eq!(get_major("1"), Some(1));
@@ -938,7 +938,7 @@ mod tests {
         assert_eq!(get_patch("1.2.0.alpha.4"), Some(0));
     }
 
-    // Ported: "isVersion(\"$version\") === $expected" — ruby/index.spec.ts line 38
+    // Ported: "isVersion(\"$version\") === $expected" — ruby/index.spec.ts line 33
     #[test]
     fn ruby_is_version_cases() {
         for v in [
@@ -962,7 +962,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — ruby/index.spec.ts line 62
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — ruby/index.spec.ts line 56
     #[test]
     fn ruby_is_greater_than_cases() {
         for (a, b) in [
@@ -1000,7 +1000,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$version\") === $expected" — ruby/index.spec.ts line 106
+    // Ported: "isStable(\"$version\") === $expected" — ruby/index.spec.ts line 95
     #[test]
     fn ruby_is_stable() {
         for v in ["1", "1.2", "1.2.3"] {
@@ -1011,7 +1011,7 @@ mod tests {
         }
     }
 
-    // Ported: "$versions -> sortVersions -> $expected" — ruby/index.spec.ts line 122
+    // Ported: "$versions -> sortVersions -> $expected" — ruby/index.spec.ts line 113
     #[test]
     fn ruby_sort_versions() {
         let mut v = vec!["1.2.3-beta", "2.0.1", "1.3.4", "1.2.3"];
@@ -1019,7 +1019,7 @@ mod tests {
         assert_eq!(v, vec!["1.2.3-beta", "1.2.3", "1.3.4", "2.0.1"]);
     }
 
-    // Ported: "minSatisfyingVersion($versions, \"$range\") === \"$expected\"" — ruby/index.spec.ts line 129
+    // Ported: "minSatisfyingVersion($versions, \"$range\") === \"$expected\"" — ruby/index.spec.ts line 120
     #[test]
     fn ruby_min_satisfying_version() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
@@ -1047,7 +1047,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, \"$range\") === \"$expected\"" — ruby/index.spec.ts line 147
+    // Ported: "getSatisfyingVersion($versions, \"$range\") === \"$expected\"" — ruby/index.spec.ts line 135
     #[test]
     fn ruby_get_satisfying_version() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
@@ -1075,7 +1075,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches(\"$version\", \"$range\") === \"$expected\"" — ruby/index.spec.ts line 165
+    // Ported: "matches(\"$version\", \"$range\") === \"$expected\"" — ruby/index.spec.ts line 150
     #[test]
     fn ruby_matches() {
         for (v, r) in [
@@ -1096,7 +1096,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange(\"$version\", \"$range\") === \"$expected\"" — ruby/index.spec.ts line 185
+    // Ported: "isLessThanRange(\"$version\", \"$range\") === \"$expected\"" — ruby/index.spec.ts line 167
     #[test]
     fn ruby_is_less_than_range() {
         let cases: &[(&str, &str, Option<bool>)] = &[
@@ -1115,7 +1115,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid(\"$version\") === $expected" (version form) — ruby/index.spec.ts line 209
+    // Ported: "isValid(\"$version\") === $expected" (version form) — ruby/index.spec.ts line 200
     #[test]
     fn ruby_is_valid_version_form() {
         for v in ["1", "1.2", "1.2.3"] {
@@ -1126,7 +1126,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid(\"$version\") === $expected" (range form) — ruby/index.spec.ts line 224
+    // Ported: "isValid(\"$version\") === $expected" (range form) — ruby/index.spec.ts line 200
     #[test]
     fn ruby_is_valid_range_form() {
         for v in [
@@ -1146,7 +1146,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $expected" — ruby/index.spec.ts line 247
+    // Ported: "isSingleVersion(\"$version\") === $expected" — ruby/index.spec.ts line 224
     #[test]
     fn ruby_is_single_version() {
         for v in [
@@ -1180,7 +1180,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns a pinned value" — ruby/index.spec.ts line 276
+    // Ported: "returns a pinned value" — ruby/index.spec.ts line 253
     #[test]
     fn ruby_get_pinned_value() {
         assert_eq!(get_pinned_value("1.2.3"), "1.2.3");

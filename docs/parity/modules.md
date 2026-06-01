@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5654 / 11670 distinct upstream it() tests ported (48.4%) across 292 modules.
-**Quality:** 6364 `// Ported:` comments → 709 duplicate, 0 orphan, 0 malformed.
+**Total:** 5655 / 11670 distinct upstream it() tests ported (48.5%) across 292 modules.
+**Quality:** 6365 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2483/3642 (68%)
+## managers  —  2485/3642 (68%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -49,7 +49,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/buildpacks` | 1 | ? | 3/3 (100%) | — |
 | `manager/bun` | 3 | ? | 3/34 (9%) | — |
 | `manager/bun-version` | 1 | ? | 6/6 (100%) | — |
-| `manager/bundler` | 7 | ? | 59/74 (80%) | — |
+| `manager/bundler` | 7 | ? | 60/74 (81%) | — |
 | `manager/cake` | 1 | ? | 3/5 (60%) | — |
 | `manager/cargo` | 6 | ? | 62/73 (85%) | — |
 | `manager/cdnurl` | 1 | ? | 1/1 (100%) | — |
@@ -74,7 +74,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/flux` | 2 | ? | 59/66 (89%) | — |
 | `manager/fvm` | 1 | ? | 7/7 (100%) | — |
 | `manager/git-submodules` | 3 | ? | 10/16 (62%) | — |
-| `manager/github-actions` | 3 | ? | 80/98 (82%) | — |
+| `manager/github-actions` | 3 | ? | 81/98 (83%) | — |
 | `manager/gitlabci` | 2 | ? | 17/18 (94%) | — |
 | `manager/gitlabci-include` | 1 | ? | 8/8 (100%) | — |
 | `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
@@ -319,7 +319,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `worker/global` | 11 | ? | 116/208 (56%) | — |
 | `worker/repository` | 103 | ? | 250/1675 (15%) | — |
 
-## config  —  428/700 (61%)
+## config  —  427/700 (61%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -327,7 +327,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `config/decrypt` | 2 | ? | 0/16 (0%) | — |
 | `config/migrations` | 58 | ? | 155/161 (96%) | — |
 | `config/options` | 2 | ? | 0/16 (0%) | — |
-| `config/presets` | 17 | ? | 52/271 (19%) | — |
+| `config/presets` | 17 | ? | 51/271 (19%) | — |
 | `config/validation-helpers` | 3 | ? | 8/8 (100%) | — |
 
 ## util  —  691/1597 (43%)

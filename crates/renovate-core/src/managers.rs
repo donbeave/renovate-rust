@@ -1708,7 +1708,7 @@ mod tests {
         }
     }
 
-    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — manager/mise/index.spec.ts line 43
+    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — manager/mise/index.spec.ts line 6
     #[test]
     fn mise_file_patterns_match_spec() {
         let should_match = &[
@@ -1791,7 +1791,7 @@ mod tests {
         assert!(!regex.is_match("build.gradle.kts"));
     }
 
-    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — manager/proto/index.spec.ts line 15
+    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — manager/proto/index.spec.ts line 6
     #[test]
     fn proto_file_patterns_match_spec() {
         let should_match = &[
@@ -1923,14 +1923,14 @@ mod tests {
         assert_eq!(manager_default_datasource("hermit"), None);
     }
 
-    // Ported: "getCustomManagerList" — modules/manager/custom/index.spec.ts line 5
+    // Ported: "getCustomManagerList" — modules/manager/custom/index.spec.ts line 4
     #[test]
     fn custom_manager_list_contains_strings() {
         assert!(!CUSTOM_MANAGER_LIST.is_empty());
         assert!(CUSTOM_MANAGER_LIST.iter().all(|s| !s.is_empty()));
     }
 
-    // Ported: "works" — modules/manager/custom/index.spec.ts line 10
+    // Ported: "works" — modules/manager/custom/index.spec.ts line 9
     #[test]
     fn is_custom_manager_returns_correct_values() {
         assert!(!is_custom_manager("npm"));
@@ -2048,7 +2048,7 @@ mod tests {
         assert!(results[1].package_files.is_none());
     }
 
-    // Ported: "does not crash for lazy regex" — modules/manager/custom/regex/utils.spec.ts line 5
+    // Ported: "does not crash for lazy regex" — modules/manager/custom/regex/utils.spec.ts line 16
     #[test]
     fn regex_match_all_does_not_crash_for_lazy_regex() {
         let re = regex::Regex::new(r"(?P<currentDigest>.*?)").unwrap();
@@ -2159,7 +2159,7 @@ mod tests {
         assert_eq!(all, all_managers_list());
     }
 
-    // Ported: "works" — modules/manager/index.spec.ts line 52
+    // Ported: "works" — modules/manager/index.spec.ts line 51
     #[test]
     fn manager_registry_get_enabled_managers_filtered() {
         let config = vec!["custom.regex".to_owned(), "npm".to_owned()];

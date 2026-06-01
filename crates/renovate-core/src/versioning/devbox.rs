@@ -115,7 +115,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid(\"$version\") === $isValid" — versioning/devbox/index.spec.ts line 34
+    // Ported: "isValid(\"$version\") === $isValid" — versioning/devbox/index.spec.ts line 33
     #[test]
     fn is_valid_matches_renovate_devbox_spec() {
         let cases = [
@@ -148,7 +148,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/devbox/index.spec.ts line 64
+    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/devbox/index.spec.ts line 62
     #[test]
     fn matches_matches_renovate_devbox_spec() {
         let cases = [
@@ -173,7 +173,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals(\"$version\", \"$range\") === $expected" — versioning/devbox/index.spec.ts line 84
+    // Ported: "equals(\"$version\", \"$range\") === $expected" — versioning/devbox/index.spec.ts line 82
     #[test]
     fn equals_matches_renovate_devbox_spec() {
         let cases = [

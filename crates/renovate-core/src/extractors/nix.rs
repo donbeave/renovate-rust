@@ -1791,13 +1791,13 @@ mod tests {
         );
     }
 
-    // Ported: "returns replace if currentValue not null" — modules/manager/nix/range.spec.ts line 3
+    // Ported: "returns replace if currentValue not null" — modules/manager/nix/range.spec.ts line 5
     #[test]
     fn nix_range_returns_replace_when_current_value_set() {
         assert_eq!(get_range_strategy(Some("1.0.0")), "replace");
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/nix/range.spec.ts line 10
+    // Ported: "defaults to update-lockfile" — modules/manager/nix/range.spec.ts line 13
     #[test]
     fn nix_range_defaults_to_update_lockfile() {
         assert_eq!(get_range_strategy(None), "update-lockfile");

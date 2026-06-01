@@ -68,7 +68,7 @@ mod tests {
         assert!(versions.contains(&"storage.k8s.io/v1"));
     }
 
-    // Ported: "is case sensitive" — kubernetes-api/index.spec.ts line 26
+    // Ported: "is case sensitive" — kubernetes-api/index.spec.ts line 27
     #[test]
     fn lookup_is_case_sensitive() {
         assert!(get_releases("csistoragecapacity").is_none());

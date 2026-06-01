@@ -40,7 +40,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports ranges" — manager/pyenv/extract.spec.ts line 18
+    // Ported: "supports ranges" — manager/pyenv/extract.spec.ts line 17
     #[test]
     fn supports_ranges() {
         let dep = extract("3.8\n");
@@ -56,7 +56,7 @@ mod tests {
         );
     }
 
-    // Ported: "skips non ranges" — manager/pyenv/extract.spec.ts line 31
+    // Ported: "skips non ranges" — manager/pyenv/extract.spec.ts line 29
     #[test]
     fn skips_non_ranges() {
         let dep = extract("latestn");

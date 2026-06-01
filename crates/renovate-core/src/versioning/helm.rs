@@ -199,7 +199,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/helm/index.spec.ts line 35
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/helm/index.spec.ts line 34
     #[test]
     fn get_new_value_matches_renovate_helm_spec() {
         let cases = [

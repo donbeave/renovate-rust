@@ -1104,7 +1104,7 @@ mod tests {
 
     const LOCK_CONTENT: &str = include_str!("../../tests/fixtures/composer/composer5.lock");
 
-    // Ported: "detects already updated" — modules/manager/composer/update-locked.spec.ts line 9
+    // Ported: "detects already updated" — modules/manager/composer/update-locked.spec.ts line 10
     #[test]
     fn composer_update_locked_detects_already_updated() {
         let result = update_locked_composer_dependency(
@@ -1115,7 +1115,7 @@ mod tests {
         assert_eq!(result.as_str(), "already-updated");
     }
 
-    // Ported: "returns unsupported" — modules/manager/composer/update-locked.spec.ts line 21
+    // Ported: "returns unsupported" — modules/manager/composer/update-locked.spec.ts line 22
     #[test]
     fn composer_update_locked_returns_unsupported() {
         let result = update_locked_composer_dependency(

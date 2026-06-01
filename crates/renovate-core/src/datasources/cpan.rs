@@ -235,7 +235,7 @@ mod tests {
         assert!(parse_release(source).is_none());
     }
 
-    // Ported: "filters out entries where module has no version" — datasource/cpan/schema.spec.ts line 27
+    // Ported: "filters out entries where module has no version" — datasource/cpan/schema.spec.ts line 26
     #[test]
     fn schema_filters_empty_version() {
         let source = SourceEntry {
@@ -251,7 +251,7 @@ mod tests {
         assert!(parse_release(source).is_none());
     }
 
-    // Ported: "includes valid entries" — datasource/cpan/schema.spec.ts line 49
+    // Ported: "includes valid entries" — datasource/cpan/schema.spec.ts line 47
     #[test]
     fn schema_includes_valid_entries() {
         let source = SourceEntry {

@@ -521,7 +521,7 @@ mod tests {
 
     // ── get_match_host_from_npmrc_host ────────────────────────────────────────
 
-    // Ported: "parses //host/path" — lib/modules/datasource/npm/npmrc.spec.ts line 6
+    // Ported: "parses //host/path" — lib/modules/datasource/npm/npmrc.spec.ts line 28
     #[test]
     fn get_match_host_from_npmrc_host_double_slash() {
         assert_eq!(
@@ -530,7 +530,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses //host" — lib/modules/datasource/npm/npmrc.spec.ts line 11
+    // Ported: "parses //host" — lib/modules/datasource/npm/npmrc.spec.ts line 22
     #[test]
     fn get_match_host_from_npmrc_host_no_path() {
         assert_eq!(
@@ -539,7 +539,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses https://host" — lib/modules/datasource/npm/npmrc.spec.ts line 16
+    // Ported: "parses https://host" — lib/modules/datasource/npm/npmrc.spec.ts line 34
     #[test]
     fn get_match_host_from_npmrc_host_https() {
         assert_eq!(
@@ -550,7 +550,7 @@ mod tests {
 
     // ── convert_npmrc_to_rules ────────────────────────────────────────────────
 
-    // Ported: "rejects invalid registries" — lib/modules/datasource/npm/npmrc.spec.ts line 22
+    // Ported: "rejects invalid registries" — lib/modules/datasource/npm/npmrc.spec.ts line 42
     #[test]
     fn convert_npmrc_rejects_invalid_registries() {
         let config = parse_npmrc("registry=1\n@scope:registry=2\n").unwrap();
@@ -559,7 +559,7 @@ mod tests {
         assert!(rules.package_rules.is_empty());
     }
 
-    // Ported: "handles naked auth" — lib/modules/datasource/npm/npmrc.spec.ts line 28
+    // Ported: "handles naked auth" — lib/modules/datasource/npm/npmrc.spec.ts line 50
     #[test]
     fn convert_npmrc_handles_naked_auth() {
         let config = parse_npmrc("_auth=YWRtaW46YWRtaW4=\n").unwrap();
@@ -577,7 +577,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles host, path and auth" — lib/modules/datasource/npm/npmrc.spec.ts line 43
+    // Ported: "handles host, path and auth" — lib/modules/datasource/npm/npmrc.spec.ts line 66
     #[test]
     fn convert_npmrc_handles_host_path_and_auth() {
         let config = parse_npmrc("//my-registry.example.com/:_authToken=123test==\n").unwrap();
@@ -595,7 +595,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles host, path, port and auth" — lib/modules/datasource/npm/npmrc.spec.ts line 58
+    // Ported: "handles host, path, port and auth" — lib/modules/datasource/npm/npmrc.spec.ts line 84
     #[test]
     fn convert_npmrc_handles_host_path_port_and_auth() {
         let config =

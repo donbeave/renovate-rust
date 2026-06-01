@@ -367,7 +367,7 @@ mod tests {
         assert!(!result.iter().any(|s| s.starts_with('.')));
     }
 
-    // Ported: "returns null in case of errors" — datasource/sbt-plugin/index.spec.ts line 39
+    // Ported: "returns null in case of errors" — datasource/sbt-plugin/index.spec.ts line 40
     #[tokio::test]
     async fn returns_null_in_case_of_errors() {
         let server = MockServer::start().await;

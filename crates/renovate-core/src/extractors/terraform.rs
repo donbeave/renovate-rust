@@ -2430,13 +2430,13 @@ resource "tfe_workspace" "workspace_with_block" {
         "kubernetes_cron_job_v1",
     ];
 
-    // Ported: "return empty array if no resource is found" — modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 8
+    // Ported: "return empty array if no resource is found" — modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 7
     #[test]
     fn generic_docker_extractor_empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "return resource and datasource types" — modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 14
+    // Ported: "return resource and datasource types" — modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 12
     #[test]
     fn generic_docker_extractor_check_list_contains_expected_types() {
         let check_list: Vec<String> = GENERIC_IMAGE_DATASOURCE_TYPES
@@ -2449,13 +2449,13 @@ resource "tfe_workspace" "workspace_with_block" {
         assert!(check_list.contains(&format!("\"{}\"", GENERIC_IMAGE_RESOURCE_TYPES[0])));
     }
 
-    // Ported: "returns null for empty" — modules/manager/terraform/lockfile/util.spec.ts line 13
+    // Ported: "returns null for empty" — modules/manager/terraform/lockfile/util.spec.ts line 6
     #[test]
     fn extract_locks_returns_none_for_no_provider_blocks() {
         assert!(extract_terraform_locks("nothing here").is_none());
     }
 
-    // Ported: "extracts" — modules/manager/terraform/lockfile/util.spec.ts line 19
+    // Ported: "extracts" — modules/manager/terraform/lockfile/util.spec.ts line 11
     #[test]
     fn extract_locks_extracts_providers() {
         let content = r#"provider "registry.terraform.io/hashicorp/aws" {
@@ -2892,7 +2892,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "1.0.0");
     }
 
-    // Ported: "should split organization, project, repository and tag from source url with subfolder" — terraform/extractors/others/modules.spec.ts
+    // Ported: "should split organization, project, repository and tag from source url with subfolder" — terraform/extractors/others/modules.spec.ts line 268
     #[test]
     fn azure_devops_ssh_ref_match_re_with_subfolder() {
         let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
@@ -2905,7 +2905,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "1.0.0");
     }
 
-    // Ported: "should split organization, project, repository and tag from source url with depth argument" — terraform/extractors/others/modules.spec.ts
+    // Ported: "should split organization, project, repository and tag from source url with depth argument" — terraform/extractors/others/modules.spec.ts line 283
     #[test]
     fn azure_devops_ssh_ref_match_re_with_depth() {
         let depth = AZURE_DEVOPS_SSH_REF_MATCH_RE
@@ -2921,7 +2921,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&depth2["tag"], "1.0.0");
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts line 309
     #[test]
     fn azure_devops_ssh_ref_match_re_parses_alphanumeric_names() {
         let m = AZURE_DEVOPS_SSH_REF_MATCH_RE

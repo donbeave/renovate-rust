@@ -267,7 +267,7 @@ mod tests {
         })
     }
 
-    // Ported: "returns null for unsupported registryUrl" — datasource/bitrise/index.spec.ts line 7
+    // Ported: "returns null for unsupported registryUrl" — datasource/bitrise/index.spec.ts line 9
     #[tokio::test]
     async fn returns_null_for_unsupported_registry_url() {
         let http = HttpClient::new().unwrap();
@@ -281,7 +281,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "support GitHub Enterprise API URL" — datasource/bitrise/index.spec.ts line 20
+    // Ported: "support GitHub Enterprise API URL" — datasource/bitrise/index.spec.ts line 19
     #[tokio::test]
     async fn support_github_enterprise_api_url() {
         let server = MockServer::start().await;
@@ -326,7 +326,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns version and filters out the asset folder" — datasource/bitrise/index.spec.ts line 55
+    // Ported: "returns version and filters out the asset folder" — datasource/bitrise/index.spec.ts line 63
     #[tokio::test]
     async fn returns_version_and_filters_asset_folder() {
         let server = MockServer::start().await;
@@ -378,7 +378,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if there are no releases" — datasource/bitrise/index.spec.ts line 123
+    // Ported: "returns null if there are no releases" — datasource/bitrise/index.spec.ts line 137
     #[tokio::test]
     async fn returns_null_if_no_releases() {
         let server = MockServer::start().await;
@@ -400,7 +400,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if the package has an unexpected format" — datasource/bitrise/index.spec.ts line 137
+    // Ported: "returns null if the package has an unexpected format" — datasource/bitrise/index.spec.ts line 159
     #[tokio::test]
     async fn returns_null_for_unexpected_format() {
         let server = MockServer::start().await;
@@ -422,7 +422,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if the file object has no content" — datasource/bitrise/index.spec.ts line 153
+    // Ported: "returns null if the file object has no content" — datasource/bitrise/index.spec.ts line 179
     #[tokio::test]
     async fn returns_null_if_no_content() {
         let server = MockServer::start().await;
@@ -456,7 +456,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if the file object has an unexpected encoding" — datasource/bitrise/index.spec.ts line 181
+    // Ported: "returns null if the file object has an unexpected encoding" — datasource/bitrise/index.spec.ts line 206
     #[tokio::test]
     async fn returns_null_for_unexpected_encoding() {
         let server = MockServer::start().await;

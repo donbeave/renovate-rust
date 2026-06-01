@@ -1159,7 +1159,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: 'isVersion("$version") === $result' — lib/modules/versioning/conan/index.spec.ts line 5
+    // Ported: 'isVersion("$version") === $result' — lib/modules/versioning/conan/index.spec.ts line 117
     #[test]
     fn is_valid_matches_renovate_conan_index_spec() {
         let cases = vec![

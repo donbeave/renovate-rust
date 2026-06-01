@@ -720,7 +720,7 @@ mod tests {
         assert!(!is_valid(None));
     }
 
-    // Ported: "isCompatible(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 90
+    // Ported: "isCompatible(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 94
     #[test]
     fn is_compatible_matches_renovate_ubuntu_spec() {
         for (version, expected) in [
@@ -735,7 +735,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 108
+    // Ported: "isSingleVersion(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 110
     #[test]
     fn is_single_version_matches_renovate_ubuntu_spec() {
         for (version, expected) in [
@@ -748,7 +748,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 118
+    // Ported: "isStable(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 121
     #[test]
     fn is_stable_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -836,7 +836,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 195
+    // Ported: "isVersion(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 202
     #[test]
     fn is_version_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -893,7 +893,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — versioning/ubuntu/index.spec.ts line 244
+    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — versioning/ubuntu/index.spec.ts line 255
     #[test]
     fn component_accessors_match_renovate_ubuntu_spec() {
         let cases = [
@@ -917,7 +917,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/ubuntu/index.spec.ts line 265
+    // Ported: "equals($a, $b) === $expected" — versioning/ubuntu/index.spec.ts line 278
     #[test]
     fn equals_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -943,7 +943,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/ubuntu/index.spec.ts line 287
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/ubuntu/index.spec.ts line 299
     #[test]
     fn is_greater_than_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -983,7 +983,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 326
+    // Ported: "getSatisfyingVersion($versions, \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 336
     #[test]
     fn get_satisfying_version_matches_renovate_ubuntu_spec() {
         let numeric = ["18.10", "19.04", "19.10", "20.04"];
@@ -1000,7 +1000,7 @@ mod tests {
         assert_eq!(get_satisfying_version(&names, "warty"), None);
     }
 
-    // Ported: "minSatisfyingVersion($versions, \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 354
+    // Ported: "minSatisfyingVersion($versions, \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 355
     #[test]
     fn min_satisfying_version_matches_renovate_ubuntu_spec() {
         let numeric = ["18.10", "19.04", "19.10", "20.04"];
@@ -1017,7 +1017,7 @@ mod tests {
         assert_eq!(min_satisfying_version(&names, "warty"), None);
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 382
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 374
     #[test]
     fn get_new_value_matches_renovate_ubuntu_spec() {
         assert_eq!(get_new_value(None, "foobar"), "foobar");
@@ -1027,7 +1027,7 @@ mod tests {
         assert_eq!(get_new_value(Some("16.04"), "focal"), "20.04");
     }
 
-    // Ported: "$versions -> sortVersions -> $expected" — versioning/ubuntu/index.spec.ts line 404
+    // Ported: "$versions -> sortVersions -> $expected" — versioning/ubuntu/index.spec.ts line 395
     #[test]
     fn sort_versions_matches_renovate_ubuntu_spec() {
         let mut numeric = ["17.03", "18.04", "18.04", "6.10", "19.10"];
@@ -1042,7 +1042,7 @@ mod tests {
         );
     }
 
-    // Ported: "matches(\"$version\", \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 411
+    // Ported: "matches(\"$version\", \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 403
     #[test]
     fn matches_matches_renovate_ubuntu_spec() {
         assert!(!matches("20.04", "2020.04"));

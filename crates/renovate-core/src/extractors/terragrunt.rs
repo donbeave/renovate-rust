@@ -467,7 +467,7 @@ terraform {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "should split project and tag from source" — modules/manager/terragrunt/modules.spec.ts line 5
+    // Ported: "should split project and tag from source" — modules/manager/terragrunt/modules.spec.ts line 11
     #[test]
     fn github_ref_regex_splits_project_and_tag() {
         let source = "github.com/hashicorp/example?ref=v1.0.0";
@@ -476,7 +476,7 @@ terraform {
         assert_eq!(&cap["tag"], "v1.0.0");
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — modules/manager/terragrunt/modules.spec.ts line 14
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — modules/manager/terragrunt/modules.spec.ts line 21
     #[test]
     fn github_ref_regex_parses_complex_repo_names() {
         let source = "github.com/hashicorp/example.repo-123?ref=v1.0.0";
@@ -485,7 +485,7 @@ terraform {
         assert_eq!(&cap["tag"], "v1.0.0");
     }
 
-    // Ported: "should split host, path and tag from source" — modules/manager/terragrunt/modules.spec.ts line 26
+    // Ported: "should split host, path and tag from source" — modules/manager/terragrunt/modules.spec.ts line 33
     #[test]
     fn git_ref_regex_splits_host_path_and_tag() {
         for prefix in &["http://", "https://", "ssh://"] {
@@ -496,7 +496,7 @@ terraform {
         }
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — modules/manager/terragrunt/modules.spec.ts line 48
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — modules/manager/terragrunt/modules.spec.ts line 61
     #[test]
     fn git_ref_regex_parses_complex_repo_path() {
         for prefix in &["http://", "https://", "ssh://"] {

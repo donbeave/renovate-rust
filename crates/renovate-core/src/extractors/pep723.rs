@@ -349,7 +349,7 @@ import requests
         assert!(result.deps[1].current_version.is_none());
     }
 
-    // Ported: "should skip invalid dependencies" — modules/manager/pep723/utils.spec.ts line 36
+    // Ported: "should skip invalid dependencies" — modules/manager/pep723/utils.spec.ts line 42
     #[test]
     fn pep723_extract_should_skip_invalid_dependencies() {
         let content = "# /// script\n# requires-python = \"==3.11\"\n# dependencies = [\n#   \"requests==2.32.3\",\n#   \"==1.2.3\",\n# ]\n# ///\n";
@@ -359,21 +359,21 @@ import requests
         assert_eq!(result.deps[0].dep_name, "requests");
     }
 
-    // Ported: "should return null on missing dependencies" — modules/manager/pep723/utils.spec.ts line 66
+    // Ported: "should return null on missing dependencies" — modules/manager/pep723/utils.spec.ts line 71
     #[test]
     fn pep723_extract_returns_none_on_missing_dependencies() {
         let content = "# /// script\n# requires-python = \">=3.11\"\n# ///\n";
         assert!(extract_pep723(content).is_none());
     }
 
-    // Ported: "should return null on invalid TOML" — modules/manager/pep723/utils.spec.ts line 81
+    // Ported: "should return null on invalid TOML" — modules/manager/pep723/utils.spec.ts line 84
     #[test]
     fn pep723_extract_returns_none_on_invalid_toml() {
         let content = "# /// script\n# requires-python\n# dependencies = [\n#   \"requests==2.32.3\",\n# ]\n# ///\n";
         assert!(extract_pep723(content).is_none());
     }
 
-    // Ported: "should return null if there is no PEP 723 metadata" — modules/manager/pep723/utils.spec.ts line 96
+    // Ported: "should return null if there is no PEP 723 metadata" — modules/manager/pep723/utils.spec.ts line 101
     #[test]
     fn pep723_extract_returns_none_if_no_metadata_block() {
         let content = "if True:\n    print(\"requires-python>=3.11\")\n";

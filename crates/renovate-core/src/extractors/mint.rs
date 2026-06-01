@@ -118,7 +118,7 @@ mod tests {
         );
     }
 
-    // Ported: "Complex Mintfile" — mint/extract.spec.ts line 61
+    // Ported: "Complex Mintfile" — mint/extract.spec.ts line 60
     #[test]
     fn complex_mintfile_mixed() {
         let content = "SwiftGen/SwiftGen@6.6.1\nyonaskolb/xcodegen\nrealm/SwiftLint @ 0.48.0\n";
@@ -133,7 +133,7 @@ mod tests {
         assert!(swift.skip_reason.is_none());
     }
 
-    // Ported: "Mintfile Includes Commented Out" — mint/extract.spec.ts line 86
+    // Ported: "Mintfile Includes Commented Out" — mint/extract.spec.ts line 88
     #[test]
     fn comment_lines_skipped() {
         let content = "SwiftGen/SwiftGen@6.6.1\n\nyonaskolb/xcodegen\n#yonaskolb/xcodegen\nrealm/SwiftLint@0.48.0 #commented out\n";
@@ -153,7 +153,7 @@ mod tests {
         );
     }
 
-    // Ported: "maintains spaces between hash and comment" — lib/modules/manager/github-actions/extract.spec.ts line 299
+    // Ported: "maintains spaces between hash and comment" — lib/modules/manager/github-actions/extract.spec.ts line 315
     #[test]
     fn inline_comment_stripped() {
         let content = "yonaskolb/XcodeGen@2.38.0 # pinned version\n";

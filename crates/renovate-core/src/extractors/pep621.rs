@@ -1304,28 +1304,28 @@ readme = "README.md"
     const PEP621_CONTENT: &str =
         "[project]\nname = \"test\"\nversion = \"0.0.2\"\ndescription = \"test\"\n";
 
-    // Ported: "increments" — modules/manager/pep621/update.spec.ts line 14
+    // Ported: "increments" — modules/manager/pep621/update.spec.ts line 13
     #[test]
     fn pep621_bump_increments_patch() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.2", "patch");
         assert_eq!(result, PEP621_CONTENT.replace("0.0.2", "0.0.3"));
     }
 
-    // Ported: "no ops" — modules/manager/pep621/update.spec.ts line 22
+    // Ported: "no ops" — modules/manager/pep621/update.spec.ts line 23
     #[test]
     fn pep621_bump_no_op_when_version_mismatch() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.1", "patch");
         assert_eq!(result, PEP621_CONTENT);
     }
 
-    // Ported: "updates" — modules/manager/pep621/update.spec.ts line 30
+    // Ported: "updates" — modules/manager/pep621/update.spec.ts line 32
     #[test]
     fn pep621_bump_updates_minor() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.1", "minor");
         assert_eq!(result, PEP621_CONTENT.replace("0.0.2", "0.1.0"));
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/pep621/update.spec.ts line 38
+    // Ported: "returns content if bumping errors" — modules/manager/pep621/update.spec.ts line 42
     #[test]
     fn pep621_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.2", "not_valid");

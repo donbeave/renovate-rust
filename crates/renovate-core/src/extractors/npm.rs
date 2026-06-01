@@ -3467,7 +3467,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts npm 7 lockfile" — npm/extract/npm.spec.ts line 34
+    // Ported: "extracts npm 7 lockfile" — npm/extract/npm.spec.ts line 33
     #[test]
     fn npm_lock_extracts_v2_packages() {
         let lock = parse_npm_lock(Some(
@@ -3494,7 +3494,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts npm 9 lockfile" — npm/extract/npm.spec.ts line 53
+    // Ported: "extracts npm 9 lockfile" — npm/extract/npm.spec.ts line 51
     #[test]
     fn npm_lock_extracts_v3_packages() {
         let lock = parse_npm_lock(Some(
@@ -3526,21 +3526,21 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if no deps" — npm/extract/npm.spec.ts line 72
+    // Ported: "returns null if no deps" — npm/extract/npm.spec.ts line 69
     #[test]
     fn npm_lock_returns_empty_if_no_deps() {
         let lock = parse_npm_lock(Some("{}"));
         assert!(lock.locked_versions.is_empty());
     }
 
-    // Ported: "returns null on read error" — npm/extract/npm.spec.ts line 78
+    // Ported: "returns null on read error" — npm/extract/npm.spec.ts line 75
     #[test]
     fn npm_lock_returns_empty_on_read_error() {
         let lock = parse_npm_lock(None);
         assert!(lock.locked_versions.is_empty());
     }
 
-    // Ported: "returns empty if exception parsing" — npm/extract/yarn.spec.ts line 10
+    // Ported: "returns empty if exception parsing" — npm/extract/yarn.spec.ts line 13
     #[test]
     fn yarn_lock_returns_empty_if_exception_parsing() {
         let lock = parse_yarn_lock(Some("abcd"));
@@ -3549,7 +3549,7 @@ mod tests {
         assert!(lock.locked_versions.is_empty());
     }
 
-    // Ported: "extracts yarn 1" — npm/extract/yarn.spec.ts line 17
+    // Ported: "extracts yarn 1" — npm/extract/yarn.spec.ts line 20
     #[test]
     fn yarn_lock_extracts_yarn1_dependencies() {
         let lock = parse_yarn_lock(Some(
@@ -3587,7 +3587,7 @@ supports-color@^5.3.0:
         );
     }
 
-    // Ported: "extracts yarn 2" — npm/extract/yarn.spec.ts line 27
+    // Ported: "extracts yarn 2" — npm/extract/yarn.spec.ts line 30
     #[test]
     fn yarn_lock_extracts_yarn2_dependencies() {
         let lock = parse_yarn_lock(Some(
@@ -3628,7 +3628,7 @@ __metadata:
         );
     }
 
-    // Ported: "extracts yarn 2 cache version" — npm/extract/yarn.spec.ts line 37
+    // Ported: "extracts yarn 2 cache version" — npm/extract/yarn.spec.ts line 40
     #[test]
     fn yarn_lock_extracts_yarn2_cache_version() {
         let lock = parse_yarn_lock(Some(
@@ -3670,7 +3670,7 @@ __metadata:
         );
     }
 
-    // Ported: "ignores individual invalid entries" — npm/extract/yarn.spec.ts line 47
+    // Ported: "ignores individual invalid entries" — npm/extract/yarn.spec.ts line 50
     #[test]
     fn yarn_lock_ignores_individual_invalid_entries() {
         let lock = parse_yarn_lock(Some(
@@ -3694,7 +3694,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "getYarnVersionFromLock" — npm/extract/yarn.spec.ts line 58
+    // Ported: "getYarnVersionFromLock" — npm/extract/yarn.spec.ts line 63
     #[test]
     fn yarn_version_from_lock_matches_lockfile_version() {
         assert_eq!(
@@ -3747,14 +3747,14 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "handles empty catalog entries" — npm/extract/yarn.spec.ts line 78
+    // Ported: "handles empty catalog entries" — npm/extract/yarn.spec.ts line 83
     #[test]
     fn yarn_catalogs_handles_empty_catalog_entries() {
         let extraction = extract_yarn_catalogs(&BTreeMap::new(), &BTreeMap::new(), None, false);
         assert!(extraction.deps.is_empty());
     }
 
-    // Ported: "parses valid .yarnrc.yml file" — npm/extract/yarn.spec.ts line 86
+    // Ported: "parses valid .yarnrc.yml file" — npm/extract/yarn.spec.ts line 91
     #[test]
     fn yarn_catalogs_parses_valid_yarnrc_yml() {
         let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.0".to_owned())]);
@@ -3785,7 +3785,7 @@ chalk@^2.4.1:
         assert!(extraction.has_package_manager);
     }
 
-    // Ported: "finds relevant lockfile" — npm/extract/yarn.spec.ts line 130
+    // Ported: "finds relevant lockfile" — npm/extract/yarn.spec.ts line 133
     #[test]
     fn yarn_catalogs_finds_relevant_lockfile() {
         let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.1".to_owned())]);
@@ -4060,7 +4060,7 @@ chalk@^2.4.1:
         assert_eq!(deps[0].skip_reason, Some(NpmSkipReason::UrlInstall));
     }
 
-    // Ported: "extracts npm package alias" — npm/extract/index.spec.ts line 815
+    // Ported: "extracts npm package alias" — npm/extract/index.spec.ts line 842
     #[test]
     fn npm_aliases_are_extracted() {
         let json = r#"{
@@ -4229,7 +4229,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts engines" — npm/extract/index.spec.ts line 412
+    // Ported: "extracts engines" — npm/extract/index.spec.ts line 422
     #[test]
     fn package_json_extracts_engines() {
         let json = r#"{
@@ -4311,7 +4311,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts volta" — npm/extract/index.spec.ts line 503
+    // Ported: "extracts volta" — npm/extract/index.spec.ts line 513
     #[test]
     fn package_json_extracts_volta() {
         let json = r#"{
@@ -4357,7 +4357,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts volta yarn unspecified-version" — npm/extract/index.spec.ts line 543
+    // Ported: "extracts volta yarn unspecified-version" — npm/extract/index.spec.ts line 556
     #[test]
     fn package_json_extracts_volta_yarn_unspecified() {
         let json = r#"{
@@ -4386,7 +4386,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts volta yarn higher than 1" — npm/extract/index.spec.ts line 584
+    // Ported: "extracts volta yarn higher than 1" — npm/extract/index.spec.ts line 597
     #[test]
     fn package_json_extracts_volta_yarn_higher_than_one() {
         let json = r#"{
@@ -4415,7 +4415,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts non-npmjs" — npm/extract/index.spec.ts line 626
+    // Ported: "extracts non-npmjs" — npm/extract/index.spec.ts line 639
     #[test]
     fn package_json_extracts_non_npmjs_github_dependencies() {
         let json = r#"{
@@ -4498,7 +4498,7 @@ chalk@^2.4.1:
         }
     }
 
-    // Ported: "extracts packageManager" — npm/extract/index.spec.ts line 894
+    // Ported: "extracts packageManager" — npm/extract/index.spec.ts line 921
     #[test]
     fn package_json_extracts_package_manager() {
         let json = r#"{
@@ -4539,7 +4539,7 @@ chalk@^2.4.1:
         assert!(resolutions.iter().any(|d| d.name == "lodash"));
     }
 
-    // Ported: "extracts dependencies from overrides" — npm/extract/index.spec.ts line 957
+    // Ported: "extracts dependencies from overrides" — npm/extract/index.spec.ts line 984
     #[test]
     fn extracts_npm_overrides() {
         let json = r#"{
@@ -4592,7 +4592,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "extracts dependencies from pnpm.overrides" — npm/extract/index.spec.ts line 1036
+    // Ported: "extracts dependencies from pnpm.overrides" — npm/extract/index.spec.ts line 1063
     #[test]
     fn extracts_pnpm_overrides() {
         let json = r#"{
@@ -4647,7 +4647,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "extracts dependencies from pnpm.overrides, with version ranges in flat syntax" — npm/extract/index.spec.ts line 1117
+    // Ported: "extracts dependencies from pnpm.overrides, with version ranges in flat syntax" — npm/extract/index.spec.ts line 1144
     #[test]
     fn extracts_pnpm_override_range_keys() {
         let json = r#"{
@@ -4685,34 +4685,34 @@ chalk@^2.4.1:
         }
     }
 
-    // Ported: "returns same if not auto" — modules/manager/npm/range.spec.ts line 4
+    // Ported: "returns same if not auto" — modules/manager/npm/range.spec.ts line 5
     #[test]
     fn npm_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("widen", None, None), "widen");
     }
 
-    // Ported: "widens peerDependencies" — modules/manager/npm/range.spec.ts line 8
+    // Ported: "widens peerDependencies" — modules/manager/npm/range.spec.ts line 10
     #[test]
     fn npm_range_widens_peer_dependencies() {
         let result = get_range_strategy("auto", Some("peerDependencies"), None);
         assert_eq!(result, "widen");
     }
 
-    // Ported: "widens complex ranges" — modules/manager/npm/range.spec.ts line 16
+    // Ported: "widens complex ranges" — modules/manager/npm/range.spec.ts line 18
     #[test]
     fn npm_range_widens_complex_ranges() {
         let result = get_range_strategy("auto", Some("dependencies"), Some("^1.6.0 || ^2.0.0"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "widens complex bump" — modules/manager/npm/range.spec.ts line 24
+    // Ported: "widens complex bump" — modules/manager/npm/range.spec.ts line 27
     #[test]
     fn npm_range_widens_complex_bump() {
         let result = get_range_strategy("bump", Some("dependencies"), Some("^1.6.0 || ^2.0.0"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/npm/range.spec.ts line 32
+    // Ported: "defaults to update-lockfile" — modules/manager/npm/range.spec.ts line 36
     #[test]
     fn npm_range_defaults_to_update_lockfile() {
         let result = get_range_strategy("auto", Some("dependencies"), None);
@@ -4728,7 +4728,7 @@ chalk@^2.4.1:
         ));
     }
 
-    // Ported: "matches package in non-nested directory" — modules/manager/npm/extract/utils.spec.ts line 14
+    // Ported: "matches package in non-nested directory" — modules/manager/npm/extract/utils.spec.ts line 17
     #[test]
     fn matches_any_pattern_non_nested_directory() {
         assert!(matches_any_pattern(
@@ -4737,7 +4737,7 @@ chalk@^2.4.1:
         ));
     }
 
-    // Ported: "matches package in explicitly defined directory" — modules/manager/npm/extract/utils.spec.ts line 23
+    // Ported: "matches package in explicitly defined directory" — modules/manager/npm/extract/utils.spec.ts line 29
     #[test]
     fn matches_any_pattern_explicit_directory() {
         assert!(matches_any_pattern(
@@ -4753,14 +4753,14 @@ chalk@^2.4.1:
         assert!(!result);
     }
 
-    // Ported: "should correctly evaluate fileName when it starts with pwd" — modules/manager/bun/utils.spec.ts line 13
+    // Ported: "should correctly evaluate fileName when it starts with pwd" — modules/manager/bun/utils.spec.ts line 14
     #[test]
     fn bun_file_matches_workspaces_true_when_starts_with_pwd() {
         let result = file_matches_workspaces("/project", "/project/foo/package.json", &["foo"]);
         assert!(result);
     }
 
-    // Ported: "should filter files matching workspaces and pwd" — modules/manager/bun/utils.spec.ts line 26
+    // Ported: "should filter files matching workspaces and pwd" — modules/manager/bun/utils.spec.ts line 30
     #[test]
     fn bun_files_matching_workspaces_filters_correctly() {
         let pwd = "/project";
@@ -4803,7 +4803,7 @@ chalk@^2.4.1:
         assert_eq!(result[1].dep_name, "lodash");
     }
 
-    // Ported: "returns correct dependencies for yarn" — modules/manager/npm/extract/common/catalogs.spec.ts line 37
+    // Ported: "returns correct dependencies for yarn" — modules/manager/npm/extract/common/catalogs.spec.ts line 39
     #[test]
     fn catalog_deps_for_yarn() {
         let result = extract_catalog_deps(&sample_catalogs(), "yarn");
@@ -4811,14 +4811,14 @@ chalk@^2.4.1:
         assert_eq!(result[1].dep_type, "yarn.catalog.custom");
     }
 
-    // Ported: "handles empty catalogs list" — modules/manager/npm/extract/common/catalogs.spec.ts line 69
+    // Ported: "handles empty catalogs list" — modules/manager/npm/extract/common/catalogs.spec.ts line 73
     #[test]
     fn catalog_deps_empty_list() {
         assert!(extract_catalog_deps(&[], "pnpm").is_empty());
         assert!(extract_catalog_deps(&[], "yarn").is_empty());
     }
 
-    // Ported: "handles catalog with no dependencies" — modules/manager/npm/extract/common/catalogs.spec.ts line 76
+    // Ported: "handles catalog with no dependencies" — modules/manager/npm/extract/common/catalogs.spec.ts line 80
     #[test]
     fn catalog_deps_empty_dependencies() {
         let catalogs = vec![Catalog {
@@ -4832,7 +4832,7 @@ chalk@^2.4.1:
     const NPM_PKG_CONTENT: &str =
         r#"{"name":"some-package","version":"0.0.2","dependencies":{"chalk":"2.4.2"}}"#;
 
-    // Ported: "mirrors" — modules/manager/npm/update/package-version/index.spec.ts line 16
+    // Ported: "mirrors" — modules/manager/npm/update/package-version/index.spec.ts line 11
     #[test]
     fn npm_bump_mirrors_dependency_version() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "mirror:chalk");
@@ -4842,14 +4842,14 @@ chalk@^2.4.1:
         assert_ne!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "aborts mirror" — modules/manager/npm/update/package-version/index.spec.ts line 24
+    // Ported: "aborts mirror" — modules/manager/npm/update/package-version/index.spec.ts line 21
     #[test]
     fn npm_bump_aborts_mirror_when_dep_not_found() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "mirror:a");
         assert_eq!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "increments" — modules/manager/npm/update/package-version/index.spec.ts line 31
+    // Ported: "increments" — modules/manager/npm/update/package-version/index.spec.ts line 30
     #[test]
     fn npm_bump_increments_patch() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "patch");
@@ -4859,14 +4859,14 @@ chalk@^2.4.1:
         assert_ne!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "no ops" — modules/manager/npm/update/package-version/index.spec.ts line 38
+    // Ported: "no ops" — modules/manager/npm/update/package-version/index.spec.ts line 40
     #[test]
     fn npm_bump_no_op_when_bumped_version_matches_content() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.1", "patch");
         assert_eq!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "updates" — modules/manager/npm/update/package-version/index.spec.ts line 44
+    // Ported: "updates" — modules/manager/npm/update/package-version/index.spec.ts line 49
     #[test]
     fn npm_bump_updates_minor() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.1", "minor");
@@ -4876,7 +4876,7 @@ chalk@^2.4.1:
         assert_ne!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/npm/update/package-version/index.spec.ts line 51
+    // Ported: "returns content if bumping errors" — modules/manager/npm/update/package-version/index.spec.ts line 59
     #[test]
     fn npm_bump_returns_content_on_invalid_bump_type() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "invalid_type");
@@ -4900,7 +4900,7 @@ chalk@^2.4.1:
     const NPM_PACKAGE_LOCK: &str =
         include_str!("../../tests/fixtures/npm/lockfile-parsing/package-lock.json");
 
-    // Ported: "parses lockfile string into an object" — modules/manager/npm/utils.spec.ts line 18
+    // Ported: "parses lockfile string into an object" — modules/manager/npm/utils.spec.ts line 16
     #[test]
     fn npm_parse_lock_file_parses_into_object() {
         let result = parse_npm_lock_file(NPM_PACKAGE_LOCK);
@@ -4913,7 +4913,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["packages"][""]["license"], "ISC");
     }
 
-    // Ported: "can deal with invalid lockfiles" — modules/manager/npm/utils.spec.ts line 32
+    // Ported: "can deal with invalid lockfiles" — modules/manager/npm/utils.spec.ts line 37
     #[test]
     fn npm_parse_lock_file_invalid_returns_none() {
         let result = parse_npm_lock_file("");
@@ -4921,7 +4921,7 @@ chalk@^2.4.1:
         assert!(result.lock_file_parsed.is_none());
     }
 
-    // Ported: "composes lockfile string out of an object" — modules/manager/npm/utils.spec.ts line 39
+    // Ported: "composes lockfile string out of an object" — modules/manager/npm/utils.spec.ts line 48
     #[test]
     fn npm_compose_lock_file_serializes_with_indent() {
         let val = serde_json::json!({
@@ -4944,7 +4944,7 @@ chalk@^2.4.1:
         assert_eq!(reparsed["lockfileVersion"], 2);
     }
 
-    // Ported: "adds trailing newline to match npms behavior and avoid diffs" — modules/manager/npm/utils.spec.ts line 49
+    // Ported: "adds trailing newline to match npms behavior and avoid diffs" — modules/manager/npm/utils.spec.ts line 66
     #[test]
     fn npm_compose_lock_file_round_trips_fixture() {
         let result = parse_npm_lock_file(NPM_PACKAGE_LOCK);
@@ -5012,7 +5012,7 @@ chalk@^2.4.1:
         assert_eq!(res, YARN2_LOCK);
     }
 
-    // Ported: "replaces without dependencies" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 18
+    // Ported: "replaces without dependencies" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 21
     #[test]
     fn yarn_replace_without_dependencies() {
         let res = replace_constraint_version(YARN_LOCK1, "fresh", "~0.2.1", "0.2.5", None);
@@ -5036,7 +5036,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces with dependencies" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 34
+    // Ported: "replaces with dependencies" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 46
     #[test]
     fn yarn_replace_with_dependencies() {
         let res = replace_constraint_version(YARN_LOCK1, "express", "4.0.0", "4.4.0", None);
@@ -5057,7 +5057,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces constraint too" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 51
+    // Ported: "replaces constraint too" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 71
     #[test]
     fn yarn_replace_constraint_too() {
         let res =
@@ -5073,7 +5073,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "handles escaped constraints" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 70
+    // Ported: "handles escaped constraints" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 99
     #[test]
     fn yarn_replace_handles_escaped_constraints() {
         let res = replace_constraint_version(
@@ -5129,7 +5129,7 @@ chalk@^2.4.1:
         assert_eq!(entry.version, "1.2.6");
     }
 
-    // Ported: "handles quoted" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 94
+    // Ported: "handles quoted" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 124
     #[test]
     fn yarn_replace_handles_quoted() {
         let res = replace_constraint_version(
@@ -5290,7 +5290,7 @@ chalk@^2.4.1:
 
     // ── processHostRules ─────────────────────────────────────────────────────
 
-    // Ported: "returns empty if no rules" — manager/npm/post-update/rules.spec.ts line 12
+    // Ported: "returns empty if no rules" — manager/npm/post-update/rules.spec.ts line 10
     #[test]
     fn process_host_rules_empty() {
         crate::util::host_rules::clear();
@@ -5299,7 +5299,7 @@ chalk@^2.4.1:
         assert!(res.additional_yarn_rc_yml.is_none());
     }
 
-    // Ported: "returns empty if no resolvedHost" — manager/npm/post-update/rules.spec.ts line 19
+    // Ported: "returns empty if no resolvedHost" — manager/npm/post-update/rules.spec.ts line 16
     #[test]
     fn process_host_rules_no_resolved_host() {
         crate::util::host_rules::clear();
@@ -5314,7 +5314,7 @@ chalk@^2.4.1:
         assert!(res.additional_yarn_rc_yml.is_none());
     }
 
-    // Ported: "returns rules content" — manager/npm/post-update/rules.spec.ts line 31
+    // Ported: "returns rules content" — manager/npm/post-update/rules.spec.ts line 23
     #[test]
     fn process_host_rules_username_password() {
         crate::util::host_rules::clear();
@@ -7046,7 +7046,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces a github fully specified version" — npm/update/dependency/yarn.spec.ts line 307
+    // Ported: "replaces a github fully specified version" — npm/update/dependency/yarn.spec.ts line 306
     #[test]
     fn yarn_update_dep_git_tag() {
         let input =
@@ -7063,7 +7063,7 @@ chalk@^2.4.1:
         assert!(result.contains("v1.1.0"));
     }
 
-    // Ported: "returns null if the dependency is not present in the target catalog" — npm/update/dependency/yarn.spec.ts line 332
+    // Ported: "returns null if the dependency is not present in the target catalog" — npm/update/dependency/yarn.spec.ts line 334
     #[test]
     fn yarn_update_dep_null_not_in_catalog() {
         let input =
@@ -7078,7 +7078,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if catalogs are missing" — npm/update/dependency/yarn.spec.ts line 352
+    // Ported: "returns null if catalogs are missing" — npm/update/dependency/yarn.spec.ts line 357
     #[test]
     fn yarn_update_dep_null_no_catalog() {
         let input = "nodeLinker: node-modules\n";
@@ -7092,7 +7092,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if empty file" — npm/update/dependency/yarn.spec.ts line 372
+    // Ported: "returns null if empty file" — npm/update/dependency/yarn.spec.ts line 375
     #[test]
     fn yarn_update_dep_null_on_empty() {
         let upgrade = NpmUpdateUpgrade {
@@ -7105,7 +7105,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "preserves literal whitespace" — npm/update/dependency/yarn.spec.ts line 388
+    // Ported: "preserves literal whitespace" — npm/update/dependency/yarn.spec.ts line 389
     #[test]
     fn yarn_update_dep_preserves_whitespace() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react:    18.3.1\n\n";
@@ -7119,7 +7119,7 @@ chalk@^2.4.1:
         assert!(result.contains("react:    19.0.0"));
     }
 
-    // Ported: "preserves single quote style" — npm/update/dependency/yarn.spec.ts line 414
+    // Ported: "preserves single quote style" — npm/update/dependency/yarn.spec.ts line 415
     #[test]
     fn yarn_update_dep_preserves_single_quotes() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: '18.3.1'\n";
@@ -7133,7 +7133,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: '19.0.0'"));
     }
 
-    // Ported: "preserves comments" — npm/update/dependency/yarn.spec.ts line 437
+    // Ported: "preserves comments" — npm/update/dependency/yarn.spec.ts line 440
     #[test]
     fn yarn_update_dep_preserves_comments() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 18.3.1 # This is a comment\n  # This is another comment\n  react-dom: 18.3.1\n";
@@ -7149,7 +7149,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["catalog"]["react-dom"].as_str().unwrap(), "18.3.1");
     }
 
-    // Ported: "preserves double quote style" — npm/update/dependency/yarn.spec.ts line 467
+    // Ported: "preserves double quote style" — npm/update/dependency/yarn.spec.ts line 469
     #[test]
     fn yarn_update_dep_preserves_double_quotes() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: \"18.3.1\"\n";
@@ -7163,7 +7163,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: \"19.0.0\""));
     }
 
-    // Ported: "preserves anchors, replacing only the value" — npm/update/dependency/yarn.spec.ts line 492
+    // Ported: "preserves anchors, replacing only the value" — npm/update/dependency/yarn.spec.ts line 494
     #[test]
     fn yarn_update_dep_preserves_anchors() {
         let input =
@@ -7179,7 +7179,7 @@ chalk@^2.4.1:
         assert!(result.contains("react-dom: *react"));
     }
 
-    // Ported: "preserves whitespace with anchors" — npm/update/dependency/yarn.spec.ts line 521
+    // Ported: "preserves whitespace with anchors" — npm/update/dependency/yarn.spec.ts line 524
     #[test]
     fn yarn_update_dep_preserves_anchor_whitespace() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: &react    18.3.1\n";
@@ -7193,7 +7193,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: &react    19.0.0"));
     }
 
-    // Ported: "preserves quotation style with anchors" — npm/update/dependency/yarn.spec.ts line 547
+    // Ported: "preserves quotation style with anchors" — npm/update/dependency/yarn.spec.ts line 549
     #[test]
     fn yarn_update_dep_preserves_anchor_quote_style() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: &react \"18.3.1\"\n";
@@ -7207,7 +7207,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: &react \"19.0.0\""));
     }
 
-    // Ported: "preserves formatting in flow style syntax" — npm/update/dependency/yarn.spec.ts line 575
+    // Ported: "preserves formatting in flow style syntax" — npm/update/dependency/yarn.spec.ts line 574
     #[test]
     fn yarn_update_dep_flow_style() {
         let input = "nodeLinker: node-modules\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
@@ -7222,7 +7222,7 @@ chalk@^2.4.1:
         assert!(result.contains("# This is a comment"));
     }
 
-    // Ported: "does not replace aliases in the value position" — npm/update/dependency/yarn.spec.ts line 605
+    // Ported: "does not replace aliases in the value position" — npm/update/dependency/yarn.spec.ts line 603
     #[test]
     fn yarn_update_dep_no_replace_value_alias() {
         let input = "__deps:\n  react: &react 18.3.1\n\nnodeLinker: node-modules\n\ncatalog:\n  react: *react\n  react-dom: *react\n";
@@ -7236,7 +7236,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "does not replace aliases in the key position" — npm/update/dependency/yarn.spec.ts line 631
+    // Ported: "does not replace aliases in the key position" — npm/update/dependency/yarn.spec.ts line 630
     #[test]
     fn yarn_update_dep_no_replace_key_alias() {
         // no newValue → early return None
@@ -7771,7 +7771,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "returns version" — npm/post-update/node-version.spec.ts line 100
+    // Ported: "returns version" — npm/post-update/node-version.spec.ts line 101
     #[test]
     fn get_node_update_finds_node() {
         let upgrades = [("lodash", "4.17.21"), ("node", "18.0.0")];

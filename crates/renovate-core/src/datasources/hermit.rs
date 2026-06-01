@@ -277,7 +277,7 @@ mod tests {
         );
     }
 
-    // Ported: "should fail on no result found" — datasource/hermit/index.spec.ts line 82
+    // Ported: "should fail on no result found" — datasource/hermit/index.spec.ts line 79
     #[tokio::test]
     async fn should_fail_on_no_result_found() {
         let server = MockServer::start().await;
@@ -306,7 +306,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should fail on network error" — datasource/hermit/index.spec.ts line 109
+    // Ported: "should fail on network error" — datasource/hermit/index.spec.ts line 106
     #[tokio::test]
     async fn should_fail_on_network_error() {
         let server = MockServer::start().await;
@@ -334,7 +334,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "should get null result on non github url given" — datasource/hermit/index.spec.ts line 134
+    // Ported: "should get null result on non github url given" — datasource/hermit/index.spec.ts line 133
     #[tokio::test]
     async fn should_get_null_on_non_github_url() {
         let http = HttpClient::new().unwrap();
@@ -349,7 +349,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should get null result on missing repo or owner" — datasource/hermit/index.spec.ts line 141
+    // Ported: "should get null result on missing repo or owner" — datasource/hermit/index.spec.ts line 142
     #[tokio::test]
     async fn should_get_null_on_missing_repo_or_owner() {
         let http = HttpClient::new().unwrap();
@@ -363,7 +363,7 @@ mod tests {
         assert!(r2.is_none());
     }
 
-    // Ported: "should get null for extra path provided in registry url" — datasource/hermit/index.spec.ts line 155
+    // Ported: "should get null for extra path provided in registry url" — datasource/hermit/index.spec.ts line 157
     #[tokio::test]
     async fn should_get_null_for_extra_path() {
         let http = HttpClient::new().unwrap();
@@ -411,7 +411,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should get null on invalid index.json asset" — datasource/hermit/index.spec.ts line 196
+    // Ported: "should get null on invalid index.json asset" — datasource/hermit/index.spec.ts line 195
     #[tokio::test]
     async fn should_get_null_on_invalid_index_json() {
         let server = MockServer::start().await;
@@ -440,7 +440,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should get null on invalid registry url" — datasource/hermit/index.spec.ts line 224
+    // Ported: "should get null on invalid registry url" — datasource/hermit/index.spec.ts line 221
     #[tokio::test]
     async fn should_get_null_on_invalid_registry_url() {
         let http = HttpClient::new().unwrap();

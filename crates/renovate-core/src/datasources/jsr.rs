@@ -221,7 +221,7 @@ mod tests {
         assert_eq!(result.name, "package-name");
     }
 
-    // Ported: "should return null for invalid name" — datasource/jsr/util.spec.ts line 11
+    // Ported: "should return null for invalid name" — datasource/jsr/util.spec.ts line 12
     #[test]
     fn extract_null_for_invalid_path() {
         assert!(extract_jsr_package_name("@invalid/package/name").is_none());
@@ -283,7 +283,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should return null for no versions" — datasource/jsr/index.spec.ts line 31
+    // Ported: "should return null for no versions" — datasource/jsr/index.spec.ts line 32
     #[tokio::test]
     async fn returns_null_for_no_versions() {
         let server = MockServer::start().await;
@@ -302,7 +302,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should fetch package info from jsr" — datasource/jsr/index.spec.ts line 44
+    // Ported: "should fetch package info from jsr" — datasource/jsr/index.spec.ts line 46
     #[tokio::test]
     async fn fetches_package_info() {
         let server = MockServer::start().await;
@@ -338,7 +338,7 @@ mod tests {
         assert!(r1.is_latest);
     }
 
-    // Ported: "contains yanked versions" — datasource/jsr/index.spec.ts line 67
+    // Ported: "contains yanked versions" — datasource/jsr/index.spec.ts line 74
     #[tokio::test]
     async fn contains_yanked_versions() {
         let server = MockServer::start().await;
@@ -367,7 +367,7 @@ mod tests {
         assert!(r1.is_latest);
     }
 
-    // Ported: "should return null if lookup fails" — datasource/jsr/index.spec.ts line 89
+    // Ported: "should return null if lookup fails" — datasource/jsr/index.spec.ts line 102
     #[tokio::test]
     async fn throws_for_404() {
         let server = MockServer::start().await;
@@ -383,7 +383,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "should throw error for unparseable" — datasource/jsr/index.spec.ts line 100
+    // Ported: "should throw error for unparseable" — datasource/jsr/index.spec.ts line 115
     #[tokio::test]
     async fn throws_for_unparseable() {
         let server = MockServer::start().await;

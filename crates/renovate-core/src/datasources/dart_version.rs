@@ -128,7 +128,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "processes real data" — dart-version/index.spec.ts line 50
+    // Ported: "processes real data" — dart-version/index.spec.ts line 53
     #[test]
     fn extract_version_from_stable_prefix() {
         let v = version_from_prefix("channels/stable/release/2.17.5/", "stable");

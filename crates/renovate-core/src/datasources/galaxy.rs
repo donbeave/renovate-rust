@@ -204,7 +204,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for unknown error" — galaxy/index.spec.ts line 58
+    // Ported: "returns null for unknown error" — galaxy/index.spec.ts line 63
     #[tokio::test]
     async fn returns_null_for_request_error() {
         // Simulate a network/request error by parsing invalid JSON (leads to parse error)
@@ -221,7 +221,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "processes real data" — galaxy/index.spec.ts line 66
+    // Ported: "processes real data" — galaxy/index.spec.ts line 76
     #[tokio::test]
     async fn processes_real_data() {
         let fixture = include_str!(
@@ -243,7 +243,7 @@ mod tests {
         assert!(result.is_some());
     }
 
-    // Ported: "handles multiple results when one user matches exactly" — galaxy/index.spec.ts line 77
+    // Ported: "handles multiple results when one user matches exactly" — galaxy/index.spec.ts line 90
     #[tokio::test]
     async fn handles_multiple_results_matching_user() {
         let fixture = include_str!(
@@ -266,7 +266,7 @@ mod tests {
         assert_eq!(result.releases.len(), 11);
     }
 
-    // Ported: "rejects multiple results when no user matches exactly" — galaxy/index.spec.ts line 86
+    // Ported: "rejects multiple results when no user matches exactly" — galaxy/index.spec.ts line 103
     #[tokio::test]
     async fn rejects_multiple_results_no_user_match() {
         let fixture = include_str!(
@@ -288,7 +288,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "return null if searching random username and project name" — galaxy/index.spec.ts line 95
+    // Ported: "return null if searching random username and project name" — galaxy/index.spec.ts line 115
     #[tokio::test]
     async fn returns_null_for_empty_results() {
         let fixture = include_str!(
@@ -310,7 +310,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — galaxy/index.spec.ts line 103
+    // Ported: "throws for 5xx" — galaxy/index.spec.ts line 127
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -324,7 +324,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws for 404" (foo.bar) — galaxy/index.spec.ts line 112
+    // Ported: "throws for 404" (foo.bar) — galaxy/index.spec.ts line 140
     #[tokio::test]
     async fn returns_null_for_404_dotted() {
         let server = MockServer::start().await;

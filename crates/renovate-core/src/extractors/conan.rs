@@ -334,13 +334,13 @@ class MyConan(ConanFile):
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns same if not auto" — modules/manager/conan/range.spec.ts line 4
+    // Ported: "returns same if not auto" — modules/manager/conan/range.spec.ts line 5
     #[test]
     fn conan_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("widen"), "widen");
     }
 
-    // Ported: "defaults to bump" — modules/manager/conan/range.spec.ts line 8
+    // Ported: "defaults to bump" — modules/manager/conan/range.spec.ts line 10
     #[test]
     fn conan_range_defaults_to_bump() {
         assert_eq!(get_range_strategy("auto"), "bump");

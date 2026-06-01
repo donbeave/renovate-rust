@@ -193,7 +193,6 @@ fn is_http_url(s: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "parses github>owner/repo:file" — config/presets/parse.spec.ts
     #[test]
     fn parse_github_preset() {
         let result = parse_preset("github>owner/repo:file").unwrap();

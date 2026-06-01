@@ -262,7 +262,7 @@ on 'test' => sub {
         assert_eq!(deps[0].phase, CpanDepPhase::Test);
     }
 
-    // Ported: "$shortcut" — cpanfile/extract.spec.ts line 296 (test.each table covers
+    // Ported: "$shortcut" — cpanfile/extract.spec.ts line 297 (test.each table covers
     // configure_requires / build_requires / test_requires / author_requires)
     #[test]
     fn extracts_phase_shortcut_keywords() {

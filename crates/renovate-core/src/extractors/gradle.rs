@@ -2117,21 +2117,21 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(result.as_deref(), Some("###1.2.4###"));
     }
 
-    // Ported: "groups" — modules/manager/gradle/update.spec.ts line 18
+    // Ported: "groups" — modules/manager/gradle/update.spec.ts line 20
     #[test]
     fn gradle_update_groups_shared_variable() {
         let result = update_dependency("###1.2.4###", 3, "1.2.3", "1.2.5", Some("group"), None);
         assert_eq!(result.as_deref(), Some("###1.2.5###"));
     }
 
-    // Ported: "returns same content" — modules/manager/gradle/update.spec.ts line 32
+    // Ported: "returns same content" — modules/manager/gradle/update.spec.ts line 37
     #[test]
     fn gradle_update_returns_same_when_already_updated() {
         let result = update_dependency("###1.2.4###", 3, "1.2.3", "1.2.4", None, None);
         assert_eq!(result.as_deref(), Some("###1.2.4###"));
     }
 
-    // Ported: "returns null" — modules/manager/gradle/update.spec.ts line 46
+    // Ported: "returns null" — modules/manager/gradle/update.spec.ts line 54
     #[test]
     fn gradle_update_returns_null_for_wrong_position() {
         // Version at offset doesn't match current_value or new_value
@@ -2142,7 +2142,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(r2.is_none());
     }
 
-    // Ported: "should return null for replacement" — modules/manager/gradle/update.spec.ts line 62
+    // Ported: "should return null for replacement" — modules/manager/gradle/update.spec.ts line 84
     #[test]
     fn gradle_update_returns_null_for_replacement() {
         let result = update_dependency("", 0, "", "", None, Some("replacement"));
@@ -2310,7 +2310,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 127
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_nested() {
         assert_eq!(
@@ -2337,7 +2337,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 148
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_alphabetical() {
         assert_eq!(
@@ -2364,7 +2364,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 182
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_independent_subfolders() {
         assert_eq!(
@@ -2407,7 +2407,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 221
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_nested_props_and_build() {
         assert_eq!(

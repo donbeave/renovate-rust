@@ -107,14 +107,14 @@ pub async fn fetch_releases(
 mod tests {
     use super::*;
 
-    // Ported: "returns null for empty 200 OK" — flutter-version/index.spec.ts line 35
+    // Ported: "returns null for empty 200 OK" — flutter-version/index.spec.ts line 34
     #[test]
     fn empty_releases_yield_none() {
         let resp = FlutterResponse { releases: vec![] };
         assert!(resp.releases.is_empty());
     }
 
-    // Ported: "processes real data" — flutter-version/index.spec.ts line 42
+    // Ported: "processes real data" — flutter-version/index.spec.ts line 44
     #[test]
     fn parse_stable_release() {
         let json = r#"{"releases":[{"hash":"abc","channel":"stable","version":"3.0.0","dart_sdk_version":"2.17.0","release_date":"2022-05-11T17:04:19.536736Z","archive":"stable/linux/flutter_linux_3.0.0-stable.tar.xz","sha256":"xyz"}]}"#;

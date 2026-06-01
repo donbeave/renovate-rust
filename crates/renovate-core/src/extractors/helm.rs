@@ -823,7 +823,7 @@ dependencies:
 
     const CHART_YAML: &str = "apiVersion: v2\nname: test\nversion: 0.0.2\n";
 
-    // Ported: "increments" — modules/manager/helmv3/update.spec.ts line 14
+    // Ported: "increments" — modules/manager/helmv3/update.spec.ts line 12
     #[test]
     fn helm_bump_increments_patch() {
         let result = bump_package_version(CHART_YAML, "0.0.2", "patch");
@@ -837,14 +837,14 @@ dependencies:
         assert_eq!(result, CHART_YAML);
     }
 
-    // Ported: "updates" — modules/manager/helmv3/update.spec.ts line 30
+    // Ported: "updates" — modules/manager/helmv3/update.spec.ts line 31
     #[test]
     fn helm_bump_updates_minor() {
         let result = bump_package_version(CHART_YAML, "0.0.1", "minor");
         assert_eq!(result, CHART_YAML.replace("0.0.2", "0.1.0"));
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/helmv3/update.spec.ts line 38
+    // Ported: "returns content if bumping errors" — modules/manager/helmv3/update.spec.ts line 41
     #[test]
     fn helm_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(CHART_YAML, "0.0.2", "not_valid");
@@ -860,21 +860,21 @@ dependencies:
         m
     }
 
-    // Ported: "return alias with \"alias:\"" — modules/manager/helmv3/utils.spec.ts line 5
+    // Ported: "return alias with \"alias:\"" — modules/manager/helmv3/utils.spec.ts line 6
     #[test]
     fn helm_resolve_alias_with_alias_prefix() {
         let result = resolve_alias(Some("alias:testRepo"), &aliases());
         assert_eq!(result.as_deref(), Some("https://charts.helm.sh/stable"));
     }
 
-    // Ported: "return alias with \"@\"" — modules/manager/helmv3/utils.spec.ts line 13
+    // Ported: "return alias with \"@\"" — modules/manager/helmv3/utils.spec.ts line 14
     #[test]
     fn helm_resolve_alias_with_at_prefix() {
         let result = resolve_alias(Some("@testRepo"), &aliases());
         assert_eq!(result.as_deref(), Some("https://charts.helm.sh/stable"));
     }
 
-    // Ported: "return null if alias repo is not defined" — modules/manager/helmv3/utils.spec.ts line 21
+    // Ported: "return null if alias repo is not defined" — modules/manager/helmv3/utils.spec.ts line 22
     #[test]
     fn helm_resolve_alias_undefined_returns_none() {
         let result = resolve_alias(Some("alias:testRepo"), &{
@@ -895,7 +895,7 @@ dependencies:
         assert_eq!(result.as_deref(), Some("oci://artifactory.example.com"));
     }
 
-    // Ported: "return repository parameter if it is not an alias" — modules/manager/helmv3/utils.spec.ts line 37
+    // Ported: "return repository parameter if it is not an alias" — modules/manager/helmv3/utils.spec.ts line 36
     #[test]
     fn helm_resolve_alias_non_alias_passthrough() {
         let url = "https://registry.example.com";
@@ -903,26 +903,26 @@ dependencies:
         assert_eq!(result.as_deref(), Some(url));
     }
 
-    // Ported: "return repository parameter if repository is null" — modules/manager/helmv3/utils.spec.ts line 47
+    // Ported: "return repository parameter if repository is null" — modules/manager/helmv3/utils.spec.ts line 44
     #[test]
     fn helm_resolve_alias_null_returns_none() {
         let result = resolve_alias(None, &aliases());
         assert!(result.is_none());
     }
 
-    // Ported: "return repository parameter if repository is undefined" — modules/manager/helmv3/utils.spec.ts line 54
+    // Ported: "return repository parameter if repository is undefined" — modules/manager/helmv3/utils.spec.ts line 52
     #[test]
     fn helm_resolve_alias_undefined_input_returns_none() {
         assert!(resolve_alias(None, &std::collections::HashMap::new()).is_none());
     }
 
-    // Ported: "return false if repository is null" (isAlias) — modules/manager/helmv3/utils.spec.ts line 63
+    // Ported: "return false if repository is null" (isAlias) — modules/manager/helmv3/utils.spec.ts line 62
     #[test]
     fn helm_is_alias_null_returns_false() {
         assert!(!is_alias(None));
     }
 
-    // Ported: "return false if repository is undefined" (isAlias) — modules/manager/helmv3/utils.spec.ts line 69
+    // Ported: "return false if repository is undefined" (isAlias) — modules/manager/helmv3/utils.spec.ts line 68
     #[test]
     fn helm_is_alias_undefined_returns_false() {
         assert!(!is_alias(None));
@@ -934,7 +934,7 @@ dependencies:
         assert!(!is_oci_registry(None));
     }
 
-    // Ported: "return false if repository is undefined" (isOCIRegistry) — modules/manager/helmv3/utils.spec.ts line 82
+    // Ported: "return false if repository is undefined" (isOCIRegistry) — modules/manager/helmv3/utils.spec.ts line 81
     #[test]
     fn helm_is_oci_registry_undefined_returns_false() {
         assert!(!is_oci_registry(None));

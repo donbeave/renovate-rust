@@ -180,7 +180,7 @@ mod tests {
         assert_eq!(cmp_pvp("4.7.0.0", "4.7.0.1"), Less);
     }
 
-    // Ported: "should make release with given version" — datasource/hackage/index.spec.ts line 10
+    // Ported: "should make release with given version" — datasource/hackage/index.spec.ts line 9
     #[test]
     fn version_to_release_sets_version() {
         let release = version_to_release("3.1.0", "base", "http://localhost/", false);
@@ -192,7 +192,7 @@ mod tests {
         assert!(!release.is_deprecated);
     }
 
-    // Ported: "returns null for 404" — datasource/hackage/index.spec.ts line 27
+    // Ported: "returns null for 404" — datasource/hackage/index.spec.ts line 26
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -208,7 +208,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns releases for 200" — datasource/hackage/index.spec.ts line 33
+    // Ported: "returns releases for 200" — datasource/hackage/index.spec.ts line 36
     #[tokio::test]
     async fn returns_releases_for_200() {
         let server = MockServer::start().await;
@@ -240,7 +240,7 @@ mod tests {
         assert!(!result.releases[1].is_deprecated);
     }
 
-    // Ported: "return null with empty registryUrl" — datasource/hackage/index.spec.ts line 19
+    // Ported: "return null with empty registryUrl" — datasource/hackage/index.spec.ts line 17
     #[tokio::test]
     async fn returns_null_with_empty_registry_url() {
         let http = HttpClient::new().unwrap();

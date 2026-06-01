@@ -147,7 +147,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$input\") === $expected" — versioning/unity3d-packages/index.spec.ts line 17
+    // Ported: "isStable(\"$input\") === $expected" — versioning/unity3d-packages/index.spec.ts line 18
     #[test]
     fn is_stable_matches_renovate_unity3d_packages_spec() {
         let cases = [
@@ -177,7 +177,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/unity3d-packages/index.spec.ts line 41
+    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/unity3d-packages/index.spec.ts line 40
     #[test]
     fn is_greater_than_matches_renovate_unity3d_packages_spec() {
         let cases = [

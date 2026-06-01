@@ -99,19 +99,19 @@ mod tests {
     use super::super::utils::get_node_options;
     use super::*;
 
-    // Ported: "maps supported versions for v9" — modules/manager/npm/post-update/pnpm.spec.ts line 990
+    // Ported: "maps supported versions for v9" — modules/manager/npm/post-update/pnpm.spec.ts line 693
     #[test]
     fn get_constraint_from_lock_file_v9() {
         assert_eq!(get_constraint_from_lock_file(9.0), Some(">=9".to_owned()));
     }
 
-    // Ported: "maps supported versions for v6" — modules/manager/npm/post-update/pnpm.spec.ts line 980
+    // Ported: "maps supported versions for v6" — modules/manager/npm/post-update/pnpm.spec.ts line 687
     #[test]
     fn get_constraint_from_lock_file_v6() {
         assert_eq!(get_constraint_from_lock_file(6.0), Some(">=8.6".to_owned()));
     }
 
-    // Ported: "returns null if lockfileVersion is not a number or numeric string" — modules/manager/npm/post-update/pnpm.spec.ts line 963
+    // Ported: "returns null if lockfileVersion is not a number or numeric string" — modules/manager/npm/post-update/pnpm.spec.ts line 669
     #[test]
     fn get_constraint_from_lock_file_old() {
         assert_eq!(get_constraint_from_lock_file(4.0), None);

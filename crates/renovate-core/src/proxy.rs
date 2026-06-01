@@ -55,14 +55,14 @@ mod tests {
             .collect()
     }
 
-    // Ported: "respects HTTP_PROXY" — proxy.spec.ts line 15
+    // Ported: "respects HTTP_PROXY" — proxy.spec.ts line 17
     #[test]
     fn respects_http_proxy() {
         let mut e = env(&[("HTTP_PROXY", "http://example.org/http-proxy")]);
         assert!(bootstrap(&mut e));
     }
 
-    // Ported: "copies upper case HTTP_PROXY to http_proxy" — proxy.spec.ts line 21
+    // Ported: "copies upper case HTTP_PROXY to http_proxy" — proxy.spec.ts line 23
     #[test]
     fn copies_upper_http_proxy_to_lower() {
         let mut e = env(&[("HTTP_PROXY", "http://example.org/http-proxy")]);
@@ -75,14 +75,14 @@ mod tests {
         assert!(!e.contains_key("no_proxy"));
     }
 
-    // Ported: "respects HTTPS_PROXY" — proxy.spec.ts line 33
+    // Ported: "respects HTTPS_PROXY" — proxy.spec.ts line 36
     #[test]
     fn respects_https_proxy() {
         let mut e = env(&[("HTTPS_PROXY", "http://example.org/https-proxy")]);
         assert!(bootstrap(&mut e));
     }
 
-    // Ported: "copies upper case HTTPS_PROXY to https_proxy" — proxy.spec.ts line 39
+    // Ported: "copies upper case HTTPS_PROXY to https_proxy" — proxy.spec.ts line 42
     #[test]
     fn copies_upper_https_proxy_to_lower() {
         let mut e = env(&[("HTTPS_PROXY", "http://example.org/https-proxy")]);
@@ -95,7 +95,7 @@ mod tests {
         assert!(!e.contains_key("no_proxy"));
     }
 
-    // Ported: "does nothing" — proxy.spec.ts line 51
+    // Ported: "does nothing" — proxy.spec.ts line 55
     #[test]
     fn does_nothing_with_only_no_proxy() {
         let mut e = env(&[("no_proxy", "http://example.org/no-proxy")]);

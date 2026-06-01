@@ -166,7 +166,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/nixpkgs/index.spec.ts line 50
+    // Ported: "equals($a, $b) === $expected" — versioning/nixpkgs/index.spec.ts line 49
     #[test]
     fn equals_matches_renovate_nixpkgs_spec() {
         let cases = [
@@ -181,7 +181,7 @@ mod tests {
         }
     }
 
-    // Ported: "$versions -> sortVersions -> $expected" — versioning/nixpkgs/index.spec.ts line 62
+    // Ported: "$versions -> sortVersions -> $expected" — versioning/nixpkgs/index.spec.ts line 60
     #[test]
     fn sort_versions_matches_renovate_nixpkgs_spec() {
         let mut versions = vec![
@@ -204,7 +204,7 @@ mod tests {
         );
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/nixpkgs/index.spec.ts line 73
+    // Ported: "equals($a, $b) === $expected" — versioning/nixpkgs/index.spec.ts line 72
     #[test]
     fn is_compatible_matches_renovate_nixpkgs_spec() {
         let cases = [

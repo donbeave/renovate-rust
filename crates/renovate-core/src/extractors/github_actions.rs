@@ -2316,7 +2316,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
     #[test]
     fn extracts_simple_action() {
         let content = r#"
@@ -2332,7 +2332,7 @@ jobs:
         assert!(deps.contains(&dep("actions/setup-node", "v3")));
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
     #[test]
     fn action_with_sub_path_uses_owner_repo() {
         let content = "      - uses: org/repo/subpath@v2\n";
@@ -2342,7 +2342,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v2");
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
     #[test]
     fn local_action_skipped() {
         let content = "      - uses: ./.github/actions/my-action\n";
@@ -2354,7 +2354,7 @@ jobs:
         );
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
     #[test]
     fn docker_ref_skipped() {
         let content = "      - uses: docker://alpine:3.18\n";
@@ -2366,7 +2366,7 @@ jobs:
         );
     }
 
-    // Ported: "disables naked SHA pins without version comment" — github-actions/extract.spec.ts line 527
+    // Ported: "disables naked SHA pins without version comment" — github-actions/extract.spec.ts line 543
     #[test]
     fn full_sha_pin_skipped() {
         let content = "      - uses: actions/checkout@a81bbbf8298c0fa03ea29cdc473d45769f953675\n";
@@ -2375,7 +2375,7 @@ jobs:
         assert_eq!(deps[0].skip_reason, Some(GithubActionsSkipReason::ShaPin));
     }
 
-    // Ported: "disables naked short SHA pins without version comment" — github-actions/extract.spec.ts line 546
+    // Ported: "disables naked short SHA pins without version comment" — github-actions/extract.spec.ts line 562
     #[test]
     fn short_sha_pin_skipped() {
         let content = "      - uses: actions/checkout@abc1234\n";
@@ -2387,7 +2387,7 @@ jobs:
         );
     }
 
-    // Ported: "does not disable SHA pins with version comment" — github-actions/extract.spec.ts line 565
+    // Ported: "does not disable SHA pins with version comment" — github-actions/extract.spec.ts line 581
     #[test]
     fn full_sha_with_version_comment_not_skipped() {
         let content =
@@ -2399,7 +2399,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "does not disable short SHA pins with version comment" — github-actions/extract.spec.ts line 590
+    // Ported: "does not disable short SHA pins with version comment" — github-actions/extract.spec.ts line 606
     #[test]
     fn short_sha_with_version_comment_not_skipped() {
         let content = "      - uses: actions/checkout@c85c95e # v4\n";
@@ -2410,7 +2410,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts tags in different formats" — github-actions/extract.spec.ts line 352
+    // Ported: "extracts tags in different formats" — github-actions/extract.spec.ts line 368
     #[test]
     fn comment_version_formats() {
         let sha = "1e204e9a9253d643386038d443f96446fa156a97";
@@ -2467,7 +2467,7 @@ jobs:
         }
     }
 
-    // Ported: "extracts non-semver ref automatically" — github-actions/extract.spec.ts line 484
+    // Ported: "extracts non-semver ref automatically" — github-actions/extract.spec.ts line 500
     #[test]
     fn non_semver_ref_extracted() {
         let content = "      - uses: taiki-e/install-action@cargo-llvm-cov\n";
@@ -2478,7 +2478,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts pinned non-semver ref with digest" — github-actions/extract.spec.ts line 504
+    // Ported: "extracts pinned non-semver ref with digest" — github-actions/extract.spec.ts line 520
     #[test]
     fn pinned_non_semver_ref_with_digest() {
         let content = "      - uses: taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # cargo-llvm-cov\n";
@@ -2489,7 +2489,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "maintains quotes" — github-actions/extract.spec.ts line 217
+    // Ported: "maintains quotes" — github-actions/extract.spec.ts line 233
     #[test]
     fn single_and_double_quoted_uses_parsed() {
         let sha = "56337c425554a6be30cdef71bf441f15be286854";
@@ -2508,7 +2508,7 @@ jobs:
         assert_eq!(deps[3].current_value, "v2"); // comment stripped, not used as version
     }
 
-    // Ported: "extracts multiple action tag lines with double quotes and comments" — github-actions/extract.spec.ts line 153
+    // Ported: "extracts multiple action tag lines with double quotes and comments" — github-actions/extract.spec.ts line 169
     #[test]
     fn quoted_action_is_parsed() {
         let content = r#"      - uses: "actions/checkout@v4""#;
@@ -2518,7 +2518,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v4");
     }
 
-    // Ported: "maintains spaces between hash and comment" — github-actions/extract.spec.ts line 299
+    // Ported: "maintains spaces between hash and comment" — github-actions/extract.spec.ts line 315
     #[test]
     fn inline_comment_stripped() {
         let content = "      - uses: actions/checkout@v4 # pinned\n";
@@ -2527,7 +2527,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v4");
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
     #[test]
     fn real_workflow_fixture() {
         let content = r#"
@@ -2570,20 +2570,20 @@ jobs:
         assert_eq!(pinned.skip_reason, Some(GithubActionsSkipReason::ShaPin));
     }
 
-    // Ported: "returns null for empty" — github-actions/extract.spec.ts line 42
+    // Ported: "returns null for empty" — github-actions/extract.spec.ts line 46
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for invalid yaml" — github-actions/extract.spec.ts line 48
+    // Ported: "returns null for invalid yaml" — github-actions/extract.spec.ts line 52
     #[test]
     fn invalid_yaml_returns_empty() {
         // Our line-scanner doesn't parse YAML — malformed YAML with no `uses:` lines is empty.
         assert!(extract("nothing here: [").is_empty());
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
     #[test]
     fn owner_repo_strips_subpath() {
         assert_eq!(
@@ -2596,7 +2596,7 @@ jobs:
 
     // ── extract_docker_images tests ───────────────────────────────────────────
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
     #[test]
     fn docker_container_inline() {
         let content = r#"
@@ -2614,7 +2614,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
     #[test]
     fn docker_container_block_form() {
         let content = r#"
@@ -2631,7 +2631,7 @@ jobs:
         assert_eq!(deps[0].tag.as_deref(), Some("16-bullseye"));
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
     #[test]
     fn docker_services_block_image() {
         let content = r#"
@@ -2656,7 +2656,7 @@ jobs:
         );
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
     #[test]
     fn docker_services_inline_string() {
         let content = r#"
@@ -2672,7 +2672,7 @@ jobs:
         assert_eq!(deps[0].tag.as_deref(), Some("10"));
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
     #[test]
     fn docker_mixed_container_and_services() {
         let content = r#"
@@ -2724,7 +2724,7 @@ jobs:
         assert!(deps.is_empty(), "variable references should be skipped");
     }
 
-    // Ported: "returns null for empty" — github-actions/extract.spec.ts line 42
+    // Ported: "returns null for empty" — github-actions/extract.spec.ts line 46
     #[test]
     fn docker_no_container_no_services_returns_empty() {
         let content = r#"
@@ -2737,7 +2737,7 @@ jobs:
         assert!(extract_docker_images(content).is_empty());
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
     #[test]
     fn docker_workflow_fixture() {
         // Reflects upstream workflow_1.yml fixture from renovatebot/renovate.
@@ -2762,7 +2762,7 @@ jobs:
 
     // ── extract_runner_labels tests ───────────────────────────────────────────
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn runner_simple_ubuntu() {
         let content = "    runs-on: ubuntu-22.04\n";
@@ -2772,7 +2772,7 @@ jobs:
         assert_eq!(runners[0].current_value, "22.04");
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn runner_macos_xlarge() {
         let content = "    runs-on: macos-14-xlarge\n";
@@ -2782,7 +2782,7 @@ jobs:
         assert_eq!(runners[0].current_value, "14-xlarge");
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn runner_windows() {
         let content = "    runs-on: windows-2022\n";
@@ -2792,28 +2792,28 @@ jobs:
         assert_eq!(runners[0].current_value, "2022");
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn runner_latest_skipped() {
         let content = "    runs-on: ubuntu-latest\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn runner_self_hosted_skipped() {
         let content = "    runs-on: self-hosted\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn runner_matrix_variable_skipped() {
         let content = "    runs-on: ${{ matrix.os }}\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn runner_inline_array() {
         let content = "    runs-on: [ubuntu-22.04, self-hosted]\n";
@@ -2822,14 +2822,14 @@ jobs:
         assert_eq!(runners[0].current_value, "22.04");
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn runner_unknown_version_skipped() {
         let content = "    runs-on: ubuntu-99.99\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
-    // Ported: "handles actions/setup-x without x-version field" — github-actions/extract.spec.ts line 873
+    // Ported: "handles actions/setup-x without x-version field" — github-actions/extract.spec.ts line 905
     #[test]
     fn setup_x_without_version_returns_only_action_dep() {
         // When actions/setup-node is used without node-version in with:, only the action dep
@@ -2850,7 +2850,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
     #[test]
     fn parse_runner_label_splits_correctly() {
         assert_eq!(
@@ -2869,7 +2869,7 @@ jobs:
         assert_eq!(parse_runner_label("nodash"), None);
     }
 
-    // Ported: "extracts actions with fqdn" — github-actions/extract.spec.ts line 614
+    // Ported: "extracts actions with fqdn" — github-actions/extract.spec.ts line 630
     #[test]
     fn extracts_actions_with_fqdn() {
         let content = r#"
@@ -2942,7 +2942,7 @@ jobs:
 
     // ── extract_uses_with tests ───────────────────────────────────────────────
 
-    // Ported: "extracts x-version from actions/setup-x" — github-actions/extract.spec.ts line 741
+    // Ported: "extracts x-version from actions/setup-x" — github-actions/extract.spec.ts line 773
     #[test]
     fn setup_x_extracts_versioned_deps() {
         let content = r#"
@@ -3001,7 +3001,7 @@ jobs:
         assert_eq!(deps[4].current_value.as_deref(), Some("latest"));
     }
 
-    // Ported: "extracts x-version from actions/setup-x in composite action" — github-actions/extract.spec.ts line 891
+    // Ported: "extracts x-version from actions/setup-x in composite action" — github-actions/extract.spec.ts line 923
     #[test]
     fn setup_x_composite_action() {
         let content = r#"
@@ -3023,6 +3023,7 @@ runs:
         assert_eq!(deps[1].current_value.as_deref(), Some("1.23"));
     }
 
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1065
     #[test]
     fn community_trivy_unspecified_version() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: aquasecurity/setup-trivy@v0.2.6\n        with: {}\n";
@@ -3170,7 +3171,7 @@ runs:
         assert_eq!(deps[0].skip_reason, Some("unspecified-version"));
     }
 
-    // Ported: "handles actions/setup-x without x-version field" — github-actions/extract.spec.ts line 873
+    // Ported: "handles actions/setup-x without x-version field" — github-actions/extract.spec.ts line 905
     #[test]
     fn setup_x_missing_version_key_emits_unspecified() {
         // When the correct version key is absent, emit unspecified-version.
@@ -3192,7 +3193,7 @@ jobs:
     // Fixture: first action in workflow_2.yml — actions/bin/shellcheck@master
     const WORKFLOW_2_FIRST_ACTION: &str = "steps:\n  - uses: actions/bin/shellcheck@master\n";
 
-    // Ported: "use github.com as registry when no settings provided" — github-actions/extract.spec.ts line 79
+    // Ported: "use github.com as registry when no settings provided" — github-actions/extract.spec.ts line 83
     #[test]
     fn use_github_com_as_registry_when_no_settings_provided() {
         let deps = extract(WORKFLOW_2_FIRST_ACTION);
@@ -3200,7 +3201,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com" — github-actions/extract.spec.ts line 87
+    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com" — github-actions/extract.spec.ts line 91
     #[test]
     fn use_enterprise_registry_when_endpoint_is_enterprise() {
         let ctx = GithubActionsContext {
@@ -3215,7 +3216,7 @@ jobs:
         );
     }
 
-    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3" — github-actions/extract.spec.ts line 102
+    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3" — github-actions/extract.spec.ts line 106
     #[test]
     fn use_enterprise_registry_when_endpoint_has_api_v3_path() {
         let ctx = GithubActionsContext {
@@ -3230,7 +3231,7 @@ jobs:
         );
     }
 
-    // Ported: "use github.com only as registry when running against non-GitHub" — github-actions/extract.spec.ts line 117
+    // Ported: "use github.com only as registry when running against non-GitHub" — github-actions/extract.spec.ts line 121
     #[test]
     fn use_no_custom_registry_when_platform_is_not_github() {
         let ctx = GithubActionsContext {
@@ -3242,7 +3243,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "use github.com only as registry when running against github.com" — github-actions/extract.spec.ts line 129
+    // Ported: "use github.com only as registry when running against github.com" — github-actions/extract.spec.ts line 133
     #[test]
     fn use_no_custom_registry_when_endpoint_is_github_com() {
         let ctx = GithubActionsContext {
@@ -3254,7 +3255,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "use github.com only as registry when running against api.github.com" — github-actions/extract.spec.ts line 141
+    // Ported: "use github.com only as registry when running against api.github.com" — github-actions/extract.spec.ts line 145
     #[test]
     fn use_no_custom_registry_when_endpoint_is_api_github_com() {
         let ctx = GithubActionsContext {
@@ -3266,7 +3267,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "returns undefined registryUrls when endpoint is invalid URL" — github-actions/extract.spec.ts line 153
+    // Ported: "returns undefined registryUrls when endpoint is invalid URL" — github-actions/extract.spec.ts line 157
     #[test]
     fn returns_no_registry_urls_when_endpoint_is_invalid() {
         let ctx = GithubActionsContext {

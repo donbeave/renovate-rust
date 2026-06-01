@@ -353,13 +353,13 @@ mod tests {
         assert!(parse_manifest_url("   ").is_none());
     }
 
-    // Ported: "ignores unexpected URLs" — rust-version/index.spec.ts line 69
+    // Ported: "ignores unexpected URLs" — rust-version/index.spec.ts line 70
     #[test]
     fn skip_invalid_url() {
         assert!(parse_manifest_url("static.rust-lang.org/dist/invalid.toml").is_none());
     }
 
-    // Ported: "deduplicates versions with latest date" — rust-version/index.spec.ts line 46
+    // Ported: "deduplicates versions with latest date" — rust-version/index.spec.ts line 47
     #[test]
     fn deduplication_keeps_latest_date() {
         let lines = [

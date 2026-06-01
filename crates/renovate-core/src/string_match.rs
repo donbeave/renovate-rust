@@ -576,7 +576,7 @@ mod tests {
 
     // ── is_skip_comment (ported from Renovate util/ignore.spec.ts) ────────────
 
-    // Ported: "returns true for \"renovate:ignore\" comments" — util/ignore.spec.ts line 9
+    // Ported: "returns true for \"renovate:ignore\" comments" — util/ignore.spec.ts line 11
     #[test]
     fn skip_comment_renovate_ignore_returns_true() {
         assert!(is_skip_comment("renovate:ignore"));
@@ -588,19 +588,19 @@ mod tests {
         assert!(is_skip_comment("pyup:ignore"));
     }
 
-    // Ported: "returns false for comments not starting with \"renovate:\" or \"pyup:\"" — util/ignore.spec.ts line 13
+    // Ported: "returns false for comments not starting with \"renovate:\" or \"pyup:\"" — util/ignore.spec.ts line 15
     #[test]
     fn skip_comment_other_prefix_returns_false() {
         assert!(!is_skip_comment("other:ignore"));
     }
 
-    // Ported: "returns false for \"renovate:\" comments without \"ignore\"" — util/ignore.spec.ts line 17
+    // Ported: "returns false for \"renovate:\" comments without \"ignore\"" — util/ignore.spec.ts line 19
     #[test]
     fn skip_comment_renovate_non_ignore_returns_false() {
         assert!(!is_skip_comment("renovate:update"));
     }
 
-    // Ported: "returns false when comment is undefined" — util/ignore.spec.ts line 29
+    // Ported: "returns false when comment is undefined" — util/ignore.spec.ts line 31
     #[test]
     fn skip_comment_empty_returns_false() {
         assert!(!is_skip_comment(""));

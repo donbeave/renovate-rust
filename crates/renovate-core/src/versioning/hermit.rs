@@ -251,7 +251,7 @@ pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
 mod tests {
     use super::*;
 
-    // Ported: "isStable("$version") === $expected" — versioning/hermit/index.spec.ts line 15
+    // Ported: "isStable("$version") === $expected" — versioning/hermit/index.spec.ts line 6
     #[test]
     fn is_stable_matches_renovate_hermit_index_spec() {
         let cases = [
@@ -268,7 +268,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid("$version") === $expected" — versioning/hermit/index.spec.ts line 42
+    // Ported: "isValid("$version") === $expected" — versioning/hermit/index.spec.ts line 19
     #[test]
     fn is_valid_matches_renovate_hermit_index_spec() {
         let cases = [
@@ -298,7 +298,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor, getMinor, getPatch for "$version"" — versioning/hermit/index.spec.ts line 57
+    // Ported: "getMajor, getMinor, getPatch for "$version"" — versioning/hermit/index.spec.ts line 46
     #[test]
     #[allow(clippy::type_complexity)]
     fn get_major_minor_patch_matches_renovate_hermit_index_spec() {
@@ -319,7 +319,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals("$version", "$other") === $expected" — versioning/hermit/index.spec.ts line 77
+    // Ported: "equals("$version", "$other") === $expected" — versioning/hermit/index.spec.ts line 65
     #[test]
     fn equals_matches_renovate_hermit_index_spec() {
         let cases = [
@@ -342,7 +342,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/hermit/index.spec.ts line 104
+    // Ported: "matches("$version", "$range") === $expected" — versioning/hermit/index.spec.ts line 83
     #[test]
     fn matches_matches_renovate_hermit_index_spec() {
         let cases = [
@@ -374,7 +374,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan("$version", "$other") === $expected" — versioning/hermit/index.spec.ts line 134
+    // Ported: "isGreaterThan("$version", "$other") === $expected" — versioning/hermit/index.spec.ts line 110
     #[test]
     fn is_greater_than_matches_renovate_hermit_index_spec() {
         let cases = [
@@ -408,7 +408,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange("$version", "$other") === $expected" — versioning/hermit/index.spec.ts line 160
+    // Ported: "isLessThanRange("$version", "$other") === $expected" — versioning/hermit/index.spec.ts line 139
     #[test]
     fn is_less_than_range_matches_renovate_hermit_index_spec() {
         let cases = [

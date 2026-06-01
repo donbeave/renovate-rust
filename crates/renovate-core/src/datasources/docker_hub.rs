@@ -529,7 +529,7 @@ mod tests {
         assert!(!s.update_available);
     }
 
-    // Ported: "findLatestStable works" — lib/modules/datasource/docker/common.spec.ts line 270
+    // Ported: "findLatestStable works" — lib/modules/datasource/docker/common.spec.ts line 279
     #[test]
     fn empty_tag_list_produces_no_latest() {
         let tags: Vec<String> = Vec::new();

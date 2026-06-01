@@ -121,7 +121,7 @@ fn extract_balanced(s: &str) -> Option<&str> {
 mod tests {
     use super::*;
 
-    // Ported: "returns found deps" — pip_setup/extract.spec.ts line 12
+    // Ported: "returns found deps" — pip_setup/extract.spec.ts line 11
     #[test]
     fn extracts_install_requires() {
         let content = r#"

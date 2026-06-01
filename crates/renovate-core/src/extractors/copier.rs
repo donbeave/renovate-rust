@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(dep.github_repo, "");
     }
 
-    // Ported: "should append a new marking line at the end to trigger the artifact update" — modules/manager/copier/update.spec.ts line 5
+    // Ported: "should append a new marking line at the end to trigger the artifact update" — modules/manager/copier/update.spec.ts line 6
     #[test]
     fn copier_update_appends_marker() {
         let content = "_src_path: https://foo.bar/baz/quux\n_commit: 1.0.0";
@@ -211,7 +211,7 @@ mod tests {
         assert_eq!(result, format!("{content}\n#copier updated"));
     }
 
-    // Ported: "should not update again if the new line has been appended" — modules/manager/copier/update.spec.ts line 18
+    // Ported: "should not update again if the new line has been appended" — modules/manager/copier/update.spec.ts line 19
     #[test]
     fn copier_update_no_op_if_already_marked() {
         let content = "_src_path: https://foo.bar/baz/quux\n_commit: 1.0.0\n#copier updated";

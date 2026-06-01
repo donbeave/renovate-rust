@@ -1701,7 +1701,7 @@ mod tests {
 
     // ── mise/utils.spec.ts tests ──────────────────────────────────────────────
 
-    // Ported: "load and parse successfully" — manager/mise/utils.spec.ts line 9
+    // Ported: "load and parse successfully" — manager/mise/utils.spec.ts line 8
     #[test]
     fn parse_toml_file_loads_and_parses_successfully() {
         let actual = parse_toml_file("[tools]\nerlang = '23.3'\nnode = '16'\n").unwrap();
@@ -1717,13 +1717,13 @@ mod tests {
         assert_eq!(tools.get("node").and_then(toml::Value::as_str), Some("16"));
     }
 
-    // Ported: "invalid toml" — manager/mise/utils.spec.ts line 22
+    // Ported: "invalid toml" — manager/mise/utils.spec.ts line 23
     #[test]
     fn parse_toml_file_rejects_invalid_toml() {
         assert!(parse_toml_file("clearly: \"invalid\" \"toml\"").is_none());
     }
 
-    // Ported: "invalid schema" — manager/mise/utils.spec.ts line 30
+    // Ported: "invalid schema" — manager/mise/utils.spec.ts line 31
     #[test]
     fn parse_toml_file_rejects_invalid_schema() {
         assert!(parse_toml_file("[invalid]\nerlang = '23.3'\nnode = '16'\n").is_none());
@@ -1756,7 +1756,7 @@ mod tests {
         assert_eq!(tools.get("node").and_then(toml::Value::as_str), Some("20"));
     }
 
-    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 28
+    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 29
     #[test]
     fn extracts_node_version() {
         let content = "[tools]\nnode = \"18\"\n";
@@ -1769,7 +1769,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 28
+    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 29
     #[test]
     fn extracts_erlang_core_plugin() {
         let content = "[tools]\nerlang = \"23.3\"\n";
@@ -1784,7 +1784,7 @@ mod tests {
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 28
+    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 29
     #[test]
     fn extracts_multiple_tools() {
         let content = "[tools]\nnode = \"20.9.0\"\npython = \"3.11.5\"\ngo = \"1.21.0\"\n";
@@ -1804,7 +1804,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts tools - mise registry tools" — mise/extract.spec.ts line 51
+    // Ported: "extracts tools - mise registry tools" — mise/extract.spec.ts line 52
     #[test]
     fn extracts_mise_registry_tools() {
         let content = r#"[tools]
@@ -2109,7 +2109,7 @@ usage = "2.1.1"
         }
     }
 
-    // Ported: "extracts tools - asdf plugins" — mise/extract.spec.ts line 393
+    // Ported: "extracts tools - asdf plugins" — mise/extract.spec.ts line 394
     #[test]
     fn asdf_tools_fall_through_to_asdf_table() {
         // Tools not in mise core but in asdf table should still be resolved.
@@ -2121,7 +2121,7 @@ usage = "2.1.1"
         assert_eq!(tf.package_name.as_deref(), Some("hashicorp/terraform"));
     }
 
-    // Ported: "provides skipReason for lines with unsupported tooling" — mise/extract.spec.ts line 781
+    // Ported: "provides skipReason for lines with unsupported tooling" — mise/extract.spec.ts line 782
     #[test]
     fn unknown_tool_skipped() {
         let content = "[tools]\nmyunknowntool = \"1.0\"\n";
@@ -2138,7 +2138,7 @@ usage = "2.1.1"
         assert_eq!(deps.len(), 1);
     }
 
-    // Ported: "extracts tools with multiple versions" — mise/extract.spec.ts line 409
+    // Ported: "extracts tools with multiple versions" — mise/extract.spec.ts line 410
     #[test]
     fn ignores_array_versions() {
         let content = "[tools]\nnode = [\"18\", \"20\"]\n";
@@ -2149,13 +2149,13 @@ usage = "2.1.1"
         assert_eq!(deps[0].datasource_id, Some("node-version"));
     }
 
-    // Ported: "returns null for empty" — mise/extract.spec.ts line 13
+    // Ported: "returns null for empty" — mise/extract.spec.ts line 14
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "core java plugin function" — mise/extract.spec.ts line 911
+    // Ported: "core java plugin function" — mise/extract.spec.ts line 912
     #[test]
     fn java_core_plugin_jdk() {
         let content = "[tools]\njava = \"adoptopenjdk-16.0.0+36\"\n";
@@ -2168,7 +2168,7 @@ usage = "2.1.1"
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "uses semver-partial versioning for short java version $version" — mise/extract.spec.ts line 1034
+    // Ported: "uses semver-partial versioning for short java version $version" — mise/extract.spec.ts line 1035
     #[test]
     fn java_short_versions_use_semver_partial() {
         for (version, current_value) in [
@@ -2186,7 +2186,7 @@ usage = "2.1.1"
         }
     }
 
-    // Ported: "does not use semver-partial for full java version $version" — mise/extract.spec.ts line 1061
+    // Ported: "does not use semver-partial for full java version $version" — mise/extract.spec.ts line 1062
     #[test]
     fn java_full_versions_do_not_use_semver_partial() {
         for (version, current_value) in [("21.0.2", "21.0.2"), ("temurin-21.0.2", "21.0.2")] {
@@ -2199,19 +2199,19 @@ usage = "2.1.1"
         }
     }
 
-    // Ported: "returns null for invalid TOML" — mise/extract.spec.ts line 17
+    // Ported: "returns null for invalid TOML" — mise/extract.spec.ts line 18
     #[test]
     fn invalid_toml_returns_empty() {
         assert!(extract("foo").is_empty());
     }
 
-    // Ported: "returns null for empty tools section" — mise/extract.spec.ts line 21
+    // Ported: "returns null for empty tools section" — mise/extract.spec.ts line 22
     #[test]
     fn empty_tools_section_returns_empty() {
         assert!(extract("[tools]\n").is_empty());
     }
 
-    // Ported: "provides skipReason for missing version - empty string" — mise/extract.spec.ts line 802
+    // Ported: "provides skipReason for missing version - empty string" — mise/extract.spec.ts line 803
     #[test]
     fn empty_version_string_skipped() {
         let content = "[tools]\npython = ''\n";
@@ -2220,7 +2220,7 @@ usage = "2.1.1"
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "provides skipReason for missing version - missing version in object" — mise/extract.spec.ts line 818
+    // Ported: "provides skipReason for missing version - missing version in object" — mise/extract.spec.ts line 819
     #[test]
     fn object_without_version_skipped() {
         let content = "[tools]\npython = {virtualenv='.venv'}\n";
@@ -2229,7 +2229,7 @@ usage = "2.1.1"
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "provides skipReason for missing version - empty array" — mise/extract.spec.ts line 834
+    // Ported: "provides skipReason for missing version - empty array" — mise/extract.spec.ts line 835
     #[test]
     fn empty_array_version_skipped() {
         let content = "[tools]\njava = '21.0.2'\nerlang = []\n";
@@ -2255,7 +2255,7 @@ usage = "2.1.1"
         );
     }
 
-    // Ported: "complete mise.toml example" — mise/extract.spec.ts line 855
+    // Ported: "complete mise.toml example" — mise/extract.spec.ts line 856
     #[test]
     fn complete_mise_toml_example() {
         let content = r#"[env]
@@ -2285,7 +2285,7 @@ my_custom_node = '20'
         assert_eq!(deps[2].datasource_id, Some("node-version"));
     }
 
-    // Ported: "complete example with skip" — mise/extract.spec.ts line 878
+    // Ported: "complete example with skip" — mise/extract.spec.ts line 879
     #[test]
     fn complete_mise_example_with_skip() {
         let content = r#"[tools]
@@ -2308,7 +2308,7 @@ fake-tool = '1.6.2'
         assert_eq!(deps[3].skip_reason, Some(AsdfSkipReason::UnsupportedTool));
     }
 
-    // Ported: "extracts tools with plugin options" — mise/extract.spec.ts line 432
+    // Ported: "extracts tools with plugin options" — mise/extract.spec.ts line 433
     #[test]
     fn tool_with_version_object() {
         let content = "[tools]\npython = {version = \"3.12.3\"}\n";
@@ -2318,7 +2318,7 @@ fake-tool = '1.6.2'
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts tools in the default registry with backends" — mise/extract.spec.ts line 448
+    // Ported: "extracts tools in the default registry with backends" — mise/extract.spec.ts line 449
     #[test]
     fn extracts_default_registry_backend_prefixed_tools() {
         let content = r#"[tools]
@@ -2354,7 +2354,7 @@ fake-tool = '1.6.2'
         assert_eq!(act.datasource_id, Some("github-releases"));
     }
 
-    // Ported: "extracts aqua backend tool" — mise/extract.spec.ts line 487
+    // Ported: "extracts aqua backend tool" — mise/extract.spec.ts line 488
     #[test]
     fn extracts_aqua_backend_tools() {
         let content = r#"[tools]
@@ -2381,7 +2381,7 @@ fake-tool = '1.6.2'
         assert_eq!(gh.datasource_id, Some("github-tags"));
     }
 
-    // Ported: "extracts cargo backend tools" — mise/extract.spec.ts line 514
+    // Ported: "extracts cargo backend tools" — mise/extract.spec.ts line 515
     #[test]
     fn extracts_cargo_backend_tools() {
         let content = r#"[tools]
@@ -2423,7 +2423,7 @@ fake-tool = '1.6.2'
         assert_eq!(rev.datasource_id, Some("git-refs"));
     }
 
-    // Ported: "extracts dotnet backend tool" — mise/extract.spec.ts line 553
+    // Ported: "extracts dotnet backend tool" — mise/extract.spec.ts line 554
     #[test]
     fn extracts_dotnet_backend_tool() {
         let deps = extract("[tools]\n\"dotnet:GitVersion.Tool\" = \"5.12.0\"\n");
@@ -2433,7 +2433,7 @@ fake-tool = '1.6.2'
         assert_eq!(deps[0].datasource_id, Some("nuget"));
     }
 
-    // Ported: "extracts gem backend tool" — mise/extract.spec.ts line 571
+    // Ported: "extracts gem backend tool" — mise/extract.spec.ts line 572
     #[test]
     fn extracts_gem_backend_tool() {
         let deps = extract("[tools]\n\"gem:rubocop\" = \"1.69.2\"\n");
@@ -2443,7 +2443,7 @@ fake-tool = '1.6.2'
         assert_eq!(deps[0].datasource_id, Some("rubygems"));
     }
 
-    // Ported: "extracts go backend tool" — mise/extract.spec.ts line 589
+    // Ported: "extracts go backend tool" — mise/extract.spec.ts line 590
     #[test]
     fn extracts_go_backend_tool() {
         let deps = extract("[tools]\n\"go:github.com/DarthSim/hivemind\" = \"1.0.6\"\n");
@@ -2456,7 +2456,7 @@ fake-tool = '1.6.2'
         assert_eq!(deps[0].datasource_id, Some("go"));
     }
 
-    // Ported: "extracts npm backend tool" — mise/extract.spec.ts line 607
+    // Ported: "extracts npm backend tool" — mise/extract.spec.ts line 608
     #[test]
     fn extracts_npm_backend_tool() {
         let deps = extract("[tools]\n\"npm:prettier\" = \"3.3.2\"\n");
@@ -2466,7 +2466,7 @@ fake-tool = '1.6.2'
         assert_eq!(deps[0].datasource_id, Some("npm"));
     }
 
-    // Ported: "extracts pipx backend tools" — mise/extract.spec.ts line 625
+    // Ported: "extracts pipx backend tools" — mise/extract.spec.ts line 626
     #[test]
     fn extracts_pipx_backend_tools() {
         let content = r#"[tools]
@@ -2498,7 +2498,7 @@ fake-tool = '1.6.2'
         assert_eq!(git_black.datasource_id, Some("github-tags"));
     }
 
-    // Ported: "extracts spm backend tools" — mise/extract.spec.ts line 657
+    // Ported: "extracts spm backend tools" — mise/extract.spec.ts line 658
     #[test]
     fn extracts_spm_backend_tools() {
         let content = r#"[tools]
@@ -2523,7 +2523,7 @@ fake-tool = '1.6.2'
         );
     }
 
-    // Ported: "extracts ubi backend tools" — mise/extract.spec.ts line 682
+    // Ported: "extracts ubi backend tools" — mise/extract.spec.ts line 683
     #[test]
     fn extracts_ubi_backend_tools() {
         let content = r#"[tools]
@@ -2591,7 +2591,7 @@ fake-tool = '1.6.2'
         );
     }
 
-    // Ported: "extracts github backend tools" — mise/extract.spec.ts line 740
+    // Ported: "extracts github backend tools" — mise/extract.spec.ts line 741
     #[test]
     fn extracts_github_backend_tools() {
         let content = r#"[tools]
@@ -2617,7 +2617,7 @@ fake-tool = '1.6.2'
         assert_eq!(gh.datasource_id, Some("github-releases"));
     }
 
-    // Ported: "resolves tools from the mise registry data file via aqua backend" — mise/extract.spec.ts line 1086
+    // Ported: "resolves tools from the mise registry data file via aqua backend" — mise/extract.spec.ts line 1087
     #[test]
     fn resolves_mise_registry_aqua_backend_tool() {
         let deps = extract("[tools]\nzola = \"0.19.2\"\n");
@@ -2628,7 +2628,7 @@ fake-tool = '1.6.2'
         assert_eq!(deps[0].package_name.as_deref(), Some("getzola/zola"));
     }
 
-    // Ported: "resolves tools from the mise registry data file via cargo backend" — mise/extract.spec.ts line 1104
+    // Ported: "resolves tools from the mise registry data file via cargo backend" — mise/extract.spec.ts line 1105
     #[test]
     fn resolves_mise_registry_cargo_backend_tool() {
         let deps = extract("[tools]\nmagika = \"0.3.1\"\n");
@@ -2639,7 +2639,7 @@ fake-tool = '1.6.2'
         assert_eq!(deps[0].package_name.as_deref(), Some("magika-cli"));
     }
 
-    // Ported: "resolves tools from the mise registry data file via github backend" — mise/extract.spec.ts line 1122
+    // Ported: "resolves tools from the mise registry data file via github backend" — mise/extract.spec.ts line 1123
     #[test]
     fn resolves_mise_registry_github_backend_tool() {
         let deps = extract("[tools]\nallurectl = \"2.14.0\"\n");
@@ -2653,7 +2653,7 @@ fake-tool = '1.6.2'
         );
     }
 
-    // Ported: "resolves a tool from the mise registry, prioritising the github backend over others" — mise/extract.spec.ts line 1140
+    // Ported: "resolves a tool from the mise registry, prioritising the github backend over others" — mise/extract.spec.ts line 1141
     #[test]
     fn resolves_mise_registry_prefers_github_backend_tool() {
         let deps = extract("[tools]\nbitwarden-secrets-manager = \"1.2.3\"\n");
@@ -2821,7 +2821,7 @@ fake-tool = '1.6.2'
         assert_eq!(r.datasource, Some("go"));
     }
 
-    // Ported: "should create a tooling config" — mise/backends.spec.ts line 209
+    // Ported: "should create a tooling config" — mise/backends.spec.ts line 210
     #[test]
     fn npm_create_tooling_config() {
         let r = create_npm_tool_config("prettier");
@@ -2829,7 +2829,7 @@ fake-tool = '1.6.2'
         assert_eq!(r.datasource, Some("npm"));
     }
 
-    // Ported: "should create a tooling config for pypi package" — mise/backends.spec.ts line 218
+    // Ported: "should create a tooling config for pypi package" — mise/backends.spec.ts line 219
     #[test]
     fn pipx_create_pypi_config() {
         let r = create_pipx_tool_config("yamllint");
@@ -2837,7 +2837,7 @@ fake-tool = '1.6.2'
         assert_eq!(r.datasource, Some("pypi"));
     }
 
-    // Ported: "should create a tooling config for github shorthand" — mise/backends.spec.ts line 225
+    // Ported: "should create a tooling config for github shorthand" — mise/backends.spec.ts line 226
     #[test]
     fn pipx_create_github_shorthand_config() {
         let r = create_pipx_tool_config("psf/black");
@@ -2845,7 +2845,7 @@ fake-tool = '1.6.2'
         assert_eq!(r.datasource, Some("github-tags"));
     }
 
-    // Ported: "should create a tooling config for github url" — mise/backends.spec.ts line 232
+    // Ported: "should create a tooling config for github url" — mise/backends.spec.ts line 233
     #[test]
     fn pipx_create_github_url_config() {
         let r = create_pipx_tool_config("git+https://github.com/psf/black.git");
@@ -2853,7 +2853,7 @@ fake-tool = '1.6.2'
         assert_eq!(r.datasource, Some("github-tags"));
     }
 
-    // Ported: "should create a tooling config for git url" — mise/backends.spec.ts line 240
+    // Ported: "should create a tooling config for git url" — mise/backends.spec.ts line 242
     #[test]
     fn pipx_create_git_url_config() {
         let r = create_pipx_tool_config("git+https://gitlab.com/user/repo.git");
@@ -2861,14 +2861,14 @@ fake-tool = '1.6.2'
         assert_eq!(r.datasource, Some("git-refs"));
     }
 
-    // Ported: "provides skipReason for zip file url" — mise/backends.spec.ts line 248
+    // Ported: "provides skipReason for zip file url" — mise/backends.spec.ts line 251
     #[test]
     fn pipx_zip_url_skip_reason() {
         let r = create_pipx_tool_config("https://github.com/psf/black/archive/18.9b0.zip");
         assert_eq!(r.skip_reason, Some("unsupported-url"));
     }
 
-    // Ported: "should create a tooling config for github shorthand" — mise/backends.spec.ts line 261
+    // Ported: "should create a tooling config for github shorthand" — mise/backends.spec.ts line 262
     #[test]
     fn spm_create_github_shorthand_config() {
         let r = create_spm_tool_config("tuist/tuist");
@@ -2876,7 +2876,7 @@ fake-tool = '1.6.2'
         assert_eq!(r.datasource, Some("github-releases"));
     }
 
-    // Ported: "should create a tooling config for github url" — mise/backends.spec.ts line 268
+    // Ported: "should create a tooling config for github url" — mise/backends.spec.ts line 269
     #[test]
     fn spm_create_github_url_config() {
         let r = create_spm_tool_config("https://github.com/tuist/tuist.git");
@@ -2884,7 +2884,7 @@ fake-tool = '1.6.2'
         assert_eq!(r.datasource, Some("github-releases"));
     }
 
-    // Ported: "provides skipReason for other url" — mise/backends.spec.ts line 276
+    // Ported: "provides skipReason for other url" — mise/backends.spec.ts line 278
     #[test]
     fn spm_non_github_url_skip_reason() {
         let r = create_spm_tool_config("https://gitlab.com/user/repo.git");
@@ -2908,21 +2908,21 @@ fake-tool = '1.6.2'
         assert_eq!(r.extract_version.as_deref(), Some("^v?(?<version>.+)"));
     }
 
-    // Ported: "should not set extractVersion if the version has leading v" — mise/backends.spec.ts line 306
+    // Ported: "should not set extractVersion if the version has leading v" — mise/backends.spec.ts line 307
     #[test]
     fn ubi_v_prefix_no_extract_version() {
         let r = create_ubi_tool_config("cli/cli", "v2.64.0", None);
         assert!(r.extract_version.is_none());
     }
 
-    // Ported: "should ignore options unless tag_regex is provided" — mise/backends.spec.ts line 313
+    // Ported: "should ignore options unless tag_regex is provided" — mise/backends.spec.ts line 315
     #[test]
     fn ubi_ignore_options_without_tag_regex() {
         let r = create_ubi_tool_config("cli/cli", "2.64.0", None);
         assert_eq!(r.extract_version.as_deref(), Some("^v?(?<version>.+)"));
     }
 
-    // Ported: "should set extractVersion if tag_regex is provided" — mise/backends.spec.ts line 322
+    // Ported: "should set extractVersion if tag_regex is provided" — mise/backends.spec.ts line 326
     #[test]
     fn ubi_set_extract_version_with_tag_regex() {
         let r =
@@ -2933,7 +2933,7 @@ fake-tool = '1.6.2'
         );
     }
 
-    // Ported: "should set extractVersion without v? when tag_regex is provided and version starts with v" — mise/backends.spec.ts line 334
+    // Ported: "should set extractVersion without v? when tag_regex is provided and version starts with v" — mise/backends.spec.ts line 339
     #[test]
     fn ubi_no_v_opt_with_tag_regex_and_v_version() {
         let r = create_ubi_tool_config(
@@ -2947,7 +2947,7 @@ fake-tool = '1.6.2'
         );
     }
 
-    // Ported: "should trim the leading ^ from tag_regex" — mise/backends.spec.ts line 346
+    // Ported: "should trim the leading ^ from tag_regex" — mise/backends.spec.ts line 352
     #[test]
     fn ubi_trim_caret_from_tag_regex() {
         let r = create_ubi_tool_config(
@@ -2961,7 +2961,7 @@ fake-tool = '1.6.2'
         );
     }
 
-    // Ported: "should only trim the leading ^ from tag_regex when version starts with v" — mise/backends.spec.ts line 358
+    // Ported: "should only trim the leading ^ from tag_regex when version starts with v" — mise/backends.spec.ts line 365
     #[test]
     fn ubi_trim_caret_v_prefix_keeps_v_in_regex() {
         let r = create_ubi_tool_config(
@@ -2975,7 +2975,7 @@ fake-tool = '1.6.2'
         );
     }
 
-    // Ported: "should trim the leading ^v from tag_regex" — mise/backends.spec.ts line 370
+    // Ported: "should trim the leading ^v from tag_regex" — mise/backends.spec.ts line 378
     #[test]
     fn ubi_trim_caret_v_from_tag_regex_no_v_version() {
         let r = create_ubi_tool_config(
@@ -2989,7 +2989,7 @@ fake-tool = '1.6.2'
         );
     }
 
-    // Ported: "should trim the leading ^v? from tag_regex" — mise/backends.spec.ts line 382
+    // Ported: "should trim the leading ^v? from tag_regex" — mise/backends.spec.ts line 391
     #[test]
     fn ubi_trim_caret_v_opt_from_tag_regex() {
         let r = create_ubi_tool_config(
@@ -3190,4 +3190,6 @@ rust = [{ version = "1.70.0" }]
     fn parse_mise_lock_file_invalid() {
         assert!(parse_mise_lock_file("not toml").is_none());
     }
+
+    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — modules/manager/mise/index.spec.ts line 6
 }

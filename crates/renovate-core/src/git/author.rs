@@ -113,26 +113,26 @@ pub fn parse_git_author(input: &str) -> Option<GitAuthor> {
 mod tests {
     use super::*;
 
-    // Ported: "returns null if empty email given" — util/git/author.spec.ts line 13
+    // Ported: "returns null if empty email given" — util/git/author.spec.ts line 8
     #[test]
     fn parse_git_author_returns_none_for_empty() {
         assert_eq!(parse_git_author(""), None);
     }
 
-    // Ported: "catches errors" — util/git/author.spec.ts line 17
+    // Ported: "catches errors" — util/git/author.spec.ts line 12
     // In Rust there are no exceptions; the function returns None for unparseable input.
     #[test]
     fn parse_git_author_returns_none_for_unparseable() {
         assert_eq!(parse_git_author("not-an-email"), None);
     }
 
-    // Ported: "handles a normal address" — util/git/author.spec.ts line 22
+    // Ported: "handles a normal address" — util/git/author.spec.ts line 19
     #[test]
     fn parse_git_author_handles_normal_address() {
         assert!(parse_git_author("renovate@whitesourcesoftware.com").is_some());
     }
 
-    // Ported: "parses bot email" — util/git/author.spec.ts line 26
+    // Ported: "parses bot email" — util/git/author.spec.ts line 23
     #[test]
     fn parse_git_author_parses_bot_email() {
         assert_eq!(
@@ -144,7 +144,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses bot name and email" — util/git/author.spec.ts line 33
+    // Ported: "parses bot name and email" — util/git/author.spec.ts line 30
     #[test]
     fn parse_git_author_parses_bot_name_and_email() {
         assert_eq!(
@@ -156,20 +156,20 @@ mod tests {
         );
     }
 
-    // Ported: "escapes names" — util/git/author.spec.ts line 40
+    // Ported: "escapes names" — util/git/author.spec.ts line 41
     #[test]
     fn parse_git_author_handles_name_with_brackets() {
         let result = parse_git_author("name [what] <name@what.com>").unwrap();
         assert_eq!(result.name, "name [what]");
     }
 
-    // Ported: "tries again and fails" — util/git/author.spec.ts line 46
+    // Ported: "tries again and fails" — util/git/author.spec.ts line 47
     #[test]
     fn parse_git_author_returns_none_for_invalid_email_in_brackets() {
         assert_eq!(parse_git_author("foo<foo>"), None);
     }
 
-    // Ported: "gives up" — util/git/author.spec.ts line 50
+    // Ported: "gives up" — util/git/author.spec.ts line 51
     #[test]
     fn parse_git_author_gives_up_on_non_email() {
         assert_eq!(parse_git_author("a.b.c"), None);

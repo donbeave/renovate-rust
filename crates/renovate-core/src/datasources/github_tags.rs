@@ -628,7 +628,7 @@ mod tests {
         assert_eq!(r2.hash.as_deref(), Some("abc"));
     }
 
-    // Ported: "if it is newer than tag timestamp" — datasource/github-tags/index.spec.ts line 183
+    // Ported: "if it is newer than tag timestamp" — datasource/github-tags/index.spec.ts line 184
     #[tokio::test]
     async fn release_timestamp_newer_than_tag_timestamp() {
         let server = MockServer::start().await;
@@ -665,7 +665,7 @@ mod tests {
         );
     }
 
-    // Ported: "keeps tag timestamp when release timestamp is older" — datasource/github-tags/index.spec.ts line 212
+    // Ported: "keeps tag timestamp when release timestamp is older" — datasource/github-tags/index.spec.ts line 213
     #[tokio::test]
     async fn keeps_tag_timestamp_when_release_timestamp_is_older() {
         let server = MockServer::start().await;
@@ -702,7 +702,7 @@ mod tests {
         );
     }
 
-    // Ported: "keeps tag timestamp when release timestamp is equal" — datasource/github-tags/index.spec.ts line 241
+    // Ported: "keeps tag timestamp when release timestamp is equal" — datasource/github-tags/index.spec.ts line 242
     #[tokio::test]
     async fn keeps_tag_timestamp_when_release_timestamp_is_equal() {
         let server = MockServer::start().await;
@@ -739,7 +739,7 @@ mod tests {
         );
     }
 
-    // Ported: "keeps tag timestamp when no corresponding release exists" — datasource/github-tags/index.spec.ts line 270
+    // Ported: "keeps tag timestamp when no corresponding release exists" — datasource/github-tags/index.spec.ts line 271
     #[tokio::test]
     async fn keeps_tag_timestamp_when_no_corresponding_release_exists() {
         let server = MockServer::start().await;

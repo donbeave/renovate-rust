@@ -266,7 +266,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns updated pixi.lock" — pixi/artifacts.spec.ts line 140
+    // Ported: "returns updated pixi.lock using docker" — pixi/artifacts.spec.ts line 140
     #[tokio::test]
     async fn returns_updated_pixi_lock() {
         let dir = tempdir().unwrap();
@@ -352,7 +352,7 @@ mod tests {
         assert_eq!(results.len(), 1);
     }
 
-    // Ported: "catches errors" — pixi/artifacts.spec.ts line 493
+    // Ported: "catches errors" — pixi/artifacts.spec.ts line 328
     #[tokio::test]
     async fn catches_errors() {
         let dir = tempdir().unwrap();

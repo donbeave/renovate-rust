@@ -5808,7 +5808,7 @@ mod tests {
     // assign_keys
     // -----------------------------------------------------------------------
 
-    // Ported: "should assign values from right to left for specified keys" — util/assign-keys.spec.ts line 5
+    // Ported: "should assign values from right to left for specified keys" — util/assign-keys.spec.ts line 4
     #[test]
     fn test_assign_keys() {
         use std::collections::HashMap;
@@ -6057,7 +6057,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports multiple data points" — util/stats.spec.ts line 42
+    // Ported: "supports multiple data points" — util/stats.spec.ts line 43
     #[test]
     fn test_make_timing_report_multiple() {
         let r = make_timing_report(&[100, 200, 400]);
@@ -8368,7 +8368,7 @@ mod tests {
         ));
     }
 
-    // Ported: "returns false if no labels found in debugData" — pr/labels.spec.ts line 162
+    // Ported: "returns false if no labels found in debugData" — pr/labels.spec.ts line 163
     #[test]
     fn test_should_update_labels_false_no_initial() {
         assert!(!should_update_labels(
@@ -8378,7 +8378,7 @@ mod tests {
         ));
     }
 
-    // Ported: "returns false if labels have been modified by user" — pr/labels.spec.ts line 168
+    // Ported: "returns false if labels have been modified by user" — pr/labels.spec.ts line 169
     #[test]
     fn test_should_update_labels_false_user_modified() {
         // initial: [npm, node], current: [npm] → user removed node → don't update
@@ -8389,7 +8389,7 @@ mod tests {
         ));
     }
 
-    // Ported: "returns false if labels are not changed" — pr/labels.spec.ts line 174
+    // Ported: "returns false if labels are not changed" — pr/labels.spec.ts line 173
     #[test]
     fn test_should_update_labels_false_unchanged() {
         assert!(!should_update_labels(
@@ -9372,7 +9372,7 @@ mod tests {
     // sanitize_markdown
     // -----------------------------------------------------------------------
 
-    // Ported: "works" — util/markdown.spec.ts line 33
+    // Ported: "works" — util/markdown.spec.ts line 32
     #[test]
     fn test_linkify_markdown_works() {
         let before = "Some references:\n\n*   Commit: f8083175fe890cbf14f41d0a06e7aa35d4989587\n*   Commit (fork): foo@f8083175fe890cbf14f41d0a06e7aa35d4989587\n*   Commit (repo): remarkjs/remark@e1aa9f6c02de18b9459b7d269712bcb50183ce89\n*   Issue or PR (`#`): #1\n*   Issue or PR (`GH-`): GH-1\n*   Issue or PR (fork): foo#1\n*   Issue or PR (project): remarkjs/remark#1\n*   Mention: @wooorm";
@@ -9380,7 +9380,7 @@ mod tests {
         assert_eq!(linkify_markdown(before, "some/repo"), expected);
     }
 
-    // Ported: "works with gitlab" — util/markdown.spec.ts line 38
+    // Ported: "works with gitlab" — util/markdown.spec.ts line 37
     #[test]
     fn test_linkify_markdown_works_with_gitlab() {
         assert_eq!(
@@ -9392,7 +9392,7 @@ mod tests {
         );
     }
 
-    // Ported: "sanitizeMarkdown check massaged release notes" — util/markdown.spec.ts line 48
+    // Ported: "sanitizeMarkdown check massaged release notes" — util/markdown.spec.ts line 47
     #[test]
     fn test_sanitize_markdown() {
         // Key behaviors: @ → @&#8203;, [#N] → [#&#8203;N]
@@ -9782,7 +9782,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "getInvalidReviewers" — modules/platform/bitbucket-server/utils.spec.ts line 94
+    // Ported: "getInvalidReviewers" — modules/platform/bitbucket-server/utils.spec.ts line 95
     #[test]
     fn test_get_invalid_reviewers() {
         // With valid reviewerErrors
@@ -9876,14 +9876,14 @@ dep1 = "^1.0.0"
         assert_eq!(v["name"], "test");
     }
 
-    // Ported: "fails for invalid YAML" — util/schema-utils/v4.spec.ts line 163
+    // Ported: "fails for invalid YAML" — util/schema-utils/v4.spec.ts line 162
     #[test]
     fn test_schema_parse_yaml_invalid() {
         let r = schema_parse_yaml("name: test\nversion: 1.0.0\n  invalid: indentation\n");
         assert!(r.is_err());
     }
 
-    // Ported: "parses valid multidoc YAML" — util/schema-utils/v4.spec.ts line 184
+    // Ported: "parses valid multidoc YAML" — util/schema-utils/v4.spec.ts line 181
     #[test]
     fn test_schema_parse_multidoc_yaml_valid() {
         let yaml = "---\nname: test1\nversion: 1.0.0\n---\nname: test2\nversion: 2.0.0\n";
@@ -9895,7 +9895,7 @@ dep1 = "^1.0.0"
         assert_eq!(docs[1]["name"], "test2");
     }
 
-    // Ported: "fails for invalid multidoc YAML" — util/schema-utils/v4.spec.ts line 209
+    // Ported: "fails for invalid multidoc YAML" — util/schema-utils/v4.spec.ts line 206
     #[test]
     fn test_schema_parse_multidoc_yaml_invalid() {
         let yaml = "---\nname: test1\nversion: 1.0.0\n---\nname: test2\n  invalid: indentation\n";
@@ -9906,7 +9906,7 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "parses valid TOML" — util/schema-utils/v4.spec.ts line 225
+    // Ported: "parses valid TOML" — util/schema-utils/v4.spec.ts line 226
     #[test]
     fn test_schema_parse_toml_valid() {
         let r = schema_parse_toml("[package]\nname = \"test\"\nversion = \"1.0.0\"\n");
@@ -9922,7 +9922,7 @@ dep1 = "^1.0.0"
 
     // ── hidden unicode detection ──────────────────────────────────────────────
 
-    // Ported: "logs a warning for hidden Unicode characters in text files" — util/unicode.spec.ts line 146
+    // Ported: "logs a warning for hidden Unicode characters in text files" — util/unicode.spec.ts line 6
     // The TypeScript test checks logger.once.warn spy; Rust tests the detection function directly.
     #[test]
     fn hidden_unicode_chars_detected_in_text() {
@@ -9933,7 +9933,7 @@ dep1 = "^1.0.0"
         assert!(found.contains(&'\u{200B}'));
     }
 
-    // Ported: "logs a trace message for BOM character only" — util/unicode.spec.ts line 156
+    // Ported: "logs a trace message for BOM character only" — util/unicode.spec.ts line 16
     #[test]
     fn bom_character_detected() {
         let content = "\u{FEFF}<Project Sdk=\"Microsoft.NET.Sdk\">";
@@ -9942,7 +9942,7 @@ dep1 = "^1.0.0"
         assert_eq!(found[0], '\u{FEFF}');
     }
 
-    // Ported: "does not log a warning for binary files with null bytes but no hidden unicode" — util/unicode.spec.ts line 170
+    // Ported: "does not log a warning for binary files with null bytes but no hidden unicode" — util/unicode.spec.ts line 30
     #[test]
     fn binary_content_with_null_bytes_detected() {
         let bytes = [
@@ -9967,7 +9967,7 @@ dep1 = "^1.0.0"
         assert!(!found.is_empty());
     }
 
-    // Ported: "does not log a warning when no hidden characters are present" — util/unicode.spec.ts line 203
+    // Ported: "does not log a warning when no hidden characters are present" — util/unicode.spec.ts line 63
     #[test]
     fn no_hidden_unicode_in_normal_text() {
         let content = "normal text content";
@@ -10160,7 +10160,7 @@ dep1 = "^1.0.0"
 
     // ── parse_s3_url ─────────────────────────────────────────────────────────
 
-    // Ported: "parses S3 URLs" — util/s3.spec.ts line 8
+    // Ported: "parses S3 URLs" — util/s3.spec.ts line 9
     #[test]
     fn test_parse_s3_url_valid() {
         let r = parse_s3_url("s3://bucket/key/path").unwrap();
@@ -10168,13 +10168,13 @@ dep1 = "^1.0.0"
         assert_eq!(r.key, "key/path");
     }
 
-    // Ported: "returns null for non-S3 URLs" — util/s3.spec.ts line 15
+    // Ported: "returns null for non-S3 URLs" — util/s3.spec.ts line 16
     #[test]
     fn test_parse_s3_url_non_s3() {
         assert!(parse_s3_url("http://example.com/key/path").is_none());
     }
 
-    // Ported: "returns null for invalid URLs" — util/s3.spec.ts line 19
+    // Ported: "returns null for invalid URLs" — util/s3.spec.ts line 20
     #[test]
     fn test_parse_s3_url_invalid() {
         assert!(parse_s3_url("thisisnotaurl").is_none());
@@ -10224,7 +10224,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.repo_fingerprint, "");
     }
 
-    // Ported: "massageMarkdown" — modules/platform/local/index.spec.ts line 92
+    // Ported: "massageMarkdown" — modules/platform/local/index.spec.ts line 90
     #[test]
     fn test_local_massage_markdown_passthrough() {
         // massageMarkdown is identity function for local platform
@@ -10232,14 +10232,14 @@ dep1 = "^1.0.0"
         assert_eq!(input, input); // identity - already tested by value
     }
 
-    // Ported: "maxBodyLength" — modules/platform/local/index.spec.ts line 96
+    // Ported: "maxBodyLength" — modules/platform/local/index.spec.ts line 94
     #[test]
     fn test_local_max_body_length() {
         // maxBodyLength returns usize::MAX (Infinity)
         assert_eq!(usize::MAX, usize::MAX);
     }
 
-    // Ported: "mergePr" — modules/platform/local/index.spec.ts line 100
+    // Ported: "mergePr" — modules/platform/local/index.spec.ts line 102
     #[test]
     fn test_local_merge_pr_returns_false() {
         // mergePr always returns false for local platform
@@ -10247,7 +10247,7 @@ dep1 = "^1.0.0"
         assert!(!result);
     }
 
-    // Ported: "getBranchStatus" — modules/platform/local/index.spec.ts
+    // Ported: "getBranchStatus" — modules/platform/local/index.spec.ts line 126
     #[test]
     fn test_local_get_branch_status_returns_red() {
         // getBranchStatus always returns 'red' for local platform
@@ -10255,7 +10255,7 @@ dep1 = "^1.0.0"
         assert_eq!(status, "red");
     }
 
-    // Ported: "ensureComment" — modules/platform/local/index.spec.ts
+    // Ported: "ensureComment" — modules/platform/local/index.spec.ts line 138
     #[test]
     fn test_local_ensure_comment_returns_false() {
         let result: bool = false;
@@ -10610,13 +10610,13 @@ dep1 = "^1.0.0"
 
     // ── massageUrl / massageGithubUrl / massageGitlabUrl ─────────────────────
 
-    // Ported: "Should return an empty string when massaging an invalid url" — modules/datasource/metadata.spec.ts line 386
+    // Ported: "Should return an empty string when massaging an invalid url" — modules/datasource/metadata.spec.ts line 385
     #[test]
     fn test_massage_url_invalid() {
         assert_eq!(massage_url("not a url"), "");
     }
 
-    // Ported: "Should massage GitHub url $sourceUrl" — modules/datasource/metadata.spec.ts line 391
+    // Ported: "Should massage GitHub url $sourceUrl" — modules/datasource/metadata.spec.ts line 389
     #[test]
     fn test_massage_url_github() {
         let cases = [
@@ -10683,7 +10683,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "Should massage other sourceUrl $sourceUrl" — modules/datasource/metadata.spec.ts line 413
+    // Ported: "Should massage other sourceUrl $sourceUrl" — modules/datasource/metadata.spec.ts line 415
     #[test]
     fn test_massage_url_other_host() {
         let cases = [
@@ -10955,7 +10955,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
     }
 
-    // Ported: "renders rebaseWhen=\"never\"" — workers/repository/update/pr/body/config-description.spec.ts line 24
+    // Ported: "renders rebaseWhen=\"never\"" — workers/repository/update/pr/body/config-description.spec.ts line 25
     #[test]
     fn test_config_desc_rebase_when_never() {
         let res = get_pr_config_description(
@@ -10973,7 +10973,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
     }
 
-    // Ported: "renders rebaseWhen=\"behind-base-branch\"" — workers/repository/update/pr/body/config-description.spec.ts line 34
+    // Ported: "renders rebaseWhen=\"behind-base-branch\"" — workers/repository/update/pr/body/config-description.spec.ts line 36
     #[test]
     fn test_config_desc_rebase_when_behind() {
         let res = get_pr_config_description(
@@ -10991,7 +10991,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("Whenever PR is behind base branch"));
     }
 
-    // Ported: "renders timezone" — workers/repository/update/pr/body/config-description.spec.ts line 43
+    // Ported: "renders timezone" — workers/repository/update/pr/body/config-description.spec.ts line 45
     #[test]
     fn test_config_desc_timezone() {
         let schedule = vec!["* 1 * * * *".to_owned()];
@@ -11030,7 +11030,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("`* 1 * * *`"));
     }
 
-    // Ported: "displays later schedules" — workers/repository/update/pr/body/config-description.spec.ts line 67
+    // Ported: "displays later schedules" — workers/repository/update/pr/body/config-description.spec.ts line 73
     #[test]
     fn test_config_desc_later_schedules() {
         let schedule = vec![
@@ -11052,7 +11052,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("\"before 6am on Monday,after 3pm on Tuesday\""));
     }
 
-    // Ported: "renders undefined schedule" — workers/repository/update/pr/body/config-description.spec.ts line 76
+    // Ported: "renders undefined schedule" — workers/repository/update/pr/body/config-description.spec.ts line 81
     #[test]
     fn test_config_desc_undefined_schedule() {
         let res =
@@ -11060,7 +11060,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("At any time (no schedule defined)"));
     }
 
-    // Ported: "renders recreateClosed=true" — workers/repository/update/pr/body/config-description.spec.ts line 100
+    // Ported: "renders recreateClosed=true" — workers/repository/update/pr/body/config-description.spec.ts line 116
     #[test]
     fn test_config_desc_recreate_closed_true() {
         let res = get_pr_config_description(
@@ -11078,7 +11078,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Immortal**"));
     }
 
-    // Ported: "does not render recreateClosed=false" — workers/repository/update/pr/body/config-description.spec.ts line 109
+    // Ported: "does not render recreateClosed=false" — workers/repository/update/pr/body/config-description.spec.ts line 124
     #[test]
     fn test_config_desc_recreate_closed_false() {
         let res =
@@ -11086,7 +11086,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("**Immortal**"));
     }
 
-    // Ported: "does not render recreateClosed=undefined" — workers/repository/update/pr/body/config-description.spec.ts line 118
+    // Ported: "does not render recreateClosed=undefined" — workers/repository/update/pr/body/config-description.spec.ts line 132
     #[test]
     fn test_config_desc_recreate_closed_undefined() {
         let res =
@@ -11094,7 +11094,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("**Immortal**"));
     }
 
-    // Ported: "renders singular" — workers/repository/update/pr/body/config-description.spec.ts line 125
+    // Ported: "renders singular" — workers/repository/update/pr/body/config-description.spec.ts line 137
     #[test]
     fn test_config_desc_singular_upgrade() {
         let res =
@@ -11103,7 +11103,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("these updates"));
     }
 
-    // Ported: "renders automerge" — workers/repository/update/pr/body/config-description.spec.ts line 133
+    // Ported: "renders automerge" — workers/repository/update/pr/body/config-description.spec.ts line 145
     #[test]
     fn test_config_desc_automerge_enabled() {
         let res =
@@ -11111,7 +11111,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Automerge**: Enabled."));
     }
 
-    // Ported: "renders blocked automerge" — workers/repository/update/pr/body/config-description.spec.ts line 140
+    // Ported: "renders blocked automerge" — workers/repository/update/pr/body/config-description.spec.ts line 150
     #[test]
     fn test_config_desc_automerge_blocked() {
         let res =
@@ -11140,7 +11140,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "returns warning text" — workers/repository/errors-warnings.spec.ts line 22
+    // Ported: "returns warning text" — workers/repository/errors-warnings.spec.ts line 20
     #[test]
     fn test_get_warnings_returns_text() {
         let warnings = [mk_warning("foo", "Failed to look up dependency")];
@@ -11150,13 +11150,13 @@ dep1 = "^1.0.0"
         assert!(result.contains("---\n"));
     }
 
-    // Ported: "getWarning returns empty string" — workers/repository/errors-warnings.spec.ts line 39
+    // Ported: "getWarning returns empty string" — workers/repository/errors-warnings.spec.ts line 41
     #[test]
     fn test_get_warnings_empty() {
         assert_eq!(get_warnings(&[]), "");
     }
 
-    // Ported: "returns error text" — workers/repository/errors-warnings.spec.ts line 318
+    // Ported: "returns error text" — workers/repository/errors-warnings.spec.ts line 260
     #[test]
     fn test_get_errors_returns_text() {
         let errors = [mk_warning("renovate.json", "Failed to parse")];
@@ -11165,13 +11165,13 @@ dep1 = "^1.0.0"
         assert!(result.contains("`renovate.json`: Failed to parse"));
     }
 
-    // Ported: "getError returns empty string" — workers/repository/errors-warnings.spec.ts line 335
+    // Ported: "getError returns empty string" — workers/repository/errors-warnings.spec.ts line 281
     #[test]
     fn test_get_errors_empty() {
         assert_eq!(get_errors(&[]), "");
     }
 
-    // Ported: "returns 2 pr warnings text dependencyDashboard true" — errors-warnings.spec.ts line 48
+    // Ported: "returns 2 pr warnings text dependencyDashboard true" — errors-warnings.spec.ts line 49
     #[test]
     fn test_get_dep_warnings_pr_dashboard_true() {
         let w1 = ["Warning 1"];
@@ -11195,7 +11195,7 @@ dep1 = "^1.0.0"
         assert!(!result.contains("warning logs"));
     }
 
-    // Ported: "returns 2 pr warnings text dependencyDashboard true with issue link" — errors-warnings.spec.ts line 73
+    // Ported: "returns 2 pr warnings text dependencyDashboard true with issue link" — errors-warnings.spec.ts line 97
     #[test]
     fn test_get_dep_warnings_pr_with_issue_link() {
         let w1 = ["Warning 1"];
@@ -11206,7 +11206,7 @@ dep1 = "^1.0.0"
         assert!(result.contains("[Dependency Dashboard](../issues/123)"));
     }
 
-    // Ported: "returns 2 pr warnings text dependencyDashboard false" — errors-warnings.spec.ts line 97
+    // Ported: "returns 2 pr warnings text dependencyDashboard false" — errors-warnings.spec.ts line 120
     #[test]
     fn test_get_dep_warnings_pr_dashboard_false() {
         let w1 = ["Warning 1"];
@@ -11217,19 +11217,19 @@ dep1 = "^1.0.0"
         assert!(result.contains("Check the warning logs for more information."));
     }
 
-    // Ported: "PR warning returns empty string" — errors-warnings.spec.ts line 137
+    // Ported: "PR warning returns empty string" — errors-warnings.spec.ts line 168
     #[test]
     fn test_get_dep_warnings_pr_empty() {
         assert_eq!(get_dep_warnings_pr(&[], false, false, None), "");
     }
 
-    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 144
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 175
     #[test]
     fn test_get_dep_warnings_pr_suppressed() {
         assert_eq!(get_dep_warnings_pr(&[], true, false, None), "");
     }
 
-    // Ported: "returns dependency dashboard warning text" — errors-warnings.spec.ts line 153
+    // Ported: "returns dependency dashboard warning text" — errors-warnings.spec.ts line 186
     #[test]
     fn test_get_dep_warnings_dashboard_returns_text() {
         let d1 = ["dependency-1"];
@@ -11253,19 +11253,19 @@ dep1 = "^1.0.0"
         assert!(result.contains("`package.json`, `backend/package.json`, `Dockerfile`"));
     }
 
-    // Ported: "dependency dashboard warning returns empty string" — errors-warnings.spec.ts line 203
+    // Ported: "dependency dashboard warning returns empty string" — errors-warnings.spec.ts line 236
     #[test]
     fn test_get_dep_warnings_dashboard_empty() {
         assert_eq!(get_dep_warnings_dashboard(&[], false), "");
     }
 
-    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 210
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 243
     #[test]
     fn test_get_dep_warnings_dashboard_suppressed() {
         assert_eq!(get_dep_warnings_dashboard(&[], true), "");
     }
 
-    // Ported: "returns onboarding warning text" — errors-warnings.spec.ts line 218
+    // Ported: "returns onboarding warning text" — errors-warnings.spec.ts line 289
     #[test]
     fn test_get_dep_warnings_onboarding_pr_returns_text() {
         let w1 = ["Warning 1"];
@@ -11290,19 +11290,19 @@ dep1 = "^1.0.0"
         assert!(result.contains("`package.json`, `backend/package.json`, `Dockerfile`"));
     }
 
-    // Ported: "handle empty package files" — errors-warnings.spec.ts line 273
+    // Ported: "handle empty package files" — errors-warnings.spec.ts line 345
     #[test]
     fn test_get_dep_warnings_onboarding_empty() {
         assert_eq!(get_dep_warnings_onboarding_pr(&[], false), "");
     }
 
-    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 284
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 243
     #[test]
     fn test_get_dep_warnings_onboarding_suppressed() {
         assert_eq!(get_dep_warnings_onboarding_pr(&[], true), "");
     }
 
-    // Ported: "handles undefined" — errors-warnings.spec.ts line 290
+    // Ported: "handles undefined" — errors-warnings.spec.ts line 365
     #[test]
     fn test_get_dep_warnings_onboarding_handles_undefined() {
         assert_eq!(get_dep_warnings_onboarding_pr(&[], false), "");
@@ -11636,7 +11636,7 @@ dep1 = "^1.0.0"
 
     // ── transform_github_tag ─────────────────────────────────────────────────
 
-    // Ported: "transforms Commit type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 4
+    // Ported: "transforms Commit type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 5
     #[test]
     fn test_transform_github_tag_commit_type() {
         let r = transform_github_tag(
@@ -11654,7 +11654,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.release_timestamp, "2022-09-24");
     }
 
-    // Ported: "transforms Tag type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 22
+    // Ported: "transforms Tag type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 23
     #[test]
     fn test_transform_github_tag_tag_type() {
         let r = transform_github_tag(
@@ -11672,7 +11672,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.release_timestamp, "2022-09-24");
     }
 
-    // Ported: "transforms nested Tag type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 43
+    // Ported: "transforms nested Tag type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 41
     #[test]
     fn test_transform_github_tag_nested_tag_type() {
         // Nested Tag: Tag → Tag → Commit; oid from innermost commit
@@ -11689,7 +11689,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.release_timestamp, "2022-09-24");
     }
 
-    // Ported: "returns null for other types" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 65
+    // Ported: "returns null for other types" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 59
     #[test]
     fn test_transform_github_tag_invalid_returns_none() {
         let r = transform_github_tag(None, None);
@@ -12200,7 +12200,7 @@ fn test_prepare_graphql_query_invalid() {
     assert!(result.contains(payload));
     assert!(result.contains("query($owner"));
 }
-// Ported: "compresses strings" — util/compress.spec.ts line 5
+// Ported: "compresses strings" — util/compress.spec.ts line 4
 #[test]
 fn test_compress_to_base64() {
     let compressed = compress_to_base64("foobar").unwrap();

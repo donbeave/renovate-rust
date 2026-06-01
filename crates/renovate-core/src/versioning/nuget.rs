@@ -956,7 +956,7 @@ mod tests {
         assert_eq!(compare("1.0.0-alpha", "1.0.0-beta"), Ordering::Less);
     }
 
-    // Ported: "compare($x, $y) === $expected" — versioning/nuget/version.spec.ts line 4
+    // Ported: "compare($x, $y) === $expected" — versioning/nuget/version.spec.ts line 6
     #[test]
     fn compare_matches_renovate_version_spec() {
         let cases = [
@@ -1119,7 +1119,7 @@ mod tests {
         assert!(!is_stable("1.0.0-rc.1"));
     }
 
-    // Ported: "isStable(\"$input\") === $expected" — versioning/nuget/index.spec.ts line 16
+    // Ported: "isStable(\"$input\") === $expected" — versioning/nuget/index.spec.ts line 18
     #[test]
     fn is_stable_matches_renovate_index_spec() {
         let cases = [
@@ -2324,7 +2324,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange(\"$version\", \"$range\") === $expected" — versioning/nuget/index.spec.ts line 346
+    // Ported: "isLessThanRange(\"$version\", \"$range\") === $expected" — versioning/nuget/index.spec.ts line 347
     #[test]
     fn nuget_is_less_than_range_parametrized() {
         let cases: &[(&str, &str, bool)] = &[

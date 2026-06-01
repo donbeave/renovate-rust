@@ -66,7 +66,7 @@ pub fn sort_versions(a: &str, b: &str) -> i32 {
 mod tests {
     use super::*;
 
-    // Ported: "isValid("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 5
+    // Ported: "isValid("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_azure_rest_api_index_spec() {
         let cases = [
@@ -92,7 +92,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 24
+    // Ported: "isCompatible("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 26
     #[test]
     fn is_compatible_matches_renovate_azure_rest_api_index_spec() {
         let cases = [("2023-01-01", true), ("2023-01-01-preview", true)];
@@ -105,7 +105,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 32
+    // Ported: "isStable("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 34
     #[test]
     fn is_stable_matches_renovate_azure_rest_api_index_spec() {
         let cases = [
@@ -121,7 +121,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 45
+    // Ported: "isSingleVersion("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 46
     #[test]
     fn is_single_version_matches_renovate_azure_rest_api_index_spec() {
         let cases = [("2023-01-01", true), ("2023-01-01-preview", true)];
@@ -134,7 +134,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 53
+    // Ported: "isVersion("$version") === $expected" — versioning/azure-rest-api/index.spec.ts line 54
     #[test]
     fn is_version_matches_renovate_azure_rest_api_index_spec() {
         let cases = [
@@ -147,7 +147,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor("$version") === 1" — versioning/azure-rest-api/index.spec.ts line 64
+    // Ported: "getMajor("$version") === 1" — versioning/azure-rest-api/index.spec.ts line 66
     #[test]
     fn get_major_matches_renovate_azure_rest_api_index_spec() {
         let cases = [
@@ -159,7 +159,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMinor("$version") === 0" — versioning/azure-rest-api/index.spec.ts line 73
+    // Ported: "getMinor("$version") === 0" — versioning/azure-rest-api/index.spec.ts line 74
     #[test]
     fn get_minor_matches_renovate_azure_rest_api_index_spec() {
         let cases = [("2023-01-01", Some(0u64)), ("2023-01-01-preview", Some(0))];
@@ -168,7 +168,7 @@ mod tests {
         }
     }
 
-    // Ported: "getPatch("$version") === 0" — versioning/azure-rest-api/index.spec.ts line 80
+    // Ported: "getPatch("$version") === 0" — versioning/azure-rest-api/index.spec.ts line 82
     #[test]
     fn get_patch_matches_renovate_azure_rest_api_index_spec() {
         let cases = [("2023-01-01", Some(0u64)), ("2023-01-01-preview", Some(0))];
@@ -177,7 +177,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals("$version", "$other") === $expected" — versioning/azure-rest-api/index.spec.ts line 87
+    // Ported: "equals("$version", "$other") === $expected" — versioning/azure-rest-api/index.spec.ts line 90
     #[test]
     fn equals_matches_renovate_azure_rest_api_index_spec() {
         let cases = [
@@ -196,7 +196,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan("$version", "$other") === $expected" — versioning/azure-rest-api/index.spec.ts line 100
+    // Ported: "isGreaterThan("$version", "$other") === $expected" — versioning/azure-rest-api/index.spec.ts line 104
     #[test]
     fn is_greater_than_matches_renovate_azure_rest_api_index_spec() {
         let cases = [
@@ -218,7 +218,7 @@ mod tests {
         }
     }
 
-    // Ported: "sortVersions("$version", "$other") === $expected" — versioning/azure-rest-api/index.spec.ts line 116
+    // Ported: "sortVersions("$version", "$other") === $expected" — versioning/azure-rest-api/index.spec.ts line 121
     #[test]
     fn sort_versions_matches_renovate_azure_rest_api_index_spec() {
         let cases = [

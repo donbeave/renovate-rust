@@ -698,7 +698,7 @@ mod tests {
         assert_eq!(entry.versions, vec!["20.0.0"]);
     }
 
-    // Ported: "handles missing dist-tags latest" — lib/modules/datasource/npm/get.spec.ts line 378
+    // Ported: "handles missing dist-tags latest" — lib/modules/datasource/npm/get.spec.ts line 379
     #[tokio::test]
     async fn fetch_versions_allows_missing_latest_dist_tag() {
         let server = MockServer::start().await;

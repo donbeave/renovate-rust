@@ -330,7 +330,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.getMajor(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 25
+    // Ported: "pvp.getMajor(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 24
     #[test]
     fn get_major_matches_renovate_pvp_spec() {
         let cases = [
@@ -345,7 +345,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.getMinor(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 38
+    // Ported: "pvp.getMinor(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 36
     #[test]
     fn get_minor_matches_renovate_pvp_spec() {
         let cases = [
@@ -360,7 +360,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.getPatch(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 50
+    // Ported: "pvp.getPatch(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 48
     #[test]
     fn get_patch_matches_renovate_pvp_spec() {
         let cases = [
@@ -377,7 +377,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.matches(\"$version\", \"$range\") === $expected" — versioning/pvp/index.spec.ts line 65
+    // Ported: "pvp.matches(\"$version\", \"$range\") === $expected" — versioning/pvp/index.spec.ts line 62
     #[test]
     fn matches_matches_renovate_pvp_spec() {
         let cases = [
@@ -404,7 +404,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.getSatisfyingVersion($versions, \"$range\") === $expected" — versioning/pvp/index.spec.ts line 90
+    // Ported: "pvp.getSatisfyingVersion($versions, \"$range\") === $expected" — versioning/pvp/index.spec.ts line 85
     #[test]
     fn get_satisfying_version_matches_renovate_pvp_spec() {
         let cases = [
@@ -430,7 +430,7 @@ mod tests {
         }
     }
 
-    // Ported: "should return min satisfying version in range" — versioning/pvp/index.spec.ts line 108
+    // Ported: "should return min satisfying version in range" — versioning/pvp/index.spec.ts line 99
     #[test]
     fn min_satisfying_version_returns_min_satisfying_version_in_range() {
         let versions = ["0.9", "1.0.0", "1.0.4", "1.3.0", "2.0.0"];
@@ -440,7 +440,7 @@ mod tests {
         );
     }
 
-    // Ported: "pvp.isLessThanRange?.(\"$version\", \"$range\") === $expected" — versioning/pvp/index.spec.ts line 121
+    // Ported: "pvp.isLessThanRange?.(\"$version\", \"$range\") === $expected" — versioning/pvp/index.spec.ts line 110
     #[test]
     fn is_less_than_range_matches_renovate_pvp_spec() {
         let cases = [
@@ -464,7 +464,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.isValid(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 142
+    // Ported: "pvp.isValid(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 130
     #[test]
     fn is_valid_matches_renovate_pvp_spec() {
         let cases = [
@@ -479,7 +479,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.getNewValue({currentValue: \"$currentValue\", newVersion: \"$newVersion\", rangeStrategy: \"$rangeStrategy\"}) === $expected" — versioning/pvp/index.spec.ts line 153
+    // Ported: "pvp.getNewValue({currentValue: \"$currentValue\", newVersion: \"$newVersion\", rangeStrategy: \"$rangeStrategy\"}) === $expected" — versioning/pvp/index.spec.ts line 142
     #[test]
     fn get_new_value_matches_renovate_pvp_spec() {
         let cases = [
@@ -500,7 +500,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.isSame(\"$type\", \"$a\", \"$b\") === $expected" — versioning/pvp/index.spec.ts line 176
+    // Ported: "pvp.isSame(\"$type\", \"$a\", \"$b\") === $expected" — versioning/pvp/index.spec.ts line 161
     #[test]
     fn is_same_matches_renovate_pvp_spec() {
         let cases = [
@@ -531,7 +531,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.isVersion(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 210
+    // Ported: "pvp.isVersion(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 188
     #[test]
     fn is_version_matches_renovate_pvp_spec() {
         let cases = [("1.0", true), (">=1.0 && <1.1", false)];
@@ -541,7 +541,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.equals(\"$a\", \"$b\") === $expected" — versioning/pvp/index.spec.ts line 219
+    // Ported: "pvp.equals(\"$a\", \"$b\") === $expected" — versioning/pvp/index.spec.ts line 198
     #[test]
     fn equals_matches_renovate_pvp_spec() {
         let cases = [
@@ -556,7 +556,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.isSingleVersion(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 230
+    // Ported: "pvp.isSingleVersion(\"$version\") === $expected" — versioning/pvp/index.spec.ts line 210
     #[test]
     fn is_single_version_matches_renovate_pvp_spec() {
         let cases = [("==1.0", true), (">=1.0 && <1.1", false)];
@@ -570,7 +570,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.subbet(\"$subRange\", \"$superRange\") === $expected" — versioning/pvp/index.spec.ts line 242
+    // Ported: "pvp.subbet(\"$subRange\", \"$superRange\") === $expected" — versioning/pvp/index.spec.ts line 223
     #[test]
     fn subset_matches_renovate_pvp_spec() {
         let cases = [
@@ -591,7 +591,7 @@ mod tests {
         }
     }
 
-    // Ported: "pvp.sortVersions(\"$a\", \"$b\") === $expected" — versioning/pvp/index.spec.ts line 259
+    // Ported: "pvp.sortVersions(\"$a\", \"$b\") === $expected" — versioning/pvp/index.spec.ts line 240
     #[test]
     fn sort_versions_matches_renovate_pvp_spec() {
         let cases = [
@@ -605,13 +605,13 @@ mod tests {
         }
     }
 
-    // Ported: "should consider 0.0.0 stable" — versioning/pvp/index.spec.ts line 269
+    // Ported: "should consider 0.0.0 stable" — versioning/pvp/index.spec.ts line 251
     #[test]
     fn is_stable_considers_all_versions_stable() {
         assert!(is_stable("0.0.0"));
     }
 
-    // Ported: "should consider 0.0.0 compatible" — versioning/pvp/index.spec.ts line 277
+    // Ported: "should consider 0.0.0 compatible" — versioning/pvp/index.spec.ts line 259
     #[test]
     fn is_compatible_considers_all_versions_compatible() {
         assert!(is_compatible("0.0.0"));

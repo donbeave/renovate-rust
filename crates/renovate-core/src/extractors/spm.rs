@@ -867,7 +867,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts other dependencies with git-tags datasource" — swift/extract.spec.ts line 117
+    // Ported: "extracts other dependencies with git-tags datasource" — swift/extract.spec.ts line 192
     #[test]
     fn extracts_other_dependencies_with_git_tags_datasource() {
         let content = r#"
@@ -884,7 +884,7 @@ mod tests {
         assert_eq!(deps[0].current_value, r#"from: "3.0.0""#);
     }
 
-    // Ported: "extracts exact version dependencies" — swift/extract.spec.ts line 138
+    // Ported: "extracts exact version dependencies" — swift/extract.spec.ts line 213
     #[test]
     fn extracts_exact_version_dependencies() {
         let content = r#"
@@ -900,7 +900,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.2.3");
     }
 
-    // Ported: "extracts exact version with label syntax" — swift/extract.spec.ts line 159
+    // Ported: "extracts exact version with label syntax" — swift/extract.spec.ts line 234
     #[test]
     fn extracts_exact_version_with_label_syntax() {
         let content = r#"
@@ -916,7 +916,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.2.1");
     }
 
-    // Ported: "extracts range version dependencies" — swift/extract.spec.ts line 180
+    // Ported: "extracts range version dependencies" — swift/extract.spec.ts line 255
     #[test]
     fn extracts_range_version_dependencies() {
         let content = r#"
@@ -933,7 +933,7 @@ mod tests {
         assert_eq!(deps[0].current_value, r#""1.0.0"..."2.0.0""#);
     }
 
-    // Ported: "extracts dependencies from sample package file" — swift/extract.spec.ts line 201
+    // Ported: "extracts dependencies from sample package file" — swift/extract.spec.ts line 276
     #[test]
     fn extracts_dependencies_from_sample_package_file() {
         let content = include_str!("../../tests/fixtures/spm/SamplePackage.swift");
@@ -968,7 +968,7 @@ mod tests {
             && d.current_value.contains("0.9.6")));
     }
 
-    // Ported: "handles malformed URLs gracefully" — swift/extract.spec.ts line 236
+    // Ported: "handles malformed URLs gracefully" — swift/extract.spec.ts line 311
     #[test]
     fn handles_malformed_urls_gracefully() {
         let content = r#"
@@ -982,7 +982,7 @@ mod tests {
         assert!(extract_package_file(content).is_none());
     }
 
-    // Ported: "handles dependencies without version" — swift/extract.spec.ts line 249
+    // Ported: "handles dependencies without version" — swift/extract.spec.ts line 324
     #[test]
     fn handles_dependencies_without_version() {
         let content = r#"
@@ -996,7 +996,7 @@ mod tests {
         assert!(extract_package_file(content).is_none());
     }
 
-    // Ported: "handles dependencies with local package" — swift/extract.spec.ts line 262
+    // Ported: "handles dependencies with local package" — swift/extract.spec.ts line 337
     #[test]
     fn handles_dependencies_with_local_package() {
         let content = r#"let package = Package(
@@ -1008,7 +1008,7 @@ mod tests {
         assert!(extract_package_file(content).is_none());
     }
 
-    // Ported: "handles dependencies with name (deprecated args)" — swift/extract.spec.ts line 275
+    // Ported: "handles dependencies with name (deprecated args)" — swift/extract.spec.ts line 350
     #[test]
     fn handles_dependencies_with_name_deprecated_args() {
         let content = r#"let package = Package(
@@ -1023,7 +1023,7 @@ mod tests {
         assert_eq!(deps[0].current_value, r#"from: "1.0.0""#);
     }
 
-    // Ported: "extracts multiple dependencies with different datasources" — swift/extract.spec.ts line 290
+    // Ported: "extracts multiple dependencies with different datasources" — swift/extract.spec.ts line 365
     #[test]
     fn extracts_multiple_dependencies_with_different_datasources() {
         let content = r#"
@@ -1043,7 +1043,7 @@ mod tests {
         assert_eq!(deps[2].datasource, "git-tags");
     }
 
-    // Ported: "extracts multiple dependencies with traits arguments" — swift/extract.spec.ts line 308
+    // Ported: "extracts multiple dependencies with traits arguments" — swift/extract.spec.ts line 383
     #[test]
     fn extracts_multiple_dependencies_with_traits_arguments() {
         let content = r#"let package = Package(
@@ -1073,13 +1073,13 @@ mod tests {
 
     // ── Range strategy (ported from swift/range.spec.ts) ─────────────────────
 
-    // Ported: "returns same if not auto" — modules/manager/swift/range.spec.ts line 5
+    // Ported: "returns same if not auto" — modules/manager/swift/range.spec.ts line 6
     #[test]
     fn swift_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("widen"), "widen");
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/swift/range.spec.ts line 10
+    // Ported: "defaults to update-lockfile" — modules/manager/swift/range.spec.ts line 11
     #[test]
     fn swift_range_defaults_to_bump() {
         assert_eq!(get_range_strategy("auto"), "bump");
@@ -1299,7 +1299,7 @@ let package = Package(
         assert!(deps.iter().all(|d| d.datasource == "github-tags"));
     }
 
-    // Ported: "extracts GitHub dependencies from SCP-style SSH URL" — swift/extract.spec.ts line 116
+    // Ported: "extracts GitHub dependencies from SCP-style SSH URL" — swift/extract.spec.ts line 117
     #[test]
     fn extracts_github_dependencies_from_scp_style_ssh_url() {
         let content = r#"
@@ -1318,7 +1318,7 @@ let package = Package(
         assert_eq!(deps[0].current_value, r#"from: "1.0.0""#);
     }
 
-    // Ported: "extracts GitLab dependencies from SCP-style SSH URL" — swift/extract.spec.ts line 137
+    // Ported: "extracts GitLab dependencies from SCP-style SSH URL" — swift/extract.spec.ts line 138
     #[test]
     fn extracts_gitlab_dependencies_from_scp_style_ssh_url() {
         let content = r#"
@@ -1337,7 +1337,7 @@ let package = Package(
         assert_eq!(deps[0].current_value, r#"from: "2.0.0""#);
     }
 
-    // Ported: "extracts dependencies from ssh:// URL" — swift/extract.spec.ts line 158
+    // Ported: "extracts dependencies from ssh:// URL" — swift/extract.spec.ts line 159
     #[test]
     fn extracts_dependencies_from_ssh_url() {
         let content = r#"
@@ -1356,7 +1356,7 @@ let package = Package(
         assert_eq!(deps[0].current_value, r#"from: "1.0.0""#);
     }
 
-    // Ported: "returns null for unparseable SSH URL" — swift/extract.spec.ts line 179
+    // Ported: "returns null for unparseable SSH URL" — swift/extract.spec.ts line 180
     #[test]
     fn returns_null_for_unparseable_ssh_url() {
         let content = r#"

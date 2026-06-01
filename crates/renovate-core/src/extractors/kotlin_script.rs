@@ -109,7 +109,6 @@ mod tests {
         assert!(extract("// just a comment\nfun main() {}").is_empty());
     }
 
-    // Ported: "dep with classifier version" — kotlin-script/extract.spec.ts
     #[test]
     fn dep_with_classifier_version() {
         let content = r#"@file:DependsOn("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2")"#;

@@ -2072,13 +2072,13 @@ mod tests {
         );
     }
 
-    // Ported: "should format message without prefix" — workers/repository/model/semantic-commit-message.spec.ts line 1
+    // Ported: "should format message without prefix" — workers/repository/model/semantic-commit-message.spec.ts line 4
     #[test]
     fn semantic_commit_no_type_capitalizes() {
         assert_eq!(semantic_commit_message_title("", "", "test"), "Test");
     }
 
-    // Ported: "should format sematic type" — workers/repository/model/semantic-commit-message.spec.ts line 8
+    // Ported: "should format sematic type" — workers/repository/model/semantic-commit-message.spec.ts line 11
     #[test]
     fn semantic_commit_type_only() {
         assert_eq!(
@@ -2087,7 +2087,7 @@ mod tests {
         );
     }
 
-    // Ported: "should format sematic prefix with scope" — workers/repository/model/semantic-commit-message.spec.ts line 16
+    // Ported: "should format sematic prefix with scope" — workers/repository/model/semantic-commit-message.spec.ts line 19
     #[test]
     fn semantic_commit_type_and_scope() {
         assert_eq!(
@@ -2096,7 +2096,7 @@ mod tests {
         );
     }
 
-    // Ported: "should transform to lowercase only first letter" — workers/repository/model/semantic-commit-message.spec.ts line 25
+    // Ported: "should transform to lowercase only first letter" — workers/repository/model/semantic-commit-message.spec.ts line 28
     #[test]
     fn semantic_commit_lowercase_first_letter_only() {
         assert_eq!(
@@ -2105,7 +2105,7 @@ mod tests {
         );
     }
 
-    // Ported: "should create instance from string without scope" — workers/repository/model/semantic-commit-message.spec.ts line 35
+    // Ported: "should create instance from string without scope" — workers/repository/model/semantic-commit-message.spec.ts line 37
     #[test]
     fn parse_semantic_commit_without_scope() {
         let parsed = parse_semantic_commit_message("feat: ticket 123").unwrap();
@@ -2114,7 +2114,7 @@ mod tests {
         assert_eq!(parsed.subject, "ticket 123");
     }
 
-    // Ported: "should create instance from string with scope" — workers/repository/model/semantic-commit-message.spec.ts line 46
+    // Ported: "should create instance from string with scope" — workers/repository/model/semantic-commit-message.spec.ts line 50
     #[test]
     fn parse_semantic_commit_with_scope() {
         let parsed = parse_semantic_commit_message("fix(dashboard): ticket 123").unwrap();
@@ -2123,7 +2123,7 @@ mod tests {
         assert_eq!(parsed.subject, "ticket 123");
     }
 
-    // Ported: "should create instance from string with empty description" — workers/repository/model/semantic-commit-message.spec.ts line 57
+    // Ported: "should create instance from string with empty description" — workers/repository/model/semantic-commit-message.spec.ts line 65
     #[test]
     fn parse_semantic_commit_empty_description() {
         let parsed = parse_semantic_commit_message("fix(deps): ").unwrap();
@@ -2132,7 +2132,7 @@ mod tests {
         assert_eq!(parsed.subject, "");
     }
 
-    // Ported: "should return undefined for invalid string" — workers/repository/model/semantic-commit-message.spec.ts line 68
+    // Ported: "should return undefined for invalid string" — workers/repository/model/semantic-commit-message.spec.ts line 78
     #[test]
     fn parse_semantic_commit_invalid_returns_none() {
         assert!(parse_semantic_commit_message("test").is_none());
@@ -2451,12 +2451,12 @@ mod tests {
         assert!(bulk_changes_disallowed(error_msg));
     }
 
-    // Ported: "handles trace level" — workers/repository/common.spec.ts line 5
-    // Ported: "handles debug level" — workers/repository/common.spec.ts line 9
-    // Ported: "handles info level" — workers/repository/common.spec.ts line 13
-    // Ported: "handles warn level" — workers/repository/common.spec.ts line 17
-    // Ported: "handles error level" — workers/repository/common.spec.ts line 21
-    // Ported: "handles fatal level" — workers/repository/common.spec.ts line 25
+    // Ported: "handles trace level" — workers/repository/common.spec.ts line 6
+    // Ported: "handles debug level" — workers/repository/common.spec.ts line 10
+    // Ported: "handles info level" — workers/repository/common.spec.ts line 14
+    // Ported: "handles warn level" — workers/repository/common.spec.ts line 18
+    // Ported: "handles error level" — workers/repository/common.spec.ts line 22
+    // Ported: "handles fatal level" — workers/repository/common.spec.ts line 26
     #[test]
     fn format_problem_level_all_bunyan_levels() {
         assert_eq!(format_problem_level(10), "🔬 TRACE");

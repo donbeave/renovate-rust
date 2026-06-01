@@ -80,7 +80,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $expected" — versioning/semver/index.spec.ts line 22
+    // Ported: "isSingleVersion(\"$version\") === $expected" — versioning/semver/index.spec.ts line 20
     #[test]
     fn is_single_version_matches_renovate_semver_spec() {
         let cases = [
@@ -99,7 +99,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/semver/index.spec.ts line 34
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/semver/index.spec.ts line 31
     #[test]
     fn get_new_value_matches_renovate_semver_spec() {
         assert_eq!(
@@ -114,7 +114,7 @@ mod tests {
         );
     }
 
-    // Ported: "isBreaking(\"$currentVersion\", \"$newVersion\") === $expected" — versioning/semver/index.spec.ts line 51
+    // Ported: "isBreaking(\"$currentVersion\", \"$newVersion\") === $expected" — versioning/semver/index.spec.ts line 48
     #[test]
     fn is_breaking_matches_renovate_semver_spec() {
         let cases = [
@@ -138,7 +138,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible(\"$version\") === $expected" — versioning/semver/index.spec.ts line 72
+    // Ported: "isCompatible(\"$version\") === $expected" — versioning/semver/index.spec.ts line 67
     #[test]
     fn is_compatible_matches_renovate_semver_spec() {
         assert!(is_compatible("1.2.0"));

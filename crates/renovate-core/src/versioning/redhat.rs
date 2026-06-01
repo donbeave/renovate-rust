@@ -55,7 +55,7 @@ pub fn is_greater_than(a: Option<&str>, b: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/redhat/index.spec.ts line 3
+    // Ported: "isValid(\"$input\") === $expected" — versioning/redhat/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_redhat_spec() {
         let cases = [
@@ -86,7 +86,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/redhat/index.spec.ts line 27
+    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/redhat/index.spec.ts line 30
     #[test]
     fn is_greater_than_matches_renovate_redhat_spec() {
         let cases = [

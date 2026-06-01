@@ -140,7 +140,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "throws for error" — datasource/devbox/index.spec.ts line 31
+    // Ported: "throws for error" — datasource/devbox/index.spec.ts line 29
     #[tokio::test]
     async fn throws_for_network_error() {
         let server = MockServer::start().await;
@@ -156,7 +156,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for 404" — datasource/devbox/index.spec.ts line 40
+    // Ported: "returns null for 404" — datasource/devbox/index.spec.ts line 43
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -174,7 +174,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty result" — datasource/devbox/index.spec.ts line 49
+    // Ported: "returns null for empty result" — datasource/devbox/index.spec.ts line 53
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -192,7 +192,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty 200 OK" — datasource/devbox/index.spec.ts line 60
+    // Ported: "returns null for empty 200 OK" — datasource/devbox/index.spec.ts line 63
     #[tokio::test]
     async fn returns_null_for_empty_releases_array() {
         let server = MockServer::start().await;
@@ -210,7 +210,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — datasource/devbox/index.spec.ts line 72
+    // Ported: "throws for 5xx" — datasource/devbox/index.spec.ts line 76
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -226,7 +226,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "processes real data" — datasource/devbox/index.spec.ts line 83
+    // Ported: "processes real data" — datasource/devbox/index.spec.ts line 86
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;
@@ -275,7 +275,7 @@ mod tests {
         );
     }
 
-    // Ported: "processes empty data" — datasource/devbox/index.spec.ts line 115
+    // Ported: "processes empty data" — datasource/devbox/index.spec.ts line 118
     #[tokio::test]
     async fn processes_empty_data() {
         let server = MockServer::start().await;

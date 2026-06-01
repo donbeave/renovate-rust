@@ -312,7 +312,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for unexpected data at versions" — galaxy-collection/index.spec.ts line 60
+    // Ported: "returns null for unexpected data at versions" — galaxy-collection/index.spec.ts line 62
     #[tokio::test]
     async fn returns_null_for_unexpected_data_at_versions() {
         let server = MockServer::start().await;
@@ -340,7 +340,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws error for remote host versions error" — galaxy-collection/index.spec.ts line 73
+    // Ported: "throws error for remote host versions error" — galaxy-collection/index.spec.ts line 77
     #[tokio::test]
     async fn throws_for_remote_host_versions_error() {
         let server = MockServer::start().await;
@@ -367,7 +367,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws error for remote host detailed versions error" — galaxy-collection/index.spec.ts line 84
+    // Ported: "throws error for remote host detailed versions error" — galaxy-collection/index.spec.ts line 92
     #[tokio::test]
     async fn throws_for_remote_host_detailed_versions_error() {
         let server = MockServer::start().await;
@@ -418,7 +418,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for empty lookup" — galaxy-collection/index.spec.ts line 104
+    // Ported: "returns null for empty lookup" — galaxy-collection/index.spec.ts line 113
     #[tokio::test]
     async fn returns_null_for_empty_package_name() {
         let http = HttpClient::new().unwrap();
@@ -428,7 +428,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for null packageName" — galaxy-collection/index.spec.ts line 112
+    // Ported: "returns null for null packageName" — galaxy-collection/index.spec.ts line 122
     #[tokio::test]
     async fn returns_null_for_null_package_name() {
         let http = HttpClient::new().unwrap();
@@ -438,7 +438,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for unknown error" — galaxy-collection/index.spec.ts line 119
+    // Ported: "returns null for unknown error" — galaxy-collection/index.spec.ts line 131
     #[tokio::test]
     async fn returns_null_for_unknown_error() {
         // A request error (network-level) should return Ok(None) per handleGenericErrors
@@ -451,7 +451,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "processes real data" — galaxy-collection/index.spec.ts line 129
+    // Ported: "processes real data" — galaxy-collection/index.spec.ts line 144
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;
@@ -520,7 +520,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns ansible url with artifactory URL" — galaxy-collection/index.spec.ts line 206
+    // Ported: "returns ansible url with artifactory URL" — galaxy-collection/index.spec.ts line 212
     #[test]
     fn construct_base_url_artifactory() {
         let url = construct_base_url(
@@ -534,7 +534,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns galaxy url with automation hub URL" — galaxy-collection/index.spec.ts line 214
+    // Ported: "returns galaxy url with automation hub URL" — galaxy-collection/index.spec.ts line 223
     #[test]
     fn construct_base_url_automation_hub() {
         let url = construct_base_url(
@@ -548,7 +548,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns galaxy url with other url" — galaxy-collection/index.spec.ts line 222
+    // Ported: "returns galaxy url with other url" — galaxy-collection/index.spec.ts line 234
     #[test]
     fn construct_base_url_other() {
         let url = construct_base_url(
@@ -562,7 +562,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null but matches automation hub URL" — galaxy-collection/index.spec.ts line 175
+    // Ported: "returns null but matches automation hub URL" — galaxy-collection/index.spec.ts line 167
     #[tokio::test]
     async fn automation_hub_url_500_throws() {
         let server = MockServer::start().await;
@@ -579,7 +579,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "processes real data with automation hub URL" — galaxy-collection/index.spec.ts line 189
+    // Ported: "processes real data with automation hub URL" — galaxy-collection/index.spec.ts line 183
     #[tokio::test]
     async fn processes_real_data_with_automation_hub_url() {
         let server = MockServer::start().await;

@@ -2400,7 +2400,7 @@ Console.WriteLine("Hello World!");
         assert!(result.contains("<Version>0.0.2</Version>"));
     }
 
-    // Ported: "does not bump version twice" — modules/manager/nuget/update.spec.ts line 29
+    // Ported: "does not bump version twice" — modules/manager/nuget/update.spec.ts line 28
     #[test]
     fn nuget_does_not_bump_twice() {
         let bumped = bump_package_version(SIMPLE_CONTENT, "0.0.1", "patch");
@@ -2408,7 +2408,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(bumped, bumped2);
     }
 
-    // Ported: "issue 23526 does not bump version incorrectly" — modules/manager/nuget/update.spec.ts line 41
+    // Ported: "issue 23526 does not bump version incorrectly" — modules/manager/nuget/update.spec.ts line 43
     #[test]
     fn nuget_issue_23526_minor_bump() {
         let bumped = bump_package_version(ISSUE23526_INITIAL, "4.9.0", "minor");
@@ -2416,7 +2416,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(bumped2, ISSUE23526_EXPECTED);
     }
 
-    // Ported: "does not bump version if version is not a semantic version" — modules/manager/nuget/update.spec.ts line 57
+    // Ported: "does not bump version if version is not a semantic version" — modules/manager/nuget/update.spec.ts line 58
     #[test]
     fn nuget_does_not_bump_non_semver() {
         let result = bump_package_version(MINIMUM_CONTENT, "1", "patch");
@@ -2424,14 +2424,14 @@ Console.WriteLine("Hello World!");
         assert!(!result.contains("<Version>2</Version>"));
     }
 
-    // Ported: "does not bump version if extract found no version" — modules/manager/nuget/update.spec.ts line 68
+    // Ported: "does not bump version if extract found no version" — modules/manager/nuget/update.spec.ts line 69
     #[test]
     fn nuget_does_not_bump_empty_current_value() {
         let result = bump_package_version(MINIMUM_CONTENT, "", "patch");
         assert_eq!(result, MINIMUM_CONTENT);
     }
 
-    // Ported: "does not bump version if csproj has no version" — modules/manager/nuget/update.spec.ts line 73
+    // Ported: "does not bump version if csproj has no version" — modules/manager/nuget/update.spec.ts line 75
     #[test]
     fn nuget_does_not_bump_when_no_version_tag() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#;
@@ -2439,21 +2439,21 @@ Console.WriteLine("Hello World!");
         assert_eq!(result, content);
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/nuget/update.spec.ts line 83
+    // Ported: "returns content if bumping errors" — modules/manager/nuget/update.spec.ts line 87
     #[test]
     fn nuget_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(SIMPLE_CONTENT, "0.0.1", "not_a_bump_type");
         assert_eq!(result, SIMPLE_CONTENT);
     }
 
-    // Ported: "bumps csproj version with prerelease semver level" — modules/manager/nuget/update.spec.ts line 92
+    // Ported: "bumps csproj version with prerelease semver level" — modules/manager/nuget/update.spec.ts line 96
     #[test]
     fn nuget_bumps_prerelease_version() {
         let result = bump_package_version(PRERELEASE_CONTENT, "1.0.0-1", "prerelease");
         assert!(result.contains("<Version>1.0.0-2</Version>"));
     }
 
-    // Ported: "bumps csproj version prefix" — modules/manager/nuget/update.spec.ts line 104
+    // Ported: "bumps csproj version prefix" — modules/manager/nuget/update.spec.ts line 107
     #[test]
     fn nuget_bumps_version_prefix() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>1.0.0</VersionPrefix></PropertyGroup></Project>"#;
@@ -2463,7 +2463,7 @@ Console.WriteLine("Hello World!");
 
     // ── createNuGetConfigXml ─────────────────────────────────────────────────
 
-    // Ported: "returns xml with registries" — manager/nuget/config-formatter.spec.ts line 13
+    // Ported: "returns xml with registries" — manager/nuget/config-formatter.spec.ts line 12
     #[test]
     fn nuget_config_xml_basic_registries() {
         crate::util::host_rules::clear();
@@ -2493,7 +2493,7 @@ Console.WriteLine("Hello World!");
         assert!(!xml.contains("packageSourceMapping"));
     }
 
-    // Ported: "strips protocol version from feed url" — manager/nuget/config-formatter.spec.ts line 154
+    // Ported: "strips protocol version from feed url" — manager/nuget/config-formatter.spec.ts line 181
     #[test]
     fn nuget_config_xml_strips_protocol_version_from_hash() {
         crate::util::host_rules::clear();
@@ -2506,7 +2506,7 @@ Console.WriteLine("Hello World!");
         assert!(!xml.contains("#protocolVersion"));
     }
 
-    // Ported: "skips duplicate registry URLs" — manager/nuget/config-formatter.spec.ts line 285
+    // Ported: "skips duplicate registry URLs" — manager/nuget/config-formatter.spec.ts line 265
     #[test]
     fn nuget_config_xml_skips_duplicates() {
         crate::util::host_rules::clear();
@@ -2532,7 +2532,7 @@ Console.WriteLine("Hello World!");
         assert!(xml.contains(r#"key="Package source 1""#));
     }
 
-    // Ported: "includes packageSourceMapping when defined" — manager/nuget/config-formatter.spec.ts line 182
+    // Ported: "includes packageSourceMapping when defined" — manager/nuget/config-formatter.spec.ts line 202
     #[test]
     fn nuget_config_xml_package_source_mapping() {
         crate::util::host_rules::clear();
@@ -2559,7 +2559,7 @@ Console.WriteLine("Hello World!");
         assert!(xml.contains(r#"<package pattern="MySpecialPackage" />"#));
     }
 
-    // Ported: "excludes packageSourceMapping when undefined" — manager/nuget/config-formatter.spec.ts line 250
+    // Ported: "excludes packageSourceMapping when undefined" — manager/nuget/config-formatter.spec.ts line 245
     #[test]
     fn nuget_config_xml_no_package_source_mapping() {
         crate::util::host_rules::clear();
@@ -2571,7 +2571,7 @@ Console.WriteLine("Hello World!");
         assert!(!xml.contains("packageSourceMapping"));
     }
 
-    // Ported: "returns xml with authenticated registries" — manager/nuget/config-formatter.spec.ts line 57
+    // Ported: "returns xml with authenticated registries" — manager/nuget/config-formatter.spec.ts line 58
     #[test]
     fn nuget_config_xml_with_credentials() {
         crate::util::host_rules::clear();
@@ -2594,7 +2594,7 @@ Console.WriteLine("Hello World!");
         assert!(xml.contains(r#"<add key="ValidAuthenticationTypes" value="basic" />"#));
     }
 
-    // Ported: "escapes registry credential names containing special characters" — manager/nuget/config-formatter.spec.ts line 124
+    // Ported: "escapes registry credential names containing special characters" — manager/nuget/config-formatter.spec.ts line 138
     #[test]
     fn nuget_config_xml_escapes_special_chars_in_names() {
         crate::util::host_rules::clear();

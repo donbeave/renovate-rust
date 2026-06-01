@@ -208,7 +208,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$input\") === $expected" — versioning/perl/index.spec.ts line 29
+    // Ported: "isStable(\"$input\") === $expected" — versioning/perl/index.spec.ts line 31
     #[test]
     fn is_stable_matches_renovate_perl_spec() {
         let cases = [
@@ -225,7 +225,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/perl/index.spec.ts line 43
+    // Ported: "equals($a, $b) === $expected" — versioning/perl/index.spec.ts line 44
     #[test]
     fn equals_matches_renovate_perl_spec() {
         let cases = [
@@ -243,7 +243,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/perl/index.spec.ts line 57
+    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/perl/index.spec.ts line 58
     #[test]
     fn is_greater_than_matches_renovate_perl_spec() {
         let cases = [

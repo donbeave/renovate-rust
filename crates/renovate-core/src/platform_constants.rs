@@ -65,14 +65,14 @@ mod tests {
         GITLAB_API_USING_HOST_TYPES,
     };
 
-    // Ported: "should be part of the GITEA_API_USING_HOST_TYPES" — constants/platform.spec.ts line 24
+    // Ported: "should be part of the GITEA_API_USING_HOST_TYPES" — constants/platform.spec.ts line 23
     #[test]
     fn gitea_api_using_host_types_include_gitea_tags_and_platform() {
         assert!(GITEA_API_USING_HOST_TYPES.contains(&"gitea-tags"));
         assert!(GITEA_API_USING_HOST_TYPES.contains(&"gitea"));
     }
 
-    // Ported: "should be part of the FORGEJO_API_USING_HOST_TYPES" — constants/platform.spec.ts line 31
+    // Ported: "should be part of the FORGEJO_API_USING_HOST_TYPES" — constants/platform.spec.ts line 30
     #[test]
     fn forgejo_api_using_host_types_include_expected_host_types() {
         assert!(FORGEJO_API_USING_HOST_TYPES.contains(&"forgejo"));
@@ -82,7 +82,7 @@ mod tests {
         assert_eq!(FORGEJO_API_USING_HOST_TYPES.len(), 4);
     }
 
-    // Ported: "should be part of the GITLAB_API_USING_HOST_TYPES" — constants/platform.spec.ts line 45
+    // Ported: "should be part of the GITLAB_API_USING_HOST_TYPES" — constants/platform.spec.ts line 42
     #[test]
     fn gitlab_api_using_host_types_include_expected_datasources_and_platform() {
         assert!(GITLAB_API_USING_HOST_TYPES.contains(&"gitlab-tags"));
@@ -92,13 +92,13 @@ mod tests {
         assert!(GITLAB_API_USING_HOST_TYPES.contains(&"gitlab"));
     }
 
-    // Ported: "should be not part of the GITLAB_API_USING_HOST_TYPES" — constants/platform.spec.ts line 62
+    // Ported: "should be not part of the GITLAB_API_USING_HOST_TYPES" — constants/platform.spec.ts line 58
     #[test]
     fn gitlab_api_using_host_types_do_not_include_github() {
         assert!(!GITLAB_API_USING_HOST_TYPES.contains(&"github"));
     }
 
-    // Ported: "should be part of the GITHUB_API_USING_HOST_TYPES" — constants/platform.spec.ts line 66
+    // Ported: "should be part of the GITHUB_API_USING_HOST_TYPES" — constants/platform.spec.ts line 62
     #[test]
     fn github_api_using_host_types_include_expected_datasources_and_platform() {
         assert!(GITHUB_API_USING_HOST_TYPES.contains(&"github-tags"));
@@ -109,20 +109,20 @@ mod tests {
         assert!(GITHUB_API_USING_HOST_TYPES.contains(&"github"));
     }
 
-    // Ported: "should be not part of the GITHUB_API_USING_HOST_TYPES" — constants/platform.spec.ts line 84
+    // Ported: "should be not part of the GITHUB_API_USING_HOST_TYPES" — constants/platform.spec.ts line 79
     #[test]
     fn github_api_using_host_types_do_not_include_gitlab() {
         assert!(!GITHUB_API_USING_HOST_TYPES.contains(&"gitlab"));
     }
 
-    // Ported: "should be part of the BITBUCKET_API_USING_HOST_TYPES" — constants/platform.spec.ts line 88
+    // Ported: "should be part of the BITBUCKET_API_USING_HOST_TYPES" — constants/platform.spec.ts line 83
     #[test]
     fn bitbucket_api_using_host_types_include_bitbucket_tags_and_platform() {
         assert!(BITBUCKET_API_USING_HOST_TYPES.contains(&"bitbucket-tags"));
         assert!(BITBUCKET_API_USING_HOST_TYPES.contains(&"bitbucket"));
     }
 
-    // Ported: "should be part of the BITBUCKET_SERVER_API_USING_HOST_TYPES" — constants/platform.spec.ts line 95
+    // Ported: "should be part of the BITBUCKET_SERVER_API_USING_HOST_TYPES" — constants/platform.spec.ts line 90
     #[test]
     fn bitbucket_server_api_using_host_types_include_server_tags_and_platform() {
         assert!(BITBUCKET_SERVER_API_USING_HOST_TYPES.contains(&"bitbucket-server-tags"));

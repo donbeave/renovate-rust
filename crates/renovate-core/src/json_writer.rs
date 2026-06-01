@@ -72,7 +72,7 @@ mod tests {
     use super::*;
     use serde_json::json;
 
-    // Ported: "should apply 2 spaces indentation by default" — util/json-writer/json-writer.spec.ts line 9
+    // Ported: "should apply 2 spaces indentation by default" — util/json-writer/json-writer.spec.ts line 8
     #[test]
     fn json_writer_default_2_space_indent() {
         let data = json!({ "value": 1 });
@@ -92,7 +92,7 @@ mod tests {
         assert_eq!(result, "{\n          \"value\": 1\n}\n");
     }
 
-    // Ported: "should apply indentation type" — util/json-writer/json-writer.spec.ts line 22
+    // Ported: "should apply indentation type" — util/json-writer/json-writer.spec.ts line 23
     #[test]
     fn json_writer_tab_indent() {
         let data = json!({ "value": 1 });
@@ -104,7 +104,7 @@ mod tests {
         assert_eq!(result, "{\n\t\"value\": 1\n}\n");
     }
 
-    // Ported: "new line at the end should be optional" — util/json-writer/json-writer.spec.ts line 32
+    // Ported: "new line at the end should be optional" — util/json-writer/json-writer.spec.ts line 31
     #[test]
     fn json_writer_optional_trailing_newline() {
         let data = json!({ "value": 1 });
@@ -116,7 +116,7 @@ mod tests {
         assert_eq!(result, "{\n          \"value\": 1\n}");
     }
 
-    // Ported: "should strip white spaces from json" — workers/repository/config-migration/branch/rebase.spec.ts line 140
+    // Ported: "should strip white spaces from json" — workers/repository/config-migration/branch/rebase.spec.ts line 138
     #[test]
     fn json_strip_whitespaces_removes_formatting() {
         let data = json!({ "name": "renovate", "enabled": true, "count": 3 });

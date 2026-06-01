@@ -341,7 +341,7 @@ mod tests {
         assert_eq!(cmd[0], "sed");
     }
 
-    // Ported: "removes pure-lockfile and frozen-lockfile from .yarnrc" — modules/manager/npm/post-update/yarn.spec.ts line 993
+    // Ported: "removes pure-lockfile and frozen-lockfile from .yarnrc" — modules/manager/npm/post-update/yarn.spec.ts line 1008
     #[test]
     fn fuzzy_match_additional_yarnrc_yml_basic() {
         let additional = r#"

@@ -1202,7 +1202,7 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
     const SBT_CONTENT: &str =
         "name := \"test\"\norganization := \"test-org\"\nversion := \"0.0.2\"\n";
 
-    // Ported: "increments" — modules/manager/sbt/update.spec.ts line 12
+    // Ported: "increments" — modules/manager/sbt/update.spec.ts line 10
     #[test]
     fn sbt_bump_increments_patch() {
         let result = bump_package_version(SBT_CONTENT, "0.0.2", "patch");
@@ -1210,14 +1210,14 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
         assert_ne!(result, SBT_CONTENT);
     }
 
-    // Ported: "no ops" — modules/manager/sbt/update.spec.ts line 20
+    // Ported: "no ops" — modules/manager/sbt/update.spec.ts line 21
     #[test]
     fn sbt_bump_no_op_when_version_mismatch() {
         let result = bump_package_version(SBT_CONTENT, "0.0.1", "patch");
         assert_eq!(result, SBT_CONTENT);
     }
 
-    // Ported: "updates" — modules/manager/sbt/update.spec.ts line 28
+    // Ported: "updates" — modules/manager/sbt/update.spec.ts line 31
     #[test]
     fn sbt_bump_updates_minor() {
         let result = bump_package_version(SBT_CONTENT, "0.0.1", "minor");
@@ -1225,7 +1225,7 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
         assert_ne!(result, SBT_CONTENT);
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/sbt/update.spec.ts line 37
+    // Ported: "returns content if bumping errors" — modules/manager/sbt/update.spec.ts line 41
     #[test]
     fn sbt_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(SBT_CONTENT, "0.0.2", "not_a_bump");
@@ -1250,43 +1250,43 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
         );
     }
 
-    // Ported: "does not normalize prior to 2.10" — modules/manager/sbt/util.spec.ts line 17
+    // Ported: "does not normalize prior to 2.10" — modules/manager/sbt/util.spec.ts line 20
     #[test]
     fn sbt_normalize_scala_version_prior_to_2_10() {
         assert_eq!(normalize_scala_version("2.9.3"), "2.9.3");
     }
 
-    // Ported: "normalizes a Scala 2.10 version number" — modules/manager/sbt/util.spec.ts line 22
+    // Ported: "normalizes a Scala 2.10 version number" — modules/manager/sbt/util.spec.ts line 25
     #[test]
     fn sbt_normalize_scala_2_10() {
         assert_eq!(normalize_scala_version("2.10.7"), "2.10");
     }
 
-    // Ported: "normalizes a Scala 2.11 version number" — modules/manager/sbt/util.spec.ts line 27
+    // Ported: "normalizes a Scala 2.11 version number" — modules/manager/sbt/util.spec.ts line 30
     #[test]
     fn sbt_normalize_scala_2_11() {
         assert_eq!(normalize_scala_version("2.11.12"), "2.11");
     }
 
-    // Ported: "normalizes a Scala 2.12 version number" — modules/manager/sbt/util.spec.ts line 32
+    // Ported: "normalizes a Scala 2.12 version number" — modules/manager/sbt/util.spec.ts line 35
     #[test]
     fn sbt_normalize_scala_2_12() {
         assert_eq!(normalize_scala_version("2.12.19"), "2.12");
     }
 
-    // Ported: "normalizes a Scala 2.13 version number" — modules/manager/sbt/util.spec.ts line 37
+    // Ported: "normalizes a Scala 2.13 version number" — modules/manager/sbt/util.spec.ts line 40
     #[test]
     fn sbt_normalize_scala_2_13() {
         assert_eq!(normalize_scala_version("2.13.14"), "2.13");
     }
 
-    // Ported: "normalizes a Scala 3 LTS version number" — modules/manager/sbt/util.spec.ts line 42
+    // Ported: "normalizes a Scala 3 LTS version number" — modules/manager/sbt/util.spec.ts line 45
     #[test]
     fn sbt_normalize_scala_3_lts() {
         assert_eq!(normalize_scala_version("3.3.3"), "3");
     }
 
-    // Ported: "normalizes a Scala 3 current version number" — modules/manager/sbt/util.spec.ts line 47
+    // Ported: "normalizes a Scala 3 current version number" — modules/manager/sbt/util.spec.ts line 50
     #[test]
     fn sbt_normalize_scala_3_current() {
         assert_eq!(normalize_scala_version("3.4.2"), "3");

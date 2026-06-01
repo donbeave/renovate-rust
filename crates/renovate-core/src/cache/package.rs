@@ -552,7 +552,7 @@ mod tests {
 
     // ── FilePackageCache ──────────────────────────────────────────────────
 
-    // Ported: "delegates get to backend" — util/cache/package/index.spec.ts line 37
+    // Ported: "delegates get to backend" — util/cache/package/index.spec.ts line 41
     #[tokio::test]
     async fn file_cache_get_returns_none_for_missing_key() {
         let dir = TempDir::new().unwrap();
@@ -561,7 +561,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "delegates set to backend" — util/cache/package/index.spec.ts line 44
+    // Ported: "delegates set to backend" — util/cache/package/index.spec.ts line 51
     #[tokio::test]
     async fn file_cache_set_and_get_roundtrip() {
         let dir = TempDir::new().unwrap();
@@ -735,7 +735,7 @@ mod tests {
         assert!(!bad_path.exists());
     }
 
-    // Ported: "removes entries with invalid expiry" — util/cache/package/impl/file.spec.ts line 158
+    // Ported: "removes entries with invalid expiry" — util/cache/package/impl/file.spec.ts line 169
     #[tokio::test]
     async fn file_cache_cleanup_removes_invalid_expiry() {
         let dir = TempDir::new().unwrap();
@@ -758,7 +758,7 @@ mod tests {
         assert!(!bad_path.exists());
     }
 
-    // Ported: "keeps entries without expiry field" — util/cache/package/impl/file.spec.ts line 140
+    // Ported: "keeps entries without expiry field" — util/cache/package/impl/file.spec.ts line 159
     #[tokio::test]
     async fn file_cache_cleanup_keeps_entries_without_expiry() {
         let dir = TempDir::new().unwrap();
@@ -776,7 +776,7 @@ mod tests {
         assert!(path.exists());
     }
 
-    // Ported: "continues on cleanup errors" — util/cache/package/impl/file.spec.ts line 171
+    // Ported: "continues on cleanup errors" — util/cache/package/impl/file.spec.ts line 182
     #[tokio::test]
     async fn file_cache_cleanup_continues_on_errors() {
         let dir = TempDir::new().unwrap();
@@ -807,7 +807,7 @@ mod tests {
 
     // ── PackageCache ──────────────────────────────────────────────────────
 
-    // Ported: "returns undefined if not initialized" — util/cache/package/index.spec.ts line 20
+    // Ported: "returns undefined if not initialized" — util/cache/package/index.spec.ts line 23
     #[tokio::test]
     async fn package_cache_get_returns_none_without_backend() {
         let cache = PackageCache::new(); // no backend
@@ -862,7 +862,7 @@ mod tests {
         assert!(!path.exists());
     }
 
-    // Ported: "deduplicates get via memCache" — util/cache/package/index.spec.ts line 73
+    // Ported: "deduplicates get via memCache" — util/cache/package/index.spec.ts line 77
     #[tokio::test]
     async fn package_cache_deduplicates_via_mem() {
         let dir = TempDir::new().unwrap();
@@ -878,7 +878,7 @@ mod tests {
         assert_eq!(r2, Some("cached-value".to_owned()));
     }
 
-    // Ported: "setWithRawTtl updates memCache" — util/cache/package/index.spec.ts line 83
+    // Ported: "setWithRawTtl updates memCache" — util/cache/package/index.spec.ts line 89
     #[tokio::test]
     async fn set_with_raw_ttl_updates_mem_immediately() {
         let dir = TempDir::new().unwrap();

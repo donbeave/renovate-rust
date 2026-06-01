@@ -318,20 +318,20 @@ gleeunit = "~> 1.0"
         assert!(extract("foo").is_empty());
     }
 
-    // Ported: "returns same if not auto" — modules/manager/gleam/range.spec.ts line 4
+    // Ported: "returns same if not auto" — modules/manager/gleam/range.spec.ts line 5
     #[test]
     fn gleam_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("pin", None), "pin");
     }
 
-    // Ported: "widens complex bump" — modules/manager/gleam/range.spec.ts line 9
+    // Ported: "widens complex bump" — modules/manager/gleam/range.spec.ts line 10
     #[test]
     fn gleam_range_widens_complex_bump() {
         let result = get_range_strategy("bump", Some(">= 1.6.0 and < 2.0.0"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "defaults to widen" — modules/manager/gleam/range.spec.ts line 18
+    // Ported: "defaults to widen" — modules/manager/gleam/range.spec.ts line 19
     #[test]
     fn gleam_range_defaults_to_widen() {
         let result = get_range_strategy("auto", None);
@@ -428,20 +428,20 @@ foo = { version = ">= 1.0.0 and < 2.0.0" }
         assert!(extract_gleam_lock_file_versions_opt(None).is_none());
     }
 
-    // Ported: "returns null for invalid lock file" — modules/manager/gleam/locked-version.spec.ts line 26
+    // Ported: "returns null for invalid lock file" — modules/manager/gleam/locked-version.spec.ts line 23
     #[test]
     fn gleam_lock_returns_none_for_invalid() {
         assert!(parse_gleam_lock_file("foo").is_none());
     }
 
-    // Ported: "returns empty map for lock file without packages" — modules/manager/gleam/locked-version.spec.ts line 31
+    // Ported: "returns empty map for lock file without packages" — modules/manager/gleam/locked-version.spec.ts line 28
     #[test]
     fn gleam_lock_returns_empty_map_for_no_packages() {
         let result = extract_gleam_lock_file_versions("[requirements]").unwrap();
         assert!(result.is_empty());
     }
 
-    // Ported: "returns a map of package versions" — modules/manager/gleam/locked-version.spec.ts line 36
+    // Ported: "returns a map of package versions" — modules/manager/gleam/locked-version.spec.ts line 33
     #[test]
     fn gleam_lock_returns_map_of_package_versions() {
         let result = extract_gleam_lock_file_versions(LOCK_FILE).unwrap();
@@ -449,7 +449,7 @@ foo = { version = ">= 1.0.0 and < 2.0.0" }
         assert_eq!(result.get("bar"), Some(&vec!["2.1.0".to_owned()]));
     }
 
-    // Ported: "parses lockfile string into an object" — modules/manager/gleam/locked-version.spec.ts line 47
+    // Ported: "parses lockfile string into an object" — modules/manager/gleam/locked-version.spec.ts line 45
     #[test]
     fn gleam_lock_parses_into_object() {
         let result = parse_gleam_lock_file(LOCK_FILE).unwrap();
@@ -462,7 +462,7 @@ foo = { version = ">= 1.0.0 and < 2.0.0" }
         assert!(result.packages[1].requirements.is_empty());
     }
 
-    // Ported: "can deal with invalid lockfiles" — modules/manager/gleam/locked-version.spec.ts line 65
+    // Ported: "can deal with invalid lockfiles" — modules/manager/gleam/locked-version.spec.ts line 63
     #[test]
     fn gleam_lock_handles_invalid_lockfile() {
         assert!(parse_gleam_lock_file("foo").is_none());

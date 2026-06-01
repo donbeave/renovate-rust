@@ -1877,7 +1877,7 @@ mod tests {
         assert_eq!(packages[0][0].dep_type, MavenDepType::Extension);
     }
 
-    // Ported: "should return empty array if extensions file is invalid or empty" — maven/extract.spec.ts line 917
+    // Ported: "should return empty array if extensions file is invalid or empty" — maven/extract.spec.ts line 998
     #[test]
     fn extract_all_package_files_invalid_extensions_return_empty() {
         assert!(
@@ -1889,7 +1889,7 @@ mod tests {
         );
     }
 
-    // Ported: "should skip root pom.xml" — maven/extract.spec.ts line 930
+    // Ported: "should skip root pom.xml" — maven/extract.spec.ts line 1011
     #[test]
     fn extract_all_package_files_marks_child_parent_as_parent_root() {
         let root = r#"<project>
@@ -1916,7 +1916,7 @@ mod tests {
         assert_eq!(packages[0][0].renovate_dep_type(), "parent-root");
     }
 
-    // Ported: "should skip root pom.xml when it has an external parent" — maven/extract.spec.ts line 964
+    // Ported: "should skip root pom.xml when it has an external parent" — maven/extract.spec.ts line 1045
     #[test]
     fn extract_all_package_files_keeps_external_root_parent() {
         let root = r#"<project>
@@ -1949,7 +1949,7 @@ mod tests {
         assert_eq!(packages[1][0].dep_type, MavenDepType::ParentRoot);
     }
 
-    // Ported: "handles cross-referencing" — maven/extract.spec.ts line 1006
+    // Ported: "handles cross-referencing" — maven/extract.spec.ts line 1087
     #[test]
     fn extract_all_package_files_handles_cross_referencing_modules() {
         let foo = r#"<project>
@@ -2524,7 +2524,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "should apply props multiple times" — maven/extract.spec.ts line 432
+    // Ported: "should apply props multiple times" — maven/extract.spec.ts line 433
     #[test]
     fn props_applied_with_multiple_usages() {
         // ${lucene.version} used in both groupId-like suffix and version.

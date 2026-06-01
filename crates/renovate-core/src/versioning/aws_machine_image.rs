@@ -91,13 +91,13 @@ mod tests {
         assert!(is_compatible("ami-00e1b2c30011d4e5f", Some("anything")));
     }
 
-    // Ported: "should return false" — versioning/aws-machine-image/index.spec.ts line 51
+    // Ported: "should return false" — versioning/aws-machine-image/index.spec.ts line 49
     #[test]
     fn is_compatible_returns_false_for_short_ami_id_with_range() {
         assert!(!is_compatible("ami-1", Some("anything")));
     }
 
-    // Ported: "should return true" — versioning/aws-machine-image/index.spec.ts line 58
+    // Ported: "should return true" — versioning/aws-machine-image/index.spec.ts line 55
     #[test]
     fn is_greater_than_returns_true_for_any_ami_pair() {
         assert!(is_greater_than("ami-00", "ami-99"));

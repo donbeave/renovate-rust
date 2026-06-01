@@ -324,7 +324,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if package is unknown" — datasource/github-runners/index.spec.ts line 71
+    // Ported: "returns null if package is unknown" — datasource/github-runners/index.spec.ts line 72
     #[test]
     fn github_runners_returns_none_for_unknown_package() {
         assert!(release_rows("unknown").is_none());

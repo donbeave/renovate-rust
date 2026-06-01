@@ -449,13 +449,13 @@ mod tests {
         assert_eq!(deps[1].dep_name, "restore-cache");
     }
 
-    // Ported: "returns null on an empty string" — modules/manager/bitrise/utils.spec.ts line 8
+    // Ported: "returns null on an empty string" — modules/manager/bitrise/utils.spec.ts line 6
     #[test]
     fn parse_step_returns_none_for_empty() {
         assert!(parse_step("").is_none());
     }
 
-    // Ported: "returns dependency for step" — modules/manager/bitrise/utils.spec.ts line 12
+    // Ported: "returns dependency for step" — modules/manager/bitrise/utils.spec.ts line 10
     #[test]
     fn parse_step_returns_dep_with_version() {
         let result = parse_step("restore-gradle-cache@1.1.2").unwrap();
@@ -465,7 +465,7 @@ mod tests {
         assert!(result.skip_reason.is_none());
     }
 
-    // Ported: "parses missing version" — modules/manager/bitrise/utils.spec.ts line 20
+    // Ported: "parses missing version" — modules/manager/bitrise/utils.spec.ts line 19
     #[test]
     fn parse_step_returns_unspecified_version_when_no_at() {
         let result = parse_step("share-pipeline-variable").unwrap();

@@ -1140,7 +1140,7 @@ mod tests {
     use super::*;
     use crate::versioning::semver_coerced;
 
-    // Ported: "extracts single-line requires" — gomod/extract.spec.ts line 16
+    // Ported: "extracts single-line requires" — gomod/extract.spec.ts line 18
     #[test]
     fn single_line_require() {
         let content = r#"
@@ -1161,7 +1161,7 @@ require github.com/pkg/errors v0.9.1
         );
     }
 
-    // Ported: "extracts multi-line requires" — gomod/extract.spec.ts line 26
+    // Ported: "extracts multi-line requires" — gomod/extract.spec.ts line 28
     #[test]
     fn require_block() {
         let content = r#"
@@ -1179,7 +1179,7 @@ require (
         assert!(deps.iter().any(|d| d.module_path == "golang.org/x/net"));
     }
 
-    // Ported: "extracts multi-line requires" — gomod/extract.spec.ts line 26
+    // Ported: "extracts multi-line requires" — gomod/extract.spec.ts line 28
     #[test]
     fn indirect_deps_included() {
         let content = "require github.com/davecgh/go-spew v1.0.0 // indirect\n";
@@ -1189,7 +1189,7 @@ require (
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "marks placeholder pseudo versions with skipReason invalid-version" — gomod/extract.spec.ts line 426
+    // Ported: "marks placeholder pseudo versions with skipReason invalid-version" — gomod/extract.spec.ts line 428
     #[test]
     fn pseudo_version_skipped() {
         let content = "require github.com/foo/bar v0.0.0-20230901123456-abcdef123456\n";
@@ -1198,7 +1198,7 @@ require (
         assert_eq!(deps[0].skip_reason, Some(GoModSkipReason::PseudoVersion));
     }
 
-    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 48
+    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 50
     #[test]
     fn local_replace_skipped() {
         let content = r#"
@@ -1210,7 +1210,7 @@ replace github.com/pkg/errors => ../errors
         assert_eq!(deps[0].skip_reason, Some(GoModSkipReason::LocalReplace));
     }
 
-    // Ported: "ignores exclude directives from multi-line and single line" — gomod/extract.spec.ts line 193
+    // Ported: "ignores exclude directives from multi-line and single line" — gomod/extract.spec.ts line 195
     #[test]
     fn exclude_block_ignored() {
         let content = r#"
@@ -1225,7 +1225,7 @@ exclude (
         assert_eq!(deps[0].module_path, "github.com/good/dep");
     }
 
-    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 48
+    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 50
     #[test]
     fn incompatible_version_included() {
         let content = "require github.com/Azure/sdk v25.1.0+incompatible\n";
@@ -1235,7 +1235,7 @@ exclude (
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 48
+    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 50
     #[test]
     fn fixture_1() {
         let content = r#"module github.com/renovate-tests/gomod1
@@ -1283,13 +1283,13 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         assert!(spew.is_indirect);
     }
 
-    // Ported: "returns null for empty" — gomod/extract.spec.ts line 12
+    // Ported: "returns null for empty" — gomod/extract.spec.ts line 14
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts `go` directive %s as a `%goMod` extracted constraint as a SemVer-minor compatible range" — gomod/extract.spec.ts line 528
+    // Ported: "extracts `go` directive %s as a `%goMod` extracted constraint as a SemVer-minor compatible range" — gomod/extract.spec.ts line 530
     #[test]
     fn go_directive_extracted() {
         for version in &["1.19", "1.19.0", "1.19.5"] {
@@ -1302,7 +1302,7 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         }
     }
 
-    // Ported: "ignores directives unrelated to dependencies" — gomod/extract.spec.ts line 402
+    // Ported: "ignores directives unrelated to dependencies" — gomod/extract.spec.ts line 404
     #[test]
     fn unrelated_directives_ignored() {
         let content = "module github.com/renovate-tests/gomod\n\
@@ -1315,7 +1315,7 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         assert!(deps.is_empty());
     }
 
-    // Ported: "ignores empty spaces in multi-line requires" — gomod/extract.spec.ts line 34
+    // Ported: "ignores empty spaces in multi-line requires" — gomod/extract.spec.ts line 36
     #[test]
     fn empty_lines_inside_require_block() {
         let content = "module github.com/renovate-tests/gomod\nrequire (\n\tcloud.google.com/go v0.45.1\n\n\tgithub.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect\n)\n";
@@ -1333,7 +1333,7 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         );
     }
 
-    // Ported: "extracts the toolchain directive" — gomod/extract.spec.ts line 212
+    // Ported: "extracts the toolchain directive" — gomod/extract.spec.ts line 214
     #[test]
     fn toolchain_directive_extracted() {
         let content = "module github.com/renovate-tests/gomod\ngo 1.23\ntoolchain go1.23.3\n";
@@ -1347,7 +1347,7 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         assert!(toolchain_dep.skip_reason.is_none());
     }
 
-    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 48
+    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 50
     #[test]
     fn replace_directives_multi_line_and_single_line() {
         let content = r#"module github.com/renovate-tests/gomod
@@ -1391,7 +1391,7 @@ replace (
         assert_eq!(cluster.current_value, "v0.17.3");
     }
 
-    // Ported: "extracts single-line tool directives" — gomod/extract.spec.ts line 263
+    // Ported: "extracts single-line tool directives" — gomod/extract.spec.ts line 265
     #[test]
     fn tool_directive_single_line_ignored() {
         // `tool X` lines are not package deps; they just reference an already-required module.
@@ -1408,7 +1408,7 @@ replace (
         assert!(deps[0].is_indirect);
     }
 
-    // Ported: "extracts multi-line tool directives" — gomod/extract.spec.ts line 282
+    // Ported: "extracts multi-line tool directives" — gomod/extract.spec.ts line 284
     #[test]
     fn tool_directive_multi_line_ignored() {
         let content = "require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect\n\
@@ -1423,7 +1423,7 @@ replace (
         );
     }
 
-    // Ported: "extracts tool directives with required modules" — gomod/extract.spec.ts line 304
+    // Ported: "extracts tool directives with required modules" — gomod/extract.spec.ts line 306
     #[test]
     fn tool_directive_with_required_module_not_indirect() {
         let content = "require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1\n\
@@ -1434,7 +1434,7 @@ replace (
         assert_eq!(deps[0].enabled, None);
     }
 
-    // Ported: "extracts tool directives of sub-modules" — gomod/extract.spec.ts line 323
+    // Ported: "extracts tool directives of sub-modules" — gomod/extract.spec.ts line 325
     #[test]
     fn tool_directive_sub_modules_disable_non_matching_indirects() {
         let content = r#"require (
@@ -1481,7 +1481,7 @@ tool github.com/foo/bar/sub1/sub2/cmd/hello
         assert_eq!(non_boundary.enabled, Some(false));
     }
 
-    // Ported: "extracts tool directives with exact match" — gomod/extract.spec.ts line 370
+    // Ported: "extracts tool directives with exact match" — gomod/extract.spec.ts line 372
     #[test]
     fn tool_directive_exact_match_keeps_indirect_enabled() {
         let content = "require github.com/foo/bar v1.2.3 // indirect\n\
@@ -1494,7 +1494,7 @@ tool github.com/foo/bar/sub1/sub2/cmd/hello
         assert_eq!(deps[0].enabled, None);
     }
 
-    // Ported: "extracts tool directives with no matching dependencies" — gomod/extract.spec.ts line 389
+    // Ported: "extracts tool directives with no matching dependencies" — gomod/extract.spec.ts line 391
     #[test]
     fn tool_directive_alone_produces_no_deps() {
         let content = "tool github.com/foo/bar/sub/cmd/hello\n";
@@ -1502,7 +1502,7 @@ tool github.com/foo/bar/sub1/sub2/cmd/hello
         assert!(deps.is_empty());
     }
 
-    // Ported: "marks placeholder pseudo versions with skipReason invalid-version" — gomod/extract.spec.ts line 426
+    // Ported: "marks placeholder pseudo versions with skipReason invalid-version" — gomod/extract.spec.ts line 428
     #[test]
     fn placeholder_pseudo_versions_have_skip_reason() {
         let content = r#"module github.com/renovate-tests/gomod
@@ -2151,7 +2151,7 @@ require (
         assert_eq!(res, expected);
     }
 
-    // Ported: "extracts replace directives from non-public module path" — gomod/extract.spec.ts line 136
+    // Ported: "extracts replace directives from non-public module path" — gomod/extract.spec.ts line 138
     #[test]
     fn replace_directive_non_public_module_path() {
         let content = r#"module github.com/JamieTanna-Mend-testing/tka-9783-golang-pro-main
@@ -2191,27 +2191,27 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         );
     }
 
-    // Ported: "matches version 1.19, even though it is not valid SemVer" — gomod/extract.spec.ts line 586
+    // Ported: "matches version 1.19, even though it is not valid SemVer" — gomod/extract.spec.ts line 588
     #[test]
     fn go_directive_constraint_matches_1_19_non_semver() {
         assert!(semver_coerced::matches("1.19", "~1.19.x"));
     }
 
-    // Ported: "matches the current SemVer minor" — gomod/extract.spec.ts line 590
+    // Ported: "matches the current SemVer minor" — gomod/extract.spec.ts line 592
     #[test]
     fn go_directive_constraint_matches_current_minor() {
         assert!(semver_coerced::matches("1.19.0", "~1.19.x"));
         assert!(semver_coerced::matches("1.19.10", "~1.19.x"));
     }
 
-    // Ported: "does not match the next SemVer minor" — gomod/extract.spec.ts line 595
+    // Ported: "does not match the next SemVer minor" — gomod/extract.spec.ts line 597
     #[test]
     fn go_directive_constraint_no_match_next_minor() {
         assert!(!semver_coerced::matches("1.20.0", "~1.19.x"));
         assert!(!semver_coerced::matches("1.20.10", "~1.19.x"));
     }
 
-    // Ported: "does not match the previous SemVer minor" — gomod/extract.spec.ts line 600
+    // Ported: "does not match the previous SemVer minor" — gomod/extract.spec.ts line 602
     #[test]
     fn go_directive_constraint_no_match_prev_minor() {
         assert!(!semver_coerced::matches("1.18.0", "~1.19.x"));
@@ -2483,7 +2483,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("github.com/src-d/gcfg/v3 v3.0.0"));
     }
 
-    // Ported: "bumps major v0 > v1 multiline" — gomod/update.spec.ts line 317
+    // Ported: "bumps major v0 > v1 multiline" — gomod/update.spec.ts line 318
     #[test]
     fn gomod_update_major_v0_v1_multiline() {
         let u = GoModUpdateUpgrade {
@@ -2503,7 +2503,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("golang.org/x/text v1.0.0"));
     }
 
-    // Ported: "handles multiline mismatch" — gomod/update.spec.ts line 395
+    // Ported: "handles multiline mismatch" — gomod/update.spec.ts line 403
     #[test]
     fn gomod_update_multiline_mismatch() {
         let u = mk_gomod_upgrade("github.com/fatih/color", "require", "v1.8.0", 8, false);
@@ -2511,7 +2511,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.is_none());
     }
 
-    // Ported: "handles +incompatible tag" — gomod/update.spec.ts line 412
+    // Ported: "handles +incompatible tag" — gomod/update.spec.ts line 418
     #[test]
     fn gomod_update_incompatible_tag_preserved() {
         let u = mk_gomod_upgrade(
@@ -2525,7 +2525,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("github.com/Azure/azure-sdk-for-go v26.0.0+incompatible"));
     }
 
-    // Ported: "handles +incompatible tag without duplicating it" — gomod/update.spec.ts line 433
+    // Ported: "handles +incompatible tag without duplicating it" — gomod/update.spec.ts line 437
     #[test]
     fn gomod_update_incompatible_no_duplicate() {
         let u = mk_gomod_upgrade(
@@ -2540,7 +2540,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("github.com/Azure/azure-sdk-for-go v26.0.0+incompatible"));
     }
 
-    // Ported: "handles replace line with minor version update" — gomod/update.spec.ts line 454
+    // Ported: "handles replace line with minor version update" — gomod/update.spec.ts line 458
     #[test]
     fn gomod_update_replace_minor() {
         let u = mk_gomod_upgrade("github.com/pravesht/gocql", "replace", "v0.0.1", 11, false);
@@ -2548,7 +2548,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("github.com/pravesht/gocql v0.0.1"));
     }
 
-    // Ported: "handles replace line with major version update" — gomod/update.spec.ts line 472
+    // Ported: "handles replace line with major version update" — gomod/update.spec.ts line 474
     #[test]
     fn gomod_update_replace_major() {
         let u = GoModUpdateUpgrade {
@@ -2568,7 +2568,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("github.com/pravesht/gocql/v2 v2.0.0"));
     }
 
-    // Ported: "handles no pinned version to latest available version" — gomod/update.spec.ts line 538
+    // Ported: "handles no pinned version to latest available version" — gomod/update.spec.ts line 546
     #[test]
     fn gomod_update_no_pinned_version() {
         let u = GoModUpdateUpgrade {
@@ -2588,7 +2588,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("github.com/caarlos0/env/v6 v6.1.0"));
     }
 
-    // Ported: "should return null for replacement" — gomod/update.spec.ts line 575
+    // Ported: "should return null for replacement" — gomod/update.spec.ts line 589
     #[test]
     fn gomod_update_null_for_replacement() {
         let u = GoModUpdateUpgrade {
@@ -2599,7 +2599,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.is_none());
     }
 
-    // Ported: "should perform indirect upgrades when top-level" — gomod/update.spec.ts line 583
+    // Ported: "should perform indirect upgrades when top-level" — gomod/update.spec.ts line 598
     #[test]
     fn gomod_update_indirect_top_level() {
         let u = mk_gomod_upgrade("github.com/davecgh/go-spew", "indirect", "v1.1.1", 4, false);
@@ -2607,7 +2607,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("v1.1.1 // indirect"));
     }
 
-    // Ported: "should perform indirect upgrades when in require blocks" — gomod/update.spec.ts line 601
+    // Ported: "should perform indirect upgrades when in require blocks" — gomod/update.spec.ts line 614
     #[test]
     fn gomod_update_indirect_in_block() {
         let u = mk_gomod_upgrade("github.com/go-ole/go-ole", "indirect", "v1.5.0", 23, true);
@@ -2636,7 +2636,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("v4.8.0"));
     }
 
-    // Ported: "update multiline digest" — gomod/update.spec.ts line 335
+    // Ported: "update multiline digest" — gomod/update.spec.ts line 337
     #[test]
     fn gomod_update_multiline_digest() {
         let u = GoModUpdateUpgrade {
@@ -2655,7 +2655,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(res.contains("github.com/spf13/jwalterweatherman 123456123456"));
     }
 
-    // Ported: "skips already-updated multiline digest" — gomod/update.spec.ts line 360
+    // Ported: "skips already-updated multiline digest" — gomod/update.spec.ts line 356
     #[test]
     fn gomod_update_skips_already_updated_digest() {
         let u = GoModUpdateUpgrade {
@@ -2674,7 +2674,7 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert_eq!(res, GOMOD2);
     }
 
-    // Ported: "updates pseudo-version with digest updateType" — gomod/update.spec.ts line 377
+    // Ported: "updates pseudo-version with digest updateType" — gomod/update.spec.ts line 373
     #[test]
     fn gomod_update_pseudo_version_digest() {
         let content = "module example.com/test
@@ -2701,7 +2701,7 @@ require (
         assert!(res.contains("knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a"));
     }
 
-    // Ported: "handles replace line with major version update that bumps both sides of the replace" — gomod/update.spec.ts line 493
+    // Ported: "handles replace line with major version update that bumps both sides of the replace" — gomod/update.spec.ts line 494
     #[test]
     fn gomod_update_replace_both_sides_major() {
         let content = "module github.com/walsm232/renovate-gomod-bug-test
@@ -2729,7 +2729,7 @@ replace (
         assert!(res.contains("github.com/grpc-ecosystem/grpc-gateway/v2 => github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0"));
     }
 
-    // Ported: "handles replace line with digest" — gomod/update.spec.ts line 521
+    // Ported: "handles replace line with digest" — gomod/update.spec.ts line 525
     #[test]
     fn gomod_update_replace_with_digest() {
         let u = GoModUpdateUpgrade {
@@ -2750,7 +2750,7 @@ replace (
         assert!(res.contains("123456123456"));
     }
 
-    // Ported: "handles multiline replace update" — gomod/update.spec.ts line 554
+    // Ported: "handles multiline replace update" — gomod/update.spec.ts line 565
     #[test]
     fn gomod_update_multiline_replace() {
         let content = "

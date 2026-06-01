@@ -627,7 +627,7 @@ fn flush_helm(
 mod tests {
     use super::*;
 
-    // Ported: "should correctly extract a default image" — kustomize/extract.spec.ts line 287
+    // Ported: "should correctly extract a default image" — kustomize/extract.spec.ts line 292
     #[test]
     fn extracts_images() {
         let content = r#"
@@ -705,7 +705,7 @@ helmGlobals:
         assert_eq!(parsed.chart_home.as_deref(), Some("customPathToCharts"));
     }
 
-    // Ported: "should correctly extract an image in a repo" — kustomize/extract.spec.ts line 305
+    // Ported: "should correctly extract an image in a repo" — kustomize/extract.spec.ts line 310
     #[test]
     fn extracts_image_in_repo() {
         let deps = extract(
@@ -724,7 +724,7 @@ images:
         assert!(image.skip_reason.is_none());
     }
 
-    // Ported: "should correctly extract from a different registry" — kustomize/extract.spec.ts line 323
+    // Ported: "should correctly extract from a different registry" — kustomize/extract.spec.ts line 328
     #[test]
     fn extracts_image_from_different_registry() {
         let deps = extract(
@@ -743,7 +743,7 @@ images:
         assert!(image.skip_reason.is_none());
     }
 
-    // Ported: "should correctly extract from a different port" — kustomize/extract.spec.ts line 341
+    // Ported: "should correctly extract from a different port" — kustomize/extract.spec.ts line 346
     #[test]
     fn extracts_image_from_registry_with_port() {
         let deps = extract(
@@ -762,7 +762,7 @@ images:
         assert!(image.skip_reason.is_none());
     }
 
-    // Ported: "should correctly extract from a multi-depth registry" — kustomize/extract.spec.ts line 359
+    // Ported: "should correctly extract from a multi-depth registry" — kustomize/extract.spec.ts line 364
     #[test]
     fn extracts_image_from_multi_depth_registry() {
         let deps = extract(
@@ -781,7 +781,7 @@ images:
         assert!(image.skip_reason.is_none());
     }
 
-    // Ported: "should correctly extract with registryAliases" — kustomize/extract.spec.ts line 377
+    // Ported: "should correctly extract with registryAliases" — kustomize/extract.spec.ts line 382
     #[test]
     fn extracts_image_with_registry_aliases() {
         let deps = extract(
@@ -808,7 +808,7 @@ images:
         assert_eq!(resolved.datasource, "docker");
     }
 
-    // Ported: "extracts newName" — kustomize/extract.spec.ts line 757
+    // Ported: "extracts newName" — kustomize/extract.spec.ts line 762
     #[test]
     fn extracts_new_name_override() {
         let deps = extract(
@@ -828,7 +828,7 @@ images:
         assert!(image.skip_reason.is_none());
     }
 
-    // Ported: "should extract out image versions" — kustomize/extract.spec.ts line 506
+    // Ported: "should extract out image versions" — kustomize/extract.spec.ts line 511
     #[test]
     fn package_file_extracts_image_versions() {
         let content = r#"
@@ -958,7 +958,7 @@ helmCharts:
         assert!(!resolved.pin_digests);
     }
 
-    // Ported: "extracts from digest" — kustomize/extract.spec.ts line 710
+    // Ported: "extracts from digest" — kustomize/extract.spec.ts line 715
     #[test]
     fn extracts_images_from_digest() {
         let digest = "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c";
@@ -1185,7 +1185,7 @@ images:
         assert_eq!(dep.dep_name, "user/test-repo");
     }
 
-    // Ported: "extracts multiple image lines" — kustomize/extract.spec.ts line 416
+    // Ported: "extracts multiple image lines" — kustomize/extract.spec.ts line 421
     #[test]
     fn extracts_multiple_base_lines() {
         let deps = extract(
@@ -1217,7 +1217,7 @@ bases:
         assert!(resources.iter().all(|dep| dep.current_value == "v0.0.1"));
     }
 
-    // Ported: "extracts ssh dependency" — kustomize/extract.spec.ts line 444
+    // Ported: "extracts ssh dependency" — kustomize/extract.spec.ts line 449
     #[test]
     fn package_file_extracts_ssh_dependency() {
         let deps = extract(
@@ -1237,7 +1237,7 @@ bases:
         assert_eq!(resource.datasource, "github-tags");
     }
 
-    // Ported: "extracts ssh dependency with a subdir" — kustomize/extract.spec.ts line 462
+    // Ported: "extracts ssh dependency with a subdir" — kustomize/extract.spec.ts line 467
     #[test]
     fn package_file_extracts_ssh_dependency_with_subdir() {
         let deps = extract(
@@ -1256,7 +1256,7 @@ bases:
         assert_eq!(resource.current_value, "v2.0.0");
     }
 
-    // Ported: "extracts http dependency" — kustomize/extract.spec.ts line 481
+    // Ported: "extracts http dependency" — kustomize/extract.spec.ts line 486
     #[test]
     fn package_file_extracts_http_dependencies() {
         let deps = extract(
@@ -1285,7 +1285,7 @@ bases:
         assert_eq!(resources[1].current_value, "1.19.0");
     }
 
-    // Ported: "should extract bases resources and components from their respective blocks" — kustomize/extract.spec.ts line 598
+    // Ported: "should extract bases resources and components from their respective blocks" — kustomize/extract.spec.ts line 603
     #[test]
     fn extracts_bases_resources_and_components_blocks() {
         let deps = extract(
@@ -1317,7 +1317,7 @@ components:
         assert_eq!(resources[2].current_value, "1.18.0");
     }
 
-    // Ported: "should extract dependencies when kind is Component" — kustomize/extract.spec.ts line 632
+    // Ported: "should extract dependencies when kind is Component" — kustomize/extract.spec.ts line 637
     #[test]
     fn extracts_dependencies_when_kind_is_component() {
         let deps = extract(
@@ -1348,7 +1348,7 @@ components:
         assert_eq!(resources[1].current_value, "1.18.0");
     }
 
-    // Ported: "parses helmChart field" — kustomize/extract.spec.ts line 799
+    // Ported: "parses helmChart field" — kustomize/extract.spec.ts line 804
     #[test]
     fn mixed_images_and_helm() {
         let content = r#"
@@ -1389,13 +1389,13 @@ helmCharts:
         assert!(extract("").is_empty());
     }
 
-    // Ported: "ignores non-Kubernetes empty files" — kustomize/extract.spec.ts line 586
+    // Ported: "ignores non-Kubernetes empty files" — kustomize/extract.spec.ts line 591
     #[test]
     fn ignores_non_kubernetes_empty_files() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "does nothing with kustomize empty kustomize files" — kustomize/extract.spec.ts line 590
+    // Ported: "does nothing with kustomize empty kustomize files" — kustomize/extract.spec.ts line 595
     #[test]
     fn empty_kustomization_returns_empty() {
         let content = r#"
@@ -1405,7 +1405,7 @@ kind: Kustomization
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for non kustomize kubernetes files" — kustomize/extract.spec.ts line 400
+    // Ported: "returns null for non kustomize kubernetes files" — kustomize/extract.spec.ts line 405
     #[test]
     fn non_kustomize_kubernetes_file_returns_empty() {
         let content = r#"
@@ -1449,14 +1449,14 @@ resources:
         assert!(deps.is_empty());
     }
 
-    // Ported: "should return null on a null input" — kustomize/extract.spec.ts line 270
+    // Ported: "should return null on a null input" — kustomize/extract.spec.ts line 275
     #[test]
     fn extract_image_null_on_empty_name() {
         let deps = extract("images:\n  - name: ''\n    newTag: v1.0.0\n");
         assert!(deps.is_empty());
     }
 
-    // Ported: "extracts correct project from $name" (it.each) — kustomize/extract.spec.ts line 1104
+    // Ported: "extracts correct project from $name" (it.each) — kustomize/extract.spec.ts line 1109
     #[test]
     fn extract_resource_url_forms() {
         struct Case {

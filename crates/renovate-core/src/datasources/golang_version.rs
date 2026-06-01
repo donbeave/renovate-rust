@@ -225,7 +225,7 @@ var Releases = []*Release{
 }
 "#;
 
-    // Ported: "parses real data" — golang-version/index.spec.ts line 21
+    // Ported: "parses real data" — golang-version/index.spec.ts line 19
     #[test]
     fn parse_skips_future_releases() {
         let releases = parse_releases(SAMPLE).unwrap();
@@ -249,14 +249,14 @@ var Releases = []*Release{
         assert_eq!(result, Some("1.18.1".into()));
     }
 
-    // Ported: "throws ExternalHostError for invalid release with no versions" — golang-version/index.spec.ts line 37
+    // Ported: "throws ExternalHostError for invalid release with no versions" — golang-version/index.spec.ts line 56
     #[test]
     fn error_on_no_releases_section() {
         let err = parse_releases("no releases here").unwrap_err();
         assert!(err.to_string().contains("could not find Releases section"));
     }
 
-    // Ported: "throws ExternalHostError for invalid release with wrong termination" — golang-version/index.spec.ts line 49
+    // Ported: "throws ExternalHostError for invalid release with wrong termination" — golang-version/index.spec.ts line 69
     #[test]
     fn error_on_block_with_no_version() {
         let input = r#"var Releases = []*Release{

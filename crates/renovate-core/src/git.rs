@@ -91,7 +91,7 @@ mod config_tests {
         assert!(cfg.timeout_block.is_none());
     }
 
-    // Ported: "uses timeout value from GlobalConfig" — util/git/config.spec.ts line 16
+    // Ported: "uses timeout value from GlobalConfig" — util/git/config.spec.ts line 20
     #[test]
     fn simple_git_config_uses_timeout() {
         let cfg = simple_git_config(Some(50000));
@@ -101,7 +101,7 @@ mod config_tests {
         assert!(!cfg.completion.on_exit);
     }
 
-    // Ported: "throws" — util/git/config.spec.ts line 27
+    // Ported: "throws" — util/git/config.spec.ts line 35
     #[test]
     fn set_no_verify_rejects_non_array() {
         let result = validate_git_no_verify(&json!(1));
