@@ -318,7 +318,12 @@ fn npm_satisfies(version: &str, npm_range: &str) -> bool {
         return false;
     };
     // Normalize npm range: space-separated comparators → comma-separated
-    let req_str = npm_range.split_whitespace().collect::<Vec<_>>().join(", ");
+    let mut req_str = npm_range.split_whitespace().collect::<Vec<_>>().join(", ");
+    // Bare version (no operator) → exact match in npm, but rust semver
+    // parses bare versions as caret ranges by default.
+    if !req_str.is_empty() && !req_str.starts_with(|c: char| c == '>' || c == '<' || c == '=' || c == '^' || c == '~' || c == '*') {
+        req_str = format!("={req_str}");
+    }
     let Ok(req) = VersionReq::parse(&req_str) else {
         return false;
     };

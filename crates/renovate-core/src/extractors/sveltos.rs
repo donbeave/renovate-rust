@@ -506,6 +506,60 @@ spec:
         );
     }
 
+    // Ported: "supports clusterpromotions" — sveltos/extract.spec.ts line 518
+    #[test]
+    fn clusterpromotion_kind_extracted() {
+        let content = r#"---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterPromotion
+metadata:
+  name: baseline
+spec:
+  profileSpec:
+    helmCharts:
+    - repositoryURL:    https://prometheus-community.github.io/helm-charts
+      repositoryName:   prometheus-community
+      chartName:        prometheus-community/prometheus
+      chartVersion:     "23.4.0"
+    - repositoryURL:    https://kyverno.github.io/kyverno/
+      repositoryName:   kyverno
+      chartName:        kyverno/kyverno
+      chartVersion:     "v3.2.5"
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterPromotion
+metadata:
+  name: vault
+spec:
+  profileSpec:
+    helmCharts:
+    - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+      repositoryName:   oci-vault
+      chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+      chartVersion:     0.7.2
+"#;
+        let deps = extract_with_registry_aliases(content, &[]);
+        assert_eq!(deps.len(), 3);
+        let prometheus = deps.iter().find(|d| d.dep_name == "prometheus-community/prometheus").unwrap();
+        assert_eq!(prometheus.current_value, "23.4.0");
+        assert_eq!(prometheus.datasource, "helm");
+        assert_eq!(prometheus.dep_type, "ClusterPromotion");
+        assert_eq!(prometheus.package_name, "prometheus");
+        assert_eq!(prometheus.registry_urls, vec!["https://prometheus-community.github.io/helm-charts"]);
+        let kyverno = deps.iter().find(|d| d.dep_name == "kyverno/kyverno").unwrap();
+        assert_eq!(kyverno.current_value, "v3.2.5");
+        assert_eq!(kyverno.datasource, "helm");
+        assert_eq!(kyverno.dep_type, "ClusterPromotion");
+        assert_eq!(kyverno.package_name, "kyverno");
+        assert_eq!(kyverno.registry_urls, vec!["https://kyverno.github.io/kyverno/"]);
+        let vault = deps.iter().find(|d| d.dep_name == "oci://registry-1.docker.io/bitnamicharts/vault").unwrap();
+        assert_eq!(vault.current_value, "0.7.2");
+        assert_eq!(vault.datasource, "docker");
+        assert_eq!(vault.dep_type, "ClusterPromotion");
+        assert_eq!(vault.package_name, "registry-1.docker.io/bitnamicharts/vault");
+        assert!(vault.registry_urls.is_empty());
+    }
+
     // Ported: "supports eventtriggers" — sveltos/extract.spec.ts line 554
     #[test]
     fn eventtrigger_kind_extracted() {

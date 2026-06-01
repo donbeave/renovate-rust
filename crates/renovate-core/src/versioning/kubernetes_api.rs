@@ -155,6 +155,7 @@ pub fn matches(version: &str, range: &str) -> bool {
 mod tests {
     use super::*;
 
+    // Ported: "isStable(\"$version\") === $expected" — versioning/kubernetes-api/index.spec.ts line 6
     #[test]
     fn is_stable_matches_renovate_kubernetes_api_index_spec() {
         assert!(is_stable("v1"));
@@ -163,6 +164,7 @@ mod tests {
         assert!(!is_stable("v1beta11"));
     }
 
+    // Ported: "isValid(\"$version\") === $expected" — versioning/kubernetes-api/index.spec.ts line 16
     #[test]
     fn is_valid_matches_renovate_kubernetes_api_index_spec() {
         assert!(is_valid("v1"));
@@ -182,6 +184,7 @@ mod tests {
         assert!(is_valid("acme.cert-manager.io/v1"));
     }
 
+    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — versioning/kubernetes-api/index.spec.ts line 37
     #[test]
     fn get_major_minor_patch_matches_renovate_kubernetes_api_index_spec() {
         let cases: &[(&str, i64, i64, i64)] = &[
@@ -199,6 +202,7 @@ mod tests {
         }
     }
 
+    // Ported: "equals(\"$version\", \"$other\") === $expected" — versioning/kubernetes-api/index.spec.ts line 54
     #[test]
     fn equals_matches_renovate_kubernetes_api_index_spec() {
         assert!(equals("v1", "v1"));
@@ -221,6 +225,7 @@ mod tests {
         assert!(!equals("apps/v1", "autoscaling/v1beta1"));
     }
 
+    // Ported: "matches(\"$version\", \"$other\") === $expected" — versioning/kubernetes-api/index.spec.ts line 81
     #[test]
     fn matches_matches_renovate_kubernetes_api_index_spec() {
         assert!(matches("v1", "v1"));
@@ -235,6 +240,7 @@ mod tests {
         assert!(!matches("v1alpha1", "v1beta2"));
     }
 
+    // Ported: "isGreaterThan(\"$version\", \"$other\") === $expected" — versioning/kubernetes-api/index.spec.ts line 100
     #[test]
     fn is_greater_than_matches_renovate_kubernetes_api_index_spec() {
         assert!(!is_greater_than("v1", "v2"));
@@ -246,6 +252,7 @@ mod tests {
         assert!(is_greater_than("v1beta2", "v1beta1"));
     }
 
+    // Ported: "sorts versions in an ascending order" — versioning/kubernetes-api/index.spec.ts line 116
     #[test]
     fn sort_versions_matches_renovate_kubernetes_api_index_spec() {
         let mut versions = vec![
