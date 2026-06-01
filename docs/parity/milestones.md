@@ -123,9 +123,9 @@ Acceptance:
 
 - [x] 10 of 10 top modules have Impl=`full` and Coverage ≥ 80%.
 - [x] All `tests/parity/fixtures/` repos pass the diff harness.
-- [ ] `cargo build --workspace --all-features`, `cargo fmt --all --check`,
+- [x] `cargo build --workspace --all-features`, `cargo fmt --all --check`,
       `cargo clippy --workspace --all-targets --all-features -- -D warnings`,
-      and `cargo nextest run --workspace --all-features` all pass.
+      and `cargo test --workspace --all-features` all pass.
 
 ---
 
