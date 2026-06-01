@@ -242,6 +242,24 @@ impl ArtifactRunner for CargoArtifactRunner {
             } else {
                 env.insert(path_key.to_owned(), dir_str);
             }
+
+            // Inject git auth env vars so private git dependencies can be fetched.
+            // Mirrors upstream getGitEnvironmentVariables with cargo hostType.
+            env.entry("GIT_TERMINAL_PROMPT".to_owned())
+                .or_insert_with(|| "0".to_owned());
+            for key in [
+                "GITHUB_TOKEN",
+                "GITLAB_TOKEN",
+                "BITBUCKET_TOKEN",
+                "SSH_AUTH_SOCK",
+                "GIT_CONFIG_GLOBAL",
+                "GIT_CONFIG_SYSTEM",
+            ] {
+                if let Ok(val) = std::env::var(key) {
+                    env.entry(key.to_owned()).or_insert(val);
+                }
+            }
+
             let cmds = Self::build_commands(
                 Path::new(&package_file_name),
                 &updated_deps,
