@@ -786,6 +786,7 @@ pub enum MavenFetchError {
     ConnectionError,
     UnsupportedHost,
     NotFound,
+    PermissionIssue,
 }
 
 /// Download XML from a Maven URL and parse it.
@@ -854,6 +855,66 @@ pub fn download_s3_protocol(url: &str) -> Result<(), MavenFetchError> {
     } else {
         Err(MavenFetchError::UnsupportedProtocol)
     }
+}
+
+/// Classify a raw network/HTTP error message into a `MavenFetchError`.
+///
+/// Mirrors the TypeScript `downloadHttpProtocol` error classification.
+pub fn classify_maven_fetch_error(err_msg: &str, status: Option<u16>) -> MavenFetchError {
+    let msg = err_msg.to_lowercase();
+    if msg.contains("host disabled") {
+        return MavenFetchError::HostDisabled;
+    }
+    if let Some(s) = status {
+        if s == 404 {
+            return MavenFetchError::NotFound;
+        }
+        if s == 429 || (500..600).contains(&s) {
+            return MavenFetchError::TemporaryError;
+        }
+    }
+    if msg.contains("timedout") || msg.contains("timeout") {
+        return MavenFetchError::HostError;
+    }
+    if msg.contains("connrefused") || msg.contains("connection refused") {
+        return MavenFetchError::ConnectionError;
+    }
+    if msg.contains("connreset") || msg.contains("connection reset") {
+        return MavenFetchError::TemporaryError;
+    }
+    if msg.contains("unsupported protocol") || msg.contains("unsupportedprotocolerror") {
+        return MavenFetchError::UnsupportedHost;
+    }
+    MavenFetchError::HostError
+}
+
+/// Download from an HTTP(S) Maven URL with typed error handling.
+///
+/// Mirrors upstream `downloadHttpProtocol`.
+/// Classifies HTTP and network errors into `MavenFetchError` variants.
+pub async fn download_http_protocol(
+    http: &HttpClient,
+    url: &str,
+) -> Result<String, MavenFetchError> {
+    let resp = match http.get_retrying(url).await {
+        Ok(r) => r,
+        Err(crate::http::HttpError::Request(e)) => {
+            return Err(classify_maven_fetch_error(&e.to_string(), None));
+        }
+        Err(crate::http::HttpError::Status { status, .. }) => {
+            return Err(classify_maven_fetch_error("", Some(status.as_u16())));
+        }
+        Err(_) => return Err(MavenFetchError::HostError),
+    };
+
+    let status = resp.status();
+    if !status.is_success() {
+        return Err(classify_maven_fetch_error("", Some(status.as_u16())));
+    }
+
+    resp.text()
+        .await
+        .map_err(|_| MavenFetchError::TemporaryError)
 }
 
 /// Result of post-processing a single Maven release.
@@ -2192,5 +2253,78 @@ mod tests {
         )
         .await;
         assert!(matches!(result, Err(MavenError::ExternalHostError)));
+    }
+
+    // Ported: "returns empty for host error" — modules/datasource/maven/util.spec.ts line 179
+    #[test]
+    fn classify_host_error_timeout() {
+        assert_eq!(
+            classify_maven_fetch_error("request timed out", None),
+            MavenFetchError::HostError
+        );
+    }
+
+    // Ported: "returns empty for temporary error" — modules/datasource/maven/util.spec.ts line 190
+    #[test]
+    fn classify_temporary_error_connreset() {
+        assert_eq!(
+            classify_maven_fetch_error("connection reset", None),
+            MavenFetchError::TemporaryError
+        );
+    }
+
+    // Ported: "returns empty for connection error" — modules/datasource/maven/util.spec.ts line 273
+    #[test]
+    fn classify_connection_error_connrefused() {
+        assert_eq!(
+            classify_maven_fetch_error("connection refused", None),
+            MavenFetchError::ConnectionError
+        );
+    }
+
+    // Ported: "returns empty for unsupported error" — modules/datasource/maven/util.spec.ts line 284
+    #[test]
+    fn classify_unsupported_host_error() {
+        assert_eq!(
+            classify_maven_fetch_error("UnsupportedProtocolError", None),
+            MavenFetchError::UnsupportedHost
+        );
+    }
+
+    // Ported: "returns empty for HOST_DISABLED error" — modules/datasource/maven/util.spec.ts line 168
+    #[test]
+    fn classify_host_disabled_error() {
+        assert_eq!(
+            classify_maven_fetch_error("Host disabled", None),
+            MavenFetchError::HostDisabled
+        );
+    }
+
+    #[tokio::test]
+    async fn download_http_protocol_404_returns_not_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = download_http_protocol(&http, &server.uri()).await;
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+    }
+
+    #[tokio::test]
+    async fn download_http_protocol_500_returns_temporary_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = download_http_protocol(&http, &server.uri()).await;
+        assert_eq!(result, Err(MavenFetchError::TemporaryError));
     }
 }
