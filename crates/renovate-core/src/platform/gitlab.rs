@@ -1698,6 +1698,7 @@ mod tests {
 
     // ── get_branch_pr ─────────────────────────────────────────────────────────
 
+    // Ported: "should return the PR object" — modules/platform/gitlab/index.spec.ts line 579
     #[tokio::test]
     async fn get_branch_pr_finds_open_mr() {
         let server = MockServer::start().await;
@@ -1745,6 +1746,7 @@ mod tests {
         assert_eq!(pr.title, "Update deps");
     }
 
+    // Ported: "should return null if no PR exists" — modules/platform/gitlab/index.spec.ts line 567
     #[tokio::test]
     async fn get_branch_pr_returns_none_when_no_mr() {
         let server = MockServer::start().await;
