@@ -583,6 +583,12 @@ resources:
         assert!(extract("not valid yaml: [").is_empty());
     }
 
+    // Ported: "returns null for invalid azure pipelines files" — azure-pipelines/extract.spec.ts line 215
+    #[test]
+    fn invalid_json_returns_empty() {
+        assert!(extract("}").is_empty());
+    }
+
     // Ported: "should return null when there is no dependency found" — azure-pipelines/extract.spec.ts line 245
     #[test]
     fn no_tasks_or_containers_returns_empty() {

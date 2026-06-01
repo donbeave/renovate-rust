@@ -205,6 +205,12 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "returns null for invalid quadlet file content" — quadlet/extract.spec.ts line 19
+    #[test]
+    fn invalid_quadlet_content_returns_empty() {
+        assert!(extract("random text").is_empty());
+    }
+
     // Ported: "handles an unsuccessful parse" — quadlet/extract.spec.ts line 158
     #[test]
     fn container_section_without_image_returns_empty() {

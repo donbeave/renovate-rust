@@ -176,6 +176,9 @@ pub async fn fetch_releases(
 
 #[cfg(test)]
 mod tests {
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
     use super::*;
 
     // Ported: "parses nightly URL" — rust-version/parse.spec.ts line 5
@@ -422,5 +425,47 @@ mod tests {
 
         assert_eq!(version_map.len(), 1);
         assert!(version_map.contains_key("1.82.0"));
+    }
+
+    // Ported: "fetches and parses manifest data" — rust-version/index.spec.ts line 10
+    #[tokio::test]
+    async fn fetches_and_parses_manifest_data() {
+        let server = MockServer::start().await;
+        let body = concat!(
+            "static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml\n",
+            "static.rust-lang.org/dist/2024-10-18/channel-rust-1.82.0.toml\n",
+            "static.rust-lang.org/dist/2024-10-19/channel-rust-nightly.toml\n",
+            "static.rust-lang.org/dist/2024-10-19/channel-rust-stable.toml\n",
+        );
+        Mock::given(method("GET"))
+            .and(path("/manifests.txt"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), &http).await.unwrap();
+        assert!(result.is_some());
+        let result = result.unwrap();
+        assert_eq!(result.releases.len(), 2);
+        // stable/beta filtered out; 1.82.0 deduplicated to latest date
+        let versions: Vec<_> = result.releases.iter().map(|r| r.version.as_str()).collect();
+        assert!(versions.contains(&"1.82.0"));
+        assert!(versions.contains(&"nightly-2024-10-19"));
+    }
+
+    // Ported: "throws for network error" — rust-version/index.spec.ts line 118
+    #[tokio::test]
+    async fn throws_for_network_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/manifests.txt"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), &http).await;
+        assert!(result.is_err());
     }
 }

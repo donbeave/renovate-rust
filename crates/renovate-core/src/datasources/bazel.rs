@@ -390,4 +390,19 @@ mod tests {
             .unwrap();
         assert!(result.is_none());
     }
+
+    // Ported: "parses metadata" — datasource/bazel/schema.spec.ts line 6
+    #[test]
+    fn parses_bazel_metadata_schema() {
+        let json = r#"{
+            "versions": ["1.0.0", "1.1.0", "1.2.0", "2.0.0"],
+            "yanked_versions": {"1.1.0": "has a bug"},
+            "homepage": "https://github.com/bazelbuild/rules_foo"
+        }"#;
+        let meta: BazelMetadata = serde_json::from_str(json).unwrap();
+        assert_eq!(meta.versions.len(), 4);
+        assert_eq!(meta.yanked_versions.len(), 1);
+        assert!(meta.yanked_versions.contains_key("1.1.0"));
+        assert_eq!(meta.homepage.as_deref(), Some("https://github.com/bazelbuild/rules_foo"));
+    }
 }

@@ -598,4 +598,27 @@ spec:
         assert_eq!(deps[0].current_value, "v1.0.0");
         assert!(deps[0].skip_reason.is_none());
     }
+
+    // Ported: "extracts image line in a YAML array" — kubernetes/extract.spec.ts line 71
+    #[test]
+    fn extracts_image_line_in_yaml_array() {
+        let content = r#"
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: local-volume-provisioner
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      containers:
+      - image: "quay.io/external_storage/local-volume-provisioner:v2.1.0"
+        name: provisioner
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image_name, "quay.io/external_storage/local-volume-provisioner");
+        assert_eq!(deps[0].current_value, "v2.1.0");
+        assert!(deps[0].skip_reason.is_none());
+    }
 }
