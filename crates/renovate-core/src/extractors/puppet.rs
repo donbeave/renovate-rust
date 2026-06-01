@@ -622,17 +622,19 @@ mod 'mock/mockpuppetdb', '1.9.0'
         let deps = extract(content);
         assert_eq!(deps.len(), 6);
 
-        let default_mods: Vec<_> = deps
-            .iter()
-            .filter(|d| matches!(&d.source, PuppetSource::PuppetForge { forge_url: Some(u) } if u == "https://forgeapi.puppetlabs.com"))
-            .collect();
-        assert_eq!(default_mods.len(), 3);
+        assert_eq!(
+            deps.iter()
+                .filter(|d| matches!(&d.source, PuppetSource::PuppetForge { forge_url: Some(u) } if u == "https://forgeapi.puppetlabs.com"))
+                .count(),
+            3
+        );
 
-        let other_mods: Vec<_> = deps
-            .iter()
-            .filter(|d| matches!(&d.source, PuppetSource::PuppetForge { forge_url: Some(u) } if u == "https://some-other-puppet-forge.com"))
-            .collect();
-        assert_eq!(other_mods.len(), 3);
+        assert_eq!(
+            deps.iter()
+                .filter(|d| matches!(&d.source, PuppetSource::PuppetForge { forge_url: Some(u) } if u == "https://some-other-puppet-forge.com"))
+                .count(),
+            3
+        );
     }
 
     // Ported: "Puppetfile_no_forge" — puppet/puppetfile-parser.spec.ts line 133
