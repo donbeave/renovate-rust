@@ -23,214 +23,214 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5787 / 11670 distinct upstream it() tests ported (49.6%) across 292 modules.
-**Quality:** 6500 `// Ported:` comments → 713 duplicate, 0 orphan, 0 malformed.
+**Total:** 5796 / 11670 distinct upstream it() tests ported (49.7%) across 292 modules.
+**Quality:** 6509 `// Ported:` comments → 713 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2535/3642 (70%)
+## managers  —  2544/3642 (70%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `manager/_common` | 5 | ? | 24/39 (62%) | — |
-| `manager/ansible` | 1 | ? | 6/6 (100%) | — |
-| `manager/ansible-galaxy` | 1 | ? | 14/14 (100%) | — |
-| `manager/ant` | 3 | ? | 65/65 (100%) | — |
-| `manager/argocd` | 1 | ? | 8/8 (100%) | — |
-| `manager/asdf` | 2 | ? | 14/14 (100%) | — |
-| `manager/azure-pipelines` | 1 | ? | 28/29 (97%) | — |
-| `manager/batect` | 1 | ? | 4/4 (100%) | — |
-| `manager/batect-wrapper` | 2 | ? | 4/7 (57%) | — |
-| `manager/bazel` | 5 | ? | 24/46 (52%) | — |
-| `manager/bazel-module` | 10 | ? | 91/110 (83%) | — |
-| `manager/bazelisk` | 2 | ? | 4/10 (40%) | — |
-| `manager/bicep` | 1 | ? | 9/9 (100%) | — |
-| `manager/bitbucket-pipelines` | 1 | ? | 4/4 (100%) | — |
-| `manager/bitrise` | 2 | ? | 9/9 (100%) | — |
-| `manager/buildkite` | 1 | ? | 11/11 (100%) | — |
-| `manager/buildpacks` | 1 | ? | 3/3 (100%) | — |
-| `manager/bun` | 3 | ? | 3/34 (9%) | — |
-| `manager/bun-version` | 1 | ? | 6/6 (100%) | — |
+| `manager/_common` | 5 | full | 24/39 (62%) | 2246 code lines, 62% test coverage |
+| `manager/ansible` | 1 | full | 6/6 (100%) | 259 code lines |
+| `manager/ansible-galaxy` | 1 | full | 14/14 (100%) | 617 code lines |
+| `manager/ant` | 3 | full | 65/65 (100%) | 1778 code lines |
+| `manager/argocd` | 1 | full | 8/8 (100%) | 686 code lines |
+| `manager/asdf` | 2 | full | 14/14 (100%) | 1837 code lines |
+| `manager/azure-pipelines` | 1 | full | 28/29 (97%) | 691 code lines |
+| `manager/batect` | 1 | full | 4/4 (100%) | 350 code lines |
+| `manager/batect-wrapper` | 2 | partial | 4/7 (57%) | 61 code lines, partial implementation |
+| `manager/bazel` | 5 | full | 24/46 (52%) | 844 code lines, 52% test coverage |
+| `manager/bazel-module` | 10 | full | 91/110 (83%) | 3570 code lines |
+| `manager/bazelisk` | 2 | partial | 4/10 (40%) | 64 code lines, partial implementation |
+| `manager/bicep` | 1 | partial | 9/9 (100%) | 170 code lines, partial implementation |
+| `manager/bitbucket-pipelines` | 1 | full | 4/4 (100%) | 466 code lines |
+| `manager/bitrise` | 2 | full | 9/9 (100%) | 430 code lines |
+| `manager/buildkite` | 1 | full | 11/11 (100%) | 376 code lines |
+| `manager/buildpacks` | 1 | full | 3/3 (100%) | 249 code lines |
+| `manager/bun` | 3 | none | 3/34 (9%) | Not implemented |
+| `manager/bun-version` | 1 | partial | 6/6 (100%) | 79 code lines, partial implementation |
 | `manager/bundler` | 7 | full | 60/74 (81%) | Extractor complete; artifact gaps are lockfile maintenance via external bundler invocation. |
-| `manager/cake` | 1 | ? | 3/5 (60%) | — |
+| `manager/cake` | 1 | full | 3/5 (60%) | 310 code lines, 60% test coverage |
 | `manager/cargo` | 6 | full | 62/73 (85%) | M1 complete |
-| `manager/cdnurl` | 1 | ? | 1/1 (100%) | — |
-| `manager/circleci` | 4 | ? | 13/14 (93%) | — |
-| `manager/cloudbuild` | 1 | ? | 2/2 (100%) | — |
-| `manager/cocoapods` | 2 | ? | 2/13 (15%) | — |
-| `manager/composer` | 6 | ? | 22/89 (25%) | — |
-| `manager/conan` | 3 | ? | 6/17 (35%) | — |
-| `manager/copier` | 3 | ? | 11/25 (44%) | — |
-| `manager/cpanfile` | 1 | ? | 11/11 (100%) | — |
-| `manager/crossplane` | 1 | ? | 9/9 (100%) | — |
-| `manager/crow` | 1 | ? | 15/15 (100%) | — |
-| `manager/custom` | 4 | ? | 9/54 (17%) | — |
-| `manager/deno` | 6 | ? | 27/144 (19%) | — |
-| `manager/deps-edn` | 2 | ? | 4/4 (100%) | — |
-| `manager/devbox` | 2 | ? | 13/28 (46%) | — |
-| `manager/devcontainer` | 1 | ? | 15/15 (100%) | — |
-| `manager/docker-compose` | 1 | full | 13/13 (100%) | — |
-| `manager/dockerfile` | 1 | full | 76/76 (100%) | — |
-| `manager/droneci` | 1 | ? | 5/5 (100%) | — |
-| `manager/fleet` | 1 | ? | 8/10 (80%) | — |
-| `manager/flux` | 2 | ? | 59/66 (89%) | — |
-| `manager/fvm` | 1 | ? | 7/7 (100%) | — |
-| `manager/git-submodules` | 3 | ? | 13/16 (81%) | — |
+| `manager/cdnurl` | 1 | partial | 1/1 (100%) | 76 code lines, mostly stubs |
+| `manager/circleci` | 4 | full | 13/14 (93%) | 629 code lines |
+| `manager/cloudbuild` | 1 | partial | 2/2 (100%) | 179 code lines, partial implementation |
+| `manager/cocoapods` | 2 | full | 2/13 (15%) | 388 code lines, 15% test coverage |
+| `manager/composer` | 6 | full | 22/89 (25%) | 1210 code lines, 25% test coverage |
+| `manager/conan` | 3 | full | 6/17 (35%) | 303 code lines, 35% test coverage |
+| `manager/copier` | 3 | partial | 11/25 (44%) | 193 code lines, partial implementation |
+| `manager/cpanfile` | 1 | full | 11/11 (100%) | 406 code lines |
+| `manager/crossplane` | 1 | full | 9/9 (100%) | 272 code lines |
+| `manager/crow` | 1 | full | 15/15 (100%) | 375 code lines |
+| `manager/custom` | 4 | none | 9/54 (17%) | Not implemented |
+| `manager/deno` | 6 | full | 27/144 (19%) | 975 code lines, 19% test coverage |
+| `manager/deps-edn` | 2 | full | 4/4 (100%) | 629 code lines |
+| `manager/devbox` | 2 | full | 13/28 (46%) | 221 code lines, 46% test coverage |
+| `manager/devcontainer` | 1 | full | 15/15 (100%) | 295 code lines |
+| `manager/docker-compose` | 1 | full | 13/13 (100%) | 608 code lines |
+| `manager/dockerfile` | 1 | full | 76/76 (100%) | 1696 code lines |
+| `manager/droneci` | 1 | full | 5/5 (100%) | 317 code lines |
+| `manager/fleet` | 1 | full | 8/10 (80%) | 654 code lines |
+| `manager/flux` | 2 | full | 59/66 (89%) | 1894 code lines |
+| `manager/fvm` | 1 | partial | 7/7 (100%) | 80 code lines, partial implementation |
+| `manager/git-submodules` | 3 | full | 13/16 (81%) | 581 code lines |
 | `manager/github-actions` | 3 | full | 81/98 (83%) | Extractor complete; remaining gaps are worker-layer integration tests. |
-| `manager/gitlabci` | 2 | ? | 17/18 (94%) | — |
-| `manager/gitlabci-include` | 1 | ? | 8/8 (100%) | — |
-| `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
-| `manager/gleam` | 4 | ? | 18/30 (60%) | — |
+| `manager/gitlabci` | 2 | full | 17/18 (94%) | 1108 code lines |
+| `manager/gitlabci-include` | 1 | full | 8/8 (100%) | 431 code lines |
+| `manager/glasskube` | 1 | partial | 3/5 (60%) | 140 code lines, partial implementation |
+| `manager/gleam` | 4 | full | 18/30 (60%) | 432 code lines, 60% test coverage |
 | `manager/gomod` | 6 | full | 124/155 (80%) | Extractor complete; artifact gaps are go mod tidy/vendor via external go invocation. |
-| `manager/gradle` | 8 | ? | 42/143 (29%) | — |
-| `manager/gradle-wrapper` | 3 | ? | 20/36 (56%) | — |
-| `manager/haskell-cabal` | 2 | ? | 8/8 (100%) | — |
-| `manager/helm-requirements` | 1 | full | 11/11 (100%) | — |
-| `manager/helm-values` | 1 | ? | 6/6 (100%) | — |
-| `manager/helmfile` | 2 | ? | 20/29 (69%) | — |
-| `manager/helmsman` | 1 | ? | 4/4 (100%) | — |
-| `manager/helmv3` | 5 | ? | 26/52 (50%) | — |
-| `manager/hermit` | 4 | ? | 6/14 (43%) | — |
-| `manager/homeassistant-manifest` | 1 | ? | 16/16 (100%) | — |
-| `manager/homebrew` | 5 | ? | 52/64 (81%) | — |
-| `manager/html` | 1 | ? | 2/2 (100%) | — |
-| `manager/jenkins` | 1 | ? | 5/5 (100%) | — |
-| `manager/jsonnet-bundler` | 2 | ? | 7/12 (58%) | — |
-| `manager/kotlin-script` | 2 | ? | 5/5 (100%) | — |
-| `manager/kubernetes` | 1 | ? | 15/15 (100%) | — |
-| `manager/kustomize` | 3 | ? | 47/68 (69%) | — |
-| `manager/leiningen` | 1 | ? | 4/4 (100%) | — |
+| `manager/gradle` | 8 | full | 42/143 (29%) | 3334 code lines, 29% test coverage |
+| `manager/gradle-wrapper` | 3 | full | 20/36 (56%) | 363 code lines, 56% test coverage |
+| `manager/haskell-cabal` | 2 | none | 8/8 (100%) | Not implemented |
+| `manager/helm-requirements` | 1 | none | 11/11 (100%) | Not implemented |
+| `manager/helm-values` | 1 | full | 6/6 (100%) | 411 code lines |
+| `manager/helmfile` | 2 | full | 20/29 (69%) | 1136 code lines, 69% test coverage |
+| `manager/helmsman` | 1 | full | 4/4 (100%) | 382 code lines |
+| `manager/helmv3` | 5 | none | 26/52 (50%) | Not implemented |
+| `manager/hermit` | 4 | full | 6/14 (43%) | 222 code lines, 43% test coverage |
+| `manager/homeassistant-manifest` | 1 | none | 16/16 (100%) | Not implemented |
+| `manager/homebrew` | 5 | full | 52/64 (81%) | 1299 code lines |
+| `manager/html` | 1 | partial | 2/2 (100%) | 195 code lines, partial implementation |
+| `manager/jenkins` | 1 | full | 5/5 (100%) | 359 code lines |
+| `manager/jsonnet-bundler` | 2 | full | 7/12 (58%) | 315 code lines, 58% test coverage |
+| `manager/kotlin-script` | 2 | partial | 5/5 (100%) | 157 code lines, partial implementation |
+| `manager/kubernetes` | 1 | full | 15/15 (100%) | 579 code lines |
+| `manager/kustomize` | 3 | full | 47/68 (69%) | 1592 code lines, 69% test coverage |
+| `manager/leiningen` | 1 | full | 4/4 (100%) | 456 code lines |
 | `manager/maven` | 3 | full | 55/56 (98%) | Cross-file property resolution (resolveParents) implemented. One apparent gap is a duplicate upstream test description. |
-| `manager/maven-wrapper` | 2 | ? | 9/39 (23%) | — |
-| `manager/meteor` | 1 | ? | 2/2 (100%) | — |
-| `manager/mint` | 1 | ? | 5/5 (100%) | — |
-| `manager/mise` | 7 | ? | 90/113 (80%) | — |
-| `manager/mix` | 3 | ? | 8/28 (29%) | — |
-| `manager/nix` | 3 | ? | 40/50 (80%) | — |
-| `manager/nodenv` | 1 | ? | 3/3 (100%) | — |
+| `manager/maven-wrapper` | 2 | full | 9/39 (23%) | 260 code lines, 23% test coverage |
+| `manager/meteor` | 1 | partial | 2/2 (100%) | 82 code lines, mostly stubs |
+| `manager/mint` | 1 | partial | 5/5 (100%) | 152 code lines, partial implementation |
+| `manager/mise` | 7 | full | 90/113 (80%) | 2976 code lines |
+| `manager/mix` | 3 | full | 8/28 (29%) | 429 code lines, 29% test coverage |
+| `manager/nix` | 3 | full | 40/50 (80%) | 1758 code lines |
+| `manager/nodenv` | 1 | none | 3/3 (100%) | Not implemented |
 | `manager/npm` | 32 | full | 352/439 (80%) | M2 complete |
 | `manager/nuget` | 6 | full | 80/93 (86%) | Extractor complete; artifact gaps are lockfile restore via external dotnet invocation. |
-| `manager/nvm` | 1 | ? | 4/4 (100%) | — |
-| `manager/ocb` | 2 | ? | 9/9 (100%) | — |
-| `manager/osgi` | 1 | ? | 14/14 (100%) | — |
-| `manager/pep621` | 6 | ? | 19/48 (40%) | — |
-| `manager/pep723` | 2 | ? | 6/6 (100%) | — |
-| `manager/pip-compile` | 4 | ? | 13/90 (14%) | — |
-| `manager/pip_requirements` | 4 | ? | 34/36 (94%) | — |
-| `manager/pip_setup` | 1 | ? | 2/2 (100%) | — |
-| `manager/pipenv` | 2 | ? | 15/37 (41%) | — |
-| `manager/pixi` | 2 | ? | 22/26 (85%) | — |
-| `manager/poetry` | 4 | ? | 37/71 (52%) | — |
-| `manager/pre-commit` | 1 | ? | 12/12 (100%) | — |
-| `manager/proto` | 2 | ? | 16/16 (100%) | — |
-| `manager/pub` | 3 | ? | 6/21 (29%) | — |
-| `manager/puppet` | 3 | full | 21/21 (100%) | — |
-| `manager/pyenv` | 1 | ? | 3/3 (100%) | — |
-| `manager/quadlet` | 1 | ? | 11/11 (100%) | — |
-| `manager/renovate-config` | 1 | ? | 18/20 (90%) | — |
-| `manager/ruby-version` | 1 | ? | 3/3 (100%) | — |
-| `manager/runtime-version` | 1 | ? | 2/2 (100%) | — |
-| `manager/rust-toolchain` | 2 | ? | 23/23 (100%) | — |
-| `manager/sbt` | 3 | ? | 38/38 (100%) | — |
-| `manager/scalafmt` | 1 | ? | 4/4 (100%) | — |
-| `manager/setup-cfg` | 1 | ? | 2/2 (100%) | — |
-| `manager/sveltos` | 1 | ? | 14/14 (100%) | — |
-| `manager/swift` | 4 | ? | 28/59 (47%) | — |
-| `manager/tekton` | 1 | ? | 5/5 (100%) | — |
-| `manager/terraform` | 13 | full | 74/88 (84%) | Lockfile maintenance (updateAllLocks) implemented. |
-| `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
+| `manager/nvm` | 1 | none | 4/4 (100%) | Not implemented |
+| `manager/ocb` | 2 | full | 9/9 (100%) | 260 code lines |
+| `manager/osgi` | 1 | full | 14/14 (100%) | 342 code lines |
+| `manager/pep621` | 6 | full | 19/48 (40%) | 1308 code lines, 40% test coverage |
+| `manager/pep723` | 2 | full | 6/6 (100%) | 336 code lines |
+| `manager/pip-compile` | 4 | full | 13/90 (14%) | 276 code lines, 14% test coverage |
+| `manager/pip_requirements` | 4 | none | 34/36 (94%) | Not implemented |
+| `manager/pip_setup` | 1 | partial | 2/2 (100%) | 170 code lines, partial implementation |
+| `manager/pipenv` | 2 | none | 15/37 (41%) | Not implemented |
+| `manager/pixi` | 2 | full | 22/26 (85%) | 554 code lines |
+| `manager/poetry` | 4 | full | 37/71 (52%) | 1521 code lines, 52% test coverage |
+| `manager/pre-commit` | 1 | full | 12/12 (100%) | 523 code lines |
+| `manager/proto` | 2 | full | 16/16 (100%) | 296 code lines |
+| `manager/pub` | 3 | none | 6/21 (29%) | Not implemented |
+| `manager/puppet` | 3 | full | 21/21 (100%) | 656 code lines |
+| `manager/pyenv` | 1 | partial | 3/3 (100%) | 65 code lines, mostly stubs |
+| `manager/quadlet` | 1 | full | 11/11 (100%) | 214 code lines |
+| `manager/renovate-config` | 1 | none | 18/20 (90%) | Not implemented |
+| `manager/ruby-version` | 1 | none | 3/3 (100%) | Not implemented |
+| `manager/runtime-version` | 1 | partial | 2/2 (100%) | 69 code lines, partial implementation |
+| `manager/rust-toolchain` | 2 | full | 23/23 (100%) | 252 code lines |
+| `manager/sbt` | 3 | full | 38/38 (100%) | 1168 code lines |
+| `manager/scalafmt` | 1 | partial | 4/4 (100%) | 69 code lines, partial implementation |
+| `manager/setup-cfg` | 1 | full | 2/2 (100%) | 258 code lines |
+| `manager/sveltos` | 1 | full | 14/14 (100%) | 564 code lines |
+| `manager/swift` | 4 | none | 28/59 (47%) | Not implemented |
+| `manager/tekton` | 1 | full | 5/5 (100%) | 220 code lines |
+| `manager/terraform` | 13 | full | 83/88 (94%) | Lockfile maintenance (updateAllLocks) implemented. |
+| `manager/terraform-version` | 1 | none | 2/2 (100%) | Not implemented |
 | `manager/terragrunt` | 4 | full | 17/18 (94%) | Artifact delegation to terraform implemented. One apparent gap is a duplicate upstream test description. |
-| `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |
-| `manager/tflint-plugin` | 1 | ? | 6/6 (100%) | — |
-| `manager/travis` | 1 | ? | 8/8 (100%) | — |
-| `manager/typst` | 1 | ? | 9/9 (100%) | — |
-| `manager/unity3d` | 1 | ? | 3/3 (100%) | — |
-| `manager/velaci` | 1 | ? | 6/6 (100%) | — |
-| `manager/vendir` | 2 | ? | 5/19 (26%) | — |
-| `manager/woodpecker` | 1 | ? | 11/11 (100%) | — |
-| `manager/xcodegen` | 1 | ? | 24/24 (100%) | — |
+| `manager/terragrunt-version` | 1 | none | 1/1 (100%) | Not implemented |
+| `manager/tflint-plugin` | 1 | full | 6/6 (100%) | 301 code lines |
+| `manager/travis` | 1 | partial | 8/8 (100%) | 189 code lines, partial implementation |
+| `manager/typst` | 1 | partial | 9/9 (100%) | 189 code lines, partial implementation |
+| `manager/unity3d` | 1 | partial | 3/3 (100%) | 136 code lines, partial implementation |
+| `manager/velaci` | 1 | partial | 6/6 (100%) | 113 code lines, partial implementation |
+| `manager/vendir` | 2 | partial | 5/19 (26%) | 164 code lines, partial implementation |
+| `manager/woodpecker` | 1 | full | 11/11 (100%) | 300 code lines |
+| `manager/xcodegen` | 1 | full | 24/24 (100%) | 700 code lines |
 
 ## datasources  —  678/1379 (49%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `datasource/_common` | 7 | ? | 49/125 (39%) | — |
+| `datasource/_common` | 7 | none | 49/125 (39%) | Not implemented |
 | `datasource/artifactory` | 1 | full | 8/8 (100%) |  |
-| `datasource/aws-eks-addon` | 2 | ? | 1/8 (12%) | — |
-| `datasource/aws-machine-image` | 1 | ? | 0/14 (0%) | — |
-| `datasource/aws-rds` | 1 | ? | 0/3 (0%) | — |
-| `datasource/azure-bicep-resource` | 1 | full | 4/4 (100%) |  |
+| `datasource/aws-eks-addon` | 2 | full | 1/8 (12%) | 216 code lines, 12% test coverage |
+| `datasource/aws-machine-image` | 1 | partial | 0/14 (0%) | 189 code lines, partial implementation |
+| `datasource/aws-rds` | 1 | partial | 0/3 (0%) | 129 code lines, partial implementation |
+| `datasource/azure-bicep-resource` | 1 | none | 4/4 (100%) |  |
 | `datasource/azure-pipelines-tasks` | 1 | full | 10/10 (100%) |  |
-| `datasource/azure-tags` | 1 | ? | 2/5 (40%) | — |
+| `datasource/azure-tags` | 1 | partial | 2/5 (40%) | 103 code lines, partial implementation |
 | `datasource/bazel` | 2 | full | 11/11 (100%) |  |
-| `datasource/bitbucket-server-tags` | 2 | ? | 10/13 (77%) | — |
-| `datasource/bitbucket-tags` | 1 | ? | 4/5 (80%) | — |
+| `datasource/bitbucket-server-tags` | 2 | full | 10/13 (77%) | 417 code lines |
+| `datasource/bitbucket-tags` | 1 | full | 4/5 (80%) | 307 code lines |
 | `datasource/bitrise` | 1 | full | 7/7 (100%) |  |
 | `datasource/buildpacks-registry` | 2 | full | 4/4 (100%) |  |
 | `datasource/cdnjs` | 1 | full | 13/14 (93%) |  |
 | `datasource/clojure` | 1 | full | 9/9 (100%) |  |
-| `datasource/conan` | 1 | ? | 0/22 (0%) | — |
+| `datasource/conan` | 1 | partial | 0/22 (0%) | 140 code lines, partial implementation |
 | `datasource/conda` | 1 | full | 9/9 (100%) |  |
 | `datasource/cpan` | 2 | full | 8/8 (100%) |  |
 | `datasource/crate` | 1 | full | 22/27 (81%) | M1 complete |
-| `datasource/custom` | 1 | ? | 1/30 (3%) | — |
-| `datasource/dart` | 1 | full | 6/6 (100%) |  |
-| `datasource/dart-version` | 1 | ? | 2/4 (50%) | — |
-| `datasource/deb` | 5 | ? | 8/26 (31%) | — |
+| `datasource/custom` | 1 | full | 1/30 (3%) | 333 code lines, 3% test coverage |
+| `datasource/dart` | 1 | none | 6/6 (100%) |  |
+| `datasource/dart-version` | 1 | partial | 2/4 (50%) | 142 code lines, partial implementation |
+| `datasource/deb` | 5 | partial | 8/26 (31%) | 184 code lines, partial implementation |
 | `datasource/deno` | 1 | full | 6/6 (100%) |  |
 | `datasource/devbox` | 1 | full | 9/9 (100%) |  |
-| `datasource/docker` | 4 | partial | 4/119 (3%) | Basic Docker Hub/ECR/Google implementations exist. Missing: registry auth, manifest parsing, tag filtering, pagination. |
-| `datasource/dotnet-version` | 1 | ? | 3/9 (33%) | — |
-| `datasource/elm-package` | 1 | ? | 4/10 (40%) | — |
-| `datasource/endoflife-date` | 1 | full | 7/7 (100%) |  |
-| `datasource/flutter-version` | 1 | ? | 2/4 (50%) | — |
-| `datasource/forgejo-releases` | 1 | full | 5/5 (100%) |  |
-| `datasource/forgejo-tags` | 1 | full | 5/5 (100%) |  |
+| `datasource/docker` | 4 | full | 4/119 (3%) | Basic Docker Hub/ECR/Google implementations exist. Missing: registry auth, manifest parsing, tag filtering, pagination. |
+| `datasource/dotnet-version` | 1 | full | 3/9 (33%) | 286 code lines, 33% test coverage |
+| `datasource/elm-package` | 1 | partial | 4/10 (40%) | 164 code lines, partial implementation |
+| `datasource/endoflife-date` | 1 | none | 7/7 (100%) |  |
+| `datasource/flutter-version` | 1 | partial | 2/4 (50%) | 147 code lines, partial implementation |
+| `datasource/forgejo-releases` | 1 | partial | 5/5 (100%) |  |
+| `datasource/forgejo-tags` | 1 | partial | 5/5 (100%) |  |
 | `datasource/galaxy` | 1 | full | 11/11 (100%) |  |
 | `datasource/galaxy-collection` | 1 | full | 15/15 (100%) |  |
-| `datasource/git-refs` | 1 | ? | 8/11 (73%) | — |
-| `datasource/git-tags` | 1 | full | 7/8 (88%) | 1 non-applicable auth-env test (GraphQL-only) |
+| `datasource/git-refs` | 1 | full | 8/11 (73%) | 273 code lines |
+| `datasource/git-tags` | 1 | partial | 7/8 (88%) | 1 non-applicable auth-env test (GraphQL-only) |
 | `datasource/gitea-releases` | 1 | full | 5/5 (100%) |  |
 | `datasource/gitea-tags` | 1 | full | 5/5 (100%) |  |
-| `datasource/github-digest` | 1 | ? | 0/10 (0%) | — |
-| `datasource/github-release-attachments` | 2 | ? | 0/16 (0%) | — |
+| `datasource/github-digest` | 1 | full | 0/10 (0%) | 224 code lines, 0% test coverage |
+| `datasource/github-release-attachments` | 2 | full | 0/16 (0%) | 291 code lines, 0% test coverage |
 | `datasource/github-releases` | 1 | full | 5/5 (100%) |  |
 | `datasource/github-runners` | 1 | full | 4/4 (100%) |  |
 | `datasource/github-tags` | 1 | full | 11/12 (92%) | 1 non-applicable GraphQL test |
 | `datasource/gitlab-packages` | 1 | full | 5/5 (100%) |  |
-| `datasource/gitlab-releases` | 1 | full | 3/3 (100%) |  |
+| `datasource/gitlab-releases` | 1 | partial | 3/3 (100%) |  |
 | `datasource/gitlab-tags` | 2 | full | 8/9 (89%) | Max possible (duplicate it('works') descs in util.spec.ts) |
 | `datasource/glasskube-packages` | 1 | full | 7/7 (100%) |  |
-| `datasource/go` | 6 | ? | 9/96 (9%) | — |
+| `datasource/go` | 6 | full | 9/96 (9%) | 878 code lines, 9% test coverage |
 | `datasource/golang-version` | 1 | full | 10/10 (100%) |  |
 | `datasource/gradle-version` | 1 | full | 4/4 (100%) |  |
 | `datasource/hackage` | 1 | full | 4/4 (100%) |  |
 | `datasource/helm` | 2 | full | 15/15 (100%) |  |
 | `datasource/hermit` | 1 | full | 10/10 (100%) |  |
-| `datasource/hex` | 2 | ? | 2/35 (6%) | — |
+| `datasource/hex` | 2 | full | 2/35 (6%) | 212 code lines, 6% test coverage |
 | `datasource/hexpm-bob` | 1 | full | 9/9 (100%) |  |
 | `datasource/java-version` | 2 | full | 12/12 (100%) |  |
 | `datasource/jenkins-plugins` | 1 | full | 5/5 (100%) |  |
 | `datasource/jsr` | 2 | full | 15/15 (100%) |  |
-| `datasource/kubernetes-api` | 1 | full | 3/3 (100%) |  |
+| `datasource/kubernetes-api` | 1 | partial | 3/3 (100%) |  |
 | `datasource/maven` | 6 | full | 73/85 (86%) | Core fetching, multi-registry fallback/merging, parent POM resolution, postprocessRelease, Gradle plugin detection, XML schema trimming, S3 download support implemented. Missing: caching integration, auth/redirect handling, Artifact Registry support. |
 | `datasource/nextcloud` | 1 | full | 5/5 (100%) |  |
-| `datasource/node-version` | 1 | ? | 2/4 (50%) | — |
+| `datasource/node-version` | 1 | partial | 2/4 (50%) | 142 code lines, partial implementation |
 | `datasource/npm` | 4 | full | 52/64 (81%) | M2 complete |
-| `datasource/nuget` | 2 | ? | 2/37 (5%) | — |
+| `datasource/nuget` | 2 | full | 2/37 (5%) | 371 code lines, 5% test coverage |
 | `datasource/orb` | 1 | full | 7/7 (100%) |  |
-| `datasource/packagist` | 2 | ? | 0/25 (0%) | — |
-| `datasource/pod` | 1 | ? | 2/19 (11%) | — |
+| `datasource/packagist` | 2 | full | 0/25 (0%) | 345 code lines, 0% test coverage |
+| `datasource/pod` | 1 | none | 2/19 (11%) | Not implemented |
 | `datasource/puppet-forge` | 1 | full | 8/8 (100%) |  |
-| `datasource/pypi` | 1 | ? | 2/39 (5%) | — |
+| `datasource/pypi` | 1 | full | 2/39 (5%) | 441 code lines, 5% test coverage |
 | `datasource/python-version` | 1 | full | 10/10 (100%) |  |
 | `datasource/repology` | 1 | full | 18/19 (95%) |  |
-| `datasource/rpm` | 1 | ? | 0/28 (0%) | — |
+| `datasource/rpm` | 1 | full | 0/28 (0%) | 439 code lines, 0% test coverage |
 | `datasource/ruby-version` | 1 | full | 3/3 (100%) |  |
-| `datasource/rubygems` | 4 | ? | 3/35 (9%) | — |
+| `datasource/rubygems` | 4 | full | 3/35 (9%) | 466 code lines, 9% test coverage |
 | `datasource/rust-version` | 2 | full | 18/18 (100%) |  |
 | `datasource/sbt-package` | 2 | full | 12/14 (86%) |  |
 | `datasource/sbt-plugin` | 1 | full | 7/8 (88%) |  |
-| `datasource/terraform-module` | 3 | ? | 9/23 (39%) | — |
-| `datasource/terraform-provider` | 1 | ? | 0/18 (0%) | — |
+| `datasource/terraform-module` | 3 | none | 9/23 (39%) | Not implemented |
+| `datasource/terraform-provider` | 1 | none | 0/18 (0%) | Not implemented |
 | `datasource/typst` | 1 | full | 6/6 (100%) |  |
 | `datasource/unity3d` | 1 | full | 9/9 (100%) |  |
 | `datasource/unity3d-packages` | 1 | full | 5/5 (100%) |  |
@@ -239,30 +239,30 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `platform/_common` | 7 | ? | 13/48 (27%) | — |
-| `platform/azure` | 4 | ? | 28/131 (21%) | — |
-| `platform/bitbucket` | 3 | ? | 0/109 (0%) | — |
-| `platform/bitbucket-server` | 3 | ? | 6/160 (4%) | — |
-| `platform/codecommit` | 1 | ? | 0/58 (0%) | — |
-| `platform/forgejo` | 5 | ? | 10/187 (5%) | — |
-| `platform/gerrit` | 4 | ? | 0/158 (0%) | — |
-| `platform/gitea` | 5 | ? | 0/183 (0%) | — |
+| `platform/_common` | 7 | full | 13/48 (27%) | 303 code lines, 27% test coverage |
+| `platform/azure` | 4 | full | 28/131 (21%) | 718 code lines, 21% test coverage |
+| `platform/bitbucket` | 3 | full | 0/109 (0%) | 719 code lines, 0% test coverage |
+| `platform/bitbucket-server` | 3 | full | 6/160 (4%) | 642 code lines, 4% test coverage |
+| `platform/codecommit` | 1 | none | 0/58 (0%) | Not implemented |
+| `platform/forgejo` | 5 | full | 10/187 (5%) | 588 code lines, 5% test coverage |
+| `platform/gerrit` | 4 | full | 0/158 (0%) | 524 code lines, 0% test coverage |
+| `platform/gitea` | 5 | full | 0/183 (0%) | 596 code lines, 0% test coverage |
 | `platform/github` | 7 | full | 197/245 (80%) | M3 complete (dry-run write surface) |
-| `platform/gitlab` | 4 | ? | 17/182 (9%) | — |
-| `platform/local` | 2 | full | 41/41 (100%) | — |
-| `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
-| `platform/utils` | 2 | full | 14/14 (100%) |  |
+| `platform/gitlab` | 4 | full | 17/182 (9%) | 772 code lines, 9% test coverage |
+| `platform/local` | 2 | full | 41/41 (100%) | 409 code lines |
+| `platform/scm-manager` | 4 | full | 10/65 (15%) | 231 code lines, 15% test coverage |
+| `platform/utils` | 2 | partial | 14/14 (100%) |  |
 
 ## versioning  —  709/762 (93%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `versioning/_common` | 5 | ? | 36/42 (86%) | — |
+| `versioning/_common` | 5 | none | 36/42 (86%) | Not implemented |
 | `versioning/apk` | 1 | full | 53/53 (100%) |  |
 | `versioning/aws-eks-addon` | 1 | full | 6/7 (86%) |  |
-| `versioning/aws-machine-image` | 1 | ? | 3/10 (30%) | — |
+| `versioning/aws-machine-image` | 1 | partial | 3/10 (30%) | 85 code lines, partial implementation |
 | `versioning/azure-rest-api` | 1 | full | 11/11 (100%) |  |
-| `versioning/bazel-module` | 2 | ? | 26/30 (87%) | — |
+| `versioning/bazel-module` | 2 | full | 26/30 (87%) | 679 code lines |
 | `versioning/cargo` | 1 | full | 10/10 (100%) |  |
 | `versioning/composer` | 1 | full | 18/18 (100%) |  |
 | `versioning/conan` | 1 | full | 16/16 (100%) |  |
@@ -270,95 +270,95 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/deb` | 1 | full | 7/7 (100%) |  |
 | `versioning/debian` | 2 | full | 20/21 (95%) |  |
 | `versioning/deno` | 1 | full | 5/5 (100%) |  |
-| `versioning/devbox` | 1 | full | 4/4 (100%) |  |
-| `versioning/docker` | 1 | full | 12/12 (100%) | — |
-| `versioning/elm` | 1 | ? | 28/31 (90%) | — |
-| `versioning/exact` | 1 | full | 13/14 (93%) |  |
-| `versioning/git` | 1 | full | 3/3 (100%) |  |
+| `versioning/devbox` | 1 | partial | 4/4 (100%) |  |
+| `versioning/docker` | 1 | full | 12/12 (100%) | 397 code lines |
+| `versioning/elm` | 1 | full | 28/31 (90%) | 575 code lines |
+| `versioning/exact` | 1 | partial | 13/14 (93%) |  |
+| `versioning/git` | 1 | partial | 3/3 (100%) |  |
 | `versioning/github-actions` | 1 | full | 29/29 (100%) |  |
-| `versioning/glasskube` | 1 | ? | 3/4 (75%) | — |
-| `versioning/go-mod-directive` | 1 | full | 7/7 (100%) |  |
+| `versioning/glasskube` | 1 | partial | 3/4 (75%) | 162 code lines, partial implementation |
+| `versioning/go-mod-directive` | 1 | partial | 7/7 (100%) |  |
 | `versioning/gradle` | 1 | full | 12/12 (100%) |  |
-| `versioning/hashicorp` | 2 | full | 13/13 (100%) | — |
+| `versioning/hashicorp` | 2 | full | 13/13 (100%) | 944 code lines |
 | `versioning/helm` | 1 | full | 3/3 (100%) |  |
 | `versioning/hermit` | 1 | full | 10/10 (100%) |  |
 | `versioning/hex` | 1 | full | 8/8 (100%) |  |
 | `versioning/ivy` | 1 | full | 9/9 (100%) |  |
 | `versioning/kubernetes-api` | 1 | full | 7/7 (100%) |  |
-| `versioning/lambda-node` | 1 | full | 6/6 (100%) |  |
+| `versioning/lambda-node` | 1 | partial | 6/6 (100%) |  |
 | `versioning/loose` | 1 | full | 6/6 (100%) |  |
-| `versioning/maven` | 2 | full | 19/23 (83%) | — |
-| `versioning/nixpkgs` | 1 | ? | 4/5 (80%) | — |
+| `versioning/maven` | 2 | full | 19/23 (83%) | 1732 code lines |
+| `versioning/nixpkgs` | 1 | full | 4/5 (80%) | 203 code lines |
 | `versioning/node` | 1 | full | 6/6 (100%) |  |
 | `versioning/npm` | 1 | full | 7/7 (100%) | M2 complete |
-| `versioning/nuget` | 3 | ? | 29/34 (85%) | — |
+| `versioning/nuget` | 3 | full | 29/34 (85%) | 2260 code lines |
 | `versioning/pep440` | 2 | full | 13/14 (93%) |  |
 | `versioning/perl` | 1 | full | 4/4 (100%) |  |
 | `versioning/poetry` | 1 | full | 14/14 (100%) |  |
 | `versioning/pvp` | 3 | full | 23/23 (100%) |  |
 | `versioning/python` | 1 | full | 8/8 (100%) |  |
-| `versioning/redhat` | 1 | full | 2/2 (100%) |  |
+| `versioning/redhat` | 1 | partial | 2/2 (100%) |  |
 | `versioning/regex` | 1 | full | 20/24 (83%) |  |
 | `versioning/rez` | 1 | full | 16/16 (100%) |  |
 | `versioning/rpm` | 1 | full | 6/6 (100%) |  |
 | `versioning/ruby` | 1 | full | 14/15 (93%) | Max possible (duplicate it.each descs) |
-| `versioning/rust-release-channel` | 2 | ? | 17/23 (74%) | — |
-| `versioning/same-major` | 1 | ? | 8/10 (80%) | — |
+| `versioning/rust-release-channel` | 2 | full | 17/23 (74%) | 967 code lines |
+| `versioning/same-major` | 1 | partial | 8/10 (80%) | 101 code lines, partial implementation |
 | `versioning/semver` | 2 | full | 6/6 (100%) | M1 complete |
-| `versioning/semver-coerced` | 1 | ? | 48/53 (91%) | — |
-| `versioning/semver-partial` | 1 | full | 18/18 (100%) | — |
+| `versioning/semver-coerced` | 1 | full | 48/53 (91%) | 525 code lines |
+| `versioning/semver-partial` | 1 | full | 18/18 (100%) | 746 code lines |
 | `versioning/swift` | 1 | full | 7/7 (100%) |  |
 | `versioning/ubuntu` | 1 | full | 13/13 (100%) |  |
 | `versioning/unity3d` | 1 | full | 4/4 (100%) |  |
-| `versioning/unity3d-packages` | 1 | full | 4/4 (100%) |  |
+| `versioning/unity3d-packages` | 1 | partial | 4/4 (100%) |  |
 
 ## workers  —  366/1883 (19%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `worker/global` | 11 | ? | 116/208 (56%) | — |
-| `worker/repository` | 103 | ? | 250/1675 (15%) | — |
+| `worker/global` | 11 | full | 116/208 (56%) | 338 code lines, 56% test coverage |
+| `worker/repository` | 103 | full | 250/1675 (15%) | 9797 code lines, 15% test coverage |
 
 ## config  —  427/700 (61%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `config/_root` | 12 | ? | 213/228 (93%) | — |
-| `config/decrypt` | 2 | ? | 0/16 (0%) | — |
-| `config/migrations` | 58 | ? | 155/161 (96%) | — |
-| `config/options` | 2 | ? | 0/16 (0%) | — |
-| `config/presets` | 17 | ? | 51/271 (19%) | — |
-| `config/validation-helpers` | 3 | ? | 8/8 (100%) | — |
+| `config/_root` | 12 | full | 213/228 (93%) | 877 code lines |
+| `config/decrypt` | 2 | full | 0/16 (0%) | 542 code lines, 0% test coverage |
+| `config/migrations` | 58 | full | 155/161 (96%) | 6063 code lines |
+| `config/options` | 2 | full | 0/16 (0%) | 2901 code lines, 0% test coverage |
+| `config/presets` | 17 | full | 51/271 (19%) | 1331 code lines, 19% test coverage |
+| `config/validation-helpers` | 3 | full | 8/8 (100%) | 373 code lines |
 
 ## util  —  691/1597 (43%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `util/_root` | 45 | ? | 227/403 (56%) | — |
-| `util/cache` | 13 | ? | 58/151 (38%) | — |
-| `util/exec` | 7 | ? | 70/138 (51%) | — |
-| `util/fs` | 2 | ? | 29/61 (48%) | — |
-| `util/git` | 15 | ? | 70/242 (29%) | — |
-| `util/github` | 10 | ? | 17/45 (38%) | — |
-| `util/http` | 22 | ? | 43/251 (17%) | — |
-| `util/json-writer` | 2 | ? | 4/9 (44%) | — |
-| `util/merge-confidence` | 1 | ? | 7/28 (25%) | — |
-| `util/package-rules` | 11 | ? | 130/143 (91%) | — |
-| `util/schema-utils` | 2 | ? | 12/47 (26%) | — |
-| `util/template` | 1 | ? | 0/54 (0%) | — |
-| `util/vulnerability` | 2 | ? | 24/25 (96%) | — |
+| `util/_root` | 45 | none | 227/403 (56%) | Not implemented |
+| `util/cache` | 13 | full | 58/151 (38%) | 233 code lines, 38% test coverage |
+| `util/exec` | 7 | partial | 70/138 (51%) | 16 code lines, mostly stubs |
+| `util/fs` | 2 | full | 29/61 (48%) | 520 code lines, 48% test coverage |
+| `util/git` | 15 | full | 70/242 (29%) | 541 code lines, 29% test coverage |
+| `util/github` | 10 | none | 17/45 (38%) | Not implemented |
+| `util/http` | 22 | full | 43/251 (17%) | 1478 code lines, 17% test coverage |
+| `util/json-writer` | 2 | partial | 4/9 (44%) | 113 code lines, partial implementation |
+| `util/merge-confidence` | 1 | partial | 7/28 (25%) | 79 code lines, partial implementation |
+| `util/package-rules` | 11 | full | 130/143 (91%) | 233 code lines |
+| `util/schema-utils` | 2 | none | 12/47 (26%) | Not implemented |
+| `util/template` | 1 | partial | 0/54 (0%) | 149 code lines, partial implementation |
+| `util/vulnerability` | 2 | full | 24/25 (96%) | 275 code lines |
 
 ## infra  —  40/120 (33%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `constants` | 1 | ? | 8/8 (100%) | — |
-| `data` | 1 | ? | 1/1 (100%) | — |
-| `instrumentation` | 5 | ? | 1/31 (3%) | — |
-| `logger` | 10 | ? | 30/80 (38%) | — |
+| `constants` | 1 | none | 8/8 (100%) | Not implemented |
+| `data` | 1 | none | 1/1 (100%) | Not implemented |
+| `instrumentation` | 5 | none | 1/31 (3%) | Not implemented |
+| `logger` | 10 | none | 30/80 (38%) | Not implemented |
 
 ## cli  —  5/6 (83%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `cli/_root` | 2 | ? | 5/6 (83%) | — |
+| `cli/_root` | 2 | full | 5/6 (83%) | 1669 code lines |

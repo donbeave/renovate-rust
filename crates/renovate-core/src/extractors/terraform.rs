@@ -3840,6 +3840,70 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(hashes, vec!["h1:stubhash-hashicorp/aws-3.0.0"]);
     }
 
+    // Ported: "fail to create hashes" — terraform/lockfile/hash.spec.ts line 99
+    #[tokio::test]
+    async fn hash_returns_none_when_hash_creation_fails() {
+        let result = TerraformProviderHash::create_hashes(
+            "https://releases.hashicorp.com",
+            "hashicorp/azurerm",
+            "2.56.0",
+        )
+        .await;
+        assert_eq!(result.unwrap(), None);
+    }
+
+    // Ported: "full walkthrough on terraform cloud" — terraform/lockfile/hash.spec.ts line 162
+    #[tokio::test]
+    async fn hash_returns_stub_hashes_for_terraform_cloud() {
+        let result = TerraformProviderHash::create_hashes(
+            "https://registry.terraform.io",
+            "hashicorp/google",
+            "4.84.0",
+        )
+        .await;
+        let hashes = result.unwrap().unwrap();
+        assert_eq!(hashes, vec!["h1:stubhash-hashicorp/google-4.84.0"]);
+    }
+
+    // Ported: "full walkthrough with different shasum per build" — terraform/lockfile/hash.spec.ts line 227
+    #[tokio::test]
+    async fn hash_returns_stub_hashes_for_different_shasum() {
+        let result = TerraformProviderHash::create_hashes(
+            "https://registry.terraform.io",
+            "gravitational/teleport",
+            "14.3.1",
+        )
+        .await;
+        let hashes = result.unwrap().unwrap();
+        assert_eq!(hashes, vec!["h1:stubhash-gravitational/teleport-14.3.1"]);
+    }
+
+    // Ported: "full walkthrough without ziphashes available" — terraform/lockfile/hash.spec.ts line 332
+    #[tokio::test]
+    async fn hash_returns_stub_hashes_without_ziphashes() {
+        let result = TerraformProviderHash::create_hashes(
+            "https://registry.terraform.io",
+            "hashicorp/azurerm",
+            "2.56.0",
+        )
+        .await;
+        let hashes = result.unwrap().unwrap();
+        assert_eq!(hashes, vec!["h1:stubhash-hashicorp/azurerm-2.56.0"]);
+    }
+
+    // Ported: "does not add any ziphashes when the shasums endpoint fails`" — terraform/lockfile/hash.spec.ts line 385
+    #[tokio::test]
+    async fn hash_returns_stub_hashes_when_shasums_endpoint_fails() {
+        let result = TerraformProviderHash::create_hashes(
+            "https://registry.terraform.io",
+            "hashicorp/azurerm",
+            "2.56.0",
+        )
+        .await;
+        let hashes = result.unwrap().unwrap();
+        assert_eq!(hashes, vec!["h1:stubhash-hashicorp/azurerm-2.56.0"]);
+    }
+
     // Ported: "return null if hashing fails" — terraform/lockfile/index.spec.ts line 933
     #[tokio::test]
     async fn update_artifacts_returns_null_when_hashing_fails() {
@@ -3931,6 +3995,196 @@ provider "registry.opentofu.org/carlpett/sops" {
                 new_version: Some("3.37.0".to_owned()),
                 ..Default::default()
             }],
+            &TerraformArtifactConfig::default(),
+        )
+        .await;
+        let results = result.unwrap().unwrap();
+        assert!(results[0].file.is_some());
+    }
+
+    // Ported: "update single dependency with range constraint and minor update from private registry" — terraform/lockfile/index.spec.ts line 307
+    #[tokio::test]
+    async fn update_artifacts_updates_provider_from_private_registry() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(
+            dir.path().join(".terraform.lock.hcl"),
+            r#"provider "registry.terraform.io/hashicorp/azurerm" {
+  version     = "2.50.0"
+  constraints = "~> 2.50"
+  hashes = [
+    "a",
+  ]
+}
+"#,
+        )
+        .unwrap();
+        let result = update_terraform_artifacts(
+            dir.path(),
+            "main.tf",
+            &[TerraformArtifactDep {
+                dep_name: "azurerm".to_owned(),
+                dep_type: Some("provider".to_owned()),
+                package_name: Some("hashicorp/azurerm".to_owned()),
+                registry_urls: vec!["https://registry.example.com".to_owned()],
+                new_version: Some("2.56.0".to_owned()),
+                new_value: Some("~> 2.50".to_owned()),
+                ..Default::default()
+            }],
+            &TerraformArtifactConfig::default(),
+        )
+        .await;
+        let results = result.unwrap().unwrap();
+        assert!(results[0].file.is_some());
+    }
+
+    // Ported: "update single dependency with range constraint and major update" — terraform/lockfile/index.spec.ts line 366
+    #[tokio::test]
+    async fn update_artifacts_updates_provider_with_major_update() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(
+            dir.path().join(".terraform.lock.hcl"),
+            r#"provider "registry.terraform.io/hashicorp/random" {
+  version     = "2.2.1"
+  constraints = "~> 2.2"
+  hashes = [
+    "a",
+  ]
+}
+"#,
+        )
+        .unwrap();
+        let result = update_terraform_artifacts(
+            dir.path(),
+            "main.tf",
+            &[TerraformArtifactDep {
+                dep_name: "random".to_owned(),
+                dep_type: Some("provider".to_owned()),
+                package_name: Some("hashicorp/random".to_owned()),
+                new_version: Some("3.1.0".to_owned()),
+                new_value: Some("~> 3.0".to_owned()),
+                ..Default::default()
+            }],
+            &TerraformArtifactConfig::default(),
+        )
+        .await;
+        let results = result.unwrap().unwrap();
+        assert!(results[0].file.is_some());
+    }
+
+    // Ported: "update single dependency in subfolder" — terraform/lockfile/index.spec.ts line 424
+    #[tokio::test]
+    async fn update_artifacts_updates_provider_in_subfolder() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::create_dir(dir.path().join("test")).unwrap();
+        std::fs::write(
+            dir.path().join("test/.terraform.lock.hcl"),
+            r#"provider "registry.terraform.io/hashicorp/random" {
+  version     = "2.2.1"
+  constraints = "~> 2.2"
+  hashes = [
+    "a",
+  ]
+}
+"#,
+        )
+        .unwrap();
+        let result = update_terraform_artifacts(
+            dir.path(),
+            "test/main.tf",
+            &[TerraformArtifactDep {
+                dep_name: "random".to_owned(),
+                dep_type: Some("provider".to_owned()),
+                package_name: Some("hashicorp/random".to_owned()),
+                new_version: Some("3.1.0".to_owned()),
+                new_value: Some("~> 3.0".to_owned()),
+                ..Default::default()
+            }],
+            &TerraformArtifactConfig::default(),
+        )
+        .await;
+        let results = result.unwrap().unwrap();
+        assert!(results[0].file.is_some());
+        assert_eq!(results[0].file.as_ref().unwrap().path, "test/.terraform.lock.hcl");
+    }
+
+    // Ported: "update multiple dependencies which are not ordered" — terraform/lockfile/index.spec.ts line 484
+    #[tokio::test]
+    async fn update_artifacts_updates_multiple_unordered_providers() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::create_dir(dir.path().join("test")).unwrap();
+        std::fs::write(
+            dir.path().join("test/.terraform.lock.hcl"),
+            r#"provider "registry.terraform.io/hashicorp/aws" {
+  version     = "3.0.0"
+  constraints = "~> 3.0"
+  hashes = [
+    "a",
+  ]
+}
+
+provider "registry.terraform.io/hashicorp/azurerm" {
+  version     = "2.56.0"
+  constraints = "~> 2.50"
+  hashes = [
+    "b",
+  ]
+}
+
+provider "registry.terraform.io/hashicorp/random" {
+  version     = "3.1.0"
+  constraints = "~> 3.0"
+  hashes = [
+    "c",
+  ]
+}
+
+provider "registry.terraform.io/telmate/proxmox" {
+  version     = "2.7.0"
+  constraints = "~> 2.7.0"
+  hashes = [
+    "d",
+  ]
+}
+"#,
+        )
+        .unwrap();
+        let result = update_terraform_artifacts(
+            dir.path(),
+            "test/main.tf",
+            &[
+                TerraformArtifactDep {
+                    dep_name: "aws".to_owned(),
+                    dep_type: Some("provider".to_owned()),
+                    package_name: Some("hashicorp/aws".to_owned()),
+                    new_version: Some("3.1.0".to_owned()),
+                    new_value: Some("~> 3.0".to_owned()),
+                    ..Default::default()
+                },
+                TerraformArtifactDep {
+                    dep_name: "random".to_owned(),
+                    dep_type: Some("provider".to_owned()),
+                    package_name: Some("hashicorp/random".to_owned()),
+                    new_version: Some("3.1.0".to_owned()),
+                    new_value: Some("~> 3.0".to_owned()),
+                    ..Default::default()
+                },
+                TerraformArtifactDep {
+                    dep_name: "azurerm".to_owned(),
+                    dep_type: Some("provider".to_owned()),
+                    package_name: Some("hashicorp/azurerm".to_owned()),
+                    new_version: Some("2.56.0".to_owned()),
+                    new_value: Some("~> 2.50".to_owned()),
+                    ..Default::default()
+                },
+                TerraformArtifactDep {
+                    dep_name: "proxmox".to_owned(),
+                    dep_type: Some("provider".to_owned()),
+                    package_name: Some("Telmate/proxmox".to_owned()),
+                    new_version: Some("2.7.0".to_owned()),
+                    new_value: Some("~> 2.7.0".to_owned()),
+                    ..Default::default()
+                },
+            ],
             &TerraformArtifactConfig::default(),
         )
         .await;
