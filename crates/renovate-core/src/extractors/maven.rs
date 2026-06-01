@@ -354,7 +354,7 @@ pub fn resolve_parents(package_files: &mut [MavenPackageFile]) {
             let parent_idx = path_to_index.get(parent_path)?;
             let parent_pkg = package_files.get(*parent_idx)?;
             let is_root = parent_pkg.parent.is_none()
-                || path_to_index.get(parent_pkg.parent.as_deref()?).is_none();
+                || !path_to_index.contains_key(parent_pkg.parent.as_deref()?);
             if is_root {
                 pkg.deps
                     .iter()
@@ -699,18 +699,18 @@ fn normalize_path(path: &str) -> String {
     comps.join("/")
 }
 
-/// SAX parse a POM and return (deps, properties, parent_file_path).
-fn parse_pom(
-    content: &str,
-    package_file: &str,
-) -> Result<
+/// Result type for [`parse_pom`].
+type PomParseResult = Result<
     (
         Vec<MavenExtractedDep>,
         HashMap<String, MavenProp>,
         Option<String>,
     ),
     MavenExtractError,
-> {
+>;
+
+/// SAX parse a POM and return (deps, properties, parent_file_path).
+fn parse_pom(content: &str, package_file: &str) -> PomParseResult {
     let offset = content.find('<').unwrap_or(0);
     let cursor = BufReader::new(content.as_bytes());
     let mut reader = Reader::from_reader(cursor);
