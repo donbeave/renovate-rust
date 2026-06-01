@@ -152,7 +152,7 @@ remaining medium gaps from PARITY_AUDIT.
 
 Acceptance:
 
-- [ ] CLI auto-replace verifies replacements by re-extracting and checking the
+- [x] CLI auto-replace verifies replacements by re-extracting and checking the
       updated dep's `current_value` matches `new_value`.
 - [ ] GitHub platform has TTL-based PR caching.
 - [ ] Cargo artifact runner injects git auth env vars.

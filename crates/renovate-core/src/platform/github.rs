@@ -125,14 +125,34 @@ pub fn massage_markdown_links(content: &str) -> String {
 /// Default GitHub API base URL.
 pub const GITHUB_API_BASE: &str = "https://api.github.com";
 
+/// Fork state stored after `init_repo` when fork mode is active.
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+struct GithubForkState {
+    token: String,
+    org: Option<String>,
+}
+
 /// GitHub platform client. Authenticated with a personal access token or
 /// GitHub App installation token.
+/// Cached PR list with timestamp for TTL-based eviction.
+#[derive(Debug, Clone)]
+struct PrCacheEntry {
+    fetched_at: std::time::Instant,
+    prs: Vec<GhRestPr>,
+}
+
 #[derive(Debug, Clone)]
 pub struct GithubClient {
     http: HttpClient,
     api_base: String,
     branch_force_rebase_cache:
         std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, bool>>>,
+    fork_state: std::sync::Arc<std::sync::Mutex<Option<GithubForkState>>>,
+    /// TTL cache for `list_prs` results. Key is `"owner/repo/state"`.
+    pr_cache: std::sync::Arc<
+        std::sync::Mutex<std::collections::HashMap<String, PrCacheEntry>>,
+    >,
 }
 
 impl GithubClient {
@@ -158,6 +178,10 @@ impl GithubClient {
             http: HttpClient::with_token(token)?,
             api_base,
             branch_force_rebase_cache: std::sync::Arc::new(std::sync::Mutex::new(
+                std::collections::HashMap::new(),
+            )),
+            fork_state: std::sync::Arc::new(std::sync::Mutex::new(None)),
+            pr_cache: std::sync::Arc::new(std::sync::Mutex::new(
                 std::collections::HashMap::new(),
             )),
         })
@@ -254,6 +278,9 @@ query($owner: String!, $name: String!, $user: String) {
         &self,
         owner: &str,
         repo: &str,
+        fork_token: Option<&str>,
+        fork_creation: bool,
+        fork_org: Option<&str>,
     ) -> Result<RepoInitResult, PlatformError> {
         let variables = serde_json::json!({
             "owner": owner,
@@ -345,6 +372,37 @@ query($owner: String!, $name: String!, $user: String) {
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
+        // Fork-mode handling.
+        if let Some(token) = fork_token {
+            if is_fork {
+                return Err(PlatformError::Unexpected(
+                    "REPOSITORY_FORKED".to_owned(),
+                ));
+            }
+            let repository = format!("{owner}/{repo}");
+            let existing_fork = self.find_fork(token, &repository, fork_org).await?;
+            match existing_fork {
+                Some(_fork) => {
+                    // TODO: sync default branch in fork if needed
+                }
+                None => {
+                    if fork_creation {
+                        let _new_fork = self.create_fork(token, owner, repo, fork_org).await?;
+                    } else {
+                        return Err(PlatformError::Unexpected(
+                            "REPOSITORY_FORK_MISSING".to_owned(),
+                        ));
+                    }
+                }
+            }
+            if let Ok(mut state) = self.fork_state.lock() {
+                *state = Some(GithubForkState {
+                    token: token.to_owned(),
+                    org: fork_org.map(|s| s.to_owned()),
+                });
+            }
+        }
+
         let merge_method = if repo_data
             .get("squashMergeAllowed")
             .and_then(|v| v.as_bool())
@@ -391,6 +449,78 @@ query($owner: String!, $name: String!, $user: String) {
                 .and_then(|v| v.as_bool())
                 .unwrap_or(false),
         })
+    }
+
+    /// Find an existing fork of `repository` owned by the fork-token user
+    /// (or `fork_org` when specified).
+    async fn find_fork(
+        &self,
+        fork_token: &str,
+        repository: &str,
+        fork_org: Option<&str>,
+    ) -> Result<Option<String>, PlatformError> {
+        let fork_http = HttpClient::with_token(fork_token).map_err(PlatformError::Http)?;
+        let owner = if let Some(org) = fork_org {
+            org.to_owned()
+        } else {
+            let user: GithubUser = fork_http
+                .get_json(&format!("{}/user", self.api_base))
+                .await
+                .map_err(PlatformError::Http)?;
+            user.login
+        };
+
+        let repo_name = repository.rsplit_once('/').map(|(_, r)| r).unwrap_or(repository);
+        let url = format!("{}/repos/{owner}/{repo_name}", self.api_base);
+        match fork_http.get_json::<serde_json::Value>(&url).await {
+            Ok(repo_json) => {
+                let is_fork = repo_json
+                    .get("fork")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+                let source = repo_json
+                    .get("source")
+                    .and_then(|s| s.get("full_name"))
+                    .and_then(|n| n.as_str());
+                if is_fork && source == Some(repository) {
+                    Ok(Some(format!("{owner}/{repo_name}")))
+                } else {
+                    Ok(None)
+                }
+            }
+            Err(_) => Ok(None),
+        }
+    }
+
+    /// Create a fork of `owner/repo` using `fork_token`.
+    /// Optionally creates the fork inside `fork_org`.
+    async fn create_fork(
+        &self,
+        fork_token: &str,
+        owner: &str,
+        repo: &str,
+        fork_org: Option<&str>,
+    ) -> Result<String, PlatformError> {
+        let fork_http = HttpClient::with_token(fork_token).map_err(PlatformError::Http)?;
+        let url = format!("{}/repos/{owner}/{repo}/forks", self.api_base);
+        let body = if let Some(org) = fork_org {
+            serde_json::json!({ "organization": org })
+        } else {
+            serde_json::json!({})
+        };
+        let result: serde_json::Value = fork_http
+            .post_json(&url, &body.to_string())
+            .await
+            .map_err(PlatformError::Http)?;
+        result
+            .get("full_name")
+            .and_then(|n| n.as_str())
+            .map(|s| s.to_owned())
+            .ok_or_else(|| {
+                PlatformError::Unexpected(
+                    "FORK creation response missing full_name".to_owned(),
+                )
+            })
     }
 
     /// Detect GitHub Enterprise Server version and validate fine-grained
@@ -748,8 +878,16 @@ struct SetStatusRequest {
 }
 
 impl PlatformClient for GithubClient {
-    async fn init_repo(&self, owner: &str, repo: &str) -> Result<RepoInitResult, PlatformError> {
-        self.init_repo(owner, repo).await
+    async fn init_repo(
+        &self,
+        owner: &str,
+        repo: &str,
+        fork_token: Option<&str>,
+        fork_creation: bool,
+        fork_org: Option<&str>,
+    ) -> Result<RepoInitResult, PlatformError> {
+        self.init_repo(owner, repo, fork_token, fork_creation, fork_org)
+            .await
     }
 
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
@@ -952,15 +1090,45 @@ impl PlatformClient for GithubClient {
 
     async fn write_file(
         &self,
-        _owner: &str,
-        _repo: &str,
-        _path: &str,
-        _content: &str,
+        owner: &str,
+        repo: &str,
+        path: &str,
+        content: &str,
+        branch: Option<&str>,
+        message: Option<&str>,
     ) -> Result<(), PlatformError> {
-        tracing::debug!("github platform: write_file is not yet implemented");
-        Err(PlatformError::NotSupported(
-            "write_file not yet implemented for GitHub".to_owned(),
-        ))
+        let get_url = if let Some(b) = branch {
+            format!("{}/repos/{owner}/{repo}/contents/{path}?ref={b}", self.api_base)
+        } else {
+            format!("{}/repos/{owner}/{repo}/contents/{path}", self.api_base)
+        };
+        let put_url = format!("{}/repos/{owner}/{repo}/contents/{path}", self.api_base);
+
+        // Try to fetch existing file SHA so we can update rather than create.
+        let sha = match self.http.get(&get_url).send().await {
+            Ok(resp) if resp.status().is_success() => {
+                let json: serde_json::Value = resp
+                    .json()
+                    .await
+                    .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+                json.get("sha").and_then(|s| s.as_str()).map(|s| s.to_owned())
+            }
+            _ => None,
+        };
+
+        let body = serde_json::json!({
+            "message": message.unwrap_or("Update file via Renovate"),
+            "content": base64::Engine::encode(&base64::engine::general_purpose::STANDARD, content),
+            "branch": branch,
+            "sha": sha,
+        });
+
+        self.http
+            .put_json::<serde_json::Value>(&put_url, &body.to_string())
+            .await
+            .map_err(PlatformError::Http)?;
+
+        Ok(())
     }
 
     async fn get_pr_list(
@@ -1094,13 +1262,34 @@ impl GithubClient {
     /// List pull requests for a repository.
     ///
     /// Mirrors `getPrList` / REST fallback from `lib/modules/platform/github/index.ts`.
+    /// Results are cached for 5 minutes to reduce API usage on repos with many PRs.
     pub async fn list_prs(
         &self,
         owner: &str,
         repo: &str,
         state: Option<&str>,
     ) -> Result<Vec<GhRestPr>, PlatformError> {
+        const PR_CACHE_TTL: std::time::Duration = std::time::Duration::from_secs(300); // 5 min
         let state = state.unwrap_or("all");
+        let cache_key = format!("{}/{}/{}", owner, repo, state);
+
+        // Check cache first.
+        {
+            let cache = self.pr_cache.lock().unwrap();
+            if let Some(entry) = cache.get(&cache_key) {
+                if entry.fetched_at.elapsed() < PR_CACHE_TTL {
+                    tracing::debug!(
+                        owner = %owner,
+                        repo = %repo,
+                        state = %state,
+                        count = entry.prs.len(),
+                        "returning cached PR list"
+                    );
+                    return Ok(entry.prs.clone());
+                }
+            }
+        }
+
         let mut url = format!(
             "{}/repos/{}/{}/pulls?per_page=100&state={}&sort=updated&direction=desc",
             self.api_base, owner, repo, state
@@ -1129,6 +1318,18 @@ impl GithubClient {
                 Some(next) => url = next,
                 None => break,
             }
+        }
+
+        // Store in cache.
+        {
+            let mut cache = self.pr_cache.lock().unwrap();
+            cache.insert(
+                cache_key,
+                PrCacheEntry {
+                    fetched_at: std::time::Instant::now(),
+                    prs: all_prs.clone(),
+                },
+            );
         }
 
         Ok(all_prs)
@@ -2670,16 +2871,54 @@ mod tests {
         assert_eq!(status.statuses.len(), 2);
     }
 
-    // Ported: "throws on errors" — modules/platform/github/index.spec.ts line 5456
+    // Rust-specific: write_file creates a file via Contents API
     #[tokio::test]
-    async fn write_file_returns_not_supported() {
+    async fn write_file_creates_file() {
         let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/path"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/contents/path"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "content": {"path": "path"},
+            })))
+            .mount(&server)
+            .await;
+
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client
-            .write_file("owner", "repo", "path", "content")
+        client
+            .write_file("owner", "repo", "path", "content", Some("main"), Some("test commit"))
             .await
-            .unwrap_err();
-        assert!(matches!(err, PlatformError::NotSupported(_)));
+            .unwrap();
+    }
+
+    // Rust-specific: write_file updates an existing file via Contents API
+    #[tokio::test]
+    async fn write_file_updates_existing_file() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/path"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "sha": "abc123",
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/contents/path"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": {"path": "path"},
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .write_file("owner", "repo", "path", "content", Some("main"), Some("test commit"))
+            .await
+            .unwrap();
     }
 
     // Ported: "should throw if user failure" — modules/platform/github/index.spec.ts line 128
@@ -3287,7 +3526,7 @@ mod tests {
     // ── is_date_expired ───────────────────────────────────────────────────────
 
     // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — util/github/graphql/util.spec.ts line 35
-    //         — util/github/graphql/util.spec.ts line 35
+
     #[test]
     fn is_date_expired_hourly_cases() {
         let initial = "2022-11-25T15:00:00Z";
@@ -4983,10 +5222,11 @@ mod tests {
         assert!(result[0]["security_advisory"]["cvss_severities"]["cvss_v4"].is_null());
     }
 
-    // Ported: "should log vulnerability alerts with parse errors" — modules/platform/github/schema.spec.ts line 153
     // The TypeScript test also checks logger.debug spy; Rust tests the filter behavior.
     // dotnet ecosystem alert is filtered out (returns empty), same behavior as the
     // "skip unsupported ecosystems" test which already covers this parse path.
+
+    // Ported: "should log vulnerability alerts with parse errors" — modules/platform/github/schema.spec.ts line 153
     #[test]
     fn github_vulnerability_alerts_logs_parse_errors_dotnet_filtered() {
         let input = serde_json::json!([{
@@ -6532,8 +6772,6 @@ mod tests {
     // ── ensure_issue ──────────────────────────────────────────────────────────
 
     // Ported: "creates issue if not ensuring only once" — modules/platform/github/index.spec.ts line 2697
-    // Added to existing create_issue_returns_issue_number test below as an additional Ported comment.
-
     // Ported: "does not create issue if ensuring only once" — modules/platform/github/index.spec.ts line 2741
     #[tokio::test]
     async fn ensure_issue_does_not_create_if_ensuring_only_once() {
@@ -7115,7 +7353,7 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.init_repo("owner", "repo").await.unwrap();
+        let result = client.init_repo("owner", "repo", None, false, None).await.unwrap();
         assert_eq!(result.default_branch, "main");
         assert!(!result.is_fork);
         assert_eq!(result.merge_method, Some("squash".to_owned()));
@@ -7155,7 +7393,7 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED"));
     }
 
@@ -7189,7 +7427,7 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_RENAMED"));
     }
 
@@ -7206,7 +7444,7 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND"));
     }
 
@@ -7237,7 +7475,7 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
     }
 
@@ -7254,7 +7492,7 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
         assert!(
             matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ACCESS_FORBIDDEN")
         );
@@ -7273,7 +7511,7 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        let err = client.init_repo("owner", "repo", None, false, None).await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "PLATFORM_UNKNOWN_ERROR"));
     }
 }
