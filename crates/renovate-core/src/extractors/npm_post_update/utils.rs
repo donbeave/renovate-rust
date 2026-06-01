@@ -34,10 +34,7 @@ mod tests {
     // Ported: "uses volta version and puts it into constraint" — modules/manager/npm/post-update/pnpm.spec.ts line 429
     #[test]
     fn get_package_manager_version_from_volta() {
-        let pj = PackageJson::parse(
-            r#"{"volta": {"npm": "10.2.3"}}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"volta": {"npm": "10.2.3"}}"#).unwrap();
         assert_eq!(
             get_package_manager_version(&pj, "npm"),
             Some("10.2.3".to_owned())

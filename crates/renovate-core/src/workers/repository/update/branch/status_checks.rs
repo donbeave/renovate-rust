@@ -19,10 +19,7 @@ pub struct StatusCheckConfig {
     pub internal_checks_as_success: bool,
 }
 
-pub fn check_status(
-    branch_status: Option<&str>,
-    ignore_tests: bool,
-) -> StatusCheckResult {
+pub fn check_status(branch_status: Option<&str>, ignore_tests: bool) -> StatusCheckResult {
     if ignore_tests {
         return StatusCheckResult::Passing;
     }
@@ -77,7 +74,10 @@ mod tests {
 
     #[test]
     fn check_status_green() {
-        assert_eq!(check_status(Some("green"), false), StatusCheckResult::Passing);
+        assert_eq!(
+            check_status(Some("green"), false),
+            StatusCheckResult::Passing
+        );
     }
 
     #[test]
@@ -87,7 +87,10 @@ mod tests {
 
     #[test]
     fn check_status_yellow() {
-        assert_eq!(check_status(Some("yellow"), false), StatusCheckResult::Pending);
+        assert_eq!(
+            check_status(Some("yellow"), false),
+            StatusCheckResult::Pending
+        );
     }
 
     #[test]

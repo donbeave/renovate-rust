@@ -620,10 +620,19 @@ mod tests {
     #[test]
     fn minimatch_glob_path_matching() {
         // /** form matches /http and /http/client
-        assert!(match_regex_or_glob("@opentelemetry/http", "@opentelemetry/**"));
-        assert!(match_regex_or_glob("@opentelemetry/http/client", "@opentelemetry/**"));
+        assert!(match_regex_or_glob(
+            "@opentelemetry/http",
+            "@opentelemetry/**"
+        ));
+        assert!(match_regex_or_glob(
+            "@opentelemetry/http/client",
+            "@opentelemetry/**"
+        ));
         // bare ** doesn't cross / with literal_separator=true
-        assert!(!match_regex_or_glob("@opentelemetry/http", "@opentelemetry**"));
+        assert!(!match_regex_or_glob(
+            "@opentelemetry/http",
+            "@opentelemetry**"
+        ));
     }
 
     // Ported: "should correctly match filenames" — util/minimatch.spec.ts line 37

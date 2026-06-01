@@ -981,10 +981,7 @@ pub struct PrTableDep {
 /// (`Package`, `Type`, `Update`, `Change`, `Pending`) with simple Rust
 /// string formatting. Custom `prBodyDefinitions` via Handlebars templates
 /// are not yet supported.
-pub fn get_pr_updates_table(
-    pr_body_columns: Option<&[String]>,
-    deps: &[PrTableDep],
-) -> String {
+pub fn get_pr_updates_table(pr_body_columns: Option<&[String]>, deps: &[PrTableDep]) -> String {
     let Some(columns) = pr_body_columns else {
         return String::new();
     };
@@ -1030,7 +1027,13 @@ pub fn get_pr_updates_table(
     // Determine non-empty columns.
     let non_empty: Vec<&String> = columns
         .iter()
-        .filter(|col| rows.iter().any(|row| row.get(col.as_str()).map(|s| !s.is_empty()).unwrap_or(false)))
+        .filter(|col| {
+            rows.iter().any(|row| {
+                row.get(col.as_str())
+                    .map(|s| !s.is_empty())
+                    .unwrap_or(false)
+            })
+        })
         .collect();
 
     if non_empty.is_empty() {
@@ -2515,8 +2518,14 @@ mod tests {
             "Change".to_owned(),
         ];
         let table = get_pr_updates_table(Some(&columns), &deps);
-        assert!(table.contains("| Package | Type | Update | Change |"), "header row missing: {table}");
-        assert!(table.contains("| lodash | dependencies | major | `^3.0.0` → `^4.0.0` |"), "data row missing: {table}");
+        assert!(
+            table.contains("| Package | Type | Update | Change |"),
+            "header row missing: {table}"
+        );
+        assert!(
+            table.contains("| lodash | dependencies | major | `^3.0.0` → `^4.0.0` |"),
+            "data row missing: {table}"
+        );
     }
 
     // Ported: "handles extra notes" — workers/repository/update/pr/body/notes.spec.ts line 44
@@ -2574,7 +2583,10 @@ mod tests {
     #[test]
     fn major_group_slug_basic() {
         assert_eq!(major_group_slug("deps", false, false, false, 1), "deps");
-        assert_eq!(major_group_slug("deps", true, true, true, 2), "major-2-deps");
+        assert_eq!(
+            major_group_slug("deps", true, true, true, 2),
+            "major-2-deps"
+        );
         assert_eq!(major_group_slug("deps", true, false, true, 2), "major-deps");
     }
 
@@ -2626,7 +2638,10 @@ mod tests {
 
     #[test]
     fn detect_semantic_commits_detects() {
-        assert!(detect_semantic_commits(&["feat: add feature", "chore: update deps"]));
+        assert!(detect_semantic_commits(&[
+            "feat: add feature",
+            "chore: update deps"
+        ]));
     }
 
     #[test]

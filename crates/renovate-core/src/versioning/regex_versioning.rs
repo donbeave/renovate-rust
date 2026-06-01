@@ -168,13 +168,11 @@ impl RegexVersioning {
         }
 
         match (&left.prerelease, &right.prerelease) {
-            (Some(lp), Some(rp)) => {
-                match numeric_aware_cmp(lp, rp) {
-                    Ordering::Less => -1,
-                    Ordering::Equal => 0,
-                    Ordering::Greater => 1,
-                }
-            }
+            (Some(lp), Some(rp)) => match numeric_aware_cmp(lp, rp) {
+                Ordering::Less => -1,
+                Ordering::Equal => 0,
+                Ordering::Greater => 1,
+            },
             (Some(_), None) => -1,
             (None, Some(_)) => 1,
             (None, None) => 0,

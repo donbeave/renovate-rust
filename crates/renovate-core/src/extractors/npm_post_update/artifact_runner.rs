@@ -101,8 +101,7 @@ impl ArtifactRunner for NpmArtifactRunner {
                 ..Default::default()
             };
 
-            let process_env: std::collections::HashMap<String, String> =
-                std::env::vars().collect();
+            let process_env: std::collections::HashMap<String, String> = std::env::vars().collect();
 
             match raw_exec(&cmd, &opts, &process_env).await {
                 Ok(result) => {
@@ -187,7 +186,10 @@ mod tests {
     #[test]
     fn build_install_cmd_npm() {
         let cmd = NpmArtifactRunner::build_install_cmd("npm", &ArtifactConfig::default());
-        assert_eq!(cmd, vec!["npm", "install", "--package-lock-only", "--ignore-scripts"]);
+        assert_eq!(
+            cmd,
+            vec!["npm", "install", "--package-lock-only", "--ignore-scripts"]
+        );
     }
 
     // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
@@ -240,7 +242,8 @@ mod tests {
                 manager: "npm".to_owned(),
                 datasource: Some("npm".to_owned()),
             }],
-            new_package_file_content: r#"{"name":"test","dependencies":{"lodash":"^4.17.21"}}"#.to_owned(),
+            new_package_file_content: r#"{"name":"test","dependencies":{"lodash":"^4.17.21"}}"#
+                .to_owned(),
             config: ArtifactConfig {
                 lock_file_dir: lock_dir.clone(),
                 ..Default::default()
@@ -314,7 +317,10 @@ mod tests {
     #[test]
     fn build_install_cmd_default() {
         let cmd = NpmArtifactRunner::build_install_cmd("other", &ArtifactConfig::default());
-        assert_eq!(cmd, vec!["npm", "install", "--package-lock-only", "--ignore-scripts"]);
+        assert_eq!(
+            cmd,
+            vec!["npm", "install", "--package-lock-only", "--ignore-scripts"]
+        );
     }
 
     // Ported: "returns null if currentValue is undefined" — modules/manager/npm/artifacts.spec.ts line 68

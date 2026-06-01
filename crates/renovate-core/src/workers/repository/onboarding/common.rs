@@ -7,10 +7,7 @@ use crate::workers::types::RenovateConfig;
 
 pub fn get_onboarding_pr_title(config: &RenovateConfig, global_config: &GlobalConfig) -> String {
     if config.semantic_commits.as_deref() == Some("enabled") {
-        let commit_type = config
-            .semantic_commit_type
-            .as_deref()
-            .unwrap_or("chore");
+        let commit_type = config.semantic_commit_type.as_deref().unwrap_or("chore");
         let title = global_config
             .onboarding_pr_title
             .as_deref()
@@ -55,7 +52,10 @@ pub fn get_default_config_file_name(global_config: &GlobalConfig) -> String {
     {
         return name.clone();
     }
-    config_file_names.first().unwrap_or(&"renovate.json").to_string()
+    config_file_names
+        .first()
+        .unwrap_or(&"renovate.json")
+        .to_string()
 }
 
 pub fn get_config_file_names(_global_config: &GlobalConfig) -> Vec<&'static str> {

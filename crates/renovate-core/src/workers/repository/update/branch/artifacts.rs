@@ -79,7 +79,8 @@ mod tests {
 
     #[test]
     fn set_artifact_error_status_no_errors() {
-        let result = set_artifact_error_status(&[], "renovate/lodash-4.x", Some("renovate/artifacts"));
+        let result =
+            set_artifact_error_status(&[], "renovate/lodash-4.x", Some("renovate/artifacts"));
         assert!(result.is_none());
     }
 
@@ -89,7 +90,8 @@ mod tests {
             lock_file: Some("package-lock.json".into()),
             stderr: Some("error".into()),
         }];
-        let result = set_artifact_error_status(&errors, "renovate/lodash-4.x", Some("renovate/artifacts"));
+        let result =
+            set_artifact_error_status(&errors, "renovate/lodash-4.x", Some("renovate/artifacts"));
         assert!(result.is_some());
         assert!(result.unwrap().contains("renovate/lodash-4.x"));
     }

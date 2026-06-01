@@ -29,13 +29,13 @@ use std::sync::Arc;
 
 use clap::Parser as _;
 use cli::Cli;
+use renovate_core::artifacts::{ArtifactConfig, ArtifactRegistry, UpdateArtifact, UpdatedDep};
 use renovate_core::config::Platform;
 use renovate_core::config::{DryRun, GlobalConfig, file as config_file};
-use renovate_core::http::HttpClient;
-use renovate_core::artifacts::{ArtifactConfig, ArtifactRegistry, UpdateArtifact, UpdatedDep};
 use renovate_core::extractors::cargo_artifact_runner::CargoArtifactRunner;
 use renovate_core::extractors::gomod_artifact_runner::GomodArtifactRunner;
 use renovate_core::extractors::npm_post_update::artifact_runner::NpmArtifactRunner;
+use renovate_core::http::HttpClient;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
@@ -286,7 +286,11 @@ fn build_pr_body(
     let table_deps: Vec<renovate_core::branch::PrTableDep> = deps
         .iter()
         .filter_map(|bd| {
-            if let output::DepStatus::UpdateAvailable { ref current, ref latest } = bd.dep.status {
+            if let output::DepStatus::UpdateAvailable {
+                ref current,
+                ref latest,
+            } = bd.dep.status
+            {
                 Some(renovate_core::branch::PrTableDep {
                     dep_name: bd.dep.name.clone(),
                     new_name: bd.dep.replacement_name.clone(),
@@ -527,18 +531,25 @@ async fn process_repo(
                             Vec::new()
                         };
                         for bd in &file_deps {
-                            if let output::DepStatus::UpdateAvailable { ref current, ref latest } =
-                                bd.dep.status
+                            if let output::DepStatus::UpdateAvailable {
+                                ref current,
+                                ref latest,
+                            } = bd.dep.status
                             {
                                 let updated = match manager.as_str() {
                                     "npm" => {
-                                        let upgrade = renovate_core::extractors::npm::NpmUpdateUpgrade {
-                                            dep_type: bd.dep.dep_type.clone().unwrap_or_default(),
-                                            dep_name: bd.dep.name.clone(),
-                                            new_value: bd.dep.new_value.clone(),
-                                            current_value: Some(current.clone()),
-                                            ..Default::default()
-                                        };
+                                        let upgrade =
+                                            renovate_core::extractors::npm::NpmUpdateUpgrade {
+                                                dep_type: bd
+                                                    .dep
+                                                    .dep_type
+                                                    .clone()
+                                                    .unwrap_or_default(),
+                                                dep_name: bd.dep.name.clone(),
+                                                new_value: bd.dep.new_value.clone(),
+                                                current_value: Some(current.clone()),
+                                                ..Default::default()
+                                            };
                                         renovate_core::extractors::npm::npm_update_dependency(
                                             &content, &upgrade,
                                         )
@@ -548,15 +559,21 @@ async fn process_repo(
                                             .iter()
                                             .find(|d| d.module_path == bd.dep.name)
                                             .and_then(|d| d.manager_data.clone());
-                                        let upgrade = renovate_core::extractors::gomod::GoModUpdateUpgrade {
-                                            dep_name: Some(bd.dep.name.clone()),
-                                            dep_type: bd.dep.dep_type.clone(),
-                                            update_type: bd.dep.update_type.clone(),
-                                            new_value: Some(bd.dep.new_value.clone().unwrap_or_else(|| latest.clone())),
-                                            current_value: Some(current.clone()),
-                                            manager_data,
-                                            ..Default::default()
-                                        };
+                                        let upgrade =
+                                            renovate_core::extractors::gomod::GoModUpdateUpgrade {
+                                                dep_name: Some(bd.dep.name.clone()),
+                                                dep_type: bd.dep.dep_type.clone(),
+                                                update_type: bd.dep.update_type.clone(),
+                                                new_value: Some(
+                                                    bd.dep
+                                                        .new_value
+                                                        .clone()
+                                                        .unwrap_or_else(|| latest.clone()),
+                                                ),
+                                                current_value: Some(current.clone()),
+                                                manager_data,
+                                                ..Default::default()
+                                            };
                                         renovate_core::extractors::gomod::gomod_update_dependency(
                                             &content, &upgrade,
                                         )
@@ -576,43 +593,69 @@ async fn process_repo(
                                             );
                                             continue;
                                         };
-                                        let upgrade = renovate_core::extractors::maven::MavenUpdateUpgrade {
-                                            dep_name: Some(bd.dep.name.clone()),
-                                            new_value: Some(bd.dep.new_value.clone().unwrap_or_else(|| latest.clone())),
-                                            current_value: Some(current.clone()),
-                                            file_replace_position: pos,
-                                            ..Default::default()
-                                        };
+                                        let upgrade =
+                                            renovate_core::extractors::maven::MavenUpdateUpgrade {
+                                                dep_name: Some(bd.dep.name.clone()),
+                                                new_value: Some(
+                                                    bd.dep
+                                                        .new_value
+                                                        .clone()
+                                                        .unwrap_or_else(|| latest.clone()),
+                                                ),
+                                                current_value: Some(current.clone()),
+                                                file_replace_position: pos,
+                                                ..Default::default()
+                                            };
                                         renovate_core::extractors::maven::maven_update_dependency(
                                             &content, &upgrade,
                                         )
                                     }
                                     "dockerfile" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::dockerfile::dockerfile_update_dependency(
                                             &content, &bd.dep.name, &new_value,
                                         )
                                     }
                                     "github-actions" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::github_actions::github_actions_update_dependency(
                                             &content, &bd.dep.name, current, &new_value,
                                         )
                                     }
                                     "docker-compose" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::docker_compose::docker_compose_update_dependency(
                                             &content, &bd.dep.name, &new_value,
                                         )
                                     }
                                     "buildkite" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::buildkite::buildkite_update_dependency(
                                             &content, &bd.dep.name, current, &new_value,
                                         )
                                     }
                                     "circleci" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         if bd.dep.name.contains(':') {
                                             // Docker image dep — reuse dockerfile logic.
                                             renovate_core::extractors::dockerfile::dockerfile_update_dependency(
@@ -621,36 +664,63 @@ async fn process_repo(
                                         } else {
                                             // Orb dep.
                                             renovate_core::extractors::circleci::circleci_update_orb(
-                                                &content, &bd.dep.name, current, &new_value,
+                                                &content,
+                                                &bd.dep.name,
+                                                current,
+                                                &new_value,
                                             )
                                         }
                                     }
                                     "gitlabci" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::dockerfile::dockerfile_update_dependency(
                                             &content, &bd.dep.name, &new_value,
                                         )
                                     }
                                     "gitlabci-include" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::gitlabci_include::gitlabci_include_update_dependency(
                                             &content, &bd.dep.name, current, &new_value,
                                         )
                                     }
                                     "helm-values" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::helm_values::helm_values_update_dependency(
                                             &content, &bd.dep.name, current, &new_value,
                                         )
                                     }
-                                    "travis" | "cloudbuild" | "droneci" | "woodpecker" | "bitbucket-pipelines" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                    "travis"
+                                    | "cloudbuild"
+                                    | "droneci"
+                                    | "woodpecker"
+                                    | "bitbucket-pipelines" => {
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         renovate_core::extractors::dockerfile::dockerfile_update_dependency(
                                             &content, &bd.dep.name, &new_value,
                                         )
                                     }
                                     "azure-pipelines" => {
-                                        let new_value = bd.dep.new_value.clone().unwrap_or_else(|| latest.clone());
+                                        let new_value = bd
+                                            .dep
+                                            .new_value
+                                            .clone()
+                                            .unwrap_or_else(|| latest.clone());
                                         // Azure Pipelines references Docker images in container resources
                                         // and task versions in `task:` references. For now, only Docker
                                         // images are supported.
@@ -717,8 +787,10 @@ async fn process_repo(
                                     let updated_deps: Vec<UpdatedDep> = file_deps
                                         .iter()
                                         .filter_map(|bd| {
-                                            if let output::DepStatus::UpdateAvailable { ref current, .. } =
-                                                bd.dep.status
+                                            if let output::DepStatus::UpdateAvailable {
+                                                ref current,
+                                                ..
+                                            } = bd.dep.status
                                             {
                                                 Some(UpdatedDep {
                                                     dep_name: bd.dep.name.clone(),
@@ -760,7 +832,10 @@ async fn process_repo(
                                                                     owner,
                                                                     repo,
                                                                     &file_change.path,
-                                                                    file_change.contents.as_deref().unwrap_or_default(),
+                                                                    file_change
+                                                                        .contents
+                                                                        .as_deref()
+                                                                        .unwrap_or_default(),
                                                                 )
                                                                 .await
                                                             {
@@ -781,7 +856,8 @@ async fn process_repo(
                                                                 );
                                                             }
                                                         }
-                                                        if let Some(ref err) = result.artifact_error {
+                                                        if let Some(ref err) = result.artifact_error
+                                                        {
                                                             tracing::error!(
                                                                 repo = %repo_slug,
                                                                 branch = %branch,
@@ -920,7 +996,8 @@ mod tests {
         let updated = renovate_core::extractors::npm::npm_update_dependency(package_json, &upgrade)
             .expect("npm_update_dependency should succeed");
         assert!(
-            updated.contains("\"lodash\": \"^4.17.21\"") || updated.contains("\"lodash\":\"^4.17.21\""),
+            updated.contains("\"lodash\": \"^4.17.21\"")
+                || updated.contains("\"lodash\":\"^4.17.21\""),
             "updated package.json should contain new version; got: {updated}"
         );
     }
@@ -968,8 +1045,17 @@ mod tests {
         }];
         let cfg = renovate_core::repo_config::RepoConfig::default();
         let body = build_pr_body(&deps, &cfg);
-        assert!(body.contains("lodash"), "body should mention dep name; got: {body}");
-        assert!(body.contains("^3.0.0"), "body should mention current version; got: {body}");
-        assert!(body.contains("4.17.21"), "body should mention latest version; got: {body}");
+        assert!(
+            body.contains("lodash"),
+            "body should mention dep name; got: {body}"
+        );
+        assert!(
+            body.contains("^3.0.0"),
+            "body should mention current version; got: {body}"
+        );
+        assert!(
+            body.contains("4.17.21"),
+            "body should mention latest version; got: {body}"
+        );
     }
 }

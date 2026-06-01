@@ -46,8 +46,8 @@ impl Migration for VersionStrategyMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::VersionStrategyMigration;
     use crate::config::migration::Migration;
@@ -62,7 +62,12 @@ mod tests {
     fn migrate_widen() {
         let m = VersionStrategyMigration::new();
         let mut migrated = Map::new();
-        m.run("versionStrategy", &json!("widen"), &Map::new(), &mut migrated);
+        m.run(
+            "versionStrategy",
+            &json!("widen"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["rangeStrategy"], json!("widen"));
     }
 
@@ -70,7 +75,12 @@ mod tests {
     fn non_widen_is_noop() {
         let m = VersionStrategyMigration::new();
         let mut migrated = Map::new();
-        m.run("versionStrategy", &json!("test"), &Map::new(), &mut migrated);
+        m.run(
+            "versionStrategy",
+            &json!("test"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert!(migrated.is_empty());
     }
 
@@ -79,7 +89,12 @@ mod tests {
         let m = VersionStrategyMigration::new();
         let mut migrated = Map::new();
         migrated.insert("rangeStrategy".into(), json!("bump"));
-        m.run("versionStrategy", &json!("widen"), &Map::new(), &mut migrated);
+        m.run(
+            "versionStrategy",
+            &json!("widen"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["rangeStrategy"], json!("bump"));
     }
 }

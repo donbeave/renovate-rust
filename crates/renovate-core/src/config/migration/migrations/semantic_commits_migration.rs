@@ -31,11 +31,7 @@ impl Migration for SemanticCommitsMigration {
         migrated_config: &mut Map<String, Value>,
     ) {
         let new_value = if let Some(b) = value.as_bool() {
-            if b {
-                "enabled"
-            } else {
-                "disabled"
-            }
+            if b { "enabled" } else { "disabled" }
         } else if let Some(s) = value.as_str() {
             if s == "enabled" || s == "disabled" {
                 s
@@ -46,10 +42,7 @@ impl Migration for SemanticCommitsMigration {
             "auto"
         };
 
-        migrated_config.insert(
-            "semanticCommits".into(),
-            Value::String(new_value.into()),
-        );
+        migrated_config.insert("semanticCommits".into(), Value::String(new_value.into()));
     }
 
     fn box_clone(&self) -> Box<dyn Migration> {
@@ -59,8 +52,8 @@ impl Migration for SemanticCommitsMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::SemanticCommitsMigration;
     use crate::config::migration::Migration;
@@ -99,7 +92,12 @@ mod tests {
     fn migrates_random_string_to_auto() {
         let m = SemanticCommitsMigration::new();
         let mut migrated = Map::new();
-        m.run("semanticCommits", &json!("test"), &Map::new(), &mut migrated);
+        m.run(
+            "semanticCommits",
+            &json!("test"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["semanticCommits"], json!("auto"));
     }
 
@@ -107,7 +105,12 @@ mod tests {
     fn leaves_enabled_unchanged() {
         let m = SemanticCommitsMigration::new();
         let mut migrated = Map::new();
-        m.run("semanticCommits", &json!("enabled"), &Map::new(), &mut migrated);
+        m.run(
+            "semanticCommits",
+            &json!("enabled"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["semanticCommits"], json!("enabled"));
     }
 
@@ -115,7 +118,12 @@ mod tests {
     fn leaves_disabled_unchanged() {
         let m = SemanticCommitsMigration::new();
         let mut migrated = Map::new();
-        m.run("semanticCommits", &json!("disabled"), &Map::new(), &mut migrated);
+        m.run(
+            "semanticCommits",
+            &json!("disabled"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["semanticCommits"], json!("disabled"));
     }
 }

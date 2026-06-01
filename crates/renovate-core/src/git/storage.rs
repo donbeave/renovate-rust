@@ -19,8 +19,7 @@ pub enum GitNoVerifyOption {
     Push,
 }
 
-#[derive(Debug, Clone)]
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct StorageConfig {
     pub current_branch: Option<String>,
     pub default_branch: Option<String>,
@@ -31,7 +30,6 @@ pub struct StorageConfig {
     pub clone_submodules_filter: Option<Vec<String>>,
     pub full_clone: bool,
 }
-
 
 #[derive(Debug, Clone)]
 pub enum FileChange {
@@ -156,7 +154,10 @@ impl GitStorage {
         std::fs::create_dir_all(&self.workdir)
             .with_context(|| format!("creating workdir {}", self.workdir.display()))?;
         let mut cmd = tokio::process::Command::new("git");
-        cmd.arg("clone").arg("--no-tags").arg("--origin").arg("origin");
+        cmd.arg("clone")
+            .arg("--no-tags")
+            .arg("--origin")
+            .arg("origin");
         if !self.config.full_clone {
             cmd.arg("--depth=2");
         }
@@ -167,9 +168,14 @@ impl GitStorage {
         }
         if let Some(ref upstream) = self.config.upstream_url {
             let status = tokio::process::Command::new("git")
-                .arg("remote").arg("add").arg(RENOVATE_FORK_UPSTREAM).arg(upstream)
+                .arg("remote")
+                .arg("add")
+                .arg(RENOVATE_FORK_UPSTREAM)
+                .arg(upstream)
                 .current_dir(&self.workdir)
-                .status().await.context("adding upstream remote")?;
+                .status()
+                .await
+                .context("adding upstream remote")?;
             if !status.success() {
                 bail!("failed to add upstream remote {}", upstream);
             }
@@ -179,11 +185,16 @@ impl GitStorage {
 
     async fn fetch_all(&mut self) -> Result<()> {
         let status = tokio::process::Command::new("git")
-            .arg("fetch").arg("--prune").arg("--no-tags")
-            .arg("origin").arg("+refs/heads/*:refs/remotes/origin/*")
+            .arg("fetch")
+            .arg("--prune")
+            .arg("--no-tags")
+            .arg("origin")
+            .arg("+refs/heads/*:refs/remotes/origin/*")
             .arg("--depth=2")
             .current_dir(&self.workdir)
-            .status().await.context("git fetch")?;
+            .status()
+            .await
+            .context("git fetch")?;
         if !status.success() {
             bail!("git fetch failed");
         }
@@ -192,9 +203,12 @@ impl GitStorage {
 
     async fn read_current_sha(&mut self) -> Result<()> {
         let output = tokio::process::Command::new("git")
-            .arg("rev-parse").arg(&self.current_branch)
+            .arg("rev-parse")
+            .arg(&self.current_branch)
             .current_dir(&self.workdir)
-            .output().await.context("git rev-parse")?;
+            .output()
+            .await
+            .context("git rev-parse")?;
         if output.status.success() {
             let sha = String::from_utf8_lossy(&output.stdout).trim().to_owned();
             self.current_branch_sha = sha.clone();
@@ -211,50 +225,74 @@ impl GitStorage {
 
     pub async fn checkout_branch(&mut self, branch_name: &str) -> Result<LongCommitSha> {
         let status = tokio::process::Command::new("git")
-            .arg("checkout").arg("--force").arg(branch_name)
+            .arg("checkout")
+            .arg("--force")
+            .arg(branch_name)
             .current_dir(&self.workdir)
-            .status().await.context("git checkout")?;
+            .status()
+            .await
+            .context("git checkout")?;
         if !status.success() {
             bail!("git checkout {} failed", branch_name);
         }
         let sha = self.get_commit_sha(branch_name).await?;
-        self.branch_commits.insert(branch_name.to_owned(), sha.clone());
+        self.branch_commits
+            .insert(branch_name.to_owned(), sha.clone());
         Ok(sha)
     }
 
     pub async fn checkout_branch_from_remote(
-        &mut self, branch_name: &str, remote_name: &str,
+        &mut self,
+        branch_name: &str,
+        remote_name: &str,
     ) -> Result<LongCommitSha> {
         let remote_branch = format!("{}/{}", remote_name, branch_name);
         let status = tokio::process::Command::new("git")
-            .arg("checkout").arg("-b").arg(branch_name).arg(&remote_branch)
+            .arg("checkout")
+            .arg("-b")
+            .arg(branch_name)
+            .arg(&remote_branch)
             .current_dir(&self.workdir)
-            .status().await.context("git checkout -b from remote")?;
+            .status()
+            .await
+            .context("git checkout -b from remote")?;
         if !status.success() {
             bail!("git checkout -b {} {} failed", branch_name, remote_branch);
         }
         let sha = self.get_commit_sha(branch_name).await?;
-        self.branch_commits.insert(branch_name.to_owned(), sha.clone());
+        self.branch_commits
+            .insert(branch_name.to_owned(), sha.clone());
         Ok(sha)
     }
 
     pub async fn get_commit_sha(&self, refname: &str) -> Result<LongCommitSha> {
         let output = tokio::process::Command::new("git")
-            .arg("rev-parse").arg(refname)
+            .arg("rev-parse")
+            .arg(refname)
             .current_dir(&self.workdir)
-            .output().await.context("git rev-parse")?;
+            .output()
+            .await
+            .context("git rev-parse")?;
         if !output.status.success() {
             bail!("git rev-parse {} failed", refname);
         }
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_owned())
     }
 
-    pub async fn get_file(&self, file_path: &str, branch_name: Option<&str>) -> Result<Option<String>> {
+    pub async fn get_file(
+        &self,
+        file_path: &str,
+        branch_name: Option<&str>,
+    ) -> Result<Option<String>> {
         let mut cmd = tokio::process::Command::new("git");
         cmd.arg("show").current_dir(&self.workdir);
         match branch_name {
-            Some(branch) => { cmd.arg(format!("{}:{}", branch, file_path)); }
-            None => { cmd.arg(format!("HEAD:{}", file_path)); }
+            Some(branch) => {
+                cmd.arg(format!("{}:{}", branch, file_path));
+            }
+            None => {
+                cmd.arg(format!("HEAD:{}", file_path));
+            }
         }
         let output = cmd.output().await.context("git show")?;
         if output.status.success() {
@@ -266,57 +304,94 @@ impl GitStorage {
 
     pub async fn get_file_list(&self) -> Result<Vec<String>> {
         let output = tokio::process::Command::new("git")
-            .arg("ls-files").current_dir(&self.workdir)
-            .output().await.context("git ls-files")?;
+            .arg("ls-files")
+            .current_dir(&self.workdir)
+            .output()
+            .await
+            .context("git ls-files")?;
         if !output.status.success() {
             bail!("git ls-files failed");
         }
-        Ok(String::from_utf8_lossy(&output.stdout).lines().map(|l| l.to_owned()).collect())
+        Ok(String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .map(|l| l.to_owned())
+            .collect())
     }
 
-    pub async fn is_branch_behind_base(&self, branch_name: &str, base_branch: &str) -> Result<bool> {
+    pub async fn is_branch_behind_base(
+        &self,
+        branch_name: &str,
+        base_branch: &str,
+    ) -> Result<bool> {
         let branch_sha = self.get_commit_sha(branch_name).await?;
         let base_sha = self.get_commit_sha(base_branch).await?;
         let output = tokio::process::Command::new("git")
-            .arg("merge-base").arg("--is-ancestor").arg(&branch_sha).arg(&base_sha)
+            .arg("merge-base")
+            .arg("--is-ancestor")
+            .arg(&branch_sha)
+            .arg(&base_sha)
             .current_dir(&self.workdir)
-            .output().await.context("git merge-base --is-ancestor")?;
+            .output()
+            .await
+            .context("git merge-base --is-ancestor")?;
         Ok(output.status.success())
     }
 
     pub async fn is_branch_modified(&self, branch_name: &str, base_branch: &str) -> Result<bool> {
         let output = tokio::process::Command::new("git")
-            .arg("log").arg(format!("{}..{}", base_branch, branch_name))
-            .arg("--format=%H").arg("--author").arg("^Renovate")
+            .arg("log")
+            .arg(format!("{}..{}", base_branch, branch_name))
+            .arg("--format=%H")
+            .arg("--author")
+            .arg("^Renovate")
             .current_dir(&self.workdir)
-            .output().await.context("git log for modified check")?;
+            .output()
+            .await
+            .context("git log for modified check")?;
         Ok(!String::from_utf8_lossy(&output.stdout).trim().is_empty())
     }
 
     pub async fn is_branch_conflicted(&self, base_branch: &str, branch: &str) -> Result<bool> {
         let status = tokio::process::Command::new("git")
-            .arg("merge-tree").arg(base_branch).arg(branch)
+            .arg("merge-tree")
+            .arg(base_branch)
+            .arg(branch)
             .current_dir(&self.workdir)
-            .status().await.context("git merge-tree")?;
+            .status()
+            .await
+            .context("git merge-tree")?;
         Ok(!status.success())
     }
 
     pub async fn delete_branch(&self, branch_name: &str) -> Result<()> {
         let _ = tokio::process::Command::new("git")
-            .arg("branch").arg("-D").arg(branch_name)
-            .current_dir(&self.workdir).status().await;
-        tokio::process::Command::new("git")
-            .arg("push").arg("origin").arg("--delete").arg(branch_name)
+            .arg("branch")
+            .arg("-D")
+            .arg(branch_name)
             .current_dir(&self.workdir)
-            .status().await.context("git push --delete")?;
+            .status()
+            .await;
+        tokio::process::Command::new("git")
+            .arg("push")
+            .arg("origin")
+            .arg("--delete")
+            .arg(branch_name)
+            .current_dir(&self.workdir)
+            .status()
+            .await
+            .context("git push --delete")?;
         Ok(())
     }
 
     pub async fn merge_branch(&self, branch_name: &str) -> Result<()> {
         let status = tokio::process::Command::new("git")
-            .arg("merge").arg("--no-ff").arg(branch_name)
+            .arg("merge")
+            .arg("--no-ff")
+            .arg(branch_name)
             .current_dir(&self.workdir)
-            .status().await.context("git merge")?;
+            .status()
+            .await
+            .context("git merge")?;
         if !status.success() {
             bail!("git merge {} failed", branch_name);
         }
@@ -335,18 +410,30 @@ impl GitStorage {
                     std::fs::write(&full_path, contents)
                         .with_context(|| format!("writing file {}", full_path.display()))?;
                     tokio::process::Command::new("git")
-                        .arg("add").arg(path).current_dir(&self.workdir)
-                        .status().await.context("git add")?;
+                        .arg("add")
+                        .arg(path)
+                        .current_dir(&self.workdir)
+                        .status()
+                        .await
+                        .context("git add")?;
                 }
                 FileChange::Deletion { path } => {
                     tokio::process::Command::new("git")
-                        .arg("rm").arg("-f").arg(path).current_dir(&self.workdir)
-                        .status().await.context("git rm")?;
+                        .arg("rm")
+                        .arg("-f")
+                        .arg(path)
+                        .current_dir(&self.workdir)
+                        .status()
+                        .await
+                        .context("git rm")?;
                 }
             }
         }
         let mut cmd = tokio::process::Command::new("git");
-        cmd.arg("commit").arg("-m").arg(&config.message).current_dir(&self.workdir);
+        cmd.arg("commit")
+            .arg("-m")
+            .arg(&config.message)
+            .current_dir(&self.workdir);
         if self.no_verify.contains(&GitNoVerifyOption::Commit) {
             cmd.arg("--no-verify");
         }
@@ -363,7 +450,10 @@ impl GitStorage {
 
     pub async fn push_commit(&self, branch_name: &str) -> Result<bool> {
         let mut cmd = tokio::process::Command::new("git");
-        cmd.arg("push").arg("origin").arg(branch_name).current_dir(&self.workdir);
+        cmd.arg("push")
+            .arg("origin")
+            .arg(branch_name)
+            .current_dir(&self.workdir);
         if self.no_verify.contains(&GitNoVerifyOption::Push) {
             cmd.arg("--no-verify");
         }
@@ -373,9 +463,13 @@ impl GitStorage {
 
     pub async fn fetch_branch(&self, branch_name: &str) -> Result<Option<LongCommitSha>> {
         let status = tokio::process::Command::new("git")
-            .arg("fetch").arg("origin").arg(format!("{}:{}", branch_name, branch_name))
+            .arg("fetch")
+            .arg("origin")
+            .arg(format!("{}:{}", branch_name, branch_name))
             .current_dir(&self.workdir)
-            .status().await.context("git fetch branch")?;
+            .status()
+            .await
+            .context("git fetch branch")?;
         if !status.success() {
             return Ok(None);
         }
@@ -385,32 +479,53 @@ impl GitStorage {
 
     pub async fn get_commit_messages(&self) -> Result<Vec<String>> {
         let output = tokio::process::Command::new("git")
-            .arg("log").arg("-n").arg("10").arg("--format=%s")
+            .arg("log")
+            .arg("-n")
+            .arg("10")
+            .arg("--format=%s")
             .current_dir(&self.workdir)
-            .output().await.context("git log")?;
-        Ok(String::from_utf8_lossy(&output.stdout).lines().map(|l| l.to_owned()).collect())
+            .output()
+            .await
+            .context("git log")?;
+        Ok(String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .map(|l| l.to_owned())
+            .collect())
     }
 
     pub async fn get_repo_status(&self) -> Result<String> {
         let output = tokio::process::Command::new("git")
-            .arg("status").arg("--porcelain").current_dir(&self.workdir)
-            .output().await.context("git status")?;
+            .arg("status")
+            .arg("--porcelain")
+            .current_dir(&self.workdir)
+            .output()
+            .await
+            .context("git status")?;
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     }
 
     pub async fn has_diff(&self, source_ref: &str, target_ref: &str) -> Result<bool> {
         let output = tokio::process::Command::new("git")
-            .arg("diff").arg("--quiet").arg(source_ref).arg(target_ref)
+            .arg("diff")
+            .arg("--quiet")
+            .arg(source_ref)
+            .arg(target_ref)
             .current_dir(&self.workdir)
-            .output().await.context("git diff")?;
+            .output()
+            .await
+            .context("git diff")?;
         Ok(!output.status.success())
     }
 
     pub async fn reset_to_commit(&self, commit: &str) -> Result<()> {
         let status = tokio::process::Command::new("git")
-            .arg("reset").arg("--hard").arg(commit)
+            .arg("reset")
+            .arg("--hard")
+            .arg(commit)
             .current_dir(&self.workdir)
-            .status().await.context("git reset --hard")?;
+            .status()
+            .await
+            .context("git reset --hard")?;
         if !status.success() {
             bail!("git reset --hard {} failed", commit);
         }
@@ -419,8 +534,13 @@ impl GitStorage {
 
     pub async fn set_config(&self, key: &str, value: &str) -> Result<()> {
         let status = tokio::process::Command::new("git")
-            .arg("config").arg(key).arg(value).current_dir(&self.workdir)
-            .status().await.context("git config")?;
+            .arg("config")
+            .arg(key)
+            .arg(value)
+            .current_dir(&self.workdir)
+            .status()
+            .await
+            .context("git config")?;
         if !status.success() {
             bail!("git config {} {} failed", key, value);
         }
@@ -451,13 +571,19 @@ pub fn parse_git_author_storage(input: &str) -> Option<GitAuthor> {
             address: if email.is_empty() { None } else { Some(email) },
         })
     } else {
-        Some(GitAuthor { name: Some(input.to_owned()), address: None })
+        Some(GitAuthor {
+            name: Some(input.to_owned()),
+            address: None,
+        })
     }
 }
 
 pub fn get_url(
-    protocol: Option<&str>, auth: Option<&str>,
-    hostname: Option<&str>, host: Option<&str>, repository: &str,
+    protocol: Option<&str>,
+    auth: Option<&str>,
+    hostname: Option<&str>,
+    host: Option<&str>,
+    repository: &str,
 ) -> String {
     let proto = protocol.unwrap_or("https");
     let auth_part = match auth {
@@ -504,7 +630,13 @@ mod tests {
     // Rust-specific: storage behavior test
     #[test]
     fn get_url_with_auth() {
-        let url = get_url(Some("https"), Some("token"), Some("gitlab.com"), None, "owner/repo");
+        let url = get_url(
+            Some("https"),
+            Some("token"),
+            Some("gitlab.com"),
+            None,
+            "owner/repo",
+        );
         assert_eq!(url, "https://token@gitlab.com/owner/repo.git");
     }
 

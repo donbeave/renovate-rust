@@ -76,10 +76,8 @@ impl PackageFiles {
                                 file.deps.len()
                             ));
                             for dep in &file.deps {
-                                let version = dep
-                                    .current_value
-                                    .as_deref()
-                                    .unwrap_or("unknown version");
+                                let version =
+                                    dep.current_value.as_deref().unwrap_or("unknown version");
                                 let name = dep.dep_name.as_deref().unwrap_or("unknown");
                                 md.push_str(&format!(" - `{name} {version}`\n"));
                             }
@@ -95,9 +93,7 @@ impl PackageFiles {
     }
 }
 
-pub fn collect_package_files(
-    extractions: &HashMap<String, Vec<PackageFile>>,
-) -> PackageFiles {
+pub fn collect_package_files(extractions: &HashMap<String, Vec<PackageFile>>) -> PackageFiles {
     let mut pf = PackageFiles::new();
     pf.add("main", extractions.clone());
     pf

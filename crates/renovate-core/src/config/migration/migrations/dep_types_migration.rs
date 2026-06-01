@@ -94,8 +94,8 @@ impl Migration for DepTypesMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::DepTypesMigration;
     use crate::config::migration::Migration;
@@ -167,10 +167,7 @@ mod tests {
     fn appends_to_existing_package_rules() {
         let m = DepTypesMigration::new();
         let mut migrated = Map::new();
-        migrated.insert(
-            "packageRules".into(),
-            json!([{ "packageNames": ["foo"] }]),
-        );
+        migrated.insert("packageRules".into(), json!([{ "packageNames": ["foo"] }]));
         m.run(
             "dependencies",
             &json!({ "versionStrategy": "widen" }),

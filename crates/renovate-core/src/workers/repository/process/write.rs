@@ -4,7 +4,9 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::workers::repository::update::branch::types::{BranchConfig, CacheFingerprintMatchResult};
+use crate::workers::repository::update::branch::types::{
+    BranchConfig, CacheFingerprintMatchResult,
+};
 use crate::workers::types::{RenovateConfig, UpgradeFingerprintConfig};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -14,9 +16,7 @@ pub enum WriteUpdateResult {
     Automerged,
 }
 
-pub fn generate_commit_fingerprint_config(
-    branch: &BranchConfig,
-) -> Vec<UpgradeFingerprintConfig> {
+pub fn generate_commit_fingerprint_config(branch: &BranchConfig) -> Vec<UpgradeFingerprintConfig> {
     branch
         .upgrades
         .iter()
@@ -51,10 +51,7 @@ pub fn compare_cache_fingerprint(
     }
 }
 
-pub fn write_updates(
-    _config: &RenovateConfig,
-    branches: &mut [BranchConfig],
-) -> WriteUpdateResult {
+pub fn write_updates(_config: &RenovateConfig, branches: &mut [BranchConfig]) -> WriteUpdateResult {
     for branch in branches.iter_mut() {
         let result = process_branch(branch);
         branch.result = Some(result);
@@ -175,7 +172,10 @@ mod tests {
         let mut branches = vec![make_branch("test")];
         let result = write_updates(&config, &mut branches);
         assert_eq!(result, WriteUpdateResult::Done);
-        assert_eq!(branches[0].result, Some(crate::workers::types::BranchResult::NoWork));
+        assert_eq!(
+            branches[0].result,
+            Some(crate::workers::types::BranchResult::NoWork)
+        );
     }
 
     #[test]
@@ -184,7 +184,10 @@ mod tests {
         let mut branches = vec![make_branch_with_upgrade("test")];
         let result = write_updates(&config, &mut branches);
         assert_eq!(result, WriteUpdateResult::Done);
-        assert_eq!(branches[0].result, Some(crate::workers::types::BranchResult::Done));
+        assert_eq!(
+            branches[0].result,
+            Some(crate::workers::types::BranchResult::Done)
+        );
     }
 
     #[test]

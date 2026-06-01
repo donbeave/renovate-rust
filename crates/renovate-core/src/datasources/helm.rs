@@ -850,7 +850,9 @@ entries:
     - version: 1.1.0
       created: "2024-02-01T00:00:00Z"
 "#;
-        let result = parse_all_versions_with_registry(index_yaml, "nginx", "https://charts.example.com").unwrap();
+        let result =
+            parse_all_versions_with_registry(index_yaml, "nginx", "https://charts.example.com")
+                .unwrap();
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "1.0.0");
         assert_eq!(result.releases[1].version, "1.1.0");
@@ -863,6 +865,9 @@ entries:
   nginx:
     - version: 1.0.0
 "#;
-        assert!(parse_all_versions_with_registry(index_yaml, "missing", "https://charts.example.com").is_none());
+        assert!(
+            parse_all_versions_with_registry(index_yaml, "missing", "https://charts.example.com")
+                .is_none()
+        );
     }
 }

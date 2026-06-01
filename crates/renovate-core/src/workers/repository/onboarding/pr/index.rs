@@ -79,8 +79,10 @@ fn build_onboarding_pr_body(
     package_files: &HashMap<String, Vec<PackageFile>>,
     branches: &[BranchConfig],
 ) -> String {
-    let mut body = String::from("Welcome to [Renovate](https://github.com/renovatebot/renovate)! \
-        This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n");
+    let mut body = String::from(
+        "Welcome to [Renovate](https://github.com/renovatebot/renovate)! \
+        This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n",
+    );
 
     if !package_files.is_empty() {
         body.push_str("### Detected Package Files\n\n");

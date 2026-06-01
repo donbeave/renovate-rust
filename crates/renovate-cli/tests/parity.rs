@@ -103,7 +103,10 @@ fn parity_npm_empty() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for npm-empty fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for npm-empty fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -147,7 +150,10 @@ fn parity_npm_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for npm-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for npm-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -186,7 +192,10 @@ fn parity_cargo_workspace() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for cargo-workspace fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for cargo-workspace fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -225,7 +234,10 @@ fn parity_cargo_hello() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for cargo-hello fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for cargo-hello fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -264,7 +276,10 @@ fn parity_npm_hello() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for npm-hello fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for npm-hello fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -306,7 +321,10 @@ fn parity_github_cargo() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for github-cargo fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for github-cargo fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -344,7 +362,10 @@ fn parity_gomod_empty() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for gomod-empty fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for gomod-empty fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -377,7 +398,10 @@ fn parity_maven_empty() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for maven-empty fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for maven-empty fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -420,7 +444,10 @@ fn parity_gomod_replace() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for gomod-replace fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for gomod-replace fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -459,7 +486,10 @@ fn parity_dockerfile_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for dockerfile-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for dockerfile-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -508,7 +538,10 @@ fn parity_github_actions_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for github-actions-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for github-actions-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -547,7 +580,10 @@ fn parity_docker_compose_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for docker-compose-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for docker-compose-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -596,7 +632,10 @@ fn parity_composer_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for composer-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for composer-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -635,7 +674,10 @@ fn parity_terraform_local() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for terraform-local fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for terraform-local fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -679,7 +721,10 @@ fn parity_pre_commit_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for pre-commit-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for pre-commit-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -718,7 +763,10 @@ fn parity_asdf_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for asdf-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for asdf-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -767,7 +815,10 @@ fn parity_pip_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for pip-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for pip-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -806,7 +857,10 @@ fn parity_circleci_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for circleci-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for circleci-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -845,7 +899,10 @@ fn parity_droneci_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for droneci-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for droneci-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -884,7 +941,10 @@ fn parity_gitlabci_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for gitlabci-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for gitlabci-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -923,7 +983,10 @@ fn parity_woodpecker_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for woodpecker-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for woodpecker-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -962,7 +1025,10 @@ fn parity_kubernetes_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for kubernetes-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for kubernetes-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1001,7 +1067,10 @@ fn parity_cloudbuild_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for cloudbuild-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for cloudbuild-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1040,7 +1109,10 @@ fn parity_bitbucket_pipelines_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for bitbucket-pipelines-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for bitbucket-pipelines-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1079,7 +1151,10 @@ fn parity_devcontainer_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for devcontainer-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for devcontainer-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1118,7 +1193,10 @@ fn parity_batect_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for batect-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for batect-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1157,7 +1235,10 @@ fn parity_quadlet_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for quadlet-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for quadlet-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1196,7 +1277,10 @@ fn parity_bazel_module_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for bazel-module-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for bazel-module-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1235,7 +1319,10 @@ fn parity_bazel_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for bazel-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for bazel-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1274,7 +1361,10 @@ fn parity_argocd_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for argocd-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for argocd-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1313,7 +1403,10 @@ fn parity_ansible_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for ansible-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for ansible-scratch fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1357,7 +1450,10 @@ fn parity_buildpacks_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for buildpacks-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for buildpacks-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1406,7 +1502,10 @@ fn parity_setup_cfg_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for setup-cfg-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for setup-cfg-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1450,7 +1549,10 @@ fn parity_bundler_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for bundler-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for bundler-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1494,7 +1596,10 @@ fn parity_pub_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for pub-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for pub-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1543,7 +1648,10 @@ fn parity_gemspec_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for gemspec-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for gemspec-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1592,7 +1700,10 @@ fn parity_cpanfile_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for cpanfile-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for cpanfile-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1636,7 +1747,10 @@ fn parity_jsonnet_bundler_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for jsonnet-bundler-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for jsonnet-bundler-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1685,7 +1799,10 @@ fn parity_pipenv_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for pipenv-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for pipenv-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1734,7 +1851,10 @@ fn parity_mix_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for mix-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for mix-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1783,7 +1903,10 @@ fn parity_cocoapods_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for cocoapods-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for cocoapods-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1832,7 +1955,10 @@ fn parity_jenkins_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for jenkins-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for jenkins-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1881,7 +2007,10 @@ fn parity_poetry_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for poetry-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for poetry-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1920,7 +2049,10 @@ fn parity_homebrew_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for homebrew-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for homebrew-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1959,7 +2091,10 @@ fn parity_buildkite_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for buildkite-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for buildkite-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -1998,7 +2133,10 @@ fn parity_puppet_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for puppet-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for puppet-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -2037,7 +2175,10 @@ fn parity_tekton_skipped() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for tekton-skipped fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for tekton-skipped fixture"
+    );
 }
 
 // Rust-specific: parity behavior test
@@ -2075,5 +2216,8 @@ fn parity_crossplane_scratch() {
             ]
         }
     ]);
-    assert_eq!(actual, expected, "normalized JSON output mismatch for crossplane-scratch fixture");
+    assert_eq!(
+        actual, expected,
+        "normalized JSON output mismatch for crossplane-scratch fixture"
+    );
 }

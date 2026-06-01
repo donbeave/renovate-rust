@@ -43,13 +43,16 @@ impl Migration for RenamePropertyMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::RenamePropertyMigration;
     use crate::config::migration::Migration;
 
-    fn empty_maps() -> (Map<String, serde_json::Value>, Map<String, serde_json::Value>) {
+    fn empty_maps() -> (
+        Map<String, serde_json::Value>,
+        Map<String, serde_json::Value>,
+    ) {
         (Map::new(), Map::new())
     }
 

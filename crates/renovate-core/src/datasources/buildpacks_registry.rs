@@ -240,7 +240,10 @@ mod tests {
             ]
         }"#;
         let parsed: ApiResponse = serde_json::from_str(json).unwrap();
-        assert_eq!(parsed.latest.unwrap().homepage, Some("https://github.com/heroku/buildpacks-python".to_owned()));
+        assert_eq!(
+            parsed.latest.unwrap().homepage,
+            Some("https://github.com/heroku/buildpacks-python".to_owned())
+        );
         assert_eq!(parsed.versions.len(), 2);
         assert_eq!(parsed.versions[0].version, "0.2.0");
         assert_eq!(parsed.versions[1].version, "0.1.0");

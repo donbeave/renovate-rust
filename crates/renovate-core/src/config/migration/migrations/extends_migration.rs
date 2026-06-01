@@ -71,8 +71,8 @@ impl Migration for ExtendsMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::ExtendsMigration;
     use crate::config::migration::Migration;

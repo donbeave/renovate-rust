@@ -72,7 +72,10 @@ mod tests {
     #[test]
     fn get_inherited_config_returns_value() {
         let inherited = json!({"onboarding": false});
-        assert_eq!(get_inherited_config(&inherited, "onboarding"), Some(&json!(false)));
+        assert_eq!(
+            get_inherited_config(&inherited, "onboarding"),
+            Some(&json!(false))
+        );
         assert_eq!(get_inherited_config(&inherited, "missing"), None);
     }
 

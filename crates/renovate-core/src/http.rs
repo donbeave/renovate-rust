@@ -855,7 +855,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"test": true})))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"test": true})),
+            )
             .mount(&server)
             .await;
 
@@ -893,10 +895,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let val: serde_json::Value = http
-            .post_json(&server.uri(), "{}")
-            .await
-            .unwrap();
+        let val: serde_json::Value = http.post_json(&server.uri(), "{}").await.unwrap();
         assert_eq!(val["id"], 123);
     }
 
@@ -956,7 +955,12 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
-        let header = resp.headers().get("www-authenticate").unwrap().to_str().unwrap();
+        let header = resp
+            .headers()
+            .get("www-authenticate")
+            .unwrap()
+            .to_str()
+            .unwrap();
         assert!(header.contains("Bearer"));
     }
 
@@ -966,15 +970,14 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("PUT"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"updated": true})))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"updated": true})),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let val: serde_json::Value = http
-            .put_json(&server.uri(), "{}")
-            .await
-            .unwrap();
+        let val: serde_json::Value = http.put_json(&server.uri(), "{}").await.unwrap();
         assert_eq!(val["updated"], true);
     }
 
@@ -984,7 +987,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("PATCH"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"patched": true})))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"patched": true})),
+            )
             .mount(&server)
             .await;
 
@@ -999,15 +1004,14 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("DELETE"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"deleted": true})))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"deleted": true})),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let val: serde_json::Value = http
-            .delete_json(&server.uri())
-            .await
-            .unwrap();
+        let val: serde_json::Value = http.delete_json(&server.uri()).await.unwrap();
         assert_eq!(val["deleted"], true);
     }
 
@@ -1144,7 +1148,10 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(200).set_body_string("name = \"test\"\nversion = \"1.0.0\"\n"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string("name = \"test\"\nversion = \"1.0.0\"\n"),
+            )
             .mount(&server)
             .await;
 

@@ -34,7 +34,10 @@ pub fn removed_presets() -> &'static BTreeMap<&'static str, Option<&'static str>
         m.insert("config:base", Some("config:recommended"));
         m.insert("config:base-js", Some("config:recommended"));
         m.insert("config:library", Some("config:js-lib"));
-        m.insert("default:automergeBranchMergeCommit", Some(":automergeBranch"));
+        m.insert(
+            "default:automergeBranchMergeCommit",
+            Some(":automergeBranch"),
+        );
         m.insert("default:automergeBranchPush", Some(":automergeBranch"));
         m.insert("default:base", Some("config:recommended"));
         m.insert("default:app", Some("config:js-app"));
@@ -204,9 +207,6 @@ mod tests {
         let base = json!({"packageRules": [{"a": 1}]});
         let preset = json!({"packageRules": [{"b": 2}]});
         let result = merge_preset(&base, &preset);
-        assert_eq!(
-            result["packageRules"],
-            json!([{"a": 1}, {"b": 2}])
-        );
+        assert_eq!(result["packageRules"], json!([{"a": 1}, {"b": 2}]));
     }
 }

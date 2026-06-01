@@ -54,8 +54,8 @@ impl Migration for DatasourceMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::DatasourceMigration;
     use crate::config::migration::Migration;
@@ -70,7 +70,12 @@ mod tests {
     fn migrates_adoptium_java() {
         let m = DatasourceMigration::new();
         let mut migrated = Map::new();
-        m.run("datasource", &json!("adoptium-java"), &Map::new(), &mut migrated);
+        m.run(
+            "datasource",
+            &json!("adoptium-java"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["datasource"], json!("java-version"));
     }
 

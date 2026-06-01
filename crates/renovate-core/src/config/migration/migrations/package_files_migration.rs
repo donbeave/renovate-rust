@@ -81,8 +81,8 @@ impl Migration for PackageFilesMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::PackageFilesMigration;
     use crate::config::migration::Migration;
@@ -120,14 +120,22 @@ mod tests {
             &Map::new(),
             &mut migrated,
         );
-        assert_eq!(migrated["includePaths"], json!(["package.json", "Chart.yaml"]));
+        assert_eq!(
+            migrated["includePaths"],
+            json!(["package.json", "Chart.yaml"])
+        );
     }
 
     #[test]
     fn migrates_string_values() {
         let m = PackageFilesMigration::new();
         let mut migrated = Map::new();
-        m.run("packageFiles", &json!(["package.json"]), &Map::new(), &mut migrated);
+        m.run(
+            "packageFiles",
+            &json!(["package.json"]),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["includePaths"], json!(["package.json"]));
     }
 

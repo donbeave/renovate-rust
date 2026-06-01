@@ -404,30 +404,54 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/github.com/pkg/a/@latest"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"Version":"v1.1.0","Time":"2023-09-01T00:00:00Z"}"#))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"{"Version":"v1.1.0","Time":"2023-09-01T00:00:00Z"}"#),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/github.com/pkg/b/@latest"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"Version":"v2.1.0","Time":"2023-09-02T00:00:00Z"}"#))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"{"Version":"v2.1.0","Time":"2023-09-02T00:00:00Z"}"#),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
         let deps = vec![
-            GoModDepInput { module_path: "github.com/pkg/a".into(), current_value: "v1.0.0".into() },
-            GoModDepInput { module_path: "github.com/pkg/b".into(), current_value: "v2.0.0".into() },
+            GoModDepInput {
+                module_path: "github.com/pkg/a".into(),
+                current_value: "v1.0.0".into(),
+            },
+            GoModDepInput {
+                module_path: "github.com/pkg/b".into(),
+                current_value: "v2.0.0".into(),
+            },
         ];
         let results = fetch_updates_concurrent(&http, &deps, &server.uri(), 10).await;
         assert_eq!(results.len(), 2);
 
-        let a = results.iter().find(|r| r.module_path == "github.com/pkg/a").unwrap();
+        let a = results
+            .iter()
+            .find(|r| r.module_path == "github.com/pkg/a")
+            .unwrap();
         assert!(a.summary.as_ref().unwrap().update_available);
-        assert_eq!(a.summary.as_ref().unwrap().latest.as_deref(), Some("v1.1.0"));
+        assert_eq!(
+            a.summary.as_ref().unwrap().latest.as_deref(),
+            Some("v1.1.0")
+        );
 
-        let b = results.iter().find(|r| r.module_path == "github.com/pkg/b").unwrap();
+        let b = results
+            .iter()
+            .find(|r| r.module_path == "github.com/pkg/b")
+            .unwrap();
         assert!(b.summary.as_ref().unwrap().update_available);
-        assert_eq!(b.summary.as_ref().unwrap().latest.as_deref(), Some("v2.1.0"));
+        assert_eq!(
+            b.summary.as_ref().unwrap().latest.as_deref(),
+            Some("v2.1.0")
+        );
     }
 
     #[test]
@@ -464,7 +488,11 @@ mod tests {
     #[test]
     fn get_source_url_gitlab_custom_registry() {
         assert_eq!(
-            get_source_url("gitlab-tags", "owner/repo", Some("https://gitlab.example.com")),
+            get_source_url(
+                "gitlab-tags",
+                "owner/repo",
+                Some("https://gitlab.example.com")
+            ),
             Some("https://gitlab.example.com/owner/repo".into())
         );
     }

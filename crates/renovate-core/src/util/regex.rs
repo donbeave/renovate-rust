@@ -49,50 +49,32 @@ mod tests {
 
     #[test]
     fn config_regex_slash_delimiters() {
-        assert_eq!(
-            config_regex_to_rust_regex("/^foo bar$/"),
-            "^foo bar$"
-        );
+        assert_eq!(config_regex_to_rust_regex("/^foo bar$/"), "^foo bar$");
     }
 
     #[test]
     fn config_regex_slash_delimiters_with_flags() {
-        assert_eq!(
-            config_regex_to_rust_regex("/^foo bar$/i"),
-            "^foo bar$"
-        );
+        assert_eq!(config_regex_to_rust_regex("/^foo bar$/i"), "^foo bar$");
     }
 
     #[test]
     fn config_regex_plain_pattern_wraps() {
-        assert_eq!(
-            config_regex_to_rust_regex("foo bar"),
-            "^foo bar$"
-        );
+        assert_eq!(config_regex_to_rust_regex("foo bar"), "^foo bar$");
     }
 
     #[test]
     fn config_regex_already_anchored() {
-        assert_eq!(
-            config_regex_to_rust_regex("^foo bar$"),
-            "^foo bar$"
-        );
+        assert_eq!(config_regex_to_rust_regex("^foo bar$"), "^foo bar$");
     }
 
     #[test]
     fn config_regex_start_anchored_only() {
-        assert_eq!(
-            config_regex_to_rust_regex("^foo"),
-            "^foo"
-        );
+        assert_eq!(config_regex_to_rust_regex("^foo"), "^foo");
     }
 
     #[test]
     fn config_regex_end_anchored_only() {
-        assert_eq!(
-            config_regex_to_rust_regex("bar$"),
-            "bar$"
-        );
+        assert_eq!(config_regex_to_rust_regex("bar$"), "bar$");
     }
 
     #[test]
@@ -107,10 +89,7 @@ mod tests {
 
     #[test]
     fn config_regex_whitespace_trimmed() {
-        assert_eq!(
-            config_regex_to_rust_regex("  foo  "),
-            "^foo$"
-        );
+        assert_eq!(config_regex_to_rust_regex("  foo  "), "^foo$");
     }
 
     #[test]

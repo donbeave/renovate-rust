@@ -235,9 +235,18 @@ mod tests {
 
     #[test]
     fn distro_family_from_name() {
-        assert_eq!(DistroFamily::from_name("ubuntu"), Some(DistroFamily::Ubuntu));
-        assert_eq!(DistroFamily::from_name("Debian"), Some(DistroFamily::Debian));
-        assert_eq!(DistroFamily::from_name("fedora"), Some(DistroFamily::Fedora));
+        assert_eq!(
+            DistroFamily::from_name("ubuntu"),
+            Some(DistroFamily::Ubuntu)
+        );
+        assert_eq!(
+            DistroFamily::from_name("Debian"),
+            Some(DistroFamily::Debian)
+        );
+        assert_eq!(
+            DistroFamily::from_name("fedora"),
+            Some(DistroFamily::Fedora)
+        );
         assert_eq!(DistroFamily::from_name("unknown"), None);
     }
 }

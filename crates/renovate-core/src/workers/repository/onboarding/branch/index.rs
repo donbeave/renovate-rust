@@ -23,13 +23,22 @@ pub struct OnboardingBranchConfig {
     pub is_modified: bool,
 }
 
-pub fn check_onboarding_branch(config: &RenovateConfig, global_config: &GlobalConfig) -> OnboardingResult {
-    let onboarding_branch = global_config.onboarding_branch.as_deref().unwrap_or("renovate/configure");
+pub fn check_onboarding_branch(
+    config: &RenovateConfig,
+    global_config: &GlobalConfig,
+) -> OnboardingResult {
+    let onboarding_branch = global_config
+        .onboarding_branch
+        .as_deref()
+        .unwrap_or("renovate/configure");
     let _ = (config, onboarding_branch);
     OnboardingResult::Onboarded
 }
 
-pub fn get_onboarding_config(config: &RenovateConfig, global_config: &GlobalConfig) -> serde_json::Value {
+pub fn get_onboarding_config(
+    config: &RenovateConfig,
+    global_config: &GlobalConfig,
+) -> serde_json::Value {
     let onboarding_config = &global_config.onboarding_config;
     let _ = config;
     if onboarding_config.is_empty() {

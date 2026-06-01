@@ -245,11 +245,7 @@ pub fn circleci_update_orb(
         }
     }
 
-    if found {
-        Some(content)
-    } else {
-        None
-    }
+    if found { Some(content) } else { None }
 }
 
 fn leading_spaces(s: &str) -> usize {
@@ -708,7 +704,9 @@ workflows:
         let updated = circleci_update_orb(content, "circleci/python", "2.1.1", "2.2.0");
         assert_eq!(
             updated,
-            Some("orbs:\n  node: circleci/node@5.1.0\n  python: circleci/python@2.2.0\n".to_owned())
+            Some(
+                "orbs:\n  node: circleci/node@5.1.0\n  python: circleci/python@2.2.0\n".to_owned()
+            )
         );
     }
 }

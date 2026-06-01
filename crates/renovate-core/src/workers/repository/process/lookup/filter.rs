@@ -77,14 +77,15 @@ fn parse_major(version: &str) -> u64 {
     version
         .split('.')
         .next()
-        .and_then(|s| s.trim_start_matches(|c: char| !c.is_ascii_digit()).parse::<u64>().ok())
+        .and_then(|s| {
+            s.trim_start_matches(|c: char| !c.is_ascii_digit())
+                .parse::<u64>()
+                .ok()
+        })
         .unwrap_or(0)
 }
 
-pub fn is_update_allowed(
-    update_type: UpdateType,
-    allowed_types: &[UpdateType],
-) -> bool {
+pub fn is_update_allowed(update_type: UpdateType, allowed_types: &[UpdateType]) -> bool {
     if allowed_types.is_empty() {
         return true;
     }
@@ -167,11 +168,7 @@ mod tests {
         };
         let mut deprecated = Release::new("1.0.1");
         deprecated.is_deprecated = Some(true);
-        let releases = vec![
-            Release::new("1.0.0"),
-            deprecated,
-            Release::new("1.1.0"),
-        ];
+        let releases = vec![Release::new("1.0.0"), deprecated, Release::new("1.1.0")];
         let result = filter_versions(&config, "1.0.0", &releases);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].version, "1.1.0");
@@ -201,11 +198,7 @@ mod tests {
         };
         let mut unstable = Release::new("1.0.1-beta");
         unstable.is_stable = Some(false);
-        let releases = vec![
-            Release::new("1.0.0"),
-            unstable,
-            Release::new("1.0.2"),
-        ];
+        let releases = vec![Release::new("1.0.0"), unstable, Release::new("1.0.2")];
         let result = filter_versions(&config, "1.0.0", &releases);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].version, "1.0.2");

@@ -2,16 +2,12 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use crate::exec::containerbase::{generate_install_commands, is_dynamic_install};
-use crate::exec::docker::{
-    generate_docker_command, remove_docker_container, DockerConfig,
-};
+use crate::exec::docker::{DockerConfig, generate_docker_command, remove_docker_container};
 use crate::exec::env::get_child_env;
 use crate::exec::error::ExecError;
 use crate::exec::hermit::{find_hermit_cwd, get_hermit_envs};
 use crate::exec::raw::raw_exec;
-use crate::exec::types::{
-    BinarySource, ExecOptions, ExecResult,
-};
+use crate::exec::types::{BinarySource, ExecOptions, ExecResult};
 
 #[derive(Debug, Clone, Default)]
 pub struct ExecConfig {
@@ -41,9 +37,10 @@ fn resolve_cwd(opts: &ExecOptions, config: &ExecConfig) -> Option<String> {
         return Some(cwd.clone());
     }
     if let Some(ref cwd_file) = opts.cwd_file
-        && let Some(parent) = Path::new(cwd_file).parent() {
-            return Some(parent.to_string_lossy().to_string());
-        }
+        && let Some(parent) = Path::new(cwd_file).parent()
+    {
+        return Some(parent.to_string_lossy().to_string());
+    }
     config.local_dir.clone()
 }
 
@@ -80,14 +77,12 @@ async fn prepare_raw_exec(
                 containerbase_dir: config.containerbase_dir.clone(),
             };
 
-            let install_commands = if is_dynamic_install(
-                &config.binary_source,
-                &opts.tool_constraints,
-            ) {
-                generate_install_commands(&config.binary_source, &opts.tool_constraints).await?
-            } else {
-                vec![]
-            };
+            let install_commands =
+                if is_dynamic_install(&config.binary_source, &opts.tool_constraints) {
+                    generate_install_commands(&config.binary_source, &opts.tool_constraints).await?
+                } else {
+                    vec![]
+                };
 
             let env_var_names: Vec<String> = env.keys().cloned().collect();
 
@@ -107,10 +102,7 @@ async fn prepare_raw_exec(
             raw_commands.push(docker_cmd);
         }
         BinarySource::Install
-            if is_dynamic_install(
-                &config.binary_source,
-                &opts.tool_constraints,
-            ) =>
+            if is_dynamic_install(&config.binary_source, &opts.tool_constraints) =>
         {
             let install_cmds =
                 generate_install_commands(&config.binary_source, &opts.tool_constraints).await?;
@@ -190,11 +182,9 @@ pub async fn exec(
         let is_docker = config.binary_source == BinarySource::Docker && opts.docker.is_some();
 
         if is_docker {
-            let _ = remove_docker_container(
-                &config.docker_sidecar_image,
-                &config.docker_child_prefix,
-            )
-            .await;
+            let _ =
+                remove_docker_container(&config.docker_sidecar_image, &config.docker_child_prefix)
+                    .await;
         }
 
         match raw_exec(raw_cmd, &exec_opts, process_env).await {
@@ -292,13 +282,7 @@ mod tests {
             ..Default::default()
         };
         let opts = ExecOptions::default();
-        let result = exec(
-            &["exit 42".to_owned()],
-            &opts,
-            &config,
-            &process_env,
-        )
-        .await;
+        let result = exec(&["exit 42".to_owned()], &opts, &config, &process_env).await;
 
         assert!(result.is_err());
         assert_eq!(result.unwrap_err().exit_code, Some(42));
@@ -339,14 +323,9 @@ mod tests {
             ignore_stdout: true,
             ..Default::default()
         };
-        let result = exec(
-            &["echo hidden".to_owned()],
-            &opts,
-            &config,
-            &process_env,
-        )
-        .await
-        .unwrap();
+        let result = exec(&["echo hidden".to_owned()], &opts, &config, &process_env)
+            .await
+            .unwrap();
 
         assert!(result.stdout.is_empty());
     }
@@ -361,14 +340,9 @@ mod tests {
             ..Default::default()
         };
         let opts = ExecOptions::default();
-        let result = exec(
-            &["echo hello".to_owned()],
-            &opts,
-            &config,
-            &process_env,
-        )
-        .await
-        .unwrap();
+        let result = exec(&["echo hello".to_owned()], &opts, &config, &process_env)
+            .await
+            .unwrap();
 
         assert_eq!(result.stdout.trim(), "hello");
     }
@@ -388,14 +362,9 @@ mod tests {
             }],
             ..Default::default()
         };
-        let result = exec(
-            &["echo hello".to_owned()],
-            &opts,
-            &config,
-            &process_env,
-        )
-        .await
-        .unwrap();
+        let result = exec(&["echo hello".to_owned()], &opts, &config, &process_env)
+            .await
+            .unwrap();
 
         assert_eq!(result.stdout.trim(), "hello");
     }
@@ -409,13 +378,7 @@ mod tests {
             ..Default::default()
         };
         let opts = ExecOptions::default();
-        let result = exec(
-            &["exit 1".to_owned()],
-            &opts,
-            &config,
-            &process_env,
-        )
-        .await;
+        let result = exec(&["exit 1".to_owned()], &opts, &config, &process_env).await;
 
         assert!(result.is_err());
     }
@@ -434,13 +397,7 @@ mod tests {
             docker: Some(crate::exec::types::DockerOptions::default()),
             ..Default::default()
         };
-        let result = exec(
-            &["echo hello".to_owned()],
-            &opts,
-            &config,
-            &process_env,
-        )
-        .await;
+        let result = exec(&["echo hello".to_owned()], &opts, &config, &process_env).await;
 
         // Docker command will fail because docker isn't available in test env,
         // but the orchestrator should return an error rather than panic.
@@ -473,14 +430,9 @@ mod tests {
             cwd: Some("/tmp".to_owned()),
             ..Default::default()
         };
-        let result = exec(
-            &["pwd".to_owned()],
-            &opts,
-            &config,
-            &process_env,
-        )
-        .await
-        .unwrap();
+        let result = exec(&["pwd".to_owned()], &opts, &config, &process_env)
+            .await
+            .unwrap();
 
         assert_eq!(result.stdout.trim(), "/tmp");
     }
@@ -495,13 +447,7 @@ mod tests {
             ..Default::default()
         };
         let opts = ExecOptions::default();
-        let result = exec(
-            &["sleep 10".to_owned()],
-            &opts,
-            &config,
-            &process_env,
-        )
-        .await;
+        let result = exec(&["sleep 10".to_owned()], &opts, &config, &process_env).await;
 
         assert!(result.is_err());
         assert!(result.unwrap_err().message.contains("timed out"));

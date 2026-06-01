@@ -6594,12 +6594,16 @@ impl RepoConfig {
                     .clone_from(&rule.override_datasource);
             }
             if let Some(override_dep_name) = &rule.override_dep_name {
-                effects.override_dep_name =
-                    Some(render_package_rule_template(override_dep_name, &current_ctx));
+                effects.override_dep_name = Some(render_package_rule_template(
+                    override_dep_name,
+                    &current_ctx,
+                ));
             }
             if let Some(override_package_name) = &rule.override_package_name {
-                effects.override_package_name =
-                    Some(render_package_rule_template(override_package_name, &current_ctx));
+                effects.override_package_name = Some(render_package_rule_template(
+                    override_package_name,
+                    &current_ctx,
+                ));
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {

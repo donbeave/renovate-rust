@@ -31,13 +31,11 @@ impl Migration for BranchNameMigration {
         migrated_config: &mut Map<String, Value>,
     ) {
         if let Some(s) = value.as_str()
-            && s.contains("{{managerBranchPrefix}}") {
-                let replaced = s.replace(
-                    "{{managerBranchPrefix}}",
-                    "{{additionalBranchPrefix}}",
-                );
-                migrated_config.insert("branchName".into(), Value::String(replaced));
-            }
+            && s.contains("{{managerBranchPrefix}}")
+        {
+            let replaced = s.replace("{{managerBranchPrefix}}", "{{additionalBranchPrefix}}");
+            migrated_config.insert("branchName".into(), Value::String(replaced));
+        }
     }
 
     fn box_clone(&self) -> Box<dyn Migration> {
@@ -47,8 +45,8 @@ impl Migration for BranchNameMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::BranchNameMigration;
     use crate::config::migration::Migration;

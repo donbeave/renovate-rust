@@ -88,8 +88,8 @@ impl Migration for UnpublishSafeMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::UnpublishSafeMigration;
     use crate::config::migration::Migration;
@@ -105,7 +105,10 @@ mod tests {
         let m = UnpublishSafeMigration::new();
         let mut migrated = Map::new();
         m.run("unpublishSafe", &json!(true), &Map::new(), &mut migrated);
-        assert_eq!(migrated["extends"], json!(["security:minimumReleaseAgeNpm"]));
+        assert_eq!(
+            migrated["extends"],
+            json!(["security:minimumReleaseAgeNpm"])
+        );
     }
 
     #[test]
@@ -118,7 +121,10 @@ mod tests {
         original.insert("extends".into(), json!("test"));
         let mut migrated2 = Map::new();
         m.run("unpublishSafe", &json!(true), &original, &mut migrated2);
-        assert_eq!(migrated2["extends"], json!(["test", "security:minimumReleaseAgeNpm"]));
+        assert_eq!(
+            migrated2["extends"],
+            json!(["test", "security:minimumReleaseAgeNpm"])
+        );
     }
 
     #[test]
@@ -128,7 +134,10 @@ mod tests {
         original.insert("extends".into(), json!([]));
         let mut migrated = Map::new();
         m.run("unpublishSafe", &json!(true), &original, &mut migrated);
-        assert_eq!(migrated["extends"], json!(["security:minimumReleaseAgeNpm"]));
+        assert_eq!(
+            migrated["extends"],
+            json!(["security:minimumReleaseAgeNpm"])
+        );
     }
 
     #[test]
@@ -138,7 +147,10 @@ mod tests {
         original.insert("extends".into(), json!(["foo", ":unpublishSafe", "bar"]));
         let mut migrated = Map::new();
         m.run("unpublishSafe", &json!(true), &original, &mut migrated);
-        assert_eq!(migrated["extends"], json!(["foo", "security:minimumReleaseAgeNpm", "bar"]));
+        assert_eq!(
+            migrated["extends"],
+            json!(["foo", "security:minimumReleaseAgeNpm", "bar"])
+        );
     }
 
     #[test]
@@ -148,7 +160,10 @@ mod tests {
         original.insert("extends".into(), json!(["security:minimumReleaseAgeNpm"]));
         let mut migrated = Map::new();
         m.run("unpublishSafe", &json!(true), &original, &mut migrated);
-        assert_eq!(migrated["extends"], json!(["security:minimumReleaseAgeNpm"]));
+        assert_eq!(
+            migrated["extends"],
+            json!(["security:minimumReleaseAgeNpm"])
+        );
     }
 
     #[test]

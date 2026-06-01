@@ -66,13 +66,11 @@ pub fn get_vulnerabilities(
     _package_name: &str,
     _datasource: &str,
     _version: &str,
-) -> Vec<VulnerabilityAlert> {    Vec::new()
+) -> Vec<VulnerabilityAlert> {
+    Vec::new()
 }
 
-pub fn is_package_vulnerable(
-    dep_version: &str,
-    affected_versions: &[String],
-) -> bool {
+pub fn is_package_vulnerable(dep_version: &str, affected_versions: &[String]) -> bool {
     affected_versions.contains(&dep_version.to_owned())
 }
 
@@ -123,9 +121,7 @@ pub fn evaluate_cvss_vector(vector: &str) -> (String, String) {
     }
 }
 
-pub fn extract_severity_details(
-    vulnerability: &OsvVulnerability,
-) -> SeverityDetails {
+pub fn extract_severity_details(vulnerability: &OsvVulnerability) -> SeverityDetails {
     let cvss_vector = vulnerability
         .severity
         .iter()
@@ -225,7 +221,8 @@ mod tests {
 
     #[test]
     fn evaluate_cvss_vector_valid_v3() {
-        let (score, severity) = evaluate_cvss_vector("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H");
+        let (score, severity) =
+            evaluate_cvss_vector("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H");
         assert!(!score.is_empty());
         assert!(!severity.is_empty());
     }

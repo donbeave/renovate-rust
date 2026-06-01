@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-pub fn get_git_config(
-    extra_config: &[(&str, &str)],
-) -> HashMap<String, String> {
+pub fn get_git_config(extra_config: &[(&str, &str)]) -> HashMap<String, String> {
     let mut config = HashMap::new();
     config.insert("core.autocrlf".to_owned(), "input".to_owned());
     config.insert("core.symlinks".to_owned(), "true".to_owned());
@@ -12,11 +10,7 @@ pub fn get_git_config(
     config
 }
 
-pub fn set_git_config(
-    config: &mut HashMap<String, String>,
-    key: &str,
-    value: &str,
-) {
+pub fn set_git_config(config: &mut HashMap<String, String>, key: &str, value: &str) {
     config.insert(key.to_owned(), value.to_owned());
 }
 
@@ -48,7 +42,10 @@ mod tests {
     fn set_git_config_adds_entry() {
         let mut config = get_git_config(&[]);
         set_git_config(&mut config, "user.email", "bot@renovate.com");
-        assert_eq!(config.get("user.email"), Some(&"bot@renovate.com".to_owned()));
+        assert_eq!(
+            config.get("user.email"),
+            Some(&"bot@renovate.com".to_owned())
+        );
     }
 
     #[test]

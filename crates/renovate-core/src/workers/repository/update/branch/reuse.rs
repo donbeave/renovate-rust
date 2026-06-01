@@ -50,10 +50,7 @@ pub fn should_reuse_branch(config: &ReuseConfig) -> (ReuseResult, bool) {
     (ReuseResult::CanReuse, false)
 }
 
-pub fn compare_branch_content(
-    existing_content: &str,
-    new_content: &str,
-) -> bool {
+pub fn compare_branch_content(existing_content: &str, new_content: &str) -> bool {
     existing_content == new_content
 }
 

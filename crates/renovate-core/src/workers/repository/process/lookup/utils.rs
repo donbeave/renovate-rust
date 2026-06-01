@@ -216,12 +216,18 @@ mod tests {
     fn determine_new_replacement_value_with_version() {
         let mut config = make_config();
         config.replacement_version = Some("5.0.0".into());
-        assert_eq!(determine_new_replacement_value(&config), Some("5.0.0".into()));
+        assert_eq!(
+            determine_new_replacement_value(&config),
+            Some("5.0.0".into())
+        );
     }
 
     #[test]
     fn determine_new_replacement_value_fallback() {
         let config = make_config();
-        assert_eq!(determine_new_replacement_value(&config), Some("4.17.0".into()));
+        assert_eq!(
+            determine_new_replacement_value(&config),
+            Some("4.17.0".into())
+        );
     }
 }

@@ -42,8 +42,8 @@ impl Migration for BinarySourceMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::BinarySourceMigration;
     use crate::config::migration::Migration;

@@ -60,8 +60,8 @@ impl Migration for MatchDatasourcesMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::MatchDatasourcesMigration;
     use crate::config::migration::Migration;

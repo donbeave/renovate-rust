@@ -2180,7 +2180,19 @@ mod tests {
 
     #[test]
     fn text_schedule_matches_month_basic() {
-        assert!(text_schedule_matches_month("before 3am on Monday", 2, 1, 1, 1));
-        assert!(!text_schedule_matches_month("before 3am on Monday", 2, 1, 2, 1));
+        assert!(text_schedule_matches_month(
+            "before 3am on Monday",
+            2,
+            1,
+            1,
+            1
+        ));
+        assert!(!text_schedule_matches_month(
+            "before 3am on Monday",
+            2,
+            1,
+            2,
+            1
+        ));
     }
 }

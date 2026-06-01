@@ -146,7 +146,11 @@ pub fn env_replace(value: &str, env: &HashMap<String, String>) -> Result<String,
 }
 
 /// Apply env-replace to every entry value in the config if `expose_all_env` is true.
-fn env_replace_config(config: &mut NpmrcConfig, expose_all_env: bool, env: &HashMap<String, String>) {
+fn env_replace_config(
+    config: &mut NpmrcConfig,
+    expose_all_env: bool,
+    env: &HashMap<String, String>,
+) {
     if !expose_all_env {
         return;
     }
@@ -202,8 +206,10 @@ fn extract_secrets(config: &NpmrcConfig) -> Vec<String> {
                         for e2 in &config.entries {
                             if e2.key == format!("{}:username", host) && !e2.value.is_empty() {
                                 let combined = format!("{}:{}", e2.value, decoded);
-                                secrets.push(base64::engine::general_purpose::STANDARD
-                                    .encode(combined.as_bytes()));
+                                secrets.push(
+                                    base64::engine::general_purpose::STANDARD
+                                        .encode(combined.as_bytes()),
+                                );
                                 added_combined = true;
                                 break;
                             }
@@ -290,44 +296,52 @@ pub fn convert_npmrc_to_rules(config: &NpmrcConfig) -> NpmrcRules {
 
         match key_type {
             "_authToken" => {
-                let rule = hosts.entry(match_host.clone()).or_insert_with(|| NpmrcHostRule {
-                    match_host: match_host.clone(),
-                    token: None,
-                    auth_type: None,
-                    username: None,
-                    password: None,
-                });
+                let rule = hosts
+                    .entry(match_host.clone())
+                    .or_insert_with(|| NpmrcHostRule {
+                        match_host: match_host.clone(),
+                        token: None,
+                        auth_type: None,
+                        username: None,
+                        password: None,
+                    });
                 rule.token = Some(entry.value.clone());
             }
             "_auth" => {
-                let rule = hosts.entry(match_host.clone()).or_insert_with(|| NpmrcHostRule {
-                    match_host: match_host.clone(),
-                    token: None,
-                    auth_type: None,
-                    username: None,
-                    password: None,
-                });
+                let rule = hosts
+                    .entry(match_host.clone())
+                    .or_insert_with(|| NpmrcHostRule {
+                        match_host: match_host.clone(),
+                        token: None,
+                        auth_type: None,
+                        username: None,
+                        password: None,
+                    });
                 rule.token = Some(entry.value.clone());
                 rule.auth_type = Some("Basic".to_owned());
             }
             "username" => {
-                let rule = hosts.entry(match_host.clone()).or_insert_with(|| NpmrcHostRule {
-                    match_host: match_host.clone(),
-                    token: None,
-                    auth_type: None,
-                    username: None,
-                    password: None,
-                });
+                let rule = hosts
+                    .entry(match_host.clone())
+                    .or_insert_with(|| NpmrcHostRule {
+                        match_host: match_host.clone(),
+                        token: None,
+                        auth_type: None,
+                        username: None,
+                        password: None,
+                    });
                 rule.username = Some(entry.value.clone());
             }
             "_password" => {
-                let rule = hosts.entry(match_host.clone()).or_insert_with(|| NpmrcHostRule {
-                    match_host: match_host.clone(),
-                    token: None,
-                    auth_type: None,
-                    username: None,
-                    password: None,
-                });
+                let rule = hosts
+                    .entry(match_host.clone())
+                    .or_insert_with(|| NpmrcHostRule {
+                        match_host: match_host.clone(),
+                        token: None,
+                        auth_type: None,
+                        username: None,
+                        password: None,
+                    });
                 let decoded = String::from_utf8(
                     base64::Engine::decode(
                         &base64::engine::general_purpose::STANDARD,
@@ -339,9 +353,7 @@ pub fn convert_npmrc_to_rules(config: &NpmrcConfig) -> NpmrcRules {
                 rule.password = Some(decoded);
             }
             "registry"
-                if key_parts.len() > 1
-                    && !entry.value.is_empty()
-                    && is_http_url(&entry.value) =>
+                if key_parts.len() > 1 && !entry.value.is_empty() && is_http_url(&entry.value) =>
             {
                 let scope = key_parts[1].to_owned();
                 rules.package_rules.push(NpmrcPackageRule {
@@ -417,7 +429,9 @@ pub fn auth_header_for_registry(registry: &str, rules: &NpmrcRules) -> Option<St
     for rule in &rules.host_rules {
         let match_host = rule.match_host.trim_end_matches('/');
         // Match by exact host, or by prefix for https://host/path rules.
-        if match_host.is_empty() || registry.starts_with(match_host) || match_host.starts_with(registry)
+        if match_host.is_empty()
+            || registry.starts_with(match_host)
+            || match_host.starts_with(registry)
         {
             if let Some(ref token) = rule.token {
                 if rule.auth_type.as_deref() == Some("Basic") {
@@ -451,7 +465,8 @@ mod tests {
 
     #[test]
     fn parse_npmrc_comments_skipped() {
-        let config = parse_npmrc("# comment\n; also comment\nregistry=https://example.com").unwrap();
+        let config =
+            parse_npmrc("# comment\n; also comment\nregistry=https://example.com").unwrap();
         assert_eq!(config.entries.len(), 1);
         assert_eq!(config.registry.as_deref(), Some("https://example.com"));
     }
@@ -459,7 +474,10 @@ mod tests {
     #[test]
     fn parse_npmrc_registry() {
         let config = parse_npmrc("registry=https://custom.registry.com").unwrap();
-        assert_eq!(config.registry.as_deref(), Some("https://custom.registry.com"));
+        assert_eq!(
+            config.registry.as_deref(),
+            Some("https://custom.registry.com")
+        );
     }
 
     #[test]
@@ -562,8 +580,7 @@ mod tests {
     // Ported: "handles host, path and auth" — lib/modules/datasource/npm/npmrc.spec.ts line 43
     #[test]
     fn convert_npmrc_handles_host_path_and_auth() {
-        let config =
-            parse_npmrc("//my-registry.example.com/:_authToken=123test==\n").unwrap();
+        let config = parse_npmrc("//my-registry.example.com/:_authToken=123test==\n").unwrap();
         let rules = convert_npmrc_to_rules(&config);
         assert_eq!(rules.host_rules.len(), 1);
         assert_eq!(
@@ -581,10 +598,9 @@ mod tests {
     // Ported: "handles host, path, port and auth" — lib/modules/datasource/npm/npmrc.spec.ts line 58
     #[test]
     fn convert_npmrc_handles_host_path_port_and_auth() {
-        let config = parse_npmrc(
-            "//my-registry.example.com:4040/some-path/:_authToken=123test==\n",
-        )
-        .unwrap();
+        let config =
+            parse_npmrc("//my-registry.example.com:4040/some-path/:_authToken=123test==\n")
+                .unwrap();
         let rules = convert_npmrc_to_rules(&config);
         assert_eq!(rules.host_rules.len(), 1);
         assert_eq!(
@@ -686,10 +702,7 @@ mod tests {
         let mut env = HashMap::new();
         env.insert("A".to_owned(), "1".to_owned());
         env.insert("B".to_owned(), "2".to_owned());
-        assert_eq!(
-            env_replace("${A}-${B}", &env).unwrap(),
-            "1-2"
-        );
+        assert_eq!(env_replace("${A}-${B}", &env).unwrap(), "1-2");
     }
 
     #[test]

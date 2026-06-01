@@ -46,8 +46,8 @@ impl Migration for SeparateMultipleMajorMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::SeparateMultipleMajorMigration;
     use crate::config::migration::Migration;
@@ -65,7 +65,12 @@ mod tests {
         original.insert("separateMajorReleases".into(), json!(true));
         let mut migrated = Map::new();
         migrated.insert("separateMultipleMajor".into(), json!(true));
-        m.run("separateMultipleMajor", &json!(true), &original, &mut migrated);
+        m.run(
+            "separateMultipleMajor",
+            &json!(true),
+            &original,
+            &mut migrated,
+        );
         assert!(migrated.get("separateMultipleMajor").is_none());
     }
 
@@ -74,7 +79,12 @@ mod tests {
         let m = SeparateMultipleMajorMigration::new();
         let mut migrated = Map::new();
         migrated.insert("separateMultipleMajor".into(), json!(true));
-        m.run("separateMultipleMajor", &json!(true), &Map::new(), &mut migrated);
+        m.run(
+            "separateMultipleMajor",
+            &json!(true),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["separateMultipleMajor"], json!(true));
     }
 }

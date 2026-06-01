@@ -11,5 +11,7 @@ pub mod types;
 pub use error::ExecError;
 pub use orchestrator::exec;
 pub use raw::raw_exec;
-pub use tool_settings::{get_tool_settings_options, gradle_jvm_arg, RawToolSettings, ToolSettingsOptions};
+pub use tool_settings::{
+    RawToolSettings, ToolSettingsOptions, get_tool_settings_options, gradle_jvm_arg,
+};
 pub use types::{BinarySource, DockerOptions, ExecOptions, ExecResult, ToolConstraint};

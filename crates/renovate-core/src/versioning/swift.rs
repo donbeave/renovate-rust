@@ -452,10 +452,19 @@ mod tests {
 
     #[test]
     fn swift_to_semver_range() {
-        assert_eq!(to_semver_range(r#"from: "1.2.3""#), Some(">=1.2.3, <2.0.0".to_owned()));
+        assert_eq!(
+            to_semver_range(r#"from: "1.2.3""#),
+            Some(">=1.2.3, <2.0.0".to_owned())
+        );
         assert_eq!(to_semver_range(r#""1.2.3"..."#), Some(">=1.2.3".to_owned()));
-        assert_eq!(to_semver_range(r#""1.2.3"..."1.2.4""#), Some(">=1.2.3, <=1.2.4".to_owned()));
-        assert_eq!(to_semver_range(r#""1.2.3"..<"1.2.4""#), Some(">=1.2.3, <1.2.4".to_owned()));
+        assert_eq!(
+            to_semver_range(r#""1.2.3"..."1.2.4""#),
+            Some(">=1.2.3, <=1.2.4".to_owned())
+        );
+        assert_eq!(
+            to_semver_range(r#""1.2.3"..<"1.2.4""#),
+            Some(">=1.2.3, <1.2.4".to_owned())
+        );
         assert_eq!(to_semver_range(r#"..."1.2.4""#), Some("<=1.2.4".to_owned()));
         assert_eq!(to_semver_range(r#"..<"1.2.4""#), Some("<1.2.4".to_owned()));
         assert_eq!(to_semver_range("invalid"), None);

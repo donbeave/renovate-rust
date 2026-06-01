@@ -44,8 +44,8 @@ impl Migration for AutomergeTypeMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::AutomergeTypeMigration;
     use crate::config::migration::Migration;
@@ -60,7 +60,12 @@ mod tests {
     fn rewrites_branch_hyphen_to_branch() {
         let m = AutomergeTypeMigration::new();
         let mut migrated = Map::new();
-        m.run("automergeType", &json!("branch-after-hours"), &Map::new(), &mut migrated);
+        m.run(
+            "automergeType",
+            &json!("branch-after-hours"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["automergeType"], json!("branch"));
     }
 

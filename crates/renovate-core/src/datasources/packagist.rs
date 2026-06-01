@@ -314,7 +314,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_latest("wanted/pkg", &http, &server.uri()).await.unwrap();
+        let result = fetch_latest("wanted/pkg", &http, &server.uri())
+            .await
+            .unwrap();
         assert_eq!(result, None);
     }
 
@@ -334,7 +336,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_latest("empty/pkg", &http, &server.uri()).await.unwrap();
+        let result = fetch_latest("empty/pkg", &http, &server.uri())
+            .await
+            .unwrap();
         assert_eq!(result, None);
     }
 
@@ -358,18 +362,30 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let deps = vec![
-            PackagistDepInput { package_name: "pkg/a".into(), current_value: "1.0.0".into() },
-            PackagistDepInput { package_name: "pkg/b".into(), current_value: "2.0.0".into() },
+            PackagistDepInput {
+                package_name: "pkg/a".into(),
+                current_value: "1.0.0".into(),
+            },
+            PackagistDepInput {
+                package_name: "pkg/b".into(),
+                current_value: "2.0.0".into(),
+            },
         ];
         let results = fetch_updates_concurrent(&http, &deps, &server.uri(), 10).await;
         assert_eq!(results.len(), 2);
 
         let a = results.iter().find(|r| r.package_name == "pkg/a").unwrap();
         assert!(a.summary.as_ref().unwrap().update_available);
-        assert_eq!(a.summary.as_ref().unwrap().latest.as_deref(), Some("v1.1.0"));
+        assert_eq!(
+            a.summary.as_ref().unwrap().latest.as_deref(),
+            Some("v1.1.0")
+        );
 
         let b = results.iter().find(|r| r.package_name == "pkg/b").unwrap();
         assert!(b.summary.as_ref().unwrap().update_available);
-        assert_eq!(b.summary.as_ref().unwrap().latest.as_deref(), Some("v2.1.0"));
+        assert_eq!(
+            b.summary.as_ref().unwrap().latest.as_deref(),
+            Some("v2.1.0")
+        );
     }
 }

@@ -328,9 +328,7 @@ pub fn parse_catalog(package_file: &str, content: &str) -> GradleCatalogResult {
                 dep_name: dep_name_str.clone(),
                 current_value,
                 dep_type: Some("plugin".to_owned()),
-                package_name: Some(format!(
-                    "{dep_name_str}:{dep_name_str}.gradle.plugin"
-                )),
+                package_name: Some(format!("{dep_name_str}:{dep_name_str}.gradle.plugin")),
                 shared_variable_name: shared_var,
                 skip_reason,
                 file_replace_position,
@@ -391,8 +389,7 @@ fn strip_jinja_templates(content: &str) -> String {
 }
 
 fn massage_toml(content: &str) -> String {
-    static RE: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r#"^\s*\{\{.+?\}\}\s*=.*$"#).unwrap());
+    static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r#"^\s*\{\{.+?\}\}\s*=.*$"#).unwrap());
     let stripped = RE.replace_all(content, "").to_string();
     strip_jinja_templates(&stripped)
 }
@@ -465,8 +462,12 @@ fn extract_version_for_catalog(
         let ver = versions.get(&original_alias);
         match ver {
             Some(v) => {
-                let result =
-                    extract_literal_version_for_catalog(v, version_start_index, version_sub_content, &original_alias);
+                let result = extract_literal_version_for_catalog(
+                    v,
+                    version_start_index,
+                    version_sub_content,
+                    &original_alias,
+                );
                 match result {
                     Some((val, pos)) => (Some(val), Some(pos), None),
                     None => (None, None, Some("unspecified-version".to_owned())),
@@ -488,10 +489,7 @@ fn extract_version_for_catalog(
     }
 }
 
-fn find_original_alias(
-    versions: &toml::map::Map<String, toml::Value>,
-    alias: &str,
-) -> String {
+fn find_original_alias(versions: &toml::map::Map<String, toml::Value>, alias: &str) -> String {
     let normalized = normalize_alias(alias);
     for key in versions.keys() {
         if normalize_alias(key) == normalized {
@@ -518,8 +516,7 @@ fn extract_catalog_dependency(
             let group = parts[0];
             let name = parts[1];
             let current_value = parts[2];
-            let pos =
-                dep_start_index + find_index_after(dep_sub_content, dep_name, current_value);
+            let pos = dep_start_index + find_index_after(dep_sub_content, dep_name, current_value);
             return GradleCatalogDep {
                 dep_name: format!("{group}:{name}"),
                 current_value: Some(current_value.to_owned()),
@@ -1247,8 +1244,7 @@ pub fn matches_content_descriptor(
                 .map(|re| re.is_match(&group_id))
                 .unwrap_or(false),
             ContentDescriptorMatcher::Subgroup => {
-                group_id == desc.group_id
-                    || format!("{group_id}.").starts_with(&desc.group_id)
+                group_id == desc.group_id || format!("{group_id}.").starts_with(&desc.group_id)
             }
             ContentDescriptorMatcher::Simple => group_id == desc.group_id,
         };
@@ -1324,9 +1320,7 @@ pub fn get_registry_urls_for_dep(
 
     let matching: Vec<&PackageRegistry> = registries
         .iter()
-        .filter(|r| {
-            r.scope == scope && matches_content_descriptor(dep, r.content.as_deref())
-        })
+        .filter(|r| r.scope == scope && matches_content_descriptor(dep, r.content.as_deref()))
         .collect();
 
     let exclusive: Vec<&&PackageRegistry> = matching
@@ -2856,27 +2850,221 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
     fn content_descriptor_simple_matches() {
         let cases: Vec<(&str, bool, Option<Vec<ContentDescriptorSpec>>)> = vec![
             ("foo:bar:1.2.3", true, None),
-            ("foo:bar:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo")])),
-            ("foo:bar:1.2.3", false, Some(vec![cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo")])),
-            ("foo:bar:1.2.3", false, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "bar")])),
-            ("foo:bar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("bar"), None)])),
-            ("foo:bar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo", Some("bar"), None)])),
-            ("foo:bar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("baz"), None)])),
-            ("foo:bar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("bar"), Some("1.2.3"))])),
-            ("foo:bar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo", Some("bar"), Some("1.2.3"))])),
-            ("foo:bar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("bar"), Some("1.2.+"))])),
-            ("foo:bar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo", Some("baz"), Some("4.5.6"))])),
-            ("foo:bar:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Subgroup, "foo")])),
-            ("foo.bar.baz:qux:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Subgroup, "foo.bar.baz")])),
-            ("foo.bar.baz:qux:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Subgroup, "foo.bar")])),
-            ("foo.bar.baz:qux:1.2.3", false, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Subgroup, "foo.barbaz")])),
-            ("foobarbaz:qux:1.2.3", true, Some(vec![cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, ".*bar.*")])),
-            ("foobarbaz:qux:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, ".*bar.*", Some("qux"), None)])),
-            ("foobar:foobar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, ".*bar.*", Some("foo.*"), None)])),
-            ("foobar:foobar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, "foobar", Some("^bar"), None)])),
-            ("foobar:foobar:1.2.3", true, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, "foobar", Some("^foo.*"), Some("1\\.*"))])),
-            ("foobar:foobar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, "foobar", Some("^foo"), Some("3.+"))])),
-            ("foobar:foobar:1.2.3", false, Some(vec![cd_spec_full(ContentDescriptorMode::Include, ContentDescriptorMatcher::Regex, "foobar", Some("qux"), Some("1\\.*"))])),
+            (
+                "foo:bar:1.2.3",
+                true,
+                Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                false,
+                Some(vec![cd_spec(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                false,
+                Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "bar",
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                true,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("bar"),
+                    None,
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                false,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("bar"),
+                    None,
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                false,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("baz"),
+                    None,
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                true,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("bar"),
+                    Some("1.2.3"),
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                false,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("bar"),
+                    Some("1.2.3"),
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                true,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("bar"),
+                    Some("1.2.+"),
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                false,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("baz"),
+                    Some("4.5.6"),
+                )]),
+            ),
+            (
+                "foo:bar:1.2.3",
+                true,
+                Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Subgroup,
+                    "foo",
+                )]),
+            ),
+            (
+                "foo.bar.baz:qux:1.2.3",
+                true,
+                Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Subgroup,
+                    "foo.bar.baz",
+                )]),
+            ),
+            (
+                "foo.bar.baz:qux:1.2.3",
+                true,
+                Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Subgroup,
+                    "foo.bar",
+                )]),
+            ),
+            (
+                "foo.bar.baz:qux:1.2.3",
+                false,
+                Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Subgroup,
+                    "foo.barbaz",
+                )]),
+            ),
+            (
+                "foobarbaz:qux:1.2.3",
+                true,
+                Some(vec![cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Regex,
+                    ".*bar.*",
+                )]),
+            ),
+            (
+                "foobarbaz:qux:1.2.3",
+                true,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Regex,
+                    ".*bar.*",
+                    Some("qux"),
+                    None,
+                )]),
+            ),
+            (
+                "foobar:foobar:1.2.3",
+                true,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Regex,
+                    ".*bar.*",
+                    Some("foo.*"),
+                    None,
+                )]),
+            ),
+            (
+                "foobar:foobar:1.2.3",
+                false,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Regex,
+                    "foobar",
+                    Some("^bar"),
+                    None,
+                )]),
+            ),
+            (
+                "foobar:foobar:1.2.3",
+                true,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Regex,
+                    "foobar",
+                    Some("^foo.*"),
+                    Some("1\\.*"),
+                )]),
+            ),
+            (
+                "foobar:foobar:1.2.3",
+                false,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Regex,
+                    "foobar",
+                    Some("^foo"),
+                    Some("3.+"),
+                )]),
+            ),
+            (
+                "foobar:foobar:1.2.3",
+                false,
+                Some(vec![cd_spec_full(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Regex,
+                    "foobar",
+                    Some("qux"),
+                    Some("1\\.*"),
+                )]),
+            ),
         ];
 
         for (input, expected_output, descriptor) in &cases {
@@ -2897,8 +3085,18 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         let result = matches_content_descriptor(
             &dep,
             Some(&[
-                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo"),
-                cd_spec_full(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo", Some("baz"), None),
+                cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                ),
+                cd_spec_full(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("baz"),
+                    None,
+                ),
             ]),
         );
         assert!(result);
@@ -2906,8 +3104,18 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         let result = matches_content_descriptor(
             &dep,
             Some(&[
-                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo"),
-                cd_spec_full(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo", Some("bar"), None),
+                cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                ),
+                cd_spec_full(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                    Some("bar"),
+                    None,
+                ),
             ]),
         );
         assert!(!result);
@@ -2921,9 +3129,21 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         let result = matches_content_descriptor(
             &dep,
             Some(&[
-                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "some"),
-                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "foo"),
-                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "bar"),
+                cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "some",
+                ),
+                cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                ),
+                cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "bar",
+                ),
             ]),
         );
         assert!(result);
@@ -2931,9 +3151,21 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         let result = matches_content_descriptor(
             &dep,
             Some(&[
-                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "some"),
-                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "other"),
-                cd_spec(ContentDescriptorMode::Include, ContentDescriptorMatcher::Simple, "bar"),
+                cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "some",
+                ),
+                cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "other",
+                ),
+                cd_spec(
+                    ContentDescriptorMode::Include,
+                    ContentDescriptorMatcher::Simple,
+                    "bar",
+                ),
             ]),
         );
         assert!(!result);
@@ -2947,9 +3179,21 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         let result = matches_content_descriptor(
             &dep,
             Some(&[
-                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "some"),
-                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "foo"),
-                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "bar"),
+                cd_spec(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "some",
+                ),
+                cd_spec(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "foo",
+                ),
+                cd_spec(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "bar",
+                ),
             ]),
         );
         assert!(!result);
@@ -2957,9 +3201,21 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         let result = matches_content_descriptor(
             &dep,
             Some(&[
-                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "some"),
-                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "other"),
-                cd_spec(ContentDescriptorMode::Exclude, ContentDescriptorMatcher::Simple, "bar"),
+                cd_spec(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "some",
+                ),
+                cd_spec(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "other",
+                ),
+                cd_spec(
+                    ContentDescriptorMode::Exclude,
+                    ContentDescriptorMatcher::Simple,
+                    "bar",
+                ),
             ]),
         );
         assert!(result);
@@ -3099,10 +3355,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
             dep_type: None,
         };
         let urls = get_registry_urls_for_dep(&registries, &matching_dep);
-        assert_eq!(
-            urls,
-            vec!["https://artifactory.foo.bar/artifactory/test"]
-        );
+        assert_eq!(urls, vec!["https://artifactory.foo.bar/artifactory/test"]);
 
         let non_matching_dep = ContentDescriptorDep {
             dep_name: "com.google.protobuf:protobuf-java".to_owned(),
@@ -3110,10 +3363,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
             dep_type: None,
         };
         let urls = get_registry_urls_for_dep(&registries, &non_matching_dep);
-        assert_eq!(
-            urls,
-            vec!["https://dl.google.com/android/maven2/"]
-        );
+        assert_eq!(urls, vec!["https://dl.google.com/android/maven2/"]);
     }
 
     // Ported: "exclusiveContent with repeated repository definition" — gradle/extract.spec.ts line 823
@@ -3150,10 +3400,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
             dep_type: None,
         };
         let urls = get_registry_urls_for_dep(&registries, &dep);
-        assert_eq!(
-            urls,
-            vec!["https://artifactory.foo.bar/artifactory/test"]
-        );
+        assert_eq!(urls, vec!["https://artifactory.foo.bar/artifactory/test"]);
     }
 }
 
@@ -3209,7 +3456,10 @@ fn gcv_supports_multiple_glob_levels() {
 fn version_like_substring_extracts_version() {
     assert_eq!(version_like_substring("1.2.3"), Some("1.2.3".into()));
     assert_eq!(version_like_substring("v1.2.3"), Some("v1.2.3".into()));
-    assert_eq!(version_like_substring("release-1.2.3"), Some("release-1.2.3".into()));
+    assert_eq!(
+        version_like_substring("release-1.2.3"),
+        Some("release-1.2.3".into())
+    );
 }
 
 #[test]
@@ -3221,7 +3471,9 @@ fn version_like_substring_no_version() {
 #[test]
 fn is_gradle_dependency_string_valid() {
     assert!(is_gradle_dependency_string("com.example:lib:1.0.0"));
-    assert!(is_gradle_dependency_string("org.jetbrains.kotlin:kotlin-stdlib:1.9.0"));
+    assert!(is_gradle_dependency_string(
+        "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
+    ));
 }
 
 #[test]
@@ -3279,7 +3531,9 @@ fn is_gradle_settings_file_non_match() {
 
 #[test]
 fn is_gradle_default_catalog_file_matches() {
-    assert!(is_gradle_default_catalog_file("project/gradle/libs.versions.toml"));
+    assert!(is_gradle_default_catalog_file(
+        "project/gradle/libs.versions.toml"
+    ));
 }
 
 #[test]
@@ -3345,15 +3599,21 @@ fn get_vars_returns_empty() {
 fn update_vars_sets_values() {
     let mut registry = VariableRegistry::new();
     let mut vars = PackageVariables::new();
-    vars.insert("key".into(), PackageVariable {
-        key: "key".into(),
-        value: "value".into(),
-        file_replace_position: None,
-        package_file: None,
-    });
+    vars.insert(
+        "key".into(),
+        PackageVariable {
+            key: "key".into(),
+            value: "value".into(),
+            file_replace_position: None,
+            package_file: None,
+        },
+    );
     // Use absolute path so update_vars and get_vars agree
     let abs_path = to_absolute_path("/project");
     update_vars(&mut registry, &abs_path, vars);
     let retrieved = get_vars(&registry, &abs_path);
-    assert_eq!(retrieved.get("key").map(|v| v.value.as_str()), Some("value"));
+    assert_eq!(
+        retrieved.get("key").map(|v| v.value.as_str()),
+        Some("value")
+    );
 }

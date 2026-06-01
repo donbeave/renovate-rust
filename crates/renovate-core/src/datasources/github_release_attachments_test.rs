@@ -4,9 +4,7 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::datasources::github_release_attachments::{
-        GithubReleaseWithAssets, ReleaseAsset,
-    };
+    use crate::datasources::github_release_attachments::{GithubReleaseWithAssets, ReleaseAsset};
 
     fn make_release(tag: &str, assets: &[(&str, u64)]) -> GithubReleaseWithAssets {
         GithubReleaseWithAssets {

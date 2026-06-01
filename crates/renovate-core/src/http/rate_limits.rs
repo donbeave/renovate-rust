@@ -61,10 +61,7 @@ pub fn get_concurrent_requests_limit(
     }
 }
 
-pub fn get_throttle_interval_ms(
-    url: &str,
-    host_rules_limits: &[ThrottleLimitRule],
-) -> Option<u64> {
+pub fn get_throttle_interval_ms(url: &str, host_rules_limits: &[ThrottleLimitRule]) -> Option<u64> {
     let host = extract_host(url)?;
 
     let mut rule_limit: Option<u64> = None;
@@ -129,48 +126,42 @@ mod tests {
     // Rust-specific: rate_limits behavior test
     #[test]
     fn concurrency_npmjs() {
-        let limit =
-            get_concurrent_requests_limit("https://registry.npmjs.org/foo", &[]);
+        let limit = get_concurrent_requests_limit("https://registry.npmjs.org/foo", &[]);
         assert_eq!(limit, Some(999));
     }
 
     // Rust-specific: rate_limits behavior test
     #[test]
     fn concurrency_repology() {
-        let limit =
-            get_concurrent_requests_limit("https://repology.org/api/v1/project/foo", &[]);
+        let limit = get_concurrent_requests_limit("https://repology.org/api/v1/project/foo", &[]);
         assert_eq!(limit, Some(1));
     }
 
     // Rust-specific: rate_limits behavior test
     #[test]
     fn concurrency_default() {
-        let limit =
-            get_concurrent_requests_limit("https://example.com/api", &[]);
+        let limit = get_concurrent_requests_limit("https://example.com/api", &[]);
         assert_eq!(limit, Some(16));
     }
 
     // Rust-specific: rate_limits behavior test
     #[test]
     fn throttle_rubygems() {
-        let interval =
-            get_throttle_interval_ms("https://rubygems.org/api/v1/gems/foo.json", &[]);
+        let interval = get_throttle_interval_ms("https://rubygems.org/api/v1/gems/foo.json", &[]);
         assert_eq!(interval, Some(125));
     }
 
     // Rust-specific: rate_limits behavior test
     #[test]
     fn throttle_crates_io() {
-        let interval =
-            get_throttle_interval_ms("https://crates.io/api/v1/crates/foo", &[]);
+        let interval = get_throttle_interval_ms("https://crates.io/api/v1/crates/foo", &[]);
         assert_eq!(interval, Some(1000));
     }
 
     // Rust-specific: rate_limits behavior test
     #[test]
     fn throttle_none_for_unknown() {
-        let interval =
-            get_throttle_interval_ms("https://example.com/api", &[]);
+        let interval = get_throttle_interval_ms("https://example.com/api", &[]);
         assert!(interval.is_none());
     }
 
@@ -202,8 +193,7 @@ mod tests {
             match_host: "registry.npmjs.org".to_owned(),
             concurrency: 5,
         }];
-        let limit =
-            get_concurrent_requests_limit("https://registry.npmjs.org/foo", &rules);
+        let limit = get_concurrent_requests_limit("https://registry.npmjs.org/foo", &rules);
         assert_eq!(limit, Some(5));
     }
 

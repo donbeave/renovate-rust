@@ -8,7 +8,6 @@ use regex::Regex;
 use std::cmp::Ordering;
 use std::sync::LazyLock;
 
-
 /// A parsed Ruby gem version.
 #[derive(Debug, Clone)]
 struct RubyVersion {
@@ -409,10 +408,27 @@ static RANGE_RE: LazyLock<Regex> = LazyLock::new(|| {
 fn parse_ruby_range(s: &str) -> RubyRange {
     let value = s.trim();
     if let Some(caps) = RANGE_RE.captures(value) {
-        let operator = caps.name("operator").map(|m| m.as_str()).unwrap_or("").to_owned();
-        let delimiter = caps.name("delimiter").map(|m| m.as_str()).unwrap_or(" ").to_owned();
-        let version = caps.name("version").map(|m| m.as_str()).unwrap_or("").to_owned();
-        RubyRange { operator, delimiter, version, companion: None }
+        let operator = caps
+            .name("operator")
+            .map(|m| m.as_str())
+            .unwrap_or("")
+            .to_owned();
+        let delimiter = caps
+            .name("delimiter")
+            .map(|m| m.as_str())
+            .unwrap_or(" ")
+            .to_owned();
+        let version = caps
+            .name("version")
+            .map(|m| m.as_str())
+            .unwrap_or("")
+            .to_owned();
+        RubyRange {
+            operator,
+            delimiter,
+            version,
+            companion: None,
+        }
     } else {
         RubyRange {
             operator: String::new(),
@@ -451,8 +467,7 @@ fn stringify_ruby_ranges(ranges: &[RubyRange]) -> String {
             if let Some(comp) = &r.companion {
                 format!(
                     "{}{}{}, {}{}{}",
-                    r.operator, r.delimiter, r.version,
-                    comp.operator, comp.delimiter, comp.version
+                    r.operator, r.delimiter, r.version, comp.operator, comp.delimiter, comp.version
                 )
             } else {
                 format!("{}{}{}", r.operator, r.delimiter, r.version)
@@ -538,7 +553,11 @@ fn ruby_increment(from: &str, to: &str) -> String {
             while next.len() < n {
                 next.push(0);
             }
-            let next_str = next.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(".");
+            let next_str = next
+                .iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<_>>()
+                .join(".");
             return ruby_increment(&next_str, to);
         }
     }
@@ -561,7 +580,11 @@ fn ruby_decrement(v: &str) -> String {
         result[i] = 0;
         // borrow: continue to next higher segment
     }
-    result.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(".")
+    result
+        .iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>()
+        .join(".")
 }
 
 // ---------------------------------------------------------------------------
@@ -645,59 +668,57 @@ fn replace_part(part: &RubyRange, to: &str) -> RubyRange {
 fn bump_ranges(ranges: &[RubyRange], to: &str) -> Vec<RubyRange> {
     ranges
         .iter()
-        .map(|part| {
-            match part.operator.as_str() {
-                "<" => {
-                    if is_greater_than(to, &part.version) || equals(to, &part.version) {
-                        replace_part(part, to)
-                    } else {
-                        part.clone()
-                    }
+        .map(|part| match part.operator.as_str() {
+            "<" => {
+                if is_greater_than(to, &part.version) || equals(to, &part.version) {
+                    replace_part(part, to)
+                } else {
+                    part.clone()
                 }
-                "<=" => {
-                    if is_greater_than(to, &part.version) {
-                        replace_part(part, to)
-                    } else {
-                        part.clone()
-                    }
+            }
+            "<=" => {
+                if is_greater_than(to, &part.version) {
+                    replace_part(part, to)
+                } else {
+                    part.clone()
                 }
-                "~>" => {
-                    let trimmed = ruby_adapt(to, &part.version);
-                    if ruby_trim_zeroes(&trimmed) == ruby_trim_zeroes(to) {
-                        RubyRange {
-                            operator: part.operator.clone(),
-                            delimiter: part.delimiter.clone(),
-                            version: trimmed,
-                            companion: None,
-                        }
-                    } else {
-                        RubyRange {
-                            operator: part.operator.clone(),
-                            delimiter: part.delimiter.clone(),
-                            version: trimmed,
-                            companion: Some(Box::new(RubyRange {
-                                operator: ">=".to_owned(),
-                                delimiter: " ".to_owned(),
-                                version: to.to_owned(),
-                                companion: None,
-                            })),
-                        }
+            }
+            "~>" => {
+                let trimmed = ruby_adapt(to, &part.version);
+                if ruby_trim_zeroes(&trimmed) == ruby_trim_zeroes(to) {
+                    RubyRange {
+                        operator: part.operator.clone(),
+                        delimiter: part.delimiter.clone(),
+                        version: trimmed,
+                        companion: None,
                     }
-                }
-                "!=" => {
-                    if is_greater_than(to, &part.version) {
-                        RubyRange {
+                } else {
+                    RubyRange {
+                        operator: part.operator.clone(),
+                        delimiter: part.delimiter.clone(),
+                        version: trimmed,
+                        companion: Some(Box::new(RubyRange {
                             operator: ">=".to_owned(),
-                            delimiter: part.delimiter.clone(),
+                            delimiter: " ".to_owned(),
                             version: to.to_owned(),
                             companion: None,
-                        }
-                    } else {
-                        part.clone()
+                        })),
                     }
                 }
-                _ => replace_part(part, to),
             }
+            "!=" => {
+                if is_greater_than(to, &part.version) {
+                    RubyRange {
+                        operator: ">=".to_owned(),
+                        delimiter: part.delimiter.clone(),
+                        version: to.to_owned(),
+                        companion: None,
+                    }
+                } else {
+                    part.clone()
+                }
+            }
+            _ => replace_part(part, to),
         })
         .collect()
 }
@@ -829,12 +850,26 @@ pub fn get_new_value(
                         Some(cv.to_owned())
                     } else {
                         // Recurse with replace strategy
-                        return get_new_value(current_value, "replace", current_version, new_version);
+                        return get_new_value(
+                            current_value,
+                            "replace",
+                            current_version,
+                            new_version,
+                        );
                     }
                 }
-                "bump" => Some(stringify_ruby_ranges(&bump_ranges(&parse_ruby_ranges(cv), nv))),
-                "auto" | "replace" => Some(stringify_ruby_ranges(&replace_ranges(&parse_ruby_ranges(cv), nv))),
-                "widen" => Some(stringify_ruby_ranges(&widen_ranges(&parse_ruby_ranges(cv), nv))),
+                "bump" => Some(stringify_ruby_ranges(&bump_ranges(
+                    &parse_ruby_ranges(cv),
+                    nv,
+                ))),
+                "auto" | "replace" => Some(stringify_ruby_ranges(&replace_ranges(
+                    &parse_ruby_ranges(cv),
+                    nv,
+                ))),
+                "widen" => Some(stringify_ruby_ranges(&widen_ranges(
+                    &parse_ruby_ranges(cv),
+                    nv,
+                ))),
                 _ => None,
             }
         }
@@ -1159,12 +1194,30 @@ mod tests {
         let cases: &[(&str, &str, &str, &str, &str)] = &[
             ("1.0.3", "pin", "1.0.3", "1.2.3", "1.2.3"),
             ("v1.0.3", "auto", "v1.0.3", "v1.2.3", "v1.2.3"),
-            ("'>= 3.0.5', '< 3.2'", "replace", "3.1.5", "3.2.1", "'>= 3.0.5', '< 3.3'"),
+            (
+                "'>= 3.0.5', '< 3.2'",
+                "replace",
+                "3.1.5",
+                "3.2.1",
+                "'>= 3.0.5', '< 3.3'",
+            ),
             ("'0.0.10'", "auto", "0.0.10", "0.0.11", "'0.0.11'"),
             ("'0.0.10'", "replace", "0.0.10", "0.0.11", "'0.0.11'"),
-            (">= 3.2, < 5.0", "bump", "4.0.2", "6.0.1", ">= 6.0.1, < 6.0.2"),
+            (
+                ">= 3.2, < 5.0",
+                "bump",
+                "4.0.2",
+                "6.0.1",
+                ">= 6.0.1, < 6.0.2",
+            ),
             ("~> 5.2, >= 5.2.5", "bump", "5.3.0", "6.0.0", "~> 6.0"),
-            ("~> 5.2, >= 5.2.5", "bump", "5.3.0", "6.0.1", "~> 6.0, >= 6.0.1"),
+            (
+                "~> 5.2, >= 5.2.5",
+                "bump",
+                "5.3.0",
+                "6.0.1",
+                "~> 6.0, >= 6.0.1",
+            ),
             ("~> 5.2.0, >= 5.2.5", "bump", "5.2.5", "5.3.1", "~> 5.3.1"),
             ("4.2.0", "bump", "4.2.0", "4.2.5.1", "4.2.5.1"),
             ("4.2.5.1", "bump", "0.1", "4.3.0", "4.3.0"),
@@ -1192,17 +1245,65 @@ mod tests {
             ("<= 1.0.3", "bump", "1.0.0", "1.0.2", "<= 1.0.3"),
             ("~> 1.0.3", "bump", "1.0.3", "1.2.3", "~> 1.2.3"),
             ("~> 1.0.3", "bump", "1.0.3", "1.0.4", "~> 1.0.4"),
-            ("~> 4.7, >= 4.7.4", "bump", "4.7.5", "4.7.9", "~> 4.7, >= 4.7.9"),
+            (
+                "~> 4.7, >= 4.7.4",
+                "bump",
+                "4.7.5",
+                "4.7.9",
+                "~> 4.7, >= 4.7.9",
+            ),
             ("~> 4.7, >= 4.7.4", "bump", "4.7.5", "4.8.0", "~> 4.8"),
-            (">= 2.0.0, <= 2.15", "bump", "2.15.0", "2.20.1", ">= 2.20.1, <= 2.20.1"),
-            ("~> 5.2.0", "bump", "5.2.4.1", "6.0.2.1", "~> 6.0.2, >= 6.0.2.1"),
+            (
+                ">= 2.0.0, <= 2.15",
+                "bump",
+                "2.15.0",
+                "2.20.1",
+                ">= 2.20.1, <= 2.20.1",
+            ),
+            (
+                "~> 5.2.0",
+                "bump",
+                "5.2.4.1",
+                "6.0.2.1",
+                "~> 6.0.2, >= 6.0.2.1",
+            ),
             ("~> 4.0, < 5", "bump", "4.7.5", "5.0.0", "~> 5.0, < 6"),
-            ("~> 4.0, < 5", "bump", "4.7.5", "5.0.1", "~> 5.0, >= 5.0.1, < 6"),
+            (
+                "~> 4.0, < 5",
+                "bump",
+                "4.7.5",
+                "5.0.1",
+                "~> 5.0, >= 5.0.1, < 6",
+            ),
             ("~> 4.0, < 5", "bump", "4.7.5", "5.1.0", "~> 5.1, < 6"),
-            (">= 3.2, < 5.0", "replace", "4.0.2", "6.0.1", ">= 3.2, < 6.0.2"),
-            ("~> 5.2, >= 5.2.5", "replace", "5.3.0", "6.0.0", "~> 6.0, >= 6.0.0"),
-            ("~> 5.2, >= 5.2.5", "replace", "5.3.0", "6.0.1", "~> 6.0, >= 6.0.1"),
-            ("~> 5.2.0, >= 5.2.5", "replace", "5.2.5", "5.3.1", "~> 5.3.0, >= 5.3.1"),
+            (
+                ">= 3.2, < 5.0",
+                "replace",
+                "4.0.2",
+                "6.0.1",
+                ">= 3.2, < 6.0.2",
+            ),
+            (
+                "~> 5.2, >= 5.2.5",
+                "replace",
+                "5.3.0",
+                "6.0.0",
+                "~> 6.0, >= 6.0.0",
+            ),
+            (
+                "~> 5.2, >= 5.2.5",
+                "replace",
+                "5.3.0",
+                "6.0.1",
+                "~> 6.0, >= 6.0.1",
+            ),
+            (
+                "~> 5.2.0, >= 5.2.5",
+                "replace",
+                "5.2.5",
+                "5.3.1",
+                "~> 5.3.0, >= 5.3.1",
+            ),
             ("4.2.0", "replace", "4.2.0", "4.2.5.1", "4.2.5.1"),
             ("4.2.5.1", "replace", "0.1", "4.3.0", "4.3.0"),
             ("4.2.5.1", "replace", "0.1", "4.2.6", "4.2.6"),
@@ -1235,17 +1336,59 @@ mod tests {
             ("<= 1.0.3", "replace", "1.0.0", "1.0.2", "<= 1.0.3"),
             ("~> 1.0.3", "replace", "1.0.0", "1.2.3", "~> 1.2.0"),
             ("~> 1.0.3", "replace", "1.0.0", "1.0.4", "~> 1.0.3"),
-            ("~> 4.7, >= 4.7.4", "replace", "1.0.0", "4.7.9", "~> 4.7, >= 4.7.4"),
-            ("~> 4.7, >= 4.7.4", "replace", "4.7.5", "4.8.0", "~> 4.7, >= 4.7.4"),
-            (">= 2.0.0, <= 2.15", "replace", "2.15.0", "2.20.1", ">= 2.0.0, <= 2.20.1"),
+            (
+                "~> 4.7, >= 4.7.4",
+                "replace",
+                "1.0.0",
+                "4.7.9",
+                "~> 4.7, >= 4.7.4",
+            ),
+            (
+                "~> 4.7, >= 4.7.4",
+                "replace",
+                "4.7.5",
+                "4.8.0",
+                "~> 4.7, >= 4.7.4",
+            ),
+            (
+                ">= 2.0.0, <= 2.15",
+                "replace",
+                "2.15.0",
+                "2.20.1",
+                ">= 2.0.0, <= 2.20.1",
+            ),
             ("~> 5.2.0", "replace", "5.2.4.1", "6.0.2.1", "~> 6.0.0"),
             ("~> 4.0, < 5", "replace", "4.7.5", "5.0.0", "~> 5.0, < 6"),
             ("~> 4.0, < 5", "replace", "4.7.5", "5.0.1", "~> 5.0, < 6"),
             ("~> 4.0, < 5", "replace", "4.7.5", "5.1.0", "~> 5.0, < 6"),
-            (">= 3.2, < 5.0", "widen", "4.0.2", "6.0.1", ">= 3.2, < 6.0.2"),
-            ("~> 5.2, >= 5.2.5", "widen", "5.3.0", "6.0.0", ">= 5.2.5, < 7"),
-            ("~> 5.2, >= 5.2.5", "widen", "5.3.0", "6.0.1", ">= 5.2.5, < 7"),
-            ("~> 5.2.0, >= 5.2.5", "widen", "5.2.5", "5.3.1", ">= 5.2.5, < 5.4"),
+            (
+                ">= 3.2, < 5.0",
+                "widen",
+                "4.0.2",
+                "6.0.1",
+                ">= 3.2, < 6.0.2",
+            ),
+            (
+                "~> 5.2, >= 5.2.5",
+                "widen",
+                "5.3.0",
+                "6.0.0",
+                ">= 5.2.5, < 7",
+            ),
+            (
+                "~> 5.2, >= 5.2.5",
+                "widen",
+                "5.3.0",
+                "6.0.1",
+                ">= 5.2.5, < 7",
+            ),
+            (
+                "~> 5.2.0, >= 5.2.5",
+                "widen",
+                "5.2.5",
+                "5.3.1",
+                ">= 5.2.5, < 5.4",
+            ),
             ("4.2.0", "widen", "4.2.0", "4.2.5.1", "4.2.5.1"),
             ("4.2.5.1", "widen", "0.1", "4.3.0", "4.3.0"),
             ("~> 1", "widen", "1.2.0", "2.0.3", ">= 1, < 3"),
@@ -1271,10 +1414,34 @@ mod tests {
             ("<= 1.0.3", "widen", "1.0.0", "1.0.2", "<= 1.0.3"),
             ("~> 1.0.3", "widen", "1.0.0", "1.2.3", ">= 1.0.3, < 1.2.4"),
             ("~> 1.0.3", "widen", "1.0.0", "1.0.4", "~> 1.0.3"),
-            ("~> 4.7, >= 4.7.4", "widen", "1.0.0", "4.7.9", "~> 4.7, >= 4.7.4"),
-            ("~> 4.7, >= 4.7.4", "widen", "4.7.5", "4.8.0", "~> 4.7, >= 4.7.4"),
-            (">= 2.0.0, <= 2.15", "widen", "2.15.0", "2.20.1", ">= 2.0.0, <= 2.20.1"),
-            ("~> 5.2.0", "widen", "5.2.4.1", "6.0.2.1", ">= 5.2.0, < 6.0.3"),
+            (
+                "~> 4.7, >= 4.7.4",
+                "widen",
+                "1.0.0",
+                "4.7.9",
+                "~> 4.7, >= 4.7.4",
+            ),
+            (
+                "~> 4.7, >= 4.7.4",
+                "widen",
+                "4.7.5",
+                "4.8.0",
+                "~> 4.7, >= 4.7.4",
+            ),
+            (
+                ">= 2.0.0, <= 2.15",
+                "widen",
+                "2.15.0",
+                "2.20.1",
+                ">= 2.0.0, <= 2.20.1",
+            ),
+            (
+                "~> 5.2.0",
+                "widen",
+                "5.2.4.1",
+                "6.0.2.1",
+                ">= 5.2.0, < 6.0.3",
+            ),
             ("~> 4.0, < 5", "widen", "4.7.5", "5.0.0", ">= 4.0, < 6, < 6"),
             ("~> 4.0, < 5", "widen", "4.7.5", "5.0.1", ">= 4.0, < 6, < 6"),
             ("~> 4.0, < 5", "widen", "4.7.5", "5.1.0", ">= 4.0, < 6, < 6"),
@@ -1284,11 +1451,20 @@ mod tests {
             ("< 1.0.3", "replace", "1.0.3", "1.2.4", "< 1.2.5"),
             ("~> 6.0.0", "update-lockfile", "6.0.2", "6.0.3", "~> 6.0.0"),
             ("~> 6.0.0", "update-lockfile", "6.0.2", "7.0.0", "~> 7.0.0"),
-            ("\"~> 6.0.0\"", "update-lockfile", "6.0.2", "7.0.0", "\"~> 7.0.0\""),
+            (
+                "\"~> 6.0.0\"",
+                "update-lockfile",
+                "6.0.2",
+                "7.0.0",
+                "\"~> 7.0.0\"",
+            ),
         ];
         for &(cv, strat, cur, nv, expected) in cases {
             let got = get_new_value(cv, strat, cur, nv).unwrap_or_default();
-            assert_eq!(got, expected, "get_new_value({cv:?}, {strat:?}, {cur:?}, {nv:?})");
+            assert_eq!(
+                got, expected,
+                "get_new_value({cv:?}, {strat:?}, {cur:?}, {nv:?})"
+            );
         }
     }
 

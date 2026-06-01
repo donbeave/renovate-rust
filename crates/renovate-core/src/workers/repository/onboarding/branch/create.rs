@@ -71,12 +71,8 @@ mod tests {
     fn create_onboarding_branch_normal() {
         let config = RenovateConfig::default();
         let global = GlobalConfig::default();
-        let result = create_onboarding_branch(
-            &config,
-            &global,
-            "renovate.json",
-            "{\"$schema\":...}",
-        );
+        let result =
+            create_onboarding_branch(&config, &global, "renovate.json", "{\"$schema\":...}");
         assert!(!result.dry_run);
         assert!(result.commit.is_some());
         assert_eq!(result.branch_name, Some("renovate/configure".to_owned()));

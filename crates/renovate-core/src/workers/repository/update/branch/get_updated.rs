@@ -94,12 +94,7 @@ mod tests {
 
     #[test]
     fn get_updated_files_not_found() {
-        let result = get_updated_files(
-            "no match here",
-            Some("4.17.0"),
-            Some("4.18.2"),
-            "lodash",
-        );
+        let result = get_updated_files("no match here", Some("4.17.0"), Some("4.18.2"), "lodash");
         assert!(result.is_none());
     }
 

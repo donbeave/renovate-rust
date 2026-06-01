@@ -495,8 +495,17 @@ mod tests {
 
     #[test]
     fn translate_stream_maps_legacy() {
-        assert_eq!(translate_stream("https://unity.com/releases/editor/lts-releases.xml"), STREAM_LTS);
-        assert_eq!(translate_stream("https://unity.com/releases/editor/beta/latest.xml"), STREAM_BETA);
-        assert_eq!(translate_stream("https://example.com/custom"), "https://example.com/custom");
+        assert_eq!(
+            translate_stream("https://unity.com/releases/editor/lts-releases.xml"),
+            STREAM_LTS
+        );
+        assert_eq!(
+            translate_stream("https://unity.com/releases/editor/beta/latest.xml"),
+            STREAM_BETA
+        );
+        assert_eq!(
+            translate_stream("https://example.com/custom"),
+            "https://example.com/custom"
+        );
     }
 }

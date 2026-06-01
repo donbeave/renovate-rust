@@ -58,8 +58,8 @@ impl Migration for SemanticPrefixMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::SemanticPrefixMigration;
     use crate::config::migration::Migration;
@@ -74,7 +74,12 @@ mod tests {
     fn parses_type_and_scope() {
         let m = SemanticPrefixMigration::new();
         let mut migrated = Map::new();
-        m.run("semanticPrefix", &json!("fix(deps):"), &Map::new(), &mut migrated);
+        m.run(
+            "semanticPrefix",
+            &json!("fix(deps):"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["semanticCommitType"], json!("fix"));
         assert_eq!(migrated["semanticCommitScope"], json!("deps"));
     }
@@ -83,7 +88,12 @@ mod tests {
     fn parses_type_without_scope() {
         let m = SemanticPrefixMigration::new();
         let mut migrated = Map::new();
-        m.run("semanticPrefix", &json!("chore:"), &Map::new(), &mut migrated);
+        m.run(
+            "semanticPrefix",
+            &json!("chore:"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["semanticCommitType"], json!("chore"));
         assert!(!migrated.contains_key("semanticCommitScope"));
     }
@@ -94,7 +104,12 @@ mod tests {
         let mut migrated = Map::new();
         migrated.insert("semanticCommitType".into(), json!("feat"));
         migrated.insert("semanticCommitScope".into(), json!("build"));
-        m.run("semanticPrefix", &json!("fix(deps):"), &Map::new(), &mut migrated);
+        m.run(
+            "semanticPrefix",
+            &json!("fix(deps):"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["semanticCommitType"], json!("feat"));
         assert_eq!(migrated["semanticCommitScope"], json!("build"));
     }

@@ -140,9 +140,7 @@ pub async fn submit_change(
     change_id: &str,
 ) -> Result<GerritChangeInfo, PlatformError> {
     let url = format!("{}/changes/{change_id}/submit", client.api_base);
-    let request = SubmitInput {
-        on_behalf_of: None,
-    };
+    let request = SubmitInput { on_behalf_of: None };
     let request_json = serde_json::to_string(&request)
         .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
 
@@ -166,8 +164,8 @@ pub async fn submit_change(
         }));
     }
     let body = resp.text().await.map_err(HttpError::Request)?;
-    let info: GerritChangeInfo = strip_gerrit_json_prefix(&body)
-        .map_err(PlatformError::Unexpected)?;
+    let info: GerritChangeInfo =
+        strip_gerrit_json_prefix(&body).map_err(PlatformError::Unexpected)?;
     Ok(info)
 }
 
@@ -194,8 +192,8 @@ pub async fn list_changes(
         }));
     }
     let body = resp.text().await.map_err(HttpError::Request)?;
-    let changes: Vec<GerritChangeInfo> = strip_gerrit_json_prefix_list(&body)
-        .map_err(PlatformError::Unexpected)?;
+    let changes: Vec<GerritChangeInfo> =
+        strip_gerrit_json_prefix_list(&body).map_err(PlatformError::Unexpected)?;
     Ok(changes)
 }
 
@@ -204,10 +202,7 @@ pub async fn add_reviewer(
     change_id: &str,
     reviewer: &str,
 ) -> Result<GerritReviewerInfo, PlatformError> {
-    let url = format!(
-        "{}/changes/{change_id}/reviewers",
-        client.api_base
-    );
+    let url = format!("{}/changes/{change_id}/reviewers", client.api_base);
     let request = AddReviewerInput {
         reviewer: reviewer.to_owned(),
         confirmed: None,
@@ -230,8 +225,8 @@ pub async fn add_reviewer(
         }));
     }
     let body = resp.text().await.map_err(HttpError::Request)?;
-    let info: GerritReviewerInfo = strip_gerrit_json_prefix_value(&body)
-        .map_err(PlatformError::Unexpected)?;
+    let info: GerritReviewerInfo =
+        strip_gerrit_json_prefix_value(&body).map_err(PlatformError::Unexpected)?;
     Ok(info)
 }
 
@@ -256,8 +251,8 @@ pub async fn get_change(
         }));
     }
     let body = resp.text().await.map_err(HttpError::Request)?;
-    let info: GerritChangeInfo = strip_gerrit_json_prefix(&body)
-        .map_err(PlatformError::Unexpected)?;
+    let info: GerritChangeInfo =
+        strip_gerrit_json_prefix(&body).map_err(PlatformError::Unexpected)?;
     Ok(info)
 }
 
@@ -271,9 +266,7 @@ fn strip_gerrit_json_prefix_list(body: &str) -> Result<Vec<GerritChangeInfo>, St
     serde_json::from_str(json_str).map_err(|e| format!("JSON parse: {e}"))
 }
 
-fn strip_gerrit_json_prefix_value<T: serde::de::DeserializeOwned>(
-    body: &str,
-) -> Result<T, String> {
+fn strip_gerrit_json_prefix_value<T: serde::de::DeserializeOwned>(body: &str) -> Result<T, String> {
     let json_str = body.strip_prefix(")]}'\n").unwrap_or(body);
     serde_json::from_str(json_str).map_err(|e| format!("JSON parse: {e}"))
 }
@@ -297,8 +290,8 @@ impl PlatformClient for GerritClient {
             }));
         }
         let body = resp.text().await.map_err(HttpError::Request)?;
-        let account: GerritAccountInfo = strip_gerrit_json_prefix_value(&body)
-            .map_err(PlatformError::Unexpected)?;
+        let account: GerritAccountInfo =
+            strip_gerrit_json_prefix_value(&body).map_err(PlatformError::Unexpected)?;
         Ok(CurrentUser {
             login: account
                 .username
@@ -318,11 +311,7 @@ impl PlatformClient for GerritClient {
         ))
     }
 
-    async fn get_file_list(
-        &self,
-        _owner: &str,
-        _repo: &str,
-    ) -> Result<Vec<String>, PlatformError> {
+    async fn get_file_list(&self, _owner: &str, _repo: &str) -> Result<Vec<String>, PlatformError> {
         Err(PlatformError::NotSupported(
             "Gerrit get_file_list not yet implemented".to_owned(),
         ))
@@ -456,9 +445,10 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
             .and(path("/a/changes/123/submit"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                ")]}'\n{\"id\": \"123\", \"status\": \"MERGED\"}",
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(")]}'\n{\"id\": \"123\", \"status\": \"MERGED\"}"),
+            )
             .mount(&server)
             .await;
 
@@ -493,9 +483,7 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let changes = list_changes(&client, "myproject", None)
-            .await
-            .unwrap();
+        let changes = list_changes(&client, "myproject", None).await.unwrap();
         assert_eq!(changes.len(), 2);
         assert_eq!(changes[0].id, Some("1".to_owned()));
     }
@@ -573,7 +561,9 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let changes = list_changes(&client, "myproject", Some("status:open")).await.unwrap();
+        let changes = list_changes(&client, "myproject", Some("status:open"))
+            .await
+            .unwrap();
         assert!(changes.is_empty());
     }
 

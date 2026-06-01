@@ -30,9 +30,10 @@ pub fn detect_yarn_version(yarn_constraint: Option<&str>) -> YarnMajorVersion {
     if let Some(constraint) = yarn_constraint {
         if let Some(major_str) = constraint.split('.').next()
             && let Ok(major) = major_str.parse::<u32>()
-                && major >= 2 {
-                    return YarnMajorVersion::V2Plus;
-                }
+            && major >= 2
+        {
+            return YarnMajorVersion::V2Plus;
+        }
         if constraint.starts_with(">=2")
             || constraint.starts_with("^2")
             || constraint.starts_with("^3")
@@ -167,10 +168,12 @@ pub fn fuzzy_match_additional_yarnrc_yml(additional: &str, existing: &str) -> St
 
 fn normalize_registry_url(url: &str) -> String {
     let normalized = url.trim_end_matches('/').to_owned();
-    if !normalized.starts_with("http://") && !normalized.starts_with("https://")
-        && let Some(rest) = normalized.split_once("://").map(|(_, r)| r) {
-            return format!("https://{}", rest);
-        }
+    if !normalized.starts_with("http://")
+        && !normalized.starts_with("https://")
+        && let Some(rest) = normalized.split_once("://").map(|(_, r)| r)
+    {
+        return format!("https://{}", rest);
+    }
     normalized
 }
 
@@ -190,28 +193,19 @@ mod tests {
     // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn detect_yarn_v1() {
-        assert_eq!(
-            detect_yarn_version(Some("1.22.19")),
-            YarnMajorVersion::V1
-        );
+        assert_eq!(detect_yarn_version(Some("1.22.19")), YarnMajorVersion::V1);
     }
 
     // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn detect_yarn_v2() {
-        assert_eq!(
-            detect_yarn_version(Some("2.4.3")),
-            YarnMajorVersion::V2Plus
-        );
+        assert_eq!(detect_yarn_version(Some("2.4.3")), YarnMajorVersion::V2Plus);
     }
 
     // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn detect_yarn_v4() {
-        assert_eq!(
-            detect_yarn_version(Some("4.1.0")),
-            YarnMajorVersion::V2Plus
-        );
+        assert_eq!(detect_yarn_version(Some("4.1.0")), YarnMajorVersion::V2Plus);
     }
 
     // Ported: "uses slim yarn instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 705
@@ -399,7 +393,9 @@ mod tests {
     // Ported: "returns offline mirror and yarn path" — modules/manager/npm/post-update/yarn.spec.ts line 919
     #[test]
     fn check_yarnrc_offline_mirror_and_yarn_path() {
-        let info = check_yarnrc("--install.offline-mirror true\n--yarn-path .yarn/releases/yarn-4.1.0.cjs\n");
+        let info = check_yarnrc(
+            "--install.offline-mirror true\n--yarn-path .yarn/releases/yarn-4.1.0.cjs\n",
+        );
         assert_eq!(info.offline_mirror.as_deref(), Some("true"));
         assert_eq!(
             info.yarn_path.as_deref(),
@@ -432,10 +428,7 @@ mod tests {
     // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn detect_yarn_version_ge2() {
-        assert_eq!(
-            detect_yarn_version(Some(">=2")),
-            YarnMajorVersion::V2Plus
-        );
+        assert_eq!(detect_yarn_version(Some(">=2")), YarnMajorVersion::V2Plus);
     }
 
     // Ported: "supports corepack on grouping" — modules/manager/npm/post-update/yarn.spec.ts line 597
@@ -455,5 +448,4 @@ mod tests {
             YarnMajorVersion::V2Plus
         );
     }
-
 }

@@ -33,8 +33,12 @@ fn dep_meta(
         _ => None,
     };
 
-    let new_major = semver_generic::parse_padded(latest).map(|v| v.major).unwrap_or(0);
-    let new_minor = semver_generic::parse_padded(latest).map(|v| v.minor).unwrap_or(0);
+    let new_major = semver_generic::parse_padded(latest)
+        .map(|v| v.major)
+        .unwrap_or(0);
+    let new_minor = semver_generic::parse_padded(latest)
+        .map(|v| v.minor)
+        .unwrap_or(0);
 
     let topic = branch::branch_topic(
         dep_name,
@@ -103,13 +107,14 @@ pub(crate) fn collect_branch_updates(
     for file in &report.files {
         for dep in &file.deps {
             if let output::DepStatus::UpdateAvailable { .. } = &dep.status
-                && let Some(branch) = dep.branch_name.as_ref() {
-                    branches.entry(branch.clone()).or_default().push(BranchDep {
-                        file_path: file.path.clone(),
-                        manager: file.manager.clone(),
-                        dep: dep.clone(),
-                    });
-                }
+                && let Some(branch) = dep.branch_name.as_ref()
+            {
+                branches.entry(branch.clone()).or_default().push(BranchDep {
+                    file_path: file.path.clone(),
+                    manager: file.manager.clone(),
+                    dep: dep.clone(),
+                });
+            }
         }
     }
     branches
@@ -125,8 +130,8 @@ pub(crate) fn build_dep_reports_cargo(
             renovate_core::datasources::crates_io::CratesIoError,
         >,
     >,
-    timestamps: &HashMap<String, renovate_core::datasources::crates_io::CrateTimestamps>,    repo_cfg: &RepoConfig,
-
+    timestamps: &HashMap<String, renovate_core::datasources::crates_io::CrateTimestamps>,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -267,8 +272,8 @@ pub(crate) fn build_dep_reports_npm(
     >,
     // Per-package release timestamps keyed by exact version string.
     // Used to populate `current_version_timestamp` for `matchCurrentAge` rules.
-    version_timestamps: &HashMap<String, HashMap<String, String>>,    repo_cfg: &RepoConfig,
-
+    version_timestamps: &HashMap<String, HashMap<String, String>>,
+    repo_cfg: &RepoConfig,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -1031,7 +1036,7 @@ pub(crate) fn build_dep_reports_poetry(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-                let (branch_name, pr_title, update_type) = match &status {
+        let (branch_name, pr_title, update_type) = match &status {
             output::DepStatus::UpdateAvailable { current, latest } => {
                 dep_meta(&dep.name, current, latest, repo_cfg)
             }
@@ -1130,7 +1135,7 @@ pub(crate) fn build_dep_reports_pip(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-                let (branch_name, pr_title, update_type) = match &status {
+        let (branch_name, pr_title, update_type) = match &status {
             output::DepStatus::UpdateAvailable { current, latest } => {
                 dep_meta(&dep.name, current, latest, repo_cfg)
             }
@@ -1226,7 +1231,7 @@ pub(crate) fn build_dep_reports_bundler(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-                let (branch_name, pr_title, update_type) = match &status {
+        let (branch_name, pr_title, update_type) = match &status {
             output::DepStatus::UpdateAvailable { current, latest } => {
                 dep_meta(&dep.name, current, latest, repo_cfg)
             }
@@ -1319,7 +1324,7 @@ pub(crate) fn build_dep_reports_terraform(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-                let (branch_name, pr_title, update_type) = match &status {
+        let (branch_name, pr_title, update_type) = match &status {
             output::DepStatus::UpdateAvailable { current, latest } => {
                 dep_meta(&dep.name, current, latest, repo_cfg)
             }
@@ -1416,7 +1421,7 @@ pub(crate) fn build_dep_reports_helm(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-                let (branch_name, pr_title, update_type) = match &status {
+        let (branch_name, pr_title, update_type) = match &status {
             output::DepStatus::UpdateAvailable { current, latest } => {
                 dep_meta(&dep.name, current, latest, repo_cfg)
             }
@@ -1509,7 +1514,7 @@ pub(crate) fn build_dep_reports_gradle(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-                let (branch_name, pr_title, update_type) = match &status {
+        let (branch_name, pr_title, update_type) = match &status {
             output::DepStatus::UpdateAvailable { current, latest } => {
                 dep_meta(&dep.dep_name, current, latest, repo_cfg)
             }
@@ -1609,7 +1614,7 @@ pub(crate) fn build_dep_reports_setup_cfg(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-                let (branch_name, pr_title, update_type) = match &status {
+        let (branch_name, pr_title, update_type) = match &status {
             output::DepStatus::UpdateAvailable { current, latest } => {
                 dep_meta(&dep.name, current, latest, repo_cfg)
             }
@@ -1772,7 +1777,10 @@ mod tests {
         let cfg = test_repo_cfg();
         let (branch, title, utype) = dep_meta("lodash", "^4.0.0", "4.17.21", &cfg);
         assert_eq!(branch, Some("renovate/lodash-4.x".to_owned()));
-        assert_eq!(title, Some("Update dependency lodash to v4.17.21".to_owned()));
+        assert_eq!(
+            title,
+            Some("Update dependency lodash to v4.17.21".to_owned())
+        );
         assert_eq!(utype, Some("minor".to_owned()));
     }
 
@@ -1783,7 +1791,10 @@ mod tests {
         cfg.separate_minor_patch = true;
         let (branch, title, utype) = dep_meta("lodash", "^4.17.0", "4.17.21", &cfg);
         assert_eq!(branch, Some("renovate/lodash-4.17.x".to_owned()));
-        assert_eq!(title, Some("Update dependency lodash to v4.17.21".to_owned()));
+        assert_eq!(
+            title,
+            Some("Update dependency lodash to v4.17.21".to_owned())
+        );
         assert_eq!(utype, Some("patch".to_owned()));
     }
 
@@ -1793,7 +1804,10 @@ mod tests {
         let cfg = test_repo_cfg();
         let (branch, title, utype) = dep_meta("@angular/core", "^17.0.0", "17.1.0", &cfg);
         assert_eq!(branch, Some("renovate/angular-core-17.x".to_owned()));
-        assert_eq!(title, Some("Update dependency @angular/core to v17.1.0".to_owned()));
+        assert_eq!(
+            title,
+            Some("Update dependency @angular/core to v17.1.0".to_owned())
+        );
         assert_eq!(utype, Some("minor".to_owned()));
     }
 
@@ -1803,7 +1817,10 @@ mod tests {
         let mut cfg = test_repo_cfg();
         cfg.semantic_commits = Some("enabled".to_owned());
         let (_branch, title, _utype) = dep_meta("express", "4.18.2", "4.19.0", &cfg);
-        assert_eq!(title, Some("chore(deps): Update dependency express to v4.19.0".to_owned()));
+        assert_eq!(
+            title,
+            Some("chore(deps): Update dependency express to v4.19.0".to_owned())
+        );
     }
 
     // Rust-specific: report_builders behavior test

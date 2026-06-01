@@ -36,28 +36,23 @@ pub async fn raw_exec(
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped());
 
-        let output = tokio::time::timeout(
-            Duration::from_millis(timeout),
-            cmd_builder.output(),
-        )
-        .await
-        .map_err(|_| {
-            ExecError::new(
-                format!("command timed out after {}ms", timeout),
-                cmd,
-            )
-        })?
-        .map_err(|e| ExecError::new(format!("failed to execute: {}", e), cmd).with_source(Box::new(e)))?;
+        let output = tokio::time::timeout(Duration::from_millis(timeout), cmd_builder.output())
+            .await
+            .map_err(|_| ExecError::new(format!("command timed out after {}ms", timeout), cmd))?
+            .map_err(|e| {
+                ExecError::new(format!("failed to execute: {}", e), cmd).with_source(Box::new(e))
+            })?;
 
         let exit_code = output.status.code();
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
 
         if !output.status.success() {
-            return Err(
-                ExecError::new(format!("command failed with status {}", output.status), cmd)
-                    .with_output(stdout, stderr, exit_code),
-            );
+            return Err(ExecError::new(
+                format!("command failed with status {}", output.status),
+                cmd,
+            )
+            .with_output(stdout, stderr, exit_code));
         }
 
         Ok(ExecResult {
@@ -78,10 +73,11 @@ pub async fn raw_exec(
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
 
         if !output.status.success() {
-            return Err(
-                ExecError::new(format!("command failed with status {}", output.status), cmd)
-                    .with_output(String::new(), stderr, exit_code),
-            );
+            return Err(ExecError::new(
+                format!("command failed with status {}", output.status),
+                cmd,
+            )
+            .with_output(String::new(), stderr, exit_code));
         }
 
         Ok(ExecResult {
@@ -103,10 +99,11 @@ pub async fn raw_exec(
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
 
         if !output.status.success() {
-            return Err(
-                ExecError::new(format!("command failed with status {}", output.status), cmd)
-                    .with_output(stdout, stderr, exit_code),
-            );
+            return Err(ExecError::new(
+                format!("command failed with status {}", output.status),
+                cmd,
+            )
+            .with_output(stdout, stderr, exit_code));
         }
 
         Ok(ExecResult {

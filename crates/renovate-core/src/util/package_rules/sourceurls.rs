@@ -37,6 +37,9 @@ mod tests {
 
     #[test]
     fn empty_url_no_match() {
-        assert!(!match_source_urls("", &["https://github.com/owner/repo".to_owned()]));
+        assert!(!match_source_urls(
+            "",
+            &["https://github.com/owner/repo".to_owned()]
+        ));
     }
 }

@@ -1868,10 +1868,7 @@ FROM $nginx_version as stage2
     fn dockerfile_update_dependency_with_digest() {
         let content = "FROM node:14@sha256:abc123\nRUN echo hello\n";
         let updated = dockerfile_update_dependency(content, "node:14", "18");
-        assert_eq!(
-            updated,
-            Some("FROM node:18\nRUN echo hello\n".to_owned())
-        );
+        assert_eq!(updated, Some("FROM node:18\nRUN echo hello\n".to_owned()));
     }
 
     #[test]
@@ -1895,9 +1892,6 @@ FROM $nginx_version as stage2
     fn dockerfile_update_dependency_replaces_first_only() {
         let content = "FROM node:14\nFROM node:14\n";
         let updated = dockerfile_update_dependency(content, "node:14", "18");
-        assert_eq!(
-            updated,
-            Some("FROM node:18\nFROM node:14\n".to_owned())
-        );
+        assert_eq!(updated, Some("FROM node:18\nFROM node:14\n".to_owned()));
     }
 }

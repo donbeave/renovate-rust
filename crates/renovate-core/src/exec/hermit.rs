@@ -26,12 +26,8 @@ pub async fn get_hermit_envs(
     cwd: &Path,
     process_env: &HashMap<String, String>,
 ) -> Result<HashMap<String, String>, ExecError> {
-    let hermit_dir = find_hermit_cwd(cwd).ok_or_else(|| {
-        ExecError::new(
-            "could not find hermit directory",
-            "hermit env",
-        )
-    })?;
+    let hermit_dir = find_hermit_cwd(cwd)
+        .ok_or_else(|| ExecError::new("could not find hermit directory", "hermit env"))?;
 
     let hermit_bin = hermit_dir.join("bin").join("hermit");
     let cmd = format!("{} env -r", hermit_bin.display());
@@ -129,9 +125,13 @@ mod tests {
     //         — util/exec/hermit.spec.ts line 62
     #[test]
     fn parse_hermit_env_output_parses_valid_lines() {
-        let output = "GOBIN=/usr/src/app/repository-a/.hermit/go/bin\nPATH=/usr/src/app/repository-a/bin\n";
+        let output =
+            "GOBIN=/usr/src/app/repository-a/.hermit/go/bin\nPATH=/usr/src/app/repository-a/bin\n";
         let envs = parse_hermit_env_output(output);
-        assert_eq!(envs.get("GOBIN").unwrap(), "/usr/src/app/repository-a/.hermit/go/bin");
+        assert_eq!(
+            envs.get("GOBIN").unwrap(),
+            "/usr/src/app/repository-a/.hermit/go/bin"
+        );
         assert_eq!(envs.get("PATH").unwrap(), "/usr/src/app/repository-a/bin");
     }
 

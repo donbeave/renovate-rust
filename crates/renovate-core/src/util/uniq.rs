@@ -23,7 +23,10 @@ mod tests {
 
     #[test]
     fn uniq_preserves_order() {
-        assert_eq!(uniq(&[3, 1, 4, 1, 5, 9, 2, 6, 5]), vec![3, 1, 4, 5, 9, 2, 6]);
+        assert_eq!(
+            uniq(&[3, 1, 4, 1, 5, 9, 2, 6, 5]),
+            vec![3, 1, 4, 5, 9, 2, 6]
+        );
     }
 
     #[test]
@@ -44,6 +47,9 @@ mod tests {
 
     #[test]
     fn uniq_strings() {
-        assert_eq!(uniq(&["foo", "bar", "foo", "baz"]), vec!["foo", "bar", "baz"]);
+        assert_eq!(
+            uniq(&["foo", "bar", "foo", "baz"]),
+            vec!["foo", "bar", "baz"]
+        );
     }
 }

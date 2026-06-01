@@ -215,9 +215,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/clusters/my-cluster/addons/vpc-cni/versions"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(addon_response(&[
-                "v1.14.0-eksbuild.1",
-            ])))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(addon_response(&["v1.14.0-eksbuild.1"])),
+            )
             .mount(&server)
             .await;
 

@@ -33,29 +33,26 @@ pub fn parse_repomd(content: &str) -> Result<Option<String>, RepomdError> {
     loop {
         use quick_xml::events::Event;
         match reader.read_event_into(&mut buf) {
-            Ok(Event::Start(ref e)) | Ok(Event::Empty(ref e)) => {
-                match e.local_name().as_ref() {
-                    b"data" => {
-                        for attr in e.attributes().flatten() {
-                            if attr.key.local_name().as_ref() == b"type" {
-                                data_type = String::from_utf8_lossy(&attr.value).to_string();
-                                if data_type == "primary" {
-                                    in_data = true;
-                                }
+            Ok(Event::Start(ref e)) | Ok(Event::Empty(ref e)) => match e.local_name().as_ref() {
+                b"data" => {
+                    for attr in e.attributes().flatten() {
+                        if attr.key.local_name().as_ref() == b"type" {
+                            data_type = String::from_utf8_lossy(&attr.value).to_string();
+                            if data_type == "primary" {
+                                in_data = true;
                             }
                         }
                     }
-                    b"location" if in_data => {
-                        for attr in e.attributes().flatten() {
-                            if attr.key.local_name().as_ref() == b"href" {
-                                location_href =
-                                    Some(String::from_utf8_lossy(&attr.value).to_string());
-                            }
-                        }
-                    }
-                    _ => {}
                 }
-            }
+                b"location" if in_data => {
+                    for attr in e.attributes().flatten() {
+                        if attr.key.local_name().as_ref() == b"href" {
+                            location_href = Some(String::from_utf8_lossy(&attr.value).to_string());
+                        }
+                    }
+                }
+                _ => {}
+            },
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"data" && in_data => {
                 break;
             }
@@ -119,9 +116,7 @@ pub fn parse_primary_xml(content: &str) -> Result<Vec<RpmPackageEntry>, RepomdEr
                     }
                 }
             }
-            Ok(Event::Empty(ref e))
-                if in_package && e.local_name().as_ref() == b"version" =>
-            {
+            Ok(Event::Empty(ref e)) if in_package && e.local_name().as_ref() == b"version" => {
                 for attr in e.attributes().flatten() {
                     match attr.key.local_name().as_ref() {
                         b"ver" => {
@@ -209,11 +204,11 @@ pub async fn fetch_primary_gzip_url(
         )));
     }
 
-    let primary_href =
-        parse_repomd(trimmed)?.ok_or(RepomdError::NoPrimaryData)?;
+    let primary_href = parse_repomd(trimmed)?.ok_or(RepomdError::NoPrimaryData)?;
 
-    let registry_url_without_repodata =
-        registry_url.trim_end_matches('/').trim_end_matches("repodata/");
+    let registry_url_without_repodata = registry_url
+        .trim_end_matches('/')
+        .trim_end_matches("repodata/");
     let full_url = format!(
         "{}/{}",
         registry_url_without_repodata.trim_end_matches('/'),
@@ -257,10 +252,7 @@ mod tests {
     #[test]
     fn parse_repomd_finds_primary() {
         let result = parse_repomd(REPOMD_XML).unwrap();
-        assert_eq!(
-            result.as_deref(),
-            Some("repodata/abc123-primary.xml.gz")
-        );
+        assert_eq!(result.as_deref(), Some("repodata/abc123-primary.xml.gz"));
     }
 
     #[test]

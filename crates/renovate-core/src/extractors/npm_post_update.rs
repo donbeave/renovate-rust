@@ -110,9 +110,10 @@ impl PackageJson {
         }
 
         if let Some(ref pm) = self.package_manager
-            && let Some(ver) = parse_corepack_version(pm, name) {
-                return Some(ver);
-            }
+            && let Some(ver) = parse_corepack_version(pm, name)
+        {
+            return Some(ver);
+        }
 
         if let Some(ref engines) = self.engines {
             let v = match name {
@@ -178,20 +179,14 @@ mod tests {
     // Ported: "performs full install" — modules/manager/npm/post-update/npm.spec.ts line 186
     #[test]
     fn parse_package_json_basic() {
-        let pj = PackageJson::parse(
-            r#"{"engines": {"node": ">=18", "npm": ">=9"}}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"engines": {"node": ">=18", "npm": ">=9"}}"#).unwrap();
         assert_eq!(pj.engines.unwrap().node.unwrap(), ">=18");
     }
 
     // Ported: "uses slim yarn instead of corepack" — modules/manager/npm/post-update/yarn.spec.ts line 705
     #[test]
     fn parse_package_json_volta() {
-        let pj = PackageJson::parse(
-            r#"{"volta": {"node": "20.11.0", "yarn": "4.1.0"}}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"volta": {"node": "20.11.0", "yarn": "4.1.0"}}"#).unwrap();
         assert_eq!(
             pj.get_package_manager_version("yarn"),
             Some("4.1.0".to_owned())
@@ -201,10 +196,7 @@ mod tests {
     // Ported: "supports corepack" — modules/manager/npm/post-update/yarn.spec.ts line 504
     #[test]
     fn parse_package_json_corepack() {
-        let pj = PackageJson::parse(
-            r#"{"packageManager": "yarn@4.1.0"}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"packageManager": "yarn@4.1.0"}"#).unwrap();
         assert_eq!(
             pj.get_package_manager_version("yarn"),
             Some("4.1.0".to_owned())
@@ -214,10 +206,7 @@ mod tests {
     // Ported: "does not use global cache if zero install is detected" — modules/manager/npm/post-update/yarn.spec.ts line 288
     #[test]
     fn parse_package_json_pnpm_corepack() {
-        let pj = PackageJson::parse(
-            r#"{"packageManager": "pnpm@9.0.0"}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"packageManager": "pnpm@9.0.0"}"#).unwrap();
         assert_eq!(
             pj.get_package_manager_version("pnpm"),
             Some("9.0.0".to_owned())

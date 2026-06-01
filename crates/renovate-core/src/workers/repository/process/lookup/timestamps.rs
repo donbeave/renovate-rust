@@ -164,10 +164,7 @@ mod tests {
 
     #[test]
     fn calculate_most_recent_timestamp_no_timestamps() {
-        let releases = vec![
-            make_release("1.0.0", None),
-            make_release("2.0.0", None),
-        ];
+        let releases = vec![make_release("1.0.0", None), make_release("2.0.0", None)];
         let result = calculate_most_recent_timestamp(&releases);
         assert!(result.is_none());
     }

@@ -187,7 +187,10 @@ mod tests {
 
     #[test]
     fn get_domain_no_scheme() {
-        assert_eq!(get_domain("example.com/path"), Some("example.com".to_owned()));
+        assert_eq!(
+            get_domain("example.com/path"),
+            Some("example.com".to_owned())
+        );
     }
 
     #[test]

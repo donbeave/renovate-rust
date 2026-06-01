@@ -525,7 +525,11 @@ pub fn update_locked_composer_dependency(
 #[serde(tag = "type")]
 pub enum ComposerRepo {
     #[serde(rename = "composer")]
-    Composer { url: String, #[serde(skip_serializing_if = "Option::is_none")] name: Option<String> },
+    Composer {
+        url: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        name: Option<String>,
+    },
     #[serde(rename = "git")]
     Git { url: String, name: String },
     #[serde(rename = "path")]
@@ -551,18 +555,30 @@ fn parse_one_repo(key: &str, val: &serde_json::Value) -> Option<ComposerRepo> {
     }
     let obj = val.as_object()?;
     let repo_type = obj.get("type")?.as_str()?;
-    let url = obj.get("url").and_then(|v| v.as_str()).unwrap_or("").to_owned();
+    let url = obj
+        .get("url")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_owned();
     match repo_type {
         "composer" => Some(ComposerRepo::Composer { url, name: None }),
-        "vcs" | "git" => Some(ComposerRepo::Git { url, name: key.to_owned() }),
-        "path" => Some(ComposerRepo::Path { url, name: key.to_owned() }),
+        "vcs" | "git" => Some(ComposerRepo::Git {
+            url,
+            name: key.to_owned(),
+        }),
+        "path" => Some(ComposerRepo::Path {
+            url,
+            name: key.to_owned(),
+        }),
         _ => None,
     }
 }
 
 /// Parse `ReposRecord` - object mapping names to repo configs or `false`.
 pub fn parse_repos_record(input: &serde_json::Value) -> Vec<ComposerRepo> {
-    let Some(obj) = input.as_object() else { return vec![]; };
+    let Some(obj) = input.as_object() else {
+        return vec![];
+    };
     let mut result = Vec::new();
     for (key, val) in obj {
         if let Some(repo) = parse_one_repo(key, val) {
@@ -574,19 +590,28 @@ pub fn parse_repos_record(input: &serde_json::Value) -> Vec<ComposerRepo> {
 
 /// Parse `ReposArray` - array of repo configs or `{packagist: false}` entries.
 pub fn parse_repos_array(input: &serde_json::Value) -> Vec<ComposerRepo> {
-    let Some(arr) = input.as_array() else { return vec![]; };
+    let Some(arr) = input.as_array() else {
+        return vec![];
+    };
     let mut result = Vec::new();
     for (idx, val) in arr.iter().enumerate() {
         let Some(obj) = val.as_object() else { continue };
         // Check disable-packagist pattern
         if obj.get("packagist").and_then(|v| v.as_bool()) == Some(false)
-           || obj.get("packagist.org").and_then(|v| v.as_bool()) == Some(false) {
+            || obj.get("packagist.org").and_then(|v| v.as_bool()) == Some(false)
+        {
             result.push(ComposerRepo::DisablePackagist);
             continue;
         }
         let repo_type = obj.get("type").and_then(|v| v.as_str()).unwrap_or("");
-        let url = obj.get("url").and_then(|v| v.as_str()).unwrap_or("").to_owned();
-        let name = obj.get("name").and_then(|v| v.as_str())
+        let url = obj
+            .get("url")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_owned();
+        let name = obj
+            .get("name")
+            .and_then(|v| v.as_str())
             .unwrap_or(&format!("__{idx}"))
             .to_owned();
         match repo_type {
@@ -624,16 +649,24 @@ pub fn parse_repos(input: &serde_json::Value) -> ParsedComposerRepos {
                 let _ = name;
             }
             ComposerRepo::Git { url, name } => {
-                git_repos.insert(name.clone(), serde_json::json!({
-                    "name": name, "type": "git", "url": url
-                }));
+                git_repos.insert(
+                    name.clone(),
+                    serde_json::json!({
+                        "name": name, "type": "git", "url": url
+                    }),
+                );
             }
             ComposerRepo::Path { url, name } => {
-                path_repos.insert(name.clone(), serde_json::json!({
-                    "name": name, "type": "path", "url": url
-                }));
+                path_repos.insert(
+                    name.clone(),
+                    serde_json::json!({
+                        "name": name, "type": "path", "url": url
+                    }),
+                );
             }
-            ComposerRepo::DisablePackagist => { packagist = false; }
+            ComposerRepo::DisablePackagist => {
+                packagist = false;
+            }
         }
     }
 
@@ -642,7 +675,11 @@ pub fn parse_repos(input: &serde_json::Value) -> ParsedComposerRepos {
     }
 
     ParsedComposerRepos {
-        registry_urls: if registry_urls.is_empty() { None } else { Some(registry_urls) },
+        registry_urls: if registry_urls.is_empty() {
+            None
+        } else {
+            Some(registry_urls)
+        },
         git_repos,
         path_repos,
     }
@@ -1170,10 +1207,25 @@ fn repos_record_parses_repositories() {
     });
     let result = parse_repos_record(&input);
     // Order is not guaranteed for HashMap iteration, so check membership
-    assert!(result.contains(&ComposerRepo::Composer { url: "https://wpackagist.org".to_owned(), name: None }));
-    assert!(result.contains(&ComposerRepo::Git { url: "https://some-vcs.com".to_owned(), name: "someGit".to_owned() }));
-    assert!(result.contains(&ComposerRepo::Path { url: "/some/path".to_owned(), name: "somePath".to_owned() }));
-    assert_eq!(result.iter().filter(|r| **r == ComposerRepo::DisablePackagist).count(), 2);
+    assert!(result.contains(&ComposerRepo::Composer {
+        url: "https://wpackagist.org".to_owned(),
+        name: None
+    }));
+    assert!(result.contains(&ComposerRepo::Git {
+        url: "https://some-vcs.com".to_owned(),
+        name: "someGit".to_owned()
+    }));
+    assert!(result.contains(&ComposerRepo::Path {
+        url: "/some/path".to_owned(),
+        name: "somePath".to_owned()
+    }));
+    assert_eq!(
+        result
+            .iter()
+            .filter(|r| **r == ComposerRepo::DisablePackagist)
+            .count(),
+        2
+    );
     assert_eq!(result.len(), 5); // foo: 'bar' is filtered
 }
 
@@ -1196,9 +1248,27 @@ fn repos_array_parses_repositories() {
         {"foo": "bar"},
     ]);
     let result = parse_repos_array(&input);
-    assert_eq!(result[0], ComposerRepo::Composer { url: "https://wpackagist.org".to_owned(), name: None });
-    assert_eq!(result[1], ComposerRepo::Git { url: "https://some-vcs.com".to_owned(), name: "someGit".to_owned() });
-    assert_eq!(result[2], ComposerRepo::Path { url: "/some/path".to_owned(), name: "somePath".to_owned() });
+    assert_eq!(
+        result[0],
+        ComposerRepo::Composer {
+            url: "https://wpackagist.org".to_owned(),
+            name: None
+        }
+    );
+    assert_eq!(
+        result[1],
+        ComposerRepo::Git {
+            url: "https://some-vcs.com".to_owned(),
+            name: "someGit".to_owned()
+        }
+    );
+    assert_eq!(
+        result[2],
+        ComposerRepo::Path {
+            url: "/some/path".to_owned(),
+            name: "somePath".to_owned()
+        }
+    );
     assert_eq!(result[3], ComposerRepo::DisablePackagist);
     assert_eq!(result[4], ComposerRepo::DisablePackagist);
     assert_eq!(result.len(), 5); // foo:bar filtered
@@ -1222,7 +1292,15 @@ fn repos_parses_array_repos() {
         {"name": "somePath", "type": "path", "url": "/some/path"},
     ]);
     let result = parse_repos(&input);
-    assert_eq!(result.registry_urls.as_deref(), Some(&["https://wpackagist.org".to_owned(), "https://repo.packagist.org".to_owned()][..]));
+    assert_eq!(
+        result.registry_urls.as_deref(),
+        Some(
+            &[
+                "https://wpackagist.org".to_owned(),
+                "https://repo.packagist.org".to_owned()
+            ][..]
+        )
+    );
     assert!(result.git_repos.contains_key("someGit"));
     assert!(result.path_repos.contains_key("somePath"));
 }

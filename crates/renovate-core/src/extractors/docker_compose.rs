@@ -658,7 +658,10 @@ services:
         let updated = docker_compose_update_dependency(content, "redis:6", "7");
         assert_eq!(
             updated,
-            Some("services:\n  web:\n    image: nginx:1.19\n  cache:\n    image: redis:7\n".to_owned())
+            Some(
+                "services:\n  web:\n    image: nginx:1.19\n  cache:\n    image: redis:7\n"
+                    .to_owned()
+            )
         );
     }
 }

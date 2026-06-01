@@ -12,10 +12,10 @@ use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 use crate::platform::gitea_forgejo_utils::{
     ContentsListResponse, ContentsResponse, ContentsType, get_merge_method,
 };
+use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 
 pub const GITEA_API_VERSION: &str = "api/v1";
 
@@ -28,10 +28,7 @@ pub struct GiteaClient {
 }
 
 impl GiteaClient {
-    pub fn new(
-        server_url: impl Into<String>,
-        token: impl Into<String>,
-    ) -> Result<Self, HttpError> {
+    pub fn new(server_url: impl Into<String>, token: impl Into<String>) -> Result<Self, HttpError> {
         Self::with_endpoint(server_url, token)
     }
 
@@ -240,37 +237,24 @@ pub async fn get_pr(
     repo: &str,
     pr_id: i64,
 ) -> Result<GiteaPr, PlatformError> {
-    let url = format!(
-        "{}/repos/{owner}/{repo}/pulls/{pr_id}",
-        client.api_base
-    );
-    client
-        .http
-        .get_json(&url)
-        .await
-        .map_err(|e| match e {
-            HttpError::Status { status, .. } if status == reqwest::StatusCode::NOT_FOUND => {
-                PlatformError::Unexpected("PR not found".to_owned())
-            }
-            other => PlatformError::Http(other),
-        })
+    let url = format!("{}/repos/{owner}/{repo}/pulls/{pr_id}", client.api_base);
+    client.http.get_json(&url).await.map_err(|e| match e {
+        HttpError::Status { status, .. } if status == reqwest::StatusCode::NOT_FOUND => {
+            PlatformError::Unexpected("PR not found".to_owned())
+        }
+        other => PlatformError::Http(other),
+    })
 }
 
 impl PlatformClient for GiteaClient {
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         let url = format!("{}/user", self.api_base);
-        let user: GiteaUser = self
-            .http
-            .get_json(&url)
-            .await
-            .map_err(|e| match e {
-                HttpError::Status { status, .. }
-                    if status == reqwest::StatusCode::UNAUTHORIZED =>
-                {
-                    PlatformError::Unauthorized
-                }
-                other => PlatformError::Http(other),
-            })?;
+        let user: GiteaUser = self.http.get_json(&url).await.map_err(|e| match e {
+            HttpError::Status { status, .. } if status == reqwest::StatusCode::UNAUTHORIZED => {
+                PlatformError::Unauthorized
+            }
+            other => PlatformError::Http(other),
+        })?;
         Ok(CurrentUser { login: user.login })
     }
 
@@ -322,15 +306,8 @@ impl PlatformClient for GiteaClient {
         }))
     }
 
-    async fn get_file_list(
-        &self,
-        owner: &str,
-        repo: &str,
-    ) -> Result<Vec<String>, PlatformError> {
-        let url = format!(
-            "{}/repos/{owner}/{repo}/contents?ref=HEAD",
-            self.api_base
-        );
+    async fn get_file_list(&self, owner: &str, repo: &str) -> Result<Vec<String>, PlatformError> {
+        let url = format!("{}/repos/{owner}/{repo}/contents?ref=HEAD", self.api_base);
         let contents: ContentsListResponse = self
             .http
             .get_json(&url)
@@ -369,10 +346,7 @@ impl PlatformClient for GiteaClient {
         body: Option<&str>,
         state: Option<&str>,
     ) -> Result<(), PlatformError> {
-        let url = format!(
-            "{}/repos/{owner}/{repo}/pulls/{pr_number}",
-            self.api_base
-        );
+        let url = format!("{}/repos/{owner}/{repo}/pulls/{pr_number}", self.api_base);
         if title.is_none() && body.is_none() && state.is_none() {
             return Ok(());
         }
@@ -494,9 +468,11 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let pr_id = create_pr(&client, "owner", "repo", "feature", "main", "Test PR", "body")
-            .await
-            .unwrap();
+        let pr_id = create_pr(
+            &client, "owner", "repo", "feature", "main", "Test PR", "body",
+        )
+        .await
+        .unwrap();
         assert_eq!(pr_id, Some(7));
     }
 
@@ -510,9 +486,11 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let pr_id = create_pr(&client, "owner", "repo", "feature", "main", "Test PR", "body")
-            .await
-            .unwrap();
+        let pr_id = create_pr(
+            &client, "owner", "repo", "feature", "main", "Test PR", "body",
+        )
+        .await
+        .unwrap();
         assert_eq!(pr_id, None);
     }
 
@@ -654,7 +632,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let file = client.get_raw_file("owner", "repo", "missing.txt").await.unwrap();
+        let file = client
+            .get_raw_file("owner", "repo", "missing.txt")
+            .await
+            .unwrap();
         assert!(file.is_none());
     }
 

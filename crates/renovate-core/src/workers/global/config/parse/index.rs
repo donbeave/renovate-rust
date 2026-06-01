@@ -64,9 +64,8 @@ mod tests {
 
     #[test]
     fn parse_config_complex() {
-        let result = parse_config(
-            r#"{"repositories": ["org/repo"], "enabled": true, "packageRules": []}"#,
-        );
+        let result =
+            parse_config(r#"{"repositories": ["org/repo"], "enabled": true, "packageRules": []}"#);
         assert!(result.errors.is_empty());
         assert_eq!(result.config["repositories"][0], "org/repo");
     }

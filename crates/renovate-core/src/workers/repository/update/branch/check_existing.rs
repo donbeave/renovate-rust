@@ -83,7 +83,8 @@ mod tests {
 
     #[test]
     fn check_existing_pr_no_existing() {
-        let result = check_existing_pr(false, None, "renovate/", "renovate/", "renovate/lodash-4.x");
+        let result =
+            check_existing_pr(false, None, "renovate/", "renovate/", "renovate/lodash-4.x");
         assert_eq!(result, ExistingPrResult::NotExists);
     }
 
@@ -95,7 +96,13 @@ mod tests {
             branch_name: Some("renovate/lodash-4.x".into()),
             ..Default::default()
         };
-        let result = check_existing_pr(false, Some(&pr), "renovate/", "renovate/", "renovate/lodash-4.x");
+        let result = check_existing_pr(
+            false,
+            Some(&pr),
+            "renovate/",
+            "renovate/",
+            "renovate/lodash-4.x",
+        );
         assert_eq!(result, ExistingPrResult::Exists);
     }
 
@@ -107,7 +114,13 @@ mod tests {
             branch_name: Some("renovate/lodash-4.x".into()),
             ..Default::default()
         };
-        let result = check_existing_pr(false, Some(&pr), "renovate/", "renovate/", "renovate/lodash-4.x");
+        let result = check_existing_pr(
+            false,
+            Some(&pr),
+            "renovate/",
+            "renovate/",
+            "renovate/lodash-4.x",
+        );
         assert_eq!(result, ExistingPrResult::Exists);
     }
 
@@ -119,7 +132,13 @@ mod tests {
             branch_name: Some("renovate/lodash-4.x".into()),
             ..Default::default()
         };
-        let result = check_existing_pr(false, Some(&pr), "renovate/", "renovate/", "renovate/lodash-4.x");
+        let result = check_existing_pr(
+            false,
+            Some(&pr),
+            "renovate/",
+            "renovate/",
+            "renovate/lodash-4.x",
+        );
         assert_eq!(result, ExistingPrResult::Modified);
     }
 
@@ -131,7 +150,13 @@ mod tests {
             branch_name: Some("renovate-old/lodash-4.x".into()),
             ..Default::default()
         };
-        let result = check_existing_pr(false, Some(&pr), "renovate/", "renovate-old/", "renovate/lodash-4.x");
+        let result = check_existing_pr(
+            false,
+            Some(&pr),
+            "renovate/",
+            "renovate-old/",
+            "renovate/lodash-4.x",
+        );
         assert_eq!(result, ExistingPrResult::Exists);
     }
 }

@@ -1513,7 +1513,8 @@ pub fn update_locked_dependency(config: &UpdateLockedConfig<'_>) -> UpdateLocked
 }
 
 fn extract_lock_versions(content: &str) -> std::collections::HashMap<String, Vec<String>> {
-    let mut result: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+    let mut result: std::collections::HashMap<String, Vec<String>> =
+        std::collections::HashMap::new();
     let mut current_name: Option<String> = None;
 
     for line in content.lines() {
@@ -1524,7 +1525,10 @@ fn extract_lock_versions(content: &str) -> std::collections::HashMap<String, Vec
             }
         } else if let Some(version) = trimmed.trim_start_matches("version = \"").strip_suffix('"') {
             if let Some(name) = &current_name {
-                result.entry(name.clone()).or_default().push(version.to_owned());
+                result
+                    .entry(name.clone())
+                    .or_default()
+                    .push(version.to_owned());
             }
         } else if trimmed == "[[package]]" || trimmed.is_empty() {
             current_name = None;
@@ -1582,7 +1586,11 @@ pub fn bump_package_version(
     }
 
     let new_version = ver.to_string();
-    let bumped = content.replacen(&format!("version = \"{}\"", current_value), &format!("version = \"{}\"", new_version), 1);
+    let bumped = content.replacen(
+        &format!("version = \"{}\"", current_value),
+        &format!("version = \"{}\"", new_version),
+        1,
+    );
 
     BumpResult {
         bumped_content: bumped,
@@ -1721,7 +1729,10 @@ mod range_update_tests {
             lock_file: "Cargo.lock",
             lock_file_content: Some("[[package]]\nname = \"serde\"\nversion = \"1.0.200\"\n"),
         };
-        assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::AlreadyUpdated);
+        assert_eq!(
+            update_locked_dependency(&config),
+            UpdateLockedStatus::AlreadyUpdated
+        );
     }
 
     // Rust-specific: cargo behavior test
@@ -1734,7 +1745,10 @@ mod range_update_tests {
             lock_file: "Cargo.lock",
             lock_file_content: Some("[[package]]\nname = \"serde\"\nversion = \"1.0.100\"\n"),
         };
-        assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::Unsupported);
+        assert_eq!(
+            update_locked_dependency(&config),
+            UpdateLockedStatus::Unsupported
+        );
     }
 
     // Rust-specific: cargo behavior test
@@ -1747,7 +1761,10 @@ mod range_update_tests {
             lock_file: "Cargo.lock",
             lock_file_content: None,
         };
-        assert_eq!(update_locked_dependency(&config), UpdateLockedStatus::UpdateFailed);
+        assert_eq!(
+            update_locked_dependency(&config),
+            UpdateLockedStatus::UpdateFailed
+        );
     }
 
     // Rust-specific: cargo behavior test
@@ -1787,7 +1804,10 @@ mod range_update_tests {
         assert_eq!(DepType::Regular.as_renovate_str(), "dependencies");
         assert_eq!(DepType::Dev.as_renovate_str(), "devDependencies");
         assert_eq!(DepType::Build.as_renovate_str(), "buildDependencies");
-        assert_eq!(DepType::Workspace.as_renovate_str(), "workspace.dependencies");
+        assert_eq!(
+            DepType::Workspace.as_renovate_str(),
+            "workspace.dependencies"
+        );
     }
 }
 
@@ -1890,7 +1910,7 @@ mod artifacts_decision_tests {
             Some("1.0.0"),
             Some("1.0.1"),
             "1.0.0", // current
-            "2.0.0",  // new (changed)
+            "2.0.0", // new (changed)
         )];
         let result = determine_cargo_update_type(true, false, &deps);
         // Range changed → dep is filtered out of precise packages, but still Precise

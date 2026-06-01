@@ -55,8 +55,8 @@ impl Migration for AzureGitlabAutomergeMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::AzureGitlabAutomergeMigration;
     use crate::config::migration::Migration;
@@ -87,7 +87,12 @@ mod tests {
     fn migrate_false() {
         let m = AzureGitlabAutomergeMigration::new();
         let mut migrated = Map::new();
-        m.run("azureAutoComplete", &json!(false), &Map::new(), &mut migrated);
+        m.run(
+            "azureAutoComplete",
+            &json!(false),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["platformAutomerge"], json!(false));
     }
 

@@ -53,8 +53,8 @@ impl Migration for BranchPrefixMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::BranchPrefixMigration;
     use crate::config::migration::Migration;
@@ -86,7 +86,12 @@ mod tests {
     fn noop_when_no_template() {
         let m = BranchPrefixMigration::new();
         let mut migrated = Map::new();
-        m.run("branchPrefix", &json!("renovate/"), &Map::new(), &mut migrated);
+        m.run(
+            "branchPrefix",
+            &json!("renovate/"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert!(migrated.is_empty());
     }
 }

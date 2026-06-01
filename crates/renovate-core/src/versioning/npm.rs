@@ -1019,7 +1019,10 @@ mod tests {
 
     #[test]
     fn min_satisfying_version_npm() {
-        assert_eq!(min_satisfying_version(&["1.0.0", "1.2.0", "2.0.0"], "^1.0.0"), Some("1.0.0"));
+        assert_eq!(
+            min_satisfying_version(&["1.0.0", "1.2.0", "2.0.0"], "^1.0.0"),
+            Some("1.0.0")
+        );
     }
 
     #[test]

@@ -180,11 +180,7 @@ pub fn buildkite_update_dependency(
         }
     }
 
-    if found {
-        Some(content)
-    } else {
-        None
-    }
+    if found { Some(content) } else { None }
 }
 
 #[cfg(test)]
@@ -407,11 +403,15 @@ steps:
 
     #[test]
     fn buildkite_update_dependency_multiple_plugins() {
-        let content = "steps:\n  - plugins:\n    - docker-compose#v5.1.0:\n    - artifacts#v1.9.3:\n";
+        let content =
+            "steps:\n  - plugins:\n    - docker-compose#v5.1.0:\n    - artifacts#v1.9.3:\n";
         let updated = buildkite_update_dependency(content, "artifacts", "v1.9.3", "v2.0.0");
         assert_eq!(
             updated,
-            Some("steps:\n  - plugins:\n    - docker-compose#v5.1.0:\n    - artifacts#v2.0.0:\n".to_owned())
+            Some(
+                "steps:\n  - plugins:\n    - docker-compose#v5.1.0:\n    - artifacts#v2.0.0:\n"
+                    .to_owned()
+            )
         );
     }
 }

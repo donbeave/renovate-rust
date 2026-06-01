@@ -109,12 +109,14 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
     // Only handle deno.json* and import map files.
     let basename = package_file.rsplit('/').next().unwrap_or(package_file);
     let is_deno_json = basename.starts_with("deno.json");
-    let is_import_map = upgrade.import_map_referrer || (!is_deno_json && package_file.ends_with(".json"));
+    let is_import_map =
+        upgrade.import_map_referrer || (!is_deno_json && package_file.ends_with(".json"));
     if !is_deno_json && !is_import_map {
         return None;
     }
 
-    let search_current = get_value_by_datasource(datasource, dep_name, upgrade.current_value.as_deref())?;
+    let search_current =
+        get_value_by_datasource(datasource, dep_name, upgrade.current_value.as_deref())?;
     let new_str = get_value_by_datasource(datasource, dep_name, new_value)?;
 
     // Parse the JSON content to build expected state.
@@ -128,7 +130,11 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             let mut match_count = 0;
             let mut match_key = None;
             for (key, val) in imports.iter() {
-                if val.as_str().map(|s| s.contains(&search_current)).unwrap_or(false) {
+                if val
+                    .as_str()
+                    .map(|s| s.contains(&search_current))
+                    .unwrap_or(false)
+                {
                     match_count += 1;
                     match_key = Some(key.clone());
                 }
@@ -142,7 +148,8 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             let new_url = old_url.replace(&search_current, &new_str);
             imports.insert(key, serde_json::Value::String(new_url));
             // Do the string replacement in the file content
-            result = deno_replace_verified(&parsed, file_content, dep_type, &search_current, &new_str);
+            result =
+                deno_replace_verified(&parsed, file_content, dep_type, &search_current, &new_str);
         }
         "scopes" => {
             let scopes = parsed.get_mut("scopes")?.as_object_mut()?;
@@ -150,7 +157,11 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             for scope_val in scopes.values_mut() {
                 if let Some(scope_map) = scope_val.as_object_mut() {
                     for val in scope_map.values_mut() {
-                        if val.as_str().map(|s| s.contains(&search_current)).unwrap_or(false) {
+                        if val
+                            .as_str()
+                            .map(|s| s.contains(&search_current))
+                            .unwrap_or(false)
+                        {
                             let old_url = val.as_str()?.to_owned();
                             let new_url = old_url.replace(&search_current, &new_str);
                             *val = serde_json::Value::String(new_url);
@@ -162,7 +173,8 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             if !found {
                 return None;
             }
-            result = deno_replace_verified(&parsed, file_content, dep_type, &search_current, &new_str);
+            result =
+                deno_replace_verified(&parsed, file_content, dep_type, &search_current, &new_str);
         }
         "tasks" => {
             let tasks = parsed.get_mut("tasks")?.as_object_mut()?;
@@ -179,7 +191,8 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             if !found {
                 return None;
             }
-            result = deno_replace_verified(&parsed, file_content, dep_type, &search_current, &new_str);
+            result =
+                deno_replace_verified(&parsed, file_content, dep_type, &search_current, &new_str);
         }
         "tasks.command" => {
             let tasks = parsed.get_mut("tasks")?.as_object_mut()?;
@@ -198,25 +211,44 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             if !found {
                 return None;
             }
-            result = deno_replace_verified(&parsed, file_content, "tasks", &search_current, &new_str);
+            result =
+                deno_replace_verified(&parsed, file_content, "tasks", &search_current, &new_str);
         }
         "compilerOptions.types" => {
             let types = parsed
                 .get_mut("compilerOptions")?
                 .get_mut("types")?
                 .as_array_mut()?;
-            let idx = types.iter().position(|v| v.as_str() == Some(&search_current))?;
+            let idx = types
+                .iter()
+                .position(|v| v.as_str() == Some(&search_current))?;
             types[idx] = serde_json::Value::String(new_str.clone());
-            result = deno_replace_verified(&parsed, file_content, "compilerOptions", &search_current, &new_str);
+            result = deno_replace_verified(
+                &parsed,
+                file_content,
+                "compilerOptions",
+                &search_current,
+                &new_str,
+            );
         }
         "compilerOptions.jsxImportSource" => {
             let val = parsed
                 .get_mut("compilerOptions")?
                 .get_mut("jsxImportSource")?;
-            if val.as_str().map(|s| s.contains(&search_current)).unwrap_or(false) {
+            if val
+                .as_str()
+                .map(|s| s.contains(&search_current))
+                .unwrap_or(false)
+            {
                 let old = val.as_str()?.to_owned();
                 *val = serde_json::Value::String(old.replace(&search_current, &new_str));
-                result = deno_replace_verified(&parsed, file_content, "compilerOptions", &search_current, &new_str);
+                result = deno_replace_verified(
+                    &parsed,
+                    file_content,
+                    "compilerOptions",
+                    &search_current,
+                    &new_str,
+                );
             } else {
                 return None;
             }
@@ -225,22 +257,32 @@ pub fn deno_update_dependency(file_content: &str, upgrade: &DenoUpdateUpgrade) -
             let val = parsed
                 .get_mut("compilerOptions")?
                 .get_mut("jsxImportSourceTypes")?;
-            if val.as_str().map(|s| s.contains(&search_current)).unwrap_or(false) {
+            if val
+                .as_str()
+                .map(|s| s.contains(&search_current))
+                .unwrap_or(false)
+            {
                 let old = val.as_str()?.to_owned();
                 *val = serde_json::Value::String(old.replace(&search_current, &new_str));
-                result = deno_replace_verified(&parsed, file_content, "compilerOptions", &search_current, &new_str);
+                result = deno_replace_verified(
+                    &parsed,
+                    file_content,
+                    "compilerOptions",
+                    &search_current,
+                    &new_str,
+                );
             } else {
                 return None;
             }
         }
         "lint.plugins" => {
-            let plugins = parsed
-                .get_mut("lint")?
-                .get_mut("plugins")?
-                .as_array_mut()?;
-            let idx = plugins.iter().position(|v| v.as_str() == Some(&search_current))?;
+            let plugins = parsed.get_mut("lint")?.get_mut("plugins")?.as_array_mut()?;
+            let idx = plugins
+                .iter()
+                .position(|v| v.as_str() == Some(&search_current))?;
             plugins[idx] = serde_json::Value::String(new_str.clone());
-            result = deno_replace_verified(&parsed, file_content, "lint", &search_current, &new_str);
+            result =
+                deno_replace_verified(&parsed, file_content, "lint", &search_current, &new_str);
         }
         _ => return None,
     }
@@ -335,7 +377,8 @@ pub fn parse_deno_lock(content: &str) -> Option<DenoLockFile> {
     if let Some(redirects) = parsed.get("redirects").and_then(|r| r.as_object()) {
         for (from, to) in redirects {
             if let Some(to_str) = to.as_str() {
-                lock.redirect_versions.insert(from.clone(), to_str.to_owned());
+                lock.redirect_versions
+                    .insert(from.clone(), to_str.to_owned());
             }
         }
     }
@@ -351,20 +394,23 @@ pub fn get_locked_version(dep: &DenoDepPost, lock: &DenoLockFile) -> Option<Stri
     if datasource == "deno" {
         if let Some(raw) = dep.current_raw_value.as_deref()
             && lock.remote_versions.contains(raw)
-                && let Some(caps) = DENO_LAND_RE.captures(raw) {
-                    return Some(caps["currentValue"].to_owned());
-                }
+            && let Some(caps) = DENO_LAND_RE.captures(raw)
+        {
+            return Some(caps["currentValue"].to_owned());
+        }
 
         if let Some(cv) = dep.current_value.as_deref() {
             let key = format!("{dep_name}@{cv}");
             if let Some(redirect) = lock.redirect_versions.get(&key)
-                && let Some(caps) = DENO_LAND_RE.captures(redirect) {
-                    return Some(caps["currentValue"].to_owned());
-                }
+                && let Some(caps) = DENO_LAND_RE.captures(redirect)
+            {
+                return Some(caps["currentValue"].to_owned());
+            }
             if let Some(redirect) = lock.redirect_versions.get(dep_name)
-                && let Some(caps) = DENO_LAND_RE.captures(redirect) {
-                    return Some(caps["currentValue"].to_owned());
-                }
+                && let Some(caps) = DENO_LAND_RE.captures(redirect)
+            {
+                return Some(caps["currentValue"].to_owned());
+            }
         }
 
         return None;
@@ -385,10 +431,10 @@ pub fn get_locked_version(dep: &DenoDepPost, lock: &DenoLockFile) -> Option<Stri
             for (key, value) in &lock.locked_versions {
                 if let Some(caps) = DEP_VALUE_RE.captures(key)
                     && &caps["depName"] == dep_name
-                        && &caps["datasource"] == datasource
-                    {
-                        return Some(value.clone());
-                    }
+                    && &caps["datasource"] == datasource
+                {
+                    return Some(value.clone());
+                }
             }
         }
     }
@@ -474,7 +520,13 @@ pub fn apply_locked_versions(
 mod tests {
     use super::*;
 
-    fn mk_deno_upgrade(dep_name: &str, dep_type: &str, datasource: &str, current: &str, new_val: &str) -> DenoUpdateUpgrade {
+    fn mk_deno_upgrade(
+        dep_name: &str,
+        dep_type: &str,
+        datasource: &str,
+        current: &str,
+        new_val: &str,
+    ) -> DenoUpdateUpgrade {
         DenoUpdateUpgrade {
             dep_name: Some(dep_name.into()),
             dep_type: Some(dep_type.into()),
@@ -490,17 +542,32 @@ mod tests {
     #[test]
     fn deno_update_imports() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.223.0/fs/mod.ts"}}"#;
-        let upgrade = mk_deno_upgrade("https://deno.land/std", "imports", "deno", "0.223.0", "0.224.0");
+        let upgrade = mk_deno_upgrade(
+            "https://deno.land/std",
+            "imports",
+            "deno",
+            "0.223.0",
+            "0.224.0",
+        );
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["imports"]["fs"].as_str().unwrap(), "https://deno.land/std@0.224.0/fs/mod.ts");
+        assert_eq!(
+            parsed["imports"]["fs"].as_str().unwrap(),
+            "https://deno.land/std@0.224.0/fs/mod.ts"
+        );
     }
 
     // Ported: "throws when multiple imports require more than one replacement" — deno/update.spec.ts line 39
     #[test]
     fn deno_update_imports_multiple_returns_none() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.223.0/fs/mod.ts","path":"https://deno.land/std@0.223.0/path/mod.ts"}}"#;
-        let upgrade = mk_deno_upgrade("https://deno.land/std", "imports", "deno", "0.223.0", "0.224.0");
+        let upgrade = mk_deno_upgrade(
+            "https://deno.land/std",
+            "imports",
+            "deno",
+            "0.223.0",
+            "0.224.0",
+        );
         // Multiple matches → None (TypeScript throws)
         let result = deno_update_dependency(content, &upgrade);
         assert!(result.is_none());
@@ -513,7 +580,12 @@ mod tests {
         let upgrade = mk_deno_upgrade("@scope/dep1", "scopes", "jsr", "latest", "2.0.0");
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["scopes"]["https://deno.land/x/"]["dep2"].as_str().unwrap(), "jsr:@scope/dep1@2.0.0");
+        assert_eq!(
+            parsed["scopes"]["https://deno.land/x/"]["dep2"]
+                .as_str()
+                .unwrap(),
+            "jsr:@scope/dep1@2.0.0"
+        );
     }
 
     // Ported: "returns null when scopes element not found" — deno/update.spec.ts line 98
@@ -532,7 +604,10 @@ mod tests {
         let upgrade = mk_deno_upgrade("esbuild", "tasks", "npm", "0.20.0", "0.21.0");
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["tasks"]["build"].as_str().unwrap(), "deno run npm:esbuild@0.21.0 main.ts");
+        assert_eq!(
+            parsed["tasks"]["build"].as_str().unwrap(),
+            "deno run npm:esbuild@0.21.0 main.ts"
+        );
     }
 
     // Ported: "returns null when tasks element not found" — deno/update.spec.ts line 191
@@ -551,7 +626,10 @@ mod tests {
         let upgrade = mk_deno_upgrade("jest", "compilerOptions.types", "npm", "29.0.0", "30.0.0");
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["compilerOptions"]["types"][0].as_str().unwrap(), "npm:jest@30.0.0");
+        assert_eq!(
+            parsed["compilerOptions"]["types"][0].as_str().unwrap(),
+            "npm:jest@30.0.0"
+        );
     }
 
     // Ported: "returns null when compilerOptions.types is empty array" — deno/update.spec.ts line 281
@@ -567,10 +645,21 @@ mod tests {
     #[test]
     fn deno_update_jsx_import_source() {
         let content = r#"{"compilerOptions":{"jsxImportSource":"npm:preact@10.22.0"}}"#;
-        let upgrade = mk_deno_upgrade("preact", "compilerOptions.jsxImportSource", "npm", "10.22.0", "10.23.0");
+        let upgrade = mk_deno_upgrade(
+            "preact",
+            "compilerOptions.jsxImportSource",
+            "npm",
+            "10.22.0",
+            "10.23.0",
+        );
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["compilerOptions"]["jsxImportSource"].as_str().unwrap(), "npm:preact@10.23.0");
+        assert_eq!(
+            parsed["compilerOptions"]["jsxImportSource"]
+                .as_str()
+                .unwrap(),
+            "npm:preact@10.23.0"
+        );
     }
 
     // Ported: "updates dependency in lint plugins" — deno/update.spec.ts line 453
@@ -580,14 +669,23 @@ mod tests {
         let upgrade = mk_deno_upgrade("@scope/plugin", "lint.plugins", "jsr", "1.0.0", "2.0.0");
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["lint"]["plugins"][0].as_str().unwrap(), "jsr:@scope/plugin@2.0.0");
+        assert_eq!(
+            parsed["lint"]["plugins"][0].as_str().unwrap(),
+            "jsr:@scope/plugin@2.0.0"
+        );
     }
 
     // Ported: "returns null if packageFile is not defined" — deno/update.spec.ts line 563
     #[test]
     fn deno_update_no_package_file() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.223.0/fs/mod.ts"}}"#;
-        let mut upgrade = mk_deno_upgrade("https://deno.land/std", "imports", "deno", "0.223.0", "0.224.0");
+        let mut upgrade = mk_deno_upgrade(
+            "https://deno.land/std",
+            "imports",
+            "deno",
+            "0.223.0",
+            "0.224.0",
+        );
         upgrade.package_file = None;
         let result = deno_update_dependency(content, &upgrade);
         assert!(result.is_none());
@@ -597,21 +695,36 @@ mod tests {
     #[test]
     fn deno_update_already_at_version() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.224.0/fs/mod.ts"}}"#;
-        let upgrade = mk_deno_upgrade("https://deno.land/std", "imports", "deno", "0.224.0", "0.224.0");
+        let upgrade = mk_deno_upgrade(
+            "https://deno.land/std",
+            "imports",
+            "deno",
+            "0.224.0",
+            "0.224.0",
+        );
         let result = deno_update_dependency(content, &upgrade);
         // When current and new are the same, no change needed
         // This might return Some(content) or None depending on implementation
         // The test expects it to return fileContent unchanged
         if let Some(r) = result {
             let parsed: serde_json::Value = serde_json::from_str(&r).unwrap();
-            assert_eq!(parsed["imports"]["fs"].as_str().unwrap(), "https://deno.land/std@0.224.0/fs/mod.ts");
+            assert_eq!(
+                parsed["imports"]["fs"].as_str().unwrap(),
+                "https://deno.land/std@0.224.0/fs/mod.ts"
+            );
         }
     }
 
     // Ported: "returns null if empty file" — deno/update.spec.ts line 712
     #[test]
     fn deno_update_empty_file() {
-        let upgrade = mk_deno_upgrade("https://deno.land/std", "imports", "deno", "0.223.0", "0.224.0");
+        let upgrade = mk_deno_upgrade(
+            "https://deno.land/std",
+            "imports",
+            "deno",
+            "0.223.0",
+            "0.224.0",
+        );
         let result = deno_update_dependency("", &upgrade);
         assert!(result.is_none());
     }
@@ -619,7 +732,13 @@ mod tests {
     // Ported: "handles error during update gracefully" — deno/update.spec.ts line 731
     #[test]
     fn deno_update_invalid_json_returns_none() {
-        let upgrade = mk_deno_upgrade("https://deno.land/std", "imports", "deno", "0.223.0", "0.224.0");
+        let upgrade = mk_deno_upgrade(
+            "https://deno.land/std",
+            "imports",
+            "deno",
+            "0.223.0",
+            "0.224.0",
+        );
         let result = deno_update_dependency("not valid json {{ ", &upgrade);
         assert!(result.is_none());
     }
@@ -639,7 +758,10 @@ mod tests {
         let upgrade = mk_deno_upgrade("dep2", "tasks.command", "npm", "14.0.1", "16.0.0");
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["tasks"]["dev"]["command"].as_str().unwrap(), "deno run --allow-net npm:dep2@16.0.0");
+        assert_eq!(
+            parsed["tasks"]["dev"]["command"].as_str().unwrap(),
+            "deno run --allow-net npm:dep2@16.0.0"
+        );
     }
 
     // Ported: "returns null when tasks.command element not found" — deno/update.spec.ts line 221
@@ -655,7 +777,13 @@ mod tests {
     #[test]
     fn deno_update_compiler_types_not_found() {
         let content = r#"{"compilerOptions":{"types":["npm:@types/other@18.0.0"]}}"#;
-        let upgrade = mk_deno_upgrade("@types/dep2", "compilerOptions.types", "npm", "18.0.0", "19.0.0");
+        let upgrade = mk_deno_upgrade(
+            "@types/dep2",
+            "compilerOptions.types",
+            "npm",
+            "18.0.0",
+            "19.0.0",
+        );
         let result = deno_update_dependency(content, &upgrade);
         assert!(result.is_none());
     }
@@ -664,7 +792,13 @@ mod tests {
     #[test]
     fn deno_update_jsx_import_source_not_found() {
         let content = r#"{"compilerOptions":{"types":["npm:@types/dep2@18.0.0"]}}"#;
-        let upgrade = mk_deno_upgrade("https://deno.land/x/dep2", "compilerOptions.jsxImportSource", "deno", "18.0.0", "19.0.0");
+        let upgrade = mk_deno_upgrade(
+            "https://deno.land/x/dep2",
+            "compilerOptions.jsxImportSource",
+            "deno",
+            "18.0.0",
+            "19.0.0",
+        );
         let result = deno_update_dependency(content, &upgrade);
         assert!(result.is_none());
     }
@@ -673,7 +807,13 @@ mod tests {
     #[test]
     fn deno_update_jsx_import_source_types_not_found() {
         let content = r#"{"compilerOptions":{"types":["npm:@types/dep2@18.0.0"]}}"#;
-        let upgrade = mk_deno_upgrade("@types/dep2", "compilerOptions.jsxImportSourceTypes", "npm", "18.0.0", "19.0.0");
+        let upgrade = mk_deno_upgrade(
+            "@types/dep2",
+            "compilerOptions.jsxImportSourceTypes",
+            "npm",
+            "18.0.0",
+            "19.0.0",
+        );
         let result = deno_update_dependency(content, &upgrade);
         assert!(result.is_none());
     }
@@ -682,10 +822,21 @@ mod tests {
     #[test]
     fn deno_update_jsx_import_source_types() {
         let content = r#"{"compilerOptions":{"jsxImportSourceTypes":"npm:@types/dep2@18.0.0"}}"#;
-        let upgrade = mk_deno_upgrade("@types/dep2", "compilerOptions.jsxImportSourceTypes", "npm", "18.0.0", "19.0.0");
+        let upgrade = mk_deno_upgrade(
+            "@types/dep2",
+            "compilerOptions.jsxImportSourceTypes",
+            "npm",
+            "18.0.0",
+            "19.0.0",
+        );
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["compilerOptions"]["jsxImportSourceTypes"].as_str().unwrap(), "npm:@types/dep2@19.0.0");
+        assert_eq!(
+            parsed["compilerOptions"]["jsxImportSourceTypes"]
+                .as_str()
+                .unwrap(),
+            "npm:@types/dep2@19.0.0"
+        );
     }
 
     // Ported: "returns null when lint.plugins element not found" — deno/update.spec.ts line 481
@@ -714,18 +865,25 @@ mod tests {
         upgrade.current_value = None;
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["imports"]["dep1"].as_str().unwrap(), "npm:dep1@1.0.0");
+        assert_eq!(
+            parsed["imports"]["dep1"].as_str().unwrap(),
+            "npm:dep1@1.0.0"
+        );
     }
 
     // Ported: "currentValue is not defined when deno datasource" — deno/update.spec.ts line 602
     #[test]
     fn deno_update_no_current_value_deno() {
         let content = r#"{"imports":{"fs":"https://deno.land/std/fs"}}"#;
-        let mut upgrade = mk_deno_upgrade("https://deno.land/std/fs", "imports", "deno", "", "2.0.0");
+        let mut upgrade =
+            mk_deno_upgrade("https://deno.land/std/fs", "imports", "deno", "", "2.0.0");
         upgrade.current_value = None;
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["imports"]["fs"].as_str().unwrap(), "https://deno.land/std/fs@2.0.0");
+        assert_eq!(
+            parsed["imports"]["fs"].as_str().unwrap(),
+            "https://deno.land/std/fs@2.0.0"
+        );
     }
 
     // Ported: "returns null for missing required values" — deno/update.spec.ts line 629
@@ -744,12 +902,19 @@ mod tests {
     // Ported: "handles complex JSON with nested structures" — deno/update.spec.ts line 648
     #[test]
     fn deno_update_complex_json() {
-        let content = r#"{"name":"my-deno-app","imports":{"dep1":"npm:dep1@1.0.0","dep2":"npm:dep2@1.0.0"}}"#;
+        let content =
+            r#"{"name":"my-deno-app","imports":{"dep1":"npm:dep1@1.0.0","dep2":"npm:dep2@1.0.0"}}"#;
         let upgrade = mk_deno_upgrade("dep1", "imports", "npm", "1.0.0", "1.1.0");
         let result = deno_update_dependency(content, &upgrade).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
-        assert_eq!(parsed["imports"]["dep1"].as_str().unwrap(), "npm:dep1@1.1.0");
-        assert_eq!(parsed["imports"]["dep2"].as_str().unwrap(), "npm:dep2@1.0.0");
+        assert_eq!(
+            parsed["imports"]["dep1"].as_str().unwrap(),
+            "npm:dep1@1.1.0"
+        );
+        assert_eq!(
+            parsed["imports"]["dep2"].as_str().unwrap(),
+            "npm:dep2@1.0.0"
+        );
     }
 
     // --- post-processing tests ---
@@ -785,9 +950,13 @@ mod tests {
     // Rust-specific: deno behavior test
     #[test]
     fn parse_deno_lock_with_remote() {
-        let content = r#"{"version":5,"remote":{"https://deno.land/std@0.223.0/fs/mod.ts":"hash1"}}"#;
+        let content =
+            r#"{"version":5,"remote":{"https://deno.land/std@0.223.0/fs/mod.ts":"hash1"}}"#;
         let lock = parse_deno_lock(content).unwrap();
-        assert!(lock.remote_versions.contains("https://deno.land/std@0.223.0/fs/mod.ts"));
+        assert!(
+            lock.remote_versions
+                .contains("https://deno.land/std@0.223.0/fs/mod.ts")
+        );
     }
 
     // Rust-specific: deno behavior test
@@ -886,5 +1055,4 @@ mod tests {
         });
         assert_eq!(pkgs[0].deps[0].locked_version, Some("4.18.2".to_owned()));
     }
-
 }

@@ -43,7 +43,10 @@ pub fn generate_pr_body(config: &PrBodyConfig) -> String {
     }
 
     if !config.updates.is_empty() {
-        body.push_str(&generate_updates_table(&config.updates, config.pr_body_columns.as_deref()));
+        body.push_str(&generate_updates_table(
+            &config.updates,
+            config.pr_body_columns.as_deref(),
+        ));
     }
 
     if config.has_release_notes {

@@ -54,17 +54,17 @@ pub mod gitlab_packages;
 pub mod gitlab_releases;
 pub mod gitlab_tags;
 pub mod glasskube_packages;
-pub mod golang_version;
-pub mod gomod;
 pub mod go_goproxy_parser;
 pub mod go_releases_direct;
+pub mod golang_version;
+pub mod gomod;
 pub mod gradle_version;
 pub mod hackage;
 pub mod helm;
 pub mod hermit;
 pub mod hex;
-pub mod hexpm_bob;
 pub mod hex_v2_package;
+pub mod hexpm_bob;
 pub mod java_version;
 pub mod jenkins_plugins;
 pub mod jsr;
@@ -109,8 +109,7 @@ pub struct DatasourceInfo {
 // addMetaData — lib/modules/datasource/metadata.ts
 // ═══════════════════════════════════════════════════════════════════════════
 
-const CHANGELOG_URLS_JSON: &str =
-    include_str!("datasources/changelog-urls.json");
+const CHANGELOG_URLS_JSON: &str = include_str!("datasources/changelog-urls.json");
 const SOURCE_URLS_JSON: &str = include_str!("datasources/source-urls.json");
 
 /// A release result entry with optional metadata fields.
@@ -229,7 +228,9 @@ pub fn add_metadata(dep: &mut ReleaseResult, datasource: &str, package_name: &st
     }
 
     // Remove homepage when it duplicates the source URL.
-    if let (Some(ref source_url), Some(ref homepage)) = (dep.source_url.clone(), dep.homepage.clone()) {
+    if let (Some(ref source_url), Some(ref homepage)) =
+        (dep.source_url.clone(), dep.homepage.clone())
+    {
         let massaged_hp = crate::util::massage_url(homepage);
         if !massaged_hp.is_empty() && (massaged_hp == *source_url || homepage == source_url) {
             dep.homepage = None;
@@ -253,20 +254,36 @@ fn normalize_timestamp(ts: &str) -> Option<String> {
 
     // Try standard ISO 8601 with timezone offset
     if let Ok(dt) = DateTime::parse_from_rfc3339(ts) {
-        return Some(dt.with_timezone(&Utc).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string());
+        return Some(
+            dt.with_timezone(&Utc)
+                .format("%Y-%m-%dT%H:%M:%S%.3fZ")
+                .to_string(),
+        );
     }
 
     // Try without timezone (treat as UTC)
     if let Ok(ndt) = NaiveDateTime::parse_from_str(ts, "%Y-%m-%dT%H:%M:%S") {
-        return Some(Utc.from_utc_datetime(&ndt).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string());
+        return Some(
+            Utc.from_utc_datetime(&ndt)
+                .format("%Y-%m-%dT%H:%M:%S%.3fZ")
+                .to_string(),
+        );
     }
     if let Ok(ndt) = NaiveDateTime::parse_from_str(ts, "%Y-%m-%dT%H:%M:%S%.f") {
-        return Some(Utc.from_utc_datetime(&ndt).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string());
+        return Some(
+            Utc.from_utc_datetime(&ndt)
+                .format("%Y-%m-%dT%H:%M:%S%.3fZ")
+                .to_string(),
+        );
     }
 
     // Try compact format like "20000103150210" → 2000-01-03 15:02:10
     if let Ok(ndt) = NaiveDateTime::parse_from_str(ts, "%Y%m%d%H%M%S") {
-        return Some(Utc.from_utc_datetime(&ndt).format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string());
+        return Some(
+            Utc.from_utc_datetime(&ndt)
+                .format("%Y-%m-%dT%H:%M:%S%.3fZ")
+                .to_string(),
+        );
     }
 
     None
@@ -279,10 +296,8 @@ fn normalize_timestamp(ts: &str) -> Option<String> {
 ///   "https://gitlab.com/group/repo/-/tree/main/subdir" → (base, "subdir")
 fn extract_source_directory(url: &str) -> Option<(String, String)> {
     // GitHub tree URLs: .../tree/{ref}/{path}
-    let github_re = regex::Regex::new(
-        r"^(https://[^/]*github[^/]*/[^/]+/[^/]+)/tree/[^/]+/(.+?)/?$",
-    )
-    .ok()?;
+    let github_re =
+        regex::Regex::new(r"^(https://[^/]*github[^/]*/[^/]+/[^/]+)/tree/[^/]+/(.+?)/?$").ok()?;
     if let Some(caps) = github_re.captures(url) {
         let base = caps.get(1)?.as_str().to_owned();
         let dir = caps.get(2)?.as_str().to_owned();
@@ -405,10 +420,12 @@ pub fn apply_constraints_filtering(
                         }
                         if use_semver_coerced {
                             // Use semver-coerced matching (matches = version satisfies range)
-                            if crate::versioning::semver_coerced::matches(rc_val, config_constraint) {
+                            if crate::versioning::semver_coerced::matches(rc_val, config_constraint)
+                            {
                                 return true;
                             }
-                            if crate::versioning::semver_coerced::matches(config_constraint, rc_val) {
+                            if crate::versioning::semver_coerced::matches(config_constraint, rc_val)
+                            {
                                 return true;
                             }
                         } else {
@@ -448,87 +465,330 @@ pub const DATASOURCE_DEFAULT_VERSIONING: &str = "semver-coerced";
 /// Static registry of known datasource IDs and their default versioning.
 /// Mirrors the datasources Map from `lib/modules/datasource/api.ts`.
 const KNOWN_DATASOURCES: &[DatasourceInfo] = &[
-    DatasourceInfo { id: "artifactory", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "aws-eks-addon", default_versioning: "aws-eks-addon" },
-    DatasourceInfo { id: "aws-machine-image", default_versioning: "aws-machine-image" },
-    DatasourceInfo { id: "aws-rds", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "azure-bicep-resource", default_versioning: "azure-rest-api" },
-    DatasourceInfo { id: "azure-pipelines-tasks", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "azure-tags", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "bazel", default_versioning: "bazel-module" },
-    DatasourceInfo { id: "bitbucket-server-tags", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "bitbucket-tags", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "bitrise", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "buildpacks-registry", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "cdnjs", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "clojure", default_versioning: "maven" },
-    DatasourceInfo { id: "conan", default_versioning: "conan" },
-    DatasourceInfo { id: "conda", default_versioning: "pep440" },
-    DatasourceInfo { id: "cpan", default_versioning: "perl" },
-    DatasourceInfo { id: "crate", default_versioning: "cargo" },
-    DatasourceInfo { id: "custom", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "dart", default_versioning: "npm" },
-    DatasourceInfo { id: "deb", default_versioning: "deb" },
-    DatasourceInfo { id: "deno", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "devbox", default_versioning: "devbox" },
-    DatasourceInfo { id: "docker", default_versioning: "docker" },
-    DatasourceInfo { id: "dotnet-version", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "elm-package", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "endoflife-date", default_versioning: "loose" },
-    DatasourceInfo { id: "flutter-version", default_versioning: "semver" },
-    DatasourceInfo { id: "forgejo-releases", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "forgejo-tags", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "galaxy", default_versioning: "pep440" },
-    DatasourceInfo { id: "galaxy-collection", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "git-refs", default_versioning: "git" },
-    DatasourceInfo { id: "git-tags", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "gitea-releases", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "gitea-tags", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "github-digest", default_versioning: "exact" },
-    DatasourceInfo { id: "github-release-attachments", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "github-releases", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "github-runners", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "github-tags", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "gitlab-packages", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "gitlab-releases", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "gitlab-tags", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "glasskube-packages", default_versioning: "glasskube" },
-    DatasourceInfo { id: "go", default_versioning: "semver" },
-    DatasourceInfo { id: "golang-version", default_versioning: "semver" },
-    DatasourceInfo { id: "gradle-version", default_versioning: "gradle" },
-    DatasourceInfo { id: "hackage", default_versioning: "pvp" },
-    DatasourceInfo { id: "helm", default_versioning: "helm" },
-    DatasourceInfo { id: "hermit", default_versioning: "hermit" },
-    DatasourceInfo { id: "hex", default_versioning: "hex" },
-    DatasourceInfo { id: "hexpm-bob", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "java-version", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "jenkins-plugins", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "jsr", default_versioning: "semver" },
-    DatasourceInfo { id: "kubernetes-api", default_versioning: "kubernetes-api" },
-    DatasourceInfo { id: "maven", default_versioning: "maven" },
-    DatasourceInfo { id: "nextcloud", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "node-version", default_versioning: "node" },
-    DatasourceInfo { id: "npm", default_versioning: "npm" },
-    DatasourceInfo { id: "nuget", default_versioning: "nuget" },
-    DatasourceInfo { id: "orb", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "packagist", default_versioning: "composer" },
-    DatasourceInfo { id: "pod", default_versioning: "ruby" },
-    DatasourceInfo { id: "pub", default_versioning: "npm" },
-    DatasourceInfo { id: "puppet-forge", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "pypi", default_versioning: "pep440" },
-    DatasourceInfo { id: "python-version", default_versioning: "pep440" },
-    DatasourceInfo { id: "repology", default_versioning: "loose" },
-    DatasourceInfo { id: "rpm", default_versioning: "rpm" },
-    DatasourceInfo { id: "ruby-version", default_versioning: "ruby" },
-    DatasourceInfo { id: "rubygems", default_versioning: "ruby" },
-    DatasourceInfo { id: "rust-version", default_versioning: "rust-release-channel" },
-    DatasourceInfo { id: "sbt-package", default_versioning: "ivy" },
-    DatasourceInfo { id: "sbt-plugin", default_versioning: "ivy" },
-    DatasourceInfo { id: "terraform-module", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "terraform-provider", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "typst", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "unity3d", default_versioning: "semver-coerced" },
-    DatasourceInfo { id: "unity3d-packages", default_versioning: "semver-coerced" },
+    DatasourceInfo {
+        id: "artifactory",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "aws-eks-addon",
+        default_versioning: "aws-eks-addon",
+    },
+    DatasourceInfo {
+        id: "aws-machine-image",
+        default_versioning: "aws-machine-image",
+    },
+    DatasourceInfo {
+        id: "aws-rds",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "azure-bicep-resource",
+        default_versioning: "azure-rest-api",
+    },
+    DatasourceInfo {
+        id: "azure-pipelines-tasks",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "azure-tags",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "bazel",
+        default_versioning: "bazel-module",
+    },
+    DatasourceInfo {
+        id: "bitbucket-server-tags",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "bitbucket-tags",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "bitrise",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "buildpacks-registry",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "cdnjs",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "clojure",
+        default_versioning: "maven",
+    },
+    DatasourceInfo {
+        id: "conan",
+        default_versioning: "conan",
+    },
+    DatasourceInfo {
+        id: "conda",
+        default_versioning: "pep440",
+    },
+    DatasourceInfo {
+        id: "cpan",
+        default_versioning: "perl",
+    },
+    DatasourceInfo {
+        id: "crate",
+        default_versioning: "cargo",
+    },
+    DatasourceInfo {
+        id: "custom",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "dart",
+        default_versioning: "npm",
+    },
+    DatasourceInfo {
+        id: "deb",
+        default_versioning: "deb",
+    },
+    DatasourceInfo {
+        id: "deno",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "devbox",
+        default_versioning: "devbox",
+    },
+    DatasourceInfo {
+        id: "docker",
+        default_versioning: "docker",
+    },
+    DatasourceInfo {
+        id: "dotnet-version",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "elm-package",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "endoflife-date",
+        default_versioning: "loose",
+    },
+    DatasourceInfo {
+        id: "flutter-version",
+        default_versioning: "semver",
+    },
+    DatasourceInfo {
+        id: "forgejo-releases",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "forgejo-tags",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "galaxy",
+        default_versioning: "pep440",
+    },
+    DatasourceInfo {
+        id: "galaxy-collection",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "git-refs",
+        default_versioning: "git",
+    },
+    DatasourceInfo {
+        id: "git-tags",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "gitea-releases",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "gitea-tags",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "github-digest",
+        default_versioning: "exact",
+    },
+    DatasourceInfo {
+        id: "github-release-attachments",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "github-releases",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "github-runners",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "github-tags",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "gitlab-packages",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "gitlab-releases",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "gitlab-tags",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "glasskube-packages",
+        default_versioning: "glasskube",
+    },
+    DatasourceInfo {
+        id: "go",
+        default_versioning: "semver",
+    },
+    DatasourceInfo {
+        id: "golang-version",
+        default_versioning: "semver",
+    },
+    DatasourceInfo {
+        id: "gradle-version",
+        default_versioning: "gradle",
+    },
+    DatasourceInfo {
+        id: "hackage",
+        default_versioning: "pvp",
+    },
+    DatasourceInfo {
+        id: "helm",
+        default_versioning: "helm",
+    },
+    DatasourceInfo {
+        id: "hermit",
+        default_versioning: "hermit",
+    },
+    DatasourceInfo {
+        id: "hex",
+        default_versioning: "hex",
+    },
+    DatasourceInfo {
+        id: "hexpm-bob",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "java-version",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "jenkins-plugins",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "jsr",
+        default_versioning: "semver",
+    },
+    DatasourceInfo {
+        id: "kubernetes-api",
+        default_versioning: "kubernetes-api",
+    },
+    DatasourceInfo {
+        id: "maven",
+        default_versioning: "maven",
+    },
+    DatasourceInfo {
+        id: "nextcloud",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "node-version",
+        default_versioning: "node",
+    },
+    DatasourceInfo {
+        id: "npm",
+        default_versioning: "npm",
+    },
+    DatasourceInfo {
+        id: "nuget",
+        default_versioning: "nuget",
+    },
+    DatasourceInfo {
+        id: "orb",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "packagist",
+        default_versioning: "composer",
+    },
+    DatasourceInfo {
+        id: "pod",
+        default_versioning: "ruby",
+    },
+    DatasourceInfo {
+        id: "pub",
+        default_versioning: "npm",
+    },
+    DatasourceInfo {
+        id: "puppet-forge",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "pypi",
+        default_versioning: "pep440",
+    },
+    DatasourceInfo {
+        id: "python-version",
+        default_versioning: "pep440",
+    },
+    DatasourceInfo {
+        id: "repology",
+        default_versioning: "loose",
+    },
+    DatasourceInfo {
+        id: "rpm",
+        default_versioning: "rpm",
+    },
+    DatasourceInfo {
+        id: "ruby-version",
+        default_versioning: "ruby",
+    },
+    DatasourceInfo {
+        id: "rubygems",
+        default_versioning: "ruby",
+    },
+    DatasourceInfo {
+        id: "rust-version",
+        default_versioning: "rust-release-channel",
+    },
+    DatasourceInfo {
+        id: "sbt-package",
+        default_versioning: "ivy",
+    },
+    DatasourceInfo {
+        id: "sbt-plugin",
+        default_versioning: "ivy",
+    },
+    DatasourceInfo {
+        id: "terraform-module",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "terraform-provider",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "typst",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "unity3d",
+        default_versioning: "semver-coerced",
+    },
+    DatasourceInfo {
+        id: "unity3d-packages",
+        default_versioning: "semver-coerced",
+    },
 ];
 
 /// Return the datasource info for a given ID, or `None` if unknown.
@@ -537,7 +797,11 @@ const KNOWN_DATASOURCES: &[DatasourceInfo] = &[
 /// Mirrors `getDatasourceFor()` from `lib/modules/datasource/common.ts`.
 pub fn get_datasource_for(name: &str) -> Option<&'static DatasourceInfo> {
     // "custom.*" → custom datasource
-    let lookup = if name.starts_with("custom.") { "custom" } else { name };
+    let lookup = if name.starts_with("custom.") {
+        "custom"
+    } else {
+        name
+    };
     KNOWN_DATASOURCES.iter().find(|d| d.id == lookup)
 }
 
@@ -639,14 +903,20 @@ mod registry_tests {
     // Ported: "returns default versioning for unknown datasource" — modules/datasource/common.spec.ts line 43
     #[test]
     fn datasource_registry_default_versioning_unknown() {
-        assert_eq!(get_datasource_default_versioning(Some("foobar")), "semver-coerced");
+        assert_eq!(
+            get_datasource_default_versioning(Some("foobar")),
+            "semver-coerced"
+        );
     }
 
     // Ported: "returns default versioning for datasource with missing default versioning configuration" — modules/datasource/common.spec.ts line 52
     #[test]
     fn datasource_registry_default_versioning_no_specific() {
         // artifactory has no specific default → semver-coerced
-        assert_eq!(get_datasource_default_versioning(Some("artifactory")), "semver-coerced");
+        assert_eq!(
+            get_datasource_default_versioning(Some("artifactory")),
+            "semver-coerced"
+        );
     }
 
     // Ported: "returns datasource-defined default versioning" — modules/datasource/common.spec.ts line 56
@@ -691,8 +961,14 @@ mod registry_tests {
     fn add_metadata_manual_changelog_url() {
         let mut dep = ReleaseResult {
             releases: vec![
-                Release { version: "2.0.0".into(), ..Default::default() },
-                Release { version: "2.1.0".into(), ..Default::default() },
+                Release {
+                    version: "2.0.0".into(),
+                    ..Default::default()
+                },
+                Release {
+                    version: "2.1.0".into(),
+                    ..Default::default()
+                },
             ],
             ..Default::default()
         };
@@ -707,9 +983,10 @@ mod registry_tests {
     #[test]
     fn add_metadata_manual_source_url() {
         let mut dep = ReleaseResult {
-            releases: vec![
-                Release { version: "2.0.0".into(), ..Default::default() },
-            ],
+            releases: vec![Release {
+                version: "2.0.0".into(),
+                ..Default::default()
+            }],
             ..Default::default()
         };
         add_metadata(&mut dep, "pypi", "mkdocs");
@@ -723,7 +1000,10 @@ mod registry_tests {
     #[test]
     fn add_metadata_parses_github_tree_url() {
         let mut dep = ReleaseResult {
-            releases: vec![Release { version: "2.0.0".into(), ..Default::default() }],
+            releases: vec![Release {
+                version: "2.0.0".into(),
+                ..Default::default()
+            }],
             source_url: Some("https://github.com/carltongibson/django-filter/tree/master".into()),
             ..Default::default()
         };
@@ -739,12 +1019,20 @@ mod registry_tests {
     fn add_metadata_extracts_source_directory() {
         let mut dep = ReleaseResult {
             releases: vec![],
-            source_url: Some("https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus".into()),
+            source_url: Some(
+                "https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus".into(),
+            ),
             ..Default::default()
         };
         add_metadata(&mut dep, "helm", "kube-prometheus");
-        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/bitnami/charts"));
-        assert_eq!(dep.source_directory.as_deref(), Some("bitnami/kube-prometheus"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/bitnami/charts")
+        );
+        assert_eq!(
+            dep.source_directory.as_deref(),
+            Some("bitnami/kube-prometheus")
+        );
     }
 
     // Ported: "Should not overwrite any existing sourceDirectory" — metadata.spec.ts line 180
@@ -752,7 +1040,9 @@ mod registry_tests {
     fn add_metadata_preserves_existing_source_directory() {
         let mut dep = ReleaseResult {
             releases: vec![],
-            source_url: Some("https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus".into()),
+            source_url: Some(
+                "https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus".into(),
+            ),
             source_directory: Some("existing-dir".into()),
             ..Default::default()
         };
@@ -775,7 +1065,10 @@ mod registry_tests {
                 ..Default::default()
             };
             add_metadata(&mut dep, "helm", "some-chart");
-            assert!(dep.source_directory.is_none(), "Expected no sourceDirectory for: {url}");
+            assert!(
+                dep.source_directory.is_none(),
+                "Expected no sourceDirectory for: {url}"
+            );
         }
     }
 
@@ -816,7 +1109,10 @@ mod registry_tests {
             ..Default::default()
         };
         add_metadata(&mut dep, "npm", "dropzone");
-        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/dropzone"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://gitlab.com/meno/dropzone")
+        );
     }
 
     // Ported: "Should normalize releaseTimestamp" — metadata.spec.ts line 357
@@ -829,7 +1125,10 @@ mod registry_tests {
             ..Default::default()
         };
         add_metadata(&mut dep, "pypi", "django-filter");
-        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/carltongibson/django-filter"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/carltongibson/django-filter")
+        );
         assert!(dep.source_directory.is_none());
     }
 
@@ -840,8 +1139,14 @@ mod registry_tests {
     #[test]
     fn add_metadata_fallback_to_massaged_url() {
         let cases = [
-            ("git@gitlab.com:group/sub-group/repo", "https://gitlab.com/group/sub-group/repo"),
-            ("git@gitlab.com:group/sub-group/repo.git", "https://gitlab.com/group/sub-group/repo"),
+            (
+                "git@gitlab.com:group/sub-group/repo",
+                "https://gitlab.com/group/sub-group/repo",
+            ),
+            (
+                "git@gitlab.com:group/sub-group/repo.git",
+                "https://gitlab.com/group/sub-group/repo",
+            ),
         ];
         for (input, expected) in cases {
             let mut dep = ReleaseResult {
@@ -850,7 +1155,12 @@ mod registry_tests {
                 ..Default::default()
             };
             add_metadata(&mut dep, "git-tags", "some-dep");
-            assert_eq!(dep.source_url.as_deref(), Some(expected), "massage_url({:?})", input);
+            assert_eq!(
+                dep.source_url.as_deref(),
+                Some(expected),
+                "massage_url({:?})",
+                input
+            );
         }
     }
 
@@ -860,12 +1170,18 @@ mod registry_tests {
     #[test]
     fn add_metadata_github_homepage_to_source_url() {
         let mut dep = ReleaseResult {
-            releases: vec![Release { version: "1.9.3".into(), ..Default::default() }],
+            releases: vec![Release {
+                version: "1.9.3".into(),
+                ..Default::default()
+            }],
             homepage: Some("http://www.github.com/mockk/mockk/".into()),
             ..Default::default()
         };
         add_metadata(&mut dep, "maven", "io.mockk:mockk");
-        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/mockk/mockk"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/mockk/mockk")
+        );
         assert!(dep.homepage.is_none());
     }
 
@@ -873,12 +1189,18 @@ mod registry_tests {
     #[test]
     fn add_metadata_gitlab_http_source_url() {
         let mut dep = ReleaseResult {
-            releases: vec![Release { version: "5.7.0".into(), ..Default::default() }],
+            releases: vec![Release {
+                version: "5.7.0".into(),
+                ..Default::default()
+            }],
             source_url: Some("http://gitlab.com/meno/dropzone/".into()),
             ..Default::default()
         };
         add_metadata(&mut dep, "maven", "dropzone");
-        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/dropzone"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://gitlab.com/meno/dropzone")
+        );
     }
 
     // Ported: "Should remove homepage when homepage and sourceUrl are same" — metadata.spec.ts line 464
@@ -886,44 +1208,79 @@ mod registry_tests {
     fn add_metadata_removes_duplicate_homepage() {
         let mut dep = ReleaseResult {
             releases: vec![
-                Release { version: "1.0.1".into(), release_timestamp: Some("2000-01-01T12:34:56".into()), ..Default::default() },
-                Release { version: "1.0.2".into(), release_timestamp: Some("2000-01-02T12:34:56.000Z".into()), ..Default::default() },
-                Release { version: "1.0.3".into(), release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()), ..Default::default() },
+                Release {
+                    version: "1.0.1".into(),
+                    release_timestamp: Some("2000-01-01T12:34:56".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.2".into(),
+                    release_timestamp: Some("2000-01-02T12:34:56.000Z".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.3".into(),
+                    release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()),
+                    ..Default::default()
+                },
             ],
             homepage: Some("https://github.com/foo/bar".into()),
             source_url: Some("https://github.com/foo/bar".into()),
             ..Default::default()
         };
         add_metadata(&mut dep, "maven", "foobar");
-        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/foo/bar"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/foo/bar")
+        );
         assert!(dep.homepage.is_none()); // homepage removed as duplicate
         // Timestamps normalized
-        assert_eq!(dep.releases[0].release_timestamp.as_deref(), Some("2000-01-01T12:34:56.000Z"));
-        assert_eq!(dep.releases[1].release_timestamp.as_deref(), Some("2000-01-02T12:34:56.000Z"));
-        assert_eq!(dep.releases[2].release_timestamp.as_deref(), Some("2000-01-03T12:34:56.000Z"));
+        assert_eq!(
+            dep.releases[0].release_timestamp.as_deref(),
+            Some("2000-01-01T12:34:56.000Z")
+        );
+        assert_eq!(
+            dep.releases[1].release_timestamp.as_deref(),
+            Some("2000-01-02T12:34:56.000Z")
+        );
+        assert_eq!(
+            dep.releases[2].release_timestamp.as_deref(),
+            Some("2000-01-03T12:34:56.000Z")
+        );
     }
 
     // Ported: "does not set homepage to sourceUrl when undefined" — metadata.spec.ts line 542
     #[test]
     fn add_metadata_no_homepage_promotion_without_homepage() {
         let mut dep = ReleaseResult {
-            releases: vec![
-                Release { version: "1.0.1".into(), release_timestamp: Some("2000-01-01T12:34:56".into()), ..Default::default() },
-            ],
+            releases: vec![Release {
+                version: "1.0.1".into(),
+                release_timestamp: Some("2000-01-01T12:34:56".into()),
+                ..Default::default()
+            }],
             source_url: Some("https://gitlab.com/meno/repo".into()),
             ..Default::default()
         };
         add_metadata(&mut dep, "maven", "foobar");
-        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/repo"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://gitlab.com/meno/repo")
+        );
         assert!(dep.homepage.is_none());
-        assert_eq!(dep.releases[0].release_timestamp.as_deref(), Some("2000-01-01T12:34:56.000Z"));
+        assert_eq!(
+            dep.releases[0].release_timestamp.as_deref(),
+            Some("2000-01-01T12:34:56.000Z")
+        );
     }
 
     // Ported: "does not set homepage to sourceUrl when not github or gitlab" — metadata.spec.ts line 580
     #[test]
     fn add_metadata_non_github_homepage_not_promoted() {
         let mut dep = ReleaseResult {
-            releases: vec![Release { version: "1.0.1".into(), ..Default::default() }],
+            releases: vec![Release {
+                version: "1.0.1".into(),
+                ..Default::default()
+            }],
             homepage: Some("https://somesource.com/".into()),
             ..Default::default()
         };
@@ -936,17 +1293,25 @@ mod registry_tests {
     #[test]
     fn add_metadata_removes_duplicate_gitlab_homepage() {
         let mut dep = ReleaseResult {
-            releases: vec![
-                Release { version: "1.0.1".into(), release_timestamp: Some("2000-01-01T12:34:56".into()), ..Default::default() },
-            ],
+            releases: vec![Release {
+                version: "1.0.1".into(),
+                release_timestamp: Some("2000-01-01T12:34:56".into()),
+                ..Default::default()
+            }],
             homepage: Some("https://gitlab.com/meno/repo".into()),
             source_url: Some("https://gitlab.com/meno/repo".into()),
             ..Default::default()
         };
         add_metadata(&mut dep, "maven", "foobar");
-        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/repo"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://gitlab.com/meno/repo")
+        );
         assert!(dep.homepage.is_none());
-        assert_eq!(dep.releases[0].release_timestamp.as_deref(), Some("2000-01-01T12:34:56.000Z"));
+        assert_eq!(
+            dep.releases[0].release_timestamp.as_deref(),
+            Some("2000-01-01T12:34:56.000Z")
+        );
     }
 
     // Ported: "Should normalize releaseTimestamp" — metadata.spec.ts line 357
@@ -954,18 +1319,46 @@ mod registry_tests {
     fn add_metadata_normalizes_timestamps() {
         let mut dep = ReleaseResult {
             releases: vec![
-                Release { version: "1.0.1".into(), release_timestamp: Some("2000-01-01T12:34:56".into()), ..Default::default() },
-                Release { version: "1.0.2".into(), release_timestamp: Some("2000-01-02T12:34:56.000Z".into()), ..Default::default() },
-                Release { version: "1.0.3".into(), release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()), ..Default::default() },
-                Release { version: "1.0.4".into(), release_timestamp: Some("20000103150210".into()), ..Default::default() },
+                Release {
+                    version: "1.0.1".into(),
+                    release_timestamp: Some("2000-01-01T12:34:56".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.2".into(),
+                    release_timestamp: Some("2000-01-02T12:34:56.000Z".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.3".into(),
+                    release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.4".into(),
+                    release_timestamp: Some("20000103150210".into()),
+                    ..Default::default()
+                },
             ],
             ..Default::default()
         };
         add_metadata(&mut dep, "maven", "foobar");
-        assert_eq!(dep.releases[0].release_timestamp.as_deref(), Some("2000-01-01T12:34:56.000Z"));
-        assert_eq!(dep.releases[1].release_timestamp.as_deref(), Some("2000-01-02T12:34:56.000Z"));
-        assert_eq!(dep.releases[2].release_timestamp.as_deref(), Some("2000-01-03T12:34:56.000Z"));
-        assert_eq!(dep.releases[3].release_timestamp.as_deref(), Some("2000-01-03T15:02:10.000Z"));
+        assert_eq!(
+            dep.releases[0].release_timestamp.as_deref(),
+            Some("2000-01-01T12:34:56.000Z")
+        );
+        assert_eq!(
+            dep.releases[1].release_timestamp.as_deref(),
+            Some("2000-01-02T12:34:56.000Z")
+        );
+        assert_eq!(
+            dep.releases[2].release_timestamp.as_deref(),
+            Some("2000-01-03T12:34:56.000Z")
+        );
+        assert_eq!(
+            dep.releases[3].release_timestamp.as_deref(),
+            Some("2000-01-03T15:02:10.000Z")
+        );
     }
 
     // Ported: "Should massage github sourceUrls" — modules/datasource/metadata.spec.ts line 197
@@ -977,7 +1370,10 @@ mod registry_tests {
             ..Default::default()
         };
         add_metadata(&mut dep, "pypi", "django-filter");
-        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/some/repo"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/some/repo")
+        );
     }
 
     // Ported: "Should handle failed parsing of sourceUrls for GitLab" — metadata.spec.ts line 251
@@ -1004,7 +1400,10 @@ mod registry_tests {
         add_metadata(&mut dep, "npm", "some-package");
         // Should still set changelogUrl / sourceUrl etc.
         assert!(dep.releases.is_empty());
-        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/some/package"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/some/package")
+        );
     }
 
     // Ported: "Should handle parsing/converting of GitHub sourceUrls with http and www correctly"
@@ -1013,11 +1412,17 @@ mod registry_tests {
     fn add_metadata_github_http_www_url() {
         let mut dep = ReleaseResult {
             source_url: Some("http://www.github.com/mockk/mockk/".into()),
-            releases: vec![Release { version: "1.9.3".into(), ..Default::default() }],
+            releases: vec![Release {
+                version: "1.9.3".into(),
+                ..Default::default()
+            }],
             ..Default::default()
         };
         add_metadata(&mut dep, "maven", "io.mockk:mockk");
-        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/mockk/mockk"));
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/mockk/mockk")
+        );
     }
 
     // ── apply_constraints_filtering tests ─────────────────────────────────
@@ -1056,7 +1461,10 @@ mod registry_tests {
     fn constraints_filtering_strict_filters_releases() {
         let result = ReleaseResult {
             releases: vec![
-                Release { version: "1.0.0".into(), ..Default::default() },
+                Release {
+                    version: "1.0.0".into(),
+                    ..Default::default()
+                },
                 Release {
                     version: "2.0.0".into(),
                     constraints: Some(serde_json::json!({"baz": [null]})),
@@ -1095,7 +1503,10 @@ mod registry_tests {
                     constraints: Some(serde_json::json!({"python": ["^1.0.0"]})),
                     ..Default::default()
                 },
-                Release { version: "2.0.0".into(), ..Default::default() },
+                Release {
+                    version: "2.0.0".into(),
+                    ..Default::default()
+                },
             ],
             ..Default::default()
         };

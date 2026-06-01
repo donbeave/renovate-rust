@@ -40,8 +40,8 @@ use self::migrations::path_rules_migration::PathRulesMigration;
 use self::migrations::pin_versions_migration::PinVersionsMigration;
 use self::migrations::platform_commit_migration::PlatformCommitMigration;
 use self::migrations::post_update_options_migration::PostUpdateOptionsMigration;
-use self::migrations::renovate_fork_migration::RenovateForkMigration;
 use self::migrations::rename_property_migration::RenamePropertyMigration;
+use self::migrations::renovate_fork_migration::RenovateForkMigration;
 use self::migrations::require_config_migration::RequireConfigMigration;
 use self::migrations::required_status_checks_migration::RequiredStatusChecksMigration;
 use self::migrations::schedule_migration::ScheduleMigration;
@@ -240,13 +240,13 @@ impl MigrationService {
         migrations: &'a [Box<dyn Migration>],
         key: &str,
     ) -> Option<&'a dyn Migration> {
-        migrations.iter().find(|m| m.matches(key)).map(|b| b.as_ref())
+        migrations
+            .iter()
+            .find(|m| m.matches(key))
+            .map(|b| b.as_ref())
     }
 
-    pub fn is_migrated(
-        original: &Map<String, Value>,
-        migrated: &Map<String, Value>,
-    ) -> bool {
+    pub fn is_migrated(original: &Map<String, Value>, migrated: &Map<String, Value>) -> bool {
         original != migrated
     }
 }
@@ -263,7 +263,9 @@ impl RemovePropertyMigration {
 
 impl Clone for RemovePropertyMigration {
     fn clone(&self) -> Self {
-        Self { property: self.property }
+        Self {
+            property: self.property,
+        }
     }
 }
 
@@ -307,8 +309,8 @@ impl Clone for MigrationService {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::MigrationService;
 

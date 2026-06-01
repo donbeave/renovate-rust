@@ -73,13 +73,21 @@ mod tests {
     use super::*;
 
     fn make_env(pairs: &[(&str, &str)]) -> HashMap<String, String> {
-        pairs.iter().cloned().map(|(k, v)| (k.to_owned(), v.to_owned())).collect()
+        pairs
+            .iter()
+            .cloned()
+            .map(|(k, v)| (k.to_owned(), v.to_owned()))
+            .collect()
     }
 
     // Ported: "returns default environment variables" — util/exec/env.spec.ts line 35
     #[test]
     fn get_child_process_env_basic() {
-        let env = make_env(&[("HOME", "/home/user"), ("PATH", "/usr/bin"), ("SECRET", "123")]);
+        let env = make_env(&[
+            ("HOME", "/home/user"),
+            ("PATH", "/usr/bin"),
+            ("SECRET", "123"),
+        ]);
         let result = get_child_process_env(&env, &[], false);
         assert_eq!(result.get("HOME").unwrap(), "/home/user");
         assert_eq!(result.get("PATH").unwrap(), "/usr/bin");

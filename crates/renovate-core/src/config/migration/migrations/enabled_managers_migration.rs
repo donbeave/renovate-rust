@@ -61,8 +61,8 @@ impl Migration for EnabledManagersMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::EnabledManagersMigration;
     use crate::config::migration::Migration;
@@ -77,7 +77,12 @@ mod tests {
     fn migrates_yarn_to_npm() {
         let m = EnabledManagersMigration::new();
         let mut migrated = Map::new();
-        m.run("enabledManagers", &json!(["yarn"]), &Map::new(), &mut migrated);
+        m.run(
+            "enabledManagers",
+            &json!(["yarn"]),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["enabledManagers"], json!(["npm"]));
     }
 
@@ -85,7 +90,12 @@ mod tests {
     fn migrates_regex_to_custom_regex() {
         let m = EnabledManagersMigration::new();
         let mut migrated = Map::new();
-        m.run("enabledManagers", &json!(["regex"]), &Map::new(), &mut migrated);
+        m.run(
+            "enabledManagers",
+            &json!(["regex"]),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["enabledManagers"], json!(["custom.regex"]));
     }
 
@@ -93,7 +103,12 @@ mod tests {
     fn leaves_npm_unchanged() {
         let m = EnabledManagersMigration::new();
         let mut migrated = Map::new();
-        m.run("enabledManagers", &json!(["npm"]), &Map::new(), &mut migrated);
+        m.run(
+            "enabledManagers",
+            &json!(["npm"]),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["enabledManagers"], json!(["npm"]));
     }
 

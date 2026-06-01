@@ -36,10 +36,7 @@ pub struct ProcessResult {
     pub onboarded: Option<bool>,
 }
 
-pub fn process_result(
-    config: &RenovateConfig,
-    result: RepositoryResult,
-) -> ProcessResult {
+pub fn process_result(config: &RenovateConfig, result: RepositoryResult) -> ProcessResult {
     let (status, enabled, onboarded) = match result {
         RepositoryResult::Disabled | RepositoryResult::Error => {
             (ProcessStatus::Disabled, Some(false), None)
@@ -48,11 +45,7 @@ pub fn process_result(
             if config.enabled == Some(false) {
                 (ProcessStatus::Disabled, Some(false), None)
             } else {
-                (
-                    ProcessStatus::Onboarded,
-                    Some(true),
-                    Some(true),
-                )
+                (ProcessStatus::Onboarded, Some(true), Some(true))
             }
         }
     };

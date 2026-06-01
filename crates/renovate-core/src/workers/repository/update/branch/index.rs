@@ -38,7 +38,8 @@ pub struct ProcessBranchConfig {
 pub fn should_process_branch(config: &ProcessBranchConfig) -> BranchResult {
     if !config.branch_exists {
         if let Some(ref mode) = config.mode
-            && mode == "silent" && config.dependency_dashboard_check.is_none()
+            && mode == "silent"
+            && config.dependency_dashboard_check.is_none()
         {
             return BranchResult::NeedsApproval;
         }
@@ -50,13 +51,15 @@ pub fn should_process_branch(config: &ProcessBranchConfig) -> BranchResult {
         }
 
         if let Some(min) = config.minimum_group_size
-            && min > config.upgrade_count && config.dependency_dashboard_check.is_none()
+            && min > config.upgrade_count
+            && config.dependency_dashboard_check.is_none()
         {
             return BranchResult::MinimumGroupSizeNotMet;
         }
     }
 
-    if !config.is_scheduled_now && config.dependency_dashboard_check.is_none()
+    if !config.is_scheduled_now
+        && config.dependency_dashboard_check.is_none()
         && !config.branch_exists
     {
         return BranchResult::NotScheduled;

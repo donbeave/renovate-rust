@@ -76,7 +76,10 @@ mod tests {
     fn massage_private_key_collapses_indentation() {
         let key = "-----BEGIN KEY-----\n  line1\n  line2\n-----END KEY-----";
         let massaged = massage_private_key(key);
-        assert_eq!(massaged, "-----BEGIN KEY-----\nline1\nline2\n-----END KEY-----");
+        assert_eq!(
+            massaged,
+            "-----BEGIN KEY-----\nline1\nline2\n-----END KEY-----"
+        );
     }
 
     #[test]

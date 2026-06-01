@@ -398,7 +398,9 @@ mod tests {
             Some(b"foobar".to_vec())
         );
         assert_eq!(
-            read_local_string(dir.path(), "file.txt").unwrap().as_deref(),
+            read_local_string(dir.path(), "file.txt")
+                .unwrap()
+                .as_deref(),
             Some("foobar")
         );
         assert_eq!(read_local_file(dir.path(), "missing.txt").unwrap(), None);
@@ -483,10 +485,15 @@ mod tests {
         )
         .unwrap();
 
-        assert!(read_local_symlink(dir.path(), "test/test")
-            .unwrap()
-            .is_some());
-        assert_eq!(read_local_symlink(dir.path(), "test/not-exists").unwrap(), None);
+        assert!(
+            read_local_symlink(dir.path(), "test/test")
+                .unwrap()
+                .is_some()
+        );
+        assert_eq!(
+            read_local_symlink(dir.path(), "test/not-exists").unwrap(),
+            None
+        );
         assert!(local_path_is_symbolic_link(dir.path(), "test/test").unwrap());
         assert!(!local_path_is_symbolic_link(dir.path(), "test/test.txt").unwrap());
         ensure_local_dir(dir.path(), "test/dir").unwrap();
@@ -556,6 +563,10 @@ mod tests {
         assert!(read_local_directory(dir.path(), "missing").is_err());
 
         ensure_local_dir(dir.path(), "empty").unwrap();
-        assert!(read_local_directory(dir.path(), "empty").unwrap().is_empty());
+        assert!(
+            read_local_directory(dir.path(), "empty")
+                .unwrap()
+                .is_empty()
+        );
     }
 }

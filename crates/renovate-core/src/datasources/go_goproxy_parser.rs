@@ -8,8 +8,7 @@ use regex::Regex;
 use std::sync::LazyLock;
 
 #[allow(dead_code)]
-static GOPROXY_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"([^,|]*(?:,|\|))").unwrap());
+static GOPROXY_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"([^,|]*(?:,|\|))").unwrap());
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GoproxyItem {

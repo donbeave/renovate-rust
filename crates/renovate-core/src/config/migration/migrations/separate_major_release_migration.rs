@@ -46,8 +46,8 @@ impl Migration for SeparateMajorReleaseMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::SeparateMajorReleaseMigration;
     use crate::config::migration::Migration;
@@ -62,7 +62,12 @@ mod tests {
     fn migrate_true() {
         let m = SeparateMajorReleaseMigration::new();
         let mut migrated = Map::new();
-        m.run("separateMajorReleases", &json!(true), &Map::new(), &mut migrated);
+        m.run(
+            "separateMajorReleases",
+            &json!(true),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["separateMajorMinor"], json!(true));
     }
 
@@ -71,7 +76,12 @@ mod tests {
         let m = SeparateMajorReleaseMigration::new();
         let mut migrated = Map::new();
         migrated.insert("separateMajorMinor".into(), json!(false));
-        m.run("separateMajorReleases", &json!(true), &Map::new(), &mut migrated);
+        m.run(
+            "separateMajorReleases",
+            &json!(true),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["separateMajorMinor"], json!(false));
     }
 }

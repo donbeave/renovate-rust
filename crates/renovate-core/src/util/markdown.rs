@@ -35,7 +35,10 @@ mod tests {
 
     #[test]
     fn link_basic() {
-        assert_eq!(link("click", "https://example.com"), "[click](https://example.com)");
+        assert_eq!(
+            link("click", "https://example.com"),
+            "[click](https://example.com)"
+        );
     }
 
     #[test]
@@ -121,10 +124,7 @@ mod tests {
 
     #[test]
     fn code_block_no_language() {
-        assert_eq!(
-            code_block("echo hello", ""),
-            "```\necho hello\n```"
-        );
+        assert_eq!(code_block("echo hello", ""), "```\necho hello\n```");
     }
 
     #[test]

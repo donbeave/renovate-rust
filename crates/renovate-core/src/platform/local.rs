@@ -110,7 +110,6 @@ impl LocalClient {
             }],
         })
     }
-
 }
 
 /// Run `git ls-files` in `dir` and return the file list, or `None` on failure.
@@ -205,11 +204,7 @@ impl PlatformClient for LocalClient {
         }
     }
 
-    async fn get_file_list(
-        &self,
-        _owner: &str,
-        _repo: &str,
-    ) -> Result<Vec<String>, PlatformError> {
+    async fn get_file_list(&self, _owner: &str, _repo: &str) -> Result<Vec<String>, PlatformError> {
         // Try git ls-files first; it respects .gitignore automatically.
         if let Some(files) = git_ls_files(&self.base_dir) {
             return Ok(files);
@@ -227,7 +222,9 @@ impl PlatformClient for LocalClient {
         _title: &str,
         _body: &str,
     ) -> Result<Option<i64>, PlatformError> {
-        Err(PlatformError::NotSupported("Local platform PR creation".to_owned()))
+        Err(PlatformError::NotSupported(
+            "Local platform PR creation".to_owned(),
+        ))
     }
 
     async fn update_pr(
@@ -239,7 +236,9 @@ impl PlatformClient for LocalClient {
         _body: Option<&str>,
         _state: Option<&str>,
     ) -> Result<(), PlatformError> {
-        Err(PlatformError::NotSupported("Local platform PR updates".to_owned()))
+        Err(PlatformError::NotSupported(
+            "Local platform PR updates".to_owned(),
+        ))
     }
 
     async fn get_branch_status(
@@ -248,7 +247,9 @@ impl PlatformClient for LocalClient {
         _repo: &str,
         _branch: &str,
     ) -> Result<CombinedBranchStatus, PlatformError> {
-        Err(PlatformError::NotSupported("Local platform branch status".to_owned()))
+        Err(PlatformError::NotSupported(
+            "Local platform branch status".to_owned(),
+        ))
     }
 
     async fn write_file(
@@ -264,8 +265,7 @@ impl PlatformClient for LocalClient {
                 PlatformError::Unexpected(format!("creating dir {}: {e}", parent.display()))
             })?;
         }
-        std::fs::write(&full, content).map_err(|e| {
-            PlatformError::Unexpected(format!("writing {}: {e}", full.display()))
-        })
+        std::fs::write(&full, content)
+            .map_err(|e| PlatformError::Unexpected(format!("writing {}: {e}", full.display())))
     }
 }

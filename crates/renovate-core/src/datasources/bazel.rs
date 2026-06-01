@@ -123,9 +123,7 @@ async fn fetch_releases_local(
     registry_url: &str,
     package_name: &str,
 ) -> Result<Option<BazelResult>, BazelError> {
-    let local_path = registry_url
-        .strip_prefix("file://")
-        .unwrap_or(registry_url);
+    let local_path = registry_url.strip_prefix("file://").unwrap_or(registry_url);
     let file_path = Path::new(local_path)
         .join("modules")
         .join(package_name)
@@ -403,6 +401,9 @@ mod tests {
         assert_eq!(meta.versions.len(), 4);
         assert_eq!(meta.yanked_versions.len(), 1);
         assert!(meta.yanked_versions.contains_key("1.1.0"));
-        assert_eq!(meta.homepage.as_deref(), Some("https://github.com/bazelbuild/rules_foo"));
+        assert_eq!(
+            meta.homepage.as_deref(),
+            Some("https://github.com/bazelbuild/rules_foo")
+        );
     }
 }

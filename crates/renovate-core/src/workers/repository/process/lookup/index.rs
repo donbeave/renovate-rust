@@ -47,8 +47,7 @@ pub fn lookup_updates(config: &LookupUpdateConfig) -> Result<UpdateResult> {
             .replacement_version
             .clone()
             .or_else(|| config.rollback.current_value.clone());
-        if new_name != config.rollback.package_name
-            || new_value.as_deref() != Some(&current_value)
+        if new_name != config.rollback.package_name || new_value.as_deref() != Some(&current_value)
         {
             res.updates.push(LookupUpdate {
                 update_type: Some(UpdateType::Replacement),
@@ -72,12 +71,7 @@ pub fn lookup_dependency(
         return Ok(UpdateResult::default());
     }
 
-    let dep_name = dep
-        .dep_name
-        .as_deref()
-        .unwrap_or("")
-        .trim()
-        .to_owned();
+    let dep_name = dep.dep_name.as_deref().unwrap_or("").trim().to_owned();
 
     if dep_name.is_empty() {
         return Ok(UpdateResult {
@@ -186,10 +180,7 @@ mod tests {
         config.replacement_version = Some("2.0.0".into());
         let result = lookup_updates(&config).unwrap();
         assert_eq!(result.updates.len(), 1);
-        assert_eq!(
-            result.updates[0].update_type,
-            Some(UpdateType::Replacement)
-        );
+        assert_eq!(result.updates[0].update_type, Some(UpdateType::Replacement));
         assert_eq!(result.updates[0].new_name, Some("new-pkg".into()));
         assert_eq!(result.updates[0].new_value, Some("2.0.0".into()));
     }

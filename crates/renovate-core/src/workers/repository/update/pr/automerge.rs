@@ -70,7 +70,10 @@ mod tests {
     #[test]
     fn pr_automerge_result_variants() {
         assert_ne!(PrAutomergeResult::Automerged, PrAutomergeResult::DryRun);
-        assert_ne!(PrAutomergeResult::Conflicted, PrAutomergeResult::OffSchedule);
+        assert_ne!(
+            PrAutomergeResult::Conflicted,
+            PrAutomergeResult::OffSchedule
+        );
     }
 
     #[test]

@@ -9,8 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::workers::repository::common::PackageFile;
 use crate::workers::types::{
-    BranchResult, BranchUpgrade, PrBlockedBy, RenovateConfig,
-    ValidationMessage,
+    BranchResult, BranchUpgrade, PrBlockedBy, RenovateConfig, ValidationMessage,
 };
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]

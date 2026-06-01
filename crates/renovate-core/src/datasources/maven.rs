@@ -714,7 +714,8 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/com/example/lib/maven-metadata.xml"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"<metadata>
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
   <versioning>
     <versions>
       <version>1.0.0</version>
@@ -722,12 +723,15 @@ mod tests {
       <version>2.0.0</version>
     </versions>
   </versioning>
-</metadata>"#))
+</metadata>"#,
+            ))
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()]).await;
+        let result =
+            fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()])
+                .await;
         assert!(result.is_some());
         let releases = result.unwrap();
         assert_eq!(releases.releases, vec!["1.0.0", "1.1.0", "2.0.0"]);
@@ -743,14 +747,22 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()]).await;
+        let result =
+            fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()])
+                .await;
         assert!(result.is_none());
     }
 
     #[tokio::test]
     async fn fetch_releases_unsupported_protocol_returns_none() {
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases_from_registry("com.example:lib", "ftp://registry.example.com", &http, &[]).await;
+        let result = fetch_releases_from_registry(
+            "com.example:lib",
+            "ftp://registry.example.com",
+            &http,
+            &[],
+        )
+        .await;
         assert!(result.is_none());
     }
 
@@ -764,7 +776,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()]).await;
+        let result =
+            fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()])
+                .await;
         assert!(result.is_none());
     }
 
@@ -772,7 +786,8 @@ mod tests {
     async fn fetch_releases_invalid_dep_name_returns_none() {
         let server = MockServer::start().await;
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases_from_registry("nocolon", &server.uri(), &http, &[&server.uri()]).await;
+        let result =
+            fetch_releases_from_registry("nocolon", &server.uri(), &http, &[&server.uri()]).await;
         assert!(result.is_none());
     }
 
@@ -811,7 +826,10 @@ mod tests {
 </project>"#;
         let info = parse_pom_info(xml);
         assert_eq!(info.homepage, Some("https://example.com".to_owned()));
-        assert_eq!(info.source_url, Some("https://github.com/example/project".to_owned()));
+        assert_eq!(
+            info.source_url,
+            Some("https://github.com/example/project".to_owned())
+        );
     }
 
     #[test]
@@ -825,18 +843,30 @@ mod tests {
 
     #[test]
     fn process_scm_url_strips_scm_prefix() {
-        assert_eq!(process_scm_url("scm:git:https://github.com/foo/bar"), Some("https://github.com/foo/bar".to_owned()));
+        assert_eq!(
+            process_scm_url("scm:git:https://github.com/foo/bar"),
+            Some("https://github.com/foo/bar".to_owned())
+        );
     }
 
     #[test]
     fn process_scm_url_converts_git_at_github() {
-        assert_eq!(process_scm_url("git@github.com:foo/bar"), Some("https://github.com/foo/bar".to_owned()));
-        assert_eq!(process_scm_url("git@github.com/foo/bar"), Some("https://github.com/foo/bar".to_owned()));
+        assert_eq!(
+            process_scm_url("git@github.com:foo/bar"),
+            Some("https://github.com/foo/bar".to_owned())
+        );
+        assert_eq!(
+            process_scm_url("git@github.com/foo/bar"),
+            Some("https://github.com/foo/bar".to_owned())
+        );
     }
 
     #[test]
     fn process_scm_url_skips_remaining_placeholders() {
-        assert_eq!(process_scm_url("https://github.com/foo/bar/tree/${branch}"), Some("https://github.com/foo/bar".to_owned()));
+        assert_eq!(
+            process_scm_url("https://github.com/foo/bar/tree/${branch}"),
+            Some("https://github.com/foo/bar".to_owned())
+        );
         assert_eq!(process_scm_url("https://github.com/foo/bar/${tag}"), None);
     }
 

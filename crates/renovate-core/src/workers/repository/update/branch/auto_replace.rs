@@ -140,10 +140,7 @@ mod tests {
             Some("@old/pkg"),
         );
         assert!(result.success);
-        assert_eq!(
-            result.content,
-            Some(r#"{"@new/pkg": "^1.0.0"}"#.to_owned())
-        );
+        assert_eq!(result.content, Some(r#"{"@new/pkg": "^1.0.0"}"#.to_owned()));
     }
 
     #[test]
@@ -163,16 +160,7 @@ mod tests {
 
     #[test]
     fn auto_replace_empty_search_returns_original() {
-        let result = auto_replace(
-            "some content",
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        );
+        let result = auto_replace("some content", None, None, None, None, None, None, None);
         assert!(result.success);
         assert_eq!(result.content, Some("some content".to_owned()));
     }

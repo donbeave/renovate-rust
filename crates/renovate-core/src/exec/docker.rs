@@ -99,10 +99,7 @@ pub async fn generate_docker_command(
     Ok(parts.join(" "))
 }
 
-pub async fn remove_docker_container(
-    _image: &str,
-    prefix: &str,
-) -> Result<(), ExecError> {
+pub async fn remove_docker_container(_image: &str, prefix: &str) -> Result<(), ExecError> {
     let container_name = format!("{}{}", prefix, SIDECAR_NAME);
     let cmd = format!("docker rm -f {}", container_name);
     let env: HashMap<String, String> = std::env::vars().collect();

@@ -32,9 +32,7 @@ pub fn fetch_updates(
                 fetch_dependency_update(dep);
             }
         }
-        result
-            .package_files
-            .insert(manager.clone(), files.clone());
+        result.package_files.insert(manager.clone(), files.clone());
     }
 
     result
@@ -46,14 +44,17 @@ fn fetch_dependency_update(dep: &mut Upgrade) {
         _ => return,
     };
 
-    if dep.datasource.is_none() || dep.datasource.as_ref().map(|d| d.is_empty()).unwrap_or(true) {
+    if dep.datasource.is_none()
+        || dep
+            .datasource
+            .as_ref()
+            .map(|d| d.is_empty())
+            .unwrap_or(true)
+    {
         return;
     }
 
-    let package_name = dep
-        .package_name
-        .clone()
-        .unwrap_or_else(|| dep_name.clone());
+    let package_name = dep.package_name.clone().unwrap_or_else(|| dep_name.clone());
     dep.package_name = Some(package_name);
 }
 
@@ -109,10 +110,7 @@ mod tests {
         assert_eq!(result.package_files.len(), 1);
         let npm = result.package_files.get("npm").unwrap();
         assert_eq!(npm.len(), 1);
-        assert_eq!(
-            npm[0].deps[0].package_name,
-            Some("lodash".into())
-        );
+        assert_eq!(npm[0].deps[0].package_name, Some("lodash".into()));
     }
 
     #[test]

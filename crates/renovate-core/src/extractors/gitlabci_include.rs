@@ -408,7 +408,8 @@ include:
     ref: v2.1.0
     file: /templates/build.yml
 ";
-        let updated = gitlabci_include_update_dependency(content, "org/templates", "v2.1.0", "v3.0.0");
+        let updated =
+            gitlabci_include_update_dependency(content, "org/templates", "v2.1.0", "v3.0.0");
         assert!(updated.is_some());
         let updated = updated.unwrap();
         assert!(updated.contains("ref: v3.0.0"));
@@ -422,7 +423,8 @@ include:
   - project: org/templates
     ref: 'v2.1.0'
 ";
-        let updated = gitlabci_include_update_dependency(content, "org/templates", "v2.1.0", "v3.0.0");
+        let updated =
+            gitlabci_include_update_dependency(content, "org/templates", "v2.1.0", "v3.0.0");
         assert!(updated.is_some());
         let updated = updated.unwrap();
         assert!(updated.contains("ref: 'v3.0.0'"));
@@ -465,7 +467,12 @@ trigger-my-job:
         file: /template.yaml
         ref: master
 ";
-        let updated = gitlabci_include_update_dependency(content, "mikebryant/include-source-example", "master", "main");
+        let updated = gitlabci_include_update_dependency(
+            content,
+            "mikebryant/include-source-example",
+            "master",
+            "main",
+        );
         assert!(updated.is_some());
         let updated = updated.unwrap();
         assert!(updated.contains("ref: main"));

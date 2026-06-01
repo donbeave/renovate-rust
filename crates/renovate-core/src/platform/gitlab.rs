@@ -326,7 +326,9 @@ impl PlatformClient for GitlabClient {
         _repo: &str,
         _branch: &str,
     ) -> Result<CombinedBranchStatus, PlatformError> {
-        Err(PlatformError::NotSupported("GitLab branch status".to_owned()))
+        Err(PlatformError::NotSupported(
+            "GitLab branch status".to_owned(),
+        ))
     }
 
     async fn write_file(
@@ -424,8 +426,7 @@ pub fn extract_rules_from_code_owners_lines(lines: &[&str]) -> Vec<FileOwnerRule
 /// Mirrors `massageMarkdown` from `lib/modules/platform/gitlab/index.ts`.
 pub fn massage_markdown(input: &str) -> String {
     use crate::platform::pr_body::smart_truncate;
-    let desc = input
-        .replace("Pull Request", "Merge Request");
+    let desc = input.replace("Pull Request", "Merge Request");
     let re_pr_hash = regex::Regex::new(r"\bPR: #").unwrap();
     let desc = re_pr_hash.replace_all(&desc, "MR: !").into_owned();
     let re_prs = regex::Regex::new(r"\bPRs\b").unwrap();
@@ -632,7 +633,14 @@ mod tests {
         let server = MockServer::start().await;
         let client = make_client(&server.uri());
         let err = client
-            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .create_pr(
+                "owner",
+                "repo",
+                "renovate/deps",
+                "main",
+                "Update deps",
+                "Body",
+            )
             .await
             .unwrap_err();
         assert!(matches!(err, PlatformError::NotSupported(_)));
@@ -653,7 +661,10 @@ mod tests {
     async fn get_branch_status_returns_not_supported() {
         let server = MockServer::start().await;
         let client = make_client(&server.uri());
-        let err = client.get_branch_status("owner", "repo", "main").await.unwrap_err();
+        let err = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::NotSupported(_)));
     }
 
@@ -813,9 +824,7 @@ mod tests {
     #[test]
     fn massage_markdown_replaces_pr_with_mr() {
         assert_eq!(
-            massage_markdown(
-                "A Pull Request is a PR, multiple Pull Requests are PRs."
-            ),
+            massage_markdown("A Pull Request is a PR, multiple Pull Requests are PRs."),
             "A Merge Request is a MR, multiple Merge Requests are MRs."
         );
     }
@@ -842,7 +851,9 @@ mod tests {
     #[test]
     fn massage_markdown_replaces_issues_link() {
         assert_eq!(
-            massage_markdown("Check the [Dependency Dashboard](../issues/123) for more information."),
+            massage_markdown(
+                "Check the [Dependency Dashboard](../issues/123) for more information."
+            ),
             "Check the [Dependency Dashboard](#123) for more information."
         );
     }

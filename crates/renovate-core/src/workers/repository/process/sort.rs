@@ -84,11 +84,7 @@ mod tests {
     use super::*;
     use crate::workers::types::{BranchUpgrade, RenovateConfig, Upgrade};
 
-    fn make_branch(
-        branch_name: &str,
-        update_type: &str,
-        pr_priority: Option<i32>,
-    ) -> BranchConfig {
+    fn make_branch(branch_name: &str, update_type: &str, pr_priority: Option<i32>) -> BranchConfig {
         BranchConfig {
             branch_name: branch_name.into(),
             base_branch: "main".into(),

@@ -48,8 +48,8 @@ impl Migration for DryRunMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::DryRunMigration;
     use crate::config::migration::Migration;

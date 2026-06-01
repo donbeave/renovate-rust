@@ -15,17 +15,11 @@ pub struct CustomRelease {
     pub version: String,
     #[serde(rename = "isDeprecated", skip_serializing_if = "Option::is_none")]
     pub is_deprecated: Option<bool>,
-    #[serde(
-        rename = "releaseTimestamp",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "releaseTimestamp", skip_serializing_if = "Option::is_none")]
     pub release_timestamp: Option<String>,
     #[serde(rename = "sourceUrl", skip_serializing_if = "Option::is_none")]
     pub source_url: Option<String>,
-    #[serde(
-        rename = "sourceDirectory",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "sourceDirectory", skip_serializing_if = "Option::is_none")]
     pub source_directory: Option<String>,
     #[serde(rename = "changelogUrl", skip_serializing_if = "Option::is_none")]
     pub changelog_url: Option<String>,
@@ -42,10 +36,7 @@ pub struct CustomReleaseResult {
     pub tags: Option<BTreeMap<String, String>>,
     #[serde(rename = "sourceUrl", skip_serializing_if = "Option::is_none")]
     pub source_url: Option<String>,
-    #[serde(
-        rename = "sourceDirectory",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "sourceDirectory", skip_serializing_if = "Option::is_none")]
     pub source_directory: Option<String>,
     #[serde(rename = "changelogUrl", skip_serializing_if = "Option::is_none")]
     pub changelog_url: Option<String>,
@@ -64,7 +55,6 @@ pub enum CustomFormat {
     Plain,
     Html,
 }
-
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct CustomDatasourceConfig {
@@ -262,8 +252,7 @@ mod tests {
                 transform_templates: vec![],
             },
         );
-        let config =
-            massage_custom_datasource_config("myds", &ds, "lodash", None, None).unwrap();
+        let config = massage_custom_datasource_config("myds", &ds, "lodash", None, None).unwrap();
         assert_eq!(
             config.default_registry_url_template,
             "https://example.com/lodash"

@@ -1126,13 +1126,17 @@ pub fn get_git_authenticated_environment_variables(
         .unwrap_or(0);
 
     let mut env = environment_variables.cloned().unwrap_or_default();
-    for rule in get_git_authentication_rules(original_git_url, host_rule.host_type.as_deref(), &token)
+    for rule in
+        get_git_authentication_rules(original_git_url, host_rule.host_type.as_deref(), &token)
     {
         env.insert(
             format!("GIT_CONFIG_KEY_{git_config_count}"),
             format!("url.{}.insteadOf", rule.url),
         );
-        env.insert(format!("GIT_CONFIG_VALUE_{git_config_count}"), rule.instead_of);
+        env.insert(
+            format!("GIT_CONFIG_VALUE_{git_config_count}"),
+            rule.instead_of,
+        );
         git_config_count += 1;
     }
     env.insert("GIT_CONFIG_COUNT".to_owned(), git_config_count.to_string());
@@ -1179,7 +1183,10 @@ pub fn get_git_environment_variables(
     }
 
     let mut allowed_host_types: std::collections::HashSet<&str> =
-        crate::platform_constants::PLATFORM_HOST_TYPES.iter().copied().collect();
+        crate::platform_constants::PLATFORM_HOST_TYPES
+            .iter()
+            .copied()
+            .collect();
     allowed_host_types.extend(additional_host_types.iter().copied());
 
     for host_rule in host_rules::get_all() {
@@ -1254,7 +1261,11 @@ fn git_auth_token(host_rule: &host_rules::HostRule) -> Option<String> {
     else {
         return None;
     };
-    Some(format!("{}:{}", percent_encode(username), percent_encode(password)))
+    Some(format!(
+        "{}:{}",
+        percent_encode(username),
+        percent_encode(password)
+    ))
 }
 
 fn has_git_credentials(host_rule: &host_rules::HostRule) -> bool {
@@ -1278,8 +1289,16 @@ fn get_git_authentication_rules(
     }
 
     let has_user = token.contains(':');
-    let first_token = if has_user { token.to_owned() } else { format!("ssh:{token}") };
-    let second_token = if has_user { token.to_owned() } else { format!("git:{token}") };
+    let first_token = if has_user {
+        token.to_owned()
+    } else {
+        format!("ssh:{token}")
+    };
+    let second_token = if has_user {
+        token.to_owned()
+    } else {
+        format!("git:{token}")
+    };
 
     vec![
         GitAuthenticationRule {
@@ -1330,7 +1349,9 @@ fn parse_git_auth_url(input: &str) -> ParsedGitAuthUrl {
         .map_or((trimmed, "/"), |(host, path)| (host, path));
     let (host, port) = host_port
         .split_once(':')
-        .map_or((host_port, None), |(host, port)| (host, Some(port.to_owned())));
+        .map_or((host_port, None), |(host, port)| {
+            (host, Some(port.to_owned()))
+        });
     ParsedGitAuthUrl {
         protocol: "https".to_owned(),
         host: host.to_owned(),
@@ -1355,7 +1376,13 @@ impl ParsedGitAuthUrl {
     }
 
     fn auth_url(&self, token: &str) -> String {
-        format!("{}://{}@{}{}", self.protocol, token, self.host_port(), self.path)
+        format!(
+            "{}://{}@{}{}",
+            self.protocol,
+            token,
+            self.host_port(),
+            self.path
+        )
     }
 
     fn ssh_instead_of(&self) -> String {
@@ -1366,7 +1393,11 @@ impl ParsedGitAuthUrl {
         if self.ssh_port.is_some() {
             self.ssh_instead_of()
         } else {
-            format!("git@{}:{}", self.host, self.ssh_path.trim_start_matches('/'))
+            format!(
+                "git@{}:{}",
+                self.host,
+                self.ssh_path.trim_start_matches('/')
+            )
         }
     }
 
@@ -2387,16 +2418,34 @@ pub fn pretty_stdout_indent(s: &str, leading: bool) -> String {
 }
 
 /// Bunyan fields that are excluded from details output.
-const BUNYAN_FIELDS: &[&str] = &["name", "hostname", "pid", "level", "v", "time", "msg", "start_time"];
+const BUNYAN_FIELDS: &[&str] = &[
+    "name",
+    "hostname",
+    "pid",
+    "level",
+    "v",
+    "time",
+    "msg",
+    "start_time",
+];
 /// Meta fields that are excluded from details output.
-const PRETTY_META_FIELDS: &[&str] = &["repository", "baseBranch", "packageFile", "depType", "dependency", "dependencies", "branch"];
+const PRETTY_META_FIELDS: &[&str] = &[
+    "repository",
+    "baseBranch",
+    "packageFile",
+    "depType",
+    "dependency",
+    "dependencies",
+    "branch",
+];
 
 /// Compact JSON stringify with spaces after `:` and `,`.
 /// Mirrors `json-stringify-pretty-compact` behavior for small objects.
 fn compact_stringify(v: &serde_json::Value) -> String {
     match v {
         serde_json::Value::Object(m) => {
-            let parts: Vec<String> = m.iter()
+            let parts: Vec<String> = m
+                .iter()
                 .map(|(k, v)| format!("{:?}: {}", k, compact_stringify(v)))
                 .collect();
             format!("{{{}}}", parts.join(", "))
@@ -2413,11 +2462,16 @@ fn compact_stringify(v: &serde_json::Value) -> String {
 ///
 /// Mirrors `getDetails()` from `lib/logger/pretty-stdout.ts`.
 pub fn get_details(rec: Option<&serde_json::Value>) -> String {
-    let Some(rec) = rec else { return String::new(); };
-    let Some(obj) = rec.as_object() else { return String::new(); };
+    let Some(rec) = rec else {
+        return String::new();
+    };
+    let Some(obj) = rec.as_object() else {
+        return String::new();
+    };
 
     // Filter to only non-bunyan, non-meta, non-module keys
-    let filtered: Vec<(&str, &serde_json::Value)> = obj.iter()
+    let filtered: Vec<(&str, &serde_json::Value)> = obj
+        .iter()
         .filter(|(k, _)| {
             *k != "module"
                 && !BUNYAN_FIELDS.contains(&k.as_str())
@@ -2443,7 +2497,10 @@ pub fn get_details(rec: Option<&serde_json::Value>) -> String {
             if *key == "err" {
                 if !err_rest.is_empty() {
                     parts.push(pretty_stdout_indent(
-                        &format!("\"err\": {}", compact_stringify(&serde_json::Value::Object(err_rest.clone()))),
+                        &format!(
+                            "\"err\": {}",
+                            compact_stringify(&serde_json::Value::Object(err_rest.clone()))
+                        ),
                         true,
                     ));
                 }
@@ -2463,14 +2520,22 @@ pub fn get_details(rec: Option<&serde_json::Value>) -> String {
         };
     }
 
-    let lines: Vec<String> = filtered.iter()
-        .map(|(key, val)| pretty_stdout_indent(&format!("\"{}\": {}", key, compact_stringify(val)), true))
+    let lines: Vec<String> = filtered
+        .iter()
+        .map(|(key, val)| {
+            pretty_stdout_indent(&format!("\"{}\": {}", key, compact_stringify(val)), true)
+        })
         .collect();
     format!("{}\n", lines.join(",\n"))
 }
 
 const LEVELS: &[(u64, &str)] = &[
-    (10, "TRACE"), (20, "DEBUG"), (30, " INFO"), (40, " WARN"), (50, "ERROR"), (60, "FATAL"),
+    (10, "TRACE"),
+    (20, "DEBUG"),
+    (30, " INFO"),
+    (40, " WARN"),
+    (50, "ERROR"),
+    (60, "FATAL"),
 ];
 
 /// Format a Bunyan log record for pretty stdout output.
@@ -2478,7 +2543,8 @@ const LEVELS: &[(u64, &str)] = &[
 /// Mirrors `formatRecord()` from `lib/logger/pretty-stdout.ts`.
 pub fn format_record(rec: &serde_json::Value, colorize: bool) -> String {
     let level_num = rec.get("level").and_then(|v| v.as_u64()).unwrap_or(0);
-    let level = LEVELS.iter()
+    let level = LEVELS
+        .iter()
         .find(|(n, _)| *n == level_num)
         .map(|(_, s)| *s)
         .unwrap_or("TRACE");
@@ -2886,9 +2952,10 @@ pub fn get_dep_warnings_dashboard(
         return String::new();
     }
     // Strip "Failed to look up X dependency " prefixes
-    static STRIP_PREFIX_RE: std::sync::LazyLock<regex_lib::Regex> = std::sync::LazyLock::new(|| {
-        regex_lib::Regex::new(r"^Failed to look up(?: [-\w]+)? dependency ").unwrap()
-    });
+    static STRIP_PREFIX_RE: std::sync::LazyLock<regex_lib::Regex> =
+        std::sync::LazyLock::new(|| {
+            regex_lib::Regex::new(r"^Failed to look up(?: [-\w]+)? dependency ").unwrap()
+        });
     let dep_list: Vec<String> = warnings
         .iter()
         .map(|w| format!("`{}`", STRIP_PREFIX_RE.replace(w, "")))
@@ -3576,11 +3643,11 @@ fn platform_from_host_type(host_type: &str) -> Option<&'static str> {
 /// Returns `Err` for strings that parse neither as JSON nor JSON5.
 ///
 /// Mirrors `parseJson` from `lib/util/common.ts`.
- pub fn parse_json(content: &str) -> Result<serde_json::Value, String> {
-     serde_json::from_str(content)
-         .or_else(|_| json5::from_str::<serde_json::Value>(content))
-         .map_err(|e| e.to_string())
- }
+pub fn parse_json(content: &str) -> Result<serde_json::Value, String> {
+    serde_json::from_str(content)
+        .or_else(|_| json5::from_str::<serde_json::Value>(content))
+        .map_err(|e| e.to_string())
+}
 
 /// Like `parse_json` but also returns whether a JSON5 fallback was needed.
 /// Mirrors the deprecation warning logic in `lib/util/common.ts` `parseJson`.
@@ -3592,8 +3659,8 @@ pub fn parse_json_with_fallback(
         Ok(v) => Ok((v, false)),
         Err(json_err) => match json5::from_str::<serde_json::Value>(content) {
             Ok(v) => {
-                let needs_warning = !file_name.ends_with(".json5")
-                    && !file_name.ends_with(".jsonc");
+                let needs_warning =
+                    !file_name.ends_with(".json5") && !file_name.ends_with(".jsonc");
                 Ok((v, needs_warning))
             }
             Err(e5) => {
@@ -3602,7 +3669,7 @@ pub fn parse_json_with_fallback(
             }
         },
     }
- }
+}
 
 /// Schema-utils v4 parse result (mirrors Zod's `SafeParseReturnType`).
 #[derive(Debug)]
@@ -3612,9 +3679,19 @@ pub enum SafeParseResult<T> {
 }
 
 impl<T> SafeParseResult<T> {
-    pub fn is_ok(&self) -> bool { matches!(self, SafeParseResult::Ok(_)) }
-    pub fn is_err(&self) -> bool { !self.is_ok() }
-    pub fn data(self) -> Option<T> { if let SafeParseResult::Ok(v) = self { Some(v) } else { None } }
+    pub fn is_ok(&self) -> bool {
+        matches!(self, SafeParseResult::Ok(_))
+    }
+    pub fn is_err(&self) -> bool {
+        !self.is_ok()
+    }
+    pub fn data(self) -> Option<T> {
+        if let SafeParseResult::Ok(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
 }
 
 /// Parse strict JSON (no JSON5/comments).
@@ -3678,12 +3755,10 @@ pub fn schema_parse_multidoc_yaml(content: &str) -> SafeParseResult<Vec<serde_js
 /// Mirrors `Toml.safeParse()` from `lib/util/schema-utils/v4.ts`.
 pub fn schema_parse_toml(content: &str) -> SafeParseResult<serde_json::Value> {
     match toml::from_str::<toml::Value>(content) {
-        Ok(v) => {
-            match serde_json::to_value(&v) {
-                Ok(json) => SafeParseResult::Ok(json),
-                Err(e) => SafeParseResult::Err(e.to_string()),
-            }
-        }
+        Ok(v) => match serde_json::to_value(&v) {
+            Ok(json) => SafeParseResult::Ok(json),
+            Err(e) => SafeParseResult::Err(e.to_string()),
+        },
         Err(_) => SafeParseResult::Err("Invalid TOML".to_owned()),
     }
 }
@@ -4394,7 +4469,8 @@ impl SplitTracker {
     pub fn add_split(&mut self, name: RenovateSplit) {
         if let Some(last) = self.last {
             let now = std::time::Instant::now();
-            self.splits.insert(name, now.duration_since(last).as_millis() as u64);
+            self.splits
+                .insert(name, now.duration_since(last).as_millis() as u64);
             self.last = Some(now);
         }
     }
@@ -4427,8 +4503,8 @@ pub fn is_binary_content(bytes: &[u8]) -> bool {
 const HIDDEN_UNICODE_CHARS: &[char] = &[
     '\u{00A0}', // Non-breaking space
     '\u{1680}', // Ogham space mark
-    '\u{2000}', '\u{2001}', '\u{2002}', '\u{2003}', '\u{2004}', '\u{2005}',
-    '\u{2006}', '\u{2007}', '\u{2008}', '\u{2009}', '\u{200A}', // Various spaces
+    '\u{2000}', '\u{2001}', '\u{2002}', '\u{2003}', '\u{2004}', '\u{2005}', '\u{2006}', '\u{2007}',
+    '\u{2008}', '\u{2009}', '\u{200A}', // Various spaces
     '\u{2028}', // Line separator
     '\u{2029}', // Paragraph separator
     '\u{202F}', // Narrow no-break space
@@ -4560,26 +4636,33 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
     let re = BULLET.get_or_init(|| Regex::new(r"(?m)^(\s*)\*\s+").unwrap());
     out = re.replace_all(&out, "$1- ").into_owned();
 
-    let re = REPO_COMMIT
-        .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40})\b").unwrap());
+    let re = REPO_COMMIT.get_or_init(|| {
+        Regex::new(r"\b([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40})\b").unwrap()
+    });
     out = re
         .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let repo = &caps[1];
             let sha = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
-            rendered_links.push(format!("[{repo}@`{}`](https://github.com/{repo}/commit/{sha})", &sha[..7]));
+            rendered_links.push(format!(
+                "[{repo}@`{}`](https://github.com/{repo}/commit/{sha})",
+                &sha[..7]
+            ));
             placeholder
         })
         .into_owned();
 
-    let re = FORK_COMMIT
-        .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+)@([0-9a-f]{40})\b").unwrap());
+    let re =
+        FORK_COMMIT.get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+)@([0-9a-f]{40})\b").unwrap());
     out = re
         .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let fork = &caps[1];
             let sha = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
-            rendered_links.push(format!("[{fork}@`{}`](https://github.com/{fork}/{repo}/commit/{sha})", &sha[..7]));
+            rendered_links.push(format!(
+                "[{fork}@`{}`](https://github.com/{fork}/{repo}/commit/{sha})",
+                &sha[..7]
+            ));
             placeholder
         })
         .into_owned();
@@ -4589,7 +4672,10 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
         .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let sha = &caps[1];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
-            rendered_links.push(format!("[`{}`](https://github.com/{repository}/commit/{sha})", &sha[..7]));
+            rendered_links.push(format!(
+                "[`{}`](https://github.com/{repository}/commit/{sha})",
+                &sha[..7]
+            ));
             placeholder
         })
         .into_owned();
@@ -4601,19 +4687,22 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
             let repo = &caps[1];
             let number = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
-            rendered_links.push(format!("[{repo}#{number}](https://github.com/{repo}/issues/{number})"));
+            rendered_links.push(format!(
+                "[{repo}#{number}](https://github.com/{repo}/issues/{number})"
+            ));
             placeholder
         })
         .into_owned();
 
-    let re = FORK_ISSUE
-        .get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+)#([0-9]+)\b").unwrap());
+    let re = FORK_ISSUE.get_or_init(|| Regex::new(r"\b([A-Za-z0-9_.-]+)#([0-9]+)\b").unwrap());
     out = re
         .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let fork = &caps[1];
             let number = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
-            rendered_links.push(format!("[{fork}#{number}](https://github.com/{fork}/{repo}/issues/{number})"));
+            rendered_links.push(format!(
+                "[{fork}#{number}](https://github.com/{fork}/{repo}/issues/{number})"
+            ));
             placeholder
         })
         .into_owned();
@@ -4623,7 +4712,9 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
         .replace_all(&out, |caps: &regex_lib::Captures<'_>| {
             let number = &caps[1];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
-            rendered_links.push(format!("[GH-{number}](https://github.com/{repository}/issues/{number})"));
+            rendered_links.push(format!(
+                "[GH-{number}](https://github.com/{repository}/issues/{number})"
+            ));
             placeholder
         })
         .into_owned();
@@ -4634,7 +4725,9 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
             let before = &caps[1];
             let number = &caps[2];
             let placeholder = format!("\u{E000}{}\u{E001}", rendered_links.len());
-            rendered_links.push(format!("[#{number}](https://github.com/{repository}/issues/{number})"));
+            rendered_links.push(format!(
+                "[#{number}](https://github.com/{repository}/issues/{number})"
+            ));
             format!("{before}{placeholder}")
         })
         .into_owned();
@@ -5430,7 +5523,6 @@ fn sha512_hex(data: &[u8]) -> String {
 // Tests
 // ---------------------------------------------------------------------------
 
-
 // ---------------------------------------------------------------------------
 // compress — lib/util/compress.ts
 // ---------------------------------------------------------------------------
@@ -5441,16 +5533,18 @@ pub fn compress_to_base64(input: &str) -> Result<String, String> {
     use base64::{Engine, engine::general_purpose::STANDARD};
     use brotli::CompressorWriter;
     use std::io::Write;
-    
+
     let mut compressed = Vec::new();
     {
         let mut writer = CompressorWriter::new(
             &mut compressed,
-            4096,  // buffer size
-            8,     // quality (0-11)
-            22,    // lgwin (window size)
+            4096, // buffer size
+            8,    // quality (0-11)
+            22,   // lgwin (window size)
         );
-        writer.write_all(input.as_bytes()).map_err(|e| e.to_string())?;
+        writer
+            .write_all(input.as_bytes())
+            .map_err(|e| e.to_string())?;
     }
     Ok(STANDARD.encode(&compressed))
 }
@@ -5465,7 +5559,9 @@ pub fn decompress_from_base64(input: &str) -> Result<String, String> {
     let compressed = STANDARD.decode(input).map_err(|e| e.to_string())?;
     let mut decompressor = Decompressor::new(compressed.as_slice(), 4096);
     let mut decompressed = Vec::new();
-    decompressor.read_to_end(&mut decompressed).map_err(|e| e.to_string())?;
+    decompressor
+        .read_to_end(&mut decompressed)
+        .map_err(|e| e.to_string())?;
     String::from_utf8(decompressed).map_err(|e| e.to_string())
 }
 
@@ -6302,12 +6398,9 @@ mod tests {
     async fn test_get_datasource_releases_stats_wraps_function() {
         let mut stats = GetDatasourceReleasesStats::new();
         let result = stats
-            .wrap(
-                "npm",
-                "https://registry.npmjs.org",
-                "lodash",
-                || async { 42u64 },
-            )
+            .wrap("npm", "https://registry.npmjs.org", "lodash", || async {
+                42u64
+            })
             .await;
         assert_eq!(result, 42);
         // one data point recorded
@@ -6619,7 +6712,10 @@ mod tests {
         let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
         let warned = check_github_token(None, true, &mut refs);
         assert_eq!(warned, vec!["foo/bar"]);
-        assert_eq!(refs[0].skip_reason.as_deref(), Some("github-token-required"));
+        assert_eq!(
+            refs[0].skip_reason.as_deref(),
+            Some("github-token-required")
+        );
     }
 
     // Ported: "logs warning for github-releases datasource" — util/check-token.spec.ts line 85
@@ -6633,7 +6729,10 @@ mod tests {
         let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
         let warned = check_github_token(None, true, &mut refs);
         assert_eq!(warned, vec!["foo/bar"]);
-        assert_eq!(refs[0].skip_reason.as_deref(), Some("github-token-required"));
+        assert_eq!(
+            refs[0].skip_reason.as_deref(),
+            Some("github-token-required")
+        );
     }
 
     // Ported: "logs warning once" — util/check-token.spec.ts line 102
@@ -6654,8 +6753,14 @@ mod tests {
         let mut refs: Vec<&mut GithubTokenDep> = deps.iter_mut().collect();
         let warned = check_github_token(None, true, &mut refs);
         assert_eq!(warned, vec!["foo/foo", "bar/bar"]);
-        assert_eq!(refs[0].skip_reason.as_deref(), Some("github-token-required"));
-        assert_eq!(refs[1].skip_reason.as_deref(), Some("github-token-required"));
+        assert_eq!(
+            refs[0].skip_reason.as_deref(),
+            Some("github-token-required")
+        );
+        assert_eq!(
+            refs[1].skip_reason.as_deref(),
+            Some("github-token-required")
+        );
     }
 
     // Ported: "should call a function only once" — logger/once.spec.ts line 15
@@ -6843,7 +6948,10 @@ mod tests {
     #[test]
     fn git_remote_url_with_token_returns_original_without_host_rule() {
         host_rules::clear();
-        assert_eq!(get_remote_url_with_token("https://foo.bar/", None), "https://foo.bar/");
+        assert_eq!(
+            get_remote_url_with_token("https://foo.bar/", None),
+            "https://foo.bar/"
+        );
     }
 
     // Ported: "transforms an ssh git url to https for the purpose of finding hostRules" — util/git/url.spec.ts line 123
@@ -6869,8 +6977,14 @@ mod tests {
     #[test]
     fn git_remote_url_with_token_keeps_unparseable_lookup_url() {
         host_rules::clear();
-        host_rules::add(git_url_host_rule(None, Some("https://abcdefg"), Some("token"), None, None))
-            .unwrap();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("https://abcdefg"),
+            Some("token"),
+            None,
+            None,
+        ))
+        .unwrap();
         assert_eq!(get_remote_url_with_token("abcdefg", None), "abcdefg");
         host_rules::clear();
     }
@@ -6879,9 +6993,18 @@ mod tests {
     #[test]
     fn git_remote_url_with_token_returns_http_url_with_token() {
         host_rules::clear();
-        host_rules::add(git_url_host_rule(None, Some("foo.bar"), Some("token"), None, None))
-            .unwrap();
-        assert_eq!(get_remote_url_with_token("http://foo.bar/", None), "http://token@foo.bar/");
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("foo.bar"),
+            Some("token"),
+            None,
+            None,
+        ))
+        .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("http://foo.bar/", None),
+            "http://token@foo.bar/"
+        );
         host_rules::clear();
     }
 
@@ -6889,8 +7012,14 @@ mod tests {
     #[test]
     fn git_remote_url_with_token_returns_https_url_with_token() {
         host_rules::clear();
-        host_rules::add(git_url_host_rule(None, Some("foo.bar"), Some("token"), None, None))
-            .unwrap();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("foo.bar"),
+            Some("token"),
+            None,
+            None,
+        ))
+        .unwrap();
         assert_eq!(
             get_remote_url_with_token("https://foo.bar/", None),
             "https://token@foo.bar/"
@@ -6902,9 +7031,18 @@ mod tests {
     #[test]
     fn git_remote_url_with_token_returns_https_url_for_non_http_protocols() {
         host_rules::clear();
-        host_rules::add(git_url_host_rule(None, Some("foo.bar"), Some("token"), None, None))
-            .unwrap();
-        assert_eq!(get_remote_url_with_token("ssh://foo.bar/", None), "https://token@foo.bar/");
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("foo.bar"),
+            Some("token"),
+            None,
+            None,
+        ))
+        .unwrap();
+        assert_eq!(
+            get_remote_url_with_token("ssh://foo.bar/", None),
+            "https://token@foo.bar/"
+        );
         host_rules::clear();
     }
 
@@ -6912,8 +7050,14 @@ mod tests {
     #[test]
     fn git_remote_url_with_token_encodes_token() {
         host_rules::clear();
-        host_rules::add(git_url_host_rule(None, Some("foo.bar"), Some("t#ken"), None, None))
-            .unwrap();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("foo.bar"),
+            Some("t#ken"),
+            None,
+            None,
+        ))
+        .unwrap();
         assert_eq!(
             get_remote_url_with_token("https://foo.bar/", None),
             "https://t%23ken@foo.bar/"
@@ -6971,7 +7115,10 @@ mod tests {
             Some("pass"),
         ))
         .unwrap();
-        assert_eq!(get_remote_url_with_token("ssh://foo.bar/", None), "https://user:pass@foo.bar/");
+        assert_eq!(
+            get_remote_url_with_token("ssh://foo.bar/", None),
+            "https://user:pass@foo.bar/"
+        );
         host_rules::clear();
     }
 
@@ -6998,8 +7145,14 @@ mod tests {
     #[test]
     fn git_remote_url_with_token_returns_gitlab_credentials() {
         host_rules::clear();
-        host_rules::add(git_url_host_rule(None, Some("gitlab.com"), Some("token"), None, None))
-            .unwrap();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("gitlab.com"),
+            Some("token"),
+            None,
+            None,
+        ))
+        .unwrap();
         assert_eq!(
             get_remote_url_with_token("ssh://gitlab.com/some/repo.git", None),
             "https://gitlab-ci-token:token@gitlab.com/some/repo.git"
@@ -7011,8 +7164,14 @@ mod tests {
     #[test]
     fn git_remote_url_with_token_returns_github_credentials() {
         host_rules::clear();
-        host_rules::add(git_url_host_rule(None, Some("github.com"), Some("token"), None, None))
-            .unwrap();
+        host_rules::add(git_url_host_rule(
+            None,
+            Some("github.com"),
+            Some("token"),
+            None,
+            None,
+        ))
+        .unwrap();
         assert_eq!(
             get_remote_url_with_token("ssh://github.com/some/repo.git", None),
             "https://x-access-token:token@github.com/some/repo.git"
@@ -7052,9 +7211,18 @@ mod tests {
             ),
             git_env(&[
                 ("GIT_CONFIG_COUNT", "3"),
-                ("GIT_CONFIG_KEY_0", "url.https://ssh:token1234@github.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_1", "url.https://git:token1234@github.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_2", "url.https://token1234@github.com/.insteadOf"),
+                (
+                    "GIT_CONFIG_KEY_0",
+                    "url.https://ssh:token1234@github.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_1",
+                    "url.https://git:token1234@github.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_2",
+                    "url.https://token1234@github.com/.insteadOf"
+                ),
                 ("GIT_CONFIG_VALUE_0", "ssh://git@github.com/"),
                 ("GIT_CONFIG_VALUE_1", "git@github.com:"),
                 ("GIT_CONFIG_VALUE_2", "https://github.com/"),
@@ -7082,9 +7250,18 @@ mod tests {
             ),
             git_env(&[
                 ("GIT_CONFIG_COUNT", "3"),
-                ("GIT_CONFIG_KEY_0", "url.https://username:password@example.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_1", "url.https://username:password@example.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_2", "url.https://username:password@example.com/.insteadOf"),
+                (
+                    "GIT_CONFIG_KEY_0",
+                    "url.https://username:password@example.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_1",
+                    "url.https://username:password@example.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_2",
+                    "url.https://username:password@example.com/.insteadOf"
+                ),
                 ("GIT_CONFIG_VALUE_0", "ssh://git@example.com/"),
                 ("GIT_CONFIG_VALUE_1", "git@example.com:"),
                 ("GIT_CONFIG_VALUE_2", "https://example.com/"),
@@ -7103,8 +7280,12 @@ mod tests {
             match_host: Some("github.com".to_owned()),
             ..Default::default()
         };
-        let env =
-            get_git_authenticated_environment_variables("https://github.com/", &rule, None, &git_env(&[]));
+        let env = get_git_authenticated_environment_variables(
+            "https://github.com/",
+            &rule,
+            None,
+            &git_env(&[]),
+        );
         assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("3"));
         assert_eq!(
             env.get("GIT_CONFIG_KEY_2").map(String::as_str),
@@ -7166,9 +7347,18 @@ mod tests {
             ),
             git_env(&[
                 ("GIT_CONFIG_COUNT", "4"),
-                ("GIT_CONFIG_KEY_1", "url.https://ssh:token1234@github.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_2", "url.https://git:token1234@github.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_3", "url.https://token1234@github.com/.insteadOf"),
+                (
+                    "GIT_CONFIG_KEY_1",
+                    "url.https://ssh:token1234@github.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_2",
+                    "url.https://git:token1234@github.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_3",
+                    "url.https://token1234@github.com/.insteadOf"
+                ),
                 ("GIT_CONFIG_VALUE_1", "ssh://git@github.com/"),
                 ("GIT_CONFIG_VALUE_2", "git@github.com:"),
                 ("GIT_CONFIG_VALUE_3", "https://github.com/"),
@@ -7217,7 +7407,10 @@ mod tests {
             Some(&git_env(&[("RANDOM_VARIABLE", "random")])),
             &git_env(&[]),
         );
-        assert_eq!(env.get("RANDOM_VARIABLE").map(String::as_str), Some("random"));
+        assert_eq!(
+            env.get("RANDOM_VARIABLE").map(String::as_str),
+            Some("random")
+        );
         assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("3"));
     }
 
@@ -7268,9 +7461,18 @@ mod tests {
             ),
             git_env(&[
                 ("GIT_CONFIG_COUNT", "3"),
-                ("GIT_CONFIG_KEY_0", "url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_1", "url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_2", "url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf"),
+                (
+                    "GIT_CONFIG_KEY_0",
+                    "url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_1",
+                    "url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_2",
+                    "url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf"
+                ),
                 ("GIT_CONFIG_VALUE_0", "ssh://git@gitlab.com/"),
                 ("GIT_CONFIG_VALUE_1", "git@gitlab.com:"),
                 ("GIT_CONFIG_VALUE_2", "https://gitlab.com/"),
@@ -7423,9 +7625,18 @@ mod tests {
             get_git_environment_variables(&[]),
             git_env(&[
                 ("GIT_CONFIG_COUNT", "3"),
-                ("GIT_CONFIG_KEY_0", "url.https://ssh:token123@github.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_1", "url.https://git:token123@github.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_2", "url.https://token123@github.com/.insteadOf"),
+                (
+                    "GIT_CONFIG_KEY_0",
+                    "url.https://ssh:token123@github.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_1",
+                    "url.https://git:token123@github.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_2",
+                    "url.https://token123@github.com/.insteadOf"
+                ),
                 ("GIT_CONFIG_VALUE_0", "ssh://git@github.com/"),
                 ("GIT_CONFIG_VALUE_1", "git@github.com:"),
                 ("GIT_CONFIG_VALUE_2", "https://github.com/"),
@@ -7531,7 +7742,9 @@ mod tests {
         let env = get_git_environment_variables(&[]);
         assert_eq!(
             env.get("GIT_CONFIG_KEY_0").map(String::as_str),
-            Some("url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf")
+            Some(
+                "url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf"
+            )
         );
         host_rules::clear();
     }
@@ -7595,9 +7808,18 @@ mod tests {
             get_git_environment_variables(&["git-refs"]),
             git_env(&[
                 ("GIT_CONFIG_COUNT", "3"),
-                ("GIT_CONFIG_KEY_0", "url.https://ssh:token123@git.example.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_1", "url.https://git:token123@git.example.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_2", "url.https://token123@git.example.com/.insteadOf"),
+                (
+                    "GIT_CONFIG_KEY_0",
+                    "url.https://ssh:token123@git.example.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_1",
+                    "url.https://git:token123@git.example.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_2",
+                    "url.https://token123@git.example.com/.insteadOf"
+                ),
                 ("GIT_CONFIG_VALUE_0", "ssh://git@git.example.com/"),
                 ("GIT_CONFIG_VALUE_1", "git@git.example.com:"),
                 ("GIT_CONFIG_VALUE_2", "https://git.example.com/"),
@@ -7658,9 +7880,18 @@ mod tests {
             get_git_environment_variables(&["git-tags"]),
             git_env(&[
                 ("GIT_CONFIG_COUNT", "3"),
-                ("GIT_CONFIG_KEY_0", "url.https://ssh:token123@git.example.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_1", "url.https://git:token123@git.example.com/.insteadOf"),
-                ("GIT_CONFIG_KEY_2", "url.https://token123@git.example.com/.insteadOf"),
+                (
+                    "GIT_CONFIG_KEY_0",
+                    "url.https://ssh:token123@git.example.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_1",
+                    "url.https://git:token123@git.example.com/.insteadOf"
+                ),
+                (
+                    "GIT_CONFIG_KEY_2",
+                    "url.https://token123@git.example.com/.insteadOf"
+                ),
                 ("GIT_CONFIG_VALUE_0", "ssh://git@git.example.com/"),
                 ("GIT_CONFIG_VALUE_1", "git@git.example.com:"),
                 ("GIT_CONFIG_VALUE_2", "https://git.example.com/"),
@@ -8849,8 +9080,7 @@ mod tests {
     #[test]
     fn test_parse_json_fallback_warns() {
         let input = r#"{name: 'Bob', age: 35, city: 'San Francisco', isMarried: false}"#;
-        let (val, needs_warning) =
-            parse_json_with_fallback(input, "renovate.json").unwrap();
+        let (val, needs_warning) = parse_json_with_fallback(input, "renovate.json").unwrap();
         assert!(needs_warning);
         assert_eq!(val["name"], "Bob");
     }
@@ -8859,8 +9089,7 @@ mod tests {
     #[test]
     fn test_parse_json_no_warn_jsonc() {
         let input = r#"{"name": "John Doe", "age": 30, "city": "New York"}"#;
-        let (_, needs_warning) =
-            parse_json_with_fallback(input, "renovate.jsonc").unwrap();
+        let (_, needs_warning) = parse_json_with_fallback(input, "renovate.jsonc").unwrap();
         assert!(!needs_warning);
     }
 
@@ -8868,8 +9097,7 @@ mod tests {
     #[test]
     fn test_parse_json_no_warn_json5() {
         let input = r#"{name: 'Bob', age: 35, city: 'San Francisco', isMarried: false}"#;
-        let (_, needs_warning) =
-            parse_json_with_fallback(input, "renovate.json5").unwrap();
+        let (_, needs_warning) = parse_json_with_fallback(input, "renovate.json5").unwrap();
         assert!(!needs_warning);
     }
 
@@ -9677,7 +9905,10 @@ dep1 = "^1.0.0"
     fn test_schema_parse_multidoc_yaml_invalid() {
         let yaml = "---\nname: test1\nversion: 1.0.0\n---\nname: test2\n  invalid: indentation\n";
         let r = schema_parse_multidoc_yaml(yaml);
-        assert!(r.is_err(), "multidoc YAML with invalid indentation should fail");
+        assert!(
+            r.is_err(),
+            "multidoc YAML with invalid indentation should fail"
+        );
     }
 
     // Ported: "parses valid TOML" — util/schema-utils/v4.spec.ts line 225
@@ -9719,7 +9950,9 @@ dep1 = "^1.0.0"
     // Ported: "does not log a warning for binary files with null bytes but no hidden unicode" — util/unicode.spec.ts line 170
     #[test]
     fn binary_content_with_null_bytes_detected() {
-        let bytes = [0x50u8, 0x4b, 0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x74, 0x65, 0x78, 0x74];
+        let bytes = [
+            0x50u8, 0x4b, 0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x74, 0x65, 0x78, 0x74,
+        ];
         assert!(is_binary_content(&bytes));
         // No hidden unicode in this ASCII binary content
         let text = String::from_utf8_lossy(&bytes);
@@ -9731,7 +9964,9 @@ dep1 = "^1.0.0"
     #[test]
     fn binary_content_with_hidden_unicode_detected() {
         // 0xe2 0x80 0x8b = UTF-8 encoding of U+200B (zero-width space)
-        let bytes = [0x50u8, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x74, 0x65, 0x78];
+        let bytes = [
+            0x50u8, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x74, 0x65, 0x78,
+        ];
         assert!(is_binary_content(&bytes));
         let text = String::from_utf8_lossy(&bytes);
         let found = find_hidden_unicode_chars(&text);
@@ -9882,7 +10117,10 @@ dep1 = "^1.0.0"
     // Ported: "handles ExternalHostError" — workers/repository/error.spec.ts line 83
     #[test]
     fn classify_repo_error_external_host_error_constant() {
-        assert_eq!(classify_repo_error("external-host-error"), "external-host-error");
+        assert_eq!(
+            classify_repo_error("external-host-error"),
+            "external-host-error"
+        );
     }
 
     // ── parse_repo_org ────────────────────────────────────────────────────────
@@ -10155,7 +10393,10 @@ dep1 = "^1.0.0"
             ..Default::default()
         };
         // colorize=true → ANSI gray escape wraps the text
-        assert_eq!(get_meta(Some(&rec), true), "\x1b[90m (repository=a/b)\x1b[0m");
+        assert_eq!(
+            get_meta(Some(&rec), true),
+            "\x1b[90m (repository=a/b)\x1b[0m"
+        );
     }
 
     // Ported: "supports multi meta" — logger/pretty-stdout.spec.ts line 34
@@ -10167,7 +10408,10 @@ dep1 = "^1.0.0"
             module: Some("test"),
             ..Default::default()
         };
-        assert_eq!(get_meta(Some(&rec), true), "\x1b[90m (repository=a/b, branch=c) [test]\x1b[0m");
+        assert_eq!(
+            get_meta(Some(&rec), true),
+            "\x1b[90m (repository=a/b, branch=c) [test]\x1b[0m"
+        );
     }
 
     // Ported: "returns plain text when colorize is false" — logger/pretty-stdout.spec.ts line 46
@@ -10207,7 +10451,10 @@ dep1 = "^1.0.0"
     fn test_get_details_config() {
         let rec = serde_json::json!({"v": 0, "config": {"a": "b", "d": ["e", "f"]}});
         let result = get_details(Some(&rec));
-        assert_eq!(result, "       \"config\": {\"a\": \"b\", \"d\": [\"e\", \"f\"]}\n");
+        assert_eq!(
+            result,
+            "       \"config\": {\"a\": \"b\", \"d\": [\"e\", \"f\"]}\n"
+        );
     }
 
     // Ported: "formats err.stack as readable multi-line output" — logger/pretty-stdout.spec.ts line 88
@@ -11881,163 +12128,183 @@ dep1 = "^1.0.0"
     }
 }
 
-    // ── get_combined_env tests ────────────────────────────────────────────
+// ── get_combined_env tests ────────────────────────────────────────────
 
-    // Ported: "return combined env" — util/env.spec.ts line 11
-    #[test]
-    fn test_get_combined_env_return_combined() {
-        use std::collections::HashMap;
-        let process_env: HashMap<String, String> =
-            [("RENOVATE_MEND_HOSTED".to_owned(), "true".to_owned())]
-                .into_iter()
-                .collect();
-        let custom_env: HashMap<String, String> =
-            [("SOME_CUSTOM_ENV_KEY".to_owned(), "SOME_CUSTOM_ENV_VALUE".to_owned())]
-                .into_iter()
-                .collect();
-        let user_env: HashMap<String, String> =
-            [("SOME_KEY".to_owned(), "SOME_VALUE".to_owned())]
-                .into_iter()
-                .collect();
-        let result = get_combined_env(&process_env, &custom_env, &user_env);
-        assert_eq!(result.get("RENOVATE_MEND_HOSTED").map(|s| s.as_str()), Some("true"));
-        assert_eq!(result.get("SOME_KEY").map(|s| s.as_str()), Some("SOME_VALUE"));
-        assert_eq!(result.get("SOME_CUSTOM_ENV_KEY").map(|s| s.as_str()), Some("SOME_CUSTOM_ENV_VALUE"));
-    }
+// Ported: "return combined env" — util/env.spec.ts line 11
+#[test]
+fn test_get_combined_env_return_combined() {
+    use std::collections::HashMap;
+    let process_env: HashMap<String, String> =
+        [("RENOVATE_MEND_HOSTED".to_owned(), "true".to_owned())]
+            .into_iter()
+            .collect();
+    let custom_env: HashMap<String, String> = [(
+        "SOME_CUSTOM_ENV_KEY".to_owned(),
+        "SOME_CUSTOM_ENV_VALUE".to_owned(),
+    )]
+    .into_iter()
+    .collect();
+    let user_env: HashMap<String, String> = [("SOME_KEY".to_owned(), "SOME_VALUE".to_owned())]
+        .into_iter()
+        .collect();
+    let result = get_combined_env(&process_env, &custom_env, &user_env);
+    assert_eq!(
+        result.get("RENOVATE_MEND_HOSTED").map(|s| s.as_str()),
+        Some("true")
+    );
+    assert_eq!(
+        result.get("SOME_KEY").map(|s| s.as_str()),
+        Some("SOME_VALUE")
+    );
+    assert_eq!(
+        result.get("SOME_CUSTOM_ENV_KEY").map(|s| s.as_str()),
+        Some("SOME_CUSTOM_ENV_VALUE")
+    );
+}
 
-    // Ported: "maintains precendence" — util/env.spec.ts line 26
-    #[test]
-    fn test_get_combined_env_maintains_precedence() {
-        use std::collections::HashMap;
-        let process_env: HashMap<String, String> =
-            [("SOME_KEY".to_owned(), "processEnvValue".to_owned())]
-                .into_iter()
-                .collect();
-        let custom_env: HashMap<String, String> =
-            [("SOME_KEY".to_owned(), "customValue".to_owned())]
-                .into_iter()
-                .collect();
-        let user_env: HashMap<String, String> =
-            [("SOME_KEY".to_owned(), "userEnvValue".to_owned())]
-                .into_iter()
-                .collect();
-        let result = get_combined_env(&process_env, &custom_env, &user_env);
-        // user_env takes precedence over custom_env and process.env
-        assert_eq!(result.get("SOME_KEY").map(|s| s.as_str()), Some("userEnvValue"));
-    }
+// Ported: "maintains precendence" — util/env.spec.ts line 26
+#[test]
+fn test_get_combined_env_maintains_precedence() {
+    use std::collections::HashMap;
+    let process_env: HashMap<String, String> =
+        [("SOME_KEY".to_owned(), "processEnvValue".to_owned())]
+            .into_iter()
+            .collect();
+    let custom_env: HashMap<String, String> = [("SOME_KEY".to_owned(), "customValue".to_owned())]
+        .into_iter()
+        .collect();
+    let user_env: HashMap<String, String> = [("SOME_KEY".to_owned(), "userEnvValue".to_owned())]
+        .into_iter()
+        .collect();
+    let result = get_combined_env(&process_env, &custom_env, &user_env);
+    // user_env takes precedence over custom_env and process.env
+    assert_eq!(
+        result.get("SOME_KEY").map(|s| s.as_str()),
+        Some("userEnvValue")
+    );
+}
 
+// Rust-specific: util behavior test
+#[test]
+fn jsonc_behavior_inline_check() {
+    let input = "{\n  \"name\": \"test\"\n  \"version\": \"1.0.0\"\n}";
+    let r = schema_parse_jsonc(input);
+    assert!(r.is_err(), "JSONC missing comma should fail");
+}
 
-    // Rust-specific: util behavior test
-    #[test]
-    fn jsonc_behavior_inline_check() {
-        let input = "{\n  \"name\": \"test\"\n  \"version\": \"1.0.0\"\n}";
-        let r = schema_parse_jsonc(input);
-        assert!(r.is_err(), "JSONC missing comma should fail");
-    }
+// ── prepare_graphql_query tests ───────────────────────────────────────
 
-    // ── prepare_graphql_query tests ───────────────────────────────────────
+// Ported: "returns valid query for valid payload query" — util/github/graphql/util.spec.ts line 10
+#[test]
+fn test_prepare_graphql_query_valid() {
+    let payload = "items { pageInfo { hasNextPage } }";
+    let result = prepare_graphql_query(payload);
+    assert!(result.contains(payload));
+    assert!(result.contains("query($owner"));
+    assert!(result.contains("repository(owner: $owner"));
+    assert!(result.contains("payload:"));
+}
 
-    // Ported: "returns valid query for valid payload query" — util/github/graphql/util.spec.ts line 10
-    #[test]
-    fn test_prepare_graphql_query_valid() {
-        let payload = "items { pageInfo { hasNextPage } }";
-        let result = prepare_graphql_query(payload);
-        assert!(result.contains(payload));
-        assert!(result.contains("query($owner"));
-        assert!(result.contains("repository(owner: $owner"));
-        assert!(result.contains("payload:"));
-    }
+// Ported: "returns invalid query for invalid payload query" — util/github/graphql/util.spec.ts line 28
+#[test]
+fn test_prepare_graphql_query_invalid() {
+    let payload = "!@#";
+    let result = prepare_graphql_query(payload);
+    assert!(result.contains(payload));
+    assert!(result.contains("query($owner"));
+}
+// Ported: "compresses strings" — util/compress.spec.ts line 5
+#[test]
+fn test_compress_to_base64() {
+    let compressed = compress_to_base64("foobar").unwrap();
+    assert_eq!(compressed, "iwKAZm9vYmFyAw==");
 
-    // Ported: "returns invalid query for invalid payload query" — util/github/graphql/util.spec.ts line 28
-    #[test]
-    fn test_prepare_graphql_query_invalid() {
-        let payload = "!@#";
-        let result = prepare_graphql_query(payload);
-        assert!(result.contains(payload));
-        assert!(result.contains("query($owner"));
-    }
-    // Ported: "compresses strings" — util/compress.spec.ts line 5
-    #[test]
-    fn test_compress_to_base64() {
-        let compressed = compress_to_base64("foobar").unwrap();
-        assert_eq!(compressed, "iwKAZm9vYmFyAw==");
+    let decompressed = decompress_from_base64(&compressed).unwrap();
+    assert_eq!(decompressed, "foobar");
+}
 
-        let decompressed = decompress_from_base64(&compressed).unwrap();
-        assert_eq!(decompressed, "foobar");
-    }
+#[test]
+fn trim_leading_slash_basic() {
+    assert_eq!(trim_leading_slash("/foo/bar"), "foo/bar");
+    assert_eq!(trim_leading_slash("foo/bar"), "foo/bar");
+    assert_eq!(trim_leading_slash("/"), "");
+}
 
-    #[test]
-    fn trim_leading_slash_basic() {
-        assert_eq!(trim_leading_slash("/foo/bar"), "foo/bar");
-        assert_eq!(trim_leading_slash("foo/bar"), "foo/bar");
-        assert_eq!(trim_leading_slash("/"), "");
-    }
+#[test]
+fn uniq_eq_removes_duplicates() {
+    assert_eq!(uniq_eq(vec![1, 2, 2, 3]), vec![1, 2, 3]);
+}
 
-    #[test]
-    fn uniq_eq_removes_duplicates() {
-        assert_eq!(uniq_eq(vec![1, 2, 2, 3]), vec![1, 2, 3]);
-    }
+#[test]
+fn is_binary_content_detects_binary() {
+    assert!(is_binary_content(b"\x00\x01\x02"));
+    assert!(!is_binary_content(b"hello world"));
+}
 
-    #[test]
-    fn is_binary_content_detects_binary() {
-        assert!(is_binary_content(b"\x00\x01\x02"));
-        assert!(!is_binary_content(b"hello world"));
-    }
+#[test]
+fn hash_data_consistent() {
+    let h1 = hash_data(b"test", None);
+    let h2 = hash_data(b"test", None);
+    assert_eq!(h1, h2);
+    let h3 = hash_data(b"different", None);
+    assert_ne!(h1, h3);
+}
 
-    #[test]
-    fn hash_data_consistent() {
-        let h1 = hash_data(b"test", None);
-        let h2 = hash_data(b"test", None);
-        assert_eq!(h1, h2);
-        let h3 = hash_data(b"different", None);
-        assert_ne!(h1, h3);
-    }
+#[test]
+fn sanitize_str_empty() {
+    assert_eq!(sanitize_str(Some("")), Some("".into()));
+}
 
-    #[test]
-    fn sanitize_str_empty() {
-        assert_eq!(sanitize_str(Some("")), Some("".into()));
-    }
+#[test]
+fn parse_git_url_basic() {
+    let parsed = parse_git_url("https://github.com/owner/repo.git").unwrap();
+    assert_eq!(parsed.host, "github.com");
+    assert_eq!(parsed.pathname, "/owner/repo.git");
+}
 
-    #[test]
-    fn parse_git_url_basic() {
-        let parsed = parse_git_url("https://github.com/owner/repo.git").unwrap();
-        assert_eq!(parsed.host, "github.com");
-        assert_eq!(parsed.pathname, "/owner/repo.git");
-    }
+#[test]
+fn is_github_fine_grained_personal_access_token_detects() {
+    assert!(is_github_fine_grained_personal_access_token(
+        "github_pat_xxx"
+    ));
+    assert!(!is_github_fine_grained_personal_access_token("ghp_xxx"));
+}
 
-    #[test]
-    fn is_github_fine_grained_personal_access_token_detects() {
-        assert!(is_github_fine_grained_personal_access_token("github_pat_xxx"));
-        assert!(!is_github_fine_grained_personal_access_token("ghp_xxx"));
-    }
+#[test]
+fn pretty_stdout_indent_basic() {
+    assert_eq!(
+        pretty_stdout_indent("line1\nline2", true),
+        "       line1\n       line2"
+    );
+    assert_eq!(pretty_stdout_indent("line1", false), "line1");
+}
 
-    #[test]
-    fn pretty_stdout_indent_basic() {
-        assert_eq!(pretty_stdout_indent("line1\nline2", true), "       line1\n       line2");
-        assert_eq!(pretty_stdout_indent("line1", false), "line1");
-    }
+#[test]
+fn get_label_description_basic() {
+    assert_eq!(
+        get_label_description("manager", "npm"),
+        "Related to the npm manager"
+    );
+}
 
-    #[test]
-    fn get_label_description_basic() {
-        assert_eq!(get_label_description("manager", "npm"), "Related to the npm manager");
-    }
+#[test]
+fn parse_git_url_host_and_name_basic() {
+    assert_eq!(
+        parse_git_url_host_and_name("https://github.com/owner/repo.git"),
+        Some(("github.com".to_owned(), "owner/repo".to_owned()))
+    );
+    assert_eq!(
+        parse_git_url_host_and_name("git@github.com:owner/repo.git"),
+        Some(("github.com".to_owned(), "owner/repo".to_owned()))
+    );
+}
 
-    #[test]
-    fn parse_git_url_host_and_name_basic() {
-        assert_eq!(
-            parse_git_url_host_and_name("https://github.com/owner/repo.git"),
-            Some(("github.com".to_owned(), "owner/repo".to_owned()))
-        );
-        assert_eq!(
-            parse_git_url_host_and_name("git@github.com:owner/repo.git"),
-            Some(("github.com".to_owned(), "owner/repo".to_owned()))
-        );
-    }
-
-    #[test]
-    fn exec_command_to_raw() {
-        let cmd = ExecCommand::Str("echo hello".to_owned());
-        assert_eq!(cmd.to_raw(), "echo hello");
-        let cmd2 = ExecCommand::WithOpts { command: vec!["echo".to_owned(), "hello".to_owned()] };
-        assert_eq!(cmd2.to_raw(), "echo hello");
-    }
+#[test]
+fn exec_command_to_raw() {
+    let cmd = ExecCommand::Str("echo hello".to_owned());
+    assert_eq!(cmd.to_raw(), "echo hello");
+    let cmd2 = ExecCommand::WithOpts {
+        command: vec!["echo".to_owned(), "hello".to_owned()],
+    };
+    assert_eq!(cmd2.to_raw(), "echo hello");
+}

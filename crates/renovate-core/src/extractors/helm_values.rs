@@ -237,9 +237,8 @@ pub fn helm_values_update_dependency(
             j += 1;
         }
 
-        let matches = repository.is_some_and(|repo| {
-            repo == image || image.ends_with(&format!("/{repo}"))
-        });
+        let matches =
+            repository.is_some_and(|repo| repo == image || image.ends_with(&format!("/{repo}")));
 
         if matches && tag_value == Some(current_value) {
             let tag_line = lines[tag_line_idx.unwrap()];
@@ -256,11 +255,7 @@ pub fn helm_values_update_dependency(
         i += 1;
     }
 
-    if changed {
-        Some(result)
-    } else {
-        None
-    }
+    if changed { Some(result) } else { None }
 }
 
 #[cfg(test)]
@@ -449,7 +444,10 @@ spec:
     fn update_object_form_registry_prefix() {
         let content = "image:\n  repository: quay.io/metallb/controller\n  tag: v0.13.10\n";
         let updated = helm_values_update_dependency(
-            content, "quay.io/metallb/controller:v0.13.10", "v0.13.10", "v0.14.0"
+            content,
+            "quay.io/metallb/controller:v0.13.10",
+            "v0.13.10",
+            "v0.14.0",
         );
         assert!(updated.is_some());
         let updated = updated.unwrap();

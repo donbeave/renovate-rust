@@ -195,13 +195,15 @@ pub fn parse_marshalled_version_info(input: &serde_json::Value) -> Result<Vec<Ge
     }
     let releases = arr
         .iter()
-        .filter_map(|v| v.get("number")?.as_str().map(|n| GemRelease {
-            version: n.to_owned(),
-            release_timestamp: None,
-            changelog_url: None,
-            source_url: None,
-            constraints: None,
-        }))
+        .filter_map(|v| {
+            v.get("number")?.as_str().map(|n| GemRelease {
+                version: n.to_owned(),
+                release_timestamp: None,
+                changelog_url: None,
+                source_url: None,
+                constraints: None,
+            })
+        })
         .collect();
     Ok(releases)
 }
@@ -219,31 +221,60 @@ pub fn parse_gem_metadata(input: &serde_json::Value) -> ParsedGemMetadata {
 /// Parse `GemVersions` - array of version objects from `/api/v1/versions`.
 pub fn parse_gem_versions(input: &serde_json::Value) -> Result<Vec<GemRelease>, String> {
     let arr = input.as_array().ok_or("not an array")?;
-    let releases: Vec<GemRelease> = arr.iter().filter_map(|v| {
-        let version = v.get("number")?.as_str()?.to_owned();
-        let release_timestamp = v.get("created_at")?.as_str().map(|s| {
-            // Normalize to ISO 8601 with milliseconds
-            if s.contains('T') { s.to_owned() } else { format!("{s}T00:00:00.000Z") }
-        });
-        let platform = v.get("platform").and_then(|p| p.as_str()).map(str::to_owned);
-        let ruby_version = v.get("ruby_version").and_then(|p| p.as_str()).map(str::to_owned);
-        let rubygems_version = v.get("rubygems_version").and_then(|p| p.as_str()).map(str::to_owned);
-        let meta = v.get("metadata").unwrap_or(&serde_json::Value::Null);
-        let changelog_url = meta.get("changelog_uri").and_then(|v| v.as_str()).map(str::to_owned);
-        let source_url = meta.get("source_code_uri").and_then(|v| v.as_str()).map(str::to_owned);
+    let releases: Vec<GemRelease> = arr
+        .iter()
+        .filter_map(|v| {
+            let version = v.get("number")?.as_str()?.to_owned();
+            let release_timestamp = v.get("created_at")?.as_str().map(|s| {
+                // Normalize to ISO 8601 with milliseconds
+                if s.contains('T') {
+                    s.to_owned()
+                } else {
+                    format!("{s}T00:00:00.000Z")
+                }
+            });
+            let platform = v
+                .get("platform")
+                .and_then(|p| p.as_str())
+                .map(str::to_owned);
+            let ruby_version = v
+                .get("ruby_version")
+                .and_then(|p| p.as_str())
+                .map(str::to_owned);
+            let rubygems_version = v
+                .get("rubygems_version")
+                .and_then(|p| p.as_str())
+                .map(str::to_owned);
+            let meta = v.get("metadata").unwrap_or(&serde_json::Value::Null);
+            let changelog_url = meta
+                .get("changelog_uri")
+                .and_then(|v| v.as_str())
+                .map(str::to_owned);
+            let source_url = meta
+                .get("source_code_uri")
+                .and_then(|v| v.as_str())
+                .map(str::to_owned);
 
-        let constraints = if platform.is_some() || ruby_version.is_some() || rubygems_version.is_some() {
-            Some(GemConstraints {
-                platform: platform.map(|p| vec![p]),
-                ruby: ruby_version.map(|r| vec![r]),
-                rubygems: rubygems_version.map(|r| vec![r]),
+            let constraints =
+                if platform.is_some() || ruby_version.is_some() || rubygems_version.is_some() {
+                    Some(GemConstraints {
+                        platform: platform.map(|p| vec![p]),
+                        ruby: ruby_version.map(|r| vec![r]),
+                        rubygems: rubygems_version.map(|r| vec![r]),
+                    })
+                } else {
+                    None
+                };
+
+            Some(GemRelease {
+                version,
+                release_timestamp,
+                changelog_url,
+                source_url,
+                constraints,
             })
-        } else {
-            None
-        };
-
-        Some(GemRelease { version, release_timestamp, changelog_url, source_url, constraints })
-    }).collect();
+        })
+        .collect();
 
     if releases.is_empty() {
         return Err("Empty response from `/v1/gems` endpoint".to_owned());
@@ -257,7 +288,9 @@ pub fn parse_gem_info(input: &str) -> Result<Vec<GemRelease>, String> {
         .lines()
         .filter_map(|line| {
             let line = line.trim();
-            if line.is_empty() || line == "---" { return None; }
+            if line.is_empty() || line == "---" {
+                return None;
+            }
             let space_idx = line.find(' ');
             let version = match space_idx {
                 Some(i) if i > 0 => &line[..i],
@@ -404,7 +437,11 @@ fn marshalled_version_info_parses_valid() {
 fn marshalled_version_info_errors_on_empty() {
     let result = parse_marshalled_version_info(&serde_json::json!([]));
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("Empty response from `/v1/dependencies`"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Empty response from `/v1/dependencies`")
+    );
 }
 
 // Ported: "parses empty object into undefined fields" — modules/datasource/rubygems/schema.spec.ts line 35
@@ -441,9 +478,18 @@ fn gem_versions_parses_valid_input() {
     let releases = parse_gem_versions(&input).unwrap();
     assert_eq!(releases.len(), 3);
     assert_eq!(releases[0].version, "1.0.0");
-    assert_eq!(releases[0].release_timestamp.as_deref(), Some("2021-01-01T00:00:00.000Z"));
-    assert_eq!(releases[0].changelog_url.as_deref(), Some("https://example.com"));
-    assert_eq!(releases[0].source_url.as_deref(), Some("https://example.com"));
+    assert_eq!(
+        releases[0].release_timestamp.as_deref(),
+        Some("2021-01-01T00:00:00.000Z")
+    );
+    assert_eq!(
+        releases[0].changelog_url.as_deref(),
+        Some("https://example.com")
+    );
+    assert_eq!(
+        releases[0].source_url.as_deref(),
+        Some("https://example.com")
+    );
     let c = releases[0].constraints.as_ref().unwrap();
     assert_eq!(c.platform.as_deref(), Some(&["ruby".to_owned()][..]));
     assert_eq!(c.ruby.as_deref(), Some(&["2.7.0".to_owned()][..]));

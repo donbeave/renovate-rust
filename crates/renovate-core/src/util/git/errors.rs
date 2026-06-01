@@ -48,19 +48,58 @@ enum GitErrorKind {
 }
 
 static ERROR_PATTERNS: &[ErrorPattern] = &[
-    ErrorPattern { pattern: "Authentication failed", kind: GitErrorKind::AuthFailed },
-    ErrorPattern { pattern: "fatal: Authentication failed", kind: GitErrorKind::AuthFailed },
-    ErrorPattern { pattern: "could not read Username", kind: GitErrorKind::AuthFailed },
-    ErrorPattern { pattern: "not found", kind: GitErrorKind::NotFound },
-    ErrorPattern { pattern: "fatal: repository not found", kind: GitErrorKind::NotFound },
-    ErrorPattern { pattern: "CONFLICT", kind: GitErrorKind::Conflict },
-    ErrorPattern { pattern: "merge conflict", kind: GitErrorKind::Conflict },
-    ErrorPattern { pattern: "lock conflict", kind: GitErrorKind::LockConflict },
-    ErrorPattern { pattern: "Lock conflict", kind: GitErrorKind::LockConflict },
-    ErrorPattern { pattern: "failed to push some refs", kind: GitErrorKind::PushRejected },
-    ErrorPattern { pattern: "push rejected", kind: GitErrorKind::PushRejected },
-    ErrorPattern { pattern: "branch was modified", kind: GitErrorKind::BranchModified },
-    ErrorPattern { pattern: "Integration failed", kind: GitErrorKind::IntegrationError },
+    ErrorPattern {
+        pattern: "Authentication failed",
+        kind: GitErrorKind::AuthFailed,
+    },
+    ErrorPattern {
+        pattern: "fatal: Authentication failed",
+        kind: GitErrorKind::AuthFailed,
+    },
+    ErrorPattern {
+        pattern: "could not read Username",
+        kind: GitErrorKind::AuthFailed,
+    },
+    ErrorPattern {
+        pattern: "not found",
+        kind: GitErrorKind::NotFound,
+    },
+    ErrorPattern {
+        pattern: "fatal: repository not found",
+        kind: GitErrorKind::NotFound,
+    },
+    ErrorPattern {
+        pattern: "CONFLICT",
+        kind: GitErrorKind::Conflict,
+    },
+    ErrorPattern {
+        pattern: "merge conflict",
+        kind: GitErrorKind::Conflict,
+    },
+    ErrorPattern {
+        pattern: "lock conflict",
+        kind: GitErrorKind::LockConflict,
+    },
+    ErrorPattern {
+        pattern: "Lock conflict",
+        kind: GitErrorKind::LockConflict,
+    },
+    ErrorPattern {
+        pattern: "failed to push some refs",
+        kind: GitErrorKind::PushRejected,
+    },
+    ErrorPattern {
+        pattern: "push rejected",
+        kind: GitErrorKind::PushRejected,
+    },
+    ErrorPattern {
+        pattern: "branch was modified",
+        kind: GitErrorKind::BranchModified,
+    },
+    ErrorPattern {
+        pattern: "Integration failed",
+        kind: GitErrorKind::IntegrationError,
+    },
 ];
 
 fn make_error(kind: GitErrorKind, msg: &str) -> GitError {
@@ -116,19 +155,28 @@ mod tests {
     #[test]
     fn classify_auth_failed() {
         let err = classify_git_error("fatal: Authentication failed for repo");
-        assert_eq!(err, GitError::AuthFailed("fatal: Authentication failed for repo".to_owned()));
+        assert_eq!(
+            err,
+            GitError::AuthFailed("fatal: Authentication failed for repo".to_owned())
+        );
     }
 
     #[test]
     fn classify_not_found() {
         let err = classify_git_error("fatal: repository not found");
-        assert_eq!(err, GitError::NotFound("fatal: repository not found".to_owned()));
+        assert_eq!(
+            err,
+            GitError::NotFound("fatal: repository not found".to_owned())
+        );
     }
 
     #[test]
     fn classify_push_rejected() {
         let err = classify_git_error("error: failed to push some refs");
-        assert_eq!(err, GitError::PushRejected("error: failed to push some refs".to_owned()));
+        assert_eq!(
+            err,
+            GitError::PushRejected("error: failed to push some refs".to_owned())
+        );
     }
 
     #[test]
@@ -139,12 +187,22 @@ mod tests {
 
     #[test]
     fn is_git_error_matches_kind() {
-        assert!(is_git_error("fatal: Authentication failed", &GitError::AuthFailed(String::new())));
-        assert!(!is_git_error("not found", &GitError::AuthFailed(String::new())));
+        assert!(is_git_error(
+            "fatal: Authentication failed",
+            &GitError::AuthFailed(String::new())
+        ));
+        assert!(!is_git_error(
+            "not found",
+            &GitError::AuthFailed(String::new())
+        ));
     }
 
     #[test]
     fn git_error_display() {
-        assert!(GitError::AuthFailed("test".to_owned()).to_string().contains("Authentication failed"));
+        assert!(
+            GitError::AuthFailed("test".to_owned())
+                .to_string()
+                .contains("Authentication failed")
+        );
     }
 }

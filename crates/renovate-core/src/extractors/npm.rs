@@ -142,8 +142,7 @@ pub struct NpmLock {
 }
 
 /// Parsed Yarn lock metadata used to choose the expected Yarn version range.
-#[derive(Debug, Clone, PartialEq, Eq)]
-#[derive(Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct YarnLock {
     pub is_yarn1: bool,
     pub lockfile_version: Option<u64>,
@@ -417,7 +416,12 @@ pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
             }
             let lock = yarn_lock_cache.get(yarn_lock_path).unwrap();
 
-            if !lock.is_yarn1 && pf.extracted_constraints.as_ref().is_none_or(|c| !c.contains_key("yarn")) {
+            if !lock.is_yarn1
+                && pf
+                    .extracted_constraints
+                    .as_ref()
+                    .is_none_or(|c| !c.contains_key("yarn"))
+            {
                 let yarn_ver = get_yarn_version_from_lock(lock);
                 if yarn_ver != "0.0.0" {
                     let ec = pf.extracted_constraints.get_or_insert_with(BTreeMap::new);
@@ -430,7 +434,8 @@ pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
                 if let Some(v) = lock.locked_versions.get(&key) {
                     dep.locked_version = Some(v.clone());
                 }
-                if (dep.dep_type == NpmDepType::Engines || dep.dep_type == NpmDepType::PackageManager)
+                if (dep.dep_type == NpmDepType::Engines
+                    || dep.dep_type == NpmDepType::PackageManager)
                     && dep.name == "yarn"
                     && !lock.is_yarn1
                 {
@@ -457,11 +462,7 @@ pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
                 }
             }
 
-            let package_dir = pf
-                .package_file
-                .rsplit('/')
-                .nth(1)
-                .unwrap_or(".");
+            let package_dir = pf.package_file.rsplit('/').nth(1).unwrap_or(".");
             let npm_root_dir = npm_lock_path.rsplit('/').nth(1).unwrap_or(".");
             let relative_dir = if package_dir == npm_root_dir {
                 String::new()
@@ -2140,7 +2141,10 @@ pub fn package_lock_find_dep_constraints(
     }
 
     // Check requires in this lock entry (transitive constraints).
-    let version = lock_entry.get("version").and_then(|v| v.as_str()).unwrap_or("");
+    let version = lock_entry
+        .get("version")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
     if let Some(parent_name) = parent_dep_name
         && let Some(constraint) = lock_entry
             .get("requires")
@@ -2213,7 +2217,11 @@ pub fn package_lock_get_locked_dependencies(
     let Some(deps_map) = entry.get("dependencies").and_then(|v| v.as_object()) else {
         return Vec::new();
     };
-    let entry_bundled = bundled || entry.get("bundled").and_then(|v| v.as_bool()).unwrap_or(false);
+    let entry_bundled = bundled
+        || entry
+            .get("bundled")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
     let mut results = Vec::new();
 
     // Check for direct match.
@@ -2222,9 +2230,7 @@ pub fn package_lock_get_locked_dependencies(
         let matches = current_version.map(|cv| cv == version).unwrap_or(true);
         if matches {
             let mut dep_clone = dep.clone();
-            if entry_bundled
-                && let Some(obj) = dep_clone.as_object_mut()
-            {
+            if entry_bundled && let Some(obj) = dep_clone.as_object_mut() {
                 obj.insert("bundled".to_owned(), serde_json::Value::Bool(true));
             }
             results.push(dep_clone);
@@ -2233,7 +2239,11 @@ pub fn package_lock_get_locked_dependencies(
 
     // Recurse into all child deps.
     for child_dep in deps_map.values() {
-        let child_bundled = entry_bundled || child_dep.get("bundled").and_then(|v| v.as_bool()).unwrap_or(false);
+        let child_bundled = entry_bundled
+            || child_dep
+                .get("bundled")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
         let sub = package_lock_get_locked_dependencies(
             child_dep,
             dep_name,
@@ -2314,8 +2324,7 @@ pub fn yarn_update_locked_dependency(config: &UpdateLockedConfig) -> UpdateLocke
     // We detect parse failure by checking for structural validity.
     let is_parseable = content.lines().any(|l| {
         let l = l.trim();
-        !l.is_empty() && !l.starts_with('#')
-            && (l.contains('@') || l.starts_with("__metadata"))
+        !l.is_empty() && !l.starts_with('#') && (l.contains('@') || l.starts_with("__metadata"))
     }) || content.trim().is_empty();
     if !is_parseable {
         return fail(());
@@ -2398,9 +2407,8 @@ pub fn npm_update_locked_dependency_main(config: &UpdateLockedConfig) -> UpdateL
     let lock_file = config.lock_file.as_deref().unwrap_or("");
 
     // Validate that both versions are clean semver (not ranges).
-    let is_clean_semver = |v: &str| -> bool {
-        semver::Version::parse(v.trim_start_matches('=')).is_ok()
-    };
+    let is_clean_semver =
+        |v: &str| -> bool { semver::Version::parse(v.trim_start_matches('=')).is_ok() };
     if !is_clean_semver(current_version) || !is_clean_semver(new_version) {
         return fail_result;
     }
@@ -2444,7 +2452,10 @@ fn npm_update_locked_package_lock(config: &UpdateLockedConfig) -> UpdateLockedRe
     };
 
     // Only support lockfileVersion 1.
-    let version = lock_json.get("lockfileVersion").and_then(|v| v.as_u64()).unwrap_or(0);
+    let version = lock_json
+        .get("lockfileVersion")
+        .and_then(|v| v.as_u64())
+        .unwrap_or(0);
     if version >= 2 {
         return fail_result;
     }
@@ -2454,12 +2465,17 @@ fn npm_update_locked_package_lock(config: &UpdateLockedConfig) -> UpdateLockedRe
     let current_version = config.current_version.as_deref().unwrap_or("");
     let new_version = config.new_version.as_deref().unwrap_or("");
 
-    let locked_deps = package_lock_get_locked_dependencies(&lock_json, dep_name, Some(current_version), false);
+    let locked_deps =
+        package_lock_get_locked_dependencies(&lock_json, dep_name, Some(current_version), false);
     if locked_deps.is_empty() {
         // Check if already at new version.
-        let new_locked = package_lock_get_locked_dependencies(&lock_json, dep_name, Some(new_version), false);
+        let new_locked =
+            package_lock_get_locked_dependencies(&lock_json, dep_name, Some(new_version), false);
         if !new_locked.is_empty() {
-            return UpdateLockedResult { status: UpdateLockedStatus::AlreadyUpdated, new_content: None };
+            return UpdateLockedResult {
+                status: UpdateLockedStatus::AlreadyUpdated,
+                new_content: None,
+            };
         }
         return fail_result;
     }
@@ -2654,7 +2670,11 @@ fn update_dependency_package_json(
         for parent in parents {
             target = target.get_mut(parent.as_str())?;
         }
-        let override_key = if dep_name == last_parent { "." } else { dep_name };
+        let override_key = if dep_name == last_parent {
+            "."
+        } else {
+            dep_name
+        };
         let ov = target
             .get(override_key)
             .and_then(|v| v.as_str())
@@ -2700,7 +2720,10 @@ fn update_dependency_package_json(
         if let Ok(re) = regex::Regex::new(&pat) {
             if let Some(caps) = re.captures(&old_version) {
                 let prefix = caps.get(1).map_or("", |m| m.as_str());
-                let after_hash = old_version.find('#').map(|i| &old_version[i..]).unwrap_or("#");
+                let after_hash = old_version
+                    .find('#')
+                    .map(|i| &old_version[i..])
+                    .unwrap_or("#");
                 let patch_new = format!("{}{}{}", prefix, new_value, after_hash);
                 if let Some(section) = parsed.get_mut("resolutions") {
                     section[dep_name] = serde_json::Value::String(patch_new.clone());
@@ -2725,8 +2748,7 @@ fn update_dependency_package_json(
         if let Some(new_name) = new_name_final {
             let alias_val = format!("npm:{}@{}", new_name, new_value);
             // Set the alias value as the expected dep value.
-            if dep_type != "packageManager" && dep_type != "pnpm.overrides" && !is_override_object
-            {
+            if dep_type != "packageManager" && dep_type != "pnpm.overrides" && !is_override_object {
                 parsed[dep_type][dep_name] = serde_json::Value::String(alias_val.clone());
             }
             json_replace_verified(&parsed, file_content, dep_type, &search_old, &alias_val)?
@@ -2734,8 +2756,7 @@ fn update_dependency_package_json(
             json_replace_verified(&parsed, file_content, dep_type, &search_old, &search_new)?
         }
     } else {
-        let mid =
-            json_replace_verified(&parsed, file_content, dep_type, &search_old, &search_new)?;
+        let mid = json_replace_verified(&parsed, file_content, dep_type, &search_old, &search_new)?;
         if let Some(new_name) = new_name_final {
             // Rename the dep key in the section.
             json_rename_key(&mut parsed, &[dep_type], dep_name, new_name);
@@ -2773,8 +2794,7 @@ fn update_dependency_package_json(
                 if let Ok(re) = regex::Regex::new(&pat) {
                     if let Some(caps) = re.captures(&res_old) {
                         let prefix = caps.get(1).map_or("", |m| m.as_str());
-                        let after_hash =
-                            res_old.find('#').map(|i| &res_old[i..]).unwrap_or("#");
+                        let after_hash = res_old.find('#').map(|i| &res_old[i..]).unwrap_or("#");
                         format!("{}{}{}", prefix, new_value, after_hash)
                     } else {
                         new_value
@@ -2823,7 +2843,6 @@ fn update_dependency_package_json(
 
     Some(result)
 }
-
 
 /// Replace the scalar value portion of a YAML line, preserving the original
 /// quote style (none / single / double), extra spacing, YAML anchors
@@ -3002,8 +3021,8 @@ fn yaml_update_at_path(
                         yaml_replace_line_value(line, target_key, old_value, new_value)?
                     };
                     if let Some(nk) = new_key {
-                        new_line = yaml_rename_key_in_line(&new_line, target_key, nk)
-                            .unwrap_or(new_line);
+                        new_line =
+                            yaml_rename_key_in_line(&new_line, target_key, nk).unwrap_or(new_line);
                     }
                     result_lines.push(new_line);
                     let remaining_start = result_lines.len();
@@ -3085,9 +3104,7 @@ fn yaml_replace_quoted_key_value(
                 ('\'', 1)
             } else {
                 // Unquoted in flow
-                let end = rest
-                    .find([',', '}', ' '])
-                    .unwrap_or(rest.len());
+                let end = rest.find([',', '}', ' ']).unwrap_or(rest.len());
                 let found = &rest[..end];
                 if found != old_value {
                     continue;
@@ -3146,7 +3163,13 @@ pub fn update_pnpm_workspace_dependency(
         if ov == new_value {
             return Some(file_content.to_owned());
         }
-        return yaml_update_at_path(file_content, &["overrides", dep_name], &ov, &new_value, None);
+        return yaml_update_at_path(
+            file_content,
+            &["overrides", dep_name],
+            &ov,
+            &new_value,
+            None,
+        );
     }
 
     // Catalog update.
@@ -3399,7 +3422,10 @@ mod tests {
     #[test]
     fn load_config_from_legacy_yarnrc_reads_registry() {
         let config = load_config_from_legacy_yarnrc("registry \"https://registry.yarnpkg.com\"\n");
-        assert_eq!(config.npm_registry_server, Some("https://registry.yarnpkg.com".to_owned()));
+        assert_eq!(
+            config.npm_registry_server,
+            Some("https://registry.yarnpkg.com".to_owned())
+        );
     }
 
     // Ported: "returns null if failed to parse" — npm/extract/npm.spec.ts line 9
@@ -5325,14 +5351,8 @@ chalk@^2.4.1:
     fn dep_constraints_finds_indirect() {
         let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
         let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
-        let result = package_lock_find_dep_constraints(
-            &pkg_json,
-            &lock,
-            "send",
-            "0.2.0",
-            "0.2.1",
-            None,
-        );
+        let result =
+            package_lock_find_dep_constraints(&pkg_json, &lock, "send", "0.2.0", "0.2.1", None);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].constraint, "0.2.0");
         assert_eq!(result[0].parent_dep_name.as_deref(), Some("express"));
@@ -5344,14 +5364,8 @@ chalk@^2.4.1:
     fn dep_constraints_finds_direct() {
         let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
         let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
-        let result = package_lock_find_dep_constraints(
-            &pkg_json,
-            &lock,
-            "express",
-            "4.0.0",
-            "4.5.0",
-            None,
-        );
+        let result =
+            package_lock_find_dep_constraints(&pkg_json, &lock, "express", "4.0.0", "4.5.0", None);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].constraint, "4.0.0");
         assert_eq!(result[0].dep_type.as_deref(), Some("dependencies"));
@@ -5362,14 +5376,8 @@ chalk@^2.4.1:
     fn dep_constraints_skips_nonmatching() {
         let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
         let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
-        let result = package_lock_find_dep_constraints(
-            &pkg_json,
-            &lock,
-            "express",
-            "4.4.0",
-            "4.5.0",
-            None,
-        );
+        let result =
+            package_lock_find_dep_constraints(&pkg_json, &lock, "express", "4.4.0", "4.5.0", None);
         assert!(result.is_empty());
     }
 
@@ -5381,14 +5389,8 @@ chalk@^2.4.1:
         let deps = pkg_json["dependencies"].take();
         pkg_json["devDependencies"] = deps;
         let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
-        let result = package_lock_find_dep_constraints(
-            &pkg_json,
-            &lock,
-            "express",
-            "4.0.0",
-            "4.5.0",
-            None,
-        );
+        let result =
+            package_lock_find_dep_constraints(&pkg_json, &lock, "express", "4.0.0", "4.5.0", None);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].dep_type.as_deref(), Some("devDependencies"));
     }
@@ -5431,7 +5433,12 @@ chalk@^2.4.1:
         let result = package_lock_get_locked_dependencies(&lock, "express", Some("4.0.0"), false);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0]["version"].as_str(), Some("4.0.0"));
-        assert!(result[0]["resolved"].as_str().unwrap().contains("express-4.0.0"));
+        assert!(
+            result[0]["resolved"]
+                .as_str()
+                .unwrap()
+                .contains("express-4.0.0")
+        );
     }
 
     // Ported: "finds indirect dependency" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 32
@@ -5455,7 +5462,8 @@ chalk@^2.4.1:
     #[test]
     fn pkg_lock_get_locked_finds_bundled() {
         let lock: serde_json::Value = serde_json::from_str(BUNDLED_PKG_LOCK).unwrap();
-        let result = package_lock_get_locked_dependencies(&lock, "ansi-regex", Some("3.0.0"), false);
+        let result =
+            package_lock_get_locked_dependencies(&lock, "ansi-regex", Some("3.0.0"), false);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0]["bundled"].as_bool(), Some(true));
         assert_eq!(result[0]["version"].as_str(), Some("3.0.0"));
@@ -5469,7 +5477,13 @@ chalk@^2.4.1:
     const PKG_JSON_FIXTURE_LOCK: &str =
         include_str!("../../tests/fixtures/npm/package-lock/package.json");
 
-    fn mk_locked_config(lock_file: &str, lock_content: &str, dep: &str, cur: &str, new_v: &str) -> UpdateLockedConfig {
+    fn mk_locked_config(
+        lock_file: &str,
+        lock_content: &str,
+        dep: &str,
+        cur: &str,
+        new_v: &str,
+    ) -> UpdateLockedConfig {
         UpdateLockedConfig {
             lock_file: Some(lock_file.into()),
             lock_file_content: Some(lock_content.into()),
@@ -5486,13 +5500,24 @@ chalk@^2.4.1:
         let res = npm_update_locked_dependency_main(&config);
         // yarn.lock with invalid content → update-failed (content not parseable by yarn handler)
         // The spec expects toMatchObject({}) meaning any object is fine
-        assert!(matches!(res.status, UpdateLockedStatus::UpdateFailed | UpdateLockedStatus::Updated | UpdateLockedStatus::Unsupported));
+        assert!(matches!(
+            res.status,
+            UpdateLockedStatus::UpdateFailed
+                | UpdateLockedStatus::Updated
+                | UpdateLockedStatus::Unsupported
+        ));
     }
 
     // Ported: "validates versions" — npm/update/locked-dependency/index.spec.ts line 54
     #[test]
     fn npm_locked_dep_main_validates_versions() {
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "express", "4.0.0", "^2.0.0");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V1,
+            "express",
+            "4.0.0",
+            "^2.0.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         // ^2.0.0 is not clean semver → update-failed
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
@@ -5517,7 +5542,13 @@ chalk@^2.4.1:
     // Ported: "returns null if no locked deps" — npm/update/locked-dependency/index.spec.ts line 81
     #[test]
     fn npm_locked_dep_main_no_locked_deps() {
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "nonexistent-dep", "1.0.0", "1.0.1");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V1,
+            "nonexistent-dep",
+            "1.0.0",
+            "1.0.1",
+        );
         let res = npm_update_locked_dependency_main(&config);
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
@@ -5544,17 +5575,32 @@ chalk@^2.4.1:
     #[test]
     fn npm_locked_dep_main_already_updated_via_parent() {
         // express@4.0.0 is in lock → found, returns Updated (simplified)
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "express", "4.0.0", "4.1.0");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V1,
+            "express",
+            "4.0.0",
+            "4.1.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         // Either Updated or AlreadyUpdated is acceptable depending on implementation
-        assert!(matches!(res.status, UpdateLockedStatus::Updated | UpdateLockedStatus::AlreadyUpdated));
+        assert!(matches!(
+            res.status,
+            UpdateLockedStatus::Updated | UpdateLockedStatus::AlreadyUpdated
+        ));
     }
 
     // Ported: "rejects null if no constraint found" — npm/update/locked-dependency/index.spec.ts line 85
     #[test]
     fn npm_locked_dep_main_no_constraint_found() {
         // accepts@10.0.0 is not in lock (lock has accepts@1.0.0) and accepts@11.0.0 is also not in lock
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "accepts", "10.0.0", "11.0.0");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V1,
+            "accepts",
+            "10.0.0",
+            "11.0.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
@@ -5562,7 +5608,13 @@ chalk@^2.4.1:
     // Ported: "remediates in-range" — npm/update/locked-dependency/index.spec.ts line 97
     #[test]
     fn npm_locked_dep_main_remediates_in_range() {
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "express", "4.0.0", "4.1.0");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V1,
+            "express",
+            "4.0.0",
+            "4.1.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         assert_eq!(res.status, UpdateLockedStatus::Updated);
     }
@@ -5570,7 +5622,13 @@ chalk@^2.4.1:
     // Ported: "fails to remediate if parent dep cannot support" — npm/update/locked-dependency/index.spec.ts line 120
     #[test]
     fn npm_locked_dep_main_fails_parent_support() {
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "express", "4.0.0", "5.0.0");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V1,
+            "express",
+            "4.0.0",
+            "5.0.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         // Minimal implementation returns Updated regardless of parent constraints
         assert_eq!(res.status, UpdateLockedStatus::Updated);
@@ -5579,7 +5637,13 @@ chalk@^2.4.1:
     // Ported: "remediates express" — npm/update/locked-dependency/index.spec.ts line 140
     #[test]
     fn npm_locked_dep_main_remediates_express() {
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "express", "4.0.0", "4.1.0");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V1,
+            "express",
+            "4.0.0",
+            "4.1.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         assert_eq!(res.status, UpdateLockedStatus::Updated);
     }
@@ -5587,7 +5651,13 @@ chalk@^2.4.1:
     // Ported: "remediates lock file v2 express" — npm/update/locked-dependency/index.spec.ts line 150
     #[test]
     fn npm_locked_dep_main_remediates_v2_express() {
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V2, "express", "4.0.0", "4.1.0");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V2,
+            "express",
+            "4.0.0",
+            "4.1.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
@@ -5638,7 +5708,13 @@ chalk@^2.4.1:
     // Ported: "fails remediation if bundled" — npm/update/locked-dependency/index.spec.ts line 231
     #[test]
     fn npm_locked_dep_main_fails_bundled() {
-        let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "buffer-crc32", "0.2.1", "0.3.0");
+        let config = mk_locked_config(
+            "package-lock.json",
+            PKG_LOCK_V1,
+            "buffer-crc32",
+            "0.2.1",
+            "0.3.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         // Minimal implementation doesn't check bundled → Updated
         assert_eq!(res.status, UpdateLockedStatus::Updated);
@@ -5647,7 +5723,13 @@ chalk@^2.4.1:
     // Ported: "rejects in-range remediation if pnpm" — npm/update/locked-dependency/index.spec.ts line 241
     #[test]
     fn npm_locked_dep_main_rejects_pnpm() {
-        let config = mk_locked_config("pnpm-lock.yaml", "lockfileVersion: 5.4", "lodash", "4.17.21", "4.18.0");
+        let config = mk_locked_config(
+            "pnpm-lock.yaml",
+            "lockfileVersion: 5.4",
+            "lodash",
+            "4.17.21",
+            "4.18.0",
+        );
         let res = npm_update_locked_dependency_main(&config);
         assert_eq!(res.status, UpdateLockedStatus::Unsupported);
     }
@@ -5887,8 +5969,9 @@ chalk@^2.4.1:
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
         assert_eq!(parsed["dependencies"]["cheerio"], "0.22.1");
         // formatting preserved: cheerio line changed, rest intact
-        assert!(result.contains("\"cheerio\": \"0.22.1\"")
-            || result.contains("\"cheerio\":\"0.22.1\""));
+        assert!(
+            result.contains("\"cheerio\": \"0.22.1\"") || result.contains("\"cheerio\":\"0.22.1\"")
+        );
     }
 
     // Ported: "replaces a github dependency value" — npm/update/dependency/index.spec.ts line 28
@@ -6533,7 +6616,8 @@ chalk@^2.4.1:
     // Ported: "replaces a github fully specified version" — npm/update/dependency/pnpm.spec.ts line 248
     #[test]
     fn pnpm_update_dep_git_tag() {
-        let input = "packages:\n  - pkg-a\n\ncatalog:\n  n: git+https://github.com/owner/n#v1.0.0\n";
+        let input =
+            "packages:\n  - pkg-a\n\ncatalog:\n  n: git+https://github.com/owner/n#v1.0.0\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "pnpm.catalog.default".into(),
             dep_name: "n".into(),
@@ -6619,8 +6703,7 @@ chalk@^2.4.1:
     // Ported: "preserves comments" — npm/update/dependency/pnpm.spec.ts line 384
     #[test]
     fn pnpm_update_dep_preserves_comments() {
-        let input =
-            "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1 # This is a comment\n  # Another comment\n  react-dom: 18.3.1\n";
+        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1 # This is a comment\n  # Another comment\n  react-dom: 18.3.1\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "pnpm.catalog.default".into(),
             dep_name: "react".into(),
@@ -6652,7 +6735,8 @@ chalk@^2.4.1:
     // Ported: "preserves anchors, replacing only the value" — npm/update/dependency/pnpm.spec.ts line 442
     #[test]
     fn pnpm_update_dep_preserves_anchors() {
-        let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: &react 18.3.1\n  react-dom: *react\n";
+        let input =
+            "packages:\n  - pkg-a\n\ncatalog:\n  react: &react 18.3.1\n  react-dom: *react\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "pnpm.catalog.default".into(),
             dep_name: "react".into(),
@@ -6697,8 +6781,7 @@ chalk@^2.4.1:
     // Ported: "preserves formatting in flow style syntax" — npm/update/dependency/pnpm.spec.ts line 528
     #[test]
     fn pnpm_update_dep_flow_style() {
-        let input =
-            "packages:\n  - pkg-a\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
+        let input = "packages:\n  - pkg-a\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "pnpm.catalog.default".into(),
             dep_name: "react".into(),
@@ -6735,7 +6818,8 @@ chalk@^2.4.1:
             new_name: Some("react-x".into()),
             ..Default::default()
         };
-        let input = "__vars:\n  react: &r \"\"\n\npackages:\n  - pkg-a\n\ncatalog:\n  react: 18.0.0\n";
+        let input =
+            "__vars:\n  react: &r \"\"\n\npackages:\n  - pkg-a\n\ncatalog:\n  react: 18.0.0\n";
         // No newValue → npm_get_new_git_value returns None, new_value? returns None
         let result = npm_update_dependency(input, &upgrade);
         assert!(result.is_none());
@@ -6904,8 +6988,7 @@ chalk@^2.4.1:
     // Ported: "replaces a github dependency value" — npm/update/dependency/yarn.spec.ts line 224
     #[test]
     fn yarn_update_dep_github_value() {
-        let input =
-            "nodeLinker: node-modules\n\ncatalog:\n  gulp: gulpjs/gulp#v4.0.0-alpha.2\n";
+        let input = "nodeLinker: node-modules\n\ncatalog:\n  gulp: gulpjs/gulp#v4.0.0-alpha.2\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "yarn.catalog.default".into(),
             dep_name: "gulp".into(),
@@ -6966,7 +7049,8 @@ chalk@^2.4.1:
     // Ported: "replaces a github fully specified version" — npm/update/dependency/yarn.spec.ts line 307
     #[test]
     fn yarn_update_dep_git_tag() {
-        let input = "nodeLinker: node-modules\n\ncatalog:\n  n: git+https://github.com/owner/n#v1.0.0\n";
+        let input =
+            "nodeLinker: node-modules\n\ncatalog:\n  n: git+https://github.com/owner/n#v1.0.0\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "yarn.catalog.default".into(),
             dep_name: "n".into(),
@@ -6982,7 +7066,8 @@ chalk@^2.4.1:
     // Ported: "returns null if the dependency is not present in the target catalog" — npm/update/dependency/yarn.spec.ts line 332
     #[test]
     fn yarn_update_dep_null_not_in_catalog() {
-        let input = "nodeLinker: node-modules\n\ncatalog:\n\ncatalogs:\n  react18:\n    react: 18.3.1\n";
+        let input =
+            "nodeLinker: node-modules\n\ncatalog:\n\ncatalogs:\n  react18:\n    react: 18.3.1\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "yarn.catalog.default".into(),
             dep_name: "react-not".into(),
@@ -7081,7 +7166,8 @@ chalk@^2.4.1:
     // Ported: "preserves anchors, replacing only the value" — npm/update/dependency/yarn.spec.ts line 492
     #[test]
     fn yarn_update_dep_preserves_anchors() {
-        let input = "nodeLinker: node-modules\n\ncatalog:\n  react: &react 18.3.1\n  react-dom: *react\n";
+        let input =
+            "nodeLinker: node-modules\n\ncatalog:\n  react: &react 18.3.1\n  react-dom: *react\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "yarn.catalog.default".into(),
             dep_name: "react".into(),
@@ -7124,8 +7210,7 @@ chalk@^2.4.1:
     // Ported: "preserves formatting in flow style syntax" — npm/update/dependency/yarn.spec.ts line 575
     #[test]
     fn yarn_update_dep_flow_style() {
-        let input =
-            "nodeLinker: node-modules\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
+        let input = "nodeLinker: node-modules\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
         let upgrade = NpmUpdateUpgrade {
             dep_type: "yarn.catalog.default".into(),
             dep_name: "react".into(),
@@ -7161,7 +7246,8 @@ chalk@^2.4.1:
             new_name: Some("react-x".into()),
             ..Default::default()
         };
-        let input = "__vars:\n  react: &r \"\"\n\nnodeLinker: node-modules\n\ncatalog:\n  react: 18.0.0\n";
+        let input =
+            "__vars:\n  react: &r \"\"\n\nnodeLinker: node-modules\n\ncatalog:\n  react: 18.0.0\n";
         let result = npm_update_dependency(input, &upgrade);
         assert!(result.is_none());
     }
@@ -7380,7 +7466,10 @@ chalk@^2.4.1:
         // The lock file is parsed with default content (empty), lockfile_version is None
         // so no constraint is added. We verify the structure works.
         get_locked_versions(&mut files);
-        assert!(files[0].extracted_constraints.is_none() || files[0].extracted_constraints.as_ref().unwrap().is_empty());
+        assert!(
+            files[0].extracted_constraints.is_none()
+                || files[0].extracted_constraints.as_ref().unwrap().is_empty()
+        );
     }
 
     // Ported: "uses package-lock.json with npm v6.0.0" — npm/extract/post/locked-versions.spec.ts line 267
@@ -7389,25 +7478,36 @@ chalk@^2.4.1:
         let content = r#"{"lockfileVersion":1,"dependencies":{"lodash":{"version":"4.17.21"}}}"#;
         let lock = parse_npm_lock(Some(content));
         assert_eq!(lock.lockfile_version, Some(1));
-        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+        assert_eq!(
+            lock.locked_versions.get("lodash"),
+            Some(&"4.17.21".to_owned())
+        );
     }
 
     // Ported: "uses package-lock.json with npm v7.0.0" — npm/extract/post/locked-versions.spec.ts line 485
     #[test]
     fn parse_npm_lock_v2_extracts_packages() {
-        let content = r#"{"lockfileVersion":2,"packages":{"node_modules/lodash":{"version":"4.17.21"}}}"#;
+        let content =
+            r#"{"lockfileVersion":2,"packages":{"node_modules/lodash":{"version":"4.17.21"}}}"#;
         let lock = parse_npm_lock(Some(content));
         assert_eq!(lock.lockfile_version, Some(2));
-        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+        assert_eq!(
+            lock.locked_versions.get("lodash"),
+            Some(&"4.17.21".to_owned())
+        );
     }
 
     // Ported: "uses package-lock.json with npm v9.0.0" — npm/extract/post/locked-versions.spec.ts line 978
     #[test]
     fn parse_npm_lock_v3_extracts_packages() {
-        let content = r#"{"lockfileVersion":3,"packages":{"node_modules/lodash":{"version":"4.17.21"}}}"#;
+        let content =
+            r#"{"lockfileVersion":3,"packages":{"node_modules/lodash":{"version":"4.17.21"}}}"#;
         let lock = parse_npm_lock(Some(content));
         assert_eq!(lock.lockfile_version, Some(3));
-        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+        assert_eq!(
+            lock.locked_versions.get("lodash"),
+            Some(&"4.17.21".to_owned())
+        );
     }
 
     // Ported: "should log warning if unsupported lockfileVersion is found" — npm/extract/post/locked-versions.spec.ts line 947
@@ -7432,7 +7532,10 @@ chalk@^2.4.1:
         let content = "lodash@^4.0.0:\n  version \"4.17.21\"\n  resolved ...\n";
         let lock = parse_yarn_lock(Some(content));
         assert!(lock.is_yarn1);
-        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+        assert_eq!(
+            lock.locked_versions.get("lodash"),
+            Some(&"4.17.21".to_owned())
+        );
     }
 
     // Ported: "uses yarn.lock with yarn v2.1.0" — npm/extract/post/locked-versions.spec.ts line 94
@@ -7442,7 +7545,10 @@ chalk@^2.4.1:
         let lock = parse_yarn_lock(Some(content));
         assert!(!lock.is_yarn1);
         assert_eq!(lock.lockfile_version, Some(6));
-        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+        assert_eq!(
+            lock.locked_versions.get("lodash"),
+            Some(&"4.17.21".to_owned())
+        );
     }
 
     // Ported: "uses yarn.lock with yarn v3.0.0" — npm/extract/post/locked-versions.spec.ts line 188
@@ -7452,41 +7558,64 @@ chalk@^2.4.1:
         let lock = parse_yarn_lock(Some(content));
         assert!(!lock.is_yarn1);
         assert_eq!(lock.lockfile_version, Some(8));
-        assert_eq!(lock.locked_versions.get("lodash"), Some(&"4.17.21".to_owned()));
+        assert_eq!(
+            lock.locked_versions.get("lodash"),
+            Some(&"4.17.21".to_owned())
+        );
     }
 
     // Ported: "uses yarn.lock with yarn v1.22.0" — npm/extract/post/locked-versions.spec.ts line 57
     #[test]
     fn get_yarn_version_from_lock_v1() {
-        let lock = YarnLock { is_yarn1: true, lockfile_version: None, locked_versions: BTreeMap::new() };
+        let lock = YarnLock {
+            is_yarn1: true,
+            lockfile_version: None,
+            locked_versions: BTreeMap::new(),
+        };
         assert_eq!(get_yarn_version_from_lock(&lock), "^1.22.18");
     }
 
     // Ported: "uses yarn.lock with yarn v2.2.0" — npm/extract/post/locked-versions.spec.ts line 141
     #[test]
     fn get_yarn_version_from_lock_v2() {
-        let lock = YarnLock { is_yarn1: false, lockfile_version: Some(6), locked_versions: BTreeMap::new() };
+        let lock = YarnLock {
+            is_yarn1: false,
+            lockfile_version: Some(6),
+            locked_versions: BTreeMap::new(),
+        };
         assert_eq!(get_yarn_version_from_lock(&lock), "^2.2.0");
     }
 
     // Ported: "uses yarn.lock with yarn v3.0.0" — npm/extract/post/locked-versions.spec.ts line 188
     #[test]
     fn get_yarn_version_from_lock_v3() {
-        let lock = YarnLock { is_yarn1: false, lockfile_version: Some(8), locked_versions: BTreeMap::new() };
+        let lock = YarnLock {
+            is_yarn1: false,
+            lockfile_version: Some(8),
+            locked_versions: BTreeMap::new(),
+        };
         assert_eq!(get_yarn_version_from_lock(&lock), "^3.0.0");
     }
 
     // Ported: "uses yarn.lock with yarn v2.1.0" — npm/extract/post/locked-versions.spec.ts line 94
     #[test]
     fn get_yarn_version_from_lock_v4() {
-        let lock = YarnLock { is_yarn1: false, lockfile_version: Some(10), locked_versions: BTreeMap::new() };
+        let lock = YarnLock {
+            is_yarn1: false,
+            lockfile_version: Some(10),
+            locked_versions: BTreeMap::new(),
+        };
         assert_eq!(get_yarn_version_from_lock(&lock), "^4.0.0");
     }
 
     // Ported: "uses yarn.lock but doesn't override extractedConstraints" — npm/extract/post/locked-versions.spec.ts line 227
     #[test]
     fn get_yarn_version_from_lock_v4_gte() {
-        let lock = YarnLock { is_yarn1: false, lockfile_version: Some(12), locked_versions: BTreeMap::new() };
+        let lock = YarnLock {
+            is_yarn1: false,
+            lockfile_version: Some(12),
+            locked_versions: BTreeMap::new(),
+        };
         assert_eq!(get_yarn_version_from_lock(&lock), ">=4.0.0");
     }
 
@@ -7609,25 +7738,37 @@ chalk@^2.4.1:
     // Ported: "widens complex bump" — npm/range.spec.ts line 27
     #[test]
     fn get_range_strategy_complex_bump_becomes_widen() {
-        assert_eq!(get_range_strategy("bump", None, Some("^1.0.0 || ^2.0.0")), "widen");
+        assert_eq!(
+            get_range_strategy("bump", None, Some("^1.0.0 || ^2.0.0")),
+            "widen"
+        );
     }
 
     // Ported: "widens peerDependencies" — npm/range.spec.ts line 10
     #[test]
     fn get_range_strategy_peer_deps() {
-        assert_eq!(get_range_strategy("auto", Some("peerDependencies"), None), "widen");
+        assert_eq!(
+            get_range_strategy("auto", Some("peerDependencies"), None),
+            "widen"
+        );
     }
 
     // Ported: "widens complex ranges" — npm/range.spec.ts line 18
     #[test]
     fn get_range_strategy_complex_auto() {
-        assert_eq!(get_range_strategy("auto", None, Some("^1.0.0 || ^2.0.0")), "widen");
+        assert_eq!(
+            get_range_strategy("auto", None, Some("^1.0.0 || ^2.0.0")),
+            "widen"
+        );
     }
 
     // Ported: "defaults to update-lockfile" — npm/range.spec.ts line 36
     #[test]
     fn get_range_strategy_default() {
-        assert_eq!(get_range_strategy("auto", Some("dependencies"), Some("^1.0.0")), "update-lockfile");
+        assert_eq!(
+            get_range_strategy("auto", Some("dependencies"), Some("^1.0.0")),
+            "update-lockfile"
+        );
     }
 
     // Ported: "returns version" — npm/post-update/node-version.spec.ts line 100
@@ -7694,7 +7835,10 @@ chalk@^2.4.1:
             replacement_approach: None,
             manager_data: None,
         };
-        assert_eq!(npm_get_new_git_value(&upgrade), Some("github:owner/repo#def456".into()));
+        assert_eq!(
+            npm_get_new_git_value(&upgrade),
+            Some("github:owner/repo#def456".into())
+        );
     }
 
     #[test]
@@ -7713,7 +7857,10 @@ chalk@^2.4.1:
             replacement_approach: None,
             manager_data: None,
         };
-        assert_eq!(npm_get_new_git_value(&upgrade), Some("github:owner/repo#v2.0.0".into()));
+        assert_eq!(
+            npm_get_new_git_value(&upgrade),
+            Some("github:owner/repo#v2.0.0".into())
+        );
     }
 
     #[test]
@@ -7751,7 +7898,10 @@ chalk@^2.4.1:
             replacement_approach: None,
             manager_data: None,
         };
-        assert_eq!(npm_get_new_alias_value(Some("2.0.0"), &upgrade), Some("npm:real-package@2.0.0".into()));
+        assert_eq!(
+            npm_get_new_alias_value(Some("2.0.0"), &upgrade),
+            Some("npm:real-package@2.0.0".into())
+        );
     }
 
     #[test]
@@ -7900,7 +8050,8 @@ lodash@npm:^4.0.0:
 express@^4.0.0:
   version "4.18.2"
 "#;
-        let result = replace_constraint_version(content, "lodash", "^4.0.0", "4.17.22", Some("^4.17.0"));
+        let result =
+            replace_constraint_version(content, "lodash", "^4.0.0", "4.17.22", Some("^4.17.0"));
         assert!(result.contains("lodash@^4.17.0:"));
         assert!(result.contains("  version \"4.17.22\""));
     }
@@ -7910,7 +8061,14 @@ express@^4.0.0:
     fn package_lock_find_dep_constraints_direct() {
         let package_json = serde_json::json!({"dependencies": {"lodash": "^4.0.0"}});
         let lock_entry = serde_json::json!({"version": "4.17.21"});
-        let result = package_lock_find_dep_constraints(&package_json, &lock_entry, "lodash", "4.17.21", "4.18.0", None);
+        let result = package_lock_find_dep_constraints(
+            &package_json,
+            &lock_entry,
+            "lodash",
+            "4.17.21",
+            "4.18.0",
+            None,
+        );
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].constraint, "^4.0.0");
         assert_eq!(result[0].dep_type, Some("dependencies".into()));
@@ -7921,7 +8079,14 @@ express@^4.0.0:
     fn package_lock_find_dep_constraints_dev() {
         let package_json = serde_json::json!({"devDependencies": {"jest": "^29.0.0"}});
         let lock_entry = serde_json::json!({"version": "29.7.0"});
-        let result = package_lock_find_dep_constraints(&package_json, &lock_entry, "jest", "29.7.0", "30.0.0", None);
+        let result = package_lock_find_dep_constraints(
+            &package_json,
+            &lock_entry,
+            "jest",
+            "29.7.0",
+            "30.0.0",
+            None,
+        );
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].constraint, "^29.0.0");
     }
@@ -7931,7 +8096,14 @@ express@^4.0.0:
     fn package_lock_find_dep_constraints_no_match() {
         let package_json = serde_json::json!({});
         let lock_entry = serde_json::json!({"version": "4.17.21"});
-        let result = package_lock_find_dep_constraints(&package_json, &lock_entry, "lodash", "4.17.21", "4.18.0", None);
+        let result = package_lock_find_dep_constraints(
+            &package_json,
+            &lock_entry,
+            "lodash",
+            "4.17.21",
+            "4.18.0",
+            None,
+        );
         assert!(result.is_empty());
     }
 
@@ -7943,7 +8115,14 @@ express@^4.0.0:
             "version": "1.0.0",
             "requires": {"lodash": "^4.0.0"}
         });
-        let result = package_lock_find_dep_constraints(&package_json, &lock_entry, "lodash", "4.17.21", "4.18.0", Some("parent-pkg"));
+        let result = package_lock_find_dep_constraints(
+            &package_json,
+            &lock_entry,
+            "lodash",
+            "4.17.21",
+            "4.18.0",
+            Some("parent-pkg"),
+        );
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].parent_dep_name, Some("parent-pkg".into()));
     }
@@ -8149,16 +8328,37 @@ express@^4.0.0:
     // Ported: "finds and filters .npmrc" — npm/extract/index.spec.ts line 207
     #[test]
     fn resolve_npmrc_with_repo_content() {
-        let result = resolve_npmrc("package.json", None, false, Some("registry=https://registry.example.com"), false);
+        let result = resolve_npmrc(
+            "package.json",
+            None,
+            false,
+            Some("registry=https://registry.example.com"),
+            false,
+        );
         assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
-        assert!(result.npmrc.as_deref().unwrap().contains("registry=https://registry.example.com"));
+        assert!(
+            result
+                .npmrc
+                .as_deref()
+                .unwrap()
+                .contains("registry=https://registry.example.com")
+        );
     }
 
     // Ported: "uses config.npmrc if no .npmrc exists" — npm/extract/index.spec.ts line 239
     #[test]
     fn resolve_npmrc_with_config_only() {
-        let result = resolve_npmrc("package.json", Some("registry=https://config.example.com"), false, None, false);
-        assert_eq!(result.npmrc.as_deref(), Some("registry=https://config.example.com"));
+        let result = resolve_npmrc(
+            "package.json",
+            Some("registry=https://config.example.com"),
+            false,
+            None,
+            false,
+        );
+        assert_eq!(
+            result.npmrc.as_deref(),
+            Some("registry=https://config.example.com")
+        );
     }
 
     // Ported: "returns undefined if no .npmrc exists and no config.npmrc" — modules/manager/npm/npmrc.spec.ts line 19
@@ -8190,7 +8390,13 @@ express@^4.0.0:
         );
         assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
         // Rust regex replacement leaves a blank line where package-lock was.
-        assert!(result.npmrc.as_deref().unwrap().contains("save-exact = true"));
+        assert!(
+            result
+                .npmrc
+                .as_deref()
+                .unwrap()
+                .contains("save-exact = true")
+        );
         assert!(!result.npmrc.as_deref().unwrap().contains("package-lock"));
     }
 
@@ -8255,7 +8461,9 @@ express@^4.0.0:
             "package.json",
             None,
             false,
-            Some("registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n"),
+            Some(
+                "registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n",
+            ),
             false,
         );
         let npmrc = result.npmrc.as_deref().unwrap();
@@ -8271,12 +8479,16 @@ express@^4.0.0:
             "package.json",
             None,
             false,
-            Some("registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n"),
+            Some(
+                "registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n",
+            ),
             true,
         );
         assert_eq!(
             result.npmrc.as_deref(),
-            Some("registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n")
+            Some(
+                "registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n"
+            )
         );
         assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
     }
@@ -8284,12 +8496,10 @@ express@^4.0.0:
     // Ported: "handles no monorepo" — npm/extract/post/monorepo.spec.ts line 8
     #[test]
     fn detect_monorepos_no_workspaces() {
-        let mut files = vec![
-            NpmPackageFile {
-                package_file: "package.json".to_owned(),
-                ..Default::default()
-            },
-        ];
+        let mut files = vec![NpmPackageFile {
+            package_file: "package.json".to_owned(),
+            ..Default::default()
+        }];
         detect_monorepos(&mut files);
         assert!(files[0].deps.is_empty());
     }
@@ -8305,10 +8515,23 @@ express@^4.0.0:
                     ..Default::default()
                 },
                 deps: vec![
-                    NpmExtractedDep { name: "@org/a".to_owned(), ..Default::default() },
-                    NpmExtractedDep { name: "@org/b".to_owned(), ..Default::default() },
-                    NpmExtractedDep { name: "@org/c".to_owned(), ..Default::default() },
-                    NpmExtractedDep { name: "foo".to_owned(), current_value: "6.1.0".to_owned(), ..Default::default() },
+                    NpmExtractedDep {
+                        name: "@org/a".to_owned(),
+                        ..Default::default()
+                    },
+                    NpmExtractedDep {
+                        name: "@org/b".to_owned(),
+                        ..Default::default()
+                    },
+                    NpmExtractedDep {
+                        name: "@org/c".to_owned(),
+                        ..Default::default()
+                    },
+                    NpmExtractedDep {
+                        name: "foo".to_owned(),
+                        current_value: "6.1.0".to_owned(),
+                        ..Default::default()
+                    },
                 ],
                 ..Default::default()
             },
@@ -8319,9 +8542,18 @@ express@^4.0.0:
                     ..Default::default()
                 },
                 deps: vec![
-                    NpmExtractedDep { name: "@org/b".to_owned(), ..Default::default() },
-                    NpmExtractedDep { name: "@org/c".to_owned(), ..Default::default() },
-                    NpmExtractedDep { name: "bar".to_owned(), ..Default::default() },
+                    NpmExtractedDep {
+                        name: "@org/b".to_owned(),
+                        ..Default::default()
+                    },
+                    NpmExtractedDep {
+                        name: "@org/c".to_owned(),
+                        ..Default::default()
+                    },
+                    NpmExtractedDep {
+                        name: "bar".to_owned(),
+                        ..Default::default()
+                    },
                 ],
                 ..Default::default()
             },
@@ -8374,7 +8606,10 @@ express@^4.0.0:
             },
         ];
         detect_monorepos(&mut files);
-        assert_eq!(files[1].npmrc, Some("@org:registry=//registry.some.org\n".to_owned()));
+        assert_eq!(
+            files[1].npmrc,
+            Some("@org:registry=//registry.some.org\n".to_owned())
+        );
     }
 
     // Ported: "uses yarn workspaces package settings with extractedConstraints" — npm/extract/post/monorepo.spec.ts line 98
@@ -8413,8 +8648,14 @@ express@^4.0.0:
             },
         ];
         detect_monorepos(&mut files);
-        assert_eq!(files[1].extracted_constraints.as_ref().unwrap().get("node"), Some(&"^14.15.0 || >=16.13.0".to_owned()));
-        assert_eq!(files[1].extracted_constraints.as_ref().unwrap().get("yarn"), Some(&"^3.2.0".to_owned()));
+        assert_eq!(
+            files[1].extracted_constraints.as_ref().unwrap().get("node"),
+            Some(&"^14.15.0 || >=16.13.0".to_owned())
+        );
+        assert_eq!(
+            files[1].extracted_constraints.as_ref().unwrap().get("yarn"),
+            Some(&"^3.2.0".to_owned())
+        );
         assert_eq!(files[1].manager_data.has_package_manager, Some(true));
     }
 
@@ -8472,6 +8713,9 @@ express@^4.0.0:
         assert_eq!(NpmDepType::Regular.as_renovate_str(), "dependencies");
         assert_eq!(NpmDepType::Dev.as_renovate_str(), "devDependencies");
         assert_eq!(NpmDepType::Peer.as_renovate_str(), "peerDependencies");
-        assert_eq!(NpmDepType::Optional.as_renovate_str(), "optionalDependencies");
+        assert_eq!(
+            NpmDepType::Optional.as_renovate_str(),
+            "optionalDependencies"
+        );
     }
 }

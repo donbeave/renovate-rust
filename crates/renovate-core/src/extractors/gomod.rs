@@ -456,7 +456,13 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 let replacement = cap[1].to_owned();
                 let version = cap[2].to_owned();
                 if !replacement.starts_with("./") && !replacement.starts_with("../") {
-                    deps.push(make_replace_dep(replacement, version, is_indirect, line_number, true));
+                    deps.push(make_replace_dep(
+                        replacement,
+                        version,
+                        is_indirect,
+                        line_number,
+                        true,
+                    ));
                 }
             }
             continue;
@@ -502,7 +508,10 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 is_toolchain_directive: false,
                 is_replace_directive: false,
                 enabled: None,
-                manager_data: Some(GoModManagerData { line_number, multi_line: false }),
+                manager_data: Some(GoModManagerData {
+                    line_number,
+                    multi_line: false,
+                }),
             });
             continue;
         }
@@ -517,7 +526,10 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 is_toolchain_directive: true,
                 is_replace_directive: false,
                 enabled: None,
-                manager_data: Some(GoModManagerData { line_number, multi_line: false }),
+                manager_data: Some(GoModManagerData {
+                    line_number,
+                    multi_line: false,
+                }),
             });
             continue;
         }
@@ -527,7 +539,13 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
             let replacement = cap[1].to_owned();
             let version = cap[2].to_owned();
             if !replacement.starts_with("./") && !replacement.starts_with("../") {
-                deps.push(make_replace_dep(replacement, version, is_indirect, line_number, false));
+                deps.push(make_replace_dep(
+                    replacement,
+                    version,
+                    is_indirect,
+                    line_number,
+                    false,
+                ));
                 continue;
             }
         }
@@ -656,7 +674,10 @@ fn make_dep(
         is_toolchain_directive: false,
         is_replace_directive: false,
         enabled: None,
-        manager_data: Some(GoModManagerData { line_number, multi_line }),
+        manager_data: Some(GoModManagerData {
+            line_number,
+            multi_line,
+        }),
     }
 }
 
@@ -676,7 +697,10 @@ fn make_replace_dep(
         is_toolchain_directive: false,
         is_replace_directive: true,
         enabled: None,
-        manager_data: Some(GoModManagerData { line_number, multi_line }),
+        manager_data: Some(GoModManagerData {
+            line_number,
+            multi_line,
+        }),
     }
 }
 
@@ -701,7 +725,10 @@ pub fn convert_go_directive_to_semver_range(
     if parts.len() < 2 {
         return None;
     }
-    Some((format!("~{}.{minor}.x", parts[0], minor = parts[1]), "semver-coerced"))
+    Some((
+        format!("~{}.{minor}.x", parts[0], minor = parts[1]),
+        "semver-coerced",
+    ))
 }
 
 // ── artifacts-extra (mirrors lib/modules/manager/gomod/artifacts-extra.ts) ──
@@ -944,10 +971,7 @@ fn gomod_name_without_version(name: &str) -> String {
 
 /// Update a single dependency in a go.mod file.
 /// Mirrors `updateDependency()` from `lib/modules/manager/gomod/update.ts`.
-pub fn gomod_update_dependency(
-    file_content: &str,
-    upgrade: &GoModUpdateUpgrade,
-) -> Option<String> {
+pub fn gomod_update_dependency(file_content: &str, upgrade: &GoModUpdateUpgrade) -> Option<String> {
     let current_name = upgrade.dep_name.as_deref()?;
     let manager_data = upgrade.manager_data.as_ref()?;
     let new_value = upgrade.new_value.as_deref().unwrap_or("");
@@ -981,10 +1005,8 @@ pub fn gomod_update_dependency(
         regex::Regex::new(r"(?P<depPart>(?:toolchain )?go)(?P<divider>\s*)(?:[^\s]+|[\w]+)").ok()
     } else if dep_type == "replace" {
         if manager_data.multi_line {
-            regex::Regex::new(
-                r"^(?P<depPart>\s+[^\s]+[\s]+=>+\s+)(?P<divider>[^\s]+\s+)[^\s]+",
-            )
-            .ok()
+            regex::Regex::new(r"^(?P<depPart>\s+[^\s]+[\s]+=>+\s+)(?P<divider>[^\s]+\s+)[^\s]+")
+                .ok()
         } else {
             regex::Regex::new(
                 r"^(?P<depPart>replace\s+[^\s]+[\s]+=>+\s+)(?P<divider>[^\s]+\s+)[^\s]+",
@@ -1013,11 +1035,8 @@ pub fn gomod_update_dependency(
         // Digest update: use newValue directly for pseudo-versions.
         if new_value.starts_with("v0.0.0-") {
             if let Some(ref re) = update_line_exp {
-                re.replace(
-                    line_to_change,
-                    format!("$depPart${{divider}}{}", new_value),
-                )
-                .into_owned()
+                re.replace(line_to_change, format!("$depPart${{divider}}{}", new_value))
+                    .into_owned()
             } else {
                 line_to_change.to_owned()
             }
@@ -1042,11 +1061,8 @@ pub fn gomod_update_dependency(
             }
         }
     } else if let Some(ref re) = update_line_exp {
-        re.replace(
-            line_to_change,
-            format!("$depPart${{divider}}{}", new_value),
-        )
-        .into_owned()
+        re.replace(line_to_change, format!("$depPart${{divider}}{}", new_value))
+            .into_owned()
     } else {
         line_to_change.to_owned()
     };
@@ -1062,23 +1078,24 @@ pub fn gomod_update_dependency(
             let new_dotv = format!(".v{}", new_major);
             new_line = new_line.replacen(&old_dotv, &new_dotv, 1);
             // Package rename: gorethink → rethinkdb.
-            new_line = new_line.replace(
-                "gorethink/gorethink.v5",
-                "rethinkdb/rethinkdb-go.v5",
-            );
+            new_line = new_line.replace("gorethink/gorethink.v5", "rethinkdb/rethinkdb-go.v5");
         } else if new_major > 1
             && !new_line.contains(&format!("/v{}", new_major))
             && !new_value.ends_with("+incompatible")
         {
             if current_name == current_name_no_version.as_str() {
                 // No existing version suffix → append /v<N>.
-                new_line = new_line.replace(
-                    current_name,
-                    &format!("{}/v{}", current_name, new_major),
-                );
+                new_line =
+                    new_line.replace(current_name, &format!("{}/v{}", current_name, new_major));
             } else {
                 // Replace existing version suffix.
-                let old_v = upgrade.current_value.as_deref().unwrap_or("").split('.').next().unwrap_or("v1");
+                let old_v = upgrade
+                    .current_value
+                    .as_deref()
+                    .unwrap_or("")
+                    .split('.')
+                    .next()
+                    .unwrap_or("v1");
                 let re_str = format!(r"/{}(\s+)", regex::escape(old_v));
                 if let Ok(re) = regex::Regex::new(&re_str) {
                     new_line = re
@@ -1091,8 +1108,7 @@ pub fn gomod_update_dependency(
 
     // Handle +incompatible suffix.
     if line_to_change.ends_with("+incompatible") && !new_value.ends_with("+incompatible") {
-        let to_add = if update_type == "major"
-            && upgrade.new_major.map(|m| m >= 2).unwrap_or(false)
+        let to_add = if update_type == "major" && upgrade.new_major.map(|m| m >= 2).unwrap_or(false)
         {
             ""
         } else {
@@ -1107,17 +1123,16 @@ pub fn gomod_update_dependency(
 
     // Ensure indirect comment on indirect dep.
     if dep_type == "indirect" {
-        let indirect_re =
-            regex::Regex::new(r"\s*(?://\s*indirect(?:\s*;)?\s*)*$").ok()?;
-        new_line = indirect_re
-            .replace(&new_line, " // indirect")
-            .into_owned();
+        let indirect_re = regex::Regex::new(r"\s*(?://\s*indirect(?:\s*;)?\s*)*$").ok()?;
+        new_line = indirect_re.replace(&new_line, " // indirect").into_owned();
     }
 
     let mut result_lines: Vec<String> = lines.iter().map(|s| (*s).to_owned()).collect();
     result_lines[line_number] = new_line;
-    Some(result_lines.join("
-"))
+    Some(result_lines.join(
+        "
+",
+    ))
 }
 
 #[cfg(test)]
@@ -2226,7 +2241,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             dep_name: Some(dep_name.into()),
             dep_type: Some(dep_type.into()),
             new_value: Some(new_value.into()),
-            manager_data: Some(GoModManagerData { line_number: line, multi_line: multi }),
+            manager_data: Some(GoModManagerData {
+                line_number: line,
+                multi_line: multi,
+            }),
             ..Default::default()
         }
     }
@@ -2264,7 +2282,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         let u = GoModUpdateUpgrade {
             dep_name: Some("github.com/pkg/errors".into()),
             new_value: Some("v0.7.0".into()),
-            manager_data: Some(GoModManagerData { line_number: 2, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 2,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2281,7 +2302,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v0.7.0".into()),
             new_major: Some(1),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 2, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 2,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2298,7 +2322,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v0.7.0".into()),
             new_major: Some(2),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 2, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 2,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2315,7 +2342,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v4.7.0".into()),
             new_major: Some(6),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 15, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 15,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2332,7 +2362,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v18.0.0".into()),
             new_major: Some(19),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 16, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 16,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2349,7 +2382,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v1.0.0".into()),
             new_major: Some(2),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 7, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 7,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2366,7 +2402,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v25.1.0+incompatible".into()),
             new_major: Some(26),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 8, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 8,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2379,7 +2418,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         let u = GoModUpdateUpgrade {
             dep_name: Some("github.com/aws/aws-sdk-go".into()),
             new_value: Some("v1.15.36".into()),
-            manager_data: Some(GoModManagerData { line_number: 2, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 2,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u);
@@ -2411,7 +2453,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v1.9.0".into()),
             new_major: Some(2),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 7, multi_line: true }),
+            manager_data: Some(GoModManagerData {
+                line_number: 7,
+                multi_line: true,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD2, &u).unwrap();
@@ -2428,7 +2473,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v2.3.0".into()),
             new_major: Some(3),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 47, multi_line: true }),
+            manager_data: Some(GoModManagerData {
+                line_number: 47,
+                multi_line: true,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD2, &u).unwrap();
@@ -2445,7 +2493,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v0.3.0".into()),
             new_major: Some(1),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 56, multi_line: true }),
+            manager_data: Some(GoModManagerData {
+                line_number: 56,
+                multi_line: true,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD2, &u).unwrap();
@@ -2463,7 +2514,13 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
     // Ported: "handles +incompatible tag" — gomod/update.spec.ts line 412
     #[test]
     fn gomod_update_incompatible_tag_preserved() {
-        let u = mk_gomod_upgrade("github.com/Azure/azure-sdk-for-go", "require", "v26.0.0", 8, false);
+        let u = mk_gomod_upgrade(
+            "github.com/Azure/azure-sdk-for-go",
+            "require",
+            "v26.0.0",
+            8,
+            false,
+        );
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
         assert!(res.contains("github.com/Azure/azure-sdk-for-go v26.0.0+incompatible"));
     }
@@ -2471,7 +2528,13 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
     // Ported: "handles +incompatible tag without duplicating it" — gomod/update.spec.ts line 433
     #[test]
     fn gomod_update_incompatible_no_duplicate() {
-        let u = mk_gomod_upgrade("github.com/Azure/azure-sdk-for-go", "require", "v26.0.0+incompatible", 8, false);
+        let u = mk_gomod_upgrade(
+            "github.com/Azure/azure-sdk-for-go",
+            "require",
+            "v26.0.0+incompatible",
+            8,
+            false,
+        );
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
         assert!(!res.contains("v26.0.0+incompatible+incompatible"));
         assert!(res.contains("github.com/Azure/azure-sdk-for-go v26.0.0+incompatible"));
@@ -2495,7 +2558,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v0.7.0".into()),
             new_major: Some(2),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 11, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 11,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2512,7 +2578,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             current_value: Some("v3.5.0+incompatible".into()),
             new_major: Some(6),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 13, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 13,
+                multi_line: false,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
@@ -2576,7 +2645,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             update_type: Some("digest".into()),
             current_digest: Some("14d3d4c51834".into()),
             new_digest: Some("123456123456abcdef".into()),
-            manager_data: Some(GoModManagerData { line_number: 43, multi_line: true }),
+            manager_data: Some(GoModManagerData {
+                line_number: 43,
+                multi_line: true,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD2, &u).unwrap();
@@ -2592,7 +2664,10 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
             update_type: Some("digest".into()),
             current_digest: Some("abcdefabcdef".into()),
             new_digest: Some("14d3d4c51834000000".into()),
-            manager_data: Some(GoModManagerData { line_number: 43, multi_line: true }),
+            manager_data: Some(GoModManagerData {
+                line_number: 43,
+                multi_line: true,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(GOMOD2, &u).unwrap();
@@ -2616,7 +2691,10 @@ require (
             current_digest: Some("b7bbf4be5dbd".into()),
             new_value: Some("v0.0.0-20260120122510-4a022ed9999a".into()),
             new_digest: Some("4a022ed9999a".into()),
-            manager_data: Some(GoModManagerData { line_number: 2, multi_line: true }),
+            manager_data: Some(GoModManagerData {
+                line_number: 2,
+                multi_line: true,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(content, &u).unwrap();
@@ -2641,7 +2719,10 @@ replace (
             current_value: Some("v1.16.0".into()),
             new_major: Some(2),
             update_type: Some("major".into()),
-            manager_data: Some(GoModManagerData { line_number: 5, multi_line: true }),
+            manager_data: Some(GoModManagerData {
+                line_number: 5,
+                multi_line: true,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(content, &u).unwrap();
@@ -2660,7 +2741,10 @@ replace (
             update_type: Some("digest".into()),
             current_digest: Some("14d3d4c51834".into()),
             new_digest: Some("123456123456abcdef".into()),
-            manager_data: Some(GoModManagerData { line_number: 11, multi_line: false }),
+            manager_data: Some(GoModManagerData {
+                line_number: 11,
+                multi_line: false,
+            }),
         };
         let res = gomod_update_dependency(GOMOD1, &u).unwrap();
         assert!(res.contains("123456123456"));
@@ -2681,7 +2765,10 @@ replace (
             current_value: Some("v0.21.9".into()),
             new_major: Some(2),
             update_type: Some("minor".into()),
-            manager_data: Some(GoModManagerData { line_number: 3, multi_line: true }),
+            manager_data: Some(GoModManagerData {
+                line_number: 3,
+                multi_line: true,
+            }),
             ..Default::default()
         };
         let res = gomod_update_dependency(content, &u).unwrap();

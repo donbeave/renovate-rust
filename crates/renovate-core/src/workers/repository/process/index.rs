@@ -150,7 +150,10 @@ mod tests {
     #[test]
     fn is_multi_base_branch_multiple() {
         let config = RenovateConfig::default();
-        assert!(is_multi_base_branch(&config, &["main".into(), "develop".into()]));
+        assert!(is_multi_base_branch(
+            &config,
+            &["main".into(), "develop".into()]
+        ));
     }
 
     #[test]

@@ -1331,9 +1331,10 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                "<a href=\"example/\" title='example/'>example/</a>",
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string("<a href=\"example/\" title='example/'>example/</a>"),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -1372,9 +1373,10 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                "<a href=\"example/\" title='example/'>example/</a>",
-            ))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string("<a href=\"example/\" title='example/'>example/</a>"),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -1384,9 +1386,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
             .await;
         Mock::given(method("GET"))
             .and(path("/maven2/org/example/example/"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(
-                "<a href='1.2.3/'>1.2.3/</a>",
-            ))
+            .respond_with(ResponseTemplate::new(200).set_body_string("<a href='1.2.3/'>1.2.3/</a>"))
             .mount(&server)
             .await;
         Mock::given(method("GET"))

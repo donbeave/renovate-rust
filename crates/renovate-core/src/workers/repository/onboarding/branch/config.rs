@@ -30,7 +30,10 @@ mod tests {
     fn get_onboarding_config_default() {
         let global = GlobalConfig::default();
         let config = get_onboarding_config(&global);
-        assert_eq!(config["$schema"], "https://docs.renovatebot.com/renovate-schema.json");
+        assert_eq!(
+            config["$schema"],
+            "https://docs.renovatebot.com/renovate-schema.json"
+        );
         assert_eq!(config["extends"], serde_json::json!(["config:recommended"]));
     }
 
@@ -41,10 +44,9 @@ mod tests {
             "$schema".to_owned(),
             serde_json::json!("https://docs.renovatebot.com/renovate-schema.json"),
         );
-        global.onboarding_config.insert(
-            "extends".to_owned(),
-            serde_json::json!(["config:base"]),
-        );
+        global
+            .onboarding_config
+            .insert("extends".to_owned(), serde_json::json!(["config:base"]));
         let config = get_onboarding_config(&global);
         assert_eq!(config["extends"], serde_json::json!(["config:base"]));
     }
@@ -60,10 +62,9 @@ mod tests {
     #[test]
     fn get_onboarding_config_content_custom() {
         let mut global = GlobalConfig::default();
-        global.onboarding_config.insert(
-            "enabled".to_owned(),
-            serde_json::json!(true),
-        );
+        global
+            .onboarding_config
+            .insert("enabled".to_owned(), serde_json::json!(true));
         let content = get_onboarding_config_content(&global);
         let parsed: Value = serde_json::from_str(&content).unwrap();
         assert_eq!(parsed["enabled"], true);

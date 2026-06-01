@@ -61,8 +61,8 @@ impl Migration for BaseBranchMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::BaseBranchMigration;
     use crate::config::migration::Migration;
@@ -85,7 +85,12 @@ mod tests {
     fn migrate_array_appends_to_patterns() {
         let m = BaseBranchMigration::new();
         let mut migrated = Map::new();
-        m.run("baseBranch", &json!(["main", "develop"]), &Map::new(), &mut migrated);
+        m.run(
+            "baseBranch",
+            &json!(["main", "develop"]),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["baseBranchPatterns"], json!(["main", "develop"]));
     }
 

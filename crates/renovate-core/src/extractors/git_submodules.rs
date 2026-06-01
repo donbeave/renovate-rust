@@ -254,9 +254,10 @@ pub fn update_dependency(
         return GitSubmoduleUpdateResult::Unchanged;
     };
     if let Some(current) = current_value
-        && current == new_val {
-            return GitSubmoduleUpdateResult::Unchanged;
-        }
+        && current == new_val
+    {
+        return GitSubmoduleUpdateResult::Unchanged;
+    }
 
     let mut result = String::new();
     let mut in_target_section = false;
@@ -267,14 +268,16 @@ pub fn update_dependency(
             in_target_section = &cap[1] == dep_name.as_str();
         }
 
-        if in_target_section && !branch_updated
+        if in_target_section
+            && !branch_updated
             && let Some(cap) = KV_RE.captures(line)
-                && cap[1].trim() == "branch" {
-                    let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
-                    result.push_str(&format!("{indent}branch = {new_val}\n"));
-                    branch_updated = true;
-                    continue;
-                }
+            && cap[1].trim() == "branch"
+        {
+            let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
+            result.push_str(&format!("{indent}branch = {new_val}\n"));
+            branch_updated = true;
+            continue;
+        }
 
         result.push_str(line);
         result.push('\n');
@@ -293,13 +296,15 @@ pub fn update_dependency(
             final_result.push_str(line);
             final_result.push('\n');
 
-            if in_target && !added
+            if in_target
+                && !added
                 && let Some(cap) = KV_RE.captures(line)
-                    && cap[1].trim() == "url" {
-                        let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
-                        final_result.push_str(&format!("{indent}branch = {new_val}\n"));
-                        added = true;
-                    }
+                && cap[1].trim() == "url"
+            {
+                let indent: String = line.chars().take_while(|c| c.is_whitespace()).collect();
+                final_result.push_str(&format!("{indent}branch = {new_val}\n"));
+                added = true;
+            }
         }
 
         if added {
@@ -576,7 +581,10 @@ mod tests {
             new_digest: None,
             package_file: None,
         };
-        assert_eq!(update_dependency(content, &config), GitSubmoduleUpdateResult::Unchanged);
+        assert_eq!(
+            update_dependency(content, &config),
+            GitSubmoduleUpdateResult::Unchanged
+        );
     }
 
     // Rust-specific: git_submodules behavior test
@@ -590,7 +598,10 @@ mod tests {
             new_digest: None,
             package_file: None,
         };
-        assert_eq!(update_dependency(content, &config), GitSubmoduleUpdateResult::Unchanged);
+        assert_eq!(
+            update_dependency(content, &config),
+            GitSubmoduleUpdateResult::Unchanged
+        );
     }
 
     // Rust-specific: git_submodules behavior test

@@ -412,11 +412,7 @@ impl PlatformClient for AzureClient {
         }))
     }
 
-    async fn get_file_list(
-        &self,
-        _owner: &str,
-        repo: &str,
-    ) -> Result<Vec<String>, PlatformError> {
+    async fn get_file_list(&self, _owner: &str, repo: &str) -> Result<Vec<String>, PlatformError> {
         let url = format!(
             "{}/repositories/{}/items?recursionLevel=Full&api-version=7.0",
             self.api_base, repo
@@ -577,13 +573,8 @@ mod tests {
             .mount(&server)
             .await;
 
-        let client = AzureClient::with_endpoint(
-            server.uri(),
-            "myorg",
-            "myproject",
-            "test-pat",
-        )
-        .unwrap();
+        let client =
+            AzureClient::with_endpoint(server.uri(), "myorg", "myproject", "test-pat").unwrap();
         let user = client.get_current_user().await.unwrap();
         assert_eq!(user.login, "testuser@org.com");
     }
@@ -597,13 +588,8 @@ mod tests {
             .mount(&server)
             .await;
 
-        let client = AzureClient::with_endpoint(
-            server.uri(),
-            "myorg",
-            "myproject",
-            "bad-pat",
-        )
-        .unwrap();
+        let client =
+            AzureClient::with_endpoint(server.uri(), "myorg", "myproject", "bad-pat").unwrap();
         let err = client.get_current_user().await.unwrap_err();
         assert!(matches!(err, PlatformError::Unauthorized));
     }
@@ -612,7 +598,9 @@ mod tests {
     async fn create_pr_returns_id() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
                 "pull_request_id": 99,
                 "title": "Test PR",
@@ -632,7 +620,9 @@ mod tests {
     async fn list_prs_returns_values() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "value": [
                     {"pull_request_id": 1, "title": "PR 1"},
@@ -653,7 +643,9 @@ mod tests {
     async fn merge_pr_succeeds() {
         let server = MockServer::start().await;
         Mock::given(method("PATCH"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/5".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/5".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(200))
             .mount(&server)
             .await;
@@ -666,7 +658,9 @@ mod tests {
     async fn add_comment_returns_thread() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/1/threads".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/1/threads".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
                 "id": 10,
                 "comments": [{"id": 1, "content": "hello"}]
@@ -675,9 +669,7 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let thread = add_comment(&client, "myrepo", 1, "hello")
-            .await
-            .unwrap();
+        let thread = add_comment(&client, "myrepo", 1, "hello").await.unwrap();
         assert_eq!(thread.id, Some(10));
     }
 
@@ -685,7 +677,9 @@ mod tests {
     async fn get_pr_returns_pr() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/5".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/5".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "pull_request_id": 5,
                 "title": "My PR",
@@ -704,7 +698,9 @@ mod tests {
     async fn get_pr_not_found() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/999".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/999".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
@@ -718,7 +714,9 @@ mod tests {
     async fn create_pr_error() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(500))
             .mount(&server)
             .await;
@@ -732,8 +730,12 @@ mod tests {
     async fn list_prs_empty() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned()))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"value": []})))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests".to_owned(),
+            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"value": []})),
+            )
             .mount(&server)
             .await;
 
@@ -746,7 +748,9 @@ mod tests {
     async fn merge_pr_error() {
         let server = MockServer::start().await;
         Mock::given(method("PATCH"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/5".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/5".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(409))
             .mount(&server)
             .await;
@@ -760,7 +764,9 @@ mod tests {
     async fn add_comment_error() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/1/threads".to_owned()))
+            .and(path(
+                "/myorg/myproject/_apis/git/repositories/myrepo/pullrequests/1/threads".to_owned(),
+            ))
             .respond_with(ResponseTemplate::new(500))
             .mount(&server)
             .await;

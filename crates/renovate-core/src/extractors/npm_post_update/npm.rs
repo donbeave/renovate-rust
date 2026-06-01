@@ -21,9 +21,7 @@ pub struct NpmLockFileResult {
     pub error: Option<String>,
 }
 
-pub fn get_npm_constraint_from_package_lock(
-    lock_file_content: &str,
-) -> Option<String> {
+pub fn get_npm_constraint_from_package_lock(lock_file_content: &str) -> Option<String> {
     let v: serde_json::Value = serde_json::from_str(lock_file_content).ok()?;
     let lockfile_version = v.get("lockfileVersion").and_then(|v| v.as_u64())?;
     match lockfile_version {
@@ -145,19 +143,13 @@ mod tests {
     // Ported: "does not install npm if no constraints specified" — modules/manager/npm/post-update/npm.spec.ts line 468
     #[test]
     fn get_npm_constraint_from_lock_invalid() {
-        assert_eq!(
-            get_npm_constraint_from_package_lock("not json"),
-            None
-        );
+        assert_eq!(get_npm_constraint_from_package_lock("not json"), None);
     }
 
     // Ported: "does not install npm if no constraints specified" — modules/manager/npm/post-update/npm.spec.ts line 468
     #[test]
     fn npm_constraint_from_pkg_json() {
-        let pj = PackageJson::parse(
-            r#"{"engines": {"npm": ">=9"}}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"engines": {"npm": ">=9"}}"#).unwrap();
         assert_eq!(
             get_npm_constraint_from_package_json(&pj),
             Some(">=9".to_owned())
@@ -167,10 +159,7 @@ mod tests {
     // Ported: "workspace in sub-folder" — modules/manager/npm/post-update/npm.spec.ts line 696
     #[test]
     fn generate_package_key_basic() {
-        assert_eq!(
-            generate_package_key("lodash", "4.17.21"),
-            "lodash@4.17.21"
-        );
+        assert_eq!(generate_package_key("lodash", "4.17.21"), "lodash@4.17.21");
     }
 
     // Ported: "sets --before from minimumReleaseAge" — modules/manager/npm/post-update/npm.spec.ts line 981
@@ -348,10 +337,7 @@ mod tests {
     // Ported: "catches errors" — modules/manager/npm/post-update/npm.spec.ts line 328
     #[test]
     fn get_npm_constraint_from_lock_catches_errors() {
-        assert_eq!(
-            get_npm_constraint_from_package_lock("not json"),
-            None
-        );
+        assert_eq!(get_npm_constraint_from_package_lock("not json"), None);
     }
 
     // Ported: "finds npm globally" — modules/manager/npm/post-update/npm.spec.ts line 344

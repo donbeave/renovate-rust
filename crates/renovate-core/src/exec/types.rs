@@ -35,17 +35,14 @@ pub struct ExecOptions {
     pub shell: Option<String>,
 }
 
-#[derive(Debug, Clone)]
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct ExecResult {
     pub stdout: String,
     pub stderr: String,
     pub exit_code: Option<i32>,
 }
 
-
-#[derive(Debug, Clone, PartialEq)]
-#[derive(Default)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum BinarySource {
     #[default]
     Global,
@@ -54,4 +51,3 @@ pub enum BinarySource {
     Containerbase,
     Install,
 }
-

@@ -16,9 +16,10 @@ pub fn get_node_constraint(
     }
 
     if let Some(constraint) = config_constraints
-        && !constraint.is_empty() {
-            return Some(constraint.to_owned());
-        }
+        && !constraint.is_empty()
+    {
+        return Some(constraint.to_owned());
+    }
 
     if let Some(content) = nvmrc_content {
         let trimmed = content.trim();
@@ -39,13 +40,15 @@ pub fn get_node_constraint(
 
     if let Some(pj) = package_json {
         if let Some(ref volta) = pj.volta
-            && let Some(ref node) = volta.node {
-                return Some(node.clone());
-            }
+            && let Some(ref node) = volta.node
+        {
+            return Some(node.clone());
+        }
         if let Some(ref engines) = pj.engines
-            && let Some(ref node) = engines.node {
-                return Some(node.clone());
-            }
+            && let Some(ref node) = engines.node
+        {
+            return Some(node.clone());
+        }
     }
 
     None
@@ -137,10 +140,7 @@ mod tests {
     // Ported: "returns from package.json" — modules/manager/npm/post-update/node-version.spec.ts line 56
     #[test]
     fn returns_package_json_engines_node() {
-        let pj = PackageJson::parse(
-            r#"{"engines": {"node": "^12.16.3"}}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"engines": {"node": "^12.16.3"}}"#).unwrap();
         assert_eq!(
             get_node_constraint(&[], None, None, None, Some(&pj)),
             Some("^12.16.3".to_owned())

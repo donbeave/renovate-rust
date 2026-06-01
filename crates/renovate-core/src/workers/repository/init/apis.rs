@@ -59,7 +59,10 @@ mod tests {
     #[test]
     fn init_apis_gitlab_with_endpoint() {
         let result = init_apis("gitlab", Some("https://gitlab.example.com/api/v4"));
-        assert_eq!(result.config.endpoint, Some("https://gitlab.example.com/api/v4".to_owned()));
+        assert_eq!(
+            result.config.endpoint,
+            Some("https://gitlab.example.com/api/v4".to_owned())
+        );
     }
 
     #[test]

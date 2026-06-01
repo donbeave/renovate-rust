@@ -1267,7 +1267,10 @@ mod tests {
 
     #[test]
     fn massage_host_url_adds_https() {
-        assert_eq!(massage_host_url("github.com/owner"), "https://github.com/owner");
+        assert_eq!(
+            massage_host_url("github.com/owner"),
+            "https://github.com/owner"
+        );
         assert_eq!(massage_host_url("https://github.com"), "https://github.com");
     }
 

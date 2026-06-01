@@ -101,11 +101,7 @@ fn compute_lib_years_for_dep(dep: &crate::workers::types::Upgrade) -> Option<f64
 
     let now = chrono::Utc::now();
     let years = (now - current_dt).num_days() as f64 / 365.25;
-    if years >= 0.0 {
-        Some(years)
-    } else {
-        None
-    }
+    if years >= 0.0 { Some(years) } else { None }
 }
 
 fn parse_iso_timestamp(ts: &str) -> Option<chrono::DateTime<chrono::Utc>> {

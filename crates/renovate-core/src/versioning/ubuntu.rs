@@ -24,51 +24,276 @@ static DATED_CODENAME_RE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 const RELEASES: &[UbuntuRelease] = &[
-    UbuntuRelease { version: "04.10", codename: "warty", release: "2004-10-20", eol: "2006-04-30" },
-    UbuntuRelease { version: "05.04", codename: "hoary", release: "2005-04-08", eol: "2006-10-31" },
-    UbuntuRelease { version: "05.10", codename: "breezy", release: "2005-10-12", eol: "2007-04-13" },
-    UbuntuRelease { version: "6.06", codename: "dapper", release: "2006-06-01", eol: "2009-07-14" },
-    UbuntuRelease { version: "6.10", codename: "edgy", release: "2006-10-26", eol: "2008-04-25" },
-    UbuntuRelease { version: "7.04", codename: "feisty", release: "2007-04-19", eol: "2008-10-19" },
-    UbuntuRelease { version: "7.10", codename: "gutsy", release: "2007-10-18", eol: "2009-04-18" },
-    UbuntuRelease { version: "8.04", codename: "hardy", release: "2008-04-24", eol: "2011-05-12" },
-    UbuntuRelease { version: "8.10", codename: "intrepid", release: "2008-10-30", eol: "2010-04-30" },
-    UbuntuRelease { version: "9.04", codename: "jaunty", release: "2009-04-23", eol: "2010-10-23" },
-    UbuntuRelease { version: "9.10", codename: "karmic", release: "2009-10-29", eol: "2011-04-30" },
-    UbuntuRelease { version: "10.04", codename: "lucid", release: "2010-04-29", eol: "2013-05-09" },
-    UbuntuRelease { version: "10.10", codename: "maverick", release: "2010-10-10", eol: "2012-04-10" },
-    UbuntuRelease { version: "11.04", codename: "natty", release: "2011-04-28", eol: "2012-10-28" },
-    UbuntuRelease { version: "11.10", codename: "oneiric", release: "2011-10-13", eol: "2013-05-09" },
-    UbuntuRelease { version: "12.04", codename: "precise", release: "2012-04-26", eol: "2017-04-28" },
-    UbuntuRelease { version: "12.10", codename: "quantal", release: "2012-10-18", eol: "2014-05-16" },
-    UbuntuRelease { version: "13.04", codename: "raring", release: "2013-04-25", eol: "2014-01-27" },
-    UbuntuRelease { version: "13.10", codename: "saucy", release: "2013-10-17", eol: "2014-07-17" },
-    UbuntuRelease { version: "14.04", codename: "trusty", release: "2014-04-17", eol: "2019-04-25" },
-    UbuntuRelease { version: "14.10", codename: "utopic", release: "2014-10-23", eol: "2015-07-23" },
-    UbuntuRelease { version: "15.04", codename: "vivid", release: "2015-04-23", eol: "2016-02-04" },
-    UbuntuRelease { version: "15.10", codename: "wily", release: "2015-10-22", eol: "2016-07-28" },
-    UbuntuRelease { version: "16.04", codename: "xenial", release: "2016-04-21", eol: "2021-04-30" },
-    UbuntuRelease { version: "16.10", codename: "yakkety", release: "2016-10-13", eol: "2017-07-20" },
-    UbuntuRelease { version: "17.04", codename: "zesty", release: "2017-04-13", eol: "2018-01-13" },
-    UbuntuRelease { version: "17.10", codename: "artful", release: "2017-10-19", eol: "2018-07-19" },
-    UbuntuRelease { version: "18.04", codename: "bionic", release: "2018-04-26", eol: "2023-05-31" },
-    UbuntuRelease { version: "18.10", codename: "cosmic", release: "2018-10-18", eol: "2019-07-18" },
-    UbuntuRelease { version: "19.04", codename: "disco", release: "2019-04-18", eol: "2020-01-23" },
-    UbuntuRelease { version: "19.10", codename: "eoan", release: "2019-10-17", eol: "2020-07-17" },
-    UbuntuRelease { version: "20.04", codename: "focal", release: "2020-04-23", eol: "2025-05-29" },
-    UbuntuRelease { version: "20.10", codename: "groovy", release: "2020-10-22", eol: "2021-07-22" },
-    UbuntuRelease { version: "21.04", codename: "hirsute", release: "2021-04-22", eol: "2022-01-20" },
-    UbuntuRelease { version: "21.10", codename: "impish", release: "2021-10-14", eol: "2022-07-14" },
-    UbuntuRelease { version: "22.04", codename: "jammy", release: "2022-04-21", eol: "2027-06-01" },
-    UbuntuRelease { version: "22.10", codename: "kinetic", release: "2022-10-20", eol: "2023-07-20" },
-    UbuntuRelease { version: "23.04", codename: "lunar", release: "2023-04-20", eol: "2024-01-25" },
-    UbuntuRelease { version: "23.10", codename: "mantic", release: "2023-10-12", eol: "2024-07-11" },
-    UbuntuRelease { version: "24.04", codename: "noble", release: "2024-04-25", eol: "2029-05-31" },
-    UbuntuRelease { version: "24.10", codename: "oracular", release: "2024-10-10", eol: "2025-07-10" },
-    UbuntuRelease { version: "25.04", codename: "plucky", release: "2025-04-17", eol: "2026-01-15" },
-    UbuntuRelease { version: "25.10", codename: "questing", release: "2025-10-09", eol: "2026-07-09" },
-    UbuntuRelease { version: "26.04", codename: "resolute", release: "2026-04-23", eol: "2031-05-29" },
-    UbuntuRelease { version: "26.10", codename: "stonking", release: "2026-10-15", eol: "2027-07-15" },
+    UbuntuRelease {
+        version: "04.10",
+        codename: "warty",
+        release: "2004-10-20",
+        eol: "2006-04-30",
+    },
+    UbuntuRelease {
+        version: "05.04",
+        codename: "hoary",
+        release: "2005-04-08",
+        eol: "2006-10-31",
+    },
+    UbuntuRelease {
+        version: "05.10",
+        codename: "breezy",
+        release: "2005-10-12",
+        eol: "2007-04-13",
+    },
+    UbuntuRelease {
+        version: "6.06",
+        codename: "dapper",
+        release: "2006-06-01",
+        eol: "2009-07-14",
+    },
+    UbuntuRelease {
+        version: "6.10",
+        codename: "edgy",
+        release: "2006-10-26",
+        eol: "2008-04-25",
+    },
+    UbuntuRelease {
+        version: "7.04",
+        codename: "feisty",
+        release: "2007-04-19",
+        eol: "2008-10-19",
+    },
+    UbuntuRelease {
+        version: "7.10",
+        codename: "gutsy",
+        release: "2007-10-18",
+        eol: "2009-04-18",
+    },
+    UbuntuRelease {
+        version: "8.04",
+        codename: "hardy",
+        release: "2008-04-24",
+        eol: "2011-05-12",
+    },
+    UbuntuRelease {
+        version: "8.10",
+        codename: "intrepid",
+        release: "2008-10-30",
+        eol: "2010-04-30",
+    },
+    UbuntuRelease {
+        version: "9.04",
+        codename: "jaunty",
+        release: "2009-04-23",
+        eol: "2010-10-23",
+    },
+    UbuntuRelease {
+        version: "9.10",
+        codename: "karmic",
+        release: "2009-10-29",
+        eol: "2011-04-30",
+    },
+    UbuntuRelease {
+        version: "10.04",
+        codename: "lucid",
+        release: "2010-04-29",
+        eol: "2013-05-09",
+    },
+    UbuntuRelease {
+        version: "10.10",
+        codename: "maverick",
+        release: "2010-10-10",
+        eol: "2012-04-10",
+    },
+    UbuntuRelease {
+        version: "11.04",
+        codename: "natty",
+        release: "2011-04-28",
+        eol: "2012-10-28",
+    },
+    UbuntuRelease {
+        version: "11.10",
+        codename: "oneiric",
+        release: "2011-10-13",
+        eol: "2013-05-09",
+    },
+    UbuntuRelease {
+        version: "12.04",
+        codename: "precise",
+        release: "2012-04-26",
+        eol: "2017-04-28",
+    },
+    UbuntuRelease {
+        version: "12.10",
+        codename: "quantal",
+        release: "2012-10-18",
+        eol: "2014-05-16",
+    },
+    UbuntuRelease {
+        version: "13.04",
+        codename: "raring",
+        release: "2013-04-25",
+        eol: "2014-01-27",
+    },
+    UbuntuRelease {
+        version: "13.10",
+        codename: "saucy",
+        release: "2013-10-17",
+        eol: "2014-07-17",
+    },
+    UbuntuRelease {
+        version: "14.04",
+        codename: "trusty",
+        release: "2014-04-17",
+        eol: "2019-04-25",
+    },
+    UbuntuRelease {
+        version: "14.10",
+        codename: "utopic",
+        release: "2014-10-23",
+        eol: "2015-07-23",
+    },
+    UbuntuRelease {
+        version: "15.04",
+        codename: "vivid",
+        release: "2015-04-23",
+        eol: "2016-02-04",
+    },
+    UbuntuRelease {
+        version: "15.10",
+        codename: "wily",
+        release: "2015-10-22",
+        eol: "2016-07-28",
+    },
+    UbuntuRelease {
+        version: "16.04",
+        codename: "xenial",
+        release: "2016-04-21",
+        eol: "2021-04-30",
+    },
+    UbuntuRelease {
+        version: "16.10",
+        codename: "yakkety",
+        release: "2016-10-13",
+        eol: "2017-07-20",
+    },
+    UbuntuRelease {
+        version: "17.04",
+        codename: "zesty",
+        release: "2017-04-13",
+        eol: "2018-01-13",
+    },
+    UbuntuRelease {
+        version: "17.10",
+        codename: "artful",
+        release: "2017-10-19",
+        eol: "2018-07-19",
+    },
+    UbuntuRelease {
+        version: "18.04",
+        codename: "bionic",
+        release: "2018-04-26",
+        eol: "2023-05-31",
+    },
+    UbuntuRelease {
+        version: "18.10",
+        codename: "cosmic",
+        release: "2018-10-18",
+        eol: "2019-07-18",
+    },
+    UbuntuRelease {
+        version: "19.04",
+        codename: "disco",
+        release: "2019-04-18",
+        eol: "2020-01-23",
+    },
+    UbuntuRelease {
+        version: "19.10",
+        codename: "eoan",
+        release: "2019-10-17",
+        eol: "2020-07-17",
+    },
+    UbuntuRelease {
+        version: "20.04",
+        codename: "focal",
+        release: "2020-04-23",
+        eol: "2025-05-29",
+    },
+    UbuntuRelease {
+        version: "20.10",
+        codename: "groovy",
+        release: "2020-10-22",
+        eol: "2021-07-22",
+    },
+    UbuntuRelease {
+        version: "21.04",
+        codename: "hirsute",
+        release: "2021-04-22",
+        eol: "2022-01-20",
+    },
+    UbuntuRelease {
+        version: "21.10",
+        codename: "impish",
+        release: "2021-10-14",
+        eol: "2022-07-14",
+    },
+    UbuntuRelease {
+        version: "22.04",
+        codename: "jammy",
+        release: "2022-04-21",
+        eol: "2027-06-01",
+    },
+    UbuntuRelease {
+        version: "22.10",
+        codename: "kinetic",
+        release: "2022-10-20",
+        eol: "2023-07-20",
+    },
+    UbuntuRelease {
+        version: "23.04",
+        codename: "lunar",
+        release: "2023-04-20",
+        eol: "2024-01-25",
+    },
+    UbuntuRelease {
+        version: "23.10",
+        codename: "mantic",
+        release: "2023-10-12",
+        eol: "2024-07-11",
+    },
+    UbuntuRelease {
+        version: "24.04",
+        codename: "noble",
+        release: "2024-04-25",
+        eol: "2029-05-31",
+    },
+    UbuntuRelease {
+        version: "24.10",
+        codename: "oracular",
+        release: "2024-10-10",
+        eol: "2025-07-10",
+    },
+    UbuntuRelease {
+        version: "25.04",
+        codename: "plucky",
+        release: "2025-04-17",
+        eol: "2026-01-15",
+    },
+    UbuntuRelease {
+        version: "25.10",
+        codename: "questing",
+        release: "2025-10-09",
+        eol: "2026-07-09",
+    },
+    UbuntuRelease {
+        version: "26.04",
+        codename: "resolute",
+        release: "2026-04-23",
+        eol: "2031-05-29",
+    },
+    UbuntuRelease {
+        version: "26.10",
+        codename: "stonking",
+        release: "2026-10-15",
+        eol: "2027-07-15",
+    },
 ];
 
 fn release_by_codename(codename: &str) -> Option<UbuntuRelease> {
@@ -340,10 +565,34 @@ struct DebianRelease {
 }
 
 static DEBIAN_RELEASES: &[DebianRelease] = &[
-    DebianRelease { series: "trixie", created: "2023-06-10", release: "2025-08-09", eol: "2028-08-09", eol_lts: "2030-06-30" },
-    DebianRelease { series: "forky", created: "2025-08-09", release: "", eol: "", eol_lts: "" },
-    DebianRelease { series: "bookworm", created: "2021-08-14", release: "2023-06-10", eol: "2026-07-11", eol_lts: "2028-06-30" },
-    DebianRelease { series: "bullseye", created: "2019-07-06", release: "2021-08-14", eol: "2024-08-14", eol_lts: "2026-08-31" },
+    DebianRelease {
+        series: "trixie",
+        created: "2023-06-10",
+        release: "2025-08-09",
+        eol: "2028-08-09",
+        eol_lts: "2030-06-30",
+    },
+    DebianRelease {
+        series: "forky",
+        created: "2025-08-09",
+        release: "",
+        eol: "",
+        eol_lts: "",
+    },
+    DebianRelease {
+        series: "bookworm",
+        created: "2021-08-14",
+        release: "2023-06-10",
+        eol: "2026-07-11",
+        eol_lts: "2028-06-30",
+    },
+    DebianRelease {
+        series: "bullseye",
+        created: "2019-07-06",
+        release: "2021-08-14",
+        eol: "2024-08-14",
+        eol_lts: "2026-08-31",
+    },
 ];
 
 fn debian_release(input: &str) -> Option<&'static DebianRelease> {
@@ -365,11 +614,15 @@ pub fn debian_is_released_at(input: &str, now_date: &str) -> bool {
 /// `isEolLts` for a Debian release, optionally ignoring the eol/eol_lts fields
 /// (to simulate the TypeScript test's `delete schedule.eol_lts; delete schedule.eol`).
 pub fn debian_is_eol_lts_at(input: &str, now_date: &str, ignore_eol: bool) -> bool {
-    let Some(r) = debian_release(input) else { return true; };
+    let Some(r) = debian_release(input) else {
+        return true;
+    };
     let eol_lts = if ignore_eol { "" } else { r.eol_lts };
     let eol = if ignore_eol { "" } else { r.eol };
     let end = if !eol_lts.is_empty() { eol_lts } else { eol };
-    if end.is_empty() { return true; }
+    if end.is_empty() {
+        return true;
+    }
     end <= now_date
 }
 

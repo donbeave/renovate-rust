@@ -193,7 +193,12 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 ctx.report.files.push(output::FileReport {
                     path: setup_cfg_path.clone(),
                     manager: "setup-cfg".into(),
-                    deps: build_dep_reports_setup_cfg(&deps, &actionable, &update_map, ctx.repo_cfg),
+                    deps: build_dep_reports_setup_cfg(
+                        &deps,
+                        &actionable,
+                        &update_map,
+                        ctx.repo_cfg,
+                    ),
                 });
             }
             Ok(None) => {
@@ -609,7 +614,12 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                     ctx.report.files.push(output::FileReport {
                         path: poetry_file_path.clone(),
                         manager: "poetry".into(),
-                        deps: build_dep_reports_poetry(&deps, &actionable, &update_map, ctx.repo_cfg),
+                        deps: build_dep_reports_poetry(
+                            &deps,
+                            &actionable,
+                            &update_map,
+                            ctx.repo_cfg,
+                        ),
                     });
                 }
                 Err(err) => {

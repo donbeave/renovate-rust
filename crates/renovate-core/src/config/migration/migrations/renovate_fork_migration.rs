@@ -49,8 +49,8 @@ impl Migration for RenovateForkMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::RenovateForkMigration;
     use crate::config::migration::Migration;

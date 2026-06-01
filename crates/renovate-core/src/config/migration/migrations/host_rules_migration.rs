@@ -66,30 +66,30 @@ impl Migration for HostRulesMigration {
                     match k.as_str() {
                         "platform" => {
                             if let Some(s) = v.as_str() {
-                                new_rule.entry("hostType".to_owned()).or_insert_with(|| {
-                                    Value::String(migrate_datasource(s).into())
-                                });
+                                new_rule
+                                    .entry("hostType".to_owned())
+                                    .or_insert_with(|| Value::String(migrate_datasource(s).into()));
                             }
                         }
                         "matchHost" => {
                             if let Some(s) = v.as_str() {
-                                new_rule.entry("matchHost".to_owned()).or_insert_with(|| {
-                                    Value::String(massage_host_url(s))
-                                });
+                                new_rule
+                                    .entry("matchHost".to_owned())
+                                    .or_insert_with(|| Value::String(massage_host_url(s)));
                             }
                         }
                         "hostType" => {
                             if let Some(s) = v.as_str() {
-                                new_rule.entry("hostType".to_owned()).or_insert_with(|| {
-                                    Value::String(migrate_datasource(s).into())
-                                });
+                                new_rule
+                                    .entry("hostType".to_owned())
+                                    .or_insert_with(|| Value::String(migrate_datasource(s).into()));
                             }
                         }
                         "endpoint" | "host" | "baseUrl" | "hostName" | "domainName" => {
                             if let Some(s) = v.as_str() {
-                                new_rule.entry("matchHost".to_owned()).or_insert_with(|| {
-                                    Value::String(massage_host_url(s))
-                                });
+                                new_rule
+                                    .entry("matchHost".to_owned())
+                                    .or_insert_with(|| Value::String(massage_host_url(s)));
                             }
                         }
                         _ => {
@@ -110,7 +110,14 @@ impl Migration for HostRulesMigration {
 }
 
 fn validate_host_rule(rule: &Map<String, Value>) {
-    let host_fields = ["matchHost", "hostName", "domainName", "baseUrl", "endpoint", "host"];
+    let host_fields = [
+        "matchHost",
+        "hostName",
+        "domainName",
+        "baseUrl",
+        "endpoint",
+        "host",
+    ];
     let mut hosts: Vec<&str> = Vec::new();
     for field in host_fields {
         if let Some(Value::String(s)) = rule.get(field) {
@@ -130,8 +137,8 @@ fn validate_host_rule(rule: &Map<String, Value>) {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::HostRulesMigration;
     use crate::config::migration::Migration;
@@ -230,9 +237,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "`hostRules` cannot contain more than one host-matching field"
-    )]
+    #[should_panic(expected = "`hostRules` cannot contain more than one host-matching field")]
     fn throws_on_multiple_hosts() {
         let m = HostRulesMigration::new();
         let mut migrated = Map::new();

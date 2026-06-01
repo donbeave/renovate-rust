@@ -60,7 +60,10 @@ fn filter_by_prefix(package_name: &str, releases: &mut [Release]) -> Vec<Release
                 continue;
             }
 
-            let normalized = release.version.strip_prefix(&prefix).unwrap_or(&release.version);
+            let normalized = release
+                .version
+                .strip_prefix(&prefix)
+                .unwrap_or(&release.version);
             if !normalized.starts_with('v') || normalized.contains('/') {
                 continue;
             }
@@ -96,10 +99,7 @@ pub async fn fetch_direct_versions(
     }
 }
 
-async fn fetch_github_tags(
-    http: &HttpClient,
-    repo: &str,
-) -> Result<ReleaseResult, GoDirectError> {
+async fn fetch_github_tags(http: &HttpClient, repo: &str) -> Result<ReleaseResult, GoDirectError> {
     let url = format!("https://api.github.com/repos/{}/tags?per_page=100", repo);
     let resp = http.get_retrying(&url).await?;
 
@@ -131,10 +131,7 @@ async fn fetch_github_tags(
     })
 }
 
-async fn fetch_gitlab_tags(
-    http: &HttpClient,
-    repo: &str,
-) -> Result<ReleaseResult, GoDirectError> {
+async fn fetch_gitlab_tags(http: &HttpClient, repo: &str) -> Result<ReleaseResult, GoDirectError> {
     let encoded = repo.replace('/', "%2F");
     let url = format!(
         "https://gitlab.com/api/v4/projects/{}/repository/tags?per_page=100",
@@ -170,10 +167,7 @@ async fn fetch_gitlab_tags(
     })
 }
 
-async fn fetch_git_tags(
-    _http: &HttpClient,
-    url: &str,
-) -> Result<ReleaseResult, GoDirectError> {
+async fn fetch_git_tags(_http: &HttpClient, url: &str) -> Result<ReleaseResult, GoDirectError> {
     Ok(ReleaseResult {
         releases: Vec::new(),
         source_url: Some(url.to_owned()),

@@ -30,7 +30,9 @@ pub mod scm_manager;
 pub mod util;
 
 // Re-export commonly-used platform types
-pub use github::{BranchState, CombinedBranchState, GhBranchStatus, CombinedBranchStatus, GhRestPr};
+pub use github::{
+    BranchState, CombinedBranchState, CombinedBranchStatus, GhBranchStatus, GhRestPr,
+};
 
 use thiserror::Error;
 
@@ -284,13 +286,16 @@ impl AnyPlatformClient {
     ) -> Result<(), PlatformError> {
         match self {
             Self::Github(c) => {
-                c.update_pr(owner, repo, pr_number, title, body, state).await
+                c.update_pr(owner, repo, pr_number, title, body, state)
+                    .await
             }
             Self::Gitlab(c) => {
-                c.update_pr(owner, repo, pr_number, title, body, state).await
+                c.update_pr(owner, repo, pr_number, title, body, state)
+                    .await
             }
             Self::Local(c) => {
-                c.update_pr(owner, repo, pr_number, title, body, state).await
+                c.update_pr(owner, repo, pr_number, title, body, state)
+                    .await
             }
         }
     }

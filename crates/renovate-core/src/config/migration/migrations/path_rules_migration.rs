@@ -54,8 +54,8 @@ impl Migration for PathRulesMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::PathRulesMigration;
     use crate::config::migration::Migration;

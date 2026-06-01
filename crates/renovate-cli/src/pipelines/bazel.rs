@@ -383,7 +383,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                     });
                 }
             }
-            Ok(None) => tracing::warn!(repo=%repo_slug, file=%bazelisk_path, ".bazelversion not found"),
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%bazelisk_path, ".bazelversion not found")
+            }
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%bazelisk_path, %err, "failed to fetch .bazelversion");
                 ctx.had_error = true;

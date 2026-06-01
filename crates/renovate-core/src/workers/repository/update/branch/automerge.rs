@@ -56,10 +56,7 @@ pub fn try_automerge(config: &AutomergeConfig) -> AutomergeResult {
         return AutomergeResult::NoAutomerge;
     }
 
-    let automerge_type = config
-        .automerge_type
-        .as_deref()
-        .unwrap_or("pr");
+    let automerge_type = config.automerge_type.as_deref().unwrap_or("pr");
 
     if automerge_type != "branch" {
         return AutomergeResult::NoAutomerge;

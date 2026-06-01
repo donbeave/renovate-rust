@@ -24,14 +24,8 @@ pub fn get_git_url_with_auth(url: &str, host_type: Option<&str>) -> String {
         return crate::util::get_http_url(url, Some(token));
     }
 
-    if let (Some(username), Some(password)) =
-        (rule.username.as_deref(), rule.password.as_deref())
-    {
-        let credentials = format!(
-            "{}:{}",
-            percent_encode(username),
-            percent_encode(password)
-        );
+    if let (Some(username), Some(password)) = (rule.username.as_deref(), rule.password.as_deref()) {
+        let credentials = format!("{}:{}", percent_encode(username), percent_encode(password));
         return crate::util::get_http_url(url, Some(&credentials));
     }
 

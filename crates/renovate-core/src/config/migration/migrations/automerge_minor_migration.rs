@@ -50,8 +50,8 @@ impl Migration for AutomergeMinorMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::AutomergeMinorMigration;
     use crate::config::migration::Migration;

@@ -31,8 +31,7 @@ fn merge_matchers(package_rule: &Map<String, Value>) -> Map<String, Value> {
         let patterns: Vec<String> = if let Some(s) = val.as_str() {
             vec![s.into()]
         } else if let Some(arr) = val.as_array() {
-            arr
-                .iter()
+            arr.iter()
                 .filter_map(|v| v.as_str())
                 .map(|s| s.into())
                 .collect()
@@ -240,8 +239,8 @@ impl Migration for PackageRulesMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::PackageRulesMigration;
     use crate::config::migration::Migration;

@@ -497,10 +497,8 @@ pub fn update_ruby_string(
     old_value: &str,
     new_value: &str,
 ) -> Option<String> {
-    let double_pat =
-        format!(r#"(\b{keyword}\s+)"{}""#, escape_re(old_value));
-    let single_pat =
-        format!(r#"(\b{keyword}\s+)'{}'"#, escape_re(old_value));
+    let double_pat = format!(r#"(\b{keyword}\s+)"{}""#, escape_re(old_value));
+    let single_pat = format!(r#"(\b{keyword}\s+)'{}'"#, escape_re(old_value));
 
     let double_re = Regex::new(&double_pat).ok()?;
     let single_re = Regex::new(&single_pat).ok()?;
@@ -569,14 +567,14 @@ pub fn update_dependency(config: &HomebrewUpdateConfig) -> HomebrewUpdateResult 
 
     let old_parsed = match handler {
         HomebrewHandlerType::GitHub => github_parse_url(&config.manager_data_url),
-        HomebrewHandlerType::Npm => npm_parse_url(&config.manager_data_url).map(|p| {
-            GitHubParsedResult {
+        HomebrewHandlerType::Npm => {
+            npm_parse_url(&config.manager_data_url).map(|p| GitHubParsedResult {
                 current_value: p.current_value,
                 owner_name: String::new(),
                 repo_name: String::new(),
                 url_type: GitHubUrlType::Archive,
-            }
-        }),
+            })
+        }
     };
     if old_parsed.is_none() {
         return HomebrewUpdateResult::NoChange;
@@ -610,7 +608,12 @@ pub fn update_dependency(config: &HomebrewUpdateConfig) -> HomebrewUpdateResult 
 
     let new_url = &candidate_urls[0];
 
-    let Some(new_content) = update_ruby_string(&config.file_content, "url", &config.manager_data_url, new_url) else {
+    let Some(new_content) = update_ruby_string(
+        &config.file_content,
+        "url",
+        &config.manager_data_url,
+        new_url,
+    ) else {
         return HomebrewUpdateResult::NoChange;
     };
 
@@ -1215,27 +1218,49 @@ end"#;
     #[test]
     fn extract_ruby_string_finds_double_quoted() {
         let content = r#"url "https://example.com/foo-1.0.tar.gz""#;
-        assert_eq!(extract_ruby_string(content, "url"), Some("https://example.com/foo-1.0.tar.gz".to_owned()));
+        assert_eq!(
+            extract_ruby_string(content, "url"),
+            Some("https://example.com/foo-1.0.tar.gz".to_owned())
+        );
     }
 
     #[test]
     fn extract_ruby_string_finds_single_quoted() {
         let content = r#"url 'https://example.com/foo-1.0.tar.gz'"#;
-        assert_eq!(extract_ruby_string(content, "url"), Some("https://example.com/foo-1.0.tar.gz".to_owned()));
+        assert_eq!(
+            extract_ruby_string(content, "url"),
+            Some("https://example.com/foo-1.0.tar.gz".to_owned())
+        );
     }
 
     #[test]
     fn update_ruby_string_replaces_double_quoted() {
         let content = r#"url "https://example.com/foo-1.0.tar.gz""#;
-        let result = update_ruby_string(content, "url", "https://example.com/foo-1.0.tar.gz", "https://example.com/foo-2.0.tar.gz");
-        assert_eq!(result, Some(r#"url "https://example.com/foo-2.0.tar.gz""#.to_owned()));
+        let result = update_ruby_string(
+            content,
+            "url",
+            "https://example.com/foo-1.0.tar.gz",
+            "https://example.com/foo-2.0.tar.gz",
+        );
+        assert_eq!(
+            result,
+            Some(r#"url "https://example.com/foo-2.0.tar.gz""#.to_owned())
+        );
     }
 
     #[test]
     fn update_ruby_string_replaces_single_quoted() {
         let content = r#"url 'https://example.com/foo-1.0.tar.gz'"#;
-        let result = update_ruby_string(content, "url", "https://example.com/foo-1.0.tar.gz", "https://example.com/foo-2.0.tar.gz");
-        assert_eq!(result, Some(r#"url 'https://example.com/foo-2.0.tar.gz'"#.to_owned()));
+        let result = update_ruby_string(
+            content,
+            "url",
+            "https://example.com/foo-1.0.tar.gz",
+            "https://example.com/foo-2.0.tar.gz",
+        );
+        assert_eq!(
+            result,
+            Some(r#"url 'https://example.com/foo-2.0.tar.gz'"#.to_owned())
+        );
     }
 
     #[test]
@@ -1295,14 +1320,18 @@ sha256 "oldhash"
             package_file: "foo.rb".to_owned(),
             dep_name: "foo".to_owned(),
         };
-        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+        assert!(matches!(
+            update_dependency(&config),
+            HomebrewUpdateResult::NoChange
+        ));
     }
 
     // Ported: "returns unchanged content if url field in Formula file is invalid" — homebrew/update.spec.ts line 240
     #[test]
     fn update_dependency_invalid_formula_url_returns_no_change() {
         let config = HomebrewUpdateConfig {
-            file_content: "url ???https://example.com/foo-1.0.tar.gz\"\nsha256 \"abc\"\n".to_owned(),
+            file_content: "url ???https://example.com/foo-1.0.tar.gz\"\nsha256 \"abc\"\n"
+                .to_owned(),
             manager_data_url: "https://example.com/foo-1.0.tar.gz".to_owned(),
             manager_data_sha256: "abc".to_owned(),
             manager_data_type: "github".to_owned(),
@@ -1310,7 +1339,10 @@ sha256 "oldhash"
             package_file: "foo.rb".to_owned(),
             dep_name: "foo".to_owned(),
         };
-        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+        assert!(matches!(
+            update_dependency(&config),
+            HomebrewUpdateResult::NoChange
+        ));
     }
 
     // Ported: "returns unchanged content if url field in Formula file is missing" — homebrew/update.spec.ts line 280
@@ -1325,7 +1357,10 @@ sha256 "oldhash"
             package_file: "foo.rb".to_owned(),
             dep_name: "foo".to_owned(),
         };
-        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+        assert!(matches!(
+            update_dependency(&config),
+            HomebrewUpdateResult::NoChange
+        ));
     }
 
     // Ported: "returns unchanged content if sha256 field in Formula file is invalid" — homebrew/update.spec.ts line 319
@@ -1368,7 +1403,10 @@ sha256 "oldhash"
             package_file: "foo.rb".to_owned(),
             dep_name: "foo".to_owned(),
         };
-        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+        assert!(matches!(
+            update_dependency(&config),
+            HomebrewUpdateResult::NoChange
+        ));
     }
 
     // Ported: "returns unchanged content if newValue is missing" — homebrew/update.spec.ts line 476
@@ -1383,6 +1421,9 @@ sha256 "oldhash"
             package_file: "foo.rb".to_owned(),
             dep_name: "foo".to_owned(),
         };
-        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+        assert!(matches!(
+            update_dependency(&config),
+            HomebrewUpdateResult::NoChange
+        ));
     }
 }

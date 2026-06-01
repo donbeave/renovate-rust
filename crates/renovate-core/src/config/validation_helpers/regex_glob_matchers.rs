@@ -18,14 +18,9 @@ pub fn check_regex_glob_matchers(args: &CheckMatcherArgs) -> Vec<ValidationMessa
     let mut result = Vec::new();
 
     if let Some(matchers) = args.val.as_array() {
-        let string_matchers: Vec<&str> = matchers
-            .iter()
-            .filter_map(|v| v.as_str())
-            .collect();
+        let string_matchers: Vec<&str> = matchers.iter().filter_map(|v| v.as_str()).collect();
 
-        if (string_matchers.iter().any(|m| *m == "*" || *m == "**"))
-            && matchers.len() > 1
-        {
+        if (string_matchers.iter().any(|m| *m == "*" || *m == "**")) && matchers.len() > 1 {
             result.push(ValidationMessage {
                 topic: "Configuration Error".to_owned(),
                 message: format!(
@@ -37,9 +32,7 @@ pub fn check_regex_glob_matchers(args: &CheckMatcherArgs) -> Vec<ValidationMessa
 
         for matcher in &string_matchers {
             if is_regex_match(matcher) {
-                let pattern = matcher
-                    .trim_start_matches('/')
-                    .trim_end_matches('/');
+                let pattern = matcher.trim_start_matches('/').trim_end_matches('/');
                 if Regex::new(pattern).is_err() {
                     result.push(ValidationMessage {
                         topic: "Configuration Error".to_owned(),

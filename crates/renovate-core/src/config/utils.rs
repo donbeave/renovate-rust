@@ -23,10 +23,7 @@ pub fn get_config_for_package_file(config: &Value, _package_file: &str) -> Value
 }
 
 /// Extract the highest vulnerability severity from parent and child configs.
-pub fn get_highest_vulnerability_severity(
-    parent: &Value,
-    child: &Value,
-) -> Option<String> {
+pub fn get_highest_vulnerability_severity(parent: &Value, child: &Value) -> Option<String> {
     let severity_order = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
     let parent_severity = parent
         .get("vulnerabilitySeverity")

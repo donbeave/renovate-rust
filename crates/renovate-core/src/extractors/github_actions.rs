@@ -397,11 +397,7 @@ pub fn github_actions_update_dependency(
         found = true;
     }
 
-    if found {
-        Some(content)
-    } else {
-        None
-    }
+    if found { Some(content) } else { None }
 }
 
 /// Extract and normalise the version string from a trailing `# <version>` comment.
@@ -3329,7 +3325,9 @@ jobs:
         let updated = github_actions_update_dependency(content, "actions/checkout", "v3", "v4");
         assert_eq!(
             updated,
-            Some("jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4 # v3\n".to_owned())
+            Some(
+                "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4 # v3\n".to_owned()
+            )
         );
     }
 

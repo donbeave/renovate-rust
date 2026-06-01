@@ -1032,7 +1032,12 @@ fn maven_update_value(content: &str, node_name: &str, old_value: &str, new_value
     let element_content = &content[value_start..value_end];
     if element_content.trim() == old_value {
         let replaced = element_content.replacen(old_value, new_value, 1);
-        format!("{}{}{}", &content[..value_start], replaced, &content[value_end..])
+        format!(
+            "{}{}{}",
+            &content[..value_start],
+            replaced,
+            &content[value_end..]
+        )
     } else {
         content.to_owned()
     }
@@ -1086,12 +1091,8 @@ pub fn maven_update_at_position(
         let mut right_block = rest_part[..block_end].to_owned();
 
         let dep_name = upgrade.dep_name.as_deref().unwrap_or("");
-        let (group_id, artifact_id) = dep_name
-            .split_once(':')
-            .unwrap_or((dep_name, ""));
-        let (new_group_id, new_artifact_id) = new_name
-            .split_once(':')
-            .unwrap_or((new_name, ""));
+        let (group_id, artifact_id) = dep_name.split_once(':').unwrap_or((dep_name, ""));
+        let (new_group_id, new_artifact_id) = new_name.split_once(':').unwrap_or((new_name, ""));
 
         if left_block.contains("<groupId") {
             left_block = maven_update_value(&left_block, "groupId", group_id, new_group_id);
@@ -1141,9 +1142,10 @@ pub fn maven_update_at_position(
             if !current_value.is_empty() {
                 replaced = replaced.replacen(current_value, new_value, 1);
             }
-            if let (Some(cur_digest), Some(new_digest)) =
-                (upgrade.current_digest.as_deref(), upgrade.new_digest.as_deref())
-            {
+            if let (Some(cur_digest), Some(new_digest)) = (
+                upgrade.current_digest.as_deref(),
+                upgrade.new_digest.as_deref(),
+            ) {
                 replaced = replaced.replacen(cur_digest, new_digest, 1);
             }
             if replaced != version {
@@ -1193,11 +1195,7 @@ pub fn maven_bump_package_version(
     MavenBumpResult { bumped_content }
 }
 
-fn try_bump_pom_version(
-    content: &str,
-    current_value: &str,
-    bump_version: &str,
-) -> Option<String> {
+fn try_bump_pom_version(content: &str, current_value: &str, bump_version: &str) -> Option<String> {
     // Must be a valid semver to bump.
     let parsed = semver::Version::parse(current_value).ok()?;
 
@@ -1243,13 +1241,12 @@ fn compute_bumped_pom_version(
         } else {
             bump_version.to_owned()
         };
-        let (new_major, new_minor, new_patch) = bump_numeric(
-            parsed.major,
-            parsed.minor,
-            parsed.patch,
-            &pre_bump,
-        )?;
-        Some(format!("{}.{}.{}-{}", new_major, new_minor, new_patch, qualifier))
+        let (new_major, new_minor, new_patch) =
+            bump_numeric(parsed.major, parsed.minor, parsed.patch, &pre_bump)?;
+        Some(format!(
+            "{}.{}.{}-{}",
+            new_major, new_minor, new_patch, qualifier
+        ))
     } else if is_prerelease_non_snapshot {
         // Prerelease with a non-SNAPSHOT qualifier: increment the pre identifier.
         // e.g. "1.0.0-1" + prerelease → "1.0.0-2"
@@ -1257,19 +1254,25 @@ fn compute_bumped_pom_version(
             let pre = pre_str.unwrap_or("0");
             // Try to increment the last numeric component of the pre string.
             let new_pre = increment_prerelease_identifier(pre)?;
-            Some(format!("{}.{}.{}-{}", parsed.major, parsed.minor, parsed.patch, new_pre))
+            Some(format!(
+                "{}.{}.{}-{}",
+                parsed.major, parsed.minor, parsed.patch, new_pre
+            ))
         } else {
-            let (major, minor, patch) = bump_numeric(parsed.major, parsed.minor, parsed.patch, bump_version)?;
+            let (major, minor, patch) =
+                bump_numeric(parsed.major, parsed.minor, parsed.patch, bump_version)?;
             Some(format!("{}.{}.{}", major, minor, patch))
         }
     } else {
         // Release version.
         if bump_version == "prerelease" {
             // Add -SNAPSHOT after bumping patch.
-            let (major, minor, patch) = bump_numeric(parsed.major, parsed.minor, parsed.patch, "prepatch")?;
+            let (major, minor, patch) =
+                bump_numeric(parsed.major, parsed.minor, parsed.patch, "prepatch")?;
             Some(format!("{}.{}.{}-SNAPSHOT", major, minor, patch))
         } else {
-            let (major, minor, patch) = bump_numeric(parsed.major, parsed.minor, parsed.patch, bump_version)?;
+            let (major, minor, patch) =
+                bump_numeric(parsed.major, parsed.minor, parsed.patch, bump_version)?;
             Some(format!("{}.{}.{}", major, minor, patch))
         }
     }
@@ -1303,7 +1306,7 @@ fn increment_prerelease_identifier(pre: &str) -> Option<String> {
 /// Find the byte range of the text content in the root-level `<version>` element.
 /// Returns `(start, end)` byte offsets into `content`.
 fn find_root_version_position(content: &str) -> Option<(usize, usize)> {
-    use quick_xml::{events::Event, Reader};
+    use quick_xml::{Reader, events::Event};
 
     let mut reader = Reader::from_str(content);
     reader.config_mut().trim_text(false);
@@ -2628,7 +2631,7 @@ mod tests {
 
     fn parse_xml_value(xml: &str, path: &[&str]) -> Option<String> {
         // Simple XPath-like traversal using quick-xml to extract a text value.
-        use quick_xml::{events::Event, Reader};
+        use quick_xml::{Reader, events::Event};
         let mut reader = Reader::from_str(xml);
         reader.config_mut().trim_text(true);
         reader.config_mut().check_end_names = false;
@@ -2637,12 +2640,16 @@ mod tests {
         loop {
             match reader.read_event() {
                 Ok(Event::Start(e)) => {
-                    let name =
-                        std::str::from_utf8(e.name().as_ref()).unwrap_or("").to_owned();
+                    let name = std::str::from_utf8(e.name().as_ref())
+                        .unwrap_or("")
+                        .to_owned();
                     stack.push(name);
                 }
                 Ok(Event::Text(e)) if result.is_none() => {
-                    let text = std::str::from_utf8(e.as_ref()).unwrap_or("").trim().to_owned();
+                    let text = std::str::from_utf8(e.as_ref())
+                        .unwrap_or("")
+                        .trim()
+                        .to_owned();
                     if !text.is_empty() {
                         let cur_path: Vec<&str> = stack.iter().map(|s| s.as_str()).collect();
                         // Return first non-empty match where path ends with target path.
@@ -2676,7 +2683,13 @@ mod tests {
         let result = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
         let value = parse_xml_value(
             &result,
-            &["project", "dependencyManagement", "dependencies", "dependency", "version"],
+            &[
+                "project",
+                "dependencyManagement",
+                "dependencies",
+                "dependency",
+                "version",
+            ],
         );
         assert_eq!(value.as_deref(), Some("0.0.2"));
     }
@@ -2695,7 +2708,13 @@ mod tests {
         let result = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
         let group_id = parse_xml_value(
             &result,
-            &["project", "dependencyManagement", "dependencies", "dependency", "groupId"],
+            &[
+                "project",
+                "dependencyManagement",
+                "dependencies",
+                "dependency",
+                "groupId",
+            ],
         );
         assert_eq!(group_id.as_deref(), Some("org.example.new"));
     }
@@ -2714,15 +2733,33 @@ mod tests {
         let result = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
         let group_id = parse_xml_value(
             &result,
-            &["project", "dependencyManagement", "dependencies", "dependency", "groupId"],
+            &[
+                "project",
+                "dependencyManagement",
+                "dependencies",
+                "dependency",
+                "groupId",
+            ],
         );
         let artifact_id = parse_xml_value(
             &result,
-            &["project", "dependencyManagement", "dependencies", "dependency", "artifactId"],
+            &[
+                "project",
+                "dependencyManagement",
+                "dependencies",
+                "dependency",
+                "artifactId",
+            ],
         );
         let version = parse_xml_value(
             &result,
-            &["project", "dependencyManagement", "dependencies", "dependency", "version"],
+            &[
+                "project",
+                "dependencyManagement",
+                "dependencies",
+                "dependency",
+                "version",
+            ],
         );
         assert_eq!(group_id.as_deref(), Some("org.example.new"));
         assert_eq!(artifact_id.as_deref(), Some("bar"));
@@ -2747,8 +2784,26 @@ mod tests {
             ..Default::default()
         };
         let result = maven_update_dependency(content, &upgrade).unwrap();
-        let group_id = parse_xml_value(&result, &["project", "dependencyManagement", "dependencies", "dependency", "groupId"]);
-        let artifact_id = parse_xml_value(&result, &["project", "dependencyManagement", "dependencies", "dependency", "artifactId"]);
+        let group_id = parse_xml_value(
+            &result,
+            &[
+                "project",
+                "dependencyManagement",
+                "dependencies",
+                "dependency",
+                "groupId",
+            ],
+        );
+        let artifact_id = parse_xml_value(
+            &result,
+            &[
+                "project",
+                "dependencyManagement",
+                "dependencies",
+                "dependency",
+                "artifactId",
+            ],
+        );
         assert_eq!(group_id.as_deref(), Some("org.example.new"));
         assert_eq!(artifact_id.as_deref(), Some("bar"));
     }
@@ -2770,7 +2825,13 @@ mod tests {
         // Just verify the group didn't change
         let group_id = parse_xml_value(
             &result,
-            &["project", "dependencyManagement", "dependencies", "dependency", "groupId"],
+            &[
+                "project",
+                "dependencyManagement",
+                "dependencies",
+                "dependency",
+                "groupId",
+            ],
         );
         // groupId should remain "org.example" since name doesn't match
         assert_eq!(group_id.as_deref(), Some("org.example"));
@@ -2799,8 +2860,12 @@ mod tests {
             dep_name: Some("docker.io/paketobuildpacks/python".into()),
             current_value: Some("2.22.1".into()),
             new_value: Some("2.24.3".into()),
-            current_digest: Some("sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138".into()),
-            new_digest: Some("sha256:ab0cf962a92158f15d9e4fed6f905d5d292ed06a8e6291aa1ce3c33a5c78bde1".into()),
+            current_digest: Some(
+                "sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138".into(),
+            ),
+            new_digest: Some(
+                "sha256:ab0cf962a92158f15d9e4fed6f905d5d292ed06a8e6291aa1ce3c33a5c78bde1".into(),
+            ),
             file_replace_position: 1634,
             ..Default::default()
         };
@@ -2907,13 +2972,22 @@ mod tests {
     #[test]
     fn extract_tracks_file_replace_position() {
         let deps = extract(SIMPLE_POM_FULL).unwrap();
-        let foo_dep = deps.iter().find(|d| d.dep_name == "org.example:foo").unwrap();
+        let foo_dep = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:foo")
+            .unwrap();
         assert_eq!(foo_dep.file_replace_position, Some(905));
 
-        let quuz_dep = deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        let quuz_dep = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:quuz")
+            .unwrap();
         assert_eq!(quuz_dep.file_replace_position, Some(3086));
 
-        let hard_range = deps.iter().find(|d| d.dep_name == "org.example:hard-range").unwrap();
+        let hard_range = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:hard-range")
+            .unwrap();
         assert_eq!(hard_range.file_replace_position, Some(3410));
     }
 
@@ -2924,7 +2998,10 @@ mod tests {
     fn maven_index_update_existing_dependency() {
         let new_value = "9.9.9.9-final";
         let deps = extract(SIMPLE_POM_FULL).unwrap();
-        let dep = deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        let dep = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:quuz")
+            .unwrap();
         let upgrade = MavenUpdateUpgrade {
             dep_name: Some(dep.dep_name.clone()),
             current_value: Some(dep.current_value.clone()),
@@ -2934,7 +3011,10 @@ mod tests {
         };
         let updated = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
         let updated_deps = extract(&updated).unwrap();
-        let updated_dep = updated_deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        let updated_dep = updated_deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:quuz")
+            .unwrap();
         assert_eq!(updated_dep.current_value, new_value);
     }
 
@@ -2942,7 +3022,10 @@ mod tests {
     #[test]
     fn maven_index_no_touch_when_equal() {
         let deps = extract(SIMPLE_POM_FULL).unwrap();
-        let dep = deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        let dep = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:quuz")
+            .unwrap();
         let upgrade = MavenUpdateUpgrade {
             dep_name: Some(dep.dep_name.clone()),
             current_value: Some(dep.current_value.clone()),
@@ -2958,7 +3041,10 @@ mod tests {
     #[test]
     fn maven_index_returns_none_when_current_mismatch() {
         let deps = extract(SIMPLE_POM_FULL).unwrap();
-        let dep = deps.iter().find(|d| d.dep_name == "org.example:quuz").unwrap();
+        let dep = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:quuz")
+            .unwrap();
         let upgrade = MavenUpdateUpgrade {
             dep_name: Some(dep.dep_name.clone()),
             current_value: Some("1.2.2".to_owned()),
@@ -2975,7 +3061,10 @@ mod tests {
     fn maven_index_update_ranges() {
         let new_value = "[1.2.3]";
         let deps = extract(SIMPLE_POM_FULL).unwrap();
-        let dep = deps.iter().find(|d| d.dep_name == "org.example:hard-range").unwrap();
+        let dep = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:hard-range")
+            .unwrap();
         let upgrade = MavenUpdateUpgrade {
             dep_name: Some(dep.dep_name.clone()),
             current_value: Some(dep.current_value.clone()),
@@ -2985,7 +3074,10 @@ mod tests {
         };
         let updated = maven_update_dependency(SIMPLE_POM_FULL, &upgrade).unwrap();
         let updated_deps = extract(&updated).unwrap();
-        let updated_dep = updated_deps.iter().find(|d| d.dep_name == "org.example:hard-range").unwrap();
+        let updated_dep = updated_deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:hard-range")
+            .unwrap();
         assert_eq!(updated_dep.current_value, new_value);
     }
 
@@ -2993,7 +3085,10 @@ mod tests {
     #[test]
     fn maven_index_preserve_ranges() {
         let deps = extract(SIMPLE_POM_FULL).unwrap();
-        let dep = deps.iter().find(|d| d.dep_name == "org.example:hard-range").unwrap();
+        let dep = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:hard-range")
+            .unwrap();
         let upgrade = MavenUpdateUpgrade {
             dep_name: Some(dep.dep_name.clone()),
             current_value: Some(dep.current_value.clone()),

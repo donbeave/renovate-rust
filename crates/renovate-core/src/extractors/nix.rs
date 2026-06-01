@@ -1831,7 +1831,9 @@ mod tests {
   "root": "root",
   "version": 7
 }"#;
-        let deps = extract_package_file_with_config(Some(flake_nix), Some(flake_lock), Default::default()).unwrap();
+        let deps =
+            extract_package_file_with_config(Some(flake_nix), Some(flake_lock), Default::default())
+                .unwrap();
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].input_name, "nixpkgs");
     }

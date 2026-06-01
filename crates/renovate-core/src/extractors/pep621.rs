@@ -1447,7 +1447,10 @@ readme = "README.md"
     #[test]
     fn pep621_dep_type_as_renovate_str() {
         assert_eq!(Pep621DepType::Regular.as_renovate_str(), "dependencies");
-        assert_eq!(Pep621DepType::Optional.as_renovate_str(), "optional-dependencies");
+        assert_eq!(
+            Pep621DepType::Optional.as_renovate_str(),
+            "optional-dependencies"
+        );
         assert_eq!(Pep621DepType::Group.as_renovate_str(), "dependency-groups");
     }
 }

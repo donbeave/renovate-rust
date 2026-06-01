@@ -37,18 +37,12 @@ mod tests {
 
     #[test]
     fn split_at_whitespace_tabs() {
-        assert_eq!(
-            split_at_whitespace("hello\tworld"),
-            vec!["hello", "world"]
-        );
+        assert_eq!(split_at_whitespace("hello\tworld"), vec!["hello", "world"]);
     }
 
     #[test]
     fn split_at_whitespace_newlines() {
-        assert_eq!(
-            split_at_whitespace("hello\nworld"),
-            vec!["hello", "world"]
-        );
+        assert_eq!(split_at_whitespace("hello\nworld"), vec!["hello", "world"]);
     }
 
     #[test]
@@ -70,34 +64,22 @@ mod tests {
 
     #[test]
     fn split_csv_basic() {
-        assert_eq!(
-            split_csv("a, b, c"),
-            vec!["a", "b", "c"]
-        );
+        assert_eq!(split_csv("a, b, c"), vec!["a", "b", "c"]);
     }
 
     #[test]
     fn split_csv_no_spaces() {
-        assert_eq!(
-            split_csv("a,b,c"),
-            vec!["a", "b", "c"]
-        );
+        assert_eq!(split_csv("a,b,c"), vec!["a", "b", "c"]);
     }
 
     #[test]
     fn split_csv_trailing_comma() {
-        assert_eq!(
-            split_csv("a, b,"),
-            vec!["a", "b"]
-        );
+        assert_eq!(split_csv("a, b,"), vec!["a", "b"]);
     }
 
     #[test]
     fn split_csv_leading_comma() {
-        assert_eq!(
-            split_csv(",a,b"),
-            vec!["a", "b"]
-        );
+        assert_eq!(split_csv(",a,b"), vec!["a", "b"]);
     }
 
     #[test]
@@ -133,9 +115,6 @@ mod tests {
 
     #[test]
     fn split_csv_trims_each_element() {
-        assert_eq!(
-            split_csv("  a  ,  b  ,  c  "),
-            vec!["a", "b", "c"]
-        );
+        assert_eq!(split_csv("  a  ,  b  ,  c  "), vec!["a", "b", "c"]);
     }
 }

@@ -49,8 +49,8 @@ impl Migration for RequireConfigMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::RequireConfigMigration;
     use crate::config::migration::Migration;
@@ -97,7 +97,12 @@ mod tests {
     fn leaves_string_optional_unchanged() {
         let m = RequireConfigMigration::new();
         let mut migrated = Map::new();
-        m.run("requireConfig", &json!("optional"), &Map::new(), &mut migrated);
+        m.run(
+            "requireConfig",
+            &json!("optional"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert!(migrated.is_empty());
     }
 }

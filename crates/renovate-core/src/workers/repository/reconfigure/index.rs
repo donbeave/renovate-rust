@@ -14,10 +14,7 @@ pub struct ReconfigureResult {
     pub errors: Vec<String>,
 }
 
-pub fn reconfigure_repository(
-    _config: &RenovateConfig,
-    branch_prefix: &str,
-) -> ReconfigureResult {
+pub fn reconfigure_repository(_config: &RenovateConfig, branch_prefix: &str) -> ReconfigureResult {
     let reconfigure_branch = format!("{branch_prefix}reconfigure");
 
     ReconfigureResult {

@@ -78,15 +78,13 @@ mod tests {
 
     #[test]
     fn set_cache_from_branches() {
-        let branches = vec![
-            BranchConfig {
-                branch_name: "renovate/pkg-1".into(),
-                base_branch: "main".into(),
-                automerge: Some(true),
-                pr_no: Some(42),
-                ..Default::default()
-            },
-        ];
+        let branches = vec![BranchConfig {
+            branch_name: "renovate/pkg-1".into(),
+            base_branch: "main".into(),
+            automerge: Some(true),
+            pr_no: Some(42),
+            ..Default::default()
+        }];
         let cache = set_cache(&branches);
         assert_eq!(cache.branches.len(), 1);
         assert!(cache.modified);

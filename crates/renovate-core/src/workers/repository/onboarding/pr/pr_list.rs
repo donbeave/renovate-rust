@@ -5,10 +5,7 @@
 use crate::workers::repository::update::branch::types::BranchConfig;
 use crate::workers::types::RenovateConfig;
 
-pub fn get_pr_list_description(
-    config: &RenovateConfig,
-    branches: &[BranchConfig],
-) -> String {
+pub fn get_pr_list_description(config: &RenovateConfig, branches: &[BranchConfig]) -> String {
     let mut desc = String::from("\n### What to Expect\n\n");
 
     if branches.is_empty() {
@@ -23,10 +20,17 @@ pub fn get_pr_list_description(
         "With your current configuration, Renovate will create {} Pull Request",
         branches.len()
     ));
-    desc.push_str(if branches.len() > 1 { "s:\n\n" } else { ":\n\n" });
+    desc.push_str(if branches.len() > 1 {
+        "s:\n\n"
+    } else {
+        ":\n\n"
+    });
 
     for branch in branches {
-        desc.push_str(&format!("<details>\n<summary>{}</summary>\n\n", branch.branch_name));
+        desc.push_str(&format!(
+            "<details>\n<summary>{}</summary>\n\n",
+            branch.branch_name
+        ));
         desc.push_str(&format!("  - Branch name: `{}`\n", branch.branch_name));
         desc.push_str("\n\n</details>\n\n");
     }

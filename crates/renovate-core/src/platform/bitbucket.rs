@@ -407,11 +407,7 @@ impl PlatformClient for BitbucketClient {
         }))
     }
 
-    async fn get_file_list(
-        &self,
-        owner: &str,
-        repo: &str,
-    ) -> Result<Vec<String>, PlatformError> {
+    async fn get_file_list(&self, owner: &str, repo: &str) -> Result<Vec<String>, PlatformError> {
         let url = format!(
             "{}/repositories/{}/{}/src?format=meta",
             self.api_base, owner, repo
@@ -614,9 +610,11 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let pr_id = create_pr(&client, "owner", "repo", "feature", "main", "Test PR", "body")
-            .await
-            .unwrap();
+        let pr_id = create_pr(
+            &client, "owner", "repo", "feature", "main", "Test PR", "body",
+        )
+        .await
+        .unwrap();
         assert_eq!(pr_id, Some(42));
     }
 
@@ -630,9 +628,11 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let pr_id = create_pr(&client, "owner", "repo", "feature", "main", "Test PR", "body")
-            .await
-            .unwrap();
+        let pr_id = create_pr(
+            &client, "owner", "repo", "feature", "main", "Test PR", "body",
+        )
+        .await
+        .unwrap();
         assert_eq!(pr_id, None);
     }
 
@@ -761,7 +761,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/repositories/owner/repo/pullrequests"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"values": []})))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"values": []})),
+            )
             .mount(&server)
             .await;
 

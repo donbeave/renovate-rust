@@ -57,8 +57,8 @@ impl Migration for GoModTidyMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::GoModTidyMigration;
     use crate::config::migration::Migration;
@@ -83,7 +83,10 @@ mod tests {
         let mut migrated = Map::new();
         migrated.insert("postUpdateOptions".into(), json!(["npmDedupe"]));
         m.run("gomodTidy", &json!(true), &Map::new(), &mut migrated);
-        assert_eq!(migrated["postUpdateOptions"], json!(["npmDedupe", "gomodTidy"]));
+        assert_eq!(
+            migrated["postUpdateOptions"],
+            json!(["npmDedupe", "gomodTidy"])
+        );
     }
 
     #[test]

@@ -111,7 +111,13 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             ctx.report.files.push(output::FileReport {
                 path: npm_file_path.clone(),
                 manager: "npm".into(),
-                deps: build_dep_reports_npm(&deps, &actionable, &update_map, &npm_version_ts, ctx.repo_cfg),
+                deps: build_dep_reports_npm(
+                    &deps,
+                    &actionable,
+                    &update_map,
+                    &npm_version_ts,
+                    ctx.repo_cfg,
+                ),
             });
         }
     }

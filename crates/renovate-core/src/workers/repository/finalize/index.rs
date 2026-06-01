@@ -13,10 +13,7 @@ pub struct FinalizeResult {
     pub cache_saved: bool,
 }
 
-pub fn finalize_repository(
-    _config: &RenovateConfig,
-    _branch_list: &[String],
-) -> FinalizeResult {
+pub fn finalize_repository(_config: &RenovateConfig, _branch_list: &[String]) -> FinalizeResult {
     FinalizeResult {
         pruned_branches: Vec::new(),
         statistics_collected: true,

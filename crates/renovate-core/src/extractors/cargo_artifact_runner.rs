@@ -13,9 +13,7 @@ use std::future::Future;
 use std::path::{Path, PathBuf};
 use std::pin::Pin;
 
-use crate::artifacts::{
-    ArtifactError, ArtifactResult, ArtifactRunner, UpdateArtifact, UpdatedDep,
-};
+use crate::artifacts::{ArtifactError, ArtifactResult, ArtifactRunner, UpdateArtifact, UpdatedDep};
 use crate::exec::raw::raw_exec;
 use crate::exec::types::ExecOptions;
 
@@ -59,7 +57,10 @@ impl CargoArtifactRunner {
         updated_deps: &[UpdatedDep],
         is_maintenance: bool,
     ) -> Vec<String> {
-        let manifest_arg = format!("--manifest-path {}", crate::util::shlex_quote(manifest_path.to_string_lossy().as_ref()));
+        let manifest_arg = format!(
+            "--manifest-path {}",
+            crate::util::shlex_quote(manifest_path.to_string_lossy().as_ref())
+        );
 
         if is_maintenance {
             return vec![format!(
@@ -175,13 +176,8 @@ impl ArtifactRunner for CargoArtifactRunner {
     fn update_artifacts(
         &self,
         input: &UpdateArtifact,
-    ) -> Pin<
-        Box<
-            dyn Future<Output = Result<Option<Vec<ArtifactResult>>, ArtifactError>>
-                + Send
-                + '_,
-        >,
-    > {
+    ) -> Pin<Box<dyn Future<Output = Result<Option<Vec<ArtifactResult>>, ArtifactError>> + Send + '_>>
+    {
         let package_file_name = input.package_file_name.clone();
         let new_package_file_content = input.new_package_file_content.clone();
         let updated_deps = input.updated_deps.clone();
@@ -196,7 +192,8 @@ impl ArtifactRunner for CargoArtifactRunner {
                 .unwrap_or_else(|| lock_file_dir.clone());
 
             // 1. Find Cargo.lock.
-            let Some(lock_path) = Self::find_lock_file(Path::new(&package_file_name), lock_file_dir)
+            let Some(lock_path) =
+                Self::find_lock_file(Path::new(&package_file_name), lock_file_dir)
             else {
                 return Ok(None);
             };
@@ -229,11 +226,19 @@ impl ArtifactRunner for CargoArtifactRunner {
             let mut env: HashMap<String, String> = if config.env.is_empty() {
                 std::env::vars().collect()
             } else {
-                config.env.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+                config
+                    .env
+                    .iter()
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect()
             };
             // Ensure the lock file dir is on PATH for cargo discovery.
             let dir_str = lock_file_dir.to_string_lossy().to_string();
-            let path_key = if env.contains_key("PATH") { "PATH" } else { "Path" };
+            let path_key = if env.contains_key("PATH") {
+                "PATH"
+            } else {
+                "Path"
+            };
             if let Some(existing) = env.get(path_key) {
                 env.insert(path_key.to_owned(), format!("{}:{}", dir_str, existing));
             } else {
@@ -248,7 +253,9 @@ impl ArtifactRunner for CargoArtifactRunner {
             for cmd in &cmds {
                 if let Err(err) = self.run_command(cmd, &package_dir, &env).await {
                     // Try recursive retry on "package ID specification" errors.
-                    let new_lock = tokio::fs::read_to_string(&lock_path).await.unwrap_or_default();
+                    let new_lock = tokio::fs::read_to_string(&lock_path)
+                        .await
+                        .unwrap_or_default();
                     if err.stderr.contains("package ID specification") {
                         let versions = Self::extract_lock_versions(&new_lock);
                         let new_deps: Vec<UpdatedDep> = updated_deps
@@ -359,7 +366,13 @@ mod tests {
         let input = UpdateArtifact {
             package_file_name: "Cargo.toml".to_owned(),
             updated_deps: vec![updated_dep(
-                "dep1", None, None, None, None, None, Some("crate"),
+                "dep1",
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some("crate"),
             )],
             new_package_file_content: String::new(),
             config: ArtifactConfig {
@@ -431,7 +444,13 @@ mod tests {
         let input = UpdateArtifact {
             package_file_name: "Cargo.toml".to_owned(),
             updated_deps: vec![updated_dep(
-                "dep1", None, None, None, None, None, Some("crate"),
+                "dep1",
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some("crate"),
             )],
             new_package_file_content: "{}".to_owned(),
             config: ArtifactConfig {
@@ -579,7 +598,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_cargo).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'Exec error' >&2\nexit 1\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'Exec error' >&2\nexit 1\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_cargo).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_cargo, perms).unwrap();
@@ -615,7 +635,11 @@ mod tests {
         let result = runner.update_artifacts(&input).await;
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(!err.stderr.is_empty(), "error stderr should not be empty: {:?}", err.stderr);
+        assert!(
+            !err.stderr.is_empty(),
+            "error stderr should not be empty: {:?}",
+            err.stderr
+        );
     }
 
     // Ported: "returns updated Cargo.lock for lockfile maintenance" — cargo/artifacts.spec.ts line 488
@@ -679,7 +703,13 @@ mod tests {
     #[test]
     fn build_commands_workspace_when_no_locked_version() {
         let deps = vec![updated_dep(
-            "dep1", None, None, None, None, None, Some("crate"),
+            "dep1",
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some("crate"),
         )];
         let cmds = CargoArtifactRunner::build_commands(Path::new("Cargo.toml"), &deps, false);
         assert_eq!(cmds.len(), 1);
@@ -690,7 +720,13 @@ mod tests {
     #[test]
     fn build_commands_precise_when_locked_version_unchanged_range() {
         let deps = vec![updated_dep(
-            "dep1", Some("dep1"), Some("1.0.0"), Some("1.0.1"), None, None, Some("crate"),
+            "dep1",
+            Some("dep1"),
+            Some("1.0.0"),
+            Some("1.0.1"),
+            None,
+            None,
+            Some("crate"),
         )];
         let cmds = CargoArtifactRunner::build_commands(Path::new("Cargo.toml"), &deps, false);
         assert_eq!(cmds.len(), 2);
@@ -735,7 +771,8 @@ mod tests {
         std::fs::create_dir_all(&sub).unwrap();
         let lock = dir.path().join("Cargo.lock");
         std::fs::write(&lock, "").unwrap();
-        let found = CargoArtifactRunner::find_lock_file(Path::new("crates/foo/Cargo.toml"), dir.path());
+        let found =
+            CargoArtifactRunner::find_lock_file(Path::new("crates/foo/Cargo.toml"), dir.path());
         assert_eq!(found, Some(lock));
     }
 }

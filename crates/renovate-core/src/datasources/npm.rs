@@ -291,13 +291,12 @@ pub fn summary_from_cache(constraint: &str, entry: &NpmVersionsEntry) -> NpmUpda
 // ── Full ReleaseResult datasource ──────────────────────────────────────────
 
 /// Regex for short-form repository identifiers like `owner/repo` or `github:owner/repo`.
-static SHORT_REPO_REGEX: LazyLock<regex::Regex> =
-    LazyLock::new(|| {
-        regex::Regex::new(
+static SHORT_REPO_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(
             r"^((?P<platform>bitbucket|github|gitlab):)?(?P<short_repo>[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)$",
         )
         .unwrap()
-    });
+});
 
 /// Map short-form platform prefixes to their base URLs.
 fn platform_url(platform: &str) -> &'static str {
@@ -564,10 +563,7 @@ pub async fn get_npm_releases(
     // Detect isPrivate from cache-control header.
     let is_private = {
         let cache_control = cache_control_header.as_deref().unwrap_or("");
-        let directives: Vec<&str> = cache_control
-            .split(',')
-            .map(|s| s.trim())
-            .collect();
+        let directives: Vec<&str> = cache_control.split(',').map(|s| s.trim()).collect();
         !directives.contains(&"public")
     };
 
@@ -776,7 +772,10 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/empty"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"name":"empty","versions":{},"dist-tags":{}}"#))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"{"name":"empty","versions":{},"dist-tags":{}}"#),
+            )
             .mount(&server)
             .await;
 
@@ -809,7 +808,9 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/pkg"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"name":"pkg","versions":{"1.0.0":{}},"dist-tags":{"latest":"1.0.0"}}"#))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"{"name":"pkg","versions":{"1.0.0":{}},"dist-tags":{"latest":"1.0.0"}}"#,
+            ))
             .mount(&server)
             .await;
 
@@ -893,7 +894,10 @@ mod tests {
         };
         let summary = summary_from_cache("^1.0.0", &entry);
         assert_eq!(summary.latest.as_deref(), Some("2.0.0"));
-        assert_eq!(summary.latest_timestamp.as_deref(), Some("2024-01-01T00:00:00Z"));
+        assert_eq!(
+            summary.latest_timestamp.as_deref(),
+            Some("2024-01-01T00:00:00Z")
+        );
     }
 
     // ── parse_source / source URL tests ─────────────────────────────────────
@@ -906,7 +910,10 @@ mod tests {
             "url": "git:github.com/renovateapp/dummy"
         });
         let (source_url, _) = parse_source(&repo);
-        assert_eq!(source_url, Some("git:github.com/renovateapp/dummy".to_string()));
+        assert_eq!(
+            source_url,
+            Some("git:github.com/renovateapp/dummy".to_string())
+        );
     }
 
     // Ported: "should parse repo url (string)" — lib/modules/datasource/npm/index.spec.ts line 90
@@ -914,21 +921,30 @@ mod tests {
     fn parse_source_string() {
         let repo = serde_json::json!("git:github.com/renovateapp/dummy");
         let (source_url, _) = parse_source(&repo);
-        assert_eq!(source_url, Some("git:github.com/renovateapp/dummy".to_string()));
+        assert_eq!(
+            source_url,
+            Some("git:github.com/renovateapp/dummy".to_string())
+        );
     }
 
     #[test]
     fn parse_source_short_repo_github() {
         let repo = serde_json::json!("vuejs/vue-next");
         let (source_url, _) = parse_source(&repo);
-        assert_eq!(source_url, Some("https://github.com/vuejs/vue-next".to_string()));
+        assert_eq!(
+            source_url,
+            Some("https://github.com/vuejs/vue-next".to_string())
+        );
     }
 
     #[test]
     fn parse_source_short_repo_explicit_platform() {
         let repo = serde_json::json!("github:vuejs/vue-next");
         let (source_url, _) = parse_source(&repo);
-        assert_eq!(source_url, Some("https://github.com/vuejs/vue-next".to_string()));
+        assert_eq!(
+            source_url,
+            Some("https://github.com/vuejs/vue-next".to_string())
+        );
     }
 
     #[test]
@@ -942,7 +958,10 @@ mod tests {
     fn parse_source_short_repo_bitbucket() {
         let repo = serde_json::json!("bitbucket:vuejs/vue");
         let (source_url, _) = parse_source(&repo);
-        assert_eq!(source_url, Some("https://bitbucket.org/vuejs/vue".to_string()));
+        assert_eq!(
+            source_url,
+            Some("https://bitbucket.org/vuejs/vue".to_string())
+        );
     }
 
     #[test]
@@ -952,7 +971,10 @@ mod tests {
             "directory": "packages/foo"
         });
         let (source_url, source_directory) = parse_source(&repo);
-        assert_eq!(source_url, Some("https://github.com/octocat/repo".to_string()));
+        assert_eq!(
+            source_url,
+            Some("https://github.com/octocat/repo".to_string())
+        );
         assert_eq!(source_directory, Some("packages/foo".to_string()));
     }
 
@@ -1104,11 +1126,20 @@ mod tests {
             .unwrap()
             .unwrap();
         assert!(result.is_private.is_none());
-        assert_eq!(result.source_url.as_deref(), Some("git://github.com/renovateapp/dummy.git"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("git://github.com/renovateapp/dummy.git")
+        );
         assert_eq!(result.source_directory.as_deref(), Some("src/a"));
-        assert_eq!(result.homepage.as_deref(), Some("https://github.com/renovateapp/dummy"));
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://github.com/renovateapp/dummy")
+        );
         assert_eq!(result.releases.len(), 2);
-        assert_eq!(result.tags.as_ref().unwrap().get("latest").unwrap(), "0.0.1");
+        assert_eq!(
+            result.tags.as_ref().unwrap().get("latest").unwrap(),
+            "0.0.1"
+        );
     }
 
     // Ported: "should return null if lookup fails" — lib/modules/datasource/npm/index.spec.ts line 216
@@ -1122,7 +1153,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await.unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -1142,7 +1175,9 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = get_npm_releases(&http, "foobar", &server.uri(), None).await.unwrap();
+        let result = get_npm_releases(&http, "foobar", &server.uri(), None)
+            .await
+            .unwrap();
         assert!(result.is_none());
     }
 
@@ -1173,13 +1208,27 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/vuejs/vue.git"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/vuejs/vue.git")
+        );
         // v2 has same URL → no per-release source_url
-        let v2 = result.releases.iter().find(|r| r.version == "2.0.0").unwrap();
+        let v2 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "2.0.0")
+            .unwrap();
         assert!(v2.source_url.is_none());
         // v3 has different URL → per-release source_url
-        let v3 = result.releases.iter().find(|r| r.version == "3.0.0").unwrap();
-        assert_eq!(v3.source_url.as_deref(), Some("https://github.com/vuejs/vue-next.git"));
+        let v3 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "3.0.0")
+            .unwrap();
+        assert_eq!(
+            v3.source_url.as_deref(),
+            Some("https://github.com/vuejs/vue-next.git")
+        );
     }
 
     // Ported: "handles short sourceUrls in releases" — lib/modules/datasource/npm/get.spec.ts line 443
@@ -1208,14 +1257,38 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/vuejs/vue"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/vuejs/vue")
+        );
         // v2: "vuejs/vue" → same as top-level github, so no per-release source_url
-        let v3 = result.releases.iter().find(|r| r.version == "3.0.0").unwrap();
-        assert_eq!(v3.source_url.as_deref(), Some("https://github.com/vuejs/vue-next"));
-        let v4 = result.releases.iter().find(|r| r.version == "4.0.0").unwrap();
-        assert_eq!(v4.source_url.as_deref(), Some("https://gitlab.com/vuejs/vue"));
-        let v5 = result.releases.iter().find(|r| r.version == "5.0.0").unwrap();
-        assert_eq!(v5.source_url.as_deref(), Some("https://bitbucket.org/vuejs/vue"));
+        let v3 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "3.0.0")
+            .unwrap();
+        assert_eq!(
+            v3.source_url.as_deref(),
+            Some("https://github.com/vuejs/vue-next")
+        );
+        let v4 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "4.0.0")
+            .unwrap();
+        assert_eq!(
+            v4.source_url.as_deref(),
+            Some("https://gitlab.com/vuejs/vue")
+        );
+        let v5 = result
+            .releases
+            .iter()
+            .find(|r| r.version == "5.0.0")
+            .unwrap();
+        assert_eq!(
+            v5.source_url.as_deref(),
+            Some("https://bitbucket.org/vuejs/vue")
+        );
     }
 
     // Ported: "handles full repository urls with release source directories" — lib/modules/datasource/npm/get.spec.ts line 527
@@ -1246,8 +1319,14 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://example.com/octocat/Hello-World"));
-        assert_eq!(result.releases[0].source_directory.as_deref(), Some("packages/foo"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://example.com/octocat/Hello-World")
+        );
+        assert_eq!(
+            result.releases[0].source_directory.as_deref(),
+            Some("packages/foo")
+        );
     }
 
     // Ported: "does not override sourceDirectory" — lib/modules/datasource/npm/get.spec.ts line 484
@@ -1275,7 +1354,10 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/neutrinojs/neutrino/tree/master/packages/react"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/neutrinojs/neutrino/tree/master/packages/react")
+        );
         assert_eq!(result.source_directory.as_deref(), Some("packages/foo"));
     }
 
@@ -1303,7 +1385,10 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://github.com/neutrinojs/neutrino/tree/master/packages/react"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://github.com/neutrinojs/neutrino/tree/master/packages/react")
+        );
         // Non-compliant URL (tree/ in it) → source_directory is NOT extracted by our implementation
         // which is correct for non-github non-compliant URLs
     }
@@ -1332,7 +1417,10 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.source_url.as_deref(), Some("https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react"));
+        assert_eq!(
+            result.source_url.as_deref(),
+            Some("https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react")
+        );
         assert!(result.source_directory.is_none());
     }
 
@@ -1446,7 +1534,10 @@ mod tests {
         let result = get_npm_releases(&http, "foobar", &format!("{}/", server.uri()), None).await;
         assert!(result.is_ok());
         let r = result.unwrap().unwrap();
-        assert_eq!(r.registry_url.as_deref(), Some(format!("{}/", server.uri()).as_str()));
+        assert_eq!(
+            r.registry_url.as_deref(),
+            Some(format!("{}/", server.uri()).as_str())
+        );
     }
 
     // Ported: "should throw error if necessary env var is not present" — lib/modules/datasource/npm/index.spec.ts line 380
@@ -1463,7 +1554,10 @@ mod tests {
     fn env_replace_substitutes_registry() {
         use crate::datasources::npm_npmrc::env_replace;
         let mut env = HashMap::new();
-        env.insert("REGISTRY".to_owned(), "https://registry.from-env.com".to_owned());
+        env.insert(
+            "REGISTRY".to_owned(),
+            "https://registry.from-env.com".to_owned(),
+        );
         let result = env_replace("registry=${REGISTRY}", &env).unwrap();
         assert_eq!(result, "registry=https://registry.from-env.com");
     }
@@ -1521,16 +1615,28 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(result.homepage.as_deref(), Some("https://example.com/package"));
+        assert_eq!(
+            result.homepage.as_deref(),
+            Some("https://example.com/package")
+        );
         assert_eq!(result.source_directory.as_deref(), Some("packages/foo"));
         assert_eq!(result.releases.len(), 1);
         let rel = &result.releases[0];
         assert_eq!(rel.version, "1.0.0");
         assert_eq!(rel.git_ref.as_deref(), Some("abc123"));
-        assert_eq!(rel.dependencies.as_ref().unwrap().get("foo").unwrap(), "^1.0.0");
-        assert_eq!(rel.dev_dependencies.as_ref().unwrap().get("bar").unwrap(), "^2.0.0");
+        assert_eq!(
+            rel.dependencies.as_ref().unwrap().get("foo").unwrap(),
+            "^1.0.0"
+        );
+        assert_eq!(
+            rel.dev_dependencies.as_ref().unwrap().get("bar").unwrap(),
+            "^2.0.0"
+        );
         assert_eq!(rel.attestation, Some(true));
-        assert_eq!(rel.release_timestamp.as_deref(), Some("2024-06-02T00:00:00.000Z"));
+        assert_eq!(
+            rel.release_timestamp.as_deref(),
+            Some("2024-06-02T00:00:00.000Z")
+        );
         assert_eq!(rel.is_deprecated, Some(true));
         // Node engine constraint
         let constraints = rel.constraints.as_ref().unwrap();
@@ -1547,7 +1653,10 @@ mod tests {
             "directory": "packages/core"
         });
         let (source_url, source_directory) = parse_source(&repo);
-        assert_eq!(source_url, Some("https://github.com/vuejs/vue.git".to_string()));
+        assert_eq!(
+            source_url,
+            Some("https://github.com/vuejs/vue.git".to_string())
+        );
         assert_eq!(source_directory, Some("packages/core".to_string()));
 
         // Null repository returns None
@@ -1832,7 +1941,10 @@ mod tests {
         let body = serde_json::json!({ "name": "pkg", "versions": { "1.0.0": {} }, "dist-tags": { "latest": "1.0.0" } });
         Mock::given(method("GET"))
             .and(path("/pkg"))
-            .and(wiremock::matchers::header("authorization", "Basic dXNlcjpwYXNz"))
+            .and(wiremock::matchers::header(
+                "authorization",
+                "Basic dXNlcjpwYXNz",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(body))
             .mount(&server)
             .await;

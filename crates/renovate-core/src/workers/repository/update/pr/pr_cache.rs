@@ -34,9 +34,7 @@ impl PrCacheStore {
         let cache = self.caches.entry(branch_name.to_owned()).or_default();
 
         let last_edited = if pr_modified || cache.last_edited.is_none() {
-            Some(
-                chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
-            )
+            Some(chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true))
         } else {
             cache.last_edited.clone()
         };

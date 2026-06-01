@@ -58,33 +58,29 @@ pub fn parse_repomd_xml(content: &str) -> Result<Option<String>, RpmError> {
     loop {
         use quick_xml::events::Event;
         match reader.read_event_into(&mut buf) {
-            Ok(Event::Start(ref e)) | Ok(Event::Empty(ref e)) => {
-                match e.local_name().as_ref() {
-                    b"data" => {
-                        for attr in e.attributes().flatten() {
-                            if attr.key.local_name().as_ref() == b"type" {
-                                data_type = String::from_utf8_lossy(&attr.value).to_string();
-                                if data_type == "primary" {
-                                    in_data = true;
-                                }
+            Ok(Event::Start(ref e)) | Ok(Event::Empty(ref e)) => match e.local_name().as_ref() {
+                b"data" => {
+                    for attr in e.attributes().flatten() {
+                        if attr.key.local_name().as_ref() == b"type" {
+                            data_type = String::from_utf8_lossy(&attr.value).to_string();
+                            if data_type == "primary" {
+                                in_data = true;
                             }
                         }
                     }
-                    b"location" if in_data => {
-                        for attr in e.attributes().flatten() {
-                            if attr.key.local_name().as_ref() == b"href" {
-                                location_href =
-                                    Some(String::from_utf8_lossy(&attr.value).to_string());
-                            }
-                        }
-                    }
-                    _ => {}
                 }
+                b"location" if in_data => {
+                    for attr in e.attributes().flatten() {
+                        if attr.key.local_name().as_ref() == b"href" {
+                            location_href = Some(String::from_utf8_lossy(&attr.value).to_string());
+                        }
+                    }
+                }
+                _ => {}
+            },
+            Ok(Event::End(ref e)) if e.local_name().as_ref() == b"data" && in_data => {
+                break;
             }
-            Ok(Event::End(ref e)) if e.local_name().as_ref() == b"data"
-                && in_data => {
-                    break;
-                }
             Ok(Event::Eof) => break,
             Err(e) => return Err(RpmError::Xml(e.to_string())),
             _ => {}
@@ -148,22 +144,24 @@ pub fn parse_primary_xml(content: &str) -> Result<Vec<RpmPackage>, RpmError> {
                     }
                 }
             }
-            Ok(Event::Empty(ref e))
-                if in_package && e.local_name().as_ref() == b"version" => {
-                    for attr in e.attributes().flatten() {
-                        match attr.key.local_name().as_ref() {
-                            b"ver" => {
-                                current_version = String::from_utf8_lossy(&attr.value).to_string()
-                            }
-                            b"rel" => {
-                                current_release = String::from_utf8_lossy(&attr.value).to_string()
-                            }
-                            _ => {}
+            Ok(Event::Empty(ref e)) if in_package && e.local_name().as_ref() == b"version" => {
+                for attr in e.attributes().flatten() {
+                    match attr.key.local_name().as_ref() {
+                        b"ver" => {
+                            current_version = String::from_utf8_lossy(&attr.value).to_string()
                         }
+                        b"rel" => {
+                            current_release = String::from_utf8_lossy(&attr.value).to_string()
+                        }
+                        _ => {}
                     }
                 }
+            }
             Ok(Event::Text(ref e)) if in_package => {
-                let text = e.decode().map(|s| s.trim().to_owned()).map_err(|e| RpmError::Xml(e.to_string()))?;
+                let text = e
+                    .decode()
+                    .map(|s| s.trim().to_owned())
+                    .map_err(|e| RpmError::Xml(e.to_string()))?;
                 match current_tag.as_str() {
                     "name" => current_name = text.clone(),
                     "arch" => current_arch = text.clone(),
@@ -239,9 +237,8 @@ pub async fn fetch_versions(
     let repomd_body = resp.text().await.map_err(crate::http::HttpError::Request)?;
     let primary_href = parse_repomd_xml(&repomd_body)?;
 
-    let primary_href = primary_href.ok_or_else(|| {
-        RpmError::Xml("primary metadata not found in repomd.xml".to_owned())
-    })?;
+    let primary_href = primary_href
+        .ok_or_else(|| RpmError::Xml("primary metadata not found in repomd.xml".to_owned()))?;
 
     let primary_url = format!("{base}/{primary_href}");
     let primary_resp = http.get_retrying(&primary_url).await?;
@@ -268,10 +265,7 @@ pub async fn fetch_versions(
 
     let packages = parse_primary_xml(&primary_xml)?;
 
-    let matching: Vec<RpmPackage> = packages
-        .into_iter()
-        .filter(|p| p.name == package)
-        .collect();
+    let matching: Vec<RpmPackage> = packages.into_iter().filter(|p| p.name == package).collect();
 
     if matching.is_empty() {
         return Err(RpmError::NotFound(package.to_owned()));
@@ -342,10 +336,7 @@ mod tests {
     #[test]
     fn parse_repomd_finds_primary_location() {
         let result = parse_repomd_xml(REPOMD_XML).unwrap();
-        assert_eq!(
-            result.as_deref(),
-            Some("repodata/abc123-primary.xml.gz")
-        );
+        assert_eq!(result.as_deref(), Some("repodata/abc123-primary.xml.gz"));
     }
 
     // Rust-specific: rpm behavior test
@@ -413,7 +404,8 @@ mod tests {
 
         let primary_gz = {
             use std::io::Write;
-            let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+            let mut encoder =
+                flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
             encoder.write_all(PRIMARY_XML.as_bytes()).unwrap();
             encoder.finish().unwrap()
         };
@@ -426,17 +418,12 @@ mod tests {
 
         Mock::given(method("GET"))
             .and(path("/repodata/abc123-primary.xml.gz"))
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .set_body_raw(primary_gz, "application/gzip"),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_raw(primary_gz, "application/gzip"))
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_versions(&http, "nginx", &server.uri())
-            .await
-            .unwrap();
+        let result = fetch_versions(&http, "nginx", &server.uri()).await.unwrap();
 
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "1.18.0-2.el8");
@@ -449,7 +436,8 @@ mod tests {
 
         let primary_gz = {
             use std::io::Write;
-            let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+            let mut encoder =
+                flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
             encoder.write_all(PRIMARY_XML.as_bytes()).unwrap();
             encoder.finish().unwrap()
         };
@@ -462,10 +450,7 @@ mod tests {
 
         Mock::given(method("GET"))
             .and(path("/repodata/abc123-primary.xml.gz"))
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .set_body_raw(primary_gz, "application/gzip"),
-            )
+            .respond_with(ResponseTemplate::new(200).set_body_raw(primary_gz, "application/gzip"))
             .mount(&server)
             .await;
 
@@ -493,8 +478,7 @@ mod tests {
     fn decompress_gz_roundtrip() {
         use std::io::Write;
         let original = b"hello world";
-        let mut encoder =
-            flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+        let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
         encoder.write_all(original).unwrap();
         let compressed = encoder.finish().unwrap();
 

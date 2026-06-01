@@ -1,5 +1,5 @@
-use rand::seq::SliceRandom;
 use rand::Rng;
+use rand::seq::SliceRandom;
 
 pub fn sample_one<T: Clone>(items: &[T]) -> Option<T> {
     if items.is_empty() {

@@ -131,7 +131,11 @@ pub trait ArtifactRunner: Send + Sync {
         &self,
         input: &UpdateArtifact,
     ) -> std::pin::Pin<
-        Box<dyn std::future::Future<Output = Result<Option<Vec<ArtifactResult>>, ArtifactError>> + Send + '_>,
+        Box<
+            dyn std::future::Future<Output = Result<Option<Vec<ArtifactResult>>, ArtifactError>>
+                + Send
+                + '_,
+        >,
     >;
 }
 
@@ -144,7 +148,11 @@ impl ArtifactRunner for NoOpArtifactRunner {
         &self,
         _input: &UpdateArtifact,
     ) -> std::pin::Pin<
-        Box<dyn std::future::Future<Output = Result<Option<Vec<ArtifactResult>>, ArtifactError>> + Send + '_>,
+        Box<
+            dyn std::future::Future<Output = Result<Option<Vec<ArtifactResult>>, ArtifactError>>
+                + Send
+                + '_,
+        >,
     > {
         Box::pin(async { Ok(None) })
     }
@@ -239,7 +247,10 @@ mod tests {
     #[test]
     fn registry_register_and_get() {
         let mut reg = ArtifactRegistry::new();
-        reg.register("cargo", Box::new(crate::extractors::cargo_artifact_runner::CargoArtifactRunner::new()));
+        reg.register(
+            "cargo",
+            Box::new(crate::extractors::cargo_artifact_runner::CargoArtifactRunner::new()),
+        );
         assert!(reg.get("cargo").is_some());
         assert!(reg.get("npm").is_none());
     }

@@ -46,8 +46,8 @@ impl Migration for RebaseConflictedPrsMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::RebaseConflictedPrsMigration;
     use crate::config::migration::Migration;
@@ -62,7 +62,12 @@ mod tests {
     fn migrate_false_to_never() {
         let m = RebaseConflictedPrsMigration::new();
         let mut migrated = Map::new();
-        m.run("rebaseConflictedPrs", &json!(false), &Map::new(), &mut migrated);
+        m.run(
+            "rebaseConflictedPrs",
+            &json!(false),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["rebaseWhen"], json!("never"));
     }
 
@@ -70,7 +75,12 @@ mod tests {
     fn migrate_true_is_noop() {
         let m = RebaseConflictedPrsMigration::new();
         let mut migrated = Map::new();
-        m.run("rebaseConflictedPrs", &json!(true), &Map::new(), &mut migrated);
+        m.run(
+            "rebaseConflictedPrs",
+            &json!(true),
+            &Map::new(),
+            &mut migrated,
+        );
         assert!(migrated.is_empty());
     }
 
@@ -79,7 +89,12 @@ mod tests {
         let m = RebaseConflictedPrsMigration::new();
         let mut migrated = Map::new();
         migrated.insert("rebaseWhen".into(), json!("auto"));
-        m.run("rebaseConflictedPrs", &json!(false), &Map::new(), &mut migrated);
+        m.run(
+            "rebaseConflictedPrs",
+            &json!(false),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["rebaseWhen"], json!("auto"));
     }
 }

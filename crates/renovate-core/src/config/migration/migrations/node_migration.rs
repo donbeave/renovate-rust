@@ -66,8 +66,8 @@ impl Migration for NodeMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::NodeMigration;
     use crate::config::migration::Migration;
@@ -82,7 +82,12 @@ mod tests {
     fn migrates_enabled_true() {
         let m = NodeMigration::new();
         let mut migrated = Map::new();
-        m.run("node", &json!({ "enabled": true }), &Map::new(), &mut migrated);
+        m.run(
+            "node",
+            &json!({ "enabled": true }),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["travis"], json!({ "enabled": true }));
         assert!(migrated.get("node").is_none());
     }
@@ -105,7 +110,12 @@ mod tests {
     fn does_nothing_when_not_enabled() {
         let m = NodeMigration::new();
         let mut migrated = Map::new();
-        m.run("node", &json!({ "automerge": false }), &Map::new(), &mut migrated);
+        m.run(
+            "node",
+            &json!({ "automerge": false }),
+            &Map::new(),
+            &mut migrated,
+        );
         assert!(migrated.get("travis").is_none());
     }
 }

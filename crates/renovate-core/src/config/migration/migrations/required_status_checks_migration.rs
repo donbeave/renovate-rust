@@ -46,8 +46,8 @@ impl Migration for RequiredStatusChecksMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::RequiredStatusChecksMigration;
     use crate::config::migration::Migration;
@@ -62,7 +62,12 @@ mod tests {
     fn migrates_null_to_ignore_tests() {
         let m = RequiredStatusChecksMigration::new();
         let mut migrated = Map::new();
-        m.run("requiredStatusChecks", &json!(null), &Map::new(), &mut migrated);
+        m.run(
+            "requiredStatusChecks",
+            &json!(null),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["ignoreTests"], json!(true));
     }
 
@@ -70,7 +75,12 @@ mod tests {
     fn ignores_non_null() {
         let m = RequiredStatusChecksMigration::new();
         let mut migrated = Map::new();
-        m.run("requiredStatusChecks", &json!(["ci"]), &Map::new(), &mut migrated);
+        m.run(
+            "requiredStatusChecks",
+            &json!(["ci"]),
+            &Map::new(),
+            &mut migrated,
+        );
         assert!(migrated.get("ignoreTests").is_none());
     }
 }

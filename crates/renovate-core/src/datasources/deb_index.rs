@@ -88,8 +88,8 @@ pub async fn fetch_versions(
     package: &str,
     registry_url: &str,
 ) -> Result<ReleaseResult, DebIndexError> {
-    let component_urls =
-        crate::datasources::deb::construct_component_urls(registry_url).map_err(DebIndexError::InvalidUrl)?;
+    let component_urls = crate::datasources::deb::construct_component_urls(registry_url)
+        .map_err(DebIndexError::InvalidUrl)?;
 
     let mut all_releases = Vec::new();
 
@@ -209,9 +209,7 @@ Size: 345678
             "{}/?suite=stable&components=main&binaryArch=amd64",
             server.uri()
         );
-        let result = fetch_versions(&http, "nginx", &registry_url)
-            .await
-            .unwrap();
+        let result = fetch_versions(&http, "nginx", &registry_url).await.unwrap();
 
         assert_eq!(result.releases.len(), 2);
         assert_eq!(result.releases[0].version, "1.18.0-6ubuntu1");

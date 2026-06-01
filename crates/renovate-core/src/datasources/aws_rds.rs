@@ -58,8 +58,8 @@ pub async fn fetch_versions(
         .map(|s| s.to_owned())
         .unwrap_or_else(|| format!("https://rds.{}.amazonaws.com", region));
 
-    let filters: Vec<serde_json::Value> = serde_json::from_str(serialized_filter)
-        .unwrap_or_default();
+    let filters: Vec<serde_json::Value> =
+        serde_json::from_str(serialized_filter).unwrap_or_default();
 
     let filter_params: String = filters
         .iter()

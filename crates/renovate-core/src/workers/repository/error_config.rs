@@ -85,7 +85,10 @@ mod tests {
     #[test]
     fn error_config_action_variants() {
         assert_ne!(ErrorConfigAction::RaiseIssue, ErrorConfigAction::Suppress);
-        assert_ne!(ErrorConfigAction::UpdateOnboardingPr, ErrorConfigAction::RaiseIssue);
+        assert_ne!(
+            ErrorConfigAction::UpdateOnboardingPr,
+            ErrorConfigAction::RaiseIssue
+        );
     }
 
     #[test]
@@ -123,11 +126,8 @@ mod tests {
 
     #[test]
     fn raise_config_warning_issue_with_source() {
-        let body = raise_config_warning_issue(
-            "bad config",
-            Some("renovate.json"),
-            Some("validation"),
-        );
+        let body =
+            raise_config_warning_issue("bad config", Some("renovate.json"), Some("validation"));
         assert!(body.contains("renovate.json"));
         assert!(body.contains("validation"));
     }

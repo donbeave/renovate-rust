@@ -278,7 +278,10 @@ mod tests {
     #[test]
     fn parse_preset_with_params() {
         let result = parse_preset("group:monorepo(arg1, arg2)").unwrap();
-        assert_eq!(result.params.as_deref(), Some(&["arg1".to_owned(), "arg2".to_owned()][..]));
+        assert_eq!(
+            result.params.as_deref(),
+            Some(&["arg1".to_owned(), "arg2".to_owned()][..])
+        );
         assert_eq!(result.raw_params.as_deref(), Some("arg1, arg2"));
     }
 

@@ -88,7 +88,11 @@ pub fn get_versioning_id(versioning: Option<&str>) -> &'static str {
     // Strip config suffix: "semver:test" → "semver"
     let base = v.split(':').next().unwrap_or(v);
     if ALL_VERSIONING_IDS.contains(&base) {
-        ALL_VERSIONING_IDS.iter().copied().find(|&id| id == base).unwrap_or(DEFAULT_VERSIONING)
+        ALL_VERSIONING_IDS
+            .iter()
+            .copied()
+            .find(|&id| id == base)
+            .unwrap_or(DEFAULT_VERSIONING)
     } else {
         DEFAULT_VERSIONING
     }

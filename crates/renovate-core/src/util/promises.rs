@@ -1,10 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 
-pub async fn run_all_concurrent<T, F, Fut>(
-    tasks: Vec<F>,
-    concurrency: usize,
-) -> Vec<T>
+pub async fn run_all_concurrent<T, F, Fut>(tasks: Vec<F>, concurrency: usize) -> Vec<T>
 where
     F: FnOnce() -> Fut + Send + 'static,
     Fut: std::future::Future<Output = T> + Send,
@@ -14,7 +11,11 @@ where
     let mut handles = Vec::with_capacity(tasks.len());
 
     for task in tasks {
-        let permit = semaphore.clone().acquire_owned().await.expect("semaphore not closed");
+        let permit = semaphore
+            .clone()
+            .acquire_owned()
+            .await
+            .expect("semaphore not closed");
         handles.push(tokio::spawn(async move {
             let _permit = permit;
             task().await
@@ -31,8 +32,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::Arc;
+    use std::sync::atomic::{AtomicU32, Ordering};
 
     #[tokio::test]
     async fn run_all_concurrent_runs_all() {
@@ -56,8 +57,12 @@ mod tests {
     #[tokio::test]
     #[allow(clippy::type_complexity)]
     async fn run_all_concurrent_empty() {
-        let tasks: Vec<Box<dyn FnOnce() -> std::pin::Pin<Box<dyn std::future::Future<Output = i32> + Send>> + Send>> =
-            vec![];
+        let tasks: Vec<
+            Box<
+                dyn FnOnce() -> std::pin::Pin<Box<dyn std::future::Future<Output = i32> + Send>>
+                    + Send,
+            >,
+        > = vec![];
         let results: Vec<i32> = run_all_concurrent(tasks, 1).await;
         assert!(results.is_empty());
     }

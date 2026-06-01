@@ -362,19 +362,29 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/pkg.a/index.json"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"versions":["1.0.0","1.1.0"]}"#))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(r#"{"versions":["1.0.0","1.1.0"]}"#),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
             .and(path("/pkg.b/index.json"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(r#"{"versions":["2.0.0","2.1.0"]}"#))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_string(r#"{"versions":["2.0.0","2.1.0"]}"#),
+            )
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
         let deps = vec![
-            NuGetDepInput { package_id: "Pkg.A".into(), current_value: "1.0.0".into() },
-            NuGetDepInput { package_id: "Pkg.B".into(), current_value: "2.0.0".into() },
+            NuGetDepInput {
+                package_id: "Pkg.A".into(),
+                current_value: "1.0.0".into(),
+            },
+            NuGetDepInput {
+                package_id: "Pkg.B".into(),
+                current_value: "2.0.0".into(),
+            },
         ];
         let results = fetch_updates_concurrent(&http, &deps, &server.uri(), 10).await;
         assert_eq!(results.len(), 2);

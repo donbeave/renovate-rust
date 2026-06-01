@@ -26,8 +26,7 @@ pub struct TerraformDefinitionFile {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TerraformBlock {
     #[serde(rename = "required_providers", skip_serializing_if = "Option::is_none")]
-    pub required_providers:
-        Option<BTreeMap<String, TerraformRequiredProviderOrString>>,
+    pub required_providers: Option<BTreeMap<String, TerraformRequiredProviderOrString>>,
     #[serde(rename = "required_version", skip_serializing_if = "Option::is_none")]
     pub required_version: Option<String>,
 }
@@ -57,15 +56,9 @@ pub struct TerraformModule {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TerraformResources {
-    #[serde(
-        rename = "helm_release",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "helm_release", skip_serializing_if = "Option::is_none")]
     pub helm_release: Option<BTreeMap<String, TerraformHelmRelease>>,
-    #[serde(
-        rename = "tfe_workspace",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "tfe_workspace", skip_serializing_if = "Option::is_none")]
     pub tfe_workspace: Option<BTreeMap<String, TerraformWorkspace>>,
 }
 
@@ -89,10 +82,7 @@ pub struct TerraformHelmRelease {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TerraformWorkspace {
-    #[serde(
-        rename = "terraform_version",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "terraform_version", skip_serializing_if = "Option::is_none")]
     pub terraform_version: Option<String>,
 }
 
@@ -115,47 +105,48 @@ fn normalize_hcl_json(val: &mut serde_json::Value) {
         return;
     };
 
-    let block_keys = [
-        "terraform",
-    ];
+    let block_keys = ["terraform"];
     for key in block_keys {
         if let Some(v) = obj.get_mut(key)
-            && v.is_object() {
-                *v = serde_json::Value::Array(vec![v.clone()]);
-            }
+            && v.is_object()
+        {
+            *v = serde_json::Value::Array(vec![v.clone()]);
+        }
     }
 
     let labeled_block_keys = ["module", "provider"];
     for key in labeled_block_keys {
         if let Some(v) = obj.get_mut(key)
-            && v.is_object() {
-                let map = std::mem::take(v).as_object_mut().unwrap().clone();
-                let new_map: serde_json::Map<String, serde_json::Value> = map
-                    .into_iter()
-                    .map(|(k, inner)| {
-                        let wrapped = if inner.is_object() {
-                            serde_json::Value::Array(vec![inner])
-                        } else {
-                            inner
-                        };
-                        (k, wrapped)
-                    })
-                    .collect();
-                *v = serde_json::Value::Object(new_map);
-            }
+            && v.is_object()
+        {
+            let map = std::mem::take(v).as_object_mut().unwrap().clone();
+            let new_map: serde_json::Map<String, serde_json::Value> = map
+                .into_iter()
+                .map(|(k, inner)| {
+                    let wrapped = if inner.is_object() {
+                        serde_json::Value::Array(vec![inner])
+                    } else {
+                        inner
+                    };
+                    (k, wrapped)
+                })
+                .collect();
+            *v = serde_json::Value::Object(new_map);
+        }
     }
 
     if let Some(v) = obj.get_mut("resource")
-        && v.is_object() {
-            let resource_types = std::mem::take(v).as_object_mut().unwrap().clone();
-            let mut result = serde_json::Map::new();
-            for (type_name, instances) in resource_types {
-                if instances.is_object() {
-                    result.insert(type_name, instances);
-                }
+        && v.is_object()
+    {
+        let resource_types = std::mem::take(v).as_object_mut().unwrap().clone();
+        let mut result = serde_json::Map::new();
+        for (type_name, instances) in resource_types {
+            if instances.is_object() {
+                result.insert(type_name, instances);
             }
-            *v = serde_json::Value::Object(result);
         }
+        *v = serde_json::Value::Object(result);
+    }
 }
 
 pub fn parse_json(content: &str) -> Option<TerraformDefinitionFile> {
@@ -249,10 +240,7 @@ mod tests {
         let def = parse_hcl(hcl).unwrap();
         let providers = def.provider.unwrap();
         assert!(providers.contains_key("aws"));
-        assert_eq!(
-            providers["aws"][0].version.as_deref(),
-            Some("~> 5.0")
-        );
+        assert_eq!(providers["aws"][0].version.as_deref(), Some("~> 5.0"));
     }
 
     // Rust-specific: terraform_hcl behavior test
@@ -295,10 +283,7 @@ mod tests {
         "#;
         let def = parse_hcl(hcl).unwrap();
         let blocks = def.terraform.unwrap();
-        assert_eq!(
-            blocks[0].required_version.as_deref(),
-            Some("~> 1.5")
-        );
+        assert_eq!(blocks[0].required_version.as_deref(), Some("~> 1.5"));
     }
 
     // Rust-specific: terraform_hcl behavior test
@@ -333,9 +318,6 @@ mod tests {
         let resources = def.resource.unwrap();
         let ws = resources.tfe_workspace.unwrap();
         assert!(ws.contains_key("test"));
-        assert_eq!(
-            ws["test"].terraform_version.as_deref(),
-            Some("1.6.0")
-        );
+        assert_eq!(ws["test"].terraform_version.as_deref(), Some("1.6.0"));
     }
 }

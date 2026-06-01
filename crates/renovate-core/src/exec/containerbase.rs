@@ -14,144 +14,213 @@ pub struct ToolConfig {
 
 fn build_tool_configs() -> HashMap<&'static str, ToolConfig> {
     let mut m = HashMap::new();
-    m.insert("node", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "containerbase/node-prebuild".to_owned(),
-        versioning: "node".to_owned(),
-        extract_version: None,
-    });
-    m.insert("npm", ToolConfig {
-        datasource: "npm".to_owned(),
-        package_name: "npm".to_owned(),
-        versioning: "npm".to_owned(),
-        extract_version: None,
-    });
-    m.insert("pnpm", ToolConfig {
-        datasource: "npm".to_owned(),
-        package_name: "pnpm".to_owned(),
-        versioning: "npm".to_owned(),
-        extract_version: None,
-    });
-    m.insert("yarn", ToolConfig {
-        datasource: "npm".to_owned(),
-        package_name: "yarn".to_owned(),
-        versioning: "npm".to_owned(),
-        extract_version: None,
-    });
-    m.insert("bun", ToolConfig {
-        datasource: "npm".to_owned(),
-        package_name: "@oven/bun".to_owned(),
-        versioning: "npm".to_owned(),
-        extract_version: None,
-    });
-    m.insert("python", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "containerbase/python-prebuild".to_owned(),
-        versioning: "python".to_owned(),
-        extract_version: None,
-    });
-    m.insert("pip", ToolConfig {
-        datasource: "pypi".to_owned(),
-        package_name: "pip".to_owned(),
-        versioning: "pep440".to_owned(),
-        extract_version: None,
-    });
-    m.insert("pipenv", ToolConfig {
-        datasource: "pypi".to_owned(),
-        package_name: "pipenv".to_owned(),
-        versioning: "pep440".to_owned(),
-        extract_version: None,
-    });
-    m.insert("poetry", ToolConfig {
-        datasource: "pypi".to_owned(),
-        package_name: "poetry".to_owned(),
-        versioning: "pep440".to_owned(),
-        extract_version: None,
-    });
-    m.insert("golang", ToolConfig {
-        datasource: "golang-version".to_owned(),
-        package_name: "go".to_owned(),
-        versioning: "go-mod-directive".to_owned(),
-        extract_version: None,
-    });
-    m.insert("rust", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "rust-lang/rust".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("java", ToolConfig {
-        datasource: "adoptium-java".to_owned(),
-        package_name: "java".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("gradle", ToolConfig {
-        datasource: "gradle-version".to_owned(),
-        package_name: "gradle".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("maven", ToolConfig {
-        datasource: "maven".to_owned(),
-        package_name: "org.apache.maven:apache-maven".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("dotnet", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "dotnet/dotnet".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("helm", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "helm/helm".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("terraform", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "hashicorp/terraform".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("bazel", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "bazelbuild/bazel".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("flutter", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "flutter/flutter".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("swift", ToolConfig {
-        datasource: "github-releases".to_owned(),
-        package_name: "swift-lang/swift".to_owned(),
-        versioning: "semver".to_owned(),
-        extract_version: None,
-    });
-    m.insert("cocoapods", ToolConfig {
-        datasource: "ruby-version".to_owned(),
-        package_name: "cocoapods".to_owned(),
-        versioning: "ruby".to_owned(),
-        extract_version: None,
-    });
-    m.insert("hashin", ToolConfig {
-        datasource: "pypi".to_owned(),
-        package_name: "hashin".to_owned(),
-        versioning: "pep440".to_owned(),
-        extract_version: None,
-    });
-    m.insert("pdm", ToolConfig {
-        datasource: "pypi".to_owned(),
-        package_name: "pdm".to_owned(),
-        versioning: "pep440".to_owned(),
-        extract_version: None,
-    });
+    m.insert(
+        "node",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "containerbase/node-prebuild".to_owned(),
+            versioning: "node".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "npm",
+        ToolConfig {
+            datasource: "npm".to_owned(),
+            package_name: "npm".to_owned(),
+            versioning: "npm".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "pnpm",
+        ToolConfig {
+            datasource: "npm".to_owned(),
+            package_name: "pnpm".to_owned(),
+            versioning: "npm".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "yarn",
+        ToolConfig {
+            datasource: "npm".to_owned(),
+            package_name: "yarn".to_owned(),
+            versioning: "npm".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "bun",
+        ToolConfig {
+            datasource: "npm".to_owned(),
+            package_name: "@oven/bun".to_owned(),
+            versioning: "npm".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "python",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "containerbase/python-prebuild".to_owned(),
+            versioning: "python".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "pip",
+        ToolConfig {
+            datasource: "pypi".to_owned(),
+            package_name: "pip".to_owned(),
+            versioning: "pep440".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "pipenv",
+        ToolConfig {
+            datasource: "pypi".to_owned(),
+            package_name: "pipenv".to_owned(),
+            versioning: "pep440".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "poetry",
+        ToolConfig {
+            datasource: "pypi".to_owned(),
+            package_name: "poetry".to_owned(),
+            versioning: "pep440".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "golang",
+        ToolConfig {
+            datasource: "golang-version".to_owned(),
+            package_name: "go".to_owned(),
+            versioning: "go-mod-directive".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "rust",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "rust-lang/rust".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "java",
+        ToolConfig {
+            datasource: "adoptium-java".to_owned(),
+            package_name: "java".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "gradle",
+        ToolConfig {
+            datasource: "gradle-version".to_owned(),
+            package_name: "gradle".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "maven",
+        ToolConfig {
+            datasource: "maven".to_owned(),
+            package_name: "org.apache.maven:apache-maven".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "dotnet",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "dotnet/dotnet".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "helm",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "helm/helm".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "terraform",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "hashicorp/terraform".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "bazel",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "bazelbuild/bazel".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "flutter",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "flutter/flutter".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "swift",
+        ToolConfig {
+            datasource: "github-releases".to_owned(),
+            package_name: "swift-lang/swift".to_owned(),
+            versioning: "semver".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "cocoapods",
+        ToolConfig {
+            datasource: "ruby-version".to_owned(),
+            package_name: "cocoapods".to_owned(),
+            versioning: "ruby".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "hashin",
+        ToolConfig {
+            datasource: "pypi".to_owned(),
+            package_name: "hashin".to_owned(),
+            versioning: "pep440".to_owned(),
+            extract_version: None,
+        },
+    );
+    m.insert(
+        "pdm",
+        ToolConfig {
+            datasource: "pypi".to_owned(),
+            package_name: "pdm".to_owned(),
+            versioning: "pep440".to_owned(),
+            extract_version: None,
+        },
+    );
     m
 }
 
@@ -188,9 +257,7 @@ pub fn is_dynamic_install(
         .all(|tc| supports_dynamic_install(&tc.tool_name))
 }
 
-pub async fn resolve_constraint(
-    tool_constraint: &ToolConstraint,
-) -> Result<String, ExecError> {
+pub async fn resolve_constraint(tool_constraint: &ToolConstraint) -> Result<String, ExecError> {
     if let Some(ref constraint) = tool_constraint.constraint {
         if constraint.starts_with('=') {
             return Ok(constraint.trim_start_matches('=').to_owned());

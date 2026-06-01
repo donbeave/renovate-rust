@@ -4,8 +4,8 @@ use std::sync::{Arc, LazyLock, Mutex};
 use tokio::sync::{Mutex as AsyncMutex, Semaphore};
 
 use super::rate_limits::{
-    get_concurrent_requests_limit, get_throttle_interval_ms, ConcurrencyLimitRule,
-    ThrottleLimitRule,
+    ConcurrencyLimitRule, ThrottleLimitRule, get_concurrent_requests_limit,
+    get_throttle_interval_ms,
 };
 
 type SharedSemaphore = Arc<AsyncMutex<Semaphore>>;
@@ -89,7 +89,9 @@ pub async fn get_throttle(url: &str) -> Option<SharedTimestamp> {
     let throttle_rules = get_throttle_rules();
     let interval_ms = get_throttle_interval_ms(url, &throttle_rules)?;
 
-    let timestamp = Arc::new(AsyncMutex::new(tokio::time::Instant::now() - tokio::time::Duration::from_millis(interval_ms)));
+    let timestamp = Arc::new(AsyncMutex::new(
+        tokio::time::Instant::now() - tokio::time::Duration::from_millis(interval_ms),
+    ));
 
     {
         let mut throttles = HOST_THROTTLES.lock().unwrap();

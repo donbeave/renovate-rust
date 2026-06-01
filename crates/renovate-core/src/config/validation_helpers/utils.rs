@@ -14,22 +14,17 @@ pub fn get_parent_name(parent_path: Option<&str>) -> String {
         Some(p) if !p.is_empty() => p,
         _ => return ".".to_owned(),
     };
-    let path = Regex::new(r"\.?encrypted$")
-        .unwrap()
-        .replace(path, "");
-    let path = Regex::new(r"\[\d+\]$")
-        .unwrap()
-        .replace(&path, "");
-    path.split('.')
-        .next_back()
-        .unwrap_or(".")
-        .to_owned()
+    let path = Regex::new(r"\.?encrypted$").unwrap().replace(path, "");
+    let path = Regex::new(r"\[\d+\]$").unwrap().replace(&path, "");
+    path.split('.').next_back().unwrap_or(".").to_owned()
 }
 
 /// Validate that a value is a plain string-keyed object with string values.
 ///
 /// Returns `Ok(())` if valid, or `Err(key)` with the first invalid key.
-pub fn validate_plain_object(val: &serde_json::Map<String, serde_json::Value>) -> Result<(), String> {
+pub fn validate_plain_object(
+    val: &serde_json::Map<String, serde_json::Value>,
+) -> Result<(), String> {
     for (key, value) in val {
         if !value.is_string() {
             return Err(key.clone());
@@ -65,7 +60,10 @@ pub fn validate_number(
     } else {
         errors.push(ValidationMessage {
             topic: "Configuration Error".to_owned(),
-            message: format!("Configuration option `{path}` should be an integer. Found: {val} ({}).", val_type_name(val)),
+            message: format!(
+                "Configuration option `{path}` should be an integer. Found: {val} ({}).",
+                val_type_name(val)
+            ),
         });
     }
     errors

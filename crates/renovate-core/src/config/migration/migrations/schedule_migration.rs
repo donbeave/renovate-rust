@@ -7,8 +7,9 @@ use crate::config::migration::Migration;
 #[derive(Clone, Debug)]
 pub struct ScheduleMigration;
 
-static EVERY_WEEKDAY_RE: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"every (mon|tues|wednes|thurs|fri|satur|sun)day$").unwrap());
+static EVERY_WEEKDAY_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"every (mon|tues|wednes|thurs|fri|satur|sun)day$").unwrap()
+});
 static EVERY_DAY_RE: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"every ([a-z]*day)$").unwrap());
 
@@ -57,7 +58,10 @@ impl Migration for ScheduleMigration {
 
         for s in &mut schedules {
             if s.contains("on the last day of the month") {
-                *s = s.replace("on the last day of the month", "on the first day of the month");
+                *s = s.replace(
+                    "on the last day of the month",
+                    "on the first day of the month",
+                );
             }
             if s.contains("on every weekday") {
                 *s = s.replace("on every weekday", "every weekday");
@@ -75,7 +79,10 @@ impl Migration for ScheduleMigration {
         }
 
         if value.is_string() && schedules.len() == 1 {
-            migrated_config.insert("schedule".into(), Value::String(schedules.into_iter().next().unwrap()));
+            migrated_config.insert(
+                "schedule".into(),
+                Value::String(schedules.into_iter().next().unwrap()),
+            );
         } else {
             migrated_config.insert(
                 "schedule".into(),
@@ -91,8 +98,8 @@ impl Migration for ScheduleMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::ScheduleMigration;
     use crate::config::migration::Migration;
@@ -154,7 +161,12 @@ mod tests {
     fn migrate_every_xday_to_on_xday() {
         let m = ScheduleMigration::new();
         let mut migrated = Map::new();
-        m.run("schedule", &json!("every monday"), &Map::new(), &mut migrated);
+        m.run(
+            "schedule",
+            &json!("every monday"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["schedule"], json!("on monday"));
     }
 
@@ -178,7 +190,12 @@ mod tests {
     fn null_value_is_noop() {
         let m = ScheduleMigration::new();
         let mut migrated = Map::new();
-        m.run("schedule", &serde_json::Value::Null, &Map::new(), &mut migrated);
+        m.run(
+            "schedule",
+            &serde_json::Value::Null,
+            &Map::new(),
+            &mut migrated,
+        );
         assert!(migrated.is_empty());
     }
 }

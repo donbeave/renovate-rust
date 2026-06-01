@@ -58,11 +58,8 @@ const BITBUCKET_API_USING_HOST_TYPES: &[&str] = &["bitbucket-changelog"];
 
 const BITBUCKET_SERVER_API_USING_HOST_TYPES: &[&str] = &["bitbucket-server-changelog"];
 
-const FORGEJO_API_USING_HOST_TYPES: &[&str] = &[
-    "forgejo-changelog",
-    "forgejo-releases",
-    "forgejo-tags",
-];
+const FORGEJO_API_USING_HOST_TYPES: &[&str] =
+    &["forgejo-changelog", "forgejo-releases", "forgejo-tags"];
 
 const GITEA_API_USING_HOST_TYPES: &[&str] = &["gitea-changelog", "gitea-releases", "gitea-tags"];
 
@@ -78,18 +75,17 @@ pub fn find_matching_rule(
     let primary = find_rules(url, host_type, host_rules);
     merge_rule_into(&mut merged, &primary);
 
-    if merged.token.is_some()
-        || merged.username.is_some()
-        || merged.password.is_some()
-    {
+    if merged.token.is_some() || merged.username.is_some() || merged.password.is_some() {
         return merged;
     }
 
     if let Some(ht) = host_type
-        && let Some(fallback_ht) = get_platform_fallback_host_type(ht, url, platform, platform_endpoint) {
-            let fallback = find_rules(url, Some(fallback_ht), host_rules);
-            merge_rule_into(&mut merged, &fallback);
-        }
+        && let Some(fallback_ht) =
+            get_platform_fallback_host_type(ht, url, platform, platform_endpoint)
+    {
+        let fallback = find_rules(url, Some(fallback_ht), host_rules);
+        merge_rule_into(&mut merged, &fallback);
+    }
 
     merged
 }
@@ -153,12 +149,13 @@ fn merge_rule_into(target: &mut HostRule, source: &HostRule) {
         target.https_certificate = source.https_certificate.clone();
     }
     if source.headers.is_some()
-        && let Some(ref h) = source.headers {
-            let target_headers = target.headers.get_or_insert_with(HashMap::new);
-            for (k, v) in h {
-                target_headers.insert(k.clone(), v.clone());
-            }
+        && let Some(ref h) = source.headers
+    {
+        let target_headers = target.headers.get_or_insert_with(HashMap::new);
+        for (k, v) in h {
+            target_headers.insert(k.clone(), v.clone());
         }
+    }
 }
 
 fn get_platform_fallback_host_type<'a>(
@@ -175,12 +172,13 @@ fn get_platform_fallback_host_type<'a>(
     }
     if platform == Some("github")
         && let Some(endpoint) = platform_endpoint
-            && let Ok(parsed_url) = url::Url::parse(url)
-                && let Some(host) = parsed_url.host_str()
-                    && let Ok(endpoint_parsed) = url::Url::parse(endpoint)
-                        && endpoint_parsed.host_str() == Some(host) {
-                            return Some("github");
-                        }
+        && let Ok(parsed_url) = url::Url::parse(url)
+        && let Some(host) = parsed_url.host_str()
+        && let Ok(endpoint_parsed) = url::Url::parse(endpoint)
+        && endpoint_parsed.host_str() == Some(host)
+    {
+        return Some("github");
+    }
     if GITLAB_API_USING_HOST_TYPES.contains(&host_type) {
         return Some("gitlab");
     }
@@ -200,7 +198,10 @@ fn get_platform_fallback_host_type<'a>(
 }
 
 fn host_matches(url: &str, pattern: &str) -> bool {
-    let Some(host) = url::Url::parse(url).ok().and_then(|u| u.host_str().map(|h| h.to_owned())) else {
+    let Some(host) = url::Url::parse(url)
+        .ok()
+        .and_then(|u| u.host_str().map(|h| h.to_owned()))
+    else {
         return false;
     };
 
@@ -231,7 +232,10 @@ mod tests {
     // Rust-specific: host_rules behavior test
     #[test]
     fn host_matches_exact() {
-        assert!(host_matches("https://api.github.com/repos", "api.github.com"));
+        assert!(host_matches(
+            "https://api.github.com/repos",
+            "api.github.com"
+        ));
     }
 
     // Rust-specific: host_rules behavior test
@@ -246,10 +250,7 @@ mod tests {
     // Rust-specific: host_rules behavior test
     #[test]
     fn host_matches_wildcard() {
-        assert!(host_matches(
-            "https://ghe.example.com/api",
-            "*.example.com"
-        ));
+        assert!(host_matches("https://ghe.example.com/api", "*.example.com"));
     }
 
     // Rust-specific: host_rules behavior test
@@ -298,13 +299,7 @@ mod tests {
     #[test]
     fn find_matching_rule_no_match() {
         let rules = vec![];
-        let result = find_matching_rule(
-            "https://example.com/api",
-            Some("npm"),
-            &rules,
-            None,
-            None,
-        );
+        let result = find_matching_rule("https://example.com/api", Some("npm"), &rules, None, None);
         assert!(result.token.is_none());
     }
 

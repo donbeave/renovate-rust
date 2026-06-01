@@ -335,7 +335,13 @@ const MANAGER_DEFS: &[ManagerDef] = &[
             r"^\.devcontainer/devcontainer\.json$",
             r"^\.devcontainer\.json$",
         ],
-        supported_datasources: &["docker", "golang-version", "node-version", "python-version", "ruby-version"],
+        supported_datasources: &[
+            "docker",
+            "golang-version",
+            "node-version",
+            "python-version",
+            "ruby-version",
+        ],
         categories: &["docker"],
         url: Some("https://code.visualstudio.com/docs/devcontainers/containers"),
     },
@@ -354,7 +360,9 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r".*-pipelines\.yml$"],
         supported_datasources: &["docker"],
         categories: &["ci"],
-        url: Some("https://support.atlassian.com/bitbucket-cloud/docs/get-started-with-bitbucket-pipelines"),
+        url: Some(
+            "https://support.atlassian.com/bitbucket-cloud/docs/get-started-with-bitbucket-pipelines",
+        ),
     },
     ManagerDef {
         name: "bundler",
@@ -445,7 +453,9 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)manifest\.json$"],
         supported_datasources: &["pypi", "git-tags"],
         categories: &["python"],
-        url: Some("https://developers.home-assistant.io/docs/creating_integration_manifest/#requirements"),
+        url: Some(
+            "https://developers.home-assistant.io/docs/creating_integration_manifest/#requirements",
+        ),
     },
     ManagerDef {
         name: "jenkins",
@@ -493,10 +503,24 @@ const MANAGER_DEFS: &[ManagerDef] = &[
             r"(^|/)\.rtx(\..*)?\.toml$",
         ],
         supported_datasources: &[
-            "crate", "dart-version", "docker", "dotnet-version", "flutter-version",
-            "git-refs", "git-tags", "github-releases", "github-tags", "go",
-            "hexpm-bob", "java-version", "node-version", "npm", "nuget",
-            "pypi", "ruby-version", "rubygems",
+            "crate",
+            "dart-version",
+            "docker",
+            "dotnet-version",
+            "flutter-version",
+            "git-refs",
+            "git-tags",
+            "github-releases",
+            "github-tags",
+            "go",
+            "hexpm-bob",
+            "java-version",
+            "node-version",
+            "npm",
+            "nuget",
+            "pypi",
+            "ruby-version",
+            "rubygems",
         ],
         categories: &[],
         url: Some("https://mise.jdx.dev"),
@@ -547,8 +571,14 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "terraform",
         patterns: &[r"\.tf$", r"\.tofu$"],
         supported_datasources: &[
-            "bitbucket-tags", "docker", "git-tags", "github-tags",
-            "github-releases", "helm", "terraform-module", "terraform-provider",
+            "bitbucket-tags",
+            "docker",
+            "git-tags",
+            "github-tags",
+            "github-releases",
+            "helm",
+            "terraform-module",
+            "terraform-provider",
         ],
         categories: &["iac", "terraform"],
         url: Some("https://developer.hashicorp.com/terraform/docs"),
@@ -557,8 +587,12 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "terragrunt",
         patterns: &[r"(^|/)terragrunt\.hcl$"],
         supported_datasources: &[
-            "git-tags", "github-tags", "gitlab-tags", "bitbucket-tags",
-            "gitea-tags", "terraform-module",
+            "git-tags",
+            "github-tags",
+            "gitlab-tags",
+            "bitbucket-tags",
+            "gitea-tags",
+            "terraform-module",
         ],
         categories: &["iac", "terraform"],
         url: Some("https://terragrunt.gruntwork.io/docs"),
@@ -568,7 +602,9 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"\.tflint\.hcl$"],
         supported_datasources: &["github-releases"],
         categories: &["terraform"],
-        url: Some("https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md"),
+        url: Some(
+            "https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md",
+        ),
     },
     ManagerDef {
         name: "travis",
@@ -622,7 +658,13 @@ const MANAGER_DEFS: &[ManagerDef] = &[
     ManagerDef {
         name: "cargo",
         patterns: &[r"(^|/)Cargo\.toml$"],
-        supported_datasources: &["crate", "github-tags", "gitlab-tags", "git-refs", "git-tags"],
+        supported_datasources: &[
+            "crate",
+            "github-tags",
+            "gitlab-tags",
+            "git-refs",
+            "git-tags",
+        ],
         categories: &["rust"],
         url: Some("https://doc.rust-lang.org/cargo"),
     },
@@ -750,9 +792,18 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "asdf",
         patterns: &[r"(^|/)\.tool-versions$"],
         supported_datasources: &[
-            "dart-version", "docker", "dotnet-version", "flutter-version",
-            "github-releases", "github-tags", "hexpm-bob", "java-version",
-            "node-version", "npm", "pypi", "ruby-version",
+            "dart-version",
+            "docker",
+            "dotnet-version",
+            "flutter-version",
+            "github-releases",
+            "github-tags",
+            "hexpm-bob",
+            "java-version",
+            "node-version",
+            "npm",
+            "pypi",
+            "ruby-version",
         ],
         categories: &[],
         url: Some("https://asdf-vm.com"),
@@ -858,7 +909,14 @@ const MANAGER_DEFS: &[ManagerDef] = &[
     ManagerDef {
         name: "poetry",
         patterns: &[r"(^|/)pyproject\.toml$"],
-        supported_datasources: &["pypi", "github-tags", "github-releases", "gitlab-tags", "git-refs", "git-tags"],
+        supported_datasources: &[
+            "pypi",
+            "github-tags",
+            "github-releases",
+            "gitlab-tags",
+            "git-refs",
+            "git-tags",
+        ],
         categories: &["python"],
         url: Some("https://python-poetry.org/docs"),
     },
@@ -901,8 +959,14 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "flux",
         patterns: &[r"(^|/)gotk-components\.ya?ml$"],
         supported_datasources: &[
-            "github-releases", "git-refs", "github-tags", "gitlab-tags",
-            "git-tags", "bitbucket-tags", "helm", "docker",
+            "github-releases",
+            "git-refs",
+            "github-tags",
+            "gitlab-tags",
+            "git-tags",
+            "bitbucket-tags",
+            "helm",
+            "docker",
         ],
         categories: &["cd", "kubernetes"],
         url: Some("https://fluxcd.io/flux"),
@@ -913,7 +977,12 @@ const MANAGER_DEFS: &[ManagerDef] = &[
             r"(^|/)(workflow-templates|\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\.ya?ml$",
             r"(^|/)action\.ya?ml$",
         ],
-        supported_datasources: &["gitea-tags", "github-digest", "github-runners", "github-tags"],
+        supported_datasources: &[
+            "gitea-tags",
+            "github-digest",
+            "github-runners",
+            "github-tags",
+        ],
         categories: &["ci"],
         url: Some("https://docs.github.com/en/actions"),
     },
@@ -1089,7 +1158,9 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)otelcol-builder\.ya?ml$", r"(^|/)ocb\.ya?ml$"],
         supported_datasources: &["go"],
         categories: &["golang"],
-        url: Some("https://github.com/open-telemetry/opentelemetry-collector/tree/main/cmd/builder"),
+        url: Some(
+            "https://github.com/open-telemetry/opentelemetry-collector/tree/main/cmd/builder",
+        ),
     },
     ManagerDef {
         name: "pep723",
@@ -1101,7 +1172,13 @@ const MANAGER_DEFS: &[ManagerDef] = &[
     ManagerDef {
         name: "proto",
         patterns: &[r"(^|/)\.prototools$"],
-        supported_datasources: &["github-releases", "github-tags", "node-version", "npm", "ruby-version"],
+        supported_datasources: &[
+            "github-releases",
+            "github-tags",
+            "node-version",
+            "npm",
+            "ruby-version",
+        ],
         categories: &[],
         url: Some("https://moonrepo.dev/proto"),
     },
@@ -1222,12 +1299,8 @@ pub fn get_enabled_managers_list(enabled_managers: Option<&[String]>) -> Vec<&'s
     // Normalize "custom.X" → "X" and filter to known managers.
     let mut result: Vec<&'static str> = config
         .iter()
-        .map(|m| {
-            m.strip_prefix("custom.").unwrap_or(m.as_str())
-        })
-        .filter_map(|name| {
-            all.iter().copied().find(|&m| m == name)
-        })
+        .map(|m| m.strip_prefix("custom.").unwrap_or(m.as_str()))
+        .filter_map(|name| all.iter().copied().find(|&m| m == name))
         .collect();
     result.sort_unstable();
     result.dedup();
@@ -1246,8 +1319,7 @@ pub fn detect_all_global_config() -> std::collections::HashMap<String, String> {
 /// Mirrors `managers.has(manager)` from `lib/modules/manager/index.ts`.
 pub fn manager_exists(name: &str) -> bool {
     let normalized = name.strip_prefix("custom.").unwrap_or(name);
-    MANAGER_DEFS.iter().any(|m| m.name == normalized)
-        || CUSTOM_MANAGER_LIST.contains(&normalized)
+    MANAGER_DEFS.iter().any(|m| m.name == normalized) || CUSTOM_MANAGER_LIST.contains(&normalized)
 }
 /// Return the human-readable dep type name for a given manager and depType.
 ///
@@ -1275,7 +1347,6 @@ pub fn get_pretty_dep_type(manager: &str, dep_type: &str) -> Option<&'static str
     }
     None
 }
-
 
 /// Apply a regex repeatedly to content, collecting all non-overlapping matches.
 ///
@@ -2108,7 +2179,10 @@ mod tests {
         assert_eq!(get_pretty_dep_type("npm", "foo-bar-baz"), None);
         assert_eq!(get_pretty_dep_type("regex", "foo-bar-baz"), None);
         // Known manager, known depType → prettyDepType
-        assert_eq!(get_pretty_dep_type("npm", "dependencies"), Some("dependency"));
+        assert_eq!(
+            get_pretty_dep_type("npm", "dependencies"),
+            Some("dependency")
+        );
     }
 
     // Ported: "gets something" — modules/manager/index.spec.ts line 38
@@ -2239,8 +2313,14 @@ mod tests {
 
     #[test]
     fn get_pretty_dep_type_known() {
-        assert_eq!(get_pretty_dep_type("npm", "dependencies"), Some("dependency"));
-        assert_eq!(get_pretty_dep_type("npm", "devDependencies"), Some("devDependency"));
+        assert_eq!(
+            get_pretty_dep_type("npm", "dependencies"),
+            Some("dependency")
+        );
+        assert_eq!(
+            get_pretty_dep_type("npm", "devDependencies"),
+            Some("devDependency")
+        );
     }
 
     #[test]

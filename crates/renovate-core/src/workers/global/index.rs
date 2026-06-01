@@ -17,7 +17,10 @@ pub struct GlobalWorkerResult {
     pub total_duration_ms: u64,
 }
 
-pub fn start_global_worker(config: &GlobalWorkerConfig, _global_config: &crate::config::GlobalConfig) -> GlobalWorkerResult {
+pub fn start_global_worker(
+    config: &GlobalWorkerConfig,
+    _global_config: &crate::config::GlobalConfig,
+) -> GlobalWorkerResult {
     let dry_run = config.dry_run;
 
     GlobalWorkerResult {

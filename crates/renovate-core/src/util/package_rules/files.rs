@@ -23,7 +23,10 @@ mod tests {
 
     #[test]
     fn glob_match() {
-        assert!(match_files("src/package.json", &["**/package.json".to_owned()]));
+        assert!(match_files(
+            "src/package.json",
+            &["**/package.json".to_owned()]
+        ));
     }
 
     #[test]

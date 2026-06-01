@@ -548,9 +548,7 @@ fn get_base_version(version: &str) -> String {
 }
 
 fn parse_suffix_numeric(suffix: Option<&str>) -> f64 {
-    suffix
-        .and_then(|s| s.parse::<f64>().ok())
-        .unwrap_or(0.0)
+    suffix.and_then(|s| s.parse::<f64>().ok()).unwrap_or(0.0)
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -569,11 +567,46 @@ mod tests {
     #[test]
     fn test_debian_is_valid() {
         let valid = [
-            "buzz", "rex", "bo", "hamm", "slink", "potato", "woody", "sarge", "etch", "lenny",
-            "squeeze", "wheezy", "jessie", "stretch", "buster", "bullseye", "bookworm", "1.1",
-            "1.2", "1.3", "2", "2.1", "2.2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
-            "12", "stable", "oldstable", "oldoldstable", "bookworm-20230816",
-            "bullseye-20220101", "buster-20190101", "bookworm-20230816.1",
+            "buzz",
+            "rex",
+            "bo",
+            "hamm",
+            "slink",
+            "potato",
+            "woody",
+            "sarge",
+            "etch",
+            "lenny",
+            "squeeze",
+            "wheezy",
+            "jessie",
+            "stretch",
+            "buster",
+            "bullseye",
+            "bookworm",
+            "1.1",
+            "1.2",
+            "1.3",
+            "2",
+            "2.1",
+            "2.2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "stable",
+            "oldstable",
+            "oldoldstable",
+            "bookworm-20230816",
+            "bullseye-20220101",
+            "buster-20190101",
+            "bookworm-20230816.1",
             "bullseye-20220101.2",
         ];
         let invalid = [
@@ -608,9 +641,7 @@ mod tests {
             ("bullseye", None::<&str>),
             ("bookworm", None::<&str>),
         ];
-        let incompatible = [
-            ("forky", None::<&str>),
-        ];
+        let incompatible = [("forky", None::<&str>)];
         for (version, range) in &compatible {
             assert!(
                 debian_is_valid(version),
@@ -700,10 +731,42 @@ mod tests {
     #[test]
     fn test_debian_is_version() {
         let valid = [
-            "buzz", "rex", "bo", "hamm", "slink", "potato", "woody", "sarge", "etch", "lenny",
-            "squeeze", "wheezy", "jessie", "stretch", "buster", "bullseye", "bookworm", "1.1",
-            "1.2", "1.3", "2", "2.1", "2.2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
-            "12", "stable", "oldstable", "oldoldstable",
+            "buzz",
+            "rex",
+            "bo",
+            "hamm",
+            "slink",
+            "potato",
+            "woody",
+            "sarge",
+            "etch",
+            "lenny",
+            "squeeze",
+            "wheezy",
+            "jessie",
+            "stretch",
+            "buster",
+            "bullseye",
+            "bookworm",
+            "1.1",
+            "1.2",
+            "1.3",
+            "2",
+            "2.1",
+            "2.2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "stable",
+            "oldstable",
+            "oldoldstable",
         ];
         let invalid = [
             "Trixie",
@@ -841,11 +904,7 @@ mod tests {
                 "2020.04",
                 None,
             ),
-            (
-                &["jessie", "stretch", "buster", "bullseye"],
-                "foobar",
-                None,
-            ),
+            (&["jessie", "stretch", "buster", "bullseye"], "foobar", None),
             (
                 &["jessie", "stretch", "buster", "bullseye"],
                 "bullseye",
@@ -895,11 +954,7 @@ mod tests {
                 "2020.04",
                 None,
             ),
-            (
-                &["jessie", "stretch", "buster", "bullseye"],
-                "foobar",
-                None,
-            ),
+            (&["jessie", "stretch", "buster", "bullseye"], "foobar", None),
             (
                 &["jessie", "stretch", "buster", "bullseye"],
                 "bullseye",
@@ -910,11 +965,7 @@ mod tests {
                 "buster",
                 Some("buster"),
             ),
-            (
-                &["jessie", "stretch", "buster", "bullseye"],
-                "warty",
-                None,
-            ),
+            (&["jessie", "stretch", "buster", "bullseye"], "warty", None),
             (
                 &["jessie", "stretch", "buster", "stable"],
                 "stable",

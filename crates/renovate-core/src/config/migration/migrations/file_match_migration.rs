@@ -37,8 +37,7 @@ impl Migration for FileMatchMigration {
         let file_match: Vec<String> = if let Some(s) = value.as_str() {
             vec![s.into()]
         } else if let Some(arr) = value.as_array() {
-            arr
-                .iter()
+            arr.iter()
                 .filter_map(|v| v.as_str())
                 .map(|s| s.into())
                 .collect()
@@ -46,8 +45,7 @@ impl Migration for FileMatchMigration {
             return;
         };
 
-        let mut manager_file_patterns: Vec<Value> = match migrated_config
-            .get("managerFilePatterns")
+        let mut manager_file_patterns: Vec<Value> = match migrated_config.get("managerFilePatterns")
         {
             Some(Value::Array(existing)) => existing.clone(),
             _ => Vec::new(),
@@ -70,8 +68,8 @@ impl Migration for FileMatchMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::FileMatchMigration;
     use crate::config::migration::Migration;

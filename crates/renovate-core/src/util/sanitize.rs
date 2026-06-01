@@ -10,9 +10,7 @@ pub fn sanitize(input: &str) -> String {
 
 pub fn sanitize_url(url: &str) -> String {
     if let Ok(mut parsed) = url::Url::parse(url) {
-        if parsed.username().is_empty()
-            && parsed.password().is_none()
-        {
+        if parsed.username().is_empty() && parsed.password().is_none() {
             return url.to_owned();
         }
         let _ = parsed.set_username("");

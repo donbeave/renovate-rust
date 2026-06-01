@@ -7,16 +7,16 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::sync::LazyLock;
 
-static SCHEDULE_MAPPINGS: LazyLock<std::collections::HashMap<&str, &str>> =
-    LazyLock::new(|| {
-        let mut m = std::collections::HashMap::new();
-        m.insert("every month", "before 5am on the first day of the month");
-        m.insert("monthly", "before 5am on the first day of the month");
-        m
-    });
+static SCHEDULE_MAPPINGS: LazyLock<std::collections::HashMap<&str, &str>> = LazyLock::new(|| {
+    let mut m = std::collections::HashMap::new();
+    m.insert("every month", "before 5am on the first day of the month");
+    m.insert("monthly", "before 5am on the first day of the month");
+    m
+});
 
-static CRON_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)$").unwrap());
+static CRON_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)$").unwrap()
+});
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ScheduleConfig {
@@ -100,7 +100,9 @@ pub fn has_valid_schedule(schedule: &[String]) -> bool {
         return true;
     }
 
-    schedule.iter().all(|s| !s.is_empty() && parse_schedule(s).is_some())
+    schedule
+        .iter()
+        .all(|s| !s.is_empty() && parse_schedule(s).is_some())
 }
 
 pub fn has_valid_timezone(timezone: &str) -> bool {

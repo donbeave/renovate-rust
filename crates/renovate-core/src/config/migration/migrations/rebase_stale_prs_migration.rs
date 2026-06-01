@@ -46,7 +46,9 @@ impl Migration for RebaseStalePrsMigration {
             _ => None,
         };
 
-        if let Some(v) = new_value && !migrated_config.contains_key("rebaseWhen") {
+        if let Some(v) = new_value
+            && !migrated_config.contains_key("rebaseWhen")
+        {
             migrated_config.insert("rebaseWhen".into(), Value::String(v.into()));
         }
     }
@@ -58,8 +60,8 @@ impl Migration for RebaseStalePrsMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::RebaseStalePrsMigration;
     use crate::config::migration::Migration;

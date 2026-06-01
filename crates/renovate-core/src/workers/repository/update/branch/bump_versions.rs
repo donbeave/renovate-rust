@@ -126,22 +126,34 @@ mod tests {
 
     #[test]
     fn bump_version_major() {
-        assert_eq!(bump_version("1.2.3", BumpType::Major), Some("2.0.0".to_owned()));
+        assert_eq!(
+            bump_version("1.2.3", BumpType::Major),
+            Some("2.0.0".to_owned())
+        );
     }
 
     #[test]
     fn bump_version_minor() {
-        assert_eq!(bump_version("1.2.3", BumpType::Minor), Some("1.3.0".to_owned()));
+        assert_eq!(
+            bump_version("1.2.3", BumpType::Minor),
+            Some("1.3.0".to_owned())
+        );
     }
 
     #[test]
     fn bump_version_patch() {
-        assert_eq!(bump_version("1.2.3", BumpType::Patch), Some("1.2.4".to_owned()));
+        assert_eq!(
+            bump_version("1.2.3", BumpType::Patch),
+            Some("1.2.4".to_owned())
+        );
     }
 
     #[test]
     fn bump_version_two_parts() {
-        assert_eq!(bump_version("1.2", BumpType::Patch), Some("1.2.1".to_owned()));
+        assert_eq!(
+            bump_version("1.2", BumpType::Patch),
+            Some("1.2.1".to_owned())
+        );
     }
 
     #[test]

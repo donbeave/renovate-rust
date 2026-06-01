@@ -450,7 +450,10 @@ mod tests {
         };
         let summary = summary_from_cache(">=1.0.0", &entry);
         assert_eq!(summary.latest, Some("2.0.0".into()));
-        assert_eq!(summary.latest_timestamp, Some("2024-06-01T00:00:00Z".into()));
+        assert_eq!(
+            summary.latest_timestamp,
+            Some("2024-06-01T00:00:00Z".into())
+        );
         assert!(!summary.update_available);
     }
 
@@ -467,7 +470,10 @@ mod tests {
         };
         let summary = summary_from_cache("==1.0.0", &entry);
         assert!(summary.update_available);
-        assert_eq!(summary.current_version_timestamp, Some("2024-01-01T00:00:00Z".into()));
+        assert_eq!(
+            summary.current_version_timestamp,
+            Some("2024-01-01T00:00:00Z".into())
+        );
     }
 
     #[test]

@@ -848,7 +848,10 @@ end
         assert!(nokogiri.skip_reason.is_none());
 
         let local_gem = reg.iter().find(|d| d.name == "local_gem").unwrap();
-        assert_eq!(local_gem.skip_reason, Some(BundlerSkipReason::InternalPackage));
+        assert_eq!(
+            local_gem.skip_reason,
+            Some(BundlerSkipReason::InternalPackage)
+        );
     }
 
     // Rust-specific: unit test for empty Gemfile handling

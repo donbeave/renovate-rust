@@ -19,7 +19,12 @@ pub struct LabelConfig {
 }
 
 pub fn get_pr_labels(config: &LabelConfig) -> Vec<String> {
-    let mut labels: Vec<String> = config.labels.iter().chain(config.add_labels.iter()).cloned().collect();
+    let mut labels: Vec<String> = config
+        .labels
+        .iter()
+        .chain(config.add_labels.iter())
+        .cloned()
+        .collect();
 
     if config.is_vulnerability_alert.unwrap_or(false) {
         let security = "security".to_owned();
@@ -150,10 +155,7 @@ mod tests {
             add_labels: vec!["review".into()],
             ..Default::default()
         };
-        assert_eq!(
-            get_pr_labels(&config),
-            vec!["dependencies", "review"]
-        );
+        assert_eq!(get_pr_labels(&config), vec!["dependencies", "review"]);
     }
 
     #[test]
@@ -243,11 +245,7 @@ mod tests {
         let initial = vec!["a".into()];
         let current = vec!["a".into()];
         let configured = vec!["b".into()];
-        assert!(should_update_labels(
-            Some(&initial),
-            &current,
-            &configured
-        ));
+        assert!(should_update_labels(Some(&initial), &current, &configured));
     }
 
     #[test]
@@ -255,10 +253,6 @@ mod tests {
         let initial = vec!["a".into()];
         let current = vec!["a".into(), "user-label".into()];
         let configured = vec!["b".into()];
-        assert!(!should_update_labels(
-            Some(&initial),
-            &current,
-            &configured
-        ));
+        assert!(!should_update_labels(Some(&initial), &current, &configured));
     }
 }

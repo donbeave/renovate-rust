@@ -85,9 +85,7 @@ pub fn commit_files_to_branch(
         .collect();
 
     if !exclude_commit_paths.is_empty() {
-        updated_files.retain(|f| {
-            !exclude_commit_paths.iter().any(|p| f.path.starts_with(p))
-        });
+        updated_files.retain(|f| !exclude_commit_paths.iter().any(|p| f.path.starts_with(p)));
     }
 
     if updated_files.is_empty() {

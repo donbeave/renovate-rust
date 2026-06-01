@@ -133,7 +133,8 @@ pub const GITHUB_API_BASE: &str = "https://api.github.com";
 pub struct GithubClient {
     http: HttpClient,
     api_base: String,
-    branch_force_rebase_cache: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, bool>>>,
+    branch_force_rebase_cache:
+        std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, bool>>>,
 }
 
 impl GithubClient {
@@ -151,12 +152,16 @@ impl GithubClient {
     ) -> Result<Self, HttpError> {
         let api_base = api_base.into().trim_end_matches('/').to_owned();
         if let Err(e) = url::Url::parse(&api_base) {
-            return Err(HttpError::Parse(format!("Invalid GitHub endpoint URL: {api_base}: {e}")));
+            return Err(HttpError::Parse(format!(
+                "Invalid GitHub endpoint URL: {api_base}: {e}"
+            )));
         }
         Ok(Self {
             http: HttpClient::with_token(token)?,
             api_base,
-            branch_force_rebase_cache: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())),
+            branch_force_rebase_cache: std::sync::Arc::new(std::sync::Mutex::new(
+                std::collections::HashMap::new(),
+            )),
         })
     }
 
@@ -166,7 +171,10 @@ impl GithubClient {
     /// resolve a git author email from the user profile or emails API.
     ///
     /// Mirrors `initPlatform` from `lib/modules/platform/github/index.ts`.
-    pub async fn init_platform(&self, token: &str) -> Result<(String, Option<String>), PlatformError> {
+    pub async fn init_platform(
+        &self,
+        token: &str,
+    ) -> Result<(String, Option<String>), PlatformError> {
         if token.is_empty() {
             return Err(PlatformError::Unexpected(
                 "Init: You must configure a GitHub token".to_owned(),
@@ -268,7 +276,10 @@ impl GithubClient {
     /// For GitHub App tokens: GET /installation/repositories?per_page=100
     ///
     /// Mirrors `getRepos` from `lib/modules/platform/github/index.ts`.
-    pub async fn get_repos(&self, topics: Option<Vec<String>>) -> Result<Vec<String>, PlatformError> {
+    pub async fn get_repos(
+        &self,
+        topics: Option<Vec<String>>,
+    ) -> Result<Vec<String>, PlatformError> {
         let token = self.http.token.as_deref().unwrap_or("");
         let is_app_token = token.starts_with("ghs_") || token.contains("x-access-token");
 
@@ -290,7 +301,11 @@ impl GithubClient {
                 archived: bool,
             }
 
-            let resp: AppRepositories = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+            let resp: AppRepositories = self
+                .http
+                .get_json(&url)
+                .await
+                .map_err(PlatformError::Http)?;
             let repos: Vec<String> = resp
                 .repositories
                 .into_iter()
@@ -308,7 +323,11 @@ impl GithubClient {
                 topics: Vec<String>,
             }
 
-            let repos: Vec<UserRepo> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+            let repos: Vec<UserRepo> = self
+                .http
+                .get_json(&url)
+                .await
+                .map_err(PlatformError::Http)?;
             let mut result: Vec<String> = repos
                 .into_iter()
                 .filter(|r| !r.archived)
@@ -746,9 +765,8 @@ impl GithubClient {
                     return Ok(None);
                 }
                 let parsed = if path.ends_with(".json5") {
-                    json5::from_str::<serde_json::Value>(&raw).map_err(|e| {
-                        PlatformError::Unexpected(format!("JSON5 parse error: {e}"))
-                    })
+                    json5::from_str::<serde_json::Value>(&raw)
+                        .map_err(|e| PlatformError::Unexpected(format!("JSON5 parse error: {e}")))
                 } else {
                     serde_json::from_str(&raw)
                         .or_else(|_| json5::from_str::<serde_json::Value>(&raw))
@@ -756,9 +774,7 @@ impl GithubClient {
                 };
                 parsed.map(Some)
             }
-            Err(HttpError::Status { status, .. })
-                if status == reqwest::StatusCode::NOT_FOUND =>
-            {
+            Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND => {
                 Ok(None)
             }
             Err(e) => Err(PlatformError::Http(e)),
@@ -782,13 +798,21 @@ impl GithubClient {
         let mut all_prs: Vec<GhRestPr> = vec![];
 
         loop {
-            let resp = self.http.get_retrying(&url).await.map_err(PlatformError::Http)?;
-            let next_url = resp.headers()
+            let resp = self
+                .http
+                .get_retrying(&url)
+                .await
+                .map_err(PlatformError::Http)?;
+            let next_url = resp
+                .headers()
                 .get("link")
                 .and_then(|v| v.to_str().ok())
                 .and_then(parse_link_header_next);
 
-            let prs: Vec<GhRestPr> = resp.json().await.map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+            let prs: Vec<GhRestPr> = resp
+                .json()
+                .await
+                .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
             all_prs.extend(prs);
 
             match next_url {
@@ -1036,7 +1060,9 @@ impl GithubClient {
                 .await
             {
                 Ok(_) => return Ok(()),
-                Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND => {
+                Err(HttpError::Status { status, .. })
+                    if status == reqwest::StatusCode::NOT_FOUND =>
+                {
                     tracing::debug!(
                         attempt = attempt + 1,
                         issue = issue_number,
@@ -1070,7 +1096,11 @@ impl GithubClient {
             "{}/repos/{}/{}/pulls/{}/requested_reviewers",
             self.api_base, owner, repo, pr_number
         );
-        let user_reviewers: Vec<String> = reviewers.iter().filter(|r| !r.starts_with("team:")).cloned().collect();
+        let user_reviewers: Vec<String> = reviewers
+            .iter()
+            .filter(|r| !r.starts_with("team:"))
+            .cloned()
+            .collect();
         let team_reviewers: Vec<String> = reviewers
             .iter()
             .filter(|r| r.starts_with("team:"))
@@ -1119,7 +1149,11 @@ impl GithubClient {
         // Autodetection: try squash -> merge -> rebase
         for method in ["squash", "merge", "rebase"] {
             let body = serde_json::json!({"merge_method": method});
-            match self.http.put_json::<serde_json::Value>(&url, &body.to_string()).await {
+            match self
+                .http
+                .put_json::<serde_json::Value>(&url, &body.to_string())
+                .await
+            {
                 Ok(_) => return Ok(true),
                 Err(e) => {
                     tracing::debug!(err = %e, method, "Failed to merge PR");
@@ -1131,12 +1165,12 @@ impl GithubClient {
         Ok(false)
     }
 
-    async fn try_merge(
-        &self,
-        url: &str,
-        body: &serde_json::Value,
-    ) -> Result<bool, PlatformError> {
-        match self.http.put_json::<serde_json::Value>(url, &body.to_string()).await {
+    async fn try_merge(&self, url: &str, body: &serde_json::Value) -> Result<bool, PlatformError> {
+        match self
+            .http
+            .put_json::<serde_json::Value>(url, &body.to_string())
+            .await
+        {
             Ok(_) => Ok(true),
             Err(HttpError::Status { status, .. })
                 if status == reqwest::StatusCode::NOT_FOUND
@@ -1171,13 +1205,20 @@ impl GithubClient {
             ref_name: String,
         }
 
-        let refs: Vec<MatchingRef> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+        let refs: Vec<MatchingRef> = self
+            .http
+            .get_json(&url)
+            .await
+            .map_err(PlatformError::Http)?;
         let branches: Vec<String> = refs
             .into_iter()
             .map(|r| r.ref_name.trim_start_matches("refs/heads/").to_owned())
             .collect();
 
-        if branches.iter().any(|b| b.starts_with(&format!("{}/", branch_name))) {
+        if branches
+            .iter()
+            .any(|b| b.starts_with(&format!("{}/", branch_name)))
+        {
             return Err(PlatformError::Unexpected(format!(
                 "Trying to create a branch '{}' while it's the part of nested branch",
                 branch_name
@@ -1211,7 +1252,11 @@ impl GithubClient {
             state: Option<String>,
         }
 
-        let checks: Vec<StatusCheck> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+        let checks: Vec<StatusCheck> = self
+            .http
+            .get_json(&url)
+            .await
+            .map_err(PlatformError::Http)?;
         for check in checks {
             if check.context == context {
                 let mapped = match check.state.as_deref() {
@@ -1264,7 +1309,8 @@ impl GithubClient {
                                     if params.get("strict_required_status_checks_policy")
                                         == Some(&serde_json::Value::Bool(true))
                                     {
-                                        let mut cache = self.branch_force_rebase_cache.lock().unwrap();
+                                        let mut cache =
+                                            self.branch_force_rebase_cache.lock().unwrap();
                                         cache.insert(cache_key, true);
                                         return Ok(true);
                                     }
@@ -1285,7 +1331,11 @@ impl GithubClient {
             self.api_base, owner, repo, branch
         );
 
-        match self.http.get_json::<serde_json::Value>(&protection_url).await {
+        match self
+            .http
+            .get_json::<serde_json::Value>(&protection_url)
+            .await
+        {
             Ok(protection) => {
                 let result = if let Some(status_checks) = protection.get("required_status_checks") {
                     status_checks.get("strict") == Some(&serde_json::Value::Bool(true))
@@ -1342,10 +1392,17 @@ impl GithubClient {
         struct RefObject {
             sha: String,
         }
-        let branch_ref: RefResponse = self.http.get_json(&ref_url).await.map_err(PlatformError::Http)?;
+        let branch_ref: RefResponse = self
+            .http
+            .get_json(&ref_url)
+            .await
+            .map_err(PlatformError::Http)?;
         let sha = branch_ref.object.sha;
 
-        let status_url = format!("{}/repos/{}/{}/statuses/{}", self.api_base, owner, repo, sha);
+        let status_url = format!(
+            "{}/repos/{}/{}/statuses/{}",
+            self.api_base, owner, repo, sha
+        );
         let body = serde_json::json!({
             "state": state,
             "description": description,
@@ -1355,7 +1412,10 @@ impl GithubClient {
         let body_str = serde_json::to_string(&body)
             .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
 
-        self.http.post_json::<serde_json::Value>(&status_url, &body_str).await.map_err(PlatformError::Http)?;
+        self.http
+            .post_json::<serde_json::Value>(&status_url, &body_str)
+            .await
+            .map_err(PlatformError::Http)?;
         Ok(())
     }
 
@@ -1373,7 +1433,10 @@ impl GithubClient {
         if pr_number == 0 {
             return Ok(None);
         }
-        let url = format!("{}/repos/{}/{}/pulls/{}", self.api_base, owner, repo, pr_number);
+        let url = format!(
+            "{}/repos/{}/{}/pulls/{}",
+            self.api_base, owner, repo, pr_number
+        );
         match self.http.get_json::<GhRestPr>(&url).await {
             Ok(pr) => Ok(Some(coerce_rest_pr(pr))),
             Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND => {
@@ -1402,7 +1465,11 @@ impl GithubClient {
                 "{}/repos/{}/{}/pulls?head={}:{}&state=open",
                 self.api_base, owner, repo, owner, branch_name
             );
-            let prs = self.http.get_json::<Vec<GhRestPr>>(&url).await.map_err(PlatformError::Http)?;
+            let prs = self
+                .http
+                .get_json::<Vec<GhRestPr>>(&url)
+                .await
+                .map_err(PlatformError::Http)?;
             return Ok(prs.into_iter().next().map(coerce_rest_pr));
         }
 
@@ -1442,7 +1509,11 @@ impl GithubClient {
         repo: &str,
     ) -> Result<Option<String>, PlatformError> {
         let url = format!("{}/repos/{}/{}", self.api_base, owner, repo);
-        let repo_info: serde_json::Value = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+        let repo_info: serde_json::Value = self
+            .http
+            .get_json(&url)
+            .await
+            .map_err(PlatformError::Http)?;
 
         if repo_info.get("allow_squash_merge") == Some(&serde_json::Value::Bool(true)) {
             return Ok(Some("squash".to_owned()));
@@ -1499,7 +1570,9 @@ impl GithubClient {
                 }
                 Ok(Some(pr.number))
             }
-            Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY => {
+            Err(HttpError::Status { status, .. })
+                if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY =>
+            {
                 tracing::debug!(
                     repo = %format!("{owner}/{repo}"),
                     branch = source_branch,
@@ -1548,7 +1621,11 @@ impl GithubClient {
         let body = serde_json::json!({ "labels": labels });
         let body_str = serde_json::to_string(&body)
             .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
-        match self.http.post_json::<serde_json::Value>(&url, &body_str).await {
+        match self
+            .http
+            .post_json::<serde_json::Value>(&url, &body_str)
+            .await
+        {
             Ok(_) => Ok(()),
             Err(e) => {
                 tracing::warn!(
@@ -1578,10 +1655,17 @@ impl GithubClient {
             "{}/repos/{}/{}/issues/{}/comments?per_page=100",
             self.api_base, owner, repo, issue_number
         );
-        let comments: Vec<GhComment> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+        let comments: Vec<GhComment> = self
+            .http
+            .get_json(&url)
+            .await
+            .map_err(PlatformError::Http)?;
 
         let topic_prefix = topic.map(|t| format!("### {}\n\n", t));
-        let expected_body = topic_prefix.as_ref().map(|p| format!("{}{}", p, content)).unwrap_or_else(|| content.to_owned());
+        let expected_body = topic_prefix
+            .as_ref()
+            .map(|p| format!("{}{}", p, content))
+            .unwrap_or_else(|| content.to_owned());
 
         // Look for an existing comment matching the topic or content
         let existing = comments.into_iter().find(|c| {
@@ -1609,11 +1693,13 @@ impl GithubClient {
             if comment.body.as_deref() == Some(&expected_body) {
                 return Ok(false); // already up to date
             }
-            self.update_comment(owner, repo, comment.id, &expected_body).await?;
+            self.update_comment(owner, repo, comment.id, &expected_body)
+                .await?;
             return Ok(true);
         }
 
-        self.create_comment(owner, repo, issue_number, &expected_body).await?;
+        self.create_comment(owner, repo, issue_number, &expected_body)
+            .await?;
         Ok(true)
     }
 
@@ -1632,17 +1718,23 @@ impl GithubClient {
             "{}/repos/{}/{}/issues/{}/comments?per_page=100",
             self.api_base, owner, repo, issue_number
         );
-        let comments: Vec<GhComment> = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+        let comments: Vec<GhComment> = self
+            .http
+            .get_json(&url)
+            .await
+            .map_err(PlatformError::Http)?;
 
         let comment_id = if let Some(topic) = topic {
             let prefix = format!("### {}\n\n", topic);
-            comments.into_iter().find(|c| {
-                c.body.as_ref().map_or(false, |b| b.starts_with(&prefix))
-            }).map(|c| c.id)
+            comments
+                .into_iter()
+                .find(|c| c.body.as_ref().map_or(false, |b| b.starts_with(&prefix)))
+                .map(|c| c.id)
         } else if let Some(content) = content {
-            comments.into_iter().find(|c| {
-                c.body.as_ref().map_or(false, |b| b.trim() == content)
-            }).map(|c| c.id)
+            comments
+                .into_iter()
+                .find(|c| c.body.as_ref().map_or(false, |b| b.trim() == content))
+                .map(|c| c.id)
         } else {
             None
         };
@@ -1676,7 +1768,9 @@ impl GithubClient {
             if ensure_only_once {
                 // Close other matching issues (keep the first one)
                 for issue in matching.iter().skip(1) {
-                    let _ = self.update_issue(owner, repo, issue.number, None, None, Some("closed"), None).await;
+                    let _ = self
+                        .update_issue(owner, repo, issue.number, None, None, Some("closed"), None)
+                        .await;
                 }
                 return Ok(None); // existing issue found, don't create
             }
@@ -1760,7 +1854,12 @@ fn coerce_rest_pr(pr: GhRestPr) -> GhPr {
         updated_at: pr.updated_at,
         node_id: pr.node_id,
         sha: Some(pr.head.sha),
-        labels: pr.labels.unwrap_or_default().into_iter().map(|l| l.name).collect(),
+        labels: pr
+            .labels
+            .unwrap_or_default()
+            .into_iter()
+            .map(|l| l.name)
+            .collect(),
         has_assignees: pr.assignee.is_some()
             || pr.assignees.as_ref().map_or(false, |a| !a.is_empty()),
         reviewers: pr
@@ -1887,9 +1986,18 @@ const SUPPORTED_ECOSYSTEMS: &[&str] = &[
 pub fn validate_github_content_response(input: &serde_json::Value) -> Result<(), String> {
     let validate_element = |v: &serde_json::Value| -> Result<(), String> {
         let obj = v.as_object().ok_or("not an object")?;
-        let type_ = obj.get("type").and_then(|t| t.as_str()).ok_or("missing type")?;
-        let _name = obj.get("name").and_then(|n| n.as_str()).ok_or("missing name")?;
-        let _path = obj.get("path").and_then(|p| p.as_str()).ok_or("missing path")?;
+        let type_ = obj
+            .get("type")
+            .and_then(|t| t.as_str())
+            .ok_or("missing type")?;
+        let _name = obj
+            .get("name")
+            .and_then(|n| n.as_str())
+            .ok_or("missing name")?;
+        let _path = obj
+            .get("path")
+            .and_then(|p| p.as_str())
+            .ok_or("missing path")?;
         match type_ {
             "file" | "dir" | "symlink" | "submodule" => Ok(()),
             other => Err(format!("unknown type: {other}")),
@@ -1911,18 +2019,28 @@ pub fn validate_github_content_response(input: &serde_json::Value) -> Result<(),
 /// Parse and filter GitHub vulnerability alerts.
 /// Filters out alerts with unsupported ecosystems and missing security_vulnerability.
 pub fn parse_github_vulnerability_alerts(input: &serde_json::Value) -> Vec<serde_json::Value> {
-    let Some(arr) = input.as_array() else { return vec![]; };
-    arr.iter().filter(|alert| {
-        let Some(sv) = alert.get("security_vulnerability") else { return false; };
-        if sv.is_null() { return false; }
-        let ecosystem = sv.get("package")
-            .and_then(|p| p.get("ecosystem"))
-            .and_then(|e| e.as_str());
-        match ecosystem {
-            Some(eco) => SUPPORTED_ECOSYSTEMS.contains(&eco),
-            None => false,
-        }
-    }).cloned().collect()
+    let Some(arr) = input.as_array() else {
+        return vec![];
+    };
+    arr.iter()
+        .filter(|alert| {
+            let Some(sv) = alert.get("security_vulnerability") else {
+                return false;
+            };
+            if sv.is_null() {
+                return false;
+            }
+            let ecosystem = sv
+                .get("package")
+                .and_then(|p| p.get("ecosystem"))
+                .and_then(|e| e.as_str());
+            match ecosystem {
+                Some(eco) => SUPPORTED_ECOSYSTEMS.contains(&eco),
+                None => false,
+            }
+        })
+        .cloned()
+        .collect()
 }
 
 #[cfg(test)]
@@ -2139,7 +2257,14 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .create_pr(
+                "owner",
+                "repo",
+                "renovate/deps",
+                "main",
+                "Update deps",
+                "Body",
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(42));
@@ -2157,7 +2282,14 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .create_pr(
+                "owner",
+                "repo",
+                "renovate/deps",
+                "main",
+                "Update deps",
+                "Body",
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, None);
@@ -2220,7 +2352,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
         assert_eq!(status.state, CombinedBranchState::Success);
         assert_eq!(status.statuses.len(), 2);
     }
@@ -2249,7 +2384,9 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.get_current_user().await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
     }
 
     // Ported: "should pass through failed" — modules/platform/github/index.spec.ts line 87
@@ -2276,7 +2413,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
         assert_eq!(status.state, CombinedBranchState::Failure);
     }
 
@@ -2305,7 +2445,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
         assert_eq!(status.state, CombinedBranchState::Pending);
     }
 
@@ -2340,10 +2483,19 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client
-            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .create_pr(
+                "owner",
+                "repo",
+                "renovate/deps",
+                "main",
+                "Update deps",
+                "Body",
+            )
             .await
             .unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
     }
 
     // Ported: "returns file content in json5 format" — modules/platform/github/index.spec.ts line 191
@@ -2431,8 +2583,13 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.get_branch_status("owner", "repo", "missing-branch").await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND));
+        let err = client
+            .get_branch_status("owner", "repo", "missing-branch")
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND)
+        );
     }
 
     // Ported: "should handle 403" — modules/platform/github/index.spec.ts line 1198
@@ -2446,8 +2603,13 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.get_branch_status("owner", "repo", "main").await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::FORBIDDEN));
+        let err = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::FORBIDDEN)
+        );
     }
 
     // Ported: "should throw 401" — modules/platform/github/index.spec.ts line 1211
@@ -2461,8 +2623,13 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.get_branch_status("owner", "repo", "main").await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNAUTHORIZED));
+        let err = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNAUTHORIZED)
+        );
     }
 
     // ── decode_github_content ────────────────────────────────────────────────
@@ -2524,7 +2691,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
         assert_eq!(status.state, CombinedBranchState::Failure);
     }
 
@@ -2550,7 +2720,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
         assert_eq!(status.state, CombinedBranchState::Success);
     }
 
@@ -2578,7 +2751,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let status = client.get_branch_status("owner", "repo", "main").await.unwrap();
+        let status = client
+            .get_branch_status("owner", "repo", "main")
+            .await
+            .unwrap();
         assert_eq!(status.state, CombinedBranchState::Pending);
     }
 
@@ -2775,7 +2951,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_json_file("owner", "repo", "file.json", None).await.unwrap();
+        let result = client
+            .get_json_file("owner", "repo", "file.json", None)
+            .await
+            .unwrap();
         assert_eq!(result, None);
     }
 
@@ -2795,7 +2974,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_json_file("owner", "repo", "file.json", None).await.unwrap();
+        let result = client
+            .get_json_file("owner", "repo", "file.json", None)
+            .await
+            .unwrap();
         assert_eq!(result, Some(data));
     }
 
@@ -2815,7 +2997,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_json_file("owner", "repo", "file.json5", None).await.unwrap();
+        let result = client
+            .get_json_file("owner", "repo", "file.json5", None)
+            .await
+            .unwrap();
         assert_eq!(result, Some(serde_json::json!({"foo": "bar"})));
     }
 
@@ -2835,7 +3020,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_json_file("other", "foreign", "file.json", None).await.unwrap();
+        let result = client
+            .get_json_file("other", "foreign", "file.json", None)
+            .await
+            .unwrap();
         assert_eq!(result, Some(data));
     }
 
@@ -2856,7 +3044,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_json_file("owner", "repo", "file.json", Some("dev")).await.unwrap();
+        let result = client
+            .get_json_file("owner", "repo", "file.json", Some("dev"))
+            .await
+            .unwrap();
         assert_eq!(result, Some(data));
     }
 
@@ -2875,7 +3066,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.get_json_file("owner", "repo", "file.json", None).await.unwrap_err();
+        let err = client
+            .get_json_file("owner", "repo", "file.json", None)
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(_)));
     }
 
@@ -2890,8 +3084,13 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.get_json_file("owner", "repo", "file.json", None).await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        let err = client
+            .get_json_file("owner", "repo", "file.json", None)
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
     }
 
     // ── get_pr / list_prs ─────────────────────────────────────────────────────
@@ -3125,7 +3324,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let prs = client.list_prs("owner", "repo", Some("closed")).await.unwrap();
+        let prs = client
+            .list_prs("owner", "repo", Some("closed"))
+            .await
+            .unwrap();
         assert_eq!(prs.len(), 1);
         assert_eq!(prs[0].state, "closed");
     }
@@ -3153,7 +3355,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let prs = client.list_prs("owner", "repo", Some("open")).await.unwrap();
+        let prs = client
+            .list_prs("owner", "repo", Some("open"))
+            .await
+            .unwrap();
         assert!(prs.iter().all(|p| p.state == "open"));
     }
 
@@ -3190,9 +3395,16 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let prs = client.list_prs("owner", "repo", None).await.unwrap();
-        let own_prs: Vec<_> = prs.into_iter().filter(|p| {
-            p.head.repo.as_ref().map(|r| r.full_name == "owner/repo").unwrap_or(true)
-        }).collect();
+        let own_prs: Vec<_> = prs
+            .into_iter()
+            .filter(|p| {
+                p.head
+                    .repo
+                    .as_ref()
+                    .map(|r| r.full_name == "owner/repo")
+                    .unwrap_or(true)
+            })
+            .collect();
         assert_eq!(own_prs.len(), 1);
         assert_eq!(own_prs[0].number, 2);
     }
@@ -3220,7 +3432,10 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let prs = client.list_prs("owner", "repo", None).await.unwrap();
-        let matching: Vec<_> = prs.into_iter().filter(|p| p.title == "Update deps").collect();
+        let matching: Vec<_> = prs
+            .into_iter()
+            .filter(|p| p.title == "Update deps")
+            .collect();
         assert_eq!(matching.len(), 1);
     }
 
@@ -3317,7 +3532,11 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let issue = client.get_issue("owner", "repo", 42).await.unwrap().unwrap();
+        let issue = client
+            .get_issue("owner", "repo", 42)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(issue.number, 42);
         assert_eq!(issue.title, "Bug report");
     }
@@ -3421,7 +3640,13 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let number = client
-            .create_issue("owner", "repo", "Dependency Dashboard", "Body", Some(vec!["renovate".to_owned()]))
+            .create_issue(
+                "owner",
+                "repo",
+                "Dependency Dashboard",
+                "Body",
+                Some(vec!["renovate".to_owned()]),
+            )
             .await
             .unwrap();
         assert_eq!(number, 42);
@@ -3439,7 +3664,15 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         client
-            .update_issue("owner", "repo", 42, Some("New title"), Some("New body"), None, None)
+            .update_issue(
+                "owner",
+                "repo",
+                42,
+                Some("New title"),
+                Some("New body"),
+                None,
+                None,
+            )
             .await
             .unwrap();
     }
@@ -3456,7 +3689,15 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         client
-            .update_issue("owner", "repo", 42, None, None, None, Some(vec!["bug".to_owned()]))
+            .update_issue(
+                "owner",
+                "repo",
+                42,
+                None,
+                None,
+                None,
+                Some(vec!["bug".to_owned()]),
+            )
             .await
             .unwrap();
     }
@@ -3520,7 +3761,9 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.get_issue("owner", "repo", 42).await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
     }
 
     // ── create_comment / update_comment / delete_comment ──────────────────────
@@ -3539,7 +3782,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let id = client.create_comment("owner", "repo", 42, "A comment").await.unwrap();
+        let id = client
+            .create_comment("owner", "repo", 42, "A comment")
+            .await
+            .unwrap();
         assert_eq!(id, 123);
     }
 
@@ -3554,7 +3800,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        client.update_comment("owner", "repo", 123, "Updated comment").await.unwrap();
+        client
+            .update_comment("owner", "repo", 123, "Updated comment")
+            .await
+            .unwrap();
     }
 
     // Ported: "deletes comment by topic if found" — modules/platform/github/index.spec.ts line 3500
@@ -3578,7 +3827,9 @@ mod tests {
     async fn remote_branch_exists_returns_true() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/repos/my/repo/git/matching-refs/heads/renovate/foobar"))
+            .and(path(
+                "/repos/my/repo/git/matching-refs/heads/renovate/foobar",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
                 {"ref": "refs/heads/renovate/foobar"}
             ])))
@@ -3586,7 +3837,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.remote_branch_exists("my", "repo", "renovate/foobar").await.unwrap();
+        let result = client
+            .remote_branch_exists("my", "repo", "renovate/foobar")
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -3595,13 +3849,18 @@ mod tests {
     async fn remote_branch_exists_returns_false() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/repos/my/repo/git/matching-refs/heads/renovate/foobar"))
+            .and(path(
+                "/repos/my/repo/git/matching-refs/heads/renovate/foobar",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
             .mount(&server)
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.remote_branch_exists("my", "repo", "renovate/foobar").await.unwrap();
+        let result = client
+            .remote_branch_exists("my", "repo", "renovate/foobar")
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -3610,7 +3869,9 @@ mod tests {
     async fn remote_branch_exists_throws_for_nested() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/repos/my/repo/git/matching-refs/heads/renovate/foobar"))
+            .and(path(
+                "/repos/my/repo/git/matching-refs/heads/renovate/foobar",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
                 {"ref": "refs/heads/renovate/foobar/branch-1"},
                 {"ref": "refs/heads/renovate/foobar/branch-2"},
@@ -3620,7 +3881,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.remote_branch_exists("my", "repo", "renovate/foobar").await.unwrap_err();
+        let err = client
+            .remote_branch_exists("my", "repo", "renovate/foobar")
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("nested branch")));
     }
 
@@ -3629,14 +3893,21 @@ mod tests {
     async fn remote_branch_exists_throws_on_server_error() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/repos/my/repo/git/matching-refs/heads/renovate/foobar"))
+            .and(path(
+                "/repos/my/repo/git/matching-refs/heads/renovate/foobar",
+            ))
             .respond_with(ResponseTemplate::new(500))
             .mount(&server)
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.remote_branch_exists("my", "repo", "renovate/foobar").await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        let err = client
+            .remote_branch_exists("my", "repo", "renovate/foobar")
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
     }
 
     // ── get_branch_status_check ───────────────────────────────────────────────
@@ -3646,7 +3917,9 @@ mod tests {
     async fn get_branch_status_check_returns_state() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/repos/owner/repo/commits/renovate/future_branch/statuses"))
+            .and(path(
+                "/repos/owner/repo/commits/renovate/future_branch/statuses",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
                 {"context": "context-1", "state": "success"},
                 {"context": "context-2", "state": "pending"},
@@ -3656,7 +3929,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_status_check("owner", "repo", "renovate/future_branch", "context-2").await.unwrap();
+        let result = client
+            .get_branch_status_check("owner", "repo", "renovate/future_branch", "context-2")
+            .await
+            .unwrap();
         assert_eq!(result, Some("yellow".to_owned()));
     }
 
@@ -3675,7 +3951,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_status_check("owner", "repo", "somebranch", "context-4").await.unwrap();
+        let result = client
+            .get_branch_status_check("owner", "repo", "somebranch", "context-4")
+            .await
+            .unwrap();
         assert_eq!(result, None);
     }
 
@@ -3692,7 +3971,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_status_check("owner", "repo", "somebranch", "context-1").await.unwrap();
+        let result = client
+            .get_branch_status_check("owner", "repo", "somebranch", "context-1")
+            .await
+            .unwrap();
         assert_eq!(result, Some("yellow".to_owned()));
     }
 
@@ -3718,7 +4000,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -3738,7 +4023,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "dev", None).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "dev", None)
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -3758,7 +4046,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -3778,8 +4069,13 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNAUTHORIZED));
+        let err = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNAUTHORIZED)
+        );
     }
 
     // Ported: "should ignore non_fast_forward ruleset for determining rebase" — modules/platform/github/index.spec.ts line 1245
@@ -3802,7 +4098,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -3825,7 +4124,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -3849,7 +4151,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -3864,8 +4169,13 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        let err = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
     }
 
     // Ported: "should fallback to legacy branch protection when rulesets not found" — modules/platform/github/index.spec.ts line 1320
@@ -3886,7 +4196,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -3916,7 +4229,10 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -3940,9 +4256,15 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result1 = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result1 = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(result1);
-        let result2 = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result2 = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(result2);
     }
 
@@ -3964,9 +4286,15 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result1 = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result1 = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(!result1);
-        let result2 = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        let result2 = client
+            .get_branch_force_rebase("owner", "repo", "main", None)
+            .await
+            .unwrap();
         assert!(!result2);
     }
 
@@ -3974,7 +4302,10 @@ mod tests {
     #[tokio::test]
     async fn get_branch_force_rebase_returns_false_when_parent_repo_set() {
         let client = GithubClient::with_endpoint("token", "https://api.github.com").unwrap();
-        let result = client.get_branch_force_rebase("owner", "repo", "main", Some("parent/repo")).await.unwrap();
+        let result = client
+            .get_branch_force_rebase("owner", "repo", "main", Some("parent/repo"))
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -3994,7 +4325,18 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         // No POST mock needed — should return early when status already matches
-        client.set_branch_status("owner", "repo", "some-branch", "some-context", "some-description", "yellow", Some("some-url")).await.unwrap();
+        client
+            .set_branch_status(
+                "owner",
+                "repo",
+                "some-branch",
+                "some-context",
+                "some-description",
+                "yellow",
+                Some("some-url"),
+            )
+            .await
+            .unwrap();
     }
 
     // Ported: "sets branch status" — modules/platform/github/index.spec.ts line 2434
@@ -4026,199 +4368,222 @@ mod tests {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        client.set_branch_status("owner", "repo", "some-branch", "some-context", "some-description", "green", Some("some-url")).await.unwrap();
+        client
+            .set_branch_status(
+                "owner",
+                "repo",
+                "some-branch",
+                "some-context",
+                "some-description",
+                "green",
+                Some("some-url"),
+            )
+            .await
+            .unwrap();
     }
 
     // Ported: "should return an array of repos when using Github App endpoint" — modules/platform/github/index.spec.ts line 663
-// Ported: "should be parse directory response" — modules/platform/github/schema.spec.ts line 5
-#[test]
-fn github_content_response_directory() {
-    let input = serde_json::json!([
-        {"type": "file", "size": 625, "name": "octokit.rb", "path": "lib/octokit.rb", "sha": "fff", "url": "u", "git_url": "g", "html_url": "h", "download_url": "d", "_links": {}},
-        {"type": "dir",  "size": 0,   "name": "octokit",    "path": "lib/octokit",    "sha": "aaa", "url": "u", "git_url": "g", "html_url": "h", "download_url": null, "_links": {}},
-        {"type": "symlink", "size": 23, "name": "some-symlink", "path": "bin/some-symlink", "sha": "bbb", "url": "u", "git_url": "g", "html_url": "h", "download_url": "d", "_links": {}},
-    ]);
-    assert!(validate_github_content_response(&input).is_ok());
-}
+    // Ported: "should be parse directory response" — modules/platform/github/schema.spec.ts line 5
+    #[test]
+    fn github_content_response_directory() {
+        let input = serde_json::json!([
+            {"type": "file", "size": 625, "name": "octokit.rb", "path": "lib/octokit.rb", "sha": "fff", "url": "u", "git_url": "g", "html_url": "h", "download_url": "d", "_links": {}},
+            {"type": "dir",  "size": 0,   "name": "octokit",    "path": "lib/octokit",    "sha": "aaa", "url": "u", "git_url": "g", "html_url": "h", "download_url": null, "_links": {}},
+            {"type": "symlink", "size": 23, "name": "some-symlink", "path": "bin/some-symlink", "sha": "bbb", "url": "u", "git_url": "g", "html_url": "h", "download_url": "d", "_links": {}},
+        ]);
+        assert!(validate_github_content_response(&input).is_ok());
+    }
 
-// Ported: "returns file content from branch or tag" — modules/platform/github/index.spec.ts line 5434
-// Ported: "should parse response for single file" — modules/platform/github/schema.spec.ts line 87
-#[test]
-fn github_content_response_single_file() {
-    let input = serde_json::json!({
-        "type": "file",
-        "encoding": "base64",
-        "size": 5362,
-        "name": "README.md",
-        "path": "README.md",
-        "content": "aaaaaaaaaa",
-        "sha": "3d21ec53a331a6f037a91c368710b99387d012c1",
-        "url": "https://api.github.com/repos/octokit/octokit.rb/contents/README.md",
-        "git_url": "https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21",
-        "html_url": "https://github.com/octokit/octokit.rb/blob/master/README.md",
-        "download_url": "https://raw.githubusercontent.com/...",
-        "_links": {}
-    });
-    assert!(validate_github_content_response(&input).is_ok());
-}
+    // Ported: "returns file content from branch or tag" — modules/platform/github/index.spec.ts line 5434
+    // Ported: "should parse response for single file" — modules/platform/github/schema.spec.ts line 87
+    #[test]
+    fn github_content_response_single_file() {
+        let input = serde_json::json!({
+            "type": "file",
+            "encoding": "base64",
+            "size": 5362,
+            "name": "README.md",
+            "path": "README.md",
+            "content": "aaaaaaaaaa",
+            "sha": "3d21ec53a331a6f037a91c368710b99387d012c1",
+            "url": "https://api.github.com/repos/octokit/octokit.rb/contents/README.md",
+            "git_url": "https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21",
+            "html_url": "https://github.com/octokit/octokit.rb/blob/master/README.md",
+            "download_url": "https://raw.githubusercontent.com/...",
+            "_links": {}
+        });
+        assert!(validate_github_content_response(&input).is_ok());
+    }
 
-// Ported: "calls logger.debug with only items that include securityVulnerability" — modules/platform/github/index.spec.ts line 5191
-// Ported: "should skip vulnerability alerts with unsupported ecosystems" — modules/platform/github/schema.spec.ts line 111
-#[test]
-fn github_vulnerability_alerts_filter_unsupported_ecosystem() {
-    let input = serde_json::json!([
-        {
+    // Ported: "calls logger.debug with only items that include securityVulnerability" — modules/platform/github/index.spec.ts line 5191
+    // Ported: "should skip vulnerability alerts with unsupported ecosystems" — modules/platform/github/schema.spec.ts line 111
+    #[test]
+    fn github_vulnerability_alerts_filter_unsupported_ecosystem() {
+        let input = serde_json::json!([
+            {
+                "dismissed_reason": null,
+                "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
+                "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "dotnet", "name": "test-package"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
+                "dependency": {"manifest_path": "package.json"},
+            },
+            {
+                "dismissed_reason": null,
+                "security_advisory": {"ghsa_id": "GHSA-4444-5555-6666", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-5678"}], "severity": "medium"},
+                "security_vulnerability": {"first_patched_version": {"identifier": "2.0.0"}, "package": {"ecosystem": "npm", "name": "valid-package"}, "severity": "medium", "vulnerable_version_range": "< 2.0.0"},
+                "dependency": {"manifest_path": "package.json"},
+            },
+        ]);
+        let result = parse_github_vulnerability_alerts(&input);
+        assert_eq!(result.len(), 1);
+        assert_eq!(
+            result[0]["security_vulnerability"]["package"]["ecosystem"],
+            "npm"
+        );
+    }
+
+    // Ported: "returns array if found" — modules/platform/github/index.spec.ts line 5113
+    // Ported: "should parse severity and cvss_severities fields" — modules/platform/github/schema.spec.ts line 206
+    #[test]
+    fn github_vulnerability_alerts_parse_severity_fields() {
+        let input = serde_json::json!([{
+            "dismissed_reason": null,
+            "security_advisory": {
+                "ghsa_id": "GHSA-1111-2222-3333",
+                "summary": "Test advisory",
+                "description": "Test advisory",
+                "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}],
+                "severity": "high",
+                "cvss_severities": {
+                    "cvss_v3": {"vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", "score": 9.8},
+                    "cvss_v4": null,
+                },
+            },
+            "security_vulnerability": {
+                "first_patched_version": {"identifier": "2.0.0"},
+                "package": {"ecosystem": "npm", "name": "test-package"},
+                "severity": "critical",
+                "vulnerable_version_range": "< 2.0.0",
+            },
+            "dependency": {"manifest_path": "package.json"},
+        }]);
+        let result = parse_github_vulnerability_alerts(&input);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0]["security_advisory"]["severity"], "high");
+        assert_eq!(result[0]["security_vulnerability"]["severity"], "critical");
+        assert_eq!(
+            result[0]["security_advisory"]["cvss_severities"]["cvss_v3"]["score"],
+            9.8
+        );
+        assert!(result[0]["security_advisory"]["cvss_severities"]["cvss_v4"].is_null());
+    }
+
+    // Ported: "should log vulnerability alerts with parse errors" — modules/platform/github/schema.spec.ts line 152
+    // The TypeScript test also checks logger.debug spy; Rust tests the filter behavior.
+    // dotnet ecosystem alert is filtered out (returns empty), same behavior as the
+    // "skip unsupported ecosystems" test which already covers this parse path.
+    #[test]
+    fn github_vulnerability_alerts_logs_parse_errors_dotnet_filtered() {
+        let input = serde_json::json!([{
             "dismissed_reason": null,
             "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
             "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "dotnet", "name": "test-package"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
-            "dependency": {"manifest_path": "package.json"},
-        },
-        {
+        }]);
+        let result = parse_github_vulnerability_alerts(&input);
+        assert!(result.is_empty());
+    }
+
+    // Ported: "should filter vulnerability alerts with missing security_vulnerability" — modules/platform/github/schema.spec.ts line 181
+    #[test]
+    fn github_vulnerability_alerts_filters_missing_security_vulnerability() {
+        let input = serde_json::json!([{
             "dismissed_reason": null,
-            "security_advisory": {"ghsa_id": "GHSA-4444-5555-6666", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-5678"}], "severity": "medium"},
-            "security_vulnerability": {"first_patched_version": {"identifier": "2.0.0"}, "package": {"ecosystem": "npm", "name": "valid-package"}, "severity": "medium", "vulnerable_version_range": "< 2.0.0"},
+            "security_advisory": {"ghsa_id": "GHSA-4444-5555-6666", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-5678"}], "severity": "high"},
+            "security_vulnerability": null,
             "dependency": {"manifest_path": "package.json"},
-        },
-    ]);
-    let result = parse_github_vulnerability_alerts(&input);
-    assert_eq!(result.len(), 1);
-    assert_eq!(result[0]["security_vulnerability"]["package"]["ecosystem"], "npm");
-}
+        }]);
+        let result = parse_github_vulnerability_alerts(&input);
+        assert!(result.is_empty());
+    }
 
-// Ported: "returns array if found" — modules/platform/github/index.spec.ts line 5113
-// Ported: "should parse severity and cvss_severities fields" — modules/platform/github/schema.spec.ts line 206
-#[test]
-fn github_vulnerability_alerts_parse_severity_fields() {
-    let input = serde_json::json!([{
-        "dismissed_reason": null,
-        "security_advisory": {
-            "ghsa_id": "GHSA-1111-2222-3333",
-            "summary": "Test advisory",
-            "description": "Test advisory",
-            "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}],
-            "severity": "high",
-            "cvss_severities": {
-                "cvss_v3": {"vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", "score": 9.8},
-                "cvss_v4": null,
-            },
-        },
-        "security_vulnerability": {
-            "first_patched_version": {"identifier": "2.0.0"},
-            "package": {"ecosystem": "npm", "name": "test-package"},
-            "severity": "critical",
-            "vulnerable_version_range": "< 2.0.0",
-        },
-        "dependency": {"manifest_path": "package.json"},
-    }]);
-    let result = parse_github_vulnerability_alerts(&input);
-    assert_eq!(result.len(), 1);
-    assert_eq!(result[0]["security_advisory"]["severity"], "high");
-    assert_eq!(result[0]["security_vulnerability"]["severity"], "critical");
-    assert_eq!(result[0]["security_advisory"]["cvss_severities"]["cvss_v3"]["score"], 9.8);
-    assert!(result[0]["security_advisory"]["cvss_severities"]["cvss_v4"].is_null());
-}
+    // ── Additional validate_github_content_response tests (index.spec.ts) ───────
 
-// Ported: "should log vulnerability alerts with parse errors" — modules/platform/github/schema.spec.ts line 152
-// The TypeScript test also checks logger.debug spy; Rust tests the filter behavior.
-// dotnet ecosystem alert is filtered out (returns empty), same behavior as the
-// "skip unsupported ecosystems" test which already covers this parse path.
-#[test]
-fn github_vulnerability_alerts_logs_parse_errors_dotnet_filtered() {
-    let input = serde_json::json!([{
-        "dismissed_reason": null,
-        "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
-        "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "dotnet", "name": "test-package"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
-    }]);
-    let result = parse_github_vulnerability_alerts(&input);
-    assert!(result.is_empty());
-}
+    // Ported: "throws unexpected graphql errors" — modules/platform/github/index.spec.ts line 48
+    #[test]
+    fn validate_github_content_missing_type() {
+        let input = serde_json::json!({"name": "foo", "path": "foo"});
+        assert!(validate_github_content_response(&input).is_err());
+    }
 
-// Ported: "should filter vulnerability alerts with missing security_vulnerability" — modules/platform/github/schema.spec.ts line 181
-#[test]
-fn github_vulnerability_alerts_filters_missing_security_vulnerability() {
-    let input = serde_json::json!([{
-        "dismissed_reason": null,
-        "security_advisory": {"ghsa_id": "GHSA-4444-5555-6666", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-5678"}], "severity": "high"},
-        "security_vulnerability": null,
-        "dependency": {"manifest_path": "package.json"},
-    }]);
-    let result = parse_github_vulnerability_alerts(&input);
-    assert!(result.is_empty());
-}
+    // Ported: "throws not-found" — modules/platform/github/index.spec.ts line 47
+    #[test]
+    fn validate_github_content_unknown_type() {
+        let input = serde_json::json!({"type": "unknown", "name": "foo", "path": "foo"});
+        assert!(validate_github_content_response(&input).is_err());
+    }
 
-// ── Additional validate_github_content_response tests (index.spec.ts) ───────
+    // Ported: "should throw error if renamed" — modules/platform/github/index.spec.ts line 50
+    #[test]
+    fn validate_github_content_not_array_or_object() {
+        let input = serde_json::json!("string");
+        assert!(validate_github_content_response(&input).is_err());
+    }
 
-// Ported: "throws unexpected graphql errors" — modules/platform/github/index.spec.ts line 48
-#[test]
-fn validate_github_content_missing_type() {
-    let input = serde_json::json!({"name": "foo", "path": "foo"});
-    assert!(validate_github_content_response(&input).is_err());
-}
+    // ── Additional parse_github_vulnerability_alerts tests (index.spec.ts) ──────
 
-// Ported: "throws not-found" — modules/platform/github/index.spec.ts line 47
-#[test]
-fn validate_github_content_unknown_type() {
-    let input = serde_json::json!({"type": "unknown", "name": "foo", "path": "foo"});
-    assert!(validate_github_content_response(&input).is_err());
-}
+    // Ported: "avoids fetching if repo has vulnerability alerts disabled" — modules/platform/github/index.spec.ts line 181
+    #[test]
+    fn parse_vulnerability_alerts_empty_array() {
+        let input = serde_json::json!([]);
+        let result = parse_github_vulnerability_alerts(&input);
+        assert!(result.is_empty());
+    }
 
-// Ported: "should throw error if renamed" — modules/platform/github/index.spec.ts line 50
-#[test]
-fn validate_github_content_not_array_or_object() {
-    let input = serde_json::json!("string");
-    assert!(validate_github_content_response(&input).is_err());
-}
+    // Ported: "returns empty if disabled" — modules/platform/github/index.spec.ts line 184
+    #[test]
+    fn parse_vulnerability_alerts_null_input() {
+        let input = serde_json::Value::Null;
+        let result = parse_github_vulnerability_alerts(&input);
+        assert!(result.is_empty());
+    }
 
-// ── Additional parse_github_vulnerability_alerts tests (index.spec.ts) ──────
+    // Ported: "handles network error" — modules/platform/github/index.spec.ts line 185
+    #[test]
+    fn parse_vulnerability_alerts_missing_ecosystem() {
+        let input = serde_json::json!([{
+            "dismissed_reason": null,
+            "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
+            "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"name": "test-package"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
+            "dependency": {"manifest_path": "package.json"},
+        }]);
+        let result = parse_github_vulnerability_alerts(&input);
+        assert!(result.is_empty());
+    }
 
-// Ported: "avoids fetching if repo has vulnerability alerts disabled" — modules/platform/github/index.spec.ts line 181
-#[test]
-fn parse_vulnerability_alerts_empty_array() {
-    let input = serde_json::json!([]);
-    let result = parse_github_vulnerability_alerts(&input);
-    assert!(result.is_empty());
-}
+    // Ported: "returns normalized names for PIP ecosystem" — modules/platform/github/index.spec.ts line 187
+    #[test]
+    fn parse_vulnerability_alerts_pip_ecosystem() {
+        let input = serde_json::json!([{
+            "dismissed_reason": null,
+            "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
+            "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "pip", "name": "requests"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
+            "dependency": {"manifest_path": "requirements.txt"},
+        }]);
+        let result = parse_github_vulnerability_alerts(&input);
+        assert_eq!(result.len(), 1);
+        assert_eq!(
+            result[0]["security_vulnerability"]["package"]["ecosystem"],
+            "pip"
+        );
+        assert_eq!(
+            result[0]["security_vulnerability"]["package"]["name"],
+            "requests"
+        );
+    }
 
-// Ported: "returns empty if disabled" — modules/platform/github/index.spec.ts line 184
-#[test]
-fn parse_vulnerability_alerts_null_input() {
-    let input = serde_json::Value::Null;
-    let result = parse_github_vulnerability_alerts(&input);
-    assert!(result.is_empty());
-}
-
-// Ported: "handles network error" — modules/platform/github/index.spec.ts line 185
-#[test]
-fn parse_vulnerability_alerts_missing_ecosystem() {
-    let input = serde_json::json!([{
-        "dismissed_reason": null,
-        "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
-        "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"name": "test-package"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
-        "dependency": {"manifest_path": "package.json"},
-    }]);
-    let result = parse_github_vulnerability_alerts(&input);
-    assert!(result.is_empty());
-}
-
-// Ported: "returns normalized names for PIP ecosystem" — modules/platform/github/index.spec.ts line 187
-#[test]
-fn parse_vulnerability_alerts_pip_ecosystem() {
-    let input = serde_json::json!([{
-        "dismissed_reason": null,
-        "security_advisory": {"ghsa_id": "GHSA-1111-2222-3333", "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
-        "security_vulnerability": {"first_patched_version": {"identifier": "1.0.0"}, "package": {"ecosystem": "pip", "name": "requests"}, "severity": "high", "vulnerable_version_range": "< 1.0.0"},
-        "dependency": {"manifest_path": "requirements.txt"},
-    }]);
-    let result = parse_github_vulnerability_alerts(&input);
-    assert_eq!(result.len(), 1);
-    assert_eq!(result[0]["security_vulnerability"]["package"]["ecosystem"], "pip");
-    assert_eq!(result[0]["security_vulnerability"]["package"]["name"], "requests");
-}
-
-// Ported: "handles pagination correctly" — modules/platform/github/index.spec.ts line 188
-#[test]
-fn parse_vulnerability_alerts_pagination() {
-    let alerts: Vec<serde_json::Value> = (0..100)
+    // Ported: "handles pagination correctly" — modules/platform/github/index.spec.ts line 188
+    #[test]
+    fn parse_vulnerability_alerts_pagination() {
+        let alerts: Vec<serde_json::Value> = (0..100)
         .map(|i| serde_json::json!({
             "dismissed_reason": null,
             "security_advisory": {"ghsa_id": format!("GHSA-{i:04x}"), "summary": "Test", "description": "Test", "identifiers": [{"type": "CVE", "value": "CVE-2024-1234"}], "severity": "high"},
@@ -4226,20 +4591,20 @@ fn parse_vulnerability_alerts_pagination() {
             "dependency": {"manifest_path": "package.json"},
         }))
         .collect();
-    let input = serde_json::Value::Array(alerts);
-    let result = parse_github_vulnerability_alerts(&input);
-    assert_eq!(result.len(), 100);
-}
+        let input = serde_json::Value::Array(alerts);
+        let result = parse_github_vulnerability_alerts(&input);
+        assert_eq!(result.len(), 100);
+    }
 
-// Ported: "returns empty if error" — modules/platform/github/index.spec.ts line 182
-#[test]
-fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
-    let input = serde_json::json!({"data": {"repository": {}}});
-    let result = parse_github_vulnerability_alerts(&input);
-    assert!(result.is_empty());
-}
+    // Ported: "returns empty if error" — modules/platform/github/index.spec.ts line 182
+    #[test]
+    fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
+        let input = serde_json::json!({"data": {"repository": {}}});
+        let result = parse_github_vulnerability_alerts(&input);
+        assert!(result.is_empty());
+    }
 
-// ── get_vulnerability_alerts ──────────────────────────────────────────────
+    // ── get_vulnerability_alerts ──────────────────────────────────────────────
 
     // Ported: "returns empty if error" — modules/platform/github/index.spec.ts line 5100
     #[tokio::test]
@@ -4252,7 +4617,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let alerts = client.get_vulnerability_alerts("owner", "repo").await.unwrap();
+        let alerts = client
+            .get_vulnerability_alerts("owner", "repo")
+            .await
+            .unwrap();
         assert!(alerts.is_empty());
     }
 
@@ -4297,7 +4665,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let alerts = client.get_vulnerability_alerts("owner", "repo").await.unwrap();
+        let alerts = client
+            .get_vulnerability_alerts("owner", "repo")
+            .await
+            .unwrap();
         assert_eq!(alerts.len(), 1);
     }
 
@@ -4314,7 +4685,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let alerts = client.get_vulnerability_alerts("owner", "repo").await.unwrap();
+        let alerts = client
+            .get_vulnerability_alerts("owner", "repo")
+            .await
+            .unwrap();
         assert!(alerts.is_empty());
     }
 
@@ -4329,7 +4703,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let alerts = client.get_vulnerability_alerts("owner", "repo").await.unwrap();
+        let alerts = client
+            .get_vulnerability_alerts("owner", "repo")
+            .await
+            .unwrap();
         assert!(alerts.is_empty());
     }
 
@@ -4346,7 +4723,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        client.delete_label("owner", "repo", 42, "rebase").await.unwrap();
+        client
+            .delete_label("owner", "repo", 42, "rebase")
+            .await
+            .unwrap();
     }
 
     // ── add_assignees ─────────────────────────────────────────────────────────
@@ -4366,7 +4746,12 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         client
-            .add_assignees("owner", "repo", 42, vec!["someuser".to_owned(), "someotheruser".to_owned()])
+            .add_assignees(
+                "owner",
+                "repo",
+                42,
+                vec!["someuser".to_owned(), "someotheruser".to_owned()],
+            )
             .await
             .unwrap();
     }
@@ -4412,7 +4797,9 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .add_assignees("owner", "repo", 42, vec!["someuser".to_owned()])
             .await
             .unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND));
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND)
+        );
     }
 
     // ── add_reviewers ─────────────────────────────────────────────────────────
@@ -4431,7 +4818,12 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         client
-            .add_reviewers("owner", "repo", 42, vec!["user1".to_owned(), "team:myteam".to_owned()])
+            .add_reviewers(
+                "owner",
+                "repo",
+                42,
+                vec!["user1".to_owned(), "team:myteam".to_owned()],
+            )
             .await
             .unwrap();
     }
@@ -4470,7 +4862,11 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let pr = client.find_pr("owner", "repo", "branch-a", None, None, false).await.unwrap().unwrap();
+        let pr = client
+            .find_pr("owner", "repo", "branch-a", None, None, false)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(pr.number, 2);
         assert_eq!(pr.source_branch, "branch-a");
     }
@@ -4497,7 +4893,11 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let pr = client.find_pr("owner", "repo", "branch-a", None, Some("!open"), false).await.unwrap().unwrap();
+        let pr = client
+            .find_pr("owner", "repo", "branch-a", None, Some("!open"), false)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(pr.number, 1);
         assert_eq!(pr.state, "closed");
     }
@@ -4524,7 +4924,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let pr = client.find_pr("owner", "repo", "branch-a", None, Some("open"), false).await.unwrap();
+        let pr = client
+            .find_pr("owner", "repo", "branch-a", None, Some("open"), false)
+            .await
+            .unwrap();
         assert!(pr.is_none());
     }
 
@@ -4550,7 +4953,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let pr = client.find_pr("owner", "repo", "branch-a", None, Some("open"), false).await.unwrap();
+        let pr = client
+            .find_pr("owner", "repo", "branch-a", None, Some("open"), false)
+            .await
+            .unwrap();
         assert!(pr.is_none());
     }
 
@@ -4576,7 +4982,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let pr = client.find_pr("owner", "repo", "branch-a", Some("bar"), None, false).await.unwrap();
+        let pr = client
+            .find_pr("owner", "repo", "branch-a", Some("bar"), None, false)
+            .await
+            .unwrap();
         assert!(pr.is_none());
     }
 
@@ -4604,7 +5013,11 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let pr = client.find_pr("owner", "repo", "branch-a", None, None, true).await.unwrap().unwrap();
+        let pr = client
+            .find_pr("owner", "repo", "branch-a", None, None, true)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(pr.number, 1);
     }
 
@@ -4620,7 +5033,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let pr = client.find_pr("owner", "repo", "branch-a", None, None, false).await.unwrap();
+        let pr = client
+            .find_pr("owner", "repo", "branch-a", None, None, false)
+            .await
+            .unwrap();
         assert!(pr.is_none());
     }
 
@@ -4738,7 +5154,11 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let pr = client.find_pr("owner", "repo", "Branch-A", None, None, false).await.unwrap().unwrap();
+        let pr = client
+            .find_pr("owner", "repo", "Branch-A", None, None, false)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(pr.number, 1);
         assert_eq!(pr.source_branch, "Branch-A");
     }
@@ -4764,7 +5184,14 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr("owner", "repo", "some-branch", "master", "PR draft", "This is a result of a draft")
+            .create_pr(
+                "owner",
+                "repo",
+                "some-branch",
+                "master",
+                "PR draft",
+                "This is a result of a draft",
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
@@ -4779,7 +5206,9 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let server = MockServer::start().await;
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.init_platform("").await.unwrap_err();
-        assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("You must configure a GitHub token")));
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg.contains("You must configure a GitHub token"))
+        );
     }
 
     // Ported: "should throw if user failure" — modules/platform/github/index.spec.ts line 128
@@ -4923,13 +5352,20 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let server = MockServer::start().await;
         Mock::given(method("HEAD"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(200).insert_header("x-github-enterprise-version", "3.9.0"))
+            .respond_with(
+                ResponseTemplate::new(200).insert_header("x-github-enterprise-version", "3.9.0"),
+            )
             .mount(&server)
             .await;
 
         let client = GithubClient::with_endpoint("github_pat_123test", server.uri()).unwrap();
-        let err = client.init_platform("github_pat_123test").await.unwrap_err();
-        assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("Fine-grained Personal Access Tokens")));
+        let err = client
+            .init_platform("github_pat_123test")
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg.contains("Fine-grained Personal Access Tokens"))
+        );
     }
 
     // Ported: "should throw if using fine-grained token with GHE unknown version" — modules/platform/github/index.spec.ts line 94
@@ -4943,8 +5379,13 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("github_pat_123test", server.uri()).unwrap();
-        let err = client.init_platform("github_pat_123test").await.unwrap_err();
-        assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("Fine-grained Personal Access Tokens")));
+        let err = client
+            .init_platform("github_pat_123test")
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg.contains("Fine-grained Personal Access Tokens"))
+        );
     }
 
     // Ported: "should support fine-grained token with GHE >=3.10" — modules/platform/github/index.spec.ts line 106
@@ -4953,7 +5394,9 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let server = MockServer::start().await;
         Mock::given(method("HEAD"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(200).insert_header("x-github-enterprise-version", "3.10.0"))
+            .respond_with(
+                ResponseTemplate::new(200).insert_header("x-github-enterprise-version", "3.10.0"),
+            )
             .mount(&server)
             .await;
         Mock::given(method("GET"))
@@ -5010,7 +5453,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let repos = client.get_repos(Some(vec!["managed-by-renovate".to_owned()])).await.unwrap();
+        let repos = client
+            .get_repos(Some(vec!["managed-by-renovate".to_owned()]))
+            .await
+            .unwrap();
         assert_eq!(repos, vec!["c/d"]);
     }
 
@@ -5081,7 +5527,17 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, Some(true), None)
+            .create_pr_with_options(
+                "owner",
+                "repo",
+                "some-branch",
+                "main",
+                "PR title",
+                "Body",
+                false,
+                Some(true),
+                None,
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
@@ -5108,7 +5564,17 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, None, None)
+            .create_pr_with_options(
+                "owner",
+                "repo",
+                "some-branch",
+                "main",
+                "PR title",
+                "Body",
+                false,
+                None,
+                None,
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
@@ -5135,7 +5601,17 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, Some(false), None)
+            .create_pr_with_options(
+                "owner",
+                "repo",
+                "some-branch",
+                "main",
+                "PR title",
+                "Body",
+                false,
+                Some(false),
+                None,
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
@@ -5168,7 +5644,17 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, None, Some(1))
+            .create_pr_with_options(
+                "owner",
+                "repo",
+                "some-branch",
+                "main",
+                "PR title",
+                "Body",
+                false,
+                None,
+                Some(1),
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
@@ -5204,7 +5690,17 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr_with_options("owner", "repo", "some-branch", "main", "bump someDep to v2", "many informations about someDep", false, None, Some(1))
+            .create_pr_with_options(
+                "owner",
+                "repo",
+                "some-branch",
+                "main",
+                "bump someDep to v2",
+                "many informations about someDep",
+                false,
+                None,
+                Some(1),
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
@@ -5228,7 +5724,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let method = client.get_repo_merge_methods("owner", "repo").await.unwrap();
+        let method = client
+            .get_repo_merge_methods("owner", "repo")
+            .await
+            .unwrap();
         assert_eq!(method, Some("squash".to_owned()));
     }
 
@@ -5250,7 +5749,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let method = client.get_repo_merge_methods("owner", "repo").await.unwrap();
+        let method = client
+            .get_repo_merge_methods("owner", "repo")
+            .await
+            .unwrap();
         assert_eq!(method, Some("merge".to_owned()));
     }
 
@@ -5272,7 +5774,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let method = client.get_repo_merge_methods("owner", "repo").await.unwrap();
+        let method = client
+            .get_repo_merge_methods("owner", "repo")
+            .await
+            .unwrap();
         assert_eq!(method, Some("rebase".to_owned()));
     }
 
@@ -5294,7 +5799,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let method = client.get_repo_merge_methods("owner", "repo").await.unwrap();
+        let method = client
+            .get_repo_merge_methods("owner", "repo")
+            .await
+            .unwrap();
         assert_eq!(method, None);
     }
 
@@ -5313,7 +5821,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        client.update_pr_labels("owner", "repo", 1234, vec!["new_label".to_owned()]).await.unwrap();
+        client
+            .update_pr_labels("owner", "repo", 1234, vec!["new_label".to_owned()])
+            .await
+            .unwrap();
     }
 
     // Ported: "warns if adding labels failed" — modules/platform/github/index.spec.ts line 4676
@@ -5329,7 +5840,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.update_pr_labels("owner", "repo", 2, vec!["fail".to_owned()]).await.unwrap_err();
+        let err = client
+            .update_pr_labels("owner", "repo", 2, vec!["fail".to_owned()])
+            .await
+            .unwrap_err();
         assert!(matches!(err, PlatformError::Http(_)));
     }
 
@@ -5363,7 +5877,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.ensure_comment("owner", "repo", 2499, Some("some-subject"), "some\ncontent").await.unwrap();
+        let result = client
+            .ensure_comment("owner", "repo", 2499, Some("some-subject"), "some\ncontent")
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5385,7 +5902,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        client.ensure_comment_removal("owner", "repo", 42, Some("some-subject"), None).await.unwrap();
+        client
+            .ensure_comment_removal("owner", "repo", 42, Some("some-subject"), None)
+            .await
+            .unwrap();
     }
 
     // Ported: "deletes comment by content if found" — modules/platform/github/index.spec.ts line 3519
@@ -5406,7 +5926,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        client.ensure_comment_removal("owner", "repo", 42, None, Some("some-content")).await.unwrap();
+        client
+            .ensure_comment_removal("owner", "repo", 42, None, Some("some-content"))
+            .await
+            .unwrap();
     }
 
     // Ported: "skips comment" — modules/platform/github/index.spec.ts line 3464
@@ -5422,7 +5945,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent").await.unwrap();
+        let result = client
+            .ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent")
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -5445,7 +5971,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent").await.unwrap();
+        let result = client
+            .ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent")
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5467,7 +5996,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent").await.unwrap();
+        let result = client
+            .ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent")
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5484,7 +6016,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.ensure_comment("owner", "repo", 42, None, "!merge").await.unwrap();
+        let result = client
+            .ensure_comment("owner", "repo", 42, None, "!merge")
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -5513,7 +6048,18 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, true, true).await.unwrap();
+        let number = client
+            .ensure_issue(
+                "owner",
+                "repo",
+                "Dependency Dashboard",
+                "Body",
+                None,
+                true,
+                true,
+            )
+            .await
+            .unwrap();
         assert_eq!(number, None);
     }
 
@@ -5549,7 +6095,18 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, true, true).await.unwrap();
+        let number = client
+            .ensure_issue(
+                "owner",
+                "repo",
+                "Dependency Dashboard",
+                "Body",
+                None,
+                true,
+                true,
+            )
+            .await
+            .unwrap();
         assert_eq!(number, None);
     }
 
@@ -5573,7 +6130,18 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, true, true).await.unwrap();
+        let number = client
+            .ensure_issue(
+                "owner",
+                "repo",
+                "Dependency Dashboard",
+                "Body",
+                None,
+                true,
+                true,
+            )
+            .await
+            .unwrap();
         assert_eq!(number, None);
     }
 
@@ -5606,7 +6174,18 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, false, false).await.unwrap();
+        let number = client
+            .ensure_issue(
+                "owner",
+                "repo",
+                "Dependency Dashboard",
+                "Body",
+                None,
+                false,
+                false,
+            )
+            .await
+            .unwrap();
         assert_eq!(number, Some(42));
     }
 
@@ -5630,7 +6209,18 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let number = client.ensure_issue("owner", "repo", "Dependency Dashboard", "Body", None, false, false).await.unwrap();
+        let number = client
+            .ensure_issue(
+                "owner",
+                "repo",
+                "Dependency Dashboard",
+                "Body",
+                None,
+                false,
+                false,
+            )
+            .await
+            .unwrap();
         assert_eq!(number, None);
     }
 
@@ -5670,7 +6260,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let number = client.create_issue("owner", "repo", "Dependency Dashboard", "Body", None).await.unwrap();
+        let number = client
+            .create_issue("owner", "repo", "Dependency Dashboard", "Body", None)
+            .await
+            .unwrap();
         assert_eq!(number, 42);
     }
 
@@ -5692,7 +6285,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1234, "somebranch", None)
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5709,7 +6305,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1234, "somebranch", None)
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -5726,7 +6325,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1234, "somebranch", Some("merge-commit")).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1234, "somebranch", Some("merge-commit"))
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -5743,7 +6345,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1234, "somebranch", None)
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -5759,7 +6364,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1234, "somebranch", Some("rebase")).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1234, "somebranch", Some("rebase"))
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5775,7 +6383,10 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1234, "somebranch", Some("fast-forward")).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1234, "somebranch", Some("fast-forward"))
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5785,13 +6396,20 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let server = MockServer::start().await;
         Mock::given(method("PUT"))
             .and(path("/repos/owner/repo/pulls/1235/merge"))
-            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"squash"}"#))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})))
+            .and(wiremock::matchers::body_json_string(
+                r#"{"merge_method":"squash"}"#,
+            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})),
+            )
             .mount(&server)
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1235, "someref", None).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1235, "someref", None)
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5801,19 +6419,31 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let server = MockServer::start().await;
         Mock::given(method("PUT"))
             .and(path("/repos/owner/repo/pulls/1236/merge"))
-            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"squash"}"#))
-            .respond_with(ResponseTemplate::new(400).set_body_json(serde_json::json!({"message": "no squashing allowed"})))
+            .and(wiremock::matchers::body_json_string(
+                r#"{"merge_method":"squash"}"#,
+            ))
+            .respond_with(
+                ResponseTemplate::new(400)
+                    .set_body_json(serde_json::json!({"message": "no squashing allowed"})),
+            )
             .mount(&server)
             .await;
         Mock::given(method("PUT"))
             .and(path("/repos/owner/repo/pulls/1236/merge"))
-            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"merge"}"#))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})))
+            .and(wiremock::matchers::body_json_string(
+                r#"{"merge_method":"merge"}"#,
+            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})),
+            )
             .mount(&server)
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1236, "someref", None).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1236, "someref", None)
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5823,25 +6453,42 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let server = MockServer::start().await;
         Mock::given(method("PUT"))
             .and(path("/repos/owner/repo/pulls/1237/merge"))
-            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"squash"}"#))
-            .respond_with(ResponseTemplate::new(405).set_body_json(serde_json::json!({"message": "no squashing allowed"})))
+            .and(wiremock::matchers::body_json_string(
+                r#"{"merge_method":"squash"}"#,
+            ))
+            .respond_with(
+                ResponseTemplate::new(405)
+                    .set_body_json(serde_json::json!({"message": "no squashing allowed"})),
+            )
             .mount(&server)
             .await;
         Mock::given(method("PUT"))
             .and(path("/repos/owner/repo/pulls/1237/merge"))
-            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"merge"}"#))
-            .respond_with(ResponseTemplate::new(405).set_body_json(serde_json::json!({"message": "no merging allowed"})))
+            .and(wiremock::matchers::body_json_string(
+                r#"{"merge_method":"merge"}"#,
+            ))
+            .respond_with(
+                ResponseTemplate::new(405)
+                    .set_body_json(serde_json::json!({"message": "no merging allowed"})),
+            )
             .mount(&server)
             .await;
         Mock::given(method("PUT"))
             .and(path("/repos/owner/repo/pulls/1237/merge"))
-            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"rebase"}"#))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})))
+            .and(wiremock::matchers::body_json_string(
+                r#"{"merge_method":"rebase"}"#,
+            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})),
+            )
             .mount(&server)
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1237, "someref", None).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1237, "someref", None)
+            .await
+            .unwrap();
         assert!(result);
     }
 
@@ -5851,12 +6498,18 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let server = MockServer::start().await;
         Mock::given(method("PUT"))
             .and(path("/repos/owner/repo/pulls/1238/merge"))
-            .respond_with(ResponseTemplate::new(405).set_body_json(serde_json::json!({"message": "not allowed"})))
+            .respond_with(
+                ResponseTemplate::new(405)
+                    .set_body_json(serde_json::json!({"message": "not allowed"})),
+            )
             .mount(&server)
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1238, "someref", None).await.unwrap();
+        let result = client
+            .merge_pr("owner", "repo", 1238, "someref", None)
+            .await
+            .unwrap();
         assert!(!result);
     }
 
@@ -5898,8 +6551,13 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let err = client.add_assignees("owner", "repo", 42, vec!["user".to_owned()]).await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY));
+        let err = client
+            .add_assignees("owner", "repo", 42, vec!["user".to_owned()])
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY)
+        );
     }
 
     // Ported: "returns null on REST error" — modules/platform/github/index.spec.ts line 5502
@@ -5914,6 +6572,8 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.get_file_list("owner", "repo").await.unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
     }
 }

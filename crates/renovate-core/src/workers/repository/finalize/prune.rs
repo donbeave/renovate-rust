@@ -58,10 +58,7 @@ mod tests {
     #[test]
     fn prune_stale_branches_with_stale() {
         let branches = vec!["renovate/pkg-1".to_owned()];
-        let renovate = vec![
-            "renovate/pkg-1".to_owned(),
-            "renovate/old-pkg".to_owned(),
-        ];
+        let renovate = vec!["renovate/pkg-1".to_owned(), "renovate/old-pkg".to_owned()];
         let result = prune_stale_branches(&branches, &renovate, "renovate/");
         assert_eq!(result.pruned_branches, vec!["renovate/old-pkg"]);
     }
@@ -69,10 +66,7 @@ mod tests {
     #[test]
     fn prune_stale_branches_filters_prefix() {
         let branches: Vec<String> = Vec::new();
-        let renovate = vec![
-            "renovate/pkg-1".to_owned(),
-            "feature/other".to_owned(),
-        ];
+        let renovate = vec!["renovate/pkg-1".to_owned(), "feature/other".to_owned()];
         let result = prune_stale_branches(&branches, &renovate, "renovate/");
         assert_eq!(result.pruned_branches, vec!["renovate/pkg-1"]);
     }

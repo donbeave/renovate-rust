@@ -44,6 +44,9 @@ mod tests {
 
     #[test]
     fn empty_urls_no_match() {
-        assert!(!match_registry_urls(&[], &["https://registry.npmjs.org".to_owned()]));
+        assert!(!match_registry_urls(
+            &[],
+            &["https://registry.npmjs.org".to_owned()]
+        ));
     }
 }

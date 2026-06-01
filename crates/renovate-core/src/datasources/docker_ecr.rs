@@ -11,10 +11,8 @@ use thiserror::Error;
 use crate::http::HttpClient;
 
 pub static ECR_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"\d+\.(?:dkr\.ecr|dkr-ecr)(?:-fips)?\.([-a-z0-9]+)\.(?:amazonaws\.com|on\.aws)",
-    )
-    .unwrap()
+    Regex::new(r"\d+\.(?:dkr\.ecr|dkr-ecr)(?:-fips)?\.([-a-z0-9]+)\.(?:amazonaws\.com|on\.aws)")
+        .unwrap()
 });
 
 pub static ECR_PUBLIC_REGEX: LazyLock<Regex> =
@@ -53,11 +51,10 @@ pub async fn get_ecr_auth_token(
     secret_access_key: Option<&str>,
 ) -> Result<EcrAuthToken, EcrError> {
     if let (Some("AWS"), Some(secret)) = (access_key_id, secret_access_key) {
-        let encoded =
-            base64::Engine::encode(&base64::engine::general_purpose::STANDARD, format!(
-                "AWS:{}",
-                secret
-            ));
+        let encoded = base64::Engine::encode(
+            &base64::engine::general_purpose::STANDARD,
+            format!("AWS:{}", secret),
+        );
         return Ok(EcrAuthToken {
             token: encoded,
             endpoint: None,

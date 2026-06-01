@@ -473,15 +473,17 @@ pub fn get_dependency_url(flavor: RegistryFlavor, raw_url: &str, package_name: &
         RegistryFlavor::Cloudsmith => {
             // Extract org and repo from path: /basic/$org/$repo/cargo/index.git
             // Upstream uses pathname.split('/') which includes a leading empty string.
-            let after_scheme = raw_url
-                .find("://")
-                .map(|i| &raw_url[i + 3..])
-                .unwrap_or("");
-            let path = after_scheme.find('/').map(|i| &after_scheme[i..]).unwrap_or("/");
+            let after_scheme = raw_url.find("://").map(|i| &raw_url[i + 3..]).unwrap_or("");
+            let path = after_scheme
+                .find('/')
+                .map(|i| &after_scheme[i..])
+                .unwrap_or("/");
             let tokens: Vec<&str> = path.split('/').collect();
             let org = tokens.get(2).unwrap_or(&"unknown");
             let repo = tokens.get(3).unwrap_or(&"unknown");
-            format!("https://cloudsmith.io/~{org}/repos/{repo}/packages/detail/cargo/{package_name}")
+            format!(
+                "https://cloudsmith.io/~{org}/repos/{repo}/packages/detail/cargo/{package_name}"
+            )
         }
         RegistryFlavor::Other => format!("{}/{package_name}", raw_url.trim_end_matches('/')),
     }
@@ -493,10 +495,7 @@ pub fn get_dependency_url(flavor: RegistryFlavor, raw_url: &str, package_name: &
 /// and `allow_custom` is `false`. Mirrors the check in
 /// `CrateDatasource.fetchRegistryInfo` from
 /// `lib/modules/datasource/crate/index.ts`.
-pub fn is_registry_allowed(
-    registry_url: &str,
-    allow_custom: bool,
-) -> bool {
+pub fn is_registry_allowed(registry_url: &str, allow_custom: bool) -> bool {
     if is_sparse_registry(registry_url) {
         return true;
     }
@@ -1203,7 +1202,9 @@ mod tests {
         assert!(is_sparse_registry("sparse+https://index.crates.io/"));
         assert!(is_sparse_registry("sparse+http://example.com/"));
         assert!(!is_sparse_registry("https://index.crates.io/"));
-        assert!(!is_sparse_registry("https://github.com/mcorbin/testregistry"));
+        assert!(!is_sparse_registry(
+            "https://github.com/mcorbin/testregistry"
+        ));
     }
 
     #[test]
@@ -1257,7 +1258,11 @@ mod tests {
     #[test]
     fn dependency_url_crates_io() {
         assert_eq!(
-            get_dependency_url(RegistryFlavor::CratesIo, "https://index.crates.io/", "serde"),
+            get_dependency_url(
+                RegistryFlavor::CratesIo,
+                "https://index.crates.io/",
+                "serde"
+            ),
             "https://crates.io/crates/serde"
         );
     }

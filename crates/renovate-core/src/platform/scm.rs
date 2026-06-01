@@ -62,25 +62,13 @@ pub fn should_use_platform_commit(platform_commit: &PlatformCommit, is_github_ap
 }
 
 pub trait Scm: Send + Sync {
-    fn branch_exists(
-        &self,
-        branch_name: &str,
-    ) -> impl Future<Output = bool> + Send;
+    fn branch_exists(&self, branch_name: &str) -> impl Future<Output = bool> + Send;
 
-    fn commit_and_push(
-        &self,
-        config: &CommitConfig,
-    ) -> impl Future<Output = ScmResult> + Send;
+    fn commit_and_push(&self, config: &CommitConfig) -> impl Future<Output = ScmResult> + Send;
 
-    fn delete_branch(
-        &self,
-        branch_name: &str,
-    ) -> impl Future<Output = ScmResult> + Send;
+    fn delete_branch(&self, branch_name: &str) -> impl Future<Output = ScmResult> + Send;
 
-    fn get_branch_commit(
-        &self,
-        branch_name: &str,
-    ) -> impl Future<Output = Option<String>> + Send;
+    fn get_branch_commit(&self, branch_name: &str) -> impl Future<Output = Option<String>> + Send;
 
     fn is_branch_behind_base(
         &self,
@@ -102,15 +90,9 @@ pub trait Scm: Send + Sync {
 
     fn get_file_list(&self) -> impl Future<Output = Vec<String>> + Send;
 
-    fn checkout_branch(
-        &self,
-        branch_name: &str,
-    ) -> impl Future<Output = ScmResult> + Send;
+    fn checkout_branch(&self, branch_name: &str) -> impl Future<Output = ScmResult> + Send;
 
-    fn merge_and_push(
-        &self,
-        branch_name: &str,
-    ) -> impl Future<Output = ScmResult> + Send;
+    fn merge_and_push(&self, branch_name: &str) -> impl Future<Output = ScmResult> + Send;
 }
 
 #[cfg(test)]
@@ -172,7 +154,10 @@ mod tests {
     // Ported: "platformCommit = disabled => delegate to git" — modules/platform/github/scm.spec.ts line 26
     #[test]
     fn platform_commit_disabled_uses_git() {
-        assert!(!should_use_platform_commit(&PlatformCommit::Disabled, false));
+        assert!(!should_use_platform_commit(
+            &PlatformCommit::Disabled,
+            false
+        ));
         assert!(!should_use_platform_commit(&PlatformCommit::Disabled, true));
     }
 

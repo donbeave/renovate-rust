@@ -23,11 +23,9 @@ pub fn parse_preset_content(content: Option<&str>, file_name: &str) -> Result<Va
         return Err(PRESET_DEP_NOT_FOUND.to_owned());
     }
     if file_name.ends_with(".json5") {
-        json5::from_str(trimmed)
-            .map_err(|e| format!("{PRESET_INVALID_JSON}: {e}"))
+        json5::from_str(trimmed).map_err(|e| format!("{PRESET_INVALID_JSON}: {e}"))
     } else {
-        serde_json::from_str(trimmed)
-            .map_err(|e| format!("{PRESET_INVALID_JSON}: {e}"))
+        serde_json::from_str(trimmed).map_err(|e| format!("{PRESET_INVALID_JSON}: {e}"))
     }
 }
 
@@ -54,9 +52,7 @@ pub fn build_preset_file_path(path_prefix: &str, file_name: &str) -> String {
 
 /// Normalize a preset reference string by stripping the source prefix.
 pub fn normalize_preset_reference(input: &str) -> String {
-    let prefixes = [
-        "github>", "gitlab>", "gitea>", "forgejo>", "local>", "npm>",
-    ];
+    let prefixes = ["github>", "gitlab>", "gitea>", "forgejo>", "local>", "npm>"];
     let mut result = input.to_owned();
     for prefix in prefixes {
         if result.starts_with(prefix) {
@@ -100,17 +96,26 @@ mod tests {
 
     #[test]
     fn ensure_trailing_slash_adds_slash() {
-        assert_eq!(ensure_trailing_slash("https://api.github.com"), "https://api.github.com/");
+        assert_eq!(
+            ensure_trailing_slash("https://api.github.com"),
+            "https://api.github.com/"
+        );
     }
 
     #[test]
     fn ensure_trailing_slash_keeps_existing() {
-        assert_eq!(ensure_trailing_slash("https://api.github.com/"), "https://api.github.com/");
+        assert_eq!(
+            ensure_trailing_slash("https://api.github.com/"),
+            "https://api.github.com/"
+        );
     }
 
     #[test]
     fn normalize_strips_prefix() {
-        assert_eq!(normalize_preset_reference("github>owner/repo"), "owner/repo");
+        assert_eq!(
+            normalize_preset_reference("github>owner/repo"),
+            "owner/repo"
+        );
         assert_eq!(normalize_preset_reference("npm>package"), "package");
     }
 

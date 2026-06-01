@@ -62,9 +62,7 @@ pub fn ensure_pr(config: &EnsurePrConfig) -> EnsurePrResult {
 
     let pr_creation = config.pr_creation.as_deref().unwrap_or("immediate");
 
-    if pr_creation == "status-success"
-        && config.branch_status.as_deref() != Some("green")
-    {
+    if pr_creation == "status-success" && config.branch_status.as_deref() != Some("green") {
         return EnsurePrResult {
             pr_result: PrResult::Blocked,
             pr_no: None,

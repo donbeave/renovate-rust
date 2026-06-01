@@ -38,38 +38,107 @@ static INTERNAL_PRESETS: LazyLock<BTreeMap<&str, PresetMap>> = LazyLock::new(|| 
 
 fn default_presets() -> PresetMap {
     let mut m = PresetMap::new();
-    m.insert("approveMajorUpdates", json!({"dependencyDashboardApproval": true, "matchUpdateTypes": ["major"]}));
-    m.insert("automergeDigest", json!({"automerge": true, "matchUpdateTypes": ["digest"]}));
-    m.insert("automergePatch", json!({"automerge": true, "matchUpdateTypes": ["patch"]}));
-    m.insert("automergeBranch", json!({"automerge": true, "automergeType": "branch"}));
-    m.insert("automergeMajor", json!({"automerge": true, "matchUpdateTypes": ["major"]}));
-    m.insert("automergeMinor", json!({"automerge": true, "matchUpdateTypes": ["minor"]}));
+    m.insert(
+        "approveMajorUpdates",
+        json!({"dependencyDashboardApproval": true, "matchUpdateTypes": ["major"]}),
+    );
+    m.insert(
+        "automergeDigest",
+        json!({"automerge": true, "matchUpdateTypes": ["digest"]}),
+    );
+    m.insert(
+        "automergePatch",
+        json!({"automerge": true, "matchUpdateTypes": ["patch"]}),
+    );
+    m.insert(
+        "automergeBranch",
+        json!({"automerge": true, "automergeType": "branch"}),
+    );
+    m.insert(
+        "automergeMajor",
+        json!({"automerge": true, "matchUpdateTypes": ["major"]}),
+    );
+    m.insert(
+        "automergeMinor",
+        json!({"automerge": true, "matchUpdateTypes": ["minor"]}),
+    );
     m.insert("autodetectPinVersions", json!({}));
-    m.insert("automergeRequireAllStatusChecks", json!({"ignoreTests": false, "requiredStatusChecks": null}));
+    m.insert(
+        "automergeRequireAllStatusChecks",
+        json!({"ignoreTests": false, "requiredStatusChecks": null}),
+    );
     m.insert("dependencyDashboard", json!({"dependencyDashboard": true}));
-    m.insert("dependencyDashboardApproval", json!({"dependencyDashboardApproval": true}));
-    m.insert("disableDependencyDashboard", json!({"dependencyDashboard": false}));
-    m.insert("disableDevDependencies", json!({"matchDepTypes": ["devDependencies"], "enabled": false}));
-    m.insert("disableDigestUpdates", json!({"matchUpdateTypes": ["digest"], "enabled": false}));
-    m.insert("disableMajorUpdates", json!({"matchUpdateTypes": ["major"], "enabled": false}));
-    m.insert("disablePeerDependencies", json!({"matchDepTypes": ["peerDependencies"], "enabled": false}));
+    m.insert(
+        "dependencyDashboardApproval",
+        json!({"dependencyDashboardApproval": true}),
+    );
+    m.insert(
+        "disableDependencyDashboard",
+        json!({"dependencyDashboard": false}),
+    );
+    m.insert(
+        "disableDevDependencies",
+        json!({"matchDepTypes": ["devDependencies"], "enabled": false}),
+    );
+    m.insert(
+        "disableDigestUpdates",
+        json!({"matchUpdateTypes": ["digest"], "enabled": false}),
+    );
+    m.insert(
+        "disableMajorUpdates",
+        json!({"matchUpdateTypes": ["major"], "enabled": false}),
+    );
+    m.insert(
+        "disablePeerDependencies",
+        json!({"matchDepTypes": ["peerDependencies"], "enabled": false}),
+    );
     m.insert("disablePrControls", json!({"dependencyDashboardApproval": false, "dependencyDashboardAutoClose": false, "prCreation": "immediate"}));
     m.insert("doNotPinPackage", json!({}));
     m.insert("enablePreCommit", json!({"customManagers": [{"customType": "regex", "managerFilePatterns": ["/(^|/)\\.pre-commit-config\\.yaml$/"], "matchStrings": ["  - repo: (?<repo>https?://[^\\s]+)\\n    rev: (?<currentValue>[^\\s]+)"], "datasourceTemplate": "git-tags", "depNameTemplate": "{{{repo}}}"}]}));
     m.insert("enableRenovate", json!({"enabled": true}));
-    m.insert("enableVulnerabilityAlerts", json!({"vulnerabilityAlerts": {"enabled": true}}));
-    m.insert("gitSignOff", json!({"commitBody": "Signed-off-by: {{{gitAuthor}}}"}));
+    m.insert(
+        "enableVulnerabilityAlerts",
+        json!({"vulnerabilityAlerts": {"enabled": true}}),
+    );
+    m.insert(
+        "gitSignOff",
+        json!({"commitBody": "Signed-off-by: {{{gitAuthor}}}"}),
+    );
     m.insert("ignoreModulesAndTests", json!({"ignorePaths": ["**/node_modules/**", "**/bower_components/**", "**/test/**", "**/tests/**", "**/__tests__/**", "**/spec/**", "**/fixtures/**"]}));
-    m.insert("labelMajorUpdates", json!({"matchUpdateTypes": ["major"], "labels": ["type: major"]}));
-    m.insert("labelMinorUpdates", json!({"matchUpdateTypes": ["minor"], "labels": ["type: minor"]}));
-    m.insert("labelPatchUpdates", json!({"matchUpdateTypes": ["patch"], "labels": ["type: patch"]}));
-    m.insert("labelPinDigests", json!({"matchUpdateTypes": ["pinDigest"], "labels": ["type: pin"]}));
-    m.insert("labelDigestUpdates", json!({"matchUpdateTypes": ["digest"], "labels": ["type: digest"]}));
-    m.insert("maintainLockFilesDisabled", json!({"lockFileMaintenance": {"enabled": false}}));
-    m.insert("maintainLockFilesWeekly", json!({"lockFileMaintenance": {"enabled": true, "schedule": ["before 5am on monday"]}}));
+    m.insert(
+        "labelMajorUpdates",
+        json!({"matchUpdateTypes": ["major"], "labels": ["type: major"]}),
+    );
+    m.insert(
+        "labelMinorUpdates",
+        json!({"matchUpdateTypes": ["minor"], "labels": ["type: minor"]}),
+    );
+    m.insert(
+        "labelPatchUpdates",
+        json!({"matchUpdateTypes": ["patch"], "labels": ["type: patch"]}),
+    );
+    m.insert(
+        "labelPinDigests",
+        json!({"matchUpdateTypes": ["pinDigest"], "labels": ["type: pin"]}),
+    );
+    m.insert(
+        "labelDigestUpdates",
+        json!({"matchUpdateTypes": ["digest"], "labels": ["type: digest"]}),
+    );
+    m.insert(
+        "maintainLockFilesDisabled",
+        json!({"lockFileMaintenance": {"enabled": false}}),
+    );
+    m.insert(
+        "maintainLockFilesWeekly",
+        json!({"lockFileMaintenance": {"enabled": true, "schedule": ["before 5am on monday"]}}),
+    );
     m.insert("noSchedule", json!({"schedule": []}));
     m.insert("pinDigests", json!({"pinDigests": true}));
-    m.insert("pinDependencies", json!({"matchUpdateTypes": ["pin"], "recreateWhen": "always"}));
+    m.insert(
+        "pinDependencies",
+        json!({"matchUpdateTypes": ["pin"], "recreateWhen": "always"}),
+    );
     m.insert("pinOnlyDevDependencies", json!({"matchDepTypes": ["devDependencies"], "rangeStrategy": "pin", "matchUpdateTypes": ["pin"]}));
     m.insert("pinSkipCi", json!({"matchUpdateTypes": ["pin"], "semanticCommitScope": "", "semanticCommitType": "chore"}));
     m.insert("pinVersions", json!({"rangeStrategy": "pin"}));
@@ -81,25 +150,49 @@ fn default_presets() -> PresetMap {
     m.insert("prImmediately", json!({"prCreation": "immediate"}));
     m.insert("prNotPending", json!({"prCreation": "not-pending"}));
     m.insert("semanticCommits", json!({"semanticCommits": "enabled"}));
-    m.insert("semanticCommitsDisabled", json!({"semanticCommits": "disabled"}));
+    m.insert(
+        "semanticCommitsDisabled",
+        json!({"semanticCommits": "disabled"}),
+    );
     m.insert("semanticCommitScope(deprecated)", json!({}));
-    m.insert("semanticCommitTypeAll(chore)", json!({"semanticCommitType": "chore"}));
-    m.insert("semanticPrefixChore", json!({"semanticCommitType": "chore", "semanticCommitScope": ""}));
-    m.insert("semanticPrefixFix", json!({"semanticCommitType": "fix", "semanticCommitScope": ""}));
+    m.insert(
+        "semanticCommitTypeAll(chore)",
+        json!({"semanticCommitType": "chore"}),
+    );
+    m.insert(
+        "semanticPrefixChore",
+        json!({"semanticCommitType": "chore", "semanticCommitScope": ""}),
+    );
+    m.insert(
+        "semanticPrefixFix",
+        json!({"semanticCommitType": "fix", "semanticCommitScope": ""}),
+    );
     m.insert("separateMajorReleases", json!({"separateMajorMinor": true}));
-    m.insert("separateMultipleMajorReleases", json!({"separateMultipleMajor": true}));
+    m.insert(
+        "separateMultipleMajorReleases",
+        json!({"separateMultipleMajor": true}),
+    );
     m.insert("separatePatchReleases", json!({"separateMinorPatch": true}));
     m.insert("skipArtifactsUpdate", json!({"skipArtifactsUpdate": true}));
     m.insert("timezone", json!({}));
     m.insert("updateNotScheduled", json!({"updateNotScheduled": true}));
-    m.insert("widenPeerDependencies", json!({"rangeStrategy": "widen", "matchDepTypes": ["peerDependencies"]}));
+    m.insert(
+        "widenPeerDependencies",
+        json!({"rangeStrategy": "widen", "matchDepTypes": ["peerDependencies"]}),
+    );
     m
 }
 
 fn config_presets() -> PresetMap {
     let mut m = PresetMap::new();
-    m.insert("js-app", json!({"extends": ["config:recommended", ":pinDependencies", "group:allNonMajor"]}));
-    m.insert("js-lib", json!({"extends": ["config:recommended", "group:allNonMajor"]}));
+    m.insert(
+        "js-app",
+        json!({"extends": ["config:recommended", ":pinDependencies", "group:allNonMajor"]}),
+    );
+    m.insert(
+        "js-lib",
+        json!({"extends": ["config:recommended", "group:allNonMajor"]}),
+    );
     m.insert("recommended", json!({"extends": [":approveMajorUpdates", ":dependencyDashboard", ":semanticCommits", ":ignoreModulesAndTests", ":autodetectPinVersions", ":prImmediately", ":maintainLockFilesWeekly"]}));
     m.insert("semverAllMonthly", json!({"extends": ["config:recommended", ":automergeDigest", ":automergeBranch", "group:all", "schedule:monthly"]}));
     m.insert("semverAllWeekly", json!({"extends": ["config:recommended", ":automergeDigest", ":automergeBranch", "group:all", "schedule:weekly"]}));
@@ -109,7 +202,10 @@ fn config_presets() -> PresetMap {
 fn docker_presets() -> PresetMap {
     let mut m = PresetMap::new();
     m.insert("disable", json!({"docker": {"enabled": false}}));
-    m.insert("disableMajor", json!({"docker": {"major": {"enabled": false}}}));
+    m.insert(
+        "disableMajor",
+        json!({"docker": {"major": {"enabled": false}}}),
+    );
     m.insert("pinDigests", json!({"docker": {"pinDigests": true}}));
     m
 }
@@ -145,19 +241,34 @@ fn preview_presets() -> PresetMap {
 fn schedule_presets() -> PresetMap {
     let mut m = PresetMap::new();
     m.insert("daily", json!({"schedule": ["every day"]}));
-    m.insert("earlyMondays", json!({"schedule": ["before 3am on Monday"]}));
+    m.insert(
+        "earlyMondays",
+        json!({"schedule": ["before 3am on Monday"]}),
+    );
     m.insert("weekdays", json!({"schedule": ["every weekday"]}));
     m.insert("weekends", json!({"schedule": ["every weekend"]}));
     m.insert("weekly", json!({"schedule": ["before 5am on Monday"]}));
-    m.insert("monthly", json!({"schedule": ["before 5am on the first day of the month"]}));
-    m.insert("quarterly", json!({"schedule": ["every 3 months on the first day of the month"]}));
-    m.insert("yearly", json!({"schedule": ["every 12 months on the first day of the month"]}));
+    m.insert(
+        "monthly",
+        json!({"schedule": ["before 5am on the first day of the month"]}),
+    );
+    m.insert(
+        "quarterly",
+        json!({"schedule": ["every 3 months on the first day of the month"]}),
+    );
+    m.insert(
+        "yearly",
+        json!({"schedule": ["every 12 months on the first day of the month"]}),
+    );
     m
 }
 
 fn security_presets() -> PresetMap {
     let mut m = PresetMap::new();
-    m.insert("minimumReleaseAgeNpm", json!({"packageRules": [{"matchDatasources": ["npm"], "minimumReleaseAge": "3 days"}]}));
+    m.insert(
+        "minimumReleaseAgeNpm",
+        json!({"packageRules": [{"matchDatasources": ["npm"], "minimumReleaseAge": "3 days"}]}),
+    );
     m
 }
 
@@ -189,7 +300,10 @@ fn global_presets() -> PresetMap {
 
 /// Get a built-in preset by group and name.
 pub fn get_internal_preset(group: &str, name: &str) -> Option<Value> {
-    INTERNAL_PRESETS.get(group).and_then(|m| m.get(name)).cloned()
+    INTERNAL_PRESETS
+        .get(group)
+        .and_then(|m| m.get(name))
+        .cloned()
 }
 
 /// List all available internal preset names.

@@ -55,7 +55,10 @@ mod tests {
     fn set_then_get_returns_value() {
         let mut cache = RepositoryCache::new();
         set_repo_cache(&mut cache, "key", serde_json::json!("value"));
-        assert_eq!(get_repo_cache(&cache, "key"), Some(serde_json::json!("value")));
+        assert_eq!(
+            get_repo_cache(&cache, "key"),
+            Some(serde_json::json!("value"))
+        );
     }
 
     #[test]

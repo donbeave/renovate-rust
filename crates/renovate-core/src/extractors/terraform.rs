@@ -2952,6 +2952,9 @@ provider "registry.opentofu.org/carlpett/sops" {
     fn terraform_dep_type_as_renovate_str() {
         assert_eq!(TerraformDepType::Provider.as_renovate_str(), "provider");
         assert_eq!(TerraformDepType::Module.as_renovate_str(), "module");
-        assert_eq!(TerraformDepType::TfeWorkspace.as_renovate_str(), "tfe_workspace");
+        assert_eq!(
+            TerraformDepType::TfeWorkspace.as_renovate_str(),
+            "tfe_workspace"
+        );
     }
 }

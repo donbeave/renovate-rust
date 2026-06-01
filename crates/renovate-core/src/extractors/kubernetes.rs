@@ -617,7 +617,10 @@ spec:
 "#;
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
-        assert_eq!(deps[0].image_name, "quay.io/external_storage/local-volume-provisioner");
+        assert_eq!(
+            deps[0].image_name,
+            "quay.io/external_storage/local-volume-provisioner"
+        );
         assert_eq!(deps[0].current_value, "v2.1.0");
         assert!(deps[0].skip_reason.is_none());
     }

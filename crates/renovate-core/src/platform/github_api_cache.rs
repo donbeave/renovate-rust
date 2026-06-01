@@ -141,7 +141,12 @@ impl GithubIssueCache {
 
     /// Load issues from a serde_json Value (repo cache).
     pub fn load_from(&mut self, cache: &serde_json::Value) {
-        if let Some(map) = cache.get("platform").and_then(|p| p.get("github")).and_then(|g| g.get("issuesCache")).and_then(|c| c.as_object()) {
+        if let Some(map) = cache
+            .get("platform")
+            .and_then(|p| p.get("github"))
+            .and_then(|g| g.get("issuesCache"))
+            .and_then(|c| c.as_object())
+        {
             for (key, val) in map {
                 if let Ok(issue) = serde_json::from_value::<GithubIssue>(val.clone()) {
                     self.issues.insert(issue.number, issue);
@@ -158,7 +163,10 @@ impl GithubIssueCache {
     pub fn save_to(&self) -> serde_json::Value {
         let mut map = serde_json::Map::new();
         for (num, issue) in &self.issues {
-            map.insert(num.to_string(), serde_json::to_value(issue).unwrap_or(serde_json::Value::Null));
+            map.insert(
+                num.to_string(),
+                serde_json::to_value(issue).unwrap_or(serde_json::Value::Null),
+            );
         }
         serde_json::json!({
             "platform": {
@@ -211,7 +219,8 @@ impl GithubIssueCache {
         for issue in &queue {
             let cached = self.issues.get(&issue.number);
             if let Some(cached) = cached
-                && cached.number == issue.number && cached.last_modified == issue.last_modified
+                && cached.number == issue.number
+                && cached.last_modified == issue.last_modified
             {
                 is_reconciled = true;
                 break;
@@ -513,10 +522,20 @@ mod tests {
     #[test]
     fn issue_cache_updates_issue() {
         let mut cache = GithubIssueCache::new();
-        cache.set_issues(vec![
-            gh_issue(1, "open", "title-1", "body-1", "2020-01-01T00:00:00.000Z"),
-        ]);
-        cache.update_issue(gh_issue(1, "closed", "new-title-1", "new-body-1", "2020-01-02T00:00:00.000Z"));
+        cache.set_issues(vec![gh_issue(
+            1,
+            "open",
+            "title-1",
+            "body-1",
+            "2020-01-01T00:00:00.000Z",
+        )]);
+        cache.update_issue(gh_issue(
+            1,
+            "closed",
+            "new-title-1",
+            "new-body-1",
+            "2020-01-02T00:00:00.000Z",
+        ));
         let issues = cache.get_issues().unwrap();
         assert_eq!(issues.len(), 1);
         assert_eq!(issues[0].state, "closed");
@@ -527,9 +546,13 @@ mod tests {
     #[test]
     fn issue_cache_deletes_issue() {
         let mut cache = GithubIssueCache::new();
-        cache.set_issues(vec![
-            gh_issue(1, "open", "title-1", "body-1", "2020-01-01T00:00:00.000Z"),
-        ]);
+        cache.set_issues(vec![gh_issue(
+            1,
+            "open",
+            "title-1",
+            "body-1",
+            "2020-01-01T00:00:00.000Z",
+        )]);
         cache.delete_issue(1);
         assert!(cache.get_issues().is_none());
     }
@@ -543,7 +566,13 @@ mod tests {
             gh_issue(2, "closed", "title-2", "body-2", "2020-01-02T00:00:00.000Z"),
         ]);
         cache.add_issues_to_reconcile(vec![
-            gh_issue(1, "open", "new-title-1", "new-body-1", "2020-01-04T00:00:00.000Z"),
+            gh_issue(
+                1,
+                "open",
+                "new-title-1",
+                "new-body-1",
+                "2020-01-04T00:00:00.000Z",
+            ),
             gh_issue(2, "closed", "title-2", "body-2", "2020-01-02T00:00:00.000Z"),
         ]);
         cache.reconcile();

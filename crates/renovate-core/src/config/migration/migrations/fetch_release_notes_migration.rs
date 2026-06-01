@@ -52,8 +52,8 @@ impl Migration for FetchReleaseNotesMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::FetchReleaseNotesMigration;
     use crate::config::migration::Migration;
@@ -68,7 +68,12 @@ mod tests {
     fn migrate_false_to_off() {
         let m = FetchReleaseNotesMigration::new();
         let mut migrated = Map::new();
-        m.run("fetchReleaseNotes", &json!(false), &Map::new(), &mut migrated);
+        m.run(
+            "fetchReleaseNotes",
+            &json!(false),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["fetchChangeLogs"], json!("off"));
     }
 
@@ -76,7 +81,12 @@ mod tests {
     fn migrate_true_to_pr() {
         let m = FetchReleaseNotesMigration::new();
         let mut migrated = Map::new();
-        m.run("fetchReleaseNotes", &json!(true), &Map::new(), &mut migrated);
+        m.run(
+            "fetchReleaseNotes",
+            &json!(true),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["fetchChangeLogs"], json!("pr"));
     }
 
@@ -84,7 +94,12 @@ mod tests {
     fn leaves_string_unchanged() {
         let m = FetchReleaseNotesMigration::new();
         let mut migrated = Map::new();
-        m.run("fetchReleaseNotes", &json!("branch"), &Map::new(), &mut migrated);
+        m.run(
+            "fetchReleaseNotes",
+            &json!("branch"),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["fetchChangeLogs"], json!("branch"));
     }
 
@@ -93,7 +108,12 @@ mod tests {
         let m = FetchReleaseNotesMigration::new();
         let mut migrated = Map::new();
         migrated.insert("fetchChangeLogs".into(), json!("off"));
-        m.run("fetchReleaseNotes", &json!(true), &Map::new(), &mut migrated);
+        m.run(
+            "fetchReleaseNotes",
+            &json!(true),
+            &Map::new(),
+            &mut migrated,
+        );
         assert_eq!(migrated["fetchChangeLogs"], json!("off"));
     }
 }

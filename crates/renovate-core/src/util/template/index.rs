@@ -127,10 +127,7 @@ mod tests {
         let ctx = HashMap::new();
         let mut env = HashMap::new();
         env.insert("HOME".to_owned(), "/home/user".to_owned());
-        assert_eq!(
-            compile_with_env("{{HOME}}", &ctx, &env),
-            "/home/user"
-        );
+        assert_eq!(compile_with_env("{{HOME}}", &ctx, &env), "/home/user");
     }
 
     #[test]

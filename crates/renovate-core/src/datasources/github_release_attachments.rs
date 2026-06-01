@@ -218,10 +218,7 @@ mod tests {
         assert_eq!(result.assets[0].size, 1024);
         assert_eq!(result.assets[1].name, "checksums.txt");
         assert_eq!(result.assets[1].download_count, 42);
-        assert_eq!(
-            result.published_at.as_deref(),
-            Some("2024-01-15T10:00:00Z")
-        );
+        assert_eq!(result.published_at.as_deref(), Some("2024-01-15T10:00:00Z"));
     }
 
     #[tokio::test]
@@ -259,10 +256,7 @@ mod tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/repos/owner/repo/releases/tags/v2.0.0"))
-            .respond_with(ResponseTemplate::new(200).set_body_string(release_json(
-                "v2.0.0",
-                &[],
-            )))
+            .respond_with(ResponseTemplate::new(200).set_body_string(release_json("v2.0.0", &[])))
             .mount(&server)
             .await;
 

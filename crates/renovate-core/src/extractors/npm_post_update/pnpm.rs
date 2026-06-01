@@ -72,14 +72,20 @@ pub fn build_pnpm_install_cmd(
     cmd
 }
 
-pub fn build_pnpm_store_env(pnpm_version: Option<&str>) -> std::collections::BTreeMap<String, String> {
+pub fn build_pnpm_store_env(
+    pnpm_version: Option<&str>,
+) -> std::collections::BTreeMap<String, String> {
     let mut env = std::collections::BTreeMap::new();
     if let Some(ver) = pnpm_version {
         let major: Option<u32> = ver.split('.').next().and_then(|v| v.parse().ok());
         if let Some(m) = major
-            && (5..=11).contains(&m) {
-                env.insert("PNPM_HOME".to_owned(), format!("/home/user/.local/share/pnpm/pnpm-v{}", m));
-            }
+            && (5..=11).contains(&m)
+        {
+            env.insert(
+                "PNPM_HOME".to_owned(),
+                format!("/home/user/.local/share/pnpm/pnpm-v{}", m),
+            );
+        }
     }
     env
 }
@@ -90,25 +96,19 @@ pub fn detect_pnpm_workspace(has_workspace_yaml: bool) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::utils::get_node_options;
+    use super::*;
 
     // Ported: "maps supported versions for v9" — modules/manager/npm/post-update/pnpm.spec.ts line 990
     #[test]
     fn get_constraint_from_lock_file_v9() {
-        assert_eq!(
-            get_constraint_from_lock_file(9.0),
-            Some(">=9".to_owned())
-        );
+        assert_eq!(get_constraint_from_lock_file(9.0), Some(">=9".to_owned()));
     }
 
     // Ported: "maps supported versions for v6" — modules/manager/npm/post-update/pnpm.spec.ts line 980
     #[test]
     fn get_constraint_from_lock_file_v6() {
-        assert_eq!(
-            get_constraint_from_lock_file(6.0),
-            Some(">=8.6".to_owned())
-        );
+        assert_eq!(get_constraint_from_lock_file(6.0), Some(">=8.6".to_owned()));
     }
 
     // Ported: "returns null if lockfileVersion is not a number or numeric string" — modules/manager/npm/post-update/pnpm.spec.ts line 963
@@ -134,19 +134,13 @@ mod tests {
     // Ported: "uses constraint version if parent json has constraints" — modules/manager/npm/post-update/pnpm.spec.ts line 341
     #[test]
     fn get_pnpm_constraint_from_upgrades_not_found() {
-        assert_eq!(
-            get_pnpm_constraint_from_upgrades(&[]),
-            None
-        );
+        assert_eq!(get_pnpm_constraint_from_upgrades(&[]), None);
     }
 
     // Ported: "uses packageManager version and puts it into constraint" — modules/manager/npm/post-update/pnpm.spec.ts line 385
     #[test]
     fn pnpm_constraint_from_pkg_json() {
-        let pj = PackageJson::parse(
-            r#"{"packageManager": "pnpm@9.0.0"}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"packageManager": "pnpm@9.0.0"}"#).unwrap();
         assert_eq!(
             get_pnpm_constraint_from_package_json(&pj),
             Some("9.0.0".to_owned())
@@ -207,10 +201,7 @@ mod tests {
     // Ported: "uses volta version and puts it into constraint" — modules/manager/npm/post-update/pnpm.spec.ts line 429
     #[test]
     fn pnpm_constraint_from_pkg_json_volta() {
-        let pj = PackageJson::parse(
-            r#"{"volta": {"pnpm": "8.15.0"}}"#,
-        )
-        .unwrap();
+        let pj = PackageJson::parse(r#"{"volta": {"pnpm": "8.15.0"}}"#).unwrap();
         assert_eq!(
             get_pnpm_constraint_from_package_json(&pj),
             Some("8.15.0".to_owned())
@@ -226,19 +217,13 @@ mod tests {
     // Ported: "generates lock files" — modules/manager/npm/post-update/pnpm.spec.ts line 55
     #[test]
     fn get_constraint_from_lock_file_v51() {
-        assert_eq!(
-            get_constraint_from_lock_file(5.1),
-            Some(">=8.0".to_owned())
-        );
+        assert_eq!(get_constraint_from_lock_file(5.1), Some(">=8.0".to_owned()));
     }
 
     // Ported: "catches errors" — modules/manager/npm/post-update/pnpm.spec.ts line 69
     #[test]
     fn get_constraint_from_lock_file_invalid_string() {
-        assert_eq!(
-            get_constraint_from_lock_file(5.0),
-            None
-        );
+        assert_eq!(get_constraint_from_lock_file(5.0), None);
     }
 
     // Ported: "finds pnpm globally" — modules/manager/npm/post-update/pnpm.spec.ts line 86
@@ -313,10 +298,7 @@ mod tests {
     // Ported: "uses skips pnpm v7 if lockfileVersion indicates <7" — modules/manager/npm/post-update/pnpm.spec.ts line 486
     #[test]
     fn get_constraint_from_lock_file_v54() {
-        assert_eq!(
-            get_constraint_from_lock_file(5.4),
-            Some(">=8.3".to_owned())
-        );
+        assert_eq!(get_constraint_from_lock_file(5.4), Some(">=8.3".to_owned()));
     }
 
     // Ported: "returns null if no lock file" — modules/manager/npm/post-update/pnpm.spec.ts line 651
@@ -361,9 +343,6 @@ mod tests {
     // Ported: "maps supported versions" — modules/manager/npm/post-update/pnpm.spec.ts line 681
     #[test]
     fn get_constraint_from_lock_file_maps_supported() {
-        assert_eq!(
-            get_constraint_from_lock_file(5.3),
-            Some(">=8.2".to_owned())
-        );
+        assert_eq!(get_constraint_from_lock_file(5.3), Some(">=8.2".to_owned()));
     }
 }

@@ -31,7 +31,9 @@ pub fn replace_args(obj: &Value, arg_mapping: &BTreeMap<String, String>) -> Valu
             }
             Value::String(result)
         }
-        Value::Array(arr) => Value::Array(arr.iter().map(|v| replace_args(v, arg_mapping)).collect()),
+        Value::Array(arr) => {
+            Value::Array(arr.iter().map(|v| replace_args(v, arg_mapping)).collect())
+        }
         Value::Object(map) => Value::Object(
             map.iter()
                 .map(|(k, v)| (k.clone(), replace_args(v, arg_mapping)))
@@ -58,9 +60,17 @@ pub fn resolve_config_presets(
 
     let ignore = ignore_presets
         .map(|s| s.to_vec())
-        .or_else(|| input_config.get("ignorePresets").and_then(Value::as_array).map(|arr| {
-            arr.iter().filter_map(Value::as_str).map(str::to_owned).collect()
-        }))
+        .or_else(|| {
+            input_config
+                .get("ignorePresets")
+                .and_then(Value::as_array)
+                .map(|arr| {
+                    arr.iter()
+                        .filter_map(Value::as_str)
+                        .map(str::to_owned)
+                        .collect()
+                })
+        })
         .unwrap_or_default();
 
     let mut config = json!({});

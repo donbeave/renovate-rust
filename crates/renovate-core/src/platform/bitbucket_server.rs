@@ -20,10 +20,7 @@ pub struct BitbucketServerClient {
 }
 
 impl BitbucketServerClient {
-    pub fn new(
-        server_url: impl Into<String>,
-        token: impl Into<String>,
-    ) -> Result<Self, HttpError> {
+    pub fn new(server_url: impl Into<String>, token: impl Into<String>) -> Result<Self, HttpError> {
         Self::with_endpoint(server_url, token)
     }
 
@@ -38,7 +35,6 @@ impl BitbucketServerClient {
             api_base,
         })
     }
-
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -148,11 +144,7 @@ pub async fn create_pr(
     let request_json = serde_json::to_string(&request)
         .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
 
-    match client
-        .http
-        .post_json::<BbsPr>(&url, &request_json)
-        .await
-    {
+    match client.http.post_json::<BbsPr>(&url, &request_json).await {
         Ok(pr) => Ok(Some(pr.id)),
         Err(HttpError::Status { status, .. })
             if status == reqwest::StatusCode::CONFLICT
@@ -262,16 +254,12 @@ pub async fn get_pr(
         "{}/projects/{}/repos/{}/pull-requests/{}",
         client.api_base, project, repo, pr_id
     );
-    let pr: BbsPr = client
-        .http
-        .get_json(&url)
-        .await
-        .map_err(|e| match e {
-            HttpError::Status { status, .. } if status == reqwest::StatusCode::NOT_FOUND => {
-                PlatformError::Unexpected("PR not found".to_owned())
-            }
-            other => PlatformError::Http(other),
-        })?;
+    let pr: BbsPr = client.http.get_json(&url).await.map_err(|e| match e {
+        HttpError::Status { status, .. } if status == reqwest::StatusCode::NOT_FOUND => {
+            PlatformError::Unexpected("PR not found".to_owned())
+        }
+        other => PlatformError::Http(other),
+    })?;
     Ok(pr)
 }
 
@@ -340,11 +328,7 @@ impl PlatformClient for BitbucketServerClient {
         }))
     }
 
-    async fn get_file_list(
-        &self,
-        owner: &str,
-        repo: &str,
-    ) -> Result<Vec<String>, PlatformError> {
+    async fn get_file_list(&self, owner: &str, repo: &str) -> Result<Vec<String>, PlatformError> {
         let url = format!(
             "{}/projects/{}/repos/{}/files?limit=10000",
             self.api_base, owner, repo
@@ -540,7 +524,9 @@ mod tests {
     async fn list_prs_returns_values() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests"))
+            .and(path(
+                "/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "values": [
                     {"id": 1, "title": "PR 1"},
@@ -560,20 +546,26 @@ mod tests {
     async fn merge_pr_succeeds() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/3/merge"))
+            .and(path(
+                "/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/3/merge",
+            ))
             .respond_with(ResponseTemplate::new(200))
             .mount(&server)
             .await;
 
         let client = make_client(&server.uri());
-        merge_pr(&client, "PROJ", "myrepo", 3, Some(1)).await.unwrap();
+        merge_pr(&client, "PROJ", "myrepo", 3, Some(1))
+            .await
+            .unwrap();
     }
 
     #[tokio::test]
     async fn add_comment_returns_comment() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/1/comments"))
+            .and(path(
+                "/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/1/comments",
+            ))
             .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
                 "id": 42,
                 "version": 1,
@@ -594,7 +586,9 @@ mod tests {
     async fn get_pr_returns_pr() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/5"))
+            .and(path(
+                "/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/5",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "id": 5,
                 "title": "My PR",
@@ -613,7 +607,9 @@ mod tests {
     async fn get_pr_not_found() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/999"))
+            .and(path(
+                "/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/999",
+            ))
             .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
@@ -627,7 +623,9 @@ mod tests {
     async fn create_pr_error() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests"))
+            .and(path(
+                "/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests",
+            ))
             .respond_with(ResponseTemplate::new(500))
             .mount(&server)
             .await;
@@ -641,8 +639,12 @@ mod tests {
     async fn list_prs_empty() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"values": []})))
+            .and(path(
+                "/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests",
+            ))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({"values": []})),
+            )
             .mount(&server)
             .await;
 
@@ -655,7 +657,9 @@ mod tests {
     async fn merge_pr_error() {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
-            .and(path("/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/5/merge"))
+            .and(path(
+                "/rest/api/1.0/projects/PROJ/repos/myrepo/pull-requests/5/merge",
+            ))
             .respond_with(ResponseTemplate::new(409))
             .mount(&server)
             .await;

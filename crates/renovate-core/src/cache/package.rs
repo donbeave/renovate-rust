@@ -104,7 +104,8 @@ impl FilePackageCache {
             .map_err(|e| trace!(namespace, key, "cache parse error: {e}"))
             .ok()?;
 
-        let expiry_str = entry.expiry
+        let expiry_str = entry
+            .expiry
             .as_deref()
             .ok_or_else(|| trace!(namespace, key, "cache missing expiry"))
             .ok()?;
@@ -709,9 +710,12 @@ mod tests {
             value: Value::String("stale".into()),
             expiry: Some((Utc::now() - Duration::minutes(1)).to_rfc3339()),
         };
-        tokio::fs::write(&expired_path, serde_json::to_string(&expired_entry).unwrap())
-            .await
-            .unwrap();
+        tokio::fs::write(
+            &expired_path,
+            serde_json::to_string(&expired_entry).unwrap(),
+        )
+        .await
+        .unwrap();
 
         // Invalid JSON entry
         let bad_path = cache.entry_path("_test-namespace", "bad-json");
@@ -784,7 +788,11 @@ mod tests {
             .await;
 
         // Create a non-file entry (directory) that will cause an error during read
-        let ns_dir = cache.cache_dir.join("renovate").join("cache-v1").join("_test-namespace");
+        let ns_dir = cache
+            .cache_dir
+            .join("renovate")
+            .join("cache-v1")
+            .join("_test-namespace");
         tokio::fs::create_dir_all(&ns_dir).await.unwrap();
         let bad_path = ns_dir.join("not-a-file");
         tokio::fs::create_dir(&bad_path).await.unwrap();
@@ -1076,30 +1084,18 @@ mod tests {
         let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
 
         let cc1 = call_count.clone();
-        let r1: Option<String> = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            move || {
-                cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                async { Ok::<_, anyhow::Error>(None::<String>) }
-            },
-        )
+        let r1: Option<String> = with_cache(&cache, &cfg, opts.clone(), None, move || {
+            cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async { Ok::<_, anyhow::Error>(None::<String>) }
+        })
         .await
         .unwrap();
 
         let cc2 = call_count.clone();
-        let r2: Option<String> = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            move || {
-                cc2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                async { Ok::<_, anyhow::Error>(Some("second".to_owned())) }
-            },
-        )
+        let r2: Option<String> = with_cache(&cache, &cfg, opts.clone(), None, move || {
+            cc2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async { Ok::<_, anyhow::Error>(Some("second".to_owned())) }
+        })
         .await
         .unwrap();
 

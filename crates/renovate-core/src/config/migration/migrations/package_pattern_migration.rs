@@ -46,8 +46,8 @@ impl Migration for PackagePatternMigration {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
     use serde_json::Map;
+    use serde_json::json;
 
     use super::PackagePatternMigration;
     use crate::config::migration::Migration;

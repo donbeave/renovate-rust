@@ -159,8 +159,14 @@ mod tests {
 
     #[test]
     fn changelog_error_variants() {
-        assert_ne!(ChangeLogError::MissingBitbucketToken, ChangeLogError::MissingGithubToken);
-        assert_ne!(ChangeLogError::MissingGitlabToken, ChangeLogError::MissingGithubToken);
+        assert_ne!(
+            ChangeLogError::MissingBitbucketToken,
+            ChangeLogError::MissingGithubToken
+        );
+        assert_ne!(
+            ChangeLogError::MissingGitlabToken,
+            ChangeLogError::MissingGithubToken
+        );
     }
 
     #[test]

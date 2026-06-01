@@ -98,8 +98,16 @@ pub async fn fetch_versions(
 
     let mut images = result.images;
     images.sort_by(|a, b| {
-        let ts_a = a.creation_date.as_deref().and_then(|s| s.parse::<f64>().ok()).unwrap_or(0.0);
-        let ts_b = b.creation_date.as_deref().and_then(|s| s.parse::<f64>().ok()).unwrap_or(0.0);
+        let ts_a = a
+            .creation_date
+            .as_deref()
+            .and_then(|s| s.parse::<f64>().ok())
+            .unwrap_or(0.0);
+        let ts_b = b
+            .creation_date
+            .as_deref()
+            .and_then(|s| s.parse::<f64>().ok())
+            .unwrap_or(0.0);
         ts_a.partial_cmp(&ts_b).unwrap_or(std::cmp::Ordering::Equal)
     });
 
@@ -139,7 +147,11 @@ pub fn load_config(serialized: &str) -> Result<AwsMachineImageConfig, serde_json
     for elem in parsed {
         if let Some(obj) = elem.as_object() {
             if obj.contains_key("Name") && obj.contains_key("Values") {
-                let name = obj.get("Name").and_then(|v| v.as_str()).unwrap_or("").to_owned();
+                let name = obj
+                    .get("Name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_owned();
                 let values = obj
                     .get("Values")
                     .and_then(|v| v.as_array())

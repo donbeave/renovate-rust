@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use crate::workers::repository::common::PackageFile;
 use crate::workers::repository::process::fetch::fetch_updates;
 use crate::workers::repository::process::sort::sort_branches;
-use crate::workers::repository::process::write::{update_repo, WriteUpdateResult};
+use crate::workers::repository::process::write::{WriteUpdateResult, update_repo};
 use crate::workers::repository::update::branch::types::BranchConfig;
 use crate::workers::types::RenovateConfig;
 
@@ -100,10 +100,7 @@ pub fn lookup(
     }
 }
 
-pub fn update(
-    config: &RenovateConfig,
-    branches: &mut [BranchConfig],
-) -> Option<WriteUpdateResult> {
+pub fn update(config: &RenovateConfig, branches: &mut [BranchConfig]) -> Option<WriteUpdateResult> {
     update_repo(config, branches)
 }
 

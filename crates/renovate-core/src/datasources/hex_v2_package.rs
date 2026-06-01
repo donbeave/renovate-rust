@@ -78,7 +78,10 @@ pub async fn fetch_hex_package(
         }));
     }
 
-    let bytes = resp.bytes().await.map_err(crate::http::HttpError::Request)?;
+    let bytes = resp
+        .bytes()
+        .await
+        .map_err(crate::http::HttpError::Request)?;
     let package = decode_hex_package(&bytes)?;
 
     let releases: Vec<Release> = package

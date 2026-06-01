@@ -184,7 +184,10 @@ mod tests {
         assert_eq!(UpdateType::Bump.as_str(), "bump");
         assert_eq!(UpdateType::Replace.as_str(), "replace");
         assert_eq!(UpdateType::PinDigest.as_str(), "pinDigest");
-        assert_eq!(UpdateType::LockFileMaintenance.as_str(), "lockFileMaintenance");
+        assert_eq!(
+            UpdateType::LockFileMaintenance.as_str(),
+            "lockFileMaintenance"
+        );
         assert_eq!(UpdateType::LockfileUpdate.as_str(), "lockfileUpdate");
         assert_eq!(UpdateType::Rollback.as_str(), "rollback");
         assert_eq!(UpdateType::Replacement.as_str(), "replacement");
@@ -291,13 +294,11 @@ mod tests {
     fn update_result_with_updates() {
         let r = UpdateResult {
             current_version: Some("1.0.0".into()),
-            updates: vec![
-                LookupUpdate {
-                    new_value: Some("2.0.0".into()),
-                    update_type: Some(UpdateType::Major),
-                    ..Default::default()
-                },
-            ],
+            updates: vec![LookupUpdate {
+                new_value: Some("2.0.0".into()),
+                update_type: Some(UpdateType::Major),
+                ..Default::default()
+            }],
             ..Default::default()
         };
         assert_eq!(r.updates.len(), 1);
