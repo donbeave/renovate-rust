@@ -853,7 +853,35 @@ pub fn find_version_in_csproj(content: &str) -> Option<String> {
 pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
     let mut reader = Reader::from_reader(BufReader::new(content.as_bytes()));
     let mut buf = Vec::new();
-    let mut registries: Vec<NuGetRegistry> = Vec::new();
+
+    // Check if packageSources exists; if not, return empty (mirrors upstream returning undefined)
+    let mut has_package_sources = false;
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) | Ok(Event::Empty(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if name == "packageSources" {
+                    has_package_sources = true;
+                    break;
+                }
+            }
+            Ok(Event::Eof) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+    if !has_package_sources {
+        return Vec::new();
+    }
+
+    // Parse source mapping, disabled sources, and registry adds in a single pass
+    let mut reader = Reader::from_reader(BufReader::new(content.as_bytes()));
+    let mut buf = Vec::new();
+    let mut registries: Vec<NuGetRegistry> = vec![NuGetRegistry {
+        name: Some("nuget.org".to_owned()),
+        url: "https://api.nuget.org/v3/index.json".to_owned(),
+        source_mapped_package_patterns: None,
+    }];
     let mut disabled_sources: std::collections::HashSet<String> = std::collections::HashSet::new();
     let mut in_package_sources = false;
     let mut in_disabled_sources = false;
@@ -863,12 +891,81 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
 
     loop {
         match reader.read_event_into(&mut buf) {
-            Ok(Event::Start(e)) => {
+            Ok(Event::Start(e)) | Ok(Event::Empty(e)) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
                 match name.as_str() {
                     "packageSources" => in_package_sources = true,
                     "disabledPackageSources" => in_disabled_sources = true,
                     "packageSourceMapping" => in_package_source_mapping = true,
+                    "clear" => {
+                        if in_package_sources {
+                            registries.clear();
+                        }
+                    }
+                    "add" => {
+                        if in_package_sources {
+                            let mut key = String::new();
+                            let mut value = String::new();
+                            let mut protocol_version = String::new();
+                            for attr in e.attributes() {
+                                if let Ok(a) = attr {
+                                    let attr_name = String::from_utf8_lossy(a.key.as_ref()).into_owned();
+                                    if let Ok(val) = a.unescape_value() {
+                                        match attr_name.as_str() {
+                                            "key" => key = val.into_owned(),
+                                            "value" => value = val.into_owned(),
+                                            "protocolVersion" => protocol_version = val.into_owned(),
+                                            _ => {}
+                                        }
+                                    }
+                                }
+                            }
+                            if value.starts_with("http://") || value.starts_with("https://") {
+                                let mut url = value;
+                                if !protocol_version.is_empty() {
+                                    url = format!("{}#protocolVersion={}", url, protocol_version);
+                                }
+                                let patterns = source_mapping.get(&key).cloned();
+                                registries.push(NuGetRegistry {
+                                    name: Some(key),
+                                    url,
+                                    source_mapped_package_patterns: patterns,
+                                });
+                            }
+                        }
+                        if in_disabled_sources {
+                            let mut key = String::new();
+                            let mut value = String::new();
+                            for attr in e.attributes() {
+                                if let Ok(a) = attr {
+                                    let attr_name = String::from_utf8_lossy(a.key.as_ref()).into_owned();
+                                    if let Ok(val) = a.unescape_value() {
+                                        match attr_name.as_str() {
+                                            "key" => key = val.into_owned(),
+                                            "value" => value = val.into_owned(),
+                                            _ => {}
+                                        }
+                                    }
+                                }
+                            }
+                            if value == "true" {
+                                disabled_sources.insert(key);
+                            }
+                        }
+                    }
+                    "packageSource" => {
+                        if in_package_source_mapping {
+                            for attr in e.attributes() {
+                                if let Ok(a) = attr {
+                                    if String::from_utf8_lossy(a.key.as_ref()) == "key" {
+                                        if let Ok(val) = a.unescape_value() {
+                                            current_mapping_key = val.into_owned();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     "package" => {
                         if in_package_source_mapping {
                             for attr in e.attributes() {
@@ -888,34 +985,6 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
                     _ => {}
                 }
             }
-            Ok(Event::Empty(e)) => {
-                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
-                if in_package_sources && name == "clear" {
-                    registries.clear();
-                }
-                if in_disabled_sources && name == "add" {
-                    for attr in e.attributes() {
-                        if let Ok(a) = attr {
-                            if String::from_utf8_lossy(a.key.as_ref()) == "key" {
-                                if let Ok(val) = a.unescape_value() {
-                                    disabled_sources.insert(val.into_owned());
-                                }
-                            }
-                        }
-                    }
-                }
-                if in_package_source_mapping && name == "packageSource" {
-                    for attr in e.attributes() {
-                        if let Ok(a) = attr {
-                            if String::from_utf8_lossy(a.key.as_ref()) == "key" {
-                                if let Ok(val) = a.unescape_value() {
-                                    current_mapping_key = val.into_owned();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
             Ok(Event::End(e)) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
                 match name.as_str() {
@@ -931,65 +1000,34 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
         buf.clear();
     }
 
-    // Re-parse for <add> elements inside packageSources
-    let mut reader2 = Reader::from_reader(BufReader::new(content.as_bytes()));
-    let mut buf2 = Vec::new();
-    let mut in_sources = false;
-    let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
-
-    loop {
-        match reader2.read_event_into(&mut buf2) {
-            Ok(Event::Start(e)) | Ok(Event::Empty(e)) => {
-                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
-                if name == "packageSources" {
-                    in_sources = true;
-                } else if in_sources && name == "add" {
-                    let mut key = String::new();
-                    let mut value = String::new();
-                    for attr in e.attributes() {
-                        if let Ok(a) = attr {
-                            let attr_name = String::from_utf8_lossy(a.key.as_ref()).into_owned();
-                            if let Ok(val) = a.unescape_value() {
-                                match attr_name.as_str() {
-                                    "key" => key = val.into_owned(),
-                                    "value" => value = val.into_owned(),
-                                    _ => {}
-                                }
-                            }
-                        }
-                    }
-                    if !value.is_empty() && !value.starts_with("file://") && !value.starts_with("/") && !value.starts_with("\\") && !value.starts_with("C:\\") {
-                        let is_disabled = disabled_sources.contains(&key);
-                        let is_re_enabled = disabled_sources.contains(&key) && value.is_empty();
-                        if !is_disabled || is_re_enabled {
-                            let url = if value.ends_with("/index.json") {
-                                parse_nuget_registry_url(&value).feed_url
-                            } else {
-                                value.clone()
-                            };
-                            if seen.insert(url.clone()) {
-                                let patterns = source_mapping.get(&key).cloned();
-                                registries.push(NuGetRegistry {
-                                    name: Some(key),
-                                    url,
-                                    source_mapped_package_patterns: patterns,
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-            Ok(Event::End(e)) => {
-                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
-                if name == "packageSources" {
-                    in_sources = false;
-                }
-            }
-            Ok(Event::Eof) => break,
-            _ => {}
-        }
-        buf2.clear();
+    // Apply disabled sources
+    if !disabled_sources.is_empty() {
+        registries.retain(|r| r.name.as_ref().map_or(true, |n| !disabled_sources.contains(n)));
     }
+
+    // Apply source mapping to default registries
+    for reg in &mut registries {
+        if reg.name.as_deref() == Some("nuget.org") && reg.source_mapped_package_patterns.is_none() {
+            if let Some(patterns) = source_mapping.get("nuget.org") {
+                reg.source_mapped_package_patterns = Some(patterns.clone());
+            }
+        }
+    }
+
+    // Deduplicate registries with #protocolVersion=3
+    // Keep any which include sourceMappedPackagePatterns
+    let plain_urls: std::collections::HashSet<String> = registries
+        .iter()
+        .filter(|r| r.source_mapped_package_patterns.is_none())
+        .map(|r| r.url.clone())
+        .collect();
+    registries.retain(|r| {
+        if r.source_mapped_package_patterns.is_some() {
+            return true;
+        }
+        let alt = format!("{}#protocolVersion=3", r.url);
+        !plain_urls.contains(&alt)
+    });
 
     registries
 }
@@ -2391,17 +2429,20 @@ Console.WriteLine("Hello World!");
     // Ported: "deduplicates registries" — nuget/util.spec.ts line 78
     #[test]
     fn get_configured_registries_deduplicates() {
-        let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources></configuration>"#;
+        let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3"/></packageSources></configuration>"#;
         let registries = parse_nuget_config_registries_full(config);
         assert_eq!(registries.len(), 1);
+        assert_eq!(registries[0].url, "https://api.nuget.org/v3/index.json#protocolVersion=3");
     }
 
     // Ported: "reads nuget config file with default registry" — nuget/util.spec.ts line 99
     #[test]
     fn get_configured_registries_with_default_registry() {
-        let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources><disabledPackageSources/></configuration>"#;
+        let config = r#"<configuration><packageSources><add key="contoso.com" value="https://contoso.com/packages/"/></packageSources><disabledPackageSources/></configuration>"#;
         let registries = parse_nuget_config_registries_full(config);
-        assert_eq!(registries.len(), 2); // default + nuget.org
+        assert_eq!(registries.len(), 2);
+        assert_eq!(registries[0].name.as_deref(), Some("nuget.org"));
+        assert_eq!(registries[1].name.as_deref(), Some("contoso.com"));
     }
 
     // Ported: "reads nuget config file with default registry disabled and added sources" — nuget/util.spec.ts line 134
