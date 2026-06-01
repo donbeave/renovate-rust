@@ -1270,4 +1270,119 @@ sha256 "oldhash"
         let result = update_dependency(&config);
         assert!(matches!(result, HomebrewUpdateResult::NoChange));
     }
+
+    // Ported: "returns null for non-string input: %s" — homebrew/handlers/github.spec.ts line 12
+    #[test]
+    fn github_parse_url_non_string_input_returns_none() {
+        assert!(github_parse_url("").is_none());
+    }
+
+    // Ported: "returns null for non-string input: %s" — homebrew/handlers/npm.spec.ts line 12
+    #[test]
+    fn npm_parse_url_non_string_input_returns_none() {
+        assert!(npm_parse_url("").is_none());
+    }
+
+    // Ported: "returns unchanged content if url field in upgrade object is invalid" — homebrew/update.spec.ts line 165
+    #[test]
+    fn update_dependency_invalid_upgrade_url_returns_no_change() {
+        let config = HomebrewUpdateConfig {
+            file_content: "url \"https://example.com/foo-1.0.tar.gz\"\nsha256 \"abc\"\n".to_owned(),
+            manager_data_url: "not-a-valid-url".to_owned(),
+            manager_data_sha256: "abc".to_owned(),
+            manager_data_type: "github".to_owned(),
+            new_value: "2.0.0".to_owned(),
+            package_file: "foo.rb".to_owned(),
+            dep_name: "foo".to_owned(),
+        };
+        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+    }
+
+    // Ported: "returns unchanged content if url field in Formula file is invalid" — homebrew/update.spec.ts line 240
+    #[test]
+    fn update_dependency_invalid_formula_url_returns_no_change() {
+        let config = HomebrewUpdateConfig {
+            file_content: "url ???https://example.com/foo-1.0.tar.gz\"\nsha256 \"abc\"\n".to_owned(),
+            manager_data_url: "https://example.com/foo-1.0.tar.gz".to_owned(),
+            manager_data_sha256: "abc".to_owned(),
+            manager_data_type: "github".to_owned(),
+            new_value: "2.0.0".to_owned(),
+            package_file: "foo.rb".to_owned(),
+            dep_name: "foo".to_owned(),
+        };
+        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+    }
+
+    // Ported: "returns unchanged content if url field in Formula file is missing" — homebrew/update.spec.ts line 280
+    #[test]
+    fn update_dependency_missing_formula_url_returns_no_change() {
+        let config = HomebrewUpdateConfig {
+            file_content: "sha256 \"abc\"\n".to_owned(),
+            manager_data_url: "https://example.com/foo-1.0.tar.gz".to_owned(),
+            manager_data_sha256: "abc".to_owned(),
+            manager_data_type: "github".to_owned(),
+            new_value: "2.0.0".to_owned(),
+            package_file: "foo.rb".to_owned(),
+            dep_name: "foo".to_owned(),
+        };
+        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+    }
+
+    // Ported: "returns unchanged content if sha256 field in Formula file is invalid" — homebrew/update.spec.ts line 319
+    #[test]
+    fn update_dependency_with_hash_invalid_formula_sha256_returns_none() {
+        let content = "url \"https://example.com/foo-1.0.tar.gz\"\nsha256 ???invalid\n".to_owned();
+        let result = update_dependency_with_hash(
+            &content,
+            "https://example.com/foo-1.0.tar.gz",
+            "abc123",
+            "https://example.com/foo-2.0.tar.gz",
+            "newhash",
+        );
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns unchanged content if sha256 field in Formula file is missing" — homebrew/update.spec.ts line 359
+    #[test]
+    fn update_dependency_with_hash_missing_formula_sha256_returns_none() {
+        let content = "url \"https://example.com/foo-1.0.tar.gz\"\n".to_owned();
+        let result = update_dependency_with_hash(
+            &content,
+            "https://example.com/foo-1.0.tar.gz",
+            "abc123",
+            "https://example.com/foo-2.0.tar.gz",
+            "newhash",
+        );
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns unchanged content for unknown handler type" — homebrew/update.spec.ts line 452
+    #[test]
+    fn update_dependency_unknown_handler_returns_no_change() {
+        let config = HomebrewUpdateConfig {
+            file_content: "url \"https://example.com/foo-1.0.tar.gz\"\nsha256 \"abc\"\n".to_owned(),
+            manager_data_url: "https://example.com/foo-1.0.tar.gz".to_owned(),
+            manager_data_sha256: "abc".to_owned(),
+            manager_data_type: "unknown".to_owned(),
+            new_value: "2.0.0".to_owned(),
+            package_file: "foo.rb".to_owned(),
+            dep_name: "foo".to_owned(),
+        };
+        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+    }
+
+    // Ported: "returns unchanged content if newValue is missing" — homebrew/update.spec.ts line 476
+    #[test]
+    fn update_dependency_missing_new_value_returns_no_change() {
+        let config = HomebrewUpdateConfig {
+            file_content: "url \"https://example.com/foo-1.0.tar.gz\"\nsha256 \"abc\"\n".to_owned(),
+            manager_data_url: "https://example.com/foo-1.0.tar.gz".to_owned(),
+            manager_data_sha256: "abc".to_owned(),
+            manager_data_type: "github".to_owned(),
+            new_value: "".to_owned(),
+            package_file: "foo.rb".to_owned(),
+            dep_name: "foo".to_owned(),
+        };
+        assert!(matches!(update_dependency(&config), HomebrewUpdateResult::NoChange));
+    }
 }
