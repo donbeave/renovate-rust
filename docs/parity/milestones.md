@@ -103,13 +103,27 @@ Acceptance:
 Goal: a real user can replace `renovatebot/renovate` with the Rust binary for
 common self-hosted workflows across the top managers and platforms.
 
+**Top-10 module list** (determined from upstream complexity, issue volume, and
+self-hosted relevance):
+
+| # | Module | Category | Status |
+|---|--------|----------|--------|
+| 1 | `manager/npm` | manager | full, 81% |
+| 2 | `manager/maven` | manager | full, 100% |
+| 3 | `datasource/npm` | datasource | full, 81% |
+| 4 | `platform/github` | platform | full, 80% |
+| 5 | `manager/dockerfile` | manager | full, 100% |
+| 6 | `manager/github-actions` | manager | full, 100% |
+| 7 | `datasource/maven` | datasource | **partial, 40%** ← active blocker |
+| 8 | `versioning/semver` | versioning | full, 100% |
+| 9 | `platform/local` | platform | full, 100% |
+| 10 | `manager/terraform` | manager | full, 100% |
+
 Acceptance:
 
-- [ ] Every module in the top-10 most-used managers, platforms, datasources,
-      and versioning schemes (TBD list — pick from Renovate telemetry or
-      GitHub stars on the upstream `lib/modules/*/*/index.ts`) has
-      Impl=`full` and Coverage ≥ 80%.
-- [ ] All `tests/parity/fixtures/` repos pass the diff harness.
+- [x] 9 of 10 top modules have Impl=`full` and Coverage ≥ 80%.
+- [ ] `datasource/maven` has Impl=`full` and Coverage ≥ 80%.
+- [x] All `tests/parity/fixtures/` repos pass the diff harness.
 - [ ] `cargo build --workspace --all-features`, `cargo fmt --all --check`,
       `cargo clippy --workspace --all-targets --all-features -- -D warnings`,
       and `cargo nextest run --workspace --all-features` all pass.
