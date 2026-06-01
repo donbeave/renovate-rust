@@ -9,7 +9,9 @@
 //! - `lib/modules/datasource/maven/common.ts` — `MAVEN_REPO`
 
 use std::collections::HashMap;
+use std::future::Future;
 use std::io::BufReader;
+use std::pin::Pin;
 use std::sync::Arc;
 
 use quick_xml::Reader;
@@ -787,6 +789,7 @@ pub enum MavenFetchError {
     UnsupportedHost,
     NotFound,
     PermissionIssue,
+    ExternalHostError,
 }
 
 /// Download XML from a Maven URL and parse it.
@@ -844,17 +847,70 @@ pub async fn download_http_content(
         .map_err(|_| MavenFetchError::TemporaryError)
 }
 
-/// Validate that a URL is an S3 URL.
+/// Result of an S3 get_object call.
+#[derive(Debug, Clone)]
+pub struct S3Object {
+    pub body: String,
+    pub last_modified: Option<String>,
+    pub delete_marker: bool,
+}
+
+/// Errors that can occur during an S3 operation.
+#[derive(Debug, Clone)]
+pub enum S3Error {
+    CredentialsProviderError,
+    RegionMissing,
+    NotFound,
+    Other(String),
+}
+
+/// Trait for S3 clients, allowing mocking in tests.
+pub trait S3Client: Send + Sync {
+    fn get_object<'a>(
+        &'a self,
+        bucket: &'a str,
+        key: &'a str,
+    ) -> Pin<Box<dyn Future<Output = Result<S3Object, S3Error>> + Send + 'a>>;
+}
+
+/// Parse an S3 URL into `(bucket, key)`.
+///
+/// Mirrors upstream `parseS3Url`.
+/// Returns `None` for non-S3 URLs or malformed S3 URLs.
+pub fn parse_s3_url(url: &str) -> Option<(String, String)> {
+    let url = url.strip_prefix("s3://")?;
+    let (bucket, key) = url.split_once('/')?;
+    Some((bucket.to_owned(), key.to_owned()))
+}
+
+/// Download content from an S3 URL using the provided S3 client.
 ///
 /// Mirrors upstream `downloadS3Protocol`.
-/// Returns `Ok(())` for `s3://` URLs.
+/// Returns the object body on success.
 /// Returns `Err(MavenFetchError::UnsupportedProtocol)` for non-S3 URLs.
-pub fn download_s3_protocol(url: &str) -> Result<(), MavenFetchError> {
-    if url.starts_with("s3://") {
-        Ok(())
-    } else {
-        Err(MavenFetchError::UnsupportedProtocol)
+/// Returns `Err(MavenFetchError::NotFound)` for deleted markers or not-found errors.
+/// Returns `Err(MavenFetchError::HostError)` for credentials/region/other errors.
+pub async fn download_s3_protocol(
+    client: &dyn S3Client,
+    url: &str,
+) -> Result<String, MavenFetchError> {
+    let (bucket, key) = parse_s3_url(url).ok_or(MavenFetchError::UnsupportedProtocol)?;
+
+    let obj = client
+        .get_object(&bucket, &key)
+        .await
+        .map_err(|e| match e {
+            S3Error::NotFound => MavenFetchError::NotFound,
+            S3Error::CredentialsProviderError => MavenFetchError::HostError,
+            S3Error::RegionMissing => MavenFetchError::HostError,
+            S3Error::Other(_) => MavenFetchError::HostError,
+        })?;
+
+    if obj.delete_marker {
+        return Err(MavenFetchError::NotFound);
     }
+
+    Ok(obj.body)
 }
 
 /// Classify a raw network/HTTP error message into a `MavenFetchError`.
@@ -919,6 +975,17 @@ fn is_metadata_url(url: &str) -> bool {
 /// Download from an HTTP(S) Maven URL with typed error handling.
 ///
 /// Mirrors upstream `downloadHttpProtocol`.
+/// Convert a `MavenFetchError` into `ExternalHostError` when the request
+/// target is Maven Central and the error is a temporary one (rate-limit or
+/// transient failure).  Mirrors the upstream `downloadHttpProtocol` behaviour
+/// that throws `ExternalHostError` for Maven Central temporary errors.
+fn maybe_external_host_error(err: MavenFetchError, url: &str) -> MavenFetchError {
+    if matches!(err, MavenFetchError::TemporaryError) && is_maven_central(url) {
+        return MavenFetchError::ExternalHostError;
+    }
+    err
+}
+
 /// Classifies HTTP and network errors into `MavenFetchError` variants.
 pub async fn download_http_protocol(
     http: &HttpClient,
@@ -931,10 +998,16 @@ pub async fn download_http_protocol(
     let resp = match http.get_retrying(url).await {
         Ok(r) => r,
         Err(crate::http::HttpError::Request(e)) => {
-            return Err(classify_maven_fetch_error(&e.to_string(), None));
+            return Err(maybe_external_host_error(
+                classify_maven_fetch_error(&e.to_string(), None),
+                url,
+            ));
         }
         Err(crate::http::HttpError::Status { status, .. }) => {
-            return Err(classify_maven_fetch_error("", Some(status.as_u16())));
+            return Err(maybe_external_host_error(
+                classify_maven_fetch_error("", Some(status.as_u16())),
+                url,
+            ));
         }
         Err(_) => return Err(MavenFetchError::HostError),
     };
@@ -944,12 +1017,15 @@ pub async fn download_http_protocol(
         if status.as_u16() == 404 && is_metadata_url(url) {
             metadata_cache_set(url);
         }
-        return Err(classify_maven_fetch_error("", Some(status.as_u16())));
+        return Err(maybe_external_host_error(
+            classify_maven_fetch_error("", Some(status.as_u16())),
+            url,
+        ));
     }
 
     resp.text()
         .await
-        .map_err(|_| MavenFetchError::TemporaryError)
+        .map_err(|_| maybe_external_host_error(MavenFetchError::TemporaryError, url))
 }
 
 /// Result of post-processing a single Maven release.
@@ -1069,6 +1145,392 @@ fn parse_latest_version(xml: &str) -> Result<Option<String>, quick_xml::Error> {
     Ok(release.or(latest).or(last_version))
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// XML schema trimming
+// ──────────────────────────────────────────────────────────────────────
+
+/// Escape XML special characters for text content.
+#[allow(dead_code)]
+fn escape_xml(value: &str) -> String {
+    value
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+}
+
+/// Extract the text content of the first element whose path ends with `suffix`.
+fn extract_path_text(xml: &str, suffix: &[&str]) -> Option<String> {
+    let cursor = BufReader::new(xml.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+    let mut stack: Vec<String> = Vec::new();
+    let mut current_tag: Option<String> = None;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                if let Some(ref ct) = current_tag {
+                    stack.push(ct.clone());
+                }
+                current_tag = Some(tag);
+            }
+            Ok(Event::Text(e)) => {
+                if let Some(ref tag) = current_tag {
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                    if !text.is_empty() {
+                        let mut full_path = stack.clone();
+                        full_path.push(tag.clone());
+                        if full_path.len() >= suffix.len()
+                            && full_path[full_path.len() - suffix.len()..]
+                                .iter()
+                                .zip(suffix.iter())
+                                .all(|(a, b)| a == *b)
+                        {
+                            return Some(text);
+                        }
+                    }
+                }
+            }
+            Ok(Event::End(_)) => {
+                if let Some(ct) = current_tag.take()
+                    && stack.last() == Some(&ct)
+                {
+                    stack.pop();
+                }
+                current_tag = stack.pop();
+            }
+            Ok(Event::Eof) | Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+    None
+}
+
+/// Extract text of all direct children named `child_name` under elements whose
+/// path ends with `parent_suffix`.
+fn extract_path_children_text(xml: &str, parent_suffix: &[&str], child_name: &str) -> Vec<String> {
+    let cursor = BufReader::new(xml.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+    let mut stack: Vec<String> = Vec::new();
+    let mut current_tag: Option<String> = None;
+    let mut results: Vec<String> = Vec::new();
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                if let Some(ref ct) = current_tag {
+                    stack.push(ct.clone());
+                }
+                current_tag = Some(tag);
+            }
+            Ok(Event::Text(e)) => {
+                if let Some(ref tag) = current_tag
+                    && tag == child_name
+                {
+                    let parent_matches = stack.len() >= parent_suffix.len()
+                        && stack[stack.len() - parent_suffix.len()..]
+                            .iter()
+                            .zip(parent_suffix.iter())
+                            .all(|(a, b)| a == *b);
+                    if parent_matches {
+                        let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                        if !text.is_empty() {
+                            results.push(text);
+                        }
+                    }
+                }
+            }
+            Ok(Event::End(_)) => {
+                if let Some(ct) = current_tag.take()
+                    && stack.last() == Some(&ct)
+                {
+                    stack.pop();
+                }
+                current_tag = stack.pop();
+            }
+            Ok(Event::Eof) | Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+    results
+}
+
+/// Returns `true` if an element exists whose path ends with `suffix`.
+fn extract_path_exists(xml: &str, suffix: &[&str]) -> bool {
+    let cursor = BufReader::new(xml.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+    let mut stack: Vec<String> = Vec::new();
+    let mut current_tag: Option<String> = None;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                if let Some(ref ct) = current_tag {
+                    stack.push(ct.clone());
+                }
+                current_tag = Some(tag.clone());
+                let mut full_path = stack.clone();
+                full_path.push(tag);
+                if full_path.len() >= suffix.len()
+                    && full_path[full_path.len() - suffix.len()..]
+                        .iter()
+                        .zip(suffix.iter())
+                        .all(|(a, b)| a == *b)
+                {
+                    return true;
+                }
+            }
+            Ok(Event::End(_)) => {
+                if let Some(ct) = current_tag.take()
+                    && stack.last() == Some(&ct)
+                {
+                    stack.pop();
+                }
+                current_tag = stack.pop();
+            }
+            Ok(Event::Eof) | Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+    false
+}
+
+type RelocationFields = (
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+);
+
+/// Extract relocation fields from a POM: `(groupId, artifactId, version, message)`.
+fn extract_relocation(xml: &str) -> Option<RelocationFields> {
+    Some((
+        extract_path_text(xml, &["distributionManagement", "relocation", "groupId"]),
+        extract_path_text(xml, &["distributionManagement", "relocation", "artifactId"]),
+        extract_path_text(xml, &["distributionManagement", "relocation", "version"]),
+        extract_path_text(xml, &["distributionManagement", "relocation", "message"]),
+    ))
+}
+
+/// Extract parent fields from a POM: `(groupId, artifactId, version)`.
+type ParentFields = (Option<String>, Option<String>, Option<String>);
+
+fn extract_parent(xml: &str) -> Option<ParentFields> {
+    Some((
+        extract_path_text(xml, &["parent", "groupId"]),
+        extract_path_text(xml, &["parent", "artifactId"]),
+        extract_path_text(xml, &["parent", "version"]),
+    ))
+}
+
+/// Build an XML document from a header + body string.
+fn build_xml(body: &str) -> String {
+    const XML_HEADER: &str = r#"<?xml version="1.0" encoding="UTF-8"?>"#;
+    format!("{XML_HEADER}\n{body}")
+}
+
+/// Return `trimmed` only when it is strictly shorter than `original`.
+fn shrink_to_useful_size(original: &str, trimmed: &str) -> String {
+    if trimmed.len() >= original.len() {
+        original.to_owned()
+    } else {
+        trimmed.to_owned()
+    }
+}
+
+/// Extract the root element name from an XML string, or `None` if unparseable.
+fn quick_xml_root_name(xml: &str) -> Option<String> {
+    let cursor = BufReader::new(xml.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+    let mut buf = Vec::new();
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                return Some(String::from_utf8_lossy(e.local_name().as_ref()).into_owned());
+            }
+            Ok(Event::Empty(e)) => {
+                return Some(String::from_utf8_lossy(e.local_name().as_ref()).into_owned());
+            }
+            Ok(Event::Eof) | Err(_) => return None,
+            _ => {}
+        }
+        buf.clear();
+    }
+}
+
+/// Trim a Maven metadata XML to the fields Renovate caches.
+fn trim_metadata_xml(input: &str) -> String {
+    let top_version = extract_path_text(input, &["metadata", "version"]);
+    let latest = extract_path_text(input, &["versioning", "latest"]);
+    let release = extract_path_text(input, &["versioning", "release"]);
+    let versions = extract_path_children_text(input, &["versioning", "versions"], "version");
+    let snapshot_ts = extract_path_text(input, &["versioning", "snapshot", "timestamp"]);
+    let snapshot_bn = extract_path_text(input, &["versioning", "snapshot", "buildNumber"]);
+
+    let mut parts: Vec<String> = Vec::new();
+
+    if let Some(v) = top_version {
+        parts.push(format!("  <version>{v}</version>"));
+    }
+
+    let mut versioning_parts: Vec<String> = Vec::new();
+    if let Some(v) = latest {
+        versioning_parts.push(format!("    <latest>{v}</latest>"));
+    }
+    if let Some(v) = release {
+        versioning_parts.push(format!("    <release>{v}</release>"));
+    }
+    if !versions.is_empty() {
+        let version_lines: Vec<String> = versions
+            .into_iter()
+            .map(|v| format!("      <version>{v}</version>"))
+            .collect();
+        versioning_parts.push(format!(
+            "    <versions>\n{}\n    </versions>",
+            version_lines.join("\n")
+        ));
+    }
+    if snapshot_ts.is_some() || snapshot_bn.is_some() {
+        let mut snap_parts: Vec<String> = Vec::new();
+        if let Some(v) = snapshot_ts {
+            snap_parts.push(format!("      <timestamp>{v}</timestamp>"));
+        }
+        if let Some(v) = snapshot_bn {
+            snap_parts.push(format!("      <buildNumber>{v}</buildNumber>"));
+        }
+        versioning_parts.push(format!(
+            "    <snapshot>\n{}\n    </snapshot>",
+            snap_parts.join("\n")
+        ));
+    }
+
+    if !versioning_parts.is_empty() {
+        parts.push(format!(
+            "  <versioning>\n{}\n  </versioning>",
+            versioning_parts.join("\n")
+        ));
+    }
+
+    if parts.is_empty() {
+        return input.to_owned();
+    }
+
+    build_xml(&format!("<metadata>\n{}\n</metadata>", parts.join("\n")))
+}
+
+/// Trim a POM XML to the fields Renovate caches.
+fn trim_pom_xml(input: &str) -> String {
+    let group_id = extract_path_text(input, &["groupId"]);
+    let url = extract_path_text(input, &["url"]);
+    let scm_url = extract_path_text(input, &["scm", "url"]);
+    let relocation = extract_relocation(input);
+    let parent = extract_parent(input);
+
+    let mut parts: Vec<String> = Vec::new();
+
+    if let Some(v) = group_id {
+        parts.push(format!("  <groupId>{v}</groupId>"));
+    }
+    if let Some(v) = url {
+        parts.push(format!("  <url>{v}</url>"));
+    }
+    if let Some(v) = scm_url {
+        parts.push(format!("  <scm>\n    <url>{v}</url>\n  </scm>"));
+    }
+
+    // distributionManagement / relocation
+    if relocation.is_some() || extract_path_exists(input, &["distributionManagement", "relocation"])
+    {
+        let mut reloc_parts: Vec<String> = Vec::new();
+        if let Some((rg, ra, rv, rm)) = relocation {
+            if let Some(v) = rg {
+                reloc_parts.push(format!("      <groupId>{v}</groupId>"));
+            }
+            if let Some(v) = ra {
+                reloc_parts.push(format!("      <artifactId>{v}</artifactId>"));
+            }
+            if let Some(v) = rv {
+                reloc_parts.push(format!("      <version>{v}</version>"));
+            }
+            if let Some(v) = rm {
+                reloc_parts.push(format!("      <message>{v}</message>"));
+            }
+        }
+        if reloc_parts.is_empty() {
+            parts.push(
+                "  <distributionManagement>\n    <relocation />\n  </distributionManagement>"
+                    .to_owned(),
+            );
+        } else {
+            parts.push(format!(
+                "  <distributionManagement>\n    <relocation>\n{}\n    </relocation>\n  </distributionManagement>",
+                reloc_parts.join("\n")
+            ));
+        }
+    }
+
+    if let Some((pg, pa, pv)) = parent {
+        let mut parent_parts: Vec<String> = Vec::new();
+        if let Some(v) = pg {
+            parent_parts.push(format!("    <groupId>{v}</groupId>"));
+        }
+        if let Some(v) = pa {
+            parent_parts.push(format!("    <artifactId>{v}</artifactId>"));
+        }
+        if let Some(v) = pv {
+            parent_parts.push(format!("    <version>{v}</version>"));
+        }
+        if !parent_parts.is_empty() {
+            parts.push(format!(
+                "  <parent>\n{}\n  </parent>",
+                parent_parts.join("\n")
+            ));
+        }
+    }
+
+    if parts.is_empty() {
+        return input.to_owned();
+    }
+
+    build_xml(&format!("<project>\n{}\n</project>", parts.join("\n")))
+}
+
+/// Trim a Maven XML document (metadata or POM) to only the fields Renovate needs.
+///
+/// Mirrors upstream `trimMavenXml` in `lib/modules/datasource/maven/schema.ts`.
+/// - Invalid XML, prefixed namespaces, or unknown root tags are passed through unchanged.
+/// - If the trimmed output is not smaller than the input, the original is returned.
+pub fn trim_maven_xml(input: &str) -> String {
+    // Fast path: detect root element name and whether it carries a namespace prefix.
+    let Some(root_name) = quick_xml_root_name(input) else {
+        return input.to_owned();
+    };
+
+    if root_name.contains(':') {
+        return input.to_owned();
+    }
+
+    let trimmed = match root_name.as_str() {
+        "metadata" => trim_metadata_xml(input),
+        "project" => trim_pom_xml(input),
+        _ => return input.to_owned(),
+    };
+
+    shrink_to_useful_size(input, &trimmed)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1138,6 +1600,185 @@ mod tests {
         let xml = "<metadata></metadata>";
         let latest = parse_latest_version(xml).unwrap();
         assert_eq!(latest, None);
+    }
+
+    // ── trim_maven_xml — modules/datasource/maven/schema.spec.ts ──
+
+    // Ported: "trims release metadata to the fields used by Renovate" — modules/datasource/maven/schema.spec.ts line 6
+    #[test]
+    fn trims_release_metadata() {
+        let input = r#"<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <versioning>
+    <latest>2.0.0</latest>
+    <release>2.0.0</release>
+    <versions>
+      <version>0.0.1</version>
+      <version>1.0.0</version>
+      <version>1.0.1</version>
+      <version>1.0.2</version>
+      <version>1.0.3-SNAPSHOT</version>
+      <version>1.0.4-SNAPSHOT</version>
+      <version>1.0.5-SNAPSHOT</version>
+      <version>2.0.0</version>
+    </versions>
+    <lastUpdated>20210101000000</lastUpdated>
+  </versioning>
+</metadata>"#;
+        let expected = r#"<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <versioning>
+    <latest>2.0.0</latest>
+    <release>2.0.0</release>
+    <versions>
+      <version>0.0.1</version>
+      <version>1.0.0</version>
+      <version>1.0.1</version>
+      <version>1.0.2</version>
+      <version>1.0.3-SNAPSHOT</version>
+      <version>1.0.4-SNAPSHOT</version>
+      <version>1.0.5-SNAPSHOT</version>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#;
+        assert_eq!(trim_maven_xml(input), expected);
+    }
+
+    // Ported: "trims snapshot metadata to the fields used by Renovate" — modules/datasource/maven/schema.spec.ts line 30
+    #[test]
+    fn trims_snapshot_metadata() {
+        let input = r#"<?xml version="1.0" encoding="UTF-8"?><metadata>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <version>1.0.3-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20200101.010003</timestamp>
+      <buildNumber>3</buildNumber>
+    </snapshot>
+  </versioning>
+</metadata>"#;
+        let expected = r#"<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <version>1.0.3-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20200101.010003</timestamp>
+      <buildNumber>3</buildNumber>
+    </snapshot>
+  </versioning>
+</metadata>"#;
+        assert_eq!(trim_maven_xml(input), expected);
+    }
+
+    // Ported: "trims pom files to the fields used by Renovate" — modules/datasource/maven/schema.spec.ts line 47
+    #[test]
+    fn trims_pom_files() {
+        let input = r#"<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <name>Package Name</name>
+  <description>Package description</description>
+  <url>https://package.example.org/about</url>
+  <scm>
+    <url>scm:git:https://github.com/example/package</url>
+  </scm>
+  <distributionManagement>
+    <relocation>
+      <groupId>org.relocated</groupId>
+      <artifactId>package-new</artifactId>
+      <version>2.0.0</version>
+      <message>Moved</message>
+    </relocation>
+  </distributionManagement>
+  <parent>
+    <groupId>org.parent</groupId>
+    <artifactId>package-parent</artifactId>
+    <version>1.2.3</version>
+  </parent>
+</project>"#;
+        let expected = r#"<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <groupId>org.example</groupId>
+  <url>https://package.example.org/about</url>
+  <scm>
+    <url>scm:git:https://github.com/example/package</url>
+  </scm>
+  <distributionManagement>
+    <relocation>
+      <groupId>org.relocated</groupId>
+      <artifactId>package-new</artifactId>
+      <version>2.0.0</version>
+      <message>Moved</message>
+    </relocation>
+  </distributionManagement>
+  <parent>
+    <groupId>org.parent</groupId>
+    <artifactId>package-parent</artifactId>
+    <version>1.2.3</version>
+  </parent>
+</project>"#;
+        assert_eq!(trim_maven_xml(input), expected);
+    }
+
+    // Ported: "preserves empty relocation tags" — modules/datasource/maven/schema.spec.ts line 99
+    #[test]
+    fn preserves_empty_relocation_tags() {
+        let input = r#"<project>
+  <artifactId>package</artifactId>
+  <name>Package Name</name>
+  <distributionManagement>
+    <relocation />
+  </distributionManagement>
+</project>"#;
+        let expected = r#"<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <distributionManagement>
+    <relocation />
+  </distributionManagement>
+</project>"#;
+        assert_eq!(trim_maven_xml(input), expected);
+    }
+
+    // Ported: "passes through unknown XML unchanged" — modules/datasource/maven/schema.spec.ts line 120
+    #[test]
+    fn passes_through_unknown_xml() {
+        let input = "<root><value>test</value></root>";
+        assert_eq!(trim_maven_xml(input), input);
+    }
+
+    // Ported: "passes through prefixed pom XML unchanged" — modules/datasource/maven/schema.spec.ts line 125
+    #[test]
+    fn passes_through_prefixed_pom_xml() {
+        let input = r#"<m:project xmlns:m="http://maven.apache.org/POM/4.0.0"><m:url>https://package.example.org/about</m:url></m:project>"#;
+        assert_eq!(trim_maven_xml(input), input);
+    }
+
+    // Ported: "passes through pom XML when no retained fields are present" — modules/datasource/maven/schema.spec.ts line 131
+    #[test]
+    fn passes_through_pom_when_no_retained_fields() {
+        let input = "<project><artifactId>package</artifactId></project>";
+        assert_eq!(trim_maven_xml(input), input);
+    }
+
+    // Ported: "passes through metadata XML when no retained fields are present" — modules/datasource/maven/schema.spec.ts line 136
+    #[test]
+    fn passes_through_metadata_when_no_retained_fields() {
+        let input = "<metadata><groupId>org.example</groupId></metadata>";
+        assert_eq!(trim_maven_xml(input), input);
+    }
+
+    // Ported: "passes through invalid XML unchanged" — modules/datasource/maven/schema.spec.ts line 141
+    #[test]
+    fn passes_through_invalid_xml() {
+        let input = "<project>";
+        assert_eq!(trim_maven_xml(input), input);
     }
 
     #[tokio::test]
@@ -2265,8 +2906,336 @@ mod tests {
     // Ported: "returns error for non-S3 URLs" — modules/datasource/maven/util.spec.ts line 102
     #[test]
     fn download_s3_protocol_non_s3_url() {
-        let result = download_s3_protocol("http://not-s3.com/");
-        assert_eq!(result, Err(MavenFetchError::UnsupportedProtocol));
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            struct DummyClient;
+            impl S3Client for DummyClient {
+                fn get_object<'a>(
+                    &'a self,
+                    _bucket: &'a str,
+                    _key: &'a str,
+                ) -> Pin<Box<dyn Future<Output = Result<S3Object, S3Error>> + Send + 'a>>
+                {
+                    Box::pin(async { Err(S3Error::Other("dummy".to_owned())) })
+                }
+            }
+            let result = download_s3_protocol(&DummyClient, "http://not-s3.com/").await;
+            assert_eq!(result, Err(MavenFetchError::UnsupportedProtocol));
+        });
+    }
+
+    // ── S3 tests — modules/datasource/maven/s3.spec.ts ──
+
+    struct MockS3Client {
+        responses: std::collections::HashMap<(String, String), Result<S3Object, S3Error>>,
+    }
+
+    impl MockS3Client {
+        fn new() -> Self {
+            Self {
+                responses: std::collections::HashMap::new(),
+            }
+        }
+
+        fn with_response(
+            mut self,
+            bucket: &str,
+            key: &str,
+            response: Result<S3Object, S3Error>,
+        ) -> Self {
+            self.responses
+                .insert((bucket.to_owned(), key.to_owned()), response);
+            self
+        }
+    }
+
+    impl S3Client for MockS3Client {
+        fn get_object<'a>(
+            &'a self,
+            bucket: &'a str,
+            key: &'a str,
+        ) -> Pin<Box<dyn Future<Output = Result<S3Object, S3Error>> + Send + 'a>> {
+            let result = self
+                .responses
+                .get(&(bucket.to_owned(), key.to_owned()))
+                .cloned()
+                .unwrap_or(Err(S3Error::NotFound));
+            Box::pin(async move { result })
+        }
+    }
+
+    fn s3_metadata_xml() -> &'static str {
+        r#"<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <versioning>
+    <latest>1.0.2</latest>
+    <release>1.0.2</release>
+    <versions>
+      <version>0.0.1</version>
+      <version>1.0.0</version>
+      <version>1.0.1</version>
+      <version>1.0.2</version>
+      <version>1.0.3</version>
+    </versions>
+  </versioning>
+</metadata>"#
+    }
+
+    // Ported: "returns releases" — modules/datasource/maven/s3.spec.ts line 43
+    #[tokio::test]
+    async fn s3_returns_releases() {
+        let client = MockS3Client::new().with_response(
+            "repobucket",
+            "org/example/package/maven-metadata.xml",
+            Ok(S3Object {
+                body: s3_metadata_xml().to_owned(),
+                last_modified: Some("2020-01-01T00:00:00Z".to_owned()),
+                delete_marker: false,
+            }),
+        );
+
+        let result = download_s3_protocol(
+            &client,
+            "s3://repobucket/org/example/package/maven-metadata.xml",
+        )
+        .await;
+
+        assert!(result.is_ok());
+        assert!(result.unwrap().contains("1.0.2"));
+    }
+
+    // Ported: "returns null on auth error" — modules/datasource/maven/s3.spec.ts line 78
+    #[tokio::test]
+    async fn s3_returns_null_on_auth_error() {
+        let client = MockS3Client::new().with_response(
+            "repobucket",
+            "org/example/package/maven-metadata.xml",
+            Err(S3Error::CredentialsProviderError),
+        );
+
+        let result = download_s3_protocol(
+            &client,
+            "s3://repobucket/org/example/package/maven-metadata.xml",
+        )
+        .await;
+
+        assert_eq!(result, Err(MavenFetchError::HostError));
+    }
+
+    // Ported: "returns null for incorrect region" — modules/datasource/maven/s3.spec.ts line 105
+    #[tokio::test]
+    async fn s3_returns_null_for_incorrect_region() {
+        let client = MockS3Client::new().with_response(
+            "repobucket",
+            "org/example/package/maven-metadata.xml",
+            Err(S3Error::RegionMissing),
+        );
+
+        let result = download_s3_protocol(
+            &client,
+            "s3://repobucket/org/example/package/maven-metadata.xml",
+        )
+        .await;
+
+        assert_eq!(result, Err(MavenFetchError::HostError));
+    }
+
+    // Ported: "returns null for NoSuchKey error" — modules/datasource/maven/s3.spec.ts line 125
+    #[tokio::test]
+    async fn s3_returns_null_for_nosuchkey_error() {
+        let client = MockS3Client::new().with_response(
+            "repobucket",
+            "org/example/package/maven-metadata.xml",
+            Err(S3Error::NotFound),
+        );
+
+        let result = download_s3_protocol(
+            &client,
+            "s3://repobucket/org/example/package/maven-metadata.xml",
+        )
+        .await;
+
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+    }
+
+    // Ported: "returns null for NotFound error" — modules/datasource/maven/s3.spec.ts line 145
+    #[tokio::test]
+    async fn s3_returns_null_for_notfound_error() {
+        let client = MockS3Client::new().with_response(
+            "repobucket",
+            "org/example/package/maven-metadata.xml",
+            Err(S3Error::NotFound),
+        );
+
+        let result = download_s3_protocol(
+            &client,
+            "s3://repobucket/org/example/package/maven-metadata.xml",
+        )
+        .await;
+
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+    }
+
+    // Ported: "returns null for Deleted marker" — modules/datasource/maven/s3.spec.ts line 165
+    #[tokio::test]
+    async fn s3_returns_null_for_deleted_marker() {
+        let client = MockS3Client::new().with_response(
+            "repobucket",
+            "org/example/package/maven-metadata.xml",
+            Ok(S3Object {
+                body: String::new(),
+                last_modified: None,
+                delete_marker: true,
+            }),
+        );
+
+        let result = download_s3_protocol(
+            &client,
+            "s3://repobucket/org/example/package/maven-metadata.xml",
+        )
+        .await;
+
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+    }
+
+    // Ported: "returns null for unknown error" — modules/datasource/maven/s3.spec.ts line 178
+    #[tokio::test]
+    async fn s3_returns_null_for_unknown_error() {
+        let client = MockS3Client::new().with_response(
+            "repobucket",
+            "org/example/package/maven-metadata.xml",
+            Err(S3Error::Other("Unknown error".to_owned())),
+        );
+
+        let result = download_s3_protocol(
+            &client,
+            "s3://repobucket/org/example/package/maven-metadata.xml",
+        )
+        .await;
+
+        assert_eq!(result, Err(MavenFetchError::HostError));
+    }
+
+    // Ported: "returns null for unexpected response type" — modules/datasource/maven/s3.spec.ts line 199
+    #[tokio::test]
+    async fn s3_returns_null_for_unexpected_response_type() {
+        let client = MockS3Client::new().with_response(
+            "repobucket",
+            "org/example/package/maven-metadata.xml",
+            Ok(S3Object {
+                body: String::new(),
+                last_modified: None,
+                delete_marker: false,
+            }),
+        );
+
+        let result = download_s3_protocol(
+            &client,
+            "s3://repobucket/org/example/package/maven-metadata.xml",
+        )
+        .await;
+
+        assert_eq!(result, Ok(String::new()));
+    }
+
+    // ── S3 postprocess tests — modules/datasource/maven/index.spec.ts ──
+
+    // Ported: "checks package" — modules/datasource/maven/index.spec.ts line 892
+    #[tokio::test]
+    async fn s3_checks_package() {
+        let client = MockS3Client::new().with_response(
+            "bucket",
+            "foo/bar/1.2.3/bar-1.2.3.pom",
+            Ok(S3Object {
+                body: "foo".to_owned(),
+                last_modified: None,
+                delete_marker: false,
+            }),
+        );
+
+        let result = download_s3_protocol(&client, "s3://bucket/foo/bar/1.2.3/bar-1.2.3.pom").await;
+
+        assert_eq!(result, Ok("foo".to_owned()));
+    }
+
+    // Ported: "supports timestamp" — modules/datasource/maven/index.spec.ts line 910
+    #[tokio::test]
+    async fn s3_supports_timestamp() {
+        let client = MockS3Client::new().with_response(
+            "bucket",
+            "foo/bar/1.2.3/bar-1.2.3.pom",
+            Ok(S3Object {
+                body: "foo".to_owned(),
+                last_modified: Some("2024-01-01T00:00:00.000Z".to_owned()),
+                delete_marker: false,
+            }),
+        );
+
+        let result = download_s3_protocol(&client, "s3://bucket/foo/bar/1.2.3/bar-1.2.3.pom").await;
+
+        assert_eq!(result, Ok("foo".to_owned()));
+    }
+
+    // Ported: "returns null for deleted object" — modules/datasource/maven/index.spec.ts line 934
+    #[tokio::test]
+    async fn s3_returns_null_for_deleted_object() {
+        let client = MockS3Client::new().with_response(
+            "bucket",
+            "foo/bar/1.2.3/bar-1.2.3.pom",
+            Ok(S3Object {
+                body: String::new(),
+                last_modified: None,
+                delete_marker: true,
+            }),
+        );
+
+        let result = download_s3_protocol(&client, "s3://bucket/foo/bar/1.2.3/bar-1.2.3.pom").await;
+
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+    }
+
+    // Ported: "returns null for NotFound response" — modules/datasource/maven/index.spec.ts line 952
+    #[tokio::test]
+    async fn s3_returns_null_for_notfound_response() {
+        let client = MockS3Client::new().with_response(
+            "bucket",
+            "foo/bar/1.2.3/bar-1.2.3.pom",
+            Err(S3Error::NotFound),
+        );
+
+        let result = download_s3_protocol(&client, "s3://bucket/foo/bar/1.2.3/bar-1.2.3.pom").await;
+
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+    }
+
+    // Ported: "returns null for NoSuchKey response" — modules/datasource/maven/index.spec.ts line 970
+    #[tokio::test]
+    async fn s3_returns_null_for_nosuchkey_response() {
+        let client = MockS3Client::new().with_response(
+            "bucket",
+            "foo/bar/1.2.3/bar-1.2.3.pom",
+            Err(S3Error::NotFound),
+        );
+
+        let result = download_s3_protocol(&client, "s3://bucket/foo/bar/1.2.3/bar-1.2.3.pom").await;
+
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+    }
+
+    // Ported: "returns original value for any other error" — modules/datasource/maven/index.spec.ts line 988
+    #[tokio::test]
+    async fn s3_returns_original_value_for_any_other_error() {
+        let client = MockS3Client::new().with_response(
+            "bucket",
+            "foo/bar/1.2.3/bar-1.2.3.pom",
+            Err(S3Error::Other("Unknown".to_owned())),
+        );
+
+        let result = download_s3_protocol(&client, "s3://bucket/foo/bar/1.2.3/bar-1.2.3.pom").await;
+
+        assert_eq!(result, Err(MavenFetchError::HostError));
     }
 
     // Ported: "throws EXTERNAL_HOST_ERROR for 50x" — modules/datasource/maven/index.spec.ts line 325
@@ -2306,6 +3275,26 @@ mod tests {
             classify_maven_fetch_error("connection reset", None),
             MavenFetchError::TemporaryError
         );
+    }
+
+    // Ported: "throws ExternalHostError for 429 status without redis cache" — modules/datasource/maven/util.spec.ts line 237
+    #[test]
+    fn external_host_error_for_maven_central_429() {
+        let err = maybe_external_host_error(
+            classify_maven_fetch_error("", Some(429)),
+            "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+        );
+        assert_eq!(err, MavenFetchError::ExternalHostError);
+    }
+
+    // Ported: "throws ExternalHostError for non-429 temporary error on maven central" — modules/datasource/maven/util.spec.ts line 258
+    #[test]
+    fn external_host_error_for_maven_central_connreset() {
+        let err = maybe_external_host_error(
+            classify_maven_fetch_error("connection reset", None),
+            "https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml",
+        );
+        assert_eq!(err, MavenFetchError::ExternalHostError);
     }
 
     // Ported: "returns empty for connection error" — modules/datasource/maven/util.spec.ts line 273

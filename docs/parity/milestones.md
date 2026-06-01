@@ -114,15 +114,14 @@ self-hosted relevance):
 | 4 | `platform/github` | platform | full, 80% |
 | 5 | `manager/dockerfile` | manager | full, 100% |
 | 6 | `manager/github-actions` | manager | full, 100% |
-| 7 | `datasource/maven` | datasource | **partial, 56%** ← active blocker |
+| 7 | `datasource/maven` | datasource | full, 86% |
 | 8 | `versioning/semver` | versioning | full, 100% |
 | 9 | `platform/local` | platform | full, 100% |
 | 10 | `manager/terraform` | manager | full, 100% |
 
 Acceptance:
 
-- [x] 9 of 10 top modules have Impl=`full` and Coverage ≥ 80%.
-- [ ] `datasource/maven` has Impl=`full` and Coverage ≥ 80%.
+- [x] 10 of 10 top modules have Impl=`full` and Coverage ≥ 80%.
 - [x] All `tests/parity/fixtures/` repos pass the diff harness.
 - [ ] `cargo build --workspace --all-features`, `cargo fmt --all --check`,
       `cargo clippy --workspace --all-targets --all-features -- -D warnings`,
