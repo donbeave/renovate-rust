@@ -849,4 +849,60 @@ mod tests {
             None
         );
     }
+
+    // Ported: "%p" — lib/modules/datasource/npm/get.spec.ts line 43
+    #[test]
+    fn npmrc_bearer_auth_configs() {
+        let configs = [
+            "registry=https://test.org\n//test.org/:_authToken=XXX",
+            "registry=https://test.org/sub\n//test.org/:_authToken=XXX",
+            "registry=https://test.org/sub\n//test.org/sub/:_authToken=XXX",
+            "registry=https://test.org/sub\n_authToken=XXX",
+            "registry=https://test.org\n_authToken=XXX",
+            "registry=https://test.org\n_authToken=XXX",
+            "@myco:registry=https://test.org\n//test.org/:_authToken=XXX",
+        ];
+
+        for npmrc in &configs {
+            let config = parse_npmrc(npmrc).unwrap();
+            let rules = convert_npmrc_to_rules(&config);
+            let registry_url = resolve_registry_url(&config, "@myco/test");
+            let auth = auth_header_for_registry(&registry_url, &rules);
+            assert_eq!(
+                auth,
+                Some("Bearer XXX".to_owned()),
+                "failed for config: {}",
+                npmrc
+            );
+        }
+    }
+
+    // Ported: "%p" — lib/modules/datasource/npm/get.spec.ts line 76
+    #[test]
+    fn npmrc_basic_auth_configs() {
+        let configs = [
+            "registry=https://test.org\n//test.org/:_auth=dGVzdDp0ZXN0",
+            "registry=https://test.org\n//test.org/:username=test\n//test.org/:_password=dGVzdA==",
+            "registry=https://test.org/sub\n//test.org/:_auth=dGVzdDp0ZXN0",
+            "registry=https://test.org/sub\n//test.org/sub/:_auth=dGVzdDp0ZXN0",
+            "registry=https://test.org/sub\n_auth=dGVzdDp0ZXN0",
+            "registry=https://test.org\n_auth=dGVzdDp0ZXN0",
+            "registry=https://test.org\n_auth=dGVzdDp0ZXN0",
+            "@myco:registry=https://test.org\n//test.org/:_auth=dGVzdDp0ZXN0",
+            "@myco:registry=https://test.org\n_auth=dGVzdDp0ZXN0",
+        ];
+
+        for npmrc in &configs {
+            let config = parse_npmrc(npmrc).unwrap();
+            let rules = convert_npmrc_to_rules(&config);
+            let registry_url = resolve_registry_url(&config, "@myco/test");
+            let auth = auth_header_for_registry(&registry_url, &rules);
+            assert_eq!(
+                auth,
+                Some("Basic dGVzdDp0ZXN0".to_owned()),
+                "failed for config: {}",
+                npmrc
+            );
+        }
+    }
 }

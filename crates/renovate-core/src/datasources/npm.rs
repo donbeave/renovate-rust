@@ -1966,4 +1966,97 @@ mod tests {
         let result = get_npm_releases(&http, "pkg", &server.uri(), auth.as_deref()).await;
         assert!(result.unwrap().is_some());
     }
+
+    // Ported: "uses hostRules basic auth" — lib/modules/datasource/npm/get.spec.ts line 118
+    #[tokio::test]
+    async fn get_npm_releases_uses_host_rules_basic_auth() {
+        use crate::datasources::npm_npmrc::{NpmrcHostRule, NpmrcRules, auth_header_for_registry};
+
+        let server = MockServer::start().await;
+        let body = serde_json::json!({ "name": "@myco/test" });
+        Mock::given(method("GET"))
+            .and(path("/@myco%2Ftest"))
+            .and(wiremock::matchers::header("authorization", "Basic dGVzdDp0ZXN0"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: server.uri().trim_end_matches('/').to_owned(),
+                token: None,
+                auth_type: None,
+                username: Some("test".to_owned()),
+                password: Some("test".to_owned()),
+            }],
+            package_rules: vec![],
+        };
+        let auth = auth_header_for_registry(&server.uri(), &rules);
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "@myco/test", &server.uri(), auth.as_deref()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "uses hostRules token auth" — lib/modules/datasource/npm/get.spec.ts line 140
+    #[tokio::test]
+    async fn get_npm_releases_uses_host_rules_token_auth() {
+        use crate::datasources::npm_npmrc::{NpmrcHostRule, NpmrcRules, auth_header_for_registry};
+
+        let server = MockServer::start().await;
+        let body = serde_json::json!({ "name": "renovate" });
+        Mock::given(method("GET"))
+            .and(path("/renovate"))
+            .and(wiremock::matchers::header("authorization", "Bearer XXX"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: server.uri().trim_end_matches('/').to_owned(),
+                token: Some("XXX".to_owned()),
+                auth_type: None,
+                username: None,
+                password: None,
+            }],
+            package_rules: vec![],
+        };
+        let auth = auth_header_for_registry(&server.uri(), &rules);
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "renovate", &server.uri(), auth.as_deref()).await;
+        assert!(result.unwrap().is_none());
+    }
+
+    // Ported: "uses hostRules basic token auth" — lib/modules/datasource/npm/get.spec.ts line 161
+    #[tokio::test]
+    async fn get_npm_releases_uses_host_rules_basic_token_auth() {
+        use crate::datasources::npm_npmrc::{NpmrcHostRule, NpmrcRules, auth_header_for_registry};
+
+        let server = MockServer::start().await;
+        let body = serde_json::json!({ "name": "renovate" });
+        Mock::given(method("GET"))
+            .and(path("/renovate"))
+            .and(wiremock::matchers::header("authorization", "Basic abc"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(&server)
+            .await;
+
+        let rules = NpmrcRules {
+            host_rules: vec![NpmrcHostRule {
+                match_host: server.uri().trim_end_matches('/').to_owned(),
+                token: Some("abc".to_owned()),
+                auth_type: Some("Basic".to_owned()),
+                username: None,
+                password: None,
+            }],
+            package_rules: vec![],
+        };
+        let auth = auth_header_for_registry(&server.uri(), &rules);
+
+        let http = HttpClient::new().unwrap();
+        let result = get_npm_releases(&http, "renovate", &server.uri(), auth.as_deref()).await;
+        assert!(result.unwrap().is_none());
+    }
 }

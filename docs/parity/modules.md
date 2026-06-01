@@ -23,8 +23,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5796 / 11670 distinct upstream it() tests ported (49.7%) across 292 modules.
-**Quality:** 6509 `// Ported:` comments → 713 duplicate, 0 orphan, 0 malformed.
+**Total:** 5799 / 11670 distinct upstream it() tests ported (49.7%) across 292 modules.
+**Quality:** 6514 `// Ported:` comments → 715 duplicate, 0 orphan, 0 malformed.
 
 ## managers  —  2544/3642 (70%)
 
@@ -148,7 +148,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | full | 11/11 (100%) | 300 code lines |
 | `manager/xcodegen` | 1 | full | 24/24 (100%) | 700 code lines |
 
-## datasources  —  678/1379 (49%)
+## datasources  —  681/1379 (49%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -214,7 +214,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/maven` | 6 | full | 73/85 (86%) | Core fetching, multi-registry fallback/merging, parent POM resolution, postprocessRelease, Gradle plugin detection, XML schema trimming, S3 download support implemented. Missing: caching integration, auth/redirect handling, Artifact Registry support. |
 | `datasource/nextcloud` | 1 | full | 5/5 (100%) |  |
 | `datasource/node-version` | 1 | partial | 2/4 (50%) | 142 code lines, partial implementation |
-| `datasource/npm` | 4 | full | 52/64 (81%) | M2 complete |
+| `datasource/npm` | 4 | full | 55/64 (86%) | M2 complete |
 | `datasource/nuget` | 2 | full | 2/37 (5%) | 371 code lines, 5% test coverage |
 | `datasource/orb` | 1 | full | 7/7 (100%) |  |
 | `datasource/packagist` | 2 | full | 0/25 (0%) | 345 code lines, 0% test coverage |
