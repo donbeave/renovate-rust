@@ -40,6 +40,24 @@ fn massage_link(url: &str) -> String {
         .into_owned()
 }
 
+/// Parse a `Link` HTTP response header and return the URL for `rel="next"`.
+fn parse_link_header_next(header: &str) -> Option<String> {
+    // Link: <url>; rel="next", <url>; rel="last"
+    for part in header.split(',') {
+        let part = part.trim();
+        if part.contains(r#"rel="next""#) || part.contains("rel='next'") {
+            if let Some(start) = part.find('<') {
+                if let Some(end) = part.find('>') {
+                    if start < end {
+                        return Some(part[start + 1..end].to_owned());
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 fn is_github_item_url(url: &str) -> bool {
     // Exclude api.github.com (handles the lookbehind the regex crate can't express).
     if url.contains("api.github.com") || url.contains("redirect.github.com") {
@@ -115,6 +133,7 @@ pub const GITHUB_API_BASE: &str = "https://api.github.com";
 pub struct GithubClient {
     http: HttpClient,
     api_base: String,
+    branch_force_rebase_cache: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, bool>>>,
 }
 
 impl GithubClient {
@@ -137,6 +156,7 @@ impl GithubClient {
         Ok(Self {
             http: HttpClient::with_token(token)?,
             api_base,
+            branch_force_rebase_cache: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())),
         })
     }
 
@@ -151,6 +171,11 @@ impl GithubClient {
             return Err(PlatformError::Unexpected(
                 "Init: You must configure a GitHub token".to_owned(),
             ));
+        }
+
+        // Detect GHE and validate fine-grained token compatibility
+        if let Err(e) = self.check_fine_grained_token(token).await {
+            return Err(e);
         }
 
         let user: GithubUser = self
@@ -171,6 +196,56 @@ impl GithubClient {
         };
 
         Ok((user.login, email))
+    }
+
+    /// Detect GitHub Enterprise Server version and validate fine-grained
+    /// Personal Access Token compatibility.
+    ///
+    /// GHE requires version >= 3.10 to support fine-grained PATs.
+    async fn check_fine_grained_token(&self, token: &str) -> Result<(), PlatformError> {
+        let is_fine_grained = token.starts_with("github_pat_");
+        if !is_fine_grained {
+            return Ok(());
+        }
+
+        let host = match url::Url::parse(&self.api_base) {
+            Ok(url) => url.host_str().unwrap_or("").to_owned(),
+            Err(_) => return Ok(()),
+        };
+
+        let is_ghe = host != "api.github.com";
+        if !is_ghe {
+            return Ok(());
+        }
+
+        let resp = match self.http.head_json(&self.api_base).await {
+            Ok(r) => r,
+            Err(_) => return Ok(()),
+        };
+
+        let ghe_version = resp
+            .headers()
+            .get("x-github-enterprise-version")
+            .and_then(|v| v.to_str().ok());
+
+        let needs_check = match ghe_version {
+            Some(v) => {
+                let version = semver::Version::parse(v).ok();
+                match version {
+                    Some(ver) => ver < semver::Version::new(3, 10, 0),
+                    None => true,
+                }
+            }
+            None => true,
+        };
+
+        if needs_check {
+            return Err(PlatformError::Unexpected(
+                "Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.".to_owned(),
+            ));
+        }
+
+        Ok(())
     }
 
     /// Fetch the primary verified email from `/user/emails`.
@@ -539,6 +614,7 @@ impl PlatformClient for GithubClient {
             body,
             false,
             None,
+            None,
         )
         .await
     }
@@ -699,14 +775,29 @@ impl GithubClient {
         state: Option<&str>,
     ) -> Result<Vec<GhRestPr>, PlatformError> {
         let state = state.unwrap_or("all");
-        let url = format!(
+        let mut url = format!(
             "{}/repos/{}/{}/pulls?per_page=100&state={}&sort=updated&direction=desc",
             self.api_base, owner, repo, state
         );
-        self.http
-            .get_json::<Vec<GhRestPr>>(&url)
-            .await
-            .map_err(PlatformError::Http)
+        let mut all_prs: Vec<GhRestPr> = vec![];
+
+        loop {
+            let resp = self.http.get_retrying(&url).await.map_err(PlatformError::Http)?;
+            let next_url = resp.headers()
+                .get("link")
+                .and_then(|v| v.to_str().ok())
+                .and_then(parse_link_header_next);
+
+            let prs: Vec<GhRestPr> = resp.json().await.map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+            all_prs.extend(prs);
+
+            match next_url {
+                Some(next) => url = next,
+                None => break,
+            }
+        }
+
+        Ok(all_prs)
     }
 
     /// Fetch a single issue by number.
@@ -936,11 +1027,33 @@ impl GithubClient {
             self.api_base, owner, repo, issue_number
         );
         let body = serde_json::json!({ "assignees": assignees });
-        self.http
-            .post_json::<serde_json::Value>(&url, &body.to_string())
-            .await
-            .map_err(PlatformError::Http)?;
-        Ok(())
+
+        let mut last_err: Option<PlatformError> = None;
+        for attempt in 0..3 {
+            match self
+                .http
+                .post_json::<serde_json::Value>(&url, &body.to_string())
+                .await
+            {
+                Ok(_) => return Ok(()),
+                Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND => {
+                    tracing::debug!(
+                        attempt = attempt + 1,
+                        issue = issue_number,
+                        "Retrying add_assignees after 404"
+                    );
+                    last_err = Some(PlatformError::Http(HttpError::Status {
+                        status,
+                        url: url.clone(),
+                    }));
+                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                }
+                Err(e) => return Err(PlatformError::Http(e)),
+            }
+        }
+        Err(last_err.unwrap_or_else(|| {
+            PlatformError::Unexpected("add_assignees: all retries exhausted".to_owned())
+        }))
     }
 
     /// Add reviewers to a PR.
@@ -992,12 +1105,38 @@ impl GithubClient {
             "{}/repos/{}/{}/pulls/{}/merge",
             self.api_base, owner, repo, pr_number
         );
-        let mut body = serde_json::json!({});
+
+        // If a strategy is provided, try it first
         if let Some(s) = strategy {
-            body["merge_method"] = s.into();
+            let body = serde_json::json!({"merge_method": s});
+            match self.try_merge(&url, &body).await {
+                Ok(true) => return Ok(true),
+                Ok(false) => return Ok(false),
+                Err(e) => return Err(e),
+            }
         }
 
-        match self.http.put_json::<serde_json::Value>(&url, &body.to_string()).await {
+        // Autodetection: try squash -> merge -> rebase
+        for method in ["squash", "merge", "rebase"] {
+            let body = serde_json::json!({"merge_method": method});
+            match self.http.put_json::<serde_json::Value>(&url, &body.to_string()).await {
+                Ok(_) => return Ok(true),
+                Err(e) => {
+                    tracing::debug!(err = %e, method, "Failed to merge PR");
+                }
+            }
+        }
+
+        tracing::info!(pr = pr_number, "All merge attempts failed");
+        Ok(false)
+    }
+
+    async fn try_merge(
+        &self,
+        url: &str,
+        body: &serde_json::Value,
+    ) -> Result<bool, PlatformError> {
+        match self.http.put_json::<serde_json::Value>(url, &body.to_string()).await {
             Ok(_) => Ok(true),
             Err(HttpError::Status { status, .. })
                 if status == reqwest::StatusCode::NOT_FOUND
@@ -1084,6 +1223,88 @@ impl GithubClient {
             }
         }
         Ok(None)
+    }
+
+    /// Check whether a branch requires PRs to be up-to-date before merging.
+    ///
+    /// Checks rulesets first, then falls back to legacy branch protection.
+    ///
+    /// Mirrors `getBranchForceRebase` from `lib/modules/platform/github/index.ts`.
+    pub async fn get_branch_force_rebase(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch: &str,
+        parent_repo: Option<&str>,
+    ) -> Result<bool, PlatformError> {
+        if parent_repo.is_some() {
+            return Ok(false);
+        }
+
+        let cache_key = format!("{}/{}/{}", owner, repo, branch);
+        {
+            let cache = self.branch_force_rebase_cache.lock().unwrap();
+            if let Some(&cached) = cache.get(&cache_key) {
+                return Ok(cached);
+            }
+        }
+
+        let ruleset_url = format!(
+            "{}/repos/{}/{}/rules/branches/{}",
+            self.api_base, owner, repo, branch
+        );
+
+        match self.http.get_json::<serde_json::Value>(&ruleset_url).await {
+            Ok(rulesets) => {
+                if let Some(rules) = rulesets.as_array() {
+                    for rule in rules {
+                        if let Some(t) = rule.get("type").and_then(|v| v.as_str()) {
+                            if t == "required_status_checks" {
+                                if let Some(params) = rule.get("parameters") {
+                                    if params.get("strict_required_status_checks_policy")
+                                        == Some(&serde_json::Value::Bool(true))
+                                    {
+                                        let mut cache = self.branch_force_rebase_cache.lock().unwrap();
+                                        cache.insert(cache_key, true);
+                                        return Ok(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Err(HttpError::Status { status, .. })
+                if status == reqwest::StatusCode::NOT_FOUND
+                    || status == reqwest::StatusCode::FORBIDDEN => {}
+            Err(e) => return Err(PlatformError::Http(e)),
+        }
+
+        let protection_url = format!(
+            "{}/repos/{}/{}/branches/{}/protection",
+            self.api_base, owner, repo, branch
+        );
+
+        match self.http.get_json::<serde_json::Value>(&protection_url).await {
+            Ok(protection) => {
+                let result = if let Some(status_checks) = protection.get("required_status_checks") {
+                    status_checks.get("strict") == Some(&serde_json::Value::Bool(true))
+                } else {
+                    false
+                };
+                let mut cache = self.branch_force_rebase_cache.lock().unwrap();
+                cache.insert(cache_key, result);
+                return Ok(result);
+            }
+            Err(HttpError::Status { status, .. })
+                if status == reqwest::StatusCode::NOT_FOUND
+                    || status == reqwest::StatusCode::FORBIDDEN => {}
+            Err(e) => return Err(PlatformError::Http(e)),
+        }
+
+        let mut cache = self.branch_force_rebase_cache.lock().unwrap();
+        cache.insert(cache_key, false);
+        Ok(false)
     }
 
     /// Set a commit status for a branch.
@@ -1206,6 +1427,35 @@ impl GithubClient {
         Ok(desired)
     }
 
+    /// Detect the preferred merge method for a repository based on allowed
+    /// merge types.
+    ///
+    /// Returns `Some("squash")`, `Some("merge")`, or `Some("rebase")` depending
+    /// on what the repository allows. Returns `None` if no method could be
+    /// determined.
+    ///
+    /// Mirrors the merge-method detection in `initRepo` from
+    /// `lib/modules/platform/github/index.ts`.
+    pub async fn get_repo_merge_methods(
+        &self,
+        owner: &str,
+        repo: &str,
+    ) -> Result<Option<String>, PlatformError> {
+        let url = format!("{}/repos/{}/{}", self.api_base, owner, repo);
+        let repo_info: serde_json::Value = self.http.get_json(&url).await.map_err(PlatformError::Http)?;
+
+        if repo_info.get("allow_squash_merge") == Some(&serde_json::Value::Bool(true)) {
+            return Ok(Some("squash".to_owned()));
+        }
+        if repo_info.get("allow_merge_commit") == Some(&serde_json::Value::Bool(true)) {
+            return Ok(Some("merge".to_owned()));
+        }
+        if repo_info.get("allow_rebase_merge") == Some(&serde_json::Value::Bool(true)) {
+            return Ok(Some("rebase".to_owned()));
+        }
+        Ok(None)
+    }
+
     /// Create a pull request with extended options.
     ///
     /// Mirrors the extended `createPr` from `lib/modules/platform/github/index.ts`.
@@ -1219,6 +1469,7 @@ impl GithubClient {
         body: &str,
         draft: bool,
         maintainer_can_modify: Option<bool>,
+        milestone: Option<i64>,
     ) -> Result<Option<i64>, PlatformError> {
         let url = format!("{}/repos/{}/{}/pulls", self.api_base, owner, repo);
         let head = format!("{}:{}", owner, source_branch);
@@ -1241,6 +1492,11 @@ impl GithubClient {
                     branch = source_branch,
                     "PR created successfully"
                 );
+                if let Some(ms) = milestone {
+                    if let Err(e) = self.add_milestone(owner, repo, pr.number, ms).await {
+                        tracing::warn!(err = %e, pr = pr.number, milestone = ms, "Unable to add milestone to PR");
+                    }
+                }
                 Ok(Some(pr.number))
             }
             Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY => {
@@ -1253,6 +1509,26 @@ impl GithubClient {
             }
             Err(e) => Err(PlatformError::Http(e)),
         }
+    }
+
+    /// Add a milestone to a PR (via the issues endpoint).
+    async fn add_milestone(
+        &self,
+        owner: &str,
+        repo: &str,
+        issue_number: i64,
+        milestone: i64,
+    ) -> Result<(), PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/issues/{}",
+            self.api_base, owner, repo, issue_number
+        );
+        let body = serde_json::json!({"milestone": milestone});
+        self.http
+            .patch_json(&url, &body.to_string())
+            .await
+            .map_err(PlatformError::Http)?;
+        Ok(())
     }
 
     /// Update labels on a PR (via the issues endpoint).
@@ -1422,6 +1698,29 @@ impl GithubClient {
 
         let number = self.create_issue(owner, repo, title, body, labels).await?;
         Ok(Some(number))
+    }
+
+    /// Fetch vulnerability alerts for a repository.
+    ///
+    /// Returns an empty vector if alerts are disabled or on error.
+    ///
+    /// Mirrors `getVulnerabilityAlerts` from `lib/modules/platform/github/index.ts`.
+    pub async fn get_vulnerability_alerts(
+        &self,
+        owner: &str,
+        repo: &str,
+    ) -> Result<Vec<serde_json::Value>, PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/dependabot/alerts?state=open&direction=asc&per_page=100",
+            self.api_base, owner, repo
+        );
+        match self.http.get_json::<serde_json::Value>(&url).await {
+            Ok(data) => Ok(parse_github_vulnerability_alerts(&data)),
+            Err(e) => {
+                tracing::debug!(err = %e, "Failed to fetch vulnerability alerts");
+                Ok(vec![])
+            }
+        }
     }
 }
 
@@ -3397,6 +3696,288 @@ mod tests {
         assert_eq!(result, Some("yellow".to_owned()));
     }
 
+    // ── get_branch_force_rebase ──────────────────────────────────────────────
+
+    // Ported: "should detect repoForceRebase" — modules/platform/github/index.spec.ts line 1151
+    #[tokio::test]
+    async fn get_branch_force_rebase_detects_from_protection() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "required_pull_request_reviews": {"required_approving_review_count": 1},
+                "required_status_checks": {"strict": true, "contexts": []},
+                "restrictions": {"users": [{"login": "rarkins"}], "teams": []},
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should handle 404" — modules/platform/github/index.spec.ts line 1185
+    #[tokio::test]
+    async fn get_branch_force_rebase_handles_404() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/dev"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/dev/protection"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "dev", None).await.unwrap();
+        assert!(!result);
+    }
+
+    // Ported: "should handle 403" — modules/platform/github/index.spec.ts line 1198
+    #[tokio::test]
+    async fn get_branch_force_rebase_handles_403() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(403))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(!result);
+    }
+
+    // Ported: "should throw 401" — modules/platform/github/index.spec.ts line 1211
+    #[tokio::test]
+    async fn get_branch_force_rebase_throws_on_401() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(401))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::UNAUTHORIZED));
+    }
+
+    // Ported: "should ignore non_fast_forward ruleset for determining rebase" — modules/platform/github/index.spec.ts line 1245
+    #[tokio::test]
+    async fn get_branch_force_rebase_ignores_non_fast_forward_ruleset() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"type": "non_fast_forward", "ruleset_source_type": "Repository", "ruleset_source": "owner/repo", "ruleset_id": 12345},
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "required_status_checks": {"strict": false},
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(!result);
+    }
+
+    // Ported: "should detect strict required status checks ruleset" — modules/platform/github/index.spec.ts line 1269
+    #[tokio::test]
+    async fn get_branch_force_rebase_detects_strict_ruleset() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "type": "required_status_checks",
+                    "parameters": {"strict_required_status_checks_policy": true},
+                    "ruleset_source_type": "Repository",
+                    "ruleset_source": "owner/repo",
+                    "ruleset_id": 12345,
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should continue if no expected rulesets have been found" — modules/platform/github/index.spec.ts line 1288
+    #[tokio::test]
+    async fn get_branch_force_rebase_continues_past_unexpected_rulesets() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"type": "deletion"},
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "required_status_checks": {"strict": true},
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should abort and throws on internal error" — modules/platform/github/index.spec.ts line 1309
+    #[tokio::test]
+    async fn get_branch_force_rebase_throws_on_internal_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    // Ported: "should fallback to legacy branch protection when rulesets not found" — modules/platform/github/index.spec.ts line 1320
+    #[tokio::test]
+    async fn get_branch_force_rebase_fallback_to_branch_protection() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "required_status_checks": {"strict": true},
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should return false when no force rebase rules found" — modules/platform/github/index.spec.ts line 1337
+    #[tokio::test]
+    async fn get_branch_force_rebase_returns_false_when_no_strict_checks() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "type": "pull_request",
+                    "parameters": {"required_approving_review_count": 1},
+                    "ruleset_source_type": "Repository",
+                    "ruleset_source": "owner/repo",
+                    "ruleset_id": 12345,
+                },
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "required_status_checks": {"strict": false},
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(!result);
+    }
+
+    // Ported: "should return cached result on subsequent calls" — modules/platform/github/index.spec.ts line 1360
+    #[tokio::test]
+    async fn get_branch_force_rebase_returns_cached_result() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(404))
+            .expect(1)
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "required_status_checks": {"strict": true},
+            })))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result1 = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(result1);
+        let result2 = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(result2);
+    }
+
+    // Ported: "should return cached false result on subsequent calls" — modules/platform/github/index.spec.ts line 1385
+    #[tokio::test]
+    async fn get_branch_force_rebase_returns_cached_false_result() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/rules/branches/main"))
+            .respond_with(ResponseTemplate::new(404))
+            .expect(1)
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/branches/main/protection"))
+            .respond_with(ResponseTemplate::new(404))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result1 = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(!result1);
+        let result2 = client.get_branch_force_rebase("owner", "repo", "main", None).await.unwrap();
+        assert!(!result2);
+    }
+
+    // Ported: "should return empty object when parentRepo is set" — modules/platform/github/index.spec.ts line 1225
+    #[tokio::test]
+    async fn get_branch_force_rebase_returns_false_when_parent_repo_set() {
+        let client = GithubClient::with_endpoint("token", "https://api.github.com").unwrap();
+        let result = client.get_branch_force_rebase("owner", "repo", "main", Some("parent/repo")).await.unwrap();
+        assert!(!result);
+    }
+
     // ── set_branch_status ─────────────────────────────────────────────────────
 
     // Ported: "returns if already set" — modules/platform/github/index.spec.ts line 2433
@@ -3658,6 +4239,100 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
     assert!(result.is_empty());
 }
 
+// ── get_vulnerability_alerts ──────────────────────────────────────────────
+
+    // Ported: "returns empty if error" — modules/platform/github/index.spec.ts line 5100
+    #[tokio::test]
+    async fn get_vulnerability_alerts_returns_empty_on_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/dependabot/alerts"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let alerts = client.get_vulnerability_alerts("owner", "repo").await.unwrap();
+        assert!(alerts.is_empty());
+    }
+
+    // Ported: "returns array if found" — modules/platform/github/index.spec.ts line 5113
+    #[tokio::test]
+    async fn get_vulnerability_alerts_returns_array_if_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/dependabot/alerts"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "security_advisory": {
+                        "ghsa_id": "GHSA-1234-5678-9012",
+                        "summary": "summary",
+                        "description": "description",
+                        "identifiers": [{"type": "type", "value": "value"}],
+                        "references": [],
+                        "severity": "high",
+                    },
+                    "security_vulnerability": {
+                        "package": {"ecosystem": "npm", "name": "left-pad"},
+                        "severity": "high",
+                        "vulnerable_version_range": "0.0.2",
+                        "first_patched_version": {"identifier": "0.0.3"},
+                    },
+                    "dependency": {"manifest_path": "bar/foo"},
+                },
+                {
+                    "security_advisory": {
+                        "ghsa_id": "GHSA-1234-5678-9012",
+                        "summary": "summary",
+                        "description": "description",
+                        "identifiers": [{"type": "type", "value": "value"}],
+                        "references": [],
+                        "severity": "high",
+                    },
+                    "security_vulnerability": null,
+                    "dependency": {"manifest_path": "bar/foo"},
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let alerts = client.get_vulnerability_alerts("owner", "repo").await.unwrap();
+        assert_eq!(alerts.len(), 1);
+    }
+
+    // Ported: "returns empty if disabled" — modules/platform/github/index.spec.ts line 5163
+    #[tokio::test]
+    async fn get_vulnerability_alerts_returns_empty_if_disabled() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/dependabot/alerts"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "data": {"repository": {}},
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let alerts = client.get_vulnerability_alerts("owner", "repo").await.unwrap();
+        assert!(alerts.is_empty());
+    }
+
+    // Ported: "handles network error" — modules/platform/github/index.spec.ts line 5177
+    #[tokio::test]
+    async fn get_vulnerability_alerts_handles_network_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/dependabot/alerts"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let alerts = client.get_vulnerability_alerts("owner", "repo").await.unwrap();
+        assert!(alerts.is_empty());
+    }
+
     // ── delete_label ──────────────────────────────────────────────────────────
 
     // Ported: "should delete the label" — modules/platform/github/index.spec.ts line 3318
@@ -3694,6 +4369,50 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .add_assignees("owner", "repo", 42, vec!["someuser".to_owned(), "someotheruser".to_owned()])
             .await
             .unwrap();
+    }
+
+    // Ported: "should retry on 404 and succeed" — modules/platform/github/index.spec.ts line 3344
+    #[tokio::test]
+    async fn add_assignees_retries_on_404_and_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/42/assignees"))
+            .respond_with(ResponseTemplate::new(404))
+            .up_to_n_times(1)
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/42/assignees"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "number": 42,
+                "state": "open",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client
+            .add_assignees("owner", "repo", 42, vec!["someuser".to_owned()])
+            .await
+            .unwrap();
+    }
+
+    // Ported: "should throw after 3 consecutive 404 responses" — modules/platform/github/index.spec.ts line 3364
+    #[tokio::test]
+    async fn add_assignees_throws_after_three_consecutive_404s() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/42/assignees"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client
+            .add_assignees("owner", "repo", 42, vec!["someuser".to_owned()])
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND));
     }
 
     // ── add_reviewers ─────────────────────────────────────────────────────────
@@ -3947,6 +4666,56 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         assert_eq!(prs[0].number, 1);
     }
 
+    // Ported: "fetches multiple pages" — modules/platform/github/index.spec.ts line 1470
+    #[tokio::test]
+    async fn list_prs_fetches_multiple_pages() {
+        let server = MockServer::start().await;
+        let next_url = format!("{}/repos/owner/repo/pulls?page=2", server.uri());
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .and(wiremock::matchers::query_param("page", "2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "number": 2,
+                    "title": "PR #2",
+                    "state": "open",
+                    "head": {"ref": "branch-2", "sha": "def2", "repo": {"full_name": "some/repo", "pushed_at": null}},
+                    "base": {"ref": "main", "sha": "abc", "repo": null},
+                    "node_id": "nid2",
+                    "created_at": "2024-01-02T00:00:00Z",
+                    "updated_at": "2024-01-10T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_json(serde_json::json!([
+                        {
+                            "number": 1,
+                            "title": "PR #1",
+                            "state": "open",
+                            "head": {"ref": "branch-1", "sha": "def", "repo": {"full_name": "some/repo", "pushed_at": null}},
+                            "base": {"ref": "main", "sha": "abc", "repo": null},
+                            "node_id": "nid",
+                            "created_at": "2024-01-01T00:00:00Z",
+                            "updated_at": "2024-01-09T00:00:00Z",
+                        },
+                    ]))
+                    .insert_header("link", format!("<{}>; rel=\"next\"", next_url)),
+            )
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let prs = client.list_prs("owner", "repo", None).await.unwrap();
+        assert_eq!(prs.len(), 2);
+        assert_eq!(prs[0].number, 1);
+        assert_eq!(prs[1].number, 2);
+    }
+
     // Ported: "should not be case sensitive" — modules/platform/github/index.spec.ts line 1124
     #[tokio::test]
     async fn find_pr_not_case_sensitive() {
@@ -4011,6 +4780,21 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let err = client.init_platform("").await.unwrap_err();
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("You must configure a GitHub token")));
+    }
+
+    // Ported: "should throw if user failure" — modules/platform/github/index.spec.ts line 128
+    #[tokio::test]
+    async fn init_platform_throws_on_user_failure() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.init_platform("123test").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Http(_)));
     }
 
     // Ported: "should throw if endpoint is invalid URL" — modules/platform/github/index.spec.ts line 70
@@ -4133,6 +4917,60 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         assert_eq!(email, None);
     }
 
+    // Ported: "should throw if using fine-grained token with GHE <3.10" — modules/platform/github/index.spec.ts line 79
+    #[tokio::test]
+    async fn init_platform_throws_on_fine_grained_token_with_old_ghe() {
+        let server = MockServer::start().await;
+        Mock::given(method("HEAD"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).insert_header("x-github-enterprise-version", "3.9.0"))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("github_pat_123test", server.uri()).unwrap();
+        let err = client.init_platform("github_pat_123test").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("Fine-grained Personal Access Tokens")));
+    }
+
+    // Ported: "should throw if using fine-grained token with GHE unknown version" — modules/platform/github/index.spec.ts line 94
+    #[tokio::test]
+    async fn init_platform_throws_on_fine_grained_token_with_unknown_ghe_version() {
+        let server = MockServer::start().await;
+        Mock::given(method("HEAD"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("github_pat_123test", server.uri()).unwrap();
+        let err = client.init_platform("github_pat_123test").await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("Fine-grained Personal Access Tokens")));
+    }
+
+    // Ported: "should support fine-grained token with GHE >=3.10" — modules/platform/github/index.spec.ts line 106
+    #[tokio::test]
+    async fn init_platform_allows_fine_grained_token_with_recent_ghe() {
+        let server = MockServer::start().await;
+        Mock::given(method("HEAD"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(200).insert_header("x-github-enterprise-version", "3.10.0"))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "login": "renovate-bot",
+                "email": "user@domain.com",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("github_pat_123test", server.uri()).unwrap();
+        let (login, email) = client.init_platform("github_pat_123test").await.unwrap();
+        assert_eq!(login, "renovate-bot");
+        assert_eq!(email, Some("user@domain.com".to_owned()));
+    }
+
     // ── get_repos ─────────────────────────────────────────────────────────────
 
     // Ported: "should return an array of repos" — modules/platform/github/index.spec.ts line 613
@@ -4243,7 +5081,7 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, Some(true))
+            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, Some(true), None)
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
@@ -4270,7 +5108,7 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, None)
+            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, None, None)
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
@@ -4297,10 +5135,167 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let pr_number = client
-            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, Some(false))
+            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, Some(false), None)
             .await
             .unwrap();
         assert_eq!(pr_number, Some(123));
+    }
+
+    // Ported: "should set the milestone on the PR" — modules/platform/github/index.spec.ts line 4287
+    #[tokio::test]
+    async fn create_pr_sets_milestone() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 123,
+                "title": "PR title",
+                "state": "open",
+                "head": {"ref": "some-branch", "sha": "abc", "repo": null},
+                "base": {"ref": "main", "sha": "def", "repo": null},
+                "node_id": "nid",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/issues/123"))
+            .and(wiremock::matchers::body_json_string(r#"{"milestone":1}"#))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr_with_options("owner", "repo", "some-branch", "main", "PR title", "Body", false, None, Some(1))
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(123));
+    }
+
+    // Ported: "should log a warning but not throw on error" — modules/platform/github/index.spec.ts line 4319
+    #[tokio::test]
+    async fn create_pr_warns_but_does_not_throw_on_milestone_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/pulls"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "number": 123,
+                "title": "bump someDep to v2",
+                "state": "open",
+                "head": {"ref": "some-branch", "sha": "abc", "repo": {"full_name": "owner/repo"}},
+                "base": {"ref": "main", "sha": "def", "repo": null},
+                "node_id": "nid",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/issues/123"))
+            .respond_with(ResponseTemplate::new(422).set_body_json(serde_json::json!({
+                "message": "Validation Failed",
+                "errors": [{"value": 1, "resource": "Issue", "field": "milestone", "code": "invalid"}],
+                "documentation_url": "https://docs.github.com/rest/issues/issues#update-an-issue",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let pr_number = client
+            .create_pr_with_options("owner", "repo", "some-branch", "main", "bump someDep to v2", "many informations about someDep", false, None, Some(1))
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(123));
+    }
+
+    // Ported: "should squash" — modules/platform/github/index.spec.ts line 801
+    #[tokio::test]
+    async fn get_repo_merge_methods_prefers_squash() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "name": "repo",
+                "full_name": "owner/repo",
+                "default_branch": "master",
+                "allow_squash_merge": true,
+                "allow_merge_commit": true,
+                "allow_rebase_merge": true,
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let method = client.get_repo_merge_methods("owner", "repo").await.unwrap();
+        assert_eq!(method, Some("squash".to_owned()));
+    }
+
+    // Ported: "should merge" — modules/platform/github/index.spec.ts line 960
+    #[tokio::test]
+    async fn get_repo_merge_methods_prefers_merge() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "name": "repo",
+                "full_name": "owner/repo",
+                "default_branch": "master",
+                "allow_squash_merge": false,
+                "allow_merge_commit": true,
+                "allow_rebase_merge": true,
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let method = client.get_repo_merge_methods("owner", "repo").await.unwrap();
+        assert_eq!(method, Some("merge".to_owned()));
+    }
+
+    // Ported: "should rebase" — modules/platform/github/index.spec.ts line 989
+    #[tokio::test]
+    async fn get_repo_merge_methods_prefers_rebase() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "name": "repo",
+                "full_name": "owner/repo",
+                "default_branch": "master",
+                "allow_squash_merge": false,
+                "allow_merge_commit": false,
+                "allow_rebase_merge": true,
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let method = client.get_repo_merge_methods("owner", "repo").await.unwrap();
+        assert_eq!(method, Some("rebase".to_owned()));
+    }
+
+    // Ported: "should not guess at merge" — modules/platform/github/index.spec.ts line 1016
+    #[tokio::test]
+    async fn get_repo_merge_methods_returns_none_when_all_disabled() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "name": "repo",
+                "full_name": "owner/repo",
+                "default_branch": "master",
+                "allow_squash_merge": false,
+                "allow_merge_commit": false,
+                "allow_rebase_merge": false,
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let method = client.get_repo_merge_methods("owner", "repo").await.unwrap();
+        assert_eq!(method, None);
     }
 
     // ── update_pr_labels ──────────────────────────────────────────────────────
@@ -4372,6 +5367,27 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         assert!(result);
     }
 
+    // Ported: "deletes comment by topic if found" — modules/platform/github/index.spec.ts line 3500
+    #[tokio::test]
+    async fn ensure_comment_deletes_by_topic_if_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"id": 1234, "body": "### some-subject\n\nblablabla"},
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("DELETE"))
+            .and(path("/repos/owner/repo/issues/comments/1234"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        client.ensure_comment_removal("owner", "repo", 42, Some("some-subject"), None).await.unwrap();
+    }
+
     // Ported: "deletes comment by content if found" — modules/platform/github/index.spec.ts line 3519
     #[tokio::test]
     async fn ensure_comment_deletes_by_content_if_found() {
@@ -4408,6 +5424,51 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let result = client.ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent").await.unwrap();
         assert!(!result);
+    }
+
+    // Ported: "add comment if not found" — modules/platform/github/index.spec.ts line 3398
+    #[tokio::test]
+    async fn ensure_comment_creates_if_not_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/repos/owner/repo/issues/42/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "body": "### some-subject\n\nsome\ncontent",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent").await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "add updates comment if necessary" — modules/platform/github/index.spec.ts line 3445
+    #[tokio::test]
+    async fn ensure_comment_updates_if_necessary() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/issues/42/comments"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"id": 1234, "body": "### some-subject\n\nblablabla"},
+            ])))
+            .mount(&server)
+            .await;
+        Mock::given(method("PATCH"))
+            .and(path("/repos/owner/repo/issues/comments/1234"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.ensure_comment("owner", "repo", 42, Some("some-subject"), "some\ncontent").await.unwrap();
+        assert!(result);
     }
 
     // Ported: "handles comment with no description" — modules/platform/github/index.spec.ts line 3481
@@ -4637,6 +5698,7 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
 
     // Ported: "should handle merge error" — modules/platform/github/index.spec.ts line 4852
     // Ported: "handles unknown error" — modules/platform/github/index.spec.ts line 4798
+    // Ported: "should handle merge error" — modules/platform/github/index.spec.ts line 4852
     #[tokio::test]
     async fn merge_pr_returns_false_on_error() {
         let server = MockServer::start().await;
@@ -4647,8 +5709,8 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
             .await;
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
-        let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await;
-        assert!(result.is_err());
+        let result = client.merge_pr("owner", "repo", 1234, "somebranch", None).await.unwrap();
+        assert!(!result);
     }
 
     // Ported: "should handle merge block" — modules/platform/github/index.spec.ts line 4873
@@ -4715,6 +5777,87 @@ fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let result = client.merge_pr("owner", "repo", 1234, "somebranch", Some("fast-forward")).await.unwrap();
         assert!(result);
+    }
+
+    // Ported: "should try squash first" — modules/platform/github/index.spec.ts line 4996
+    #[tokio::test]
+    async fn merge_pr_autodetect_tries_squash_first() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1235/merge"))
+            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"squash"}"#))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1235, "someref", None).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should try merge after squash" — modules/platform/github/index.spec.ts line 5015
+    #[tokio::test]
+    async fn merge_pr_autodetect_tries_merge_after_squash_fails() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1236/merge"))
+            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"squash"}"#))
+            .respond_with(ResponseTemplate::new(400).set_body_json(serde_json::json!({"message": "no squashing allowed"})))
+            .mount(&server)
+            .await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1236/merge"))
+            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"merge"}"#))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1236, "someref", None).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should try rebase after merge" — modules/platform/github/index.spec.ts line 5036
+    #[tokio::test]
+    async fn merge_pr_autodetect_tries_rebase_after_merge_fails() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1237/merge"))
+            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"squash"}"#))
+            .respond_with(ResponseTemplate::new(405).set_body_json(serde_json::json!({"message": "no squashing allowed"})))
+            .mount(&server)
+            .await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1237/merge"))
+            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"merge"}"#))
+            .respond_with(ResponseTemplate::new(405).set_body_json(serde_json::json!({"message": "no merging allowed"})))
+            .mount(&server)
+            .await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1237/merge"))
+            .and(wiremock::matchers::body_json_string(r#"{"merge_method":"rebase"}"#))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"sha": "abc"})))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1237, "someref", None).await.unwrap();
+        assert!(result);
+    }
+
+    // Ported: "should give up" — modules/platform/github/index.spec.ts line 5061
+    #[tokio::test]
+    async fn merge_pr_autodetect_gives_up() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/repos/owner/repo/pulls/1238/merge"))
+            .respond_with(ResponseTemplate::new(405).set_body_json(serde_json::json!({"message": "not allowed"})))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.merge_pr("owner", "repo", 1238, "someref", None).await.unwrap();
+        assert!(!result);
     }
 
     // Ported: "should skip automerge if disabled in repo settings" — modules/platform/github/index.spec.ts line 4009
