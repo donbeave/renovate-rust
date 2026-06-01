@@ -208,6 +208,7 @@ mod tests {
             package_file: "requirements.txt".to_owned(),
             manager: "pip_requirements".to_owned(),
             datasource: None,
+            update_type: None,
         }
     }
 

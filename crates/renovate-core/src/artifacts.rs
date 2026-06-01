@@ -23,6 +23,7 @@ pub struct UpdatedDep {
     pub package_file: String,
     pub manager: String,
     pub datasource: Option<String>,
+    pub update_type: Option<String>,
 }
 
 /// Configuration passed to artifact update.
@@ -268,6 +269,7 @@ mod tests {
             package_file: "Cargo.toml".to_owned(),
             manager: "cargo".to_owned(),
             datasource: Some("crate".to_owned()),
+            update_type: None,
         };
         let json = serde_json::to_string(&dep).unwrap();
         assert!(json.contains("serde"));

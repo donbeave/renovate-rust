@@ -388,12 +388,14 @@ mod tests {
                 package_file: "go.mod".to_owned(),
                 manager: "gomod".to_owned(),
                 datasource: None,
+                update_type: None,
             }],
             new_package_file_content: go_mod.to_owned(),
             config: ArtifactConfig {
                 lock_file_dir: lock_dir,
                 ..Default::default()
             },
+
         }
     }
 
@@ -559,12 +561,14 @@ mod tests {
                 package_file: package_file_name.to_owned(),
                 manager: "gomod".to_owned(),
                 datasource: None,
+                update_type: None,
             }],
             new_package_file_content: go_mod.to_owned(),
             config: ArtifactConfig {
                 lock_file_dir: lock_dir,
                 ..Default::default()
             },
+
         }
     }
 
@@ -1001,6 +1005,7 @@ mod tests {
             package_file: "go.mod".to_owned(),
             manager: "gomod".to_owned(),
             datasource: None,
+            update_type: None,
         }];
         input.config.env = make_fake_go(
             &dir,
@@ -1045,6 +1050,7 @@ mod tests {
             package_file: "go.mod".to_owned(),
             manager: "gomod".to_owned(),
             datasource: None,
+            update_type: None,
         }];
         input.config.env = make_fake_go(
             &dir,
@@ -1089,6 +1095,7 @@ mod tests {
             package_file: "go.mod".to_owned(),
             manager: "gomod".to_owned(),
             datasource: None,
+            update_type: None,
         }];
         input.config.env = make_fake_go(
             &dir,

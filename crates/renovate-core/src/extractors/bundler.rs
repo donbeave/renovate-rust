@@ -611,6 +611,102 @@ fn percent_encode_username(username: &str) -> String {
         .collect()
 }
 
+// ── Common helpers (mirrors bundler/common.ts) ────────────────────────────────
+
+/// Extract the ruby version from Gemfile content.
+///
+/// Mirrors `common.ts` `extractRubyVersion`.
+pub fn extract_ruby_version(txt: &str) -> Option<&str> {
+    let re = Regex::new(r#"(?m)^ruby\s+['"](?P<ver>[^'"]+)['"]\s*$"#).ok()?;
+    let cap = re.captures(txt)?;
+    cap.name("ver").map(|m| m.as_str())
+}
+
+/// Get the bundler version constraint.
+///
+/// 1. Uses `config.constraints["bundler"]` if present.
+/// 2. Falls back to `BUNDLED WITH` section in the lock file.
+pub fn get_bundler_constraint(config: &crate::artifacts::ArtifactConfig, lock_content: &str) -> Option<String> {
+    if let Some(v) = config.constraints.get("bundler") {
+        return Some(v.clone());
+    }
+    let re = Regex::new(r"\nBUNDLED WITH\n\s+(.*?)(\n|$)").ok()?;
+    let cap = re.captures(lock_content)?;
+    cap.get(1).map(|m| m.as_str().trim().to_owned())
+}
+
+/// Get the ruby version constraint.
+///
+/// 1. Uses `config.constraints["ruby"]` if present.
+/// 2. Extracts from Gemfile content (`ruby "x.y.z"`).
+/// 3. Reads `.ruby-version` and `.tool-versions` sibling files.
+/// 4. Reads the lock file for ruby version.
+pub async fn get_ruby_constraint(
+    package_file_name: &str,
+    new_package_file_content: &str,
+    config: &crate::artifacts::ArtifactConfig,
+) -> Option<String> {
+    if let Some(v) = config.constraints.get("ruby") {
+        return Some(v.clone());
+    }
+    if let Some(v) = extract_ruby_version(new_package_file_content) {
+        return Some(v.to_owned());
+    }
+
+    let package_path = std::path::Path::new(package_file_name);
+    let parent = package_path.parent().unwrap_or(std::path::Path::new(""));
+    let lock_dir = &config.lock_file_dir;
+
+    for sibling in [".ruby-version", ".tool-versions"] {
+        let path = lock_dir.join(parent).join(sibling);
+        if let Ok(content) = tokio::fs::read_to_string(&path).await {
+            let trimmed = content.trim();
+            if sibling == ".ruby-version" {
+                return Some(trimmed.to_owned());
+            }
+            // .tool-versions: extract ruby version line
+            for line in trimmed.lines() {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if parts.len() == 2 && parts[0] == "ruby" {
+                    return Some(parts[1].to_owned());
+                }
+            }
+        }
+    }
+
+    // Try lock file
+    let lock_path = get_lock_file_path(package_file_name, lock_dir).await.ok()?;
+    if let Ok(content) = tokio::fs::read_to_string(&lock_path).await {
+        let re = Regex::new(r"^ {3}ruby (\d[\d.]*)(?:[a-z]|\s|$)").ok()?;
+        for line in content.lines() {
+            if let Some(cap) = re.captures(line) {
+                return cap.get(1).map(|m| m.as_str().to_owned());
+            }
+        }
+    }
+
+    None
+}
+
+/// Determine the lock file path for a given Gemfile path.
+///
+/// Prefers `<packageFile>.lock` if it exists, otherwise falls back to
+/// `Gemfile.lock` in the same directory.
+pub async fn get_lock_file_path(
+    package_file_path: &str,
+    lock_dir: &std::path::Path,
+) -> Result<std::path::PathBuf, std::io::Error> {
+    let sibling = format!("{}.lock", package_file_path);
+    let sibling_path = lock_dir.join(&sibling);
+    if tokio::fs::metadata(&sibling_path).await.is_ok() {
+        Ok(sibling_path)
+    } else {
+        let package_path = std::path::Path::new(package_file_path);
+        let parent = package_path.parent().unwrap_or(std::path::Path::new(""));
+        Ok(lock_dir.join(parent).join("Gemfile.lock"))
+    }
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -935,6 +1031,7 @@ end
     // ── Ported: locked-version tests ──────────────────────────────────────────
 
     // Ported: "Parse Rails Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 13
+    // Ported: "matches the expected output" — modules/manager/bundler/gemfile.spec.ts line 7
     #[test]
     fn bundler_locked_version_parse_rails() {
         let entries = extract_lock_file_entries(RAILS_LOCK);
@@ -1424,5 +1521,134 @@ end
     fn bundler_dep_type_as_renovate_str() {
         assert_eq!(BundlerDepType::Regular.as_renovate_str(), "dependencies");
         assert_eq!(BundlerDepType::Dev.as_renovate_str(), "devDependencies");
+    }
+
+    // ── Ported: common tests ───────────────────────────────────────────────────
+
+    // Ported: "uses existing constraint" — modules/manager/bundler/common.spec.ts line 31
+    #[test]
+    fn get_bundler_constraint_uses_existing() {
+        let mut config = crate::artifacts::ArtifactConfig::default();
+        config.constraints.insert("bundler".to_owned(), "2.1.0".to_owned());
+        let result = get_bundler_constraint(&config, "");
+        assert_eq!(result, Some("2.1.0".to_owned()));
+    }
+
+    // Ported: "extracts from lockfile" — modules/manager/bundler/common.spec.ts line 41
+    #[test]
+    fn get_bundler_constraint_from_lockfile() {
+        let config = crate::artifacts::ArtifactConfig::default();
+        let lock = "GEM\n  remote: https://rubygems.org/\n\nBUNDLED WITH\n   1.17.3\n";
+        let result = get_bundler_constraint(&config, lock);
+        assert_eq!(result, Some("1.17.3".to_owned()));
+    }
+
+    // Ported: "returns null" — modules/manager/bundler/common.spec.ts line 49
+    #[test]
+    fn get_bundler_constraint_returns_none() {
+        let config = crate::artifacts::ArtifactConfig::default();
+        let result = get_bundler_constraint(&config, "");
+        assert_eq!(result, None);
+    }
+
+    // Ported: "uses existing constraint" — modules/manager/bundler/common.spec.ts line 59
+    #[tokio::test]
+    async fn get_ruby_constraint_uses_existing() {
+        let mut config = crate::artifacts::ArtifactConfig::default();
+        config.constraints.insert("ruby".to_owned(), "2.1.0".to_owned());
+        let result = get_ruby_constraint("Gemfile", "", &config).await;
+        assert_eq!(result, Some("2.1.0".to_owned()));
+    }
+
+    // Ported: "extracts from gemfile" — modules/manager/bundler/common.spec.ts line 71
+    #[tokio::test]
+    async fn get_ruby_constraint_from_gemfile() {
+        let config = crate::artifacts::ArtifactConfig::default();
+        let gemfile = "source 'https://rubygems.org'\nruby '~> 1.5.3'\n";
+        let result = get_ruby_constraint("Gemfile", gemfile, &config).await;
+        assert_eq!(result, Some("~> 1.5.3".to_owned()));
+    }
+
+    // Ported: "extracts from .ruby-version" — modules/manager/bundler/common.spec.ts line 81
+    #[tokio::test]
+    async fn get_ruby_constraint_from_ruby_version() {
+        let dir = tempfile::tempdir().unwrap();
+        tokio::fs::write(dir.path().join(".ruby-version"), "2.7.8\n")
+            .await
+            .unwrap();
+        let config = crate::artifacts::ArtifactConfig {
+            lock_file_dir: dir.path().to_path_buf(),
+            ..Default::default()
+        };
+        let result = get_ruby_constraint("Gemfile", "", &config).await;
+        assert_eq!(result, Some("2.7.8".to_owned()));
+    }
+
+    // Ported: "extracts from .tool-versions" — modules/manager/bundler/common.spec.ts line 92
+    #[tokio::test]
+    async fn get_ruby_constraint_from_tool_versions() {
+        let dir = tempfile::tempdir().unwrap();
+        tokio::fs::write(dir.path().join(".tool-versions"), "python\t3.8.10\nruby\t3.3.4\n")
+            .await
+            .unwrap();
+        let config = crate::artifacts::ArtifactConfig {
+            lock_file_dir: dir.path().to_path_buf(),
+            ..Default::default()
+        };
+        let result = get_ruby_constraint("Gemfile", "", &config).await;
+        assert_eq!(result, Some("3.3.4".to_owned()));
+    }
+
+    // Ported: "extracts from lockfile" — modules/manager/bundler/common.spec.ts line 105
+    #[tokio::test]
+    async fn get_ruby_constraint_from_lockfile() {
+        let dir = tempfile::tempdir().unwrap();
+        tokio::fs::write(
+            dir.path().join("Gemfile.lock"),
+            "GEM\n  remote: https://rubygems.org/\n\nPLATFORMS\n  ruby\n\nDEPENDENCIES\n\n   ruby 2.6.5\n\nBUNDLED WITH\n   1.17.3\n",
+        )
+        .await
+        .unwrap();
+        let config = crate::artifacts::ArtifactConfig {
+            lock_file_dir: dir.path().to_path_buf(),
+            ..Default::default()
+        };
+        let result = get_ruby_constraint("Gemfile", "", &config).await;
+        assert_eq!(result, Some("2.6.5".to_owned()));
+    }
+
+    // Ported: "returns null" — modules/manager/bundler/common.spec.ts line 120
+    #[tokio::test]
+    async fn get_ruby_constraint_returns_none() {
+        let dir = tempfile::tempdir().unwrap();
+        let config = crate::artifacts::ArtifactConfig {
+            lock_file_dir: dir.path().to_path_buf(),
+            ..Default::default()
+        };
+        let result = get_ruby_constraint("Gemfile", "", &config).await;
+        assert_eq!(result, None);
+    }
+
+    // Ported: "returns packageFileName.lock" — modules/manager/bundler/common.spec.ts line 132
+    #[tokio::test]
+    async fn get_lock_file_path_returns_sibling() {
+        let dir = tempfile::tempdir().unwrap();
+        tokio::fs::write(dir.path().join("packageFileName.lock"), "")
+            .await
+            .unwrap();
+        let result = get_lock_file_path("packageFileName", dir.path())
+            .await
+            .unwrap();
+        assert_eq!(result, dir.path().join("packageFileName.lock"));
+    }
+
+    // Ported: "returns Gemfile.lock" — modules/manager/bundler/common.spec.ts line 138
+    #[tokio::test]
+    async fn get_lock_file_path_returns_gemfile_lock() {
+        let dir = tempfile::tempdir().unwrap();
+        let result = get_lock_file_path("packageFileName", dir.path())
+            .await
+            .unwrap();
+        assert_eq!(result, dir.path().join("Gemfile.lock"));
     }
 }

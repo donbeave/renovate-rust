@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5615 / 11670 distinct upstream it() tests ported (48.1%) across 292 modules.
-**Quality:** 6332 `// Ported:` comments → 709 duplicate, 0 orphan, 0 malformed.
+**Total:** 5614 / 11670 distinct upstream it() tests ported (48.1%) across 292 modules.
+**Quality:** 6324 `// Ported:` comments → 709 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2444/3642 (67%)
+## managers  —  2443/3642 (67%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -49,7 +49,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/buildpacks` | 1 | full | 3/3 (100%) | — |
 | `manager/bun` | 3 | ? | 3/34 (9%) | — |
 | `manager/bun-version` | 1 | full | 6/6 (100%) | — |
-| `manager/bundler` | 7 | full | 60/74 (81%) | — |
+| `manager/bundler` | 7 | full | 59/74 (80%) | — |
 | `manager/cake` | 1 | ? | 3/5 (60%) | — |
 | `manager/cargo` | 6 | full | 62/73 (85%) | — |
 | `manager/cdnurl` | 1 | full | 1/1 (100%) | — |

@@ -241,6 +241,7 @@ mod tests {
                 package_file: "package.json".to_owned(),
                 manager: "npm".to_owned(),
                 datasource: Some("npm".to_owned()),
+                update_type: None,
             }],
             new_package_file_content: r#"{"name":"test","dependencies":{"lodash":"^4.17.21"}}"#
                 .to_owned(),

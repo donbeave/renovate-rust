@@ -355,6 +355,7 @@ mod tests {
             package_file: "Cargo.toml".to_owned(),
             manager: "cargo".to_owned(),
             datasource: datasource.map(|s| s.to_owned()),
+            update_type: None,
         }
     }
 

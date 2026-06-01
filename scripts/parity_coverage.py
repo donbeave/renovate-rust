@@ -93,7 +93,7 @@ def classify(spec_rel: str) -> tuple[str, str]:
 # already counted them.
 IT_CALL_RE = re.compile(
     r"""
-    ^[ \t]+                       # must be indented (avoids commented top-level)
+    ^[ \t]*                       # may be top-level (some specs have unindented it.each)
     (?:it|test)                    # base
     (?:\.(?:each|skip|only|failing|concurrent|todo))?  # optional variant chain
     (?:\.(?:each|skip|only|failing|concurrent|todo))?  # up to two chained
@@ -104,7 +104,7 @@ IT_CALL_RE = re.compile(
 )
 
 # Also catch xit / xtest (skipped, counts as pending).
-XIT_RE = re.compile(r"^[ \t]+(?:xit|xtest)\s*\(")
+XIT_RE = re.compile(r"^[ \t]*(?:xit|xtest)\s*\(")
 
 
 @dataclass
@@ -569,7 +569,7 @@ IT_DESC_RE = re.compile(
 
 
 EACH_OPENER_RE = re.compile(
-    r"^[ \t]+(?:it|test|xit|xtest)\.each\s*[\(\`]"
+    r"^[ \t]*(?:it|test|xit|xtest)\.each\s*[\(\`]"
 )
 
 
@@ -596,8 +596,8 @@ def _spec_it_at(spec_path: Path, line_no: int) -> str | None:
     if not EACH_OPENER_RE.match(line):
         return None
 
-    # Read up to 80 lines forward as one chunk and scan for the description.
-    end = min(line_no + 80, len(lines))
+    # Read up to 600 lines forward as one chunk and scan for the description.
+    end = min(line_no + 600, len(lines))
     chunk = "\n".join(lines[line_no - 1:end])
 
     # Backtick form: find the closing backtick that precedes `(`.

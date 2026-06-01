@@ -22,6 +22,7 @@ pub mod buildkite;
 pub mod buildpacks;
 pub mod bun_version;
 pub mod bundler;
+pub mod bundler_artifact_runner;
 pub mod cabal;
 pub mod cake;
 pub mod cargo;
