@@ -67,8 +67,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/deps-edn` | 2 | ? | 4/4 (100%) | — |
 | `manager/devbox` | 2 | ? | 13/28 (46%) | — |
 | `manager/devcontainer` | 1 | ? | 15/15 (100%) | — |
-| `manager/docker-compose` | 1 | ? | 13/13 (100%) | — |
-| `manager/dockerfile` | 1 | ? | 76/76 (100%) | — |
+| `manager/docker-compose` | 1 | full | 13/13 (100%) | — |
+| `manager/dockerfile` | 1 | full | 76/76 (100%) | — |
 | `manager/droneci` | 1 | ? | 5/5 (100%) | — |
 | `manager/fleet` | 1 | ? | 8/10 (80%) | — |
 | `manager/flux` | 2 | ? | 59/66 (89%) | — |
