@@ -794,6 +794,265 @@ pub fn bump_package_version(content: &str, current_value: &str, bump_version: &s
     content.to_owned()
 }
 
+/// Find the `<Version>` or `<VersionPrefix>` element value in a .csproj XML string.
+///
+/// Mirrors `findVersion()` from `lib/modules/manager/nuget/util.ts`.
+pub fn find_version_in_csproj(content: &str) -> Option<String> {
+    let mut reader = Reader::from_reader(BufReader::new(content.as_bytes()));
+    let mut buf = Vec::new();
+    let mut in_property_group = false;
+    let mut current_tag = String::new();
+    let mut version: Option<String> = None;
+    let mut version_prefix: Option<String> = None;
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if name == "PropertyGroup" {
+                    in_property_group = true;
+                } else if in_property_group && (name == "Version" || name == "VersionPrefix") {
+                    current_tag = name;
+                }
+            }
+            Ok(Event::Text(e)) => {
+                if !current_tag.is_empty() {
+                    let val = e.decode().ok()?.into_owned();
+                    if current_tag == "Version" {
+                        version = Some(val);
+                    } else if current_tag == "VersionPrefix" && version.is_none() {
+                        version_prefix = Some(val);
+                    }
+                    current_tag.clear();
+                }
+            }
+            Ok(Event::End(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if name == "PropertyGroup" {
+                    in_property_group = false;
+                }
+                current_tag.clear();
+            }
+            Ok(Event::Empty(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if in_property_group && (name == "Version" || name == "VersionPrefix") {
+                    // empty tag like <Version /> — no value
+                }
+            }
+            Ok(Event::Eof) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+    version.or(version_prefix)
+}
+
+/// Parse a NuGet.config XML string and return the list of active registries.
+///
+/// Mirrors `getConfiguredRegistries()` from `lib/modules/manager/nuget/util.ts`.
+pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
+    let mut reader = Reader::from_reader(BufReader::new(content.as_bytes()));
+    let mut buf = Vec::new();
+    let mut registries: Vec<NuGetRegistry> = Vec::new();
+    let mut disabled_sources: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let mut in_package_sources = false;
+    let mut in_disabled_sources = false;
+    let mut source_mapping: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+    let mut in_package_source_mapping = false;
+    let mut current_mapping_key = String::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                match name.as_str() {
+                    "packageSources" => in_package_sources = true,
+                    "disabledPackageSources" => in_disabled_sources = true,
+                    "packageSourceMapping" => in_package_source_mapping = true,
+                    "package" => {
+                        if in_package_source_mapping {
+                            for attr in e.attributes() {
+                                if let Ok(a) = attr {
+                                    if String::from_utf8_lossy(a.key.as_ref()) == "pattern" {
+                                        if let Ok(val) = a.unescape_value() {
+                                            source_mapping
+                                                .entry(current_mapping_key.clone())
+                                                .or_default()
+                                                .push(val.into_owned());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Ok(Event::Empty(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if in_package_sources && name == "clear" {
+                    registries.clear();
+                }
+                if in_disabled_sources && name == "add" {
+                    for attr in e.attributes() {
+                        if let Ok(a) = attr {
+                            if String::from_utf8_lossy(a.key.as_ref()) == "key" {
+                                if let Ok(val) = a.unescape_value() {
+                                    disabled_sources.insert(val.into_owned());
+                                }
+                            }
+                        }
+                    }
+                }
+                if in_package_source_mapping && name == "packageSource" {
+                    for attr in e.attributes() {
+                        if let Ok(a) = attr {
+                            if String::from_utf8_lossy(a.key.as_ref()) == "key" {
+                                if let Ok(val) = a.unescape_value() {
+                                    current_mapping_key = val.into_owned();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(Event::End(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                match name.as_str() {
+                    "packageSources" => in_package_sources = false,
+                    "disabledPackageSources" => in_disabled_sources = false,
+                    "packageSourceMapping" => in_package_source_mapping = false,
+                    _ => {}
+                }
+            }
+            Ok(Event::Eof) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    // Re-parse for <add> elements inside packageSources
+    let mut reader2 = Reader::from_reader(BufReader::new(content.as_bytes()));
+    let mut buf2 = Vec::new();
+    let mut in_sources = false;
+    let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+
+    loop {
+        match reader2.read_event_into(&mut buf2) {
+            Ok(Event::Start(e)) | Ok(Event::Empty(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if name == "packageSources" {
+                    in_sources = true;
+                } else if in_sources && name == "add" {
+                    let mut key = String::new();
+                    let mut value = String::new();
+                    for attr in e.attributes() {
+                        if let Ok(a) = attr {
+                            let attr_name = String::from_utf8_lossy(a.key.as_ref()).into_owned();
+                            if let Ok(val) = a.unescape_value() {
+                                match attr_name.as_str() {
+                                    "key" => key = val.into_owned(),
+                                    "value" => value = val.into_owned(),
+                                    _ => {}
+                                }
+                            }
+                        }
+                    }
+                    if !value.is_empty() && !value.starts_with("file://") && !value.starts_with("/") && !value.starts_with("\\") && !value.starts_with("C:\\") {
+                        let is_disabled = disabled_sources.contains(&key);
+                        let is_re_enabled = disabled_sources.contains(&key) && value.is_empty();
+                        if !is_disabled || is_re_enabled {
+                            let url = if value.ends_with("/index.json") {
+                                parse_nuget_registry_url(&value).feed_url
+                            } else {
+                                value.clone()
+                            };
+                            if seen.insert(url.clone()) {
+                                let patterns = source_mapping.get(&key).cloned();
+                                registries.push(NuGetRegistry {
+                                    name: Some(key),
+                                    url,
+                                    source_mapped_package_patterns: patterns,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(Event::End(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if name == "packageSources" {
+                    in_sources = false;
+                }
+            }
+            Ok(Event::Eof) => break,
+            _ => {}
+        }
+        buf2.clear();
+    }
+
+    registries
+}
+
+/// Minimal dependency representation for util-layer registry mapping.
+#[derive(Debug, Clone, Default)]
+pub struct NuGetPackageDependency {
+    pub dep_name: String,
+    pub registry_urls: Option<Vec<String>>,
+}
+
+/// Apply registry URLs to a dependency, respecting source mapping patterns.
+///
+/// Mirrors `applyRegistries()` from `lib/modules/manager/nuget/util.ts`.
+pub fn apply_registries_to_dep(dep: &mut NuGetPackageDependency, registries: &[NuGetRegistry]) {
+    if registries.is_empty() {
+        return;
+    }
+
+    let has_source_mapping = registries.iter().any(|r| r.source_mapped_package_patterns.is_some());
+    if !has_source_mapping {
+        dep.registry_urls = Some(registries.iter().map(|r| r.url.clone()).collect());
+        return;
+    }
+
+    let dep_name = dep.dep_name.as_str();
+    let mut matched_urls: Vec<String> = Vec::new();
+    let mut patterns: Vec<(String, Vec<String>)> = Vec::new();
+
+    for reg in registries {
+        if let Some(ref pats) = reg.source_mapped_package_patterns {
+            for pat in pats {
+                patterns.push((pat.clone(), vec![reg.url.clone()]));
+            }
+        }
+    }
+
+    // Sort patterns: exact matches first, then wildcards, longest first
+    patterns.sort_by(|a, b| {
+        let a_wild = a.0.ends_with('*');
+        let b_wild = b.0.ends_with('*');
+        if a_wild && !b_wild {
+            return std::cmp::Ordering::Greater;
+        }
+        if !a_wild && b_wild {
+            return std::cmp::Ordering::Less;
+        }
+        b.0.len().cmp(&a.0.len())
+    });
+
+    for (pattern, urls) in &patterns {
+        let glob = pattern.trim_end_matches('*');
+        if pattern == "*" || dep_name.eq_ignore_ascii_case(glob) || dep_name.to_ascii_lowercase().starts_with(&glob.to_ascii_lowercase()) {
+            matched_urls.extend(urls.iter().cloned());
+            break;
+        }
+    }
+
+    if !matched_urls.is_empty() {
+        dep.registry_urls = Some(matched_urls);
+    }
+}
+
 fn bump_csproj_semver(version: &semver::Version, bump_type: &str) -> Option<String> {
     let mut new = version.clone();
     match bump_type {
@@ -2099,5 +2358,191 @@ Console.WriteLine("Hello World!");
         let parsed = parse_nuget_registry_url("https://nuget.org#protocolVersion=3");
         assert_eq!(parsed.feed_url, "https://nuget.org/");
         assert_eq!(parsed.protocol_version, 3);
+    }
+
+    // ── nuget/util.spec.ts ───────────────────────────────────────────────────
+
+    // Ported: "finds the version in a later property group" — nuget/util.spec.ts line 17
+    #[test]
+    fn find_version_in_later_property_group() {
+        let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup><PropertyGroup><Version>0.0.2</Version></PropertyGroup></Project>"#;
+        let version = find_version_in_csproj(content);
+        assert_eq!(version, Some("0.0.2".to_owned()));
+    }
+
+    // Ported: "picks version over versionprefix" — nuget/util.spec.ts line 28
+    #[test]
+    fn find_version_prefers_version_over_versionprefix() {
+        let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>0.0.5</VersionPrefix></PropertyGroup><PropertyGroup><Version>0.0.2</Version></PropertyGroup></Project>"#;
+        let version = find_version_in_csproj(content);
+        assert_eq!(version, Some("0.0.2".to_owned()));
+    }
+
+    // Ported: "reads nuget config file" — nuget/util.spec.ts line 41
+    #[test]
+    fn get_configured_registries_reads_nuget_config() {
+        let config = r#"<configuration><packageSources><clear/><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/><add key="contoso.com" value="https://contoso.com/packages/"/></packageSources></configuration>"#;
+        let registries = parse_nuget_config_registries_full(config);
+        assert_eq!(registries.len(), 2);
+        assert_eq!(registries[0].url, "https://api.nuget.org/v3/index.json");
+        assert_eq!(registries[1].url, "https://contoso.com/packages/");
+    }
+
+    // Ported: "deduplicates registries" — nuget/util.spec.ts line 78
+    #[test]
+    fn get_configured_registries_deduplicates() {
+        let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources></configuration>"#;
+        let registries = parse_nuget_config_registries_full(config);
+        assert_eq!(registries.len(), 1);
+    }
+
+    // Ported: "reads nuget config file with default registry" — nuget/util.spec.ts line 99
+    #[test]
+    fn get_configured_registries_with_default_registry() {
+        let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources><disabledPackageSources/></configuration>"#;
+        let registries = parse_nuget_config_registries_full(config);
+        assert_eq!(registries.len(), 2); // default + nuget.org
+    }
+
+    // Ported: "reads nuget config file with default registry disabled and added sources" — nuget/util.spec.ts line 134
+    #[test]
+    fn get_configured_registries_default_disabled_with_added_sources() {
+        let config = r#"<configuration><packageSources><clear/><add key="contoso" value="https://contoso.com/packages/"/></packageSources><disabledPackageSources><add key="nuget.org"/></disabledPackageSources></configuration>"#;
+        let registries = parse_nuget_config_registries_full(config);
+        assert_eq!(registries.len(), 1);
+        assert_eq!(registries[0].url, "https://contoso.com/packages/");
+    }
+
+    // Ported: "reads nuget config file with default registry disabled given default registry added" — nuget/util.spec.ts line 157
+    #[test]
+    fn get_configured_registries_default_disabled_given_default_added() {
+        let config = r#"<configuration><packageSources><clear/><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources><disabledPackageSources><add key="nuget.org"/></disabledPackageSources></configuration>"#;
+        let registries = parse_nuget_config_registries_full(config);
+        assert_eq!(registries.len(), 1);
+        assert_eq!(registries[0].url, "https://api.nuget.org/v3/index.json");
+    }
+
+    // Ported: "reads nuget config file with unknown disabled source" — nuget/util.spec.ts line 181
+    #[test]
+    fn get_configured_registries_unknown_disabled_source() {
+        let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources><disabledPackageSources><add key="unknown"/></disabledPackageSources></configuration>"#;
+        let registries = parse_nuget_config_registries_full(config);
+        assert_eq!(registries.len(), 2); // default + nuget.org
+    }
+
+    // Ported: "reads nuget config file with disabled source with value false" — nuget/util.spec.ts line 208
+    #[test]
+    fn get_configured_registries_disabled_source_with_value_false() {
+        let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources><disabledPackageSources><add key="nuget.org" value="false"/></disabledPackageSources></configuration>"#;
+        let registries = parse_nuget_config_registries_full(config);
+        assert_eq!(registries.len(), 2);
+    }
+
+    // Ported: "reads nuget config file without packageSources and ignores disabledPackageSources" — nuget/util.spec.ts line 237
+    #[test]
+    fn get_configured_registries_no_package_sources() {
+        let config = r#"<configuration><disabledPackageSources><add key="nuget.org"/></disabledPackageSources></configuration>"#;
+        let registries = parse_nuget_config_registries_full(config);
+        assert!(registries.is_empty());
+    }
+
+    // Ported: "applies registry to package name via source mapping" — nuget/util.spec.ts line 254
+    #[test]
+    fn apply_registries_with_source_mapping() {
+        let mut dep = NuGetPackageDependency {
+            dep_name: "Newtonsoft.Json".to_owned(),
+            ..Default::default()
+        };
+        let registries = vec![
+            NuGetRegistry {
+                name: Some("nuget.org".to_owned()),
+                url: "https://api.nuget.org/v3/index.json".to_owned(),
+                source_mapped_package_patterns: Some(vec!["*".to_owned()]),
+            },
+        ];
+        apply_registries_to_dep(&mut dep, &registries);
+        assert_eq!(dep.registry_urls, Some(vec!["https://api.nuget.org/v3/index.json".to_owned()]));
+    }
+
+    // Ported: "applies registry to package name case insensitive" — nuget/util.spec.ts line 323
+    #[test]
+    fn apply_registries_case_insensitive() {
+        let mut dep = NuGetPackageDependency {
+            dep_name: "newtonsoft.json".to_owned(),
+            ..Default::default()
+        };
+        let registries = vec![
+            NuGetRegistry {
+                name: Some("nuget.org".to_owned()),
+                url: "https://api.nuget.org/v3/index.json".to_owned(),
+                source_mapped_package_patterns: Some(vec!["Newtonsoft*".to_owned()]),
+            },
+        ];
+        apply_registries_to_dep(&mut dep, &registries);
+        assert_eq!(dep.registry_urls, Some(vec!["https://api.nuget.org/v3/index.json".to_owned()]));
+    }
+
+    // Ported: "applies all registries to package name" — nuget/util.spec.ts line 343
+    #[test]
+    fn apply_registries_all_matching() {
+        let mut dep = NuGetPackageDependency {
+            dep_name: "Newtonsoft.Json".to_owned(),
+            ..Default::default()
+        };
+        let registries = vec![
+            NuGetRegistry {
+                name: Some("nuget.org".to_owned()),
+                url: "https://api.nuget.org/v3/index.json".to_owned(),
+                source_mapped_package_patterns: None,
+            },
+            NuGetRegistry {
+                name: Some("contoso".to_owned()),
+                url: "https://contoso.com/packages/".to_owned(),
+                source_mapped_package_patterns: None,
+            },
+        ];
+        apply_registries_to_dep(&mut dep, &registries);
+        assert_eq!(dep.registry_urls, Some(vec![
+            "https://api.nuget.org/v3/index.json".to_owned(),
+            "https://contoso.com/packages/".to_owned(),
+        ]));
+    }
+
+    // Ported: "applies nothing" — nuget/util.spec.ts line 371
+    #[test]
+    fn apply_registries_no_match() {
+        let mut dep = NuGetPackageDependency {
+            dep_name: "Newtonsoft.Json".to_owned(),
+            ..Default::default()
+        };
+        apply_registries_to_dep(&mut dep, &[]);
+        assert!(dep.registry_urls.is_none());
+    }
+
+    // Ported: "not found" — nuget/util.spec.ts line 386
+    #[test]
+    fn find_global_json_not_found() {
+        assert!(extract_global_json("{}").is_none());
+    }
+
+    // Ported: "no content" — nuget/util.spec.ts line 392
+    #[test]
+    fn find_global_json_no_content() {
+        assert!(extract_global_json("").is_none());
+    }
+
+    // Ported: "fails to parse" — nuget/util.spec.ts line 398
+    #[test]
+    fn find_global_json_fails_to_parse() {
+        assert!(extract_global_json("{{").is_none());
+    }
+
+    // Ported: "parses" — nuget/util.spec.ts line 405
+    #[test]
+    fn find_global_json_parses() {
+        let content = r#"{"sdk": {"version": "5.0.302", "rollForward": "latestMajor"}, "msbuild-sdks": {"My.Custom.Sdk": "5.0.0"}}"#;
+        let result = extract_global_json(content).unwrap();
+        assert_eq!(result.dotnet_sdk_constraint, Some("5.0.302".to_owned()));
+        assert_eq!(result.deps.len(), 2);
     }
 }

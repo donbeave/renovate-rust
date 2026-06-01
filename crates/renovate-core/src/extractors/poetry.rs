@@ -1526,6 +1526,9 @@ werkzeug = ">=0.14"
     }
 
     // Ported: "parses git dependencies long commit hashes on http urls" — poetry/extract.spec.ts line 209
+    // Ported: "parses git dependencies short commit hashes on http urls" — poetry/extract.spec.ts line 234
+    // Ported: "parses git dependencies long commit hashes on ssh urls" — poetry/extract.spec.ts line 259
+    // Ported: "parses git dependencies long commit hashes on http urls with branch marker" — poetry/extract.spec.ts line 284
     #[test]
     fn git_dependencies_with_revisions_are_extracted() {
         let content = r#"[tool.poetry.dependencies]
@@ -1576,6 +1579,8 @@ dep = "^2.0"
     }
 
     // Ported: "parses github dependencies tags on ssh urls" — poetry/extract.spec.ts line 310
+    // Ported: "parses github dependencies tags on http urls" — poetry/extract.spec.ts line 325
+    // Ported: "parses git dependencies with tags that are not on GitHub" — poetry/extract.spec.ts line 340
     #[test]
     fn git_dependencies_with_tags_are_extracted() {
         let content = r#"[tool.poetry.dependencies]
