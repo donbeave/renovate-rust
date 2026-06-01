@@ -1764,6 +1764,102 @@ mod tests {
         assert!(pr.is_none());
     }
 
+    // Ported: "should strip draft prefix from title" — modules/platform/gitlab/index.spec.ts line 618
+    #[tokio::test]
+    async fn get_branch_pr_strips_draft_prefix() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("source_branch", "renovate/deps"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 7,
+                    "title": "Draft: some change",
+                    "description": "a merge request",
+                    "state": "opened",
+                    "source_branch": "renovate/deps",
+                    "target_branch": "main",
+                    "created_at": "2025-05-19T12:00:00Z",
+                    "updated_at": "2025-05-19T12:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/7"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 7,
+                "title": "Draft: some change",
+                "description": "a merge request",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2025-05-19T12:00:00Z",
+                "updated_at": "2025-05-19T12:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client
+            .get_branch_pr("owner", "repo", "renovate/deps")
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(pr.title, "some change");
+        assert!(pr.is_draft);
+    }
+
+    // Ported: "should strip deprecated draft prefix from title" — modules/platform/gitlab/index.spec.ts line 657
+    #[tokio::test]
+    async fn get_branch_pr_strips_wip_prefix() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("source_branch", "renovate/deps"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 7,
+                    "title": "WIP: some change",
+                    "description": "a merge request",
+                    "state": "opened",
+                    "source_branch": "renovate/deps",
+                    "target_branch": "main",
+                    "created_at": "2025-05-19T12:00:00Z",
+                    "updated_at": "2025-05-19T12:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/7"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 7,
+                "title": "WIP: some change",
+                "description": "a merge request",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2025-05-19T12:00:00Z",
+                "updated_at": "2025-05-19T12:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client
+            .get_branch_pr("owner", "repo", "renovate/deps")
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(pr.title, "some change");
+        assert!(pr.is_draft);
+    }
+
     // ── code-owners ───────────────────────────────────────────────────────────
 
     // Ported: "should extract an owner rule from a line" — modules/platform/gitlab/code-owners.spec.ts line 5
