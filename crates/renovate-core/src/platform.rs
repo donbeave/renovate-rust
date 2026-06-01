@@ -75,11 +75,45 @@ pub struct RawFile {
     pub content: String,
 }
 
+/// Result of initializing a repository on the platform.
+///
+/// Mirrors `RepoResult` from `lib/modules/platform/types.ts`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RepoInitResult {
+    /// Default branch name (e.g. "main" or "master").
+    pub default_branch: String,
+    /// Whether the repository is a fork.
+    pub is_fork: bool,
+    /// Stable fingerprint derived from repo id + endpoint.
+    pub repo_fingerprint: String,
+    /// Preferred merge method: "squash", "merge", "rebase", or None if unknown.
+    pub merge_method: Option<String>,
+    /// Whether auto-merge is allowed for this repository.
+    pub auto_merge_allowed: bool,
+    /// Whether issues are enabled.
+    pub has_issues_enabled: bool,
+    /// Whether vulnerability alerts are enabled.
+    pub has_vulnerability_alerts_enabled: bool,
+}
+
 /// Common interface for all platform integrations.
 ///
 /// All methods are async. Use [`AnyPlatformClient`] when you need runtime
 /// dispatch across platforms.
 pub trait PlatformClient: Send + Sync {
+    /// Initialize the platform for a specific repository.
+    ///
+    /// Fetches repository metadata (default branch, merge methods, fork status,
+    /// etc.) and returns a [`RepoInitResult`]. This is the first platform call
+    /// for every repository in a Renovate run.
+    ///
+    /// Mirrors `initRepo` from upstream platform implementations.
+    fn init_repo(
+        &self,
+        owner: &str,
+        repo: &str,
+    ) -> impl std::future::Future<Output = Result<RepoInitResult, PlatformError>> + Send;
+
     /// Verify authentication and return the currently-authenticated user.
     fn get_current_user(
         &self,
@@ -209,6 +243,19 @@ impl AnyPlatformClient {
         match self {
             Self::Local(c) => Some(c.base_dir()),
             _ => None,
+        }
+    }
+
+    /// Initialize the platform for a specific repository.
+    pub async fn init_repo(
+        &self,
+        owner: &str,
+        repo: &str,
+    ) -> Result<RepoInitResult, PlatformError> {
+        match self {
+            Self::Github(c) => c.init_repo(owner, repo).await,
+            Self::Gitlab(c) => c.init_repo(owner, repo).await,
+            Self::Local(c) => c.init_repo(owner, repo).await,
         }
     }
 

@@ -21,7 +21,7 @@ use base64::Engine as _;
 use serde::Deserialize;
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
+use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
 
 /// Default GitLab API base URL.
 pub const GITLAB_API_BASE: &str = "https://gitlab.com/api/v4";
@@ -161,6 +161,23 @@ struct GitlabTreeEntry {
 // ── PlatformClient impl ───────────────────────────────────────────────────────
 
 impl PlatformClient for GitlabClient {
+    async fn init_repo(
+        &self,
+        _owner: &str,
+        _repo: &str,
+    ) -> Result<RepoInitResult, PlatformError> {
+        // TODO: Implement GitLab-specific init_repo (fetch project metadata via REST API).
+        Ok(RepoInitResult {
+            default_branch: "main".to_owned(),
+            is_fork: false,
+            repo_fingerprint: String::new(),
+            merge_method: None,
+            auto_merge_allowed: false,
+            has_issues_enabled: true,
+            has_vulnerability_alerts_enabled: false,
+        })
+    }
+
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         let url = format!("{}/user", self.api_base);
         let resp = self

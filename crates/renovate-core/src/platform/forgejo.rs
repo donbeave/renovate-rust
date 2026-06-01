@@ -14,7 +14,7 @@ use crate::http::{HttpClient, HttpError};
 use crate::platform::gitea_forgejo_utils::{
     ContentsListResponse, ContentsResponse, get_merge_method,
 };
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
+use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
 
 pub const FORGEJO_API_VERSION: &str = "api/v1";
 
@@ -250,6 +250,21 @@ pub async fn get_pr(
 }
 
 impl PlatformClient for ForgejoClient {
+    async fn init_repo(
+        &self,
+        _owner: &str,
+        _repo: &str,
+    ) -> Result<RepoInitResult, PlatformError> {
+        Ok(RepoInitResult {
+            default_branch: "main".to_owned(),
+            is_fork: false,
+            repo_fingerprint: String::new(),
+            merge_method: None,
+            auto_merge_allowed: false,
+            has_issues_enabled: true,
+            has_vulnerability_alerts_enabled: false,
+        })
+    }
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         let url = format!("{}/user", self.api_base);
         let user: ForgejoUser = self.http.get_json(&url).await.map_err(|e| match e {

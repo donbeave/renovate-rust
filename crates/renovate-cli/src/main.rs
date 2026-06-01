@@ -353,6 +353,26 @@ async fn process_repo(
 
     tracing::info!(repo = %repo_slug, "processing repository");
 
+    // Initialize the repository on the platform: fetch metadata (default branch,
+    // merge methods, fork status, etc.). This is the first platform call for
+    // every repository — mirrors upstream `initRepo`.
+    let repo_init = match client.init_repo(owner, repo).await {
+        Ok(init) => {
+            tracing::info!(
+                repo = %repo_slug,
+                default_branch = %init.default_branch,
+                is_fork = init.is_fork,
+                merge_method = ?init.merge_method,
+                "platform init_repo succeeded"
+            );
+            init
+        }
+        Err(err) => {
+            tracing::error!(repo = %repo_slug, %err, "platform init_repo failed");
+            return (None, true);
+        }
+    };
+
     // Parse the per-repo config and apply top-level gates.
     let repo_cfg = match repo_config::discover(client, owner, repo, config).await {
         Ok(repo_config::RepoConfigResult::Found { path, config: rc }) => {
@@ -486,7 +506,7 @@ async fn process_repo(
         .base_branches
         .first()
         .cloned()
-        .unwrap_or_else(|| "main".to_owned());
+        .unwrap_or_else(|| repo_init.default_branch.clone());
 
     // Branchify: group UpdateAvailable deps by branch_name so deps sharing
     // a branch are coalesced into a single PR.  Mirrors Renovate's

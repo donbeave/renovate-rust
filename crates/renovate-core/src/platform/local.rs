@@ -11,7 +11,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::platform::scm::{CommitConfig, Scm, ScmResult};
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
+use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
 
 /// Platform client that reads from the local filesystem.
 #[derive(Debug, Clone)]
@@ -179,6 +179,37 @@ fn walk_dir_inner(base: &Path, current: &Path, files: &mut Vec<String>) {
 }
 
 impl PlatformClient for LocalClient {
+    async fn init_repo(
+        &self,
+        _owner: &str,
+        _repo: &str,
+    ) -> Result<RepoInitResult, PlatformError> {
+        // Try to read the default branch from git config.
+        let default_branch = std::process::Command::new("git")
+            .args(["config", "--get", "init.defaultBranch"])
+            .current_dir(&self.base_dir)
+            .output()
+            .ok()
+            .and_then(|out| {
+                if out.status.success() {
+                    Some(String::from_utf8_lossy(&out.stdout).trim().to_owned())
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_else(|| "main".to_owned());
+
+        Ok(RepoInitResult {
+            default_branch,
+            is_fork: false,
+            repo_fingerprint: String::new(),
+            merge_method: None,
+            auto_merge_allowed: false,
+            has_issues_enabled: false,
+            has_vulnerability_alerts_enabled: false,
+        })
+    }
+
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         Ok(CurrentUser {
             login: "local".to_owned(),

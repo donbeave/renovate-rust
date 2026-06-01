@@ -12,7 +12,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CurrentUser, PlatformClient, PlatformError, RawFile};
+use crate::platform::{CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
 
 // ── massage-markdown-links ────────────────────────────────────────────────────
 
@@ -163,6 +163,48 @@ impl GithubClient {
         })
     }
 
+    /// GraphQL query to fetch repository metadata.
+    ///
+    /// Mirrors `repoInfoQuery` from `lib/modules/platform/github/graphql.ts`.
+    const REPO_INFO_QUERY: &str = r#"
+query($owner: String!, $name: String!, $user: String) {
+  repository(owner: $owner, name: $name) {
+    id
+    isFork
+    parent {
+      nameWithOwner
+    }
+    isArchived
+    nameWithOwner
+    hasIssuesEnabled
+    hasVulnerabilityAlertsEnabled
+    autoMergeAllowed
+    mergeCommitAllowed
+    rebaseMergeAllowed
+    squashMergeAllowed
+    defaultBranchRef {
+      name
+      target {
+        oid
+      }
+    }
+    issues(
+      orderBy: { field: UPDATED_AT, direction: DESC },
+      filterBy: { createdBy: $user },
+      first: 5
+    ) {
+      nodes {
+        number
+        state
+        title
+        body
+        updatedAt
+      }
+    }
+  }
+}
+"#;
+
     /// Initialize the GitHub platform.
     ///
     /// Validates the token, fetches the current user, and attempts to
@@ -200,6 +242,155 @@ impl GithubClient {
         };
 
         Ok((user.login, email))
+    }
+
+    /// Initialize a specific repository on GitHub.
+    ///
+    /// Fetches repository metadata via GraphQL, detects merge methods,
+    /// archived/renamed/empty states, and computes a repo fingerprint.
+    ///
+    /// Mirrors `initRepo` from `lib/modules/platform/github/index.ts`.
+    pub async fn init_repo(
+        &self,
+        owner: &str,
+        repo: &str,
+    ) -> Result<RepoInitResult, PlatformError> {
+        let variables = serde_json::json!({
+            "owner": owner,
+            "name": repo,
+        });
+        let body = serde_json::json!({
+            "query": Self::REPO_INFO_QUERY,
+            "variables": variables,
+        });
+        let url = format!("{}/graphql", self.api_base);
+
+        let response: serde_json::Value = self
+            .http
+            .post_json(&url, &body.to_string())
+            .await
+            .map_err(|e| match e {
+                HttpError::Status { status, .. } if status == reqwest::StatusCode::FORBIDDEN => {
+                    PlatformError::Unexpected("REPOSITORY_ACCESS_FORBIDDEN".to_owned())
+                }
+                HttpError::Status { status, .. } if status == reqwest::StatusCode::NOT_FOUND => {
+                    PlatformError::Unexpected("REPOSITORY_NOT_FOUND".to_owned())
+                }
+                other => PlatformError::Http(other),
+            })?;
+
+        // Check for GraphQL-level errors.
+        if let Some(errors) = response.get("errors") {
+            let errors_array = errors.as_array().cloned().unwrap_or_default();
+            if errors_array.iter().any(|e| {
+                e.get("type")
+                    .and_then(|t| t.as_str())
+                    .map(|t| t == "RATE_LIMITED")
+                    .unwrap_or(false)
+            }) {
+                return Err(PlatformError::Unexpected(
+                    "PLATFORM_RATE_LIMIT_EXCEEDED".to_owned(),
+                ));
+            }
+            if errors_array.iter().any(|e| {
+                e.get("message")
+                    .and_then(|m| m.as_str())
+                    .map(|m| m.starts_with("Repository access blocked"))
+                    .unwrap_or(false)
+            }) {
+                return Err(PlatformError::Unexpected(
+                    "REPOSITORY_ACCESS_FORBIDDEN".to_owned(),
+                ));
+            }
+            return Err(PlatformError::Unexpected(
+                "PLATFORM_UNKNOWN_ERROR".to_owned(),
+            ));
+        }
+
+        let repo_data = response
+            .get("data")
+            .and_then(|d| d.get("repository"))
+            .ok_or_else(|| PlatformError::Unexpected("REPOSITORY_NOT_FOUND".to_owned()))?;
+
+        if repo_data.is_null() {
+            return Err(PlatformError::Unexpected("REPOSITORY_NOT_FOUND".to_owned()));
+        }
+
+        let default_branch = repo_data
+            .get("defaultBranchRef")
+            .and_then(|b| b.get("name"))
+            .and_then(|n| n.as_str())
+            .ok_or_else(|| PlatformError::Unexpected("REPOSITORY_EMPTY".to_owned()))?;
+
+        let name_with_owner = repo_data
+            .get("nameWithOwner")
+            .and_then(|n| n.as_str())
+            .unwrap_or_default();
+        if !name_with_owner.is_empty()
+            && name_with_owner.to_uppercase() != format!("{owner}/{repo}").to_uppercase()
+        {
+            return Err(PlatformError::Unexpected("REPOSITORY_RENAMED".to_owned()));
+        }
+
+        let is_archived = repo_data
+            .get("isArchived")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        if is_archived {
+            return Err(PlatformError::Unexpected("REPOSITORY_ARCHIVED".to_owned()));
+        }
+
+        let is_fork = repo_data
+            .get("isFork")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+
+        let merge_method = if repo_data
+            .get("squashMergeAllowed")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
+            Some("squash".to_owned())
+        } else if repo_data
+            .get("mergeCommitAllowed")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
+            Some("merge".to_owned())
+        } else if repo_data
+            .get("rebaseMergeAllowed")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
+            Some("rebase".to_owned())
+        } else {
+            None
+        };
+
+        let repo_id = repo_data
+            .get("id")
+            .and_then(|v| v.as_str())
+            .unwrap_or_default();
+        let fingerprint = super::util::repo_fingerprint(repo_id, Some(&self.api_base));
+
+        Ok(RepoInitResult {
+            default_branch: default_branch.to_owned(),
+            is_fork,
+            repo_fingerprint: fingerprint,
+            merge_method,
+            auto_merge_allowed: repo_data
+                .get("autoMergeAllowed")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false),
+            has_issues_enabled: repo_data
+                .get("hasIssuesEnabled")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false),
+            has_vulnerability_alerts_enabled: repo_data
+                .get("hasVulnerabilityAlertsEnabled")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false),
+        })
     }
 
     /// Detect GitHub Enterprise Server version and validate fine-grained
@@ -547,6 +738,14 @@ struct SetStatusRequest {
 }
 
 impl PlatformClient for GithubClient {
+    async fn init_repo(
+        &self,
+        owner: &str,
+        repo: &str,
+    ) -> Result<RepoInitResult, PlatformError> {
+        self.init_repo(owner, repo).await
+    }
+
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         let url = format!("{}/user", self.api_base);
         let user: GithubUser = self.http.get_json(&url).await.map_err(|e| match e {
@@ -6568,6 +6767,210 @@ mod tests {
         let err = client.get_file_list("owner", "repo").await.unwrap_err();
         assert!(
             matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
+    }
+
+    // ── init_repo tests ─────────────────────────────────────────────────────────
+
+    // Ported: "should initialise repo config" — modules/platform/github/index.spec.ts line 1031
+    #[tokio::test]
+    async fn init_repo_returns_repo_config() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/graphql"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "data": {
+                    "repository": {
+                        "id": "123",
+                        "isFork": false,
+                        "isArchived": false,
+                        "nameWithOwner": "owner/repo",
+                        "hasIssuesEnabled": true,
+                        "hasVulnerabilityAlertsEnabled": true,
+                        "autoMergeAllowed": true,
+                        "mergeCommitAllowed": true,
+                        "rebaseMergeAllowed": true,
+                        "squashMergeAllowed": true,
+                        "defaultBranchRef": {
+                            "name": "main",
+                            "target": { "oid": "abc123" }
+                        }
+                    }
+                }
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client.init_repo("owner", "repo").await.unwrap();
+        assert_eq!(result.default_branch, "main");
+        assert!(!result.is_fork);
+        assert_eq!(result.merge_method, Some("squash".to_owned()));
+        assert!(result.auto_merge_allowed);
+        assert!(result.has_issues_enabled);
+        assert!(result.has_vulnerability_alerts_enabled);
+        assert!(!result.repo_fingerprint.is_empty());
+    }
+
+    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 1101
+    #[tokio::test]
+    async fn init_repo_throws_if_archived() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/graphql"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "data": {
+                    "repository": {
+                        "id": "123",
+                        "isFork": false,
+                        "isArchived": true,
+                        "nameWithOwner": "owner/repo",
+                        "hasIssuesEnabled": true,
+                        "hasVulnerabilityAlertsEnabled": false,
+                        "autoMergeAllowed": false,
+                        "mergeCommitAllowed": false,
+                        "rebaseMergeAllowed": false,
+                        "squashMergeAllowed": false,
+                        "defaultBranchRef": {
+                            "name": "main",
+                            "target": { "oid": "abc123" }
+                        }
+                    }
+                }
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED")
+        );
+    }
+
+    // Ported: "should throw error if renamed" — modules/platform/github/index.spec.ts line 1101
+    #[tokio::test]
+    async fn init_repo_throws_if_renamed() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/graphql"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "data": {
+                    "repository": {
+                        "id": "123",
+                        "isFork": false,
+                        "isArchived": false,
+                        "nameWithOwner": "owner/new-repo",
+                        "hasIssuesEnabled": true,
+                        "hasVulnerabilityAlertsEnabled": false,
+                        "autoMergeAllowed": false,
+                        "mergeCommitAllowed": false,
+                        "rebaseMergeAllowed": false,
+                        "squashMergeAllowed": false,
+                        "defaultBranchRef": {
+                            "name": "main",
+                            "target": { "oid": "abc123" }
+                        }
+                    }
+                }
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_RENAMED")
+        );
+    }
+
+    // Ported: "should throw not-found" — modules/platform/github/index.spec.ts line 1060
+    #[tokio::test]
+    async fn init_repo_throws_not_found() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/graphql"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "data": { "repository": null }
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND")
+        );
+    }
+
+    // Ported: "should throw error if empty" — modules/platform/github/index.spec.ts line 1082
+    #[tokio::test]
+    async fn init_repo_throws_if_empty() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/graphql"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "data": {
+                    "repository": {
+                        "id": "123",
+                        "isFork": false,
+                        "isArchived": false,
+                        "nameWithOwner": "owner/repo",
+                        "hasIssuesEnabled": true,
+                        "hasVulnerabilityAlertsEnabled": false,
+                        "autoMergeAllowed": false,
+                        "mergeCommitAllowed": false,
+                        "rebaseMergeAllowed": false,
+                        "squashMergeAllowed": false,
+                        "defaultBranchRef": null
+                    }
+                }
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY")
+        );
+    }
+
+    // Ported: "should throw error if blocked" — modules/platform/github/index.spec.ts line 1114
+    #[tokio::test]
+    async fn init_repo_throws_if_blocked() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/graphql"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "errors": [{ "type": "FORBIDDEN", "message": "Repository access blocked" }]
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ACCESS_FORBIDDEN")
+        );
+    }
+
+    // Ported: "should handle GraphQL errors" — modules/platform/github/index.spec.ts line 1067
+    #[tokio::test]
+    async fn init_repo_handles_graphql_errors() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/graphql"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "errors": [{ "type": "UNKNOWN", "message": "Something went wrong" }]
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let err = client.init_repo("owner", "repo").await.unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg == "PLATFORM_UNKNOWN_ERROR")
         );
     }
 }

@@ -12,7 +12,7 @@ use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
+use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile, RepoInitResult};
 
 #[derive(Debug, Clone)]
 pub struct AzureClient {
@@ -335,6 +335,21 @@ pub async fn get_pr(
 }
 
 impl PlatformClient for AzureClient {
+    async fn init_repo(
+        &self,
+        _owner: &str,
+        _repo: &str,
+    ) -> Result<RepoInitResult, PlatformError> {
+        Ok(RepoInitResult {
+            default_branch: "main".to_owned(),
+            is_fork: false,
+            repo_fingerprint: String::new(),
+            merge_method: None,
+            auto_merge_allowed: false,
+            has_issues_enabled: true,
+            has_vulnerability_alerts_enabled: false,
+        })
+    }
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         let connection_url = format!(
             "{}/_apis/connectionData?api-version=7.0",

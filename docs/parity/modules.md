@@ -23,8 +23,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5799 / 11670 distinct upstream it() tests ported (49.7%) across 292 modules.
-**Quality:** 6514 `// Ported:` comments → 715 duplicate, 0 orphan, 0 malformed.
+**Total:** 5803 / 11670 distinct upstream it() tests ported (49.7%) across 292 modules.
+**Quality:** 6521 `// Ported:` comments → 718 duplicate, 0 orphan, 0 malformed.
 
 ## managers  —  2544/3642 (70%)
 
@@ -106,7 +106,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/mix` | 3 | full | 8/28 (29%) | 429 code lines, 29% test coverage |
 | `manager/nix` | 3 | full | 40/50 (80%) | 1758 code lines |
 | `manager/nodenv` | 1 | none | 3/3 (100%) | Not implemented |
-| `manager/npm` | 32 | full | 352/439 (80%) | M2 complete |
+| `manager/npm` | 32 | partial | 352/439 (80%) | Extractor complete. Artifact/post-update pipeline is a skeleton: hardcoded install commands, missing workspace support, update-lockfile rangeStrategy, lockfile maintenance, yarn version detection, zero-install, pnpm workspace, tool constraints, .npmrc/.yarnrc.yml auth injection. |
 | `manager/nuget` | 6 | full | 80/93 (86%) | Extractor complete; artifact gaps are lockfile restore via external dotnet invocation. |
 | `manager/nvm` | 1 | none | 4/4 (100%) | Not implemented |
 | `manager/ocb` | 2 | full | 9/9 (100%) | 260 code lines |
@@ -135,7 +135,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/sveltos` | 1 | full | 14/14 (100%) | 564 code lines |
 | `manager/swift` | 4 | none | 28/59 (47%) | Not implemented |
 | `manager/tekton` | 1 | full | 5/5 (100%) | 220 code lines |
-| `manager/terraform` | 13 | full | 83/88 (94%) | Lockfile maintenance (updateAllLocks) implemented. |
+| `manager/terraform` | 13 | partial | 83/88 (94%) | Extractor complete. create_hashes() is a stub returning 'h1:stubhash-{repo}-{ver}' — produces invalid .terraform.lock.hcl. |
 | `manager/terraform-version` | 1 | none | 2/2 (100%) | Not implemented |
 | `manager/terragrunt` | 4 | full | 17/18 (94%) | Artifact delegation to terraform implemented. One apparent gap is a duplicate upstream test description. |
 | `manager/terragrunt-version` | 1 | none | 1/1 (100%) | Not implemented |
@@ -235,7 +235,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/unity3d` | 1 | full | 9/9 (100%) |  |
 | `datasource/unity3d-packages` | 1 | full | 5/5 (100%) |  |
 
-## platforms  —  336/1581 (21%)
+## platforms  —  340/1581 (22%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -247,7 +247,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/forgejo` | 5 | full | 10/187 (5%) | 588 code lines, 5% test coverage |
 | `platform/gerrit` | 4 | full | 0/158 (0%) | 524 code lines, 0% test coverage |
 | `platform/gitea` | 5 | full | 0/183 (0%) | 596 code lines, 0% test coverage |
-| `platform/github` | 7 | full | 197/245 (80%) | M3 complete (dry-run write surface) |
+| `platform/github` | 7 | partial | 201/245 (82%) | Missing: initRepo, check-runs API, massageMarkdown (smart-truncate + alert blocks), fork mode, platform-native commitFiles. Default-run surface incomplete. |
 | `platform/gitlab` | 4 | full | 17/182 (9%) | 772 code lines, 9% test coverage |
 | `platform/local` | 2 | full | 41/41 (100%) | 409 code lines |
 | `platform/scm-manager` | 4 | full | 10/65 (15%) | 231 code lines, 15% test coverage |
@@ -316,8 +316,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `worker/global` | 11 | full | 116/208 (56%) | 338 code lines, 56% test coverage |
-| `worker/repository` | 103 | full | 250/1675 (15%) | 9797 code lines, 15% test coverage |
+| `worker/global` | 11 | partial | 116/208 (56%) | Config parsing and autodiscover present. Does not yet orchestrate full repo lifecycle (delegated to stubbed worker/repository). |
+| `worker/repository` | 103 | partial | 250/1675 (15%) | process_repository (~43 lines vs ~500+ upstream), process_branch (~90 vs 1122), ensure_pr (~100 vs 632) are heavily stubbed. PR body missing config-description, changelogs, notes compilation, debug data. Onboarding PR missing template compilation. |
 
 ## config  —  427/700 (61%)
 
