@@ -321,7 +321,7 @@ fn npm_satisfies(version: &str, npm_range: &str) -> bool {
     let mut req_str = npm_range.split_whitespace().collect::<Vec<_>>().join(", ");
     // Bare version (no operator) → exact match in npm, but rust semver
     // parses bare versions as caret ranges by default.
-    if !req_str.is_empty() && !req_str.starts_with(|c: char| c == '>' || c == '<' || c == '=' || c == '^' || c == '~' || c == '*') {
+    if !req_str.is_empty() && !req_str.starts_with(['>', '<', '=', '^', '~', '*']) {
         req_str = format!("={req_str}");
     }
     let Ok(req) = VersionReq::parse(&req_str) else {
