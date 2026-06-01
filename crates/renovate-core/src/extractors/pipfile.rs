@@ -698,12 +698,20 @@ python_version = "3.6"
         );
         assert_eq!(package_file.lock_files, vec!["Pipfile.lock".to_owned()]);
 
-        let django = package_file.deps.iter().find(|d| d.name == "django").unwrap();
+        let django = package_file
+            .deps
+            .iter()
+            .find(|d| d.name == "django")
+            .unwrap();
         assert_eq!(django.current_value, "==1");
         assert!(!django.is_dev);
         assert!(django.skip_reason.is_none());
 
-        let wsgiref = package_file.deps.iter().find(|d| d.name == "wsgiref").unwrap();
+        let wsgiref = package_file
+            .deps
+            .iter()
+            .find(|d| d.name == "wsgiref")
+            .unwrap();
         assert_eq!(wsgiref.current_value, "==0.1.2");
         assert!(!wsgiref.is_dev);
         assert!(wsgiref.skip_reason.is_none());

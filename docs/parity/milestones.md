@@ -167,13 +167,13 @@ tested, matching the coverage and functionality of `platform/github`.
 
 Acceptance:
 
-- [ ] `platform/gitlab` Impl=`full` for PR read/write surface:
+- [x] `platform/gitlab` Impl=`full` for PR read/write surface:
   `get_pr_list`, `get_pr`, `get_branch_pr`, `create_pr`, `update_pr`,
   `write_file`.
-- [ ] `platform/gitlab` Coverage ≥ 40% (currently 11%).
-- [ ] All ported upstream tests from `lib/modules/platform/gitlab/index.spec.ts`
+- [x] `platform/gitlab` Coverage ≥ 40% (currently 40%).
+- [x] All ported upstream tests from `lib/modules/platform/gitlab/index.spec.ts`
   pass with wiremock.
-- [ ] `cargo build --workspace --all-features`, `cargo fmt --all --check`,
+- [x] `cargo build --workspace --all-features`, `cargo fmt --all --check`,
   `cargo clippy --workspace --all-targets --all-features -- -D warnings`,
   and `cargo test --workspace --all-features` all pass.
 

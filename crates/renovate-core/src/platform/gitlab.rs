@@ -728,7 +728,11 @@ fn encode_path(path: &str) -> String {
 /// All slashes in both owner and repo are encoded as `%2F` to support nested
 /// namespaces (e.g. `group/subgroup/project`).
 fn encode_project(owner: &str, repo: &str) -> String {
-    format!("{}%2F{}", owner.replace('/', "%2F"), repo.replace('/', "%2F"))
+    format!(
+        "{}%2F{}",
+        owner.replace('/', "%2F"),
+        repo.replace('/', "%2F")
+    )
 }
 
 const DRAFT_PREFIX: &str = "Draft: ";
@@ -740,7 +744,10 @@ const DRAFT_PREFIX_DEPRECATED: &str = "WIP: ";
 fn mr_to_gh_pr(mr: GitLabMergeRequest) -> crate::platform::GhPr {
     let mut title = mr.title;
     let is_draft = if title.starts_with(DRAFT_PREFIX) {
-        title = title.strip_prefix(DRAFT_PREFIX).unwrap_or(&title).to_owned();
+        title = title
+            .strip_prefix(DRAFT_PREFIX)
+            .unwrap_or(&title)
+            .to_owned();
         true
     } else if title.starts_with(DRAFT_PREFIX_DEPRECATED) {
         title = title
@@ -1020,7 +1027,9 @@ mod tests {
             .init_repo("owner", "repo", None, false, None)
             .await
             .unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        assert!(
+            matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR)
+        );
     }
 
     // Ported: "should fall back if http_url_to_repo is empty" — modules/platform/gitlab/index.spec.ts line 437
@@ -1365,7 +1374,14 @@ mod tests {
 
         let client = make_client(&server.uri());
         let pr_number = client
-            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .create_pr(
+                "owner",
+                "repo",
+                "renovate/deps",
+                "main",
+                "Update deps",
+                "Body",
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(42));
@@ -1379,7 +1395,9 @@ mod tests {
         let server = MockServer::start().await;
         let client = make_client(&server.uri());
         // No request should be sent when all args are None.
-        let result = client.update_pr("owner", "repo", 42, None, None, None).await;
+        let result = client
+            .update_pr("owner", "repo", 42, None, None, None)
+            .await;
         assert!(result.is_ok());
     }
 
@@ -1404,7 +1422,14 @@ mod tests {
 
         let client = make_client(&server.uri());
         let result = client
-            .update_pr("owner", "repo", 42, Some("New title"), Some("New body"), None)
+            .update_pr(
+                "owner",
+                "repo",
+                42,
+                Some("New title"),
+                Some("New body"),
+                None,
+            )
             .await;
         assert!(result.is_ok());
     }
@@ -1570,7 +1595,14 @@ mod tests {
 
         let client = make_client(&server.uri());
         let result = client
-            .write_file("owner", "repo", "existing.txt", "updated", Some("main"), None)
+            .write_file(
+                "owner",
+                "repo",
+                "existing.txt",
+                "updated",
+                Some("main"),
+                None,
+            )
             .await;
         assert!(result.is_ok());
     }
@@ -1648,7 +1680,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let prs = client.get_pr_list("owner", "repo", Some("open")).await.unwrap();
+        let prs = client
+            .get_pr_list("owner", "repo", Some("open"))
+            .await
+            .unwrap();
         assert_eq!(prs.len(), 1);
         assert_eq!(prs[0].state, "open");
     }
@@ -1932,7 +1967,6 @@ mod tests {
         assert!(pr.is_draft);
     }
 
-
     // Ported: "handles empty response" — modules/platform/gitlab/pr-cache.spec.ts line 251
     #[tokio::test]
     async fn get_pr_list_empty_response() {
@@ -2000,7 +2034,14 @@ mod tests {
 
         let client = make_client(&server.uri());
         let pr_number = client
-            .create_pr("owner", "repo", "renovate/deps", "main", "WIP: Update deps", "Body")
+            .create_pr(
+                "owner",
+                "repo",
+                "renovate/deps",
+                "main",
+                "WIP: Update deps",
+                "Body",
+            )
             .await
             .unwrap();
         assert_eq!(pr_number, Some(44));
@@ -2042,7 +2083,14 @@ mod tests {
 
         let client = make_client(&server.uri());
         let result = client
-            .update_pr("owner", "repo", 42, Some("New title"), Some("New body"), None)
+            .update_pr(
+                "owner",
+                "repo",
+                42,
+                Some("New title"),
+                Some("New body"),
+                None,
+            )
             .await;
         assert!(result.is_ok());
     }
@@ -2108,7 +2156,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let result = client.init_repo("owner", "repo", None, false, None).await.unwrap();
+        let result = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap();
         assert_eq!(result.merge_method, Some("merge".to_owned()));
     }
 
@@ -2132,7 +2183,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let result = client.init_repo("owner", "repo", None, false, None).await.unwrap();
+        let result = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap();
         assert_eq!(result.merge_method, Some("rebase".to_owned()));
     }
 
@@ -2256,7 +2310,6 @@ mod tests {
         let user = client.get_current_user().await.unwrap();
         assert_eq!(user.login, "renovate-bot");
     }
-
 
     // Ported: "returns null if no matching results" — modules/platform/gitlab/index.spec.ts line 1076
     #[tokio::test]
@@ -2404,7 +2457,10 @@ mod tests {
             .await;
 
         let client = make_client(&server.uri());
-        let files = client.get_file_list("group/subgroup", "repo").await.unwrap();
+        let files = client
+            .get_file_list("group/subgroup", "repo")
+            .await
+            .unwrap();
         assert_eq!(files, vec!["main.rs"]);
     }
 
