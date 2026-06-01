@@ -77,7 +77,7 @@ Acceptance:
       huge; 60% covers the live-run path).
 - [x] `worker/repository` Impl=`partial` with branch-name generation,
       commit-message rendering, and PR body rendering complete and tested.
-- [ ] `tests/parity/fixtures/github-cargo/` runs the diff harness for the
+- [x] `tests/parity/fixtures/github-cargo/` runs the diff harness for the
       branch + PR plan.
 
 ---

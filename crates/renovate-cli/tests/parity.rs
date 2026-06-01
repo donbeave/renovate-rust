@@ -30,6 +30,10 @@ fn normalize_report(value: &mut Value) {
                             if let Some(obj) = dep.as_object_mut() {
                                 obj.remove("releaseTimestamp");
                                 obj.remove("latest");
+                                // prTitle and newValue embed the latest version string,
+                                // which changes whenever the registry publishes a new release.
+                                obj.remove("prTitle");
+                                obj.remove("newValue");
                             }
                         }
                     }
@@ -261,6 +265,48 @@ fn parity_npm_hello() {
         }
     ]);
     assert_eq!(actual, expected, "normalized JSON output mismatch for npm-hello fixture");
+}
+
+// Rust-specific: parity behavior test
+#[test]
+fn parity_github_cargo() {
+    let actual = run_fixture("github-cargo");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 1,
+                "upToDate": 0,
+                "skipped": 0,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "Cargo.toml",
+                    "manager": "cargo",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 1,
+                        "upToDate": 0,
+                        "skipped": 0,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "serde",
+                            "branchName": "renovate/serde-1.x",
+                            "updateType": "patch",
+                            "depType": "dependencies",
+                            "status": "updateAvailable",
+                            "current": "=1.0.0"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for github-cargo fixture");
 }
 
 // Rust-specific: parity behavior test

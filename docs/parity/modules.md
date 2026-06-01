@@ -247,7 +247,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/forgejo` | 5 | ? | 10/187 (5%) | — |
 | `platform/gerrit` | 4 | ? | 0/158 (0%) | — |
 | `platform/gitea` | 5 | ? | 0/183 (0%) | — |
-| `platform/github` | 7 | ? | 197/245 (80%) | — |
+| `platform/github` | 7 | full | 197/245 (80%) | Read + dry-write surface complete; long-tail PR/issue/comment ops not fully covered |
 | `platform/gitlab` | 4 | ? | 17/182 (9%) | — |
 | `platform/local` | 2 | ? | 28/41 (68%) | — |
 | `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
@@ -317,7 +317,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `worker/global` | 11 | ? | 116/208 (56%) | — |
-| `worker/repository` | 103 | ? | 238/1675 (14%) | — |
+| `worker/repository` | 103 | partial | 238/1675 (14%) | Branch-name generation, commit-message rendering, PR body rendering complete; full worker pipeline not implemented |
 
 ## config  —  427/700 (61%)
 
