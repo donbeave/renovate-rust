@@ -41,7 +41,7 @@ Acceptance:
 - [x] `manager/cargo` Impl=`full`, Coverage ≥ 80%.
 - [x] `datasource/crate` Impl=`full`, Coverage ≥ 80%.
 - [x] `versioning/semver` Impl=`full`, Coverage ≥ 80% (already 100%).
-- [ ] `tests/parity/fixtures/cargo-hello/` runs the diff harness and matches
+- [x] `tests/parity/fixtures/cargo-hello/` runs the diff harness and matches
       upstream Renovate output (or the recorded expected output) byte-for-byte
       after the normalizer.
 - [x] `cargo build --workspace` and `cargo test -p renovate-core
