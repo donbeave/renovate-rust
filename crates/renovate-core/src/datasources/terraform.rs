@@ -143,6 +143,39 @@ pub async fn fetch_provider_latest(
     Ok(latest)
 }
 
+/// Fetch all releases (versions) of a Terraform provider.
+///
+/// Returns a Vec of version strings, or `None` if the provider is not found.
+pub async fn fetch_provider_releases(
+    name: &str,
+    http: &HttpClient,
+    registry_base: &str,
+) -> Result<Option<Vec<String>>, TerraformError> {
+    let (namespace, provider_type) = split_provider_name(name)?;
+    let url = format!(
+        "{registry_base}/v2/providers/{namespace}/{provider_type}?include=provider-versions"
+    );
+
+    let resp = http.get_retrying(&url).await?;
+    if resp.status().as_u16() == 404 {
+        return Ok(None);
+    }
+    if !resp.status().is_success() {
+        return Ok(None);
+    }
+
+    let body: ProviderV2Response = resp.json().await.map_err(TerraformError::Json)?;
+
+    let versions: Vec<String> = body
+        .included
+        .into_iter()
+        .filter(|e| e.entry_type == "provider-versions")
+        .map(|e| e.attributes.version)
+        .collect();
+
+    Ok(if versions.is_empty() { None } else { Some(versions) })
+}
+
 /// Fetch the latest version of a Terraform module.
 ///
 /// `name` must be `{namespace}/{name}/{provider}` (e.g. `terraform-aws-modules/vpc/aws`).

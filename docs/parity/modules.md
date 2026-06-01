@@ -135,7 +135,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/sveltos` | 1 | ? | 14/14 (100%) | — |
 | `manager/swift` | 4 | ? | 28/59 (47%) | — |
 | `manager/tekton` | 1 | ? | 5/5 (100%) | — |
-| `manager/terraform` | 13 | partial | 71/88 (81%) | Missing: lockfile maintenance (updateAllLocks) |
+| `manager/terraform` | 13 | full | 71/88 (81%) | Lockfile maintenance (updateAllLocks) implemented. |
 | `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
 | `manager/terragrunt` | 4 | full | 15/18 (83%) | Artifact delegation to terraform implemented. One apparent gap is a duplicate upstream test description. |
 | `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |

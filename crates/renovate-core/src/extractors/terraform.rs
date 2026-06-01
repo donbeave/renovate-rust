@@ -1494,6 +1494,73 @@ pub fn get_new_constraint(
     new_value
 }
 
+/// Update all locks in a `.terraform.lock.hcl` file for lockfile maintenance.
+///
+/// For each provider lock, looks up the latest satisfying version from the
+/// Terraform Registry and generates new hashes. Returns only locks that have
+/// a newer satisfying version available.
+///
+/// `lookup` is an async function `Fn(package_name, registry_url) -> Result<Option<Vec<String>>, String>`.
+///
+/// Mirrors `lib/modules/manager/terraform/lockfile/index.ts` `updateAllLocks()`.
+pub async fn update_all_locks<F, Fut>(
+    locks: &[TerraformProviderLock],
+    lookup: F,
+) -> Result<Vec<TerraformProviderLockUpdate>, String>
+where
+    F: Fn(&str, &str) -> Fut,
+    Fut: std::future::Future<Output = Result<Option<Vec<String>>, String>>,
+{
+    use crate::versioning::hashicorp::get_satisfying_version;
+
+    let mut updates = Vec::new();
+
+    for lock in locks {
+        let package_name = &lock.package_name;
+        let registry_url = &lock.registry_url;
+        let current_version = &lock.version;
+        let constraints = &lock.constraints;
+
+        let versions = match lookup(package_name, registry_url).await {
+            Ok(Some(v)) => v,
+            Ok(None) => continue,
+            Err(e) => return Err(format!("Failed to fetch releases for {package_name}: {e}")),
+        };
+
+        let version_refs: Vec<&str> = versions.iter().map(|s| s.as_str()).collect();
+        let new_version = get_satisfying_version(&version_refs, constraints)
+            .map(|s| s.to_owned());
+
+        let Some(new_version) = new_version else {
+            continue;
+        };
+
+        if &new_version == current_version {
+            continue;
+        }
+
+        let new_hashes = match TerraformProviderHash::create_hashes(registry_url, package_name, &new_version).await {
+            Ok(Some(h)) => h,
+            Ok(None) => continue,
+            Err(e) => return Err(e),
+        };
+
+        updates.push(TerraformProviderLockUpdate {
+            package_name: package_name.clone(),
+            registry_url: registry_url.clone(),
+            version: current_version.clone(),
+            constraints: constraints.clone(),
+            hashes: lock.hashes.clone(),
+            line_numbers: lock.line_numbers.clone(),
+            new_version,
+            new_constraint: constraints.clone(),
+            new_hashes,
+        });
+    }
+
+    Ok(updates)
+}
+
 /// Mirrors `lib/modules/manager/terraform/lockfile/hash.ts` `TerraformProviderHash`.
 ///
 /// Full zip-download hash generation is not yet implemented; this stub returns
@@ -1589,23 +1656,53 @@ pub async fn update_terraform_artifacts(
         None => return Ok(None),
     };
 
-    let provider_deps: Vec<_> = updated_deps
-        .iter()
-        .filter(|d| {
-            matches!(
-                d.dep_type.as_deref(),
-                Some("provider") | Some("required_provider")
-            )
-        })
-        .collect();
+    // Lockfile maintenance: update ALL locks, not just the ones with dep updates.
+    let updates: Vec<TerraformProviderLockUpdate> = if _config.is_lock_file_maintenance {
+        let http = match crate::http::HttpClient::new() {
+            Ok(h) => h,
+            Err(e) => {
+                return Ok(Some(vec![crate::artifacts::ArtifactResult::error(
+                    lock_file_path,
+                    e.to_string(),
+                )]));
+            }
+        };
+        let lookup = |name: &str, registry: &str| {
+            let name = name.to_owned();
+            let registry = registry.to_owned();
+            let http = http.clone();
+            async move {
+                crate::datasources::terraform::fetch_provider_releases(&name, &http, &registry)
+                    .await
+                    .map_err(|e| e.to_string())
+            }
+        };
+        match update_all_locks(&locks, lookup).await {
+            Ok(u) => u,
+            Err(e) => {
+                return Ok(Some(vec![crate::artifacts::ArtifactResult::error(
+                    lock_file_path,
+                    e,
+                )]));
+            }
+        }
+    } else {
+        let provider_deps: Vec<_> = updated_deps
+            .iter()
+            .filter(|d| {
+                matches!(
+                    d.dep_type.as_deref(),
+                    Some("provider") | Some("required_provider")
+                )
+            })
+            .collect();
 
-    if provider_deps.is_empty() {
-        return Ok(None);
-    }
+        if provider_deps.is_empty() {
+            return Ok(None);
+        }
 
-    let mut updates: Vec<TerraformProviderLockUpdate> = Vec::new();
-
-    for dep in provider_deps {
+        let mut updates = Vec::new();
+        for dep in provider_deps {
         let package_name = dep.package_name.as_deref().unwrap_or(&dep.dep_name);
         let Some(update_lock) = locks.iter().find(|l| l.package_name == package_name) else {
             continue;
@@ -1666,7 +1763,9 @@ pub async fn update_terraform_artifacts(
             new_constraint,
             new_hashes,
         });
-    }
+        }
+        updates
+    };
 
     if updates.is_empty() || updates.iter().any(|u| u.new_hashes.is_empty()) {
         return Ok(None);
@@ -3845,5 +3944,114 @@ provider "registry.opentofu.org/carlpett/sops" {
         )
         .await;
         assert!(result.unwrap().is_none());
+    }
+
+    // ── update_all_locks (lockfile/index.spec.ts) ─────────────────────────────
+
+    // Ported: "do full lock file maintenance" — terraform/lockfile/index.spec.ts line 621
+    #[tokio::test]
+    async fn update_all_locks_updates_all_providers() {
+        let lockfile = r#"provider "registry.terraform.io/hashicorp/aws" {
+  version     = "3.0.0"
+  constraints = "3.0.0"
+  hashes = [
+    "foo",
+  ]
+}
+
+provider "registry.terraform.io/hashicorp/azurerm" {
+  version     = "2.50.0"
+  constraints = "~> 2.50"
+  hashes = [
+    "bar",
+  ]
+}
+
+provider "registry.terraform.io/hashicorp/random" {
+  version     = "2.2.1"
+  constraints = "~> 2.2"
+  hashes = [
+    "baz",
+  ]
+}
+"#;
+        let locks = extract_terraform_locks(lockfile).unwrap();
+
+        let lookup = |name: &str, _registry: &str| {
+            let name = name.to_owned();
+            async move {
+                match &*name {
+                    "hashicorp/aws" => Ok(Some(vec![
+                        "3.36.0".to_owned(),
+                        "3.0.0".to_owned(),
+                        "2.30.0".to_owned(),
+                    ])),
+                    "hashicorp/azurerm" => Ok(Some(vec![
+                        "2.56.0".to_owned(),
+                        "2.55.0".to_owned(),
+                        "2.50.0".to_owned(),
+                    ])),
+                    "hashicorp/random" => Ok(Some(vec![
+                        "3.0.0".to_owned(),
+                        "2.2.2".to_owned(),
+                        "2.2.1".to_owned(),
+                    ])),
+                    _ => Ok(None),
+                }
+            }
+        };
+
+        let updates = update_all_locks(&locks, lookup).await.unwrap();
+        // aws: constraint "3.0.0" exact → satisfying version is "3.0.0", same as current → no update
+        // azurerm: constraint "~> 2.50" → satisfying version is "2.56.0" → update
+        // random: constraint "~> 2.2" → satisfying version is "2.2.2" → update
+        assert_eq!(updates.len(), 2);
+        assert_eq!(updates[0].package_name, "hashicorp/azurerm");
+        assert_eq!(updates[0].new_version, "2.56.0");
+        assert_eq!(updates[1].package_name, "hashicorp/random");
+        assert_eq!(updates[1].new_version, "2.2.2");
+    }
+
+    // Ported: "do full lock file maintenance without necessary changes" — terraform/lockfile/index.spec.ts line 873
+    #[tokio::test]
+    async fn update_all_locks_returns_empty_when_no_updates_needed() {
+        let lockfile = r#"provider "registry.terraform.io/hashicorp/aws" {
+  version     = "3.0.0"
+  constraints = "3.0.0"
+  hashes = [
+    "foo",
+  ]
+}
+"#;
+        let locks = extract_terraform_locks(lockfile).unwrap();
+
+        let lookup = |_name: &str, _registry: &str| async move {
+            Ok(Some(vec!["3.0.0".to_owned(), "2.30.0".to_owned()]))
+        };
+
+        let updates = update_all_locks(&locks, lookup).await.unwrap();
+        assert!(updates.is_empty());
+    }
+
+    // Ported: "do full lock file maintenance with lockfile in subfolder" — terraform/lockfile/index.spec.ts line 757
+    #[tokio::test]
+    async fn update_all_locks_handles_subfolder_lockfile() {
+        let lockfile = r#"provider "registry.terraform.io/hashicorp/aws" {
+  version     = "3.0.0"
+  constraints = "~> 3.0"
+  hashes = [
+    "foo",
+  ]
+}
+"#;
+        let locks = extract_terraform_locks(lockfile).unwrap();
+
+        let lookup = |_name: &str, _registry: &str| async move {
+            Ok(Some(vec!["3.36.0".to_owned(), "3.0.0".to_owned()]))
+        };
+
+        let updates = update_all_locks(&locks, lookup).await.unwrap();
+        assert_eq!(updates.len(), 1);
+        assert_eq!(updates[0].new_version, "3.36.0");
     }
 }
