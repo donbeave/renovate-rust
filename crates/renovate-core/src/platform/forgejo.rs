@@ -420,6 +420,33 @@ impl PlatformClient for ForgejoClient {
             "Forgejo write_file not yet implemented".to_owned(),
         ))
     }
+
+    async fn get_pr_list(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _state: Option<&str>,
+    ) -> Result<Vec<crate::platform::GhPr>, PlatformError> {
+        Err(PlatformError::NotSupported("Forgejo PR list".to_owned()))
+    }
+
+    async fn get_pr(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _pr_number: i64,
+    ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
+        Err(PlatformError::NotSupported("Forgejo get PR".to_owned()))
+    }
+
+    async fn get_branch_pr(
+        &self,
+        _owner: &str,
+        _repo: &str,
+        _branch: &str,
+    ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
+        Err(PlatformError::NotSupported("Forgejo get branch PR".to_owned()))
+    }
 }
 
 #[cfg(test)]

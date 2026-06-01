@@ -965,6 +965,41 @@ impl PlatformClient for GithubClient {
             "write_file not yet implemented for GitHub".to_owned(),
         ))
     }
+
+    async fn get_pr_list(
+        &self,
+        owner: &str,
+        repo: &str,
+        state: Option<&str>,
+    ) -> Result<Vec<GhPr>, PlatformError> {
+        let prs = self.list_prs(owner, repo, state).await?;
+        Ok(prs.into_iter().map(coerce_rest_pr).collect())
+    }
+
+    async fn get_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+    ) -> Result<Option<GhPr>, PlatformError> {
+        self.get_pr(owner, repo, pr_number).await
+    }
+
+    async fn get_branch_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch: &str,
+    ) -> Result<Option<GhPr>, PlatformError> {
+        // Mirrors upstream getBranchPr: find open PR for branch, then fetch full details.
+        let open = self
+            .find_pr(owner, repo, branch, None, Some("open"), false)
+            .await?;
+        match open {
+            Some(pr) => self.get_pr(owner, repo, pr.number).await,
+            None => Ok(None),
+        }
+    }
 }
 
 impl GithubClient {

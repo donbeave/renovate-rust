@@ -31,7 +31,7 @@ pub mod util;
 
 // Re-export commonly-used platform types
 pub use github::{
-    BranchState, CombinedBranchState, CombinedBranchStatus, GhBranchStatus, GhRestPr,
+    BranchState, CombinedBranchState, CombinedBranchStatus, GhBranchStatus, GhPr, GhRestPr,
 };
 
 use thiserror::Error;
@@ -191,6 +191,36 @@ pub trait PlatformClient: Send + Sync {
         path: &str,
         content: &str,
     ) -> impl std::future::Future<Output = Result<(), PlatformError>> + Send;
+
+    /// List pull requests for a repository.
+    ///
+    /// `state` can be `"open"`, `"closed"`, `"all"`, or `None` (defaults to `"all"`).
+    fn get_pr_list(
+        &self,
+        owner: &str,
+        repo: &str,
+        state: Option<&str>,
+    ) -> impl std::future::Future<Output = Result<Vec<GhPr>, PlatformError>> + Send;
+
+    /// Get a single pull request by number.
+    ///
+    /// Returns `Ok(None)` if the PR does not exist.
+    fn get_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+    ) -> impl std::future::Future<Output = Result<Option<GhPr>, PlatformError>> + Send;
+
+    /// Find the open PR for a given branch.
+    ///
+    /// Returns `Ok(None)` if no open PR exists for the branch.
+    fn get_branch_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch: &str,
+    ) -> impl std::future::Future<Output = Result<Option<GhPr>, PlatformError>> + Send;
 }
 
 /// Enum dispatch wrapper covering all supported platform clients.
@@ -373,6 +403,48 @@ impl AnyPlatformClient {
             Self::Github(c) => c.write_file(owner, repo, path, content).await,
             Self::Gitlab(c) => c.write_file(owner, repo, path, content).await,
             Self::Local(c) => c.write_file(owner, repo, path, content).await,
+        }
+    }
+
+    /// List pull requests for a repository.
+    pub async fn get_pr_list(
+        &self,
+        owner: &str,
+        repo: &str,
+        state: Option<&str>,
+    ) -> Result<Vec<GhPr>, PlatformError> {
+        match self {
+            Self::Github(c) => c.get_pr_list(owner, repo, state).await,
+            Self::Gitlab(c) => c.get_pr_list(owner, repo, state).await,
+            Self::Local(c) => c.get_pr_list(owner, repo, state).await,
+        }
+    }
+
+    /// Get a single pull request by number.
+    pub async fn get_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+    ) -> Result<Option<GhPr>, PlatformError> {
+        match self {
+            Self::Github(c) => c.get_pr(owner, repo, pr_number).await,
+            Self::Gitlab(c) => c.get_pr(owner, repo, pr_number).await,
+            Self::Local(c) => c.get_pr(owner, repo, pr_number).await,
+        }
+    }
+
+    /// Find the open PR for a given branch.
+    pub async fn get_branch_pr(
+        &self,
+        owner: &str,
+        repo: &str,
+        branch: &str,
+    ) -> Result<Option<GhPr>, PlatformError> {
+        match self {
+            Self::Github(c) => c.get_branch_pr(owner, repo, branch).await,
+            Self::Gitlab(c) => c.get_branch_pr(owner, repo, branch).await,
+            Self::Local(c) => c.get_branch_pr(owner, repo, branch).await,
         }
     }
 }
