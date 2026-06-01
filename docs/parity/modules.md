@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5614 / 11670 distinct upstream it() tests ported (48.1%) across 292 modules.
-**Quality:** 6324 `// Ported:` comments → 709 duplicate, 0 orphan, 0 malformed.
+**Total:** 5620 / 11670 distinct upstream it() tests ported (48.2%) across 292 modules.
+**Quality:** 6330 `// Ported:` comments → 709 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2443/3642 (67%)
+## managers  —  2449/3642 (67%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -117,7 +117,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/pip_requirements` | 4 | full | 34/36 (94%) | — |
 | `manager/pip_setup` | 1 | full | 2/2 (100%) | — |
 | `manager/pipenv` | 2 | ? | 15/37 (41%) | — |
-| `manager/pixi` | 2 | ? | 16/26 (62%) | — |
+| `manager/pixi` | 2 | full | 22/26 (85%) | — |
 | `manager/poetry` | 4 | ? | 32/71 (45%) | — |
 | `manager/pre-commit` | 1 | full | 12/12 (100%) | — |
 | `manager/proto` | 2 | full | 16/16 (100%) | — |

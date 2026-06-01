@@ -37,6 +37,7 @@ use renovate_core::extractors::cargo_artifact_runner::CargoArtifactRunner;
 use renovate_core::extractors::gomod_artifact_runner::GomodArtifactRunner;
 use renovate_core::extractors::npm_post_update::artifact_runner::NpmArtifactRunner;
 use renovate_core::extractors::pip_artifact_runner::PipArtifactRunner;
+use renovate_core::extractors::pixi_artifact_runner::PixiArtifactRunner;
 use renovate_core::http::HttpClient;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
@@ -499,6 +500,7 @@ async fn process_repo(
     artifact_registry.register("cargo", Box::new(CargoArtifactRunner));
     artifact_registry.register("pip_requirements", Box::new(PipArtifactRunner));
     artifact_registry.register("bundler", Box::new(BundlerArtifactRunner));
+    artifact_registry.register("pixi", Box::new(PixiArtifactRunner));
 
     // Manifest editing: apply newValue constraints to source files.
     // Only npm/package.json is supported in this slice; other managers

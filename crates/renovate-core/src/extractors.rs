@@ -92,6 +92,7 @@ pub mod pip_compile;
 pub mod pip_setup;
 pub mod pipfile;
 pub mod pixi;
+pub mod pixi_artifact_runner;
 pub mod poetry;
 pub mod pre_commit;
 pub mod proto;
