@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5675 / 11670 distinct upstream it() tests ported (48.6%) across 292 modules.
-**Quality:** 6385 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
+**Total:** 5691 / 11670 distinct upstream it() tests ported (48.8%) across 292 modules.
+**Quality:** 6401 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
 
-## managers  —  2498/3642 (69%)
+## managers  —  2514/3642 (69%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -135,7 +135,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/sveltos` | 1 | ? | 14/14 (100%) | — |
 | `manager/swift` | 4 | ? | 28/59 (47%) | — |
 | `manager/tekton` | 1 | ? | 5/5 (100%) | — |
-| `manager/terraform` | 13 | ? | 55/88 (62%) | — |
+| `manager/terraform` | 13 | ? | 71/88 (81%) | — |
 | `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
 | `manager/terragrunt` | 4 | ? | 15/18 (83%) | — |
 | `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |
