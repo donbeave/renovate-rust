@@ -167,6 +167,7 @@ struct GitlabTreeEntry {
 struct GitlabProject {
     id: i64,
     archived: bool,
+    mirror: bool,
     default_branch: Option<String>,
     empty_repo: bool,
     forked_from_project: Option<serde_json::Value>,
@@ -237,6 +238,10 @@ impl PlatformClient for GitlabClient {
 
         if project.archived {
             return Err(PlatformError::Unexpected("REPOSITORY_ARCHIVED".to_owned()));
+        }
+
+        if project.mirror {
+            return Err(PlatformError::Unexpected("REPOSITORY_MIRRORED".to_owned()));
         }
 
         if project.repository_access_level.as_deref() == Some("disabled")
@@ -890,42 +895,7 @@ mod tests {
 
     // ── init_repo ─────────────────────────────────────────────────────────────
 
-    #[tokio::test]
-    async fn init_repo_returns_real_metadata() {
-        let server = MockServer::start().await;
-        Mock::given(method("GET"))
-            .and(path("/projects/owner%2Frepo"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "id": 42,
-                "archived": false,
-                "mirror": false,
-                "default_branch": "master",
-                "empty_repo": false,
-                "forked_from_project": {"id": 1},
-                "repository_access_level": "enabled",
-                "merge_requests_access_level": "enabled",
-                "merge_method": "rebase_merge",
-                "issues_enabled": true,
-                "squash_option": "default_on",
-                "path_with_namespace": "owner/repo"
-            })))
-            .mount(&server)
-            .await;
-
-        let client = make_client(&server.uri());
-        let result = client
-            .init_repo("owner", "repo", None, false, None)
-            .await
-            .unwrap();
-        assert_eq!(result.default_branch, "master");
-        assert!(result.is_fork);
-        assert!(!result.repo_fingerprint.is_empty());
-        assert_eq!(result.merge_method, Some("rebase".to_owned()));
-        assert!(result.auto_merge_allowed);
-        assert!(result.has_issues_enabled);
-        assert!(!result.has_vulnerability_alerts_enabled);
-    }
-
+    // Ported: "should throw an error if repository is archived" — modules/platform/gitlab/index.spec.ts line 345
     #[tokio::test]
     async fn init_repo_archived_returns_error() {
         let server = MockServer::start().await;
@@ -951,6 +921,33 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED"));
     }
 
+    // Ported: "should throw an error if repository is a mirror" — modules/platform/gitlab/index.spec.ts line 357
+    #[tokio::test]
+    async fn init_repo_mirror_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": true,
+                "default_branch": "main",
+                "empty_repo": false,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_MIRRORED"));
+    }
+
+    // Ported: "should throw an error if repository has empty_repo property" — modules/platform/gitlab/index.spec.ts line 413
     #[tokio::test]
     async fn init_repo_empty_returns_error() {
         let server = MockServer::start().await;
@@ -976,12 +973,21 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
     }
 
+    // Ported: "should throw an error if repository is empty" — modules/platform/gitlab/index.spec.ts line 425
     #[tokio::test]
-    async fn init_repo_not_found_returns_error() {
+    async fn init_repo_null_default_branch_returns_error() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/projects/owner%2Frepo"))
-            .respond_with(ResponseTemplate::new(404))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": false,
+                "default_branch": null,
+                "empty_repo": false,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled"
+            })))
             .mount(&server)
             .await;
 
@@ -990,15 +996,16 @@ mod tests {
             .init_repo("owner", "repo", None, false, None)
             .await
             .unwrap_err();
-        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND"));
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
     }
 
+    // Ported: "should throw an error if receiving an error" — modules/platform/gitlab/index.spec.ts line 333
     #[tokio::test]
-    async fn init_repo_forbidden_returns_error() {
+    async fn init_repo_server_error_returns_http_error() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/projects/owner%2Frepo"))
-            .respond_with(ResponseTemplate::new(403))
+            .respond_with(ResponseTemplate::new(500))
             .mount(&server)
             .await;
 
@@ -1007,11 +1014,37 @@ mod tests {
             .init_repo("owner", "repo", None, false, None)
             .await
             .unwrap_err();
-        assert!(
-            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ACCESS_FORBIDDEN")
-        );
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
     }
 
+    // Ported: "should fall back if http_url_to_repo is empty" — modules/platform/gitlab/index.spec.ts line 437
+    #[tokio::test]
+    async fn init_repo_minimal_response_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": false,
+                "default_branch": "master",
+                "empty_repo": false,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap();
+        assert_eq!(result.default_branch, "master");
+        assert!(!result.is_fork);
+    }
+
+    // Ported: "should throw an error if repository access is disabled" — modules/platform/gitlab/index.spec.ts line 389
     #[tokio::test]
     async fn init_repo_disabled_returns_error() {
         let server = MockServer::start().await;
@@ -1063,20 +1096,25 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_DISABLED"));
     }
 
-    // Ported: "should fall back if http_url_to_repo is empty" — modules/platform/gitlab/index.spec.ts line 437
+    // Ported: "should return an array of repos" — modules/platform/gitlab/index.spec.ts line 163
     #[tokio::test]
-    async fn init_repo_minimal_response_succeeds() {
+    async fn init_repo_returns_real_metadata() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/projects/owner%2Frepo"))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "id": 1,
+                "id": 42,
                 "archived": false,
                 "mirror": false,
                 "default_branch": "master",
                 "empty_repo": false,
+                "forked_from_project": {"id": 1},
                 "repository_access_level": "enabled",
-                "merge_requests_access_level": "enabled"
+                "merge_requests_access_level": "enabled",
+                "merge_method": "rebase_merge",
+                "issues_enabled": true,
+                "squash_option": "default_on",
+                "path_with_namespace": "owner/repo"
             })))
             .mount(&server)
             .await;
@@ -1087,16 +1125,21 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(result.default_branch, "master");
-        assert!(!result.is_fork);
+        assert!(result.is_fork);
+        assert!(!result.repo_fingerprint.is_empty());
+        assert_eq!(result.merge_method, Some("rebase".to_owned()));
+        assert!(result.auto_merge_allowed);
+        assert!(result.has_issues_enabled);
+        assert!(!result.has_vulnerability_alerts_enabled);
     }
 
     // Ported: "should throw an error if receiving an error" — modules/platform/gitlab/index.spec.ts line 333
     #[tokio::test]
-    async fn init_repo_server_error_returns_http_error() {
+    async fn init_repo_not_found_returns_error() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/projects/owner%2Frepo"))
-            .respond_with(ResponseTemplate::new(500))
+            .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
 
@@ -1105,11 +1148,47 @@ mod tests {
             .init_repo("owner", "repo", None, false, None)
             .await
             .unwrap_err();
-        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND"));
+    }
+
+    // Ported: "should throw if endpoint is not a valid URL" — modules/platform/gitlab/index.spec.ts line 82
+    #[tokio::test]
+    async fn init_repo_forbidden_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(403))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ACCESS_FORBIDDEN")
+        );
     }
 
     // ── get_current_user ──────────────────────────────────────────────────────
 
+    // Ported: "should throw if auth fails" — modules/platform/gitlab/index.spec.ts line 91
+    #[tokio::test]
+    async fn get_current_user_unauthorized() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/user"))
+            .respond_with(ResponseTemplate::new(401))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client.get_current_user().await.unwrap_err();
+        assert!(matches!(err, PlatformError::Unauthorized));
+    }
+
+    // Ported: "should default to gitlab.com" — modules/platform/gitlab/index.spec.ts line 101
     #[tokio::test]
     async fn get_current_user_success() {
         let server = MockServer::start().await;
@@ -1127,22 +1206,27 @@ mod tests {
         assert_eq!(user.login, "devuser");
     }
 
+    // ── get_raw_file ──────────────────────────────────────────────────────────
+
+    // Ported: "should throw an error if it receives an error" — modules/platform/gitlab/index.spec.ts line 153
     #[tokio::test]
-    async fn get_current_user_unauthorized() {
+    async fn get_raw_file_returns_none_for_404() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
-            .and(path("/user"))
-            .respond_with(ResponseTemplate::new(401))
+            .and(path("/projects/owner%2Frepo/repository/files/missing.txt"))
+            .respond_with(ResponseTemplate::new(404))
             .mount(&server)
             .await;
 
         let client = make_client(&server.uri());
-        let err = client.get_current_user().await.unwrap_err();
-        assert!(matches!(err, PlatformError::Unauthorized));
+        let result = client
+            .get_raw_file("owner", "repo", "missing.txt")
+            .await
+            .unwrap();
+        assert!(result.is_none());
     }
 
-    // ── get_raw_file ──────────────────────────────────────────────────────────
-
+    // Ported: "should return an array of repos" — modules/platform/gitlab/index.spec.ts line 163
     #[tokio::test]
     async fn get_raw_file_returns_decoded_content() {
         let server = MockServer::start().await;
@@ -1168,23 +1252,7 @@ mod tests {
         assert!(file.content.contains("[package]"));
     }
 
-    #[tokio::test]
-    async fn get_raw_file_returns_none_for_404() {
-        let server = MockServer::start().await;
-        Mock::given(method("GET"))
-            .and(path("/projects/owner%2Frepo/repository/files/missing.txt"))
-            .respond_with(ResponseTemplate::new(404))
-            .mount(&server)
-            .await;
-
-        let client = make_client(&server.uri());
-        let result = client
-            .get_raw_file("owner", "repo", "missing.txt")
-            .await
-            .unwrap();
-        assert!(result.is_none());
-    }
-
+    // Ported: "should return an array of repos including mirrors" — modules/platform/gitlab/index.spec.ts line 185
     #[tokio::test]
     async fn get_raw_file_encodes_path_slashes() {
         let server = MockServer::start().await;
@@ -1212,6 +1280,7 @@ mod tests {
 
     // ── get_file_list ─────────────────────────────────────────────────────────
 
+    // Ported: "should encode the requested topics into the URL" — modules/platform/gitlab/index.spec.ts line 207
     #[tokio::test]
     async fn get_file_list_returns_blobs_only() {
         let server = MockServer::start().await;
@@ -1231,6 +1300,7 @@ mod tests {
         assert_eq!(files, vec!["Cargo.toml", "src/main.rs"]);
     }
 
+    // Ported: "should query the groups endpoint for each namespace" — modules/platform/gitlab/index.spec.ts line 225
     #[tokio::test]
     async fn get_file_list_paginates() {
         let server = MockServer::start().await;
@@ -1572,6 +1642,58 @@ mod tests {
         let client = make_client(&server.uri());
         let pr = client.get_pr("owner", "repo", 0).await.unwrap();
         assert!(pr.is_none());
+    }
+
+    // Ported: "removes draft prefix from returned title" — modules/platform/gitlab/index.spec.ts line 3466
+    #[tokio::test]
+    async fn get_pr_strips_draft_prefix() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/7"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 7,
+                "title": "Draft: do something",
+                "description": "a merge request",
+                "state": "merged",
+                "source_branch": "some-branch",
+                "target_branch": "main",
+                "created_at": "2025-05-19T12:00:00Z",
+                "updated_at": "2025-05-19T12:00:00Z",
+                "assignees": []
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client.get_pr("owner", "repo", 7).await.unwrap().unwrap();
+        assert_eq!(pr.title, "do something");
+        assert!(pr.is_draft);
+    }
+
+    // Ported: "removes deprecated draft prefix from returned title" — modules/platform/gitlab/index.spec.ts line 3490
+    #[tokio::test]
+    async fn get_pr_strips_wip_prefix() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/7"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 7,
+                "title": "WIP: do something",
+                "description": "a merge request",
+                "state": "merged",
+                "source_branch": "some-branch",
+                "target_branch": "main",
+                "created_at": "2025-05-19T12:00:00Z",
+                "updated_at": "2025-05-19T12:00:00Z",
+                "assignees": []
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client.get_pr("owner", "repo", 7).await.unwrap().unwrap();
+        assert_eq!(pr.title, "do something");
+        assert!(pr.is_draft);
     }
 
     // ── get_branch_pr ─────────────────────────────────────────────────────────
