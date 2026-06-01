@@ -970,31 +970,68 @@ async fn process_repo(
                 );
             }
             _ => {
-                match client
-                    .create_pr(owner, repo, &branch, &target_branch, title, &body)
-                    .await
-                {
-                    Ok(Some(pr_number)) => {
-                        tracing::info!(
-                            repo = %repo_slug,
-                            branch = %branch,
-                            pr_number,
-                            "created PR"
-                        );
+                match client.get_branch_pr(owner, repo, &branch).await {
+                    Ok(Some(pr)) => {
+                        // PR already exists — update title/body if changed.
+                        if let Err(err) = client
+                            .update_pr(owner, repo, pr.number, Some(title), Some(&body), None)
+                            .await
+                        {
+                            tracing::error!(
+                                repo = %repo_slug,
+                                branch = %branch,
+                                pr_number = pr.number,
+                                %err,
+                                "failed to update PR"
+                            );
+                            had_error = true;
+                        } else {
+                            tracing::info!(
+                                repo = %repo_slug,
+                                branch = %branch,
+                                pr_number = pr.number,
+                                "updated PR"
+                            );
+                        }
                     }
                     Ok(None) => {
-                        tracing::debug!(
-                            repo = %repo_slug,
-                            branch = %branch,
-                            "PR already exists or skipped"
-                        );
+                        // No existing PR — create one.
+                        match client
+                            .create_pr(owner, repo, &branch, &target_branch, title, &body)
+                            .await
+                        {
+                            Ok(Some(pr_number)) => {
+                                tracing::info!(
+                                    repo = %repo_slug,
+                                    branch = %branch,
+                                    pr_number,
+                                    "created PR"
+                                );
+                            }
+                            Ok(None) => {
+                                tracing::debug!(
+                                    repo = %repo_slug,
+                                    branch = %branch,
+                                    "PR creation skipped"
+                                );
+                            }
+                            Err(err) => {
+                                tracing::error!(
+                                    repo = %repo_slug,
+                                    branch = %branch,
+                                    %err,
+                                    "failed to create PR"
+                                );
+                                had_error = true;
+                            }
+                        }
                     }
                     Err(err) => {
                         tracing::error!(
                             repo = %repo_slug,
                             branch = %branch,
                             %err,
-                            "failed to create PR"
+                            "failed to check for existing PR"
                         );
                         had_error = true;
                     }
