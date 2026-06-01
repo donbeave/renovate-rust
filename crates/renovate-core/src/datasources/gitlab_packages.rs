@@ -213,4 +213,43 @@ mod tests {
             effective == "mypkg"
         }));
     }
+
+    // Ported: "returns null for 404" — gitlab-packages/index.spec.ts line 93
+    #[tokio::test]
+    async fn returns_null_for_404() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/api/v4/projects/group%2Fproject/packages"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), "group/project:mypkg", &http)
+            .await
+            .unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "throws for 5xx" — gitlab-packages/index.spec.ts line 131
+    #[tokio::test]
+    async fn throws_for_5xx() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/api/v4/projects/group%2Fproject/packages"))
+            .respond_with(ResponseTemplate::new(502))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), "group/project:mypkg", &http)
+            .await;
+        assert!(result.is_err());
+    }
 }

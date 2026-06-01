@@ -23,8 +23,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5574 / 11667 distinct upstream it() tests ported (47.8%) across 292 modules.
-**Quality:** 6289 `// Ported:` comments → 697 duplicate, 25 orphan, 25 malformed.
+**Total:** 5577 / 11667 distinct upstream it() tests ported (47.8%) across 292 modules.
+**Quality:** 6292 `// Ported:` comments → 697 duplicate, 25 orphan, 25 malformed.
 
 ## managers  —  2426/3642 (67%)
 
@@ -148,7 +148,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | full | 11/11 (100%) | — |
 | `manager/xcodegen` | 1 | full | 24/24 (100%) | — |
 
-## datasources  —  601/1379 (44%)
+## datasources  —  604/1379 (44%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -195,8 +195,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/github-releases` | 1 | full | 5/5 (100%) | — |
 | `datasource/github-runners` | 1 | full | 4/4 (100%) | — |
 | `datasource/github-tags` | 1 | full | 11/12 (92%) | — |
-| `datasource/gitlab-packages` | 1 | ? | 3/5 (60%) | — |
-| `datasource/gitlab-releases` | 1 | ? | 2/3 (67%) | — |
+| `datasource/gitlab-packages` | 1 | full | 5/5 (100%) | — |
+| `datasource/gitlab-releases` | 1 | full | 3/3 (100%) | — |
 | `datasource/gitlab-tags` | 2 | full | 8/9 (89%) | — |
 | `datasource/glasskube-packages` | 1 | full | 7/7 (100%) | — |
 | `datasource/go` | 6 | ? | 9/96 (9%) | — |

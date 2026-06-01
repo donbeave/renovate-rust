@@ -138,6 +138,32 @@ mod tests {
         assert!(!is_fatal_status(StatusCode::NOT_FOUND));
     }
 
+    // Ported: "returns releases from default registry" — gitlab-releases/index.spec.ts line 32
+    #[tokio::test]
+    async fn returns_releases_from_default_registry() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/api/v4/projects/some%2Fdep2/releases"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"tag_name": "v1.0.0", "released_at": "2021-01-01T00:00:00.000Z"},
+                {"tag_name": "v1.1.0", "released_at": "2021-03-01T00:00:00.000Z"}
+            ])))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), "some/dep2", &http)
+            .await
+            .unwrap()
+            .expect("should return releases");
+        assert_eq!(result.releases.len(), 2);
+        assert_eq!(result.releases[0].version, "v1.0.0");
+        assert_eq!(result.releases[1].version, "v1.1.0");
+    }
+
     // Rust-specific: gitlab_releases behavior test
     #[test]
     fn rfc3339_utc_conversion() {
