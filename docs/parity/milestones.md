@@ -114,7 +114,7 @@ self-hosted relevance):
 | 4 | `platform/github` | platform | full, 80% |
 | 5 | `manager/dockerfile` | manager | full, 100% |
 | 6 | `manager/github-actions` | manager | full, 100% |
-| 7 | `datasource/maven` | datasource | **partial, 40%** ← active blocker |
+| 7 | `datasource/maven` | datasource | **partial, 56%** ← active blocker |
 | 8 | `versioning/semver` | versioning | full, 100% |
 | 9 | `platform/local` | platform | full, 100% |
 | 10 | `manager/terraform` | manager | full, 100% |

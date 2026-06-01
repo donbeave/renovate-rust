@@ -888,6 +888,32 @@ pub fn classify_maven_fetch_error(err_msg: &str, status: Option<u16>) -> MavenFe
     MavenFetchError::HostError
 }
 
+/// Simple in-memory cache for Maven metadata 404 responses.
+/// Mirrors upstream `packageCache` for `datasource-maven:metadata-not-found`.
+use std::sync::Mutex;
+static METADATA_NOT_FOUND_CACHE: Mutex<Option<std::collections::HashSet<String>>> =
+    Mutex::new(None);
+
+fn metadata_cache_get(url: &str) -> bool {
+    let guard = METADATA_NOT_FOUND_CACHE.lock().unwrap();
+    guard.as_ref().is_some_and(|c| c.contains(url))
+}
+
+fn metadata_cache_set(url: &str) {
+    let mut guard = METADATA_NOT_FOUND_CACHE.lock().unwrap();
+    guard.get_or_insert_with(std::collections::HashSet::new).insert(url.to_owned());
+}
+
+#[allow(dead_code)]
+fn metadata_cache_clear() {
+    let mut guard = METADATA_NOT_FOUND_CACHE.lock().unwrap();
+    *guard = None;
+}
+
+fn is_metadata_url(url: &str) -> bool {
+    url.ends_with("/maven-metadata.xml")
+}
+
 /// Download from an HTTP(S) Maven URL with typed error handling.
 ///
 /// Mirrors upstream `downloadHttpProtocol`.
@@ -896,6 +922,10 @@ pub async fn download_http_protocol(
     http: &HttpClient,
     url: &str,
 ) -> Result<String, MavenFetchError> {
+    if is_metadata_url(url) && metadata_cache_get(url) {
+        return Err(MavenFetchError::NotFound);
+    }
+
     let resp = match http.get_retrying(url).await {
         Ok(r) => r,
         Err(crate::http::HttpError::Request(e)) => {
@@ -909,6 +939,9 @@ pub async fn download_http_protocol(
 
     let status = resp.status();
     if !status.is_success() {
+        if status.as_u16() == 404 && is_metadata_url(url) {
+            metadata_cache_set(url);
+        }
         return Err(classify_maven_fetch_error("", Some(status.as_u16())));
     }
 
@@ -2326,5 +2359,53 @@ mod tests {
         let http = HttpClient::new().unwrap();
         let result = download_http_protocol(&http, &server.uri()).await;
         assert_eq!(result, Err(MavenFetchError::TemporaryError));
+    }
+
+    // Ported: "caches 404 for maven-metadata.xml URLs" — modules/datasource/maven/util.spec.ts line 302
+    #[tokio::test]
+    async fn download_http_protocol_caches_404_for_metadata() {
+        metadata_cache_clear();
+        let server = MockServer::start().await;
+        let metadata_url = format!("{}/maven-metadata.xml", server.uri());
+        Mock::given(method("GET"))
+            .and(path("/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = download_http_protocol(&http, &metadata_url).await;
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+        assert!(metadata_cache_get(&metadata_url));
+    }
+
+    // Ported: "does not cache 404 for non-metadata URLs" — modules/datasource/maven/util.spec.ts line 328
+    #[tokio::test]
+    async fn download_http_protocol_does_not_cache_404_for_non_metadata() {
+        metadata_cache_clear();
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = download_http_protocol(&http, &server.uri()).await;
+        assert_eq!(result, Err(MavenFetchError::NotFound));
+        assert!(!metadata_cache_get(&server.uri()));
+    }
+
+    // Ported: "returns cached not-found without making HTTP request" — modules/datasource/maven/util.spec.ts line 344
+    #[tokio::test]
+    async fn download_http_protocol_returns_cached_not_found() {
+        metadata_cache_clear();
+        let server = MockServer::start().await;
+        let metadata_url = format!("{}/maven-metadata.xml", server.uri());
+        metadata_cache_set(&metadata_url);
+
+        let http = HttpClient::new().unwrap();
+        let result = download_http_protocol(&http, &metadata_url).await;
+        assert_eq!(result, Err(MavenFetchError::NotFound));
     }
 }
