@@ -5706,7 +5706,7 @@ mod tests {
         assert_eq!(coerce_string(None, Some("foo")), "foo");
     }
 
-    // Ported: "$input\" -> \"$expected" — util/string.spec.ts line 51
+    // Ported: "\"$input\" -> \"$expected\"" — util/string.spec.ts line 51
     #[test]
     fn test_strip_templates() {
         assert_eq!(
