@@ -665,6 +665,50 @@ pipenv = "==2020.8.13"
         );
     }
 
+    // Ported: "extracts multiple dependencies" — pipenv/extract.spec.ts line 142
+    #[test]
+    fn extracts_multiple_dependencies() {
+        let content = r#"
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+Django = "==1"
+distribute = "==0.6.27"
+dj-database-url = "==0.2"
+psycopg2 = "==2.4.5"
+wsgiref = "==0.1.2"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"
+"#;
+        let package_file = extract_package_file(content);
+        assert_eq!(package_file.deps.len(), 5);
+        assert_eq!(
+            package_file.registry_urls,
+            vec!["https://pypi.org/simple".to_owned()]
+        );
+        assert_eq!(
+            package_file.extracted_constraints.get("python"),
+            Some(&"== 3.6.*".to_owned())
+        );
+        assert_eq!(package_file.lock_files, vec!["Pipfile.lock".to_owned()]);
+
+        let django = package_file.deps.iter().find(|d| d.name == "django").unwrap();
+        assert_eq!(django.current_value, "==1");
+        assert!(!django.is_dev);
+        assert!(django.skip_reason.is_none());
+
+        let wsgiref = package_file.deps.iter().find(|d| d.name == "wsgiref").unwrap();
+        assert_eq!(wsgiref.current_value, "==0.1.2");
+        assert!(!wsgiref.is_dev);
+        assert!(wsgiref.skip_reason.is_none());
+    }
+
     const PIPFILE4: &str = r#"
 [[source]]
 url = 'https://pypi.python.org/simple'

@@ -23,8 +23,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5804 / 11670 distinct upstream it() tests ported (49.7%) across 292 modules.
-**Quality:** 6523 `// Ported:` comments → 719 duplicate, 0 orphan, 0 malformed.
+**Total:** 5806 / 11670 distinct upstream it() tests ported (49.8%) across 292 modules.
+**Quality:** 6525 `// Ported:` comments → 719 duplicate, 0 orphan, 0 malformed.
 
 ## managers  —  2544/3642 (70%)
 
@@ -235,7 +235,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/unity3d` | 1 | ? | 9/9 (100%) | — |
 | `datasource/unity3d-packages` | 1 | ? | 5/5 (100%) | — |
 
-## platforms  —  339/1581 (21%)
+## platforms  —  341/1581 (22%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -248,7 +248,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/gerrit` | 4 | ? | 0/158 (0%) | — |
 | `platform/gitea` | 5 | ? | 0/183 (0%) | — |
 | `platform/github` | 7 | full | 197/245 (80%) | Read, write, PR ops, fork handling all implemented. |
-| `platform/gitlab` | 4 | ? | 20/182 (11%) | — |
+| `platform/gitlab` | 4 | ? | 22/182 (12%) | — |
 | `platform/local` | 2 | full | 41/41 (100%) | Self-hosted platform stubs complete. |
 | `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
 | `platform/utils` | 2 | ? | 14/14 (100%) | — |

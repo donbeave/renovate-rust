@@ -160,6 +160,25 @@ Acceptance:
 
 ---
 
+## M7 — GitLab platform completeness
+
+Goal: `platform/gitlab` has the full read+write PR surface implemented and
+tested, matching the coverage and functionality of `platform/github`.
+
+Acceptance:
+
+- [ ] `platform/gitlab` Impl=`full` for PR read/write surface:
+  `get_pr_list`, `get_pr`, `get_branch_pr`, `create_pr`, `update_pr`,
+  `write_file`.
+- [ ] `platform/gitlab` Coverage ≥ 40% (currently 11%).
+- [ ] All ported upstream tests from `lib/modules/platform/gitlab/index.spec.ts`
+  pass with wiremock.
+- [ ] `cargo build --workspace --all-features`, `cargo fmt --all --check`,
+  `cargo clippy --workspace --all-targets --all-features -- -D warnings`,
+  and `cargo test --workspace --all-features` all pass.
+
+---
+
 ## What "full parity" means now
 
 Full parity is **the union of all milestones**, not a single number. There is

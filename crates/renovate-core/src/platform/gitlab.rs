@@ -176,6 +176,27 @@ struct GitlabProject {
     issues_enabled: Option<bool>,
 }
 
+/// GitLab merge request response.
+/// `GET /projects/{id}/merge_requests/{iid}` or list endpoint.
+#[derive(Debug, Deserialize)]
+struct GitLabMergeRequest {
+    iid: i64,
+    title: String,
+    description: Option<String>,
+    state: String,
+    source_branch: String,
+    created_at: String,
+    updated_at: String,
+    sha: Option<String>,
+    #[serde(default)]
+    labels: Vec<String>,
+    assignee: Option<GitlabUser>,
+    #[serde(default)]
+    assignees: Vec<GitlabUser>,
+    #[serde(default)]
+    reviewers: Vec<GitlabUser>,
+}
+
 // ── PlatformClient impl ───────────────────────────────────────────────────────
 
 impl PlatformClient for GitlabClient {
@@ -390,26 +411,99 @@ impl PlatformClient for GitlabClient {
 
     async fn create_pr(
         &self,
-        _owner: &str,
-        _repo: &str,
-        _source_branch: &str,
-        _target_branch: &str,
-        _title: &str,
-        _body: &str,
+        owner: &str,
+        repo: &str,
+        source_branch: &str,
+        target_branch: &str,
+        title: &str,
+        body: &str,
     ) -> Result<Option<i64>, PlatformError> {
-        Err(PlatformError::NotSupported("GitLab PR creation".to_owned()))
+        let project_id = encode_project(owner, repo);
+        let url = format!("{}/projects/{}/merge_requests", self.api_base, project_id);
+
+        let body_json = serde_json::json!({
+            "source_branch": source_branch,
+            "target_branch": target_branch,
+            "title": title,
+            "description": body,
+            "remove_source_branch": true,
+        });
+        let body_str = serde_json::to_string(&body_json)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+
+        let resp = self
+            .http
+            .post_json::<GitLabMergeRequest>(&url, &body_str)
+            .await
+            .map_err(PlatformError::Http)?;
+
+        Ok(Some(resp.iid))
     }
 
     async fn update_pr(
         &self,
-        _owner: &str,
-        _repo: &str,
-        _pr_number: i64,
-        _title: Option<&str>,
-        _body: Option<&str>,
-        _state: Option<&str>,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
+        title: Option<&str>,
+        body: Option<&str>,
+        state: Option<&str>,
     ) -> Result<(), PlatformError> {
-        Err(PlatformError::NotSupported("GitLab PR updates".to_owned()))
+        if title.is_none() && body.is_none() && state.is_none() {
+            return Ok(());
+        }
+
+        let project_id = encode_project(owner, repo);
+        let url = format!(
+            "{}/projects/{}/merge_requests/{}",
+            self.api_base, project_id, pr_number
+        );
+
+        // Preserve draft prefix if the existing PR is a draft.
+        let effective_title = match title {
+            Some(t) => match self.get_pr(owner, repo, pr_number).await? {
+                Some(existing) if existing.is_draft => Some(format!("{DRAFT_PREFIX}{t}")),
+                _ => Some(t.to_owned()),
+            },
+            None => None,
+        };
+
+        let state_event = state.map(|s| match s {
+            "closed" => "close",
+            "open" => "reopen",
+            _ => s,
+        });
+
+        let mut request = serde_json::Map::new();
+        if let Some(t) = effective_title {
+            request.insert("title".to_owned(), serde_json::Value::String(t));
+        }
+        if let Some(b) = body {
+            request.insert(
+                "description".to_owned(),
+                serde_json::Value::String(b.to_owned()),
+            );
+        }
+        if let Some(se) = state_event {
+            request.insert(
+                "state_event".to_owned(),
+                serde_json::Value::String(se.to_owned()),
+            );
+        }
+
+        let body_str = serde_json::to_string(&request)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+
+        let resp = self
+            .http
+            .put_json::<GitLabMergeRequest>(&url, &body_str)
+            .await
+            .map_err(PlatformError::Http)?;
+
+        if !resp.state.is_empty() {
+            tracing::debug!(pr = pr_number, "PR updated successfully");
+        }
+        Ok(())
     }
 
     async fn get_branch_status(
@@ -425,46 +519,192 @@ impl PlatformClient for GitlabClient {
 
     async fn write_file(
         &self,
-        _owner: &str,
-        _repo: &str,
-        _path: &str,
-        _content: &str,
-        _branch: Option<&str>,
-        _message: Option<&str>,
+        owner: &str,
+        repo: &str,
+        path: &str,
+        content: &str,
+        branch: Option<&str>,
+        message: Option<&str>,
     ) -> Result<(), PlatformError> {
-        tracing::debug!("gitlab platform: write_file is not yet implemented");
-        Err(PlatformError::NotSupported(
-            "write_file not yet implemented for GitLab".to_owned(),
-        ))
+        let project_id = encode_project(owner, repo);
+        let encoded_path = encode_path(path);
+        let branch = branch.ok_or_else(|| {
+            PlatformError::Unexpected("GitLab write_file requires a branch".to_owned())
+        })?;
+
+        // Try to fetch existing file to determine whether to create or update.
+        let get_url = format!(
+            "{}/projects/{}/repository/files/{}?ref={}",
+            self.api_base, project_id, encoded_path, branch
+        );
+        let exists = match self.http.get(&get_url).send().await {
+            Ok(resp) => resp.status().is_success(),
+            Err(_) => false,
+        };
+
+        let b64_content = base64::engine::general_purpose::STANDARD.encode(content);
+        let body = serde_json::json!({
+            "branch": branch,
+            "content": b64_content,
+            "encoding": "base64",
+            "commit_message": message.unwrap_or("Update file via Renovate"),
+        });
+        let body_str = serde_json::to_string(&body)
+            .map_err(|e| PlatformError::Unexpected(format!("JSON serialize: {e}")))?;
+
+        let url = format!(
+            "{}/projects/{}/repository/files/{}",
+            self.api_base, project_id, encoded_path
+        );
+
+        if exists {
+            self.http
+                .put_json::<serde_json::Value>(&url, &body_str)
+                .await
+                .map_err(PlatformError::Http)?;
+        } else {
+            self.http
+                .post_json::<serde_json::Value>(&url, &body_str)
+                .await
+                .map_err(PlatformError::Http)?;
+        }
+
+        Ok(())
     }
 
     async fn get_pr_list(
         &self,
-        _owner: &str,
-        _repo: &str,
-        _state: Option<&str>,
+        owner: &str,
+        repo: &str,
+        state: Option<&str>,
     ) -> Result<Vec<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported("GitLab PR list".to_owned()))
+        let project_id = encode_project(owner, repo);
+        let gl_state = match state {
+            Some("open") => "opened",
+            Some(s) => s,
+            None => "all",
+        };
+
+        let mut all_prs: Vec<crate::platform::GhPr> = Vec::new();
+        let mut page: u32 = 1;
+
+        loop {
+            let url = format!(
+                "{}/projects/{}/merge_requests?per_page=100&state={}&page={}",
+                self.api_base, project_id, gl_state, page
+            );
+
+            let resp = self
+                .http
+                .get_retrying(&url)
+                .await
+                .map_err(PlatformError::Http)?;
+
+            match resp.status() {
+                s if s.is_success() => {}
+                s if s == reqwest::StatusCode::NOT_FOUND => {
+                    return Err(PlatformError::Unexpected("repository not found".to_owned()));
+                }
+                s if s == reqwest::StatusCode::UNAUTHORIZED => {
+                    return Err(PlatformError::Unauthorized);
+                }
+                s => return Err(PlatformError::Http(HttpError::Status { status: s, url })),
+            }
+
+            let mrs: Vec<GitLabMergeRequest> = resp
+                .json()
+                .await
+                .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+
+            let count = mrs.len();
+            all_prs.extend(mrs.into_iter().map(mr_to_gh_pr));
+
+            if count < 100 || page >= 50 {
+                if page >= 50 {
+                    tracing::warn!(
+                        repo = %format!("{owner}/{repo}"),
+                        "GitLab PR list exceeded 50 pages; list may be incomplete"
+                    );
+                }
+                break;
+            }
+            page += 1;
+        }
+
+        Ok(all_prs)
     }
 
     async fn get_pr(
         &self,
-        _owner: &str,
-        _repo: &str,
-        _pr_number: i64,
+        owner: &str,
+        repo: &str,
+        pr_number: i64,
     ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported("GitLab get PR".to_owned()))
+        if pr_number == 0 {
+            return Ok(None);
+        }
+
+        let project_id = encode_project(owner, repo);
+        let url = format!(
+            "{}/projects/{}/merge_requests/{}?include_diverged_commits_count=1",
+            self.api_base, project_id, pr_number
+        );
+
+        match self.http.get(&url).send().await {
+            Ok(resp) if resp.status().is_success() => {
+                let mr: GitLabMergeRequest = resp
+                    .json()
+                    .await
+                    .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+                Ok(Some(mr_to_gh_pr(mr)))
+            }
+            Ok(resp) if resp.status() == reqwest::StatusCode::NOT_FOUND => Ok(None),
+            Ok(resp) => Err(PlatformError::Http(HttpError::Status {
+                status: resp.status(),
+                url,
+            })),
+            Err(e) => Err(PlatformError::Http(HttpError::Request(e))),
+        }
     }
 
     async fn get_branch_pr(
         &self,
-        _owner: &str,
-        _repo: &str,
-        _branch: &str,
+        owner: &str,
+        repo: &str,
+        branch: &str,
     ) -> Result<Option<crate::platform::GhPr>, PlatformError> {
-        Err(PlatformError::NotSupported(
-            "GitLab get branch PR".to_owned(),
-        ))
+        let project_id = encode_project(owner, repo);
+        let url = format!(
+            "{}/projects/{}/merge_requests?source_branch={}&state=opened&per_page=1",
+            self.api_base, project_id, branch
+        );
+
+        let resp = self
+            .http
+            .get_retrying(&url)
+            .await
+            .map_err(PlatformError::Http)?;
+
+        match resp.status() {
+            s if s.is_success() => {}
+            s if s == reqwest::StatusCode::NOT_FOUND => {
+                return Err(PlatformError::Unexpected("repository not found".to_owned()));
+            }
+            s if s == reqwest::StatusCode::UNAUTHORIZED => {
+                return Err(PlatformError::Unauthorized);
+            }
+            s => return Err(PlatformError::Http(HttpError::Status { status: s, url })),
+        }
+
+        let mrs: Vec<GitLabMergeRequest> = resp
+            .json()
+            .await
+            .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+
+        match mrs.into_iter().next() {
+            Some(mr) => self.get_pr(owner, repo, mr.iid).await,
+            None => Ok(None),
+        }
     }
 }
 
@@ -482,6 +722,61 @@ fn encode_path(path: &str) -> String {
 /// GitLab accepts `{namespace}%2F{project}` as the project ID in REST URLs.
 fn encode_project(owner: &str, repo: &str) -> String {
     format!("{owner}%2F{repo}")
+}
+
+const DRAFT_PREFIX: &str = "Draft: ";
+const DRAFT_PREFIX_DEPRECATED: &str = "WIP: ";
+
+/// Convert a GitLab merge request into the Renovate `GhPr` format.
+///
+/// Mirrors `prInfo()` from `lib/modules/platform/gitlab/utils.ts`.
+fn mr_to_gh_pr(mr: GitLabMergeRequest) -> crate::platform::GhPr {
+    let mut title = mr.title;
+    let is_draft = if title.starts_with(DRAFT_PREFIX) {
+        title = title.strip_prefix(DRAFT_PREFIX).unwrap_or(&title).to_owned();
+        true
+    } else if title.starts_with(DRAFT_PREFIX_DEPRECATED) {
+        title = title
+            .strip_prefix(DRAFT_PREFIX_DEPRECATED)
+            .unwrap_or(&title)
+            .to_owned();
+        true
+    } else {
+        false
+    };
+
+    let state = if mr.state == "opened" {
+        "open".to_owned()
+    } else {
+        mr.state
+    };
+
+    let has_assignees = mr.assignee.is_some() || !mr.assignees.is_empty();
+    let reviewers = mr
+        .reviewers
+        .into_iter()
+        .map(|u| u.username)
+        .collect::<Vec<_>>();
+
+    let body_struct = crate::platform::pr_body::get_pr_body_struct(mr.description.as_deref());
+
+    crate::platform::GhPr {
+        number: mr.iid,
+        title,
+        state,
+        source_branch: mr.source_branch,
+        source_repo: None,
+        body_struct: Some(body_struct),
+        updated_at: mr.updated_at,
+        node_id: mr.iid.to_string(),
+        sha: mr.sha,
+        labels: mr.labels,
+        has_assignees,
+        reviewers,
+        created_at: Some(mr.created_at),
+        closed_at: None,
+        is_draft,
+    }
 }
 
 // ── code-owners (mirrors lib/modules/platform/gitlab/code-owners.ts) ─────────
@@ -742,6 +1037,77 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_DISABLED"));
     }
 
+    // Ported: "should throw an error if MRs are disabled" — modules/platform/gitlab/index.spec.ts line 401
+    #[tokio::test]
+    async fn init_repo_mrs_disabled_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": false,
+                "default_branch": "main",
+                "empty_repo": false,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "disabled"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_DISABLED"));
+    }
+
+    // Ported: "should fall back if http_url_to_repo is empty" — modules/platform/gitlab/index.spec.ts line 437
+    #[tokio::test]
+    async fn init_repo_minimal_response_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "id": 1,
+                "archived": false,
+                "mirror": false,
+                "default_branch": "master",
+                "empty_repo": false,
+                "repository_access_level": "enabled",
+                "merge_requests_access_level": "enabled"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap();
+        assert_eq!(result.default_branch, "master");
+        assert!(!result.is_fork);
+    }
+
+    // Ported: "should throw an error if receiving an error" — modules/platform/gitlab/index.spec.ts line 333
+    #[tokio::test]
+    async fn init_repo_server_error_returns_http_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let err = client
+            .init_repo("owner", "repo", None, false, None)
+            .await
+            .unwrap_err();
+        assert!(matches!(err, PlatformError::Http(HttpError::Status { status, .. }) if status == reqwest::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
     // ── get_current_user ──────────────────────────────────────────────────────
 
     #[tokio::test]
@@ -900,34 +1266,96 @@ mod tests {
         assert!(files.contains(&"README.md".to_owned()));
     }
 
+    // ── create_pr ─────────────────────────────────────────────────────────────
+
     #[tokio::test]
-    async fn create_pr_returns_not_supported() {
+    async fn create_pr_succeeds() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "Update deps",
+                "description": "Body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr_number = client
+            .create_pr("owner", "repo", "renovate/deps", "main", "Update deps", "Body")
+            .await
+            .unwrap();
+        assert_eq!(pr_number, Some(42));
+    }
+
+    // ── update_pr ─────────────────────────────────────────────────────────────
+
+    #[tokio::test]
+    async fn update_pr_no_op_when_nothing_to_update() {
         let server = MockServer::start().await;
         let client = make_client(&server.uri());
-        let err = client
-            .create_pr(
-                "owner",
-                "repo",
-                "renovate/deps",
-                "main",
-                "Update deps",
-                "Body",
-            )
-            .await
-            .unwrap_err();
-        assert!(matches!(err, PlatformError::NotSupported(_)));
+        // No request should be sent when all args are None.
+        let result = client.update_pr("owner", "repo", 42, None, None, None).await;
+        assert!(result.is_ok());
     }
 
     #[tokio::test]
-    async fn update_pr_returns_not_supported() {
+    async fn update_pr_succeeds() {
         let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "New title",
+                "description": "New body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
         let client = make_client(&server.uri());
-        let err = client
-            .update_pr("owner", "repo", 42, Some("New title"), None, None)
-            .await
-            .unwrap_err();
-        assert!(matches!(err, PlatformError::NotSupported(_)));
+        let result = client
+            .update_pr("owner", "repo", 42, Some("New title"), Some("New body"), None)
+            .await;
+        assert!(result.is_ok());
     }
+
+    #[tokio::test]
+    async fn update_pr_closes_pr() {
+        let server = MockServer::start().await;
+        Mock::given(method("PUT"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "Title",
+                "description": "Body",
+                "state": "closed",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client
+            .update_pr("owner", "repo", 42, None, None, Some("closed"))
+            .await;
+        assert!(result.is_ok());
+    }
+
+    // ── get_branch_status ─────────────────────────────────────────────────────
 
     #[tokio::test]
     async fn get_branch_status_returns_not_supported() {
@@ -940,15 +1368,278 @@ mod tests {
         assert!(matches!(err, PlatformError::NotSupported(_)));
     }
 
+    // ── write_file ────────────────────────────────────────────────────────────
+
     #[tokio::test]
-    async fn write_file_returns_not_supported() {
+    async fn write_file_requires_branch() {
         let server = MockServer::start().await;
         let client = make_client(&server.uri());
         let err = client
             .write_file("owner", "repo", "path", "content", None, None)
             .await
             .unwrap_err();
-        assert!(matches!(err, PlatformError::NotSupported(_)));
+        assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("requires a branch")));
+    }
+
+    #[tokio::test]
+    async fn write_file_creates_file() {
+        let server = MockServer::start().await;
+        // File does not exist → GET returns 404
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/repository/files/new.txt"))
+            .and(query_param("ref", "main"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("POST"))
+            .and(path("/projects/owner%2Frepo/repository/files/new.txt"))
+            .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+                "file_path": "new.txt",
+                "branch": "main",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client
+            .write_file("owner", "repo", "new.txt", "hello", Some("main"), None)
+            .await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn write_file_updates_existing_file() {
+        let server = MockServer::start().await;
+        let encoded = base64::engine::general_purpose::STANDARD.encode(b"existing");
+        // File exists → GET returns 200
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/repository/files/existing.txt"))
+            .and(query_param("ref", "main"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "file_path": "existing.txt",
+                "content": encoded,
+                "encoding": "base64",
+            })))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("PUT"))
+            .and(path("/projects/owner%2Frepo/repository/files/existing.txt"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "file_path": "existing.txt",
+                "branch": "main",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = client
+            .write_file("owner", "repo", "existing.txt", "updated", Some("main"), None)
+            .await;
+        assert!(result.is_ok());
+    }
+
+    // ── get_pr_list ───────────────────────────────────────────────────────────
+
+    #[tokio::test]
+    async fn get_pr_list_returns_prs() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("state", "all"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 1,
+                    "title": "Update deps",
+                    "description": "Body",
+                    "state": "opened",
+                    "source_branch": "renovate/deps",
+                    "target_branch": "main",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-02T00:00:00Z",
+                    "sha": "abc123",
+                    "labels": ["dependencies"],
+                },
+                {
+                    "iid": 2,
+                    "title": "WIP: Draft PR",
+                    "description": null,
+                    "state": "closed",
+                    "source_branch": "renovate/draft",
+                    "target_branch": "main",
+                    "created_at": "2024-01-03T00:00:00Z",
+                    "updated_at": "2024-01-04T00:00:00Z",
+                    "sha": "def456",
+                    "labels": [],
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let prs = client.get_pr_list("owner", "repo", None).await.unwrap();
+        assert_eq!(prs.len(), 2);
+        assert_eq!(prs[0].number, 1);
+        assert_eq!(prs[0].state, "open");
+        assert_eq!(prs[0].source_branch, "renovate/deps");
+        assert_eq!(prs[1].number, 2);
+        assert_eq!(prs[1].state, "closed");
+        assert!(prs[1].is_draft);
+        assert_eq!(prs[1].title, "Draft PR");
+    }
+
+    #[tokio::test]
+    async fn get_pr_list_filters_by_state() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 1,
+                    "title": "Update deps",
+                    "description": null,
+                    "state": "opened",
+                    "source_branch": "renovate/deps",
+                    "target_branch": "main",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-01T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let prs = client.get_pr_list("owner", "repo", Some("open")).await.unwrap();
+        assert_eq!(prs.len(), 1);
+        assert_eq!(prs[0].state, "open");
+    }
+
+    // ── get_pr ────────────────────────────────────────────────────────────────
+
+    #[tokio::test]
+    async fn get_pr_returns_mr() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/42"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 42,
+                "title": "Update deps",
+                "description": "Body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-02T00:00:00Z",
+                "sha": "abc123",
+                "labels": ["dependencies"],
+                "assignee": {"id": 1, "username": "alice"},
+                "assignees": [{"id": 1, "username": "alice"}],
+                "reviewers": [{"id": 2, "username": "bob"}],
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client.get_pr("owner", "repo", 42).await.unwrap().unwrap();
+        assert_eq!(pr.number, 42);
+        assert_eq!(pr.title, "Update deps");
+        assert_eq!(pr.state, "open");
+        assert!(pr.has_assignees);
+        assert_eq!(pr.reviewers, vec!["bob"]);
+        assert_eq!(pr.labels, vec!["dependencies"]);
+        assert_eq!(pr.sha, Some("abc123".to_owned()));
+    }
+
+    #[tokio::test]
+    async fn get_pr_returns_none_for_404() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/99"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client.get_pr("owner", "repo", 99).await.unwrap();
+        assert!(pr.is_none());
+    }
+
+    #[tokio::test]
+    async fn get_pr_returns_none_for_zero() {
+        let server = MockServer::start().await;
+        let client = make_client(&server.uri());
+        let pr = client.get_pr("owner", "repo", 0).await.unwrap();
+        assert!(pr.is_none());
+    }
+
+    // ── get_branch_pr ─────────────────────────────────────────────────────────
+
+    #[tokio::test]
+    async fn get_branch_pr_finds_open_mr() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("source_branch", "renovate/deps"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 7,
+                    "title": "Update deps",
+                    "description": null,
+                    "state": "opened",
+                    "source_branch": "renovate/deps",
+                    "target_branch": "main",
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "updated_at": "2024-01-01T00:00:00Z",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests/7"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "iid": 7,
+                "title": "Update deps",
+                "description": "Detailed body",
+                "state": "opened",
+                "source_branch": "renovate/deps",
+                "target_branch": "main",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client
+            .get_branch_pr("owner", "repo", "renovate/deps")
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(pr.number, 7);
+        assert_eq!(pr.title, "Update deps");
+    }
+
+    #[tokio::test]
+    async fn get_branch_pr_returns_none_when_no_mr() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("source_branch", "renovate/missing"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let pr = client
+            .get_branch_pr("owner", "repo", "renovate/missing")
+            .await
+            .unwrap();
+        assert!(pr.is_none());
     }
 
     // ── code-owners ───────────────────────────────────────────────────────────
