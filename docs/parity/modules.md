@@ -49,7 +49,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/buildpacks` | 1 | ? | 3/3 (100%) | — |
 | `manager/bun` | 3 | ? | 3/34 (9%) | — |
 | `manager/bun-version` | 1 | ? | 6/6 (100%) | — |
-| `manager/bundler` | 7 | ? | 60/74 (81%) | — |
+| `manager/bundler` | 7 | partial | 60/74 (81%) | Coverage OK, needs audit |
 | `manager/cake` | 1 | ? | 3/5 (60%) | — |
 | `manager/cargo` | 6 | full | 62/73 (85%) | M1 complete |
 | `manager/cdnurl` | 1 | ? | 1/1 (100%) | — |
@@ -74,12 +74,12 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/flux` | 2 | ? | 59/66 (89%) | — |
 | `manager/fvm` | 1 | ? | 7/7 (100%) | — |
 | `manager/git-submodules` | 3 | ? | 13/16 (81%) | — |
-| `manager/github-actions` | 3 | ? | 81/98 (83%) | — |
+| `manager/github-actions` | 3 | partial | 81/98 (83%) | Coverage OK, needs audit |
 | `manager/gitlabci` | 2 | ? | 17/18 (94%) | — |
 | `manager/gitlabci-include` | 1 | ? | 8/8 (100%) | — |
 | `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
 | `manager/gleam` | 4 | ? | 18/30 (60%) | — |
-| `manager/gomod` | 6 | ? | 124/155 (80%) | — |
+| `manager/gomod` | 6 | partial | 124/155 (80%) | Coverage OK, needs audit |
 | `manager/gradle` | 8 | ? | 42/143 (29%) | — |
 | `manager/gradle-wrapper` | 3 | ? | 20/36 (56%) | — |
 | `manager/haskell-cabal` | 2 | ? | 8/8 (100%) | — |
@@ -98,7 +98,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/kubernetes` | 1 | ? | 15/15 (100%) | — |
 | `manager/kustomize` | 3 | ? | 47/68 (69%) | — |
 | `manager/leiningen` | 1 | ? | 4/4 (100%) | — |
-| `manager/maven` | 3 | ? | 52/56 (93%) | — |
+| `manager/maven` | 3 | partial | 52/56 (93%) | Coverage OK, needs audit |
 | `manager/maven-wrapper` | 2 | ? | 9/39 (23%) | — |
 | `manager/meteor` | 1 | ? | 2/2 (100%) | — |
 | `manager/mint` | 1 | ? | 5/5 (100%) | — |
@@ -107,7 +107,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/nix` | 3 | ? | 40/50 (80%) | — |
 | `manager/nodenv` | 1 | ? | 3/3 (100%) | — |
 | `manager/npm` | 32 | full | 352/439 (80%) | M2 complete |
-| `manager/nuget` | 6 | ? | 80/93 (86%) | — |
+| `manager/nuget` | 6 | partial | 80/93 (86%) | Coverage OK, needs audit |
 | `manager/nvm` | 1 | ? | 4/4 (100%) | — |
 | `manager/ocb` | 2 | ? | 9/9 (100%) | — |
 | `manager/osgi` | 1 | ? | 14/14 (100%) | — |
@@ -137,7 +137,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/tekton` | 1 | ? | 5/5 (100%) | — |
 | `manager/terraform` | 13 | partial | 71/88 (81%) | Missing: lockfile maintenance (updateAllLocks) |
 | `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
-| `manager/terragrunt` | 4 | ? | 15/18 (83%) | — |
+| `manager/terragrunt` | 4 | partial | 15/18 (83%) | Missing: artifact delegation to terraform |
 | `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |
 | `manager/tflint-plugin` | 1 | ? | 6/6 (100%) | — |
 | `manager/travis` | 1 | ? | 8/8 (100%) | — |
