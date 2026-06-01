@@ -23,10 +23,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5519 / 11667 distinct upstream it() tests ported (47.3%) across 292 modules.
-**Quality:** 6233 `// Ported:` comments → 696 duplicate, 25 orphan, 25 malformed.
+**Total:** 5524 / 11667 distinct upstream it() tests ported (47.3%) across 292 modules.
+**Quality:** 6238 `// Ported:` comments → 696 duplicate, 25 orphan, 25 malformed.
 
-## managers  —  2388/3642 (66%)
+## managers  —  2390/3642 (66%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -79,7 +79,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/gitlabci-include` | 1 | ? | 8/8 (100%) | — |
 | `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
 | `manager/gleam` | 4 | ? | 18/30 (60%) | — |
-| `manager/gomod` | 6 | ? | 100/155 (65%) | — |
+| `manager/gomod` | 6 | ? | 102/155 (66%) | — |
 | `manager/gradle` | 8 | ? | 42/143 (29%) | — |
 | `manager/gradle-wrapper` | 3 | ? | 20/36 (56%) | — |
 | `manager/haskell-cabal` | 2 | ? | 8/8 (100%) | — |
@@ -148,7 +148,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | ? | 11/11 (100%) | — |
 | `manager/xcodegen` | 1 | ? | 24/24 (100%) | — |
 
-## datasources  —  594/1379 (43%)
+## datasources  —  597/1379 (43%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -200,7 +200,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/gitlab-tags` | 2 | ? | 8/9 (89%) | — |
 | `datasource/glasskube-packages` | 1 | ? | 7/7 (100%) | — |
 | `datasource/go` | 6 | ? | 9/96 (9%) | — |
-| `datasource/golang-version` | 1 | ? | 7/10 (70%) | — |
+| `datasource/golang-version` | 1 | ? | 10/10 (100%) | — |
 | `datasource/gradle-version` | 1 | ? | 4/4 (100%) | — |
 | `datasource/hackage` | 1 | ? | 4/4 (100%) | — |
 | `datasource/helm` | 2 | ? | 15/15 (100%) | — |

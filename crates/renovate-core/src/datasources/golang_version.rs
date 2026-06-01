@@ -268,7 +268,7 @@ var Releases = []*Release{
         assert!(err.to_string().contains("no version"), "unexpected: {err}");
     }
 
-    // Rust-specific: golang_version behavior test
+    // Ported: "throws ExternalHostError for zero releases extracted" — golang-version/index.spec.ts line 92
     #[test]
     fn error_on_zero_releases_extracted() {
         let input = r#"var Releases = []*Release{
@@ -337,5 +337,39 @@ var Releases = []*Release{
         let http = HttpClient::new().unwrap();
         let result = fetch_releases(&server.uri(), &http).await.unwrap();
         assert!(result.is_none());
+    }
+
+    // Ported: "supports custom registry URL" — golang-version/index.spec.ts line 36
+    #[tokio::test]
+    async fn fetch_releases_supports_custom_registry_url() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/HEAD/internal/history/release.go"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(SAMPLE))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), &http).await.unwrap();
+        assert!(result.is_some());
+        let res = result.unwrap();
+        assert_eq!(res.releases.len(), 2);
+        assert_eq!(res.releases[0].version, "1.18.0");
+        assert_eq!(res.releases[1].version, "1.17.5");
+    }
+
+    // Ported: "throws ExternalHostError for empty result" — golang-version/index.spec.ts line 82
+    #[tokio::test]
+    async fn fetch_releases_errors_on_empty_response() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/HEAD/internal/history/release.go"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("{}"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), &http).await;
+        assert!(result.is_err());
     }
 }

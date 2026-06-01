@@ -688,6 +688,22 @@ fn strip_comment(line: &str) -> &str {
     }
 }
 
+/// Convert a `go` directive value (e.g. `"1.19"`) to a SemVer-compatible
+/// range string (`"~1.19.x"`) and the versioning scheme (`"semver-coerced"`).
+///
+/// Mirrors `convertGoDirectiveToSemVerRange` from
+/// `lib/modules/manager/gomod/extract.ts`.
+pub fn convert_go_directive_to_semver_range(
+    go_directive: Option<&str>,
+) -> Option<(String, &'static str)> {
+    let directive = go_directive?;
+    let parts: Vec<&str> = directive.split('.').collect();
+    if parts.len() < 2 {
+        return None;
+    }
+    Some((format!("~{}.{minor}.x", parts[0], minor = parts[1]), "semver-coerced"))
+}
+
 // ── artifacts-extra (mirrors lib/modules/manager/gomod/artifacts-extra.ts) ──
 
 /// A single dependency change detected between two go.mod files.
@@ -2185,6 +2201,20 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
     fn go_directive_constraint_no_match_prev_minor() {
         assert!(!semver_coerced::matches("1.18.0", "~1.19.x"));
         assert!(!semver_coerced::matches("1.18.5", "~1.19.x"));
+    }
+
+    // Ported: "handles undefined go directive" — gomod/extract.spec.ts line 609
+    #[test]
+    fn convert_go_directive_to_semver_range_undefined() {
+        assert_eq!(convert_go_directive_to_semver_range(None), None);
+    }
+
+    // Ported: "extracts \`go\` directive %s as a \`%goMod\` extracted constraint as a SemVer-minor compatible range" — gomod/extract.spec.ts line 530
+    #[test]
+    fn convert_go_directive_to_semver_range_valid() {
+        let (range, versioning) = convert_go_directive_to_semver_range(Some("1.19")).unwrap();
+        assert_eq!(range, "~1.19.x");
+        assert_eq!(versioning, "semver-coerced");
     }
 
     // ── gomod updateDependency tests ───────────────────────────────────────
