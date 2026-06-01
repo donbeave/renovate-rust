@@ -213,4 +213,36 @@ mod tests {
             .unwrap();
         assert!(result.is_none());
     }
+
+    // Ported: "parses buildpack-registry schema" — datasource/buildpacks-registry/schema.spec.ts line 4
+    #[test]
+    fn parses_buildpack_registry_schema() {
+        let json = r#"{
+            "latest": {
+                "version": "0.17.1",
+                "namespace": "heroku",
+                "name": "python",
+                "description": "Heroku's buildpack for Python applications.",
+                "homepage": "https://github.com/heroku/buildpacks-python",
+                "licenses": ["BSD-3-Clause"],
+                "stacks": ["*"],
+                "id": "75946bf8-3f6a-4af0-a757-614bebfdfcd6"
+            },
+            "versions": [
+                {
+                    "version": "0.2.0",
+                    "_link": "https://registry.buildpacks.io//api/v1/buildpacks/heroku/python/0.2.0"
+                },
+                {
+                    "version": "0.1.0",
+                    "_link": "https://registry.buildpacks.io//api/v1/buildpacks/heroku/python/0.1.0"
+                }
+            ]
+        }"#;
+        let parsed: ApiResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(parsed.latest.unwrap().homepage, Some("https://github.com/heroku/buildpacks-python".to_owned()));
+        assert_eq!(parsed.versions.len(), 2);
+        assert_eq!(parsed.versions[0].version, "0.2.0");
+        assert_eq!(parsed.versions[1].version, "0.1.0");
+    }
 }

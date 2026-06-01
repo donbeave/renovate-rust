@@ -82,13 +82,18 @@ impl ArtifactRunner for GomodArtifactRunner {
             }
 
             // Run `go mod tidy`.
+            let tidy_cmd = if package_file_name == "go.mod" {
+                "go mod tidy".to_owned()
+            } else {
+                format!("go mod tidy -modfile={}", package_file_name)
+            };
             let opts = ExecOptions {
                 cwd: Some(package_dir.to_string_lossy().to_string()),
                 timeout: Some(300_000), // 5 minutes
                 ..Default::default()
             };
 
-            match raw_exec("go mod tidy", &opts, &env).await {
+            match raw_exec(&tidy_cmd, &opts, &env).await {
                 Ok(_) => {}
                 Err(e) => {
                     return Err(crate::artifacts::ArtifactError {
@@ -152,6 +157,57 @@ impl ArtifactRunner for GomodArtifactRunner {
             }
         })
     }
+}
+
+/// Derive the Go toolchain constraint from config and go.mod content.
+///
+/// Precedence:
+/// 1. `config.constraints.go`
+/// 2. `toolchain goX.Y.Z` directive in go.mod
+/// 3. `go X.Y.Z` full version directive in go.mod
+/// 4. `go X.Y` → returns `^X.Y`
+///
+/// Mirrors `deriveGoToolchainConstraints` from
+/// `lib/modules/manager/gomod/artifacts.ts`.
+pub fn derive_go_toolchain_constraints(
+    config_constraint: Option<&str>,
+    go_mod_content: &str,
+) -> Option<String> {
+    if let Some(c) = config_constraint {
+        return Some(c.to_owned());
+    }
+
+    // Prefer toolchain directive.
+    for line in go_mod_content.lines() {
+        let trimmed = line.trim();
+        if let Some(v) = trimmed.strip_prefix("toolchain go") {
+            return Some(v.trim().to_owned());
+        }
+    }
+
+    // Full go directive (e.g. go 1.23.5).
+    for line in go_mod_content.lines() {
+        let trimmed = line.trim();
+        if let Some(v) = trimmed.strip_prefix("go ") {
+            let v = v.trim();
+            if v.matches('.').count() == 2 {
+                return Some(v.to_owned());
+            }
+        }
+    }
+
+    // Major.minor go directive (e.g. go 1.17) → semver range.
+    for line in go_mod_content.lines() {
+        let trimmed = line.trim();
+        if let Some(v) = trimmed.strip_prefix("go ") {
+            let v = v.trim();
+            if v.matches('.').count() == 1 {
+                return Some(format!("^{v}"));
+            }
+        }
+    }
+
+    None
 }
 
 #[cfg(test)]
@@ -290,5 +346,70 @@ mod tests {
         let r1 = GomodArtifactRunner::new();
         let r2 = GomodArtifactRunner;
         assert_eq!(format!("{:?}", r1), format!("{:?}", r2));
+    }
+
+    // Ported: "returns config constraint when set" — gomod/artifacts.spec.ts line 2837
+    #[test]
+    fn derive_go_toolchain_constraints_config() {
+        assert_eq!(
+            derive_go_toolchain_constraints(Some("1.21"), ""),
+            Some("1.21".to_owned())
+        );
+    }
+
+    // Ported: "config constraint takes precedence over go.mod content" — gomod/artifacts.spec.ts line 2843
+    #[test]
+    fn derive_go_toolchain_constraints_config_precedence() {
+        assert_eq!(
+            derive_go_toolchain_constraints(Some("1.20"), "go 1.23.5"),
+            Some("1.20".to_owned())
+        );
+    }
+
+    // Ported: "returns toolchain version when toolchain directive is present" — gomod/artifacts.spec.ts line 2852
+    #[test]
+    fn derive_go_toolchain_constraints_toolchain() {
+        assert_eq!(
+            derive_go_toolchain_constraints(None, "go 1.13\ntoolchain go1.23.6"),
+            Some("1.23.6".to_owned())
+        );
+    }
+
+    // Ported: "returns full go version when only full go directive is present (no toolchain)" — gomod/artifacts.spec.ts line 2858
+    #[test]
+    fn derive_go_toolchain_constraints_full_go() {
+        assert_eq!(
+            derive_go_toolchain_constraints(None, "go 1.23.5"),
+            Some("1.23.5".to_owned())
+        );
+    }
+
+    // Ported: "returns range constraint for major.minor go directive" — gomod/artifacts.spec.ts line 2862
+    #[test]
+    fn derive_go_toolchain_constraints_minor_range() {
+        assert_eq!(
+            derive_go_toolchain_constraints(None, "go 1.17"),
+            Some("^1.17".to_owned())
+        );
+    }
+
+    // Ported: "returns undefined when no go version in content and no config constraint" — gomod/artifacts.spec.ts line 2866
+    #[test]
+    fn derive_go_toolchain_constraints_undefined() {
+        assert_eq!(
+            derive_go_toolchain_constraints(None, "module example.com/foo"),
+            None
+        );
+    }
+
+    // Ported: "ignores constraints.golang and falls back to go.mod content" — gomod/artifacts.spec.ts line 2873
+    #[test]
+    fn derive_go_toolchain_constraints_ignores_golang_constraint() {
+        // Our Rust API only passes `constraints.go`, so `constraints.golang`
+        // is never passed in.  This test documents that behaviour.
+        assert_eq!(
+            derive_go_toolchain_constraints(None, "go 1.23.5"),
+            Some("1.23.5".to_owned())
+        );
     }
 }
