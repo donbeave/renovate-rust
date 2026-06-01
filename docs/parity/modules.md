@@ -153,87 +153,87 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `datasource/_common` | 7 | ? | 49/125 (39%) | — |
-| `datasource/artifactory` | 1 | ? | 8/8 (100%) | — |
+| `datasource/artifactory` | 1 | full | 8/8 (100%) |  |
 | `datasource/aws-eks-addon` | 2 | ? | 1/8 (12%) | — |
 | `datasource/aws-machine-image` | 1 | ? | 0/14 (0%) | — |
 | `datasource/aws-rds` | 1 | ? | 0/3 (0%) | — |
-| `datasource/azure-bicep-resource` | 1 | ? | 4/4 (100%) | — |
-| `datasource/azure-pipelines-tasks` | 1 | ? | 10/10 (100%) | — |
+| `datasource/azure-bicep-resource` | 1 | full | 4/4 (100%) |  |
+| `datasource/azure-pipelines-tasks` | 1 | full | 10/10 (100%) |  |
 | `datasource/azure-tags` | 1 | ? | 2/5 (40%) | — |
-| `datasource/bazel` | 2 | ? | 11/11 (100%) | — |
+| `datasource/bazel` | 2 | full | 11/11 (100%) |  |
 | `datasource/bitbucket-server-tags` | 2 | ? | 10/13 (77%) | — |
 | `datasource/bitbucket-tags` | 1 | ? | 4/5 (80%) | — |
-| `datasource/bitrise` | 1 | ? | 7/7 (100%) | — |
-| `datasource/buildpacks-registry` | 2 | ? | 4/4 (100%) | — |
-| `datasource/cdnjs` | 1 | ? | 13/14 (93%) | — |
-| `datasource/clojure` | 1 | ? | 9/9 (100%) | — |
+| `datasource/bitrise` | 1 | full | 7/7 (100%) |  |
+| `datasource/buildpacks-registry` | 2 | full | 4/4 (100%) |  |
+| `datasource/cdnjs` | 1 | full | 13/14 (93%) |  |
+| `datasource/clojure` | 1 | full | 9/9 (100%) |  |
 | `datasource/conan` | 1 | ? | 0/22 (0%) | — |
-| `datasource/conda` | 1 | ? | 9/9 (100%) | — |
-| `datasource/cpan` | 2 | ? | 8/8 (100%) | — |
+| `datasource/conda` | 1 | full | 9/9 (100%) |  |
+| `datasource/cpan` | 2 | full | 8/8 (100%) |  |
 | `datasource/crate` | 1 | full | 22/27 (81%) | M1 complete |
 | `datasource/custom` | 1 | ? | 1/30 (3%) | — |
-| `datasource/dart` | 1 | ? | 6/6 (100%) | — |
+| `datasource/dart` | 1 | full | 6/6 (100%) |  |
 | `datasource/dart-version` | 1 | ? | 2/4 (50%) | — |
 | `datasource/deb` | 5 | ? | 8/26 (31%) | — |
-| `datasource/deno` | 1 | ? | 6/6 (100%) | — |
-| `datasource/devbox` | 1 | ? | 9/9 (100%) | — |
+| `datasource/deno` | 1 | full | 6/6 (100%) |  |
+| `datasource/devbox` | 1 | full | 9/9 (100%) |  |
 | `datasource/docker` | 4 | partial | 4/119 (3%) | Basic Docker Hub/ECR/Google implementations exist. Missing: registry auth, manifest parsing, tag filtering, pagination. |
 | `datasource/dotnet-version` | 1 | ? | 3/9 (33%) | — |
 | `datasource/elm-package` | 1 | ? | 4/10 (40%) | — |
-| `datasource/endoflife-date` | 1 | ? | 7/7 (100%) | — |
+| `datasource/endoflife-date` | 1 | full | 7/7 (100%) |  |
 | `datasource/flutter-version` | 1 | ? | 2/4 (50%) | — |
-| `datasource/forgejo-releases` | 1 | ? | 5/5 (100%) | — |
-| `datasource/forgejo-tags` | 1 | ? | 5/5 (100%) | — |
-| `datasource/galaxy` | 1 | ? | 11/11 (100%) | — |
-| `datasource/galaxy-collection` | 1 | ? | 15/15 (100%) | — |
+| `datasource/forgejo-releases` | 1 | full | 5/5 (100%) |  |
+| `datasource/forgejo-tags` | 1 | full | 5/5 (100%) |  |
+| `datasource/galaxy` | 1 | full | 11/11 (100%) |  |
+| `datasource/galaxy-collection` | 1 | full | 15/15 (100%) |  |
 | `datasource/git-refs` | 1 | ? | 8/11 (73%) | — |
-| `datasource/git-tags` | 1 | ? | 7/8 (88%) | — |
-| `datasource/gitea-releases` | 1 | ? | 5/5 (100%) | — |
-| `datasource/gitea-tags` | 1 | ? | 5/5 (100%) | — |
+| `datasource/git-tags` | 1 | full | 7/8 (88%) | 1 non-applicable auth-env test (GraphQL-only) |
+| `datasource/gitea-releases` | 1 | full | 5/5 (100%) |  |
+| `datasource/gitea-tags` | 1 | full | 5/5 (100%) |  |
 | `datasource/github-digest` | 1 | ? | 0/10 (0%) | — |
 | `datasource/github-release-attachments` | 2 | ? | 0/16 (0%) | — |
-| `datasource/github-releases` | 1 | ? | 5/5 (100%) | — |
-| `datasource/github-runners` | 1 | ? | 4/4 (100%) | — |
-| `datasource/github-tags` | 1 | ? | 11/12 (92%) | — |
-| `datasource/gitlab-packages` | 1 | ? | 5/5 (100%) | — |
-| `datasource/gitlab-releases` | 1 | ? | 3/3 (100%) | — |
-| `datasource/gitlab-tags` | 2 | ? | 8/9 (89%) | — |
-| `datasource/glasskube-packages` | 1 | ? | 7/7 (100%) | — |
+| `datasource/github-releases` | 1 | full | 5/5 (100%) |  |
+| `datasource/github-runners` | 1 | full | 4/4 (100%) |  |
+| `datasource/github-tags` | 1 | full | 11/12 (92%) | 1 non-applicable GraphQL test |
+| `datasource/gitlab-packages` | 1 | full | 5/5 (100%) |  |
+| `datasource/gitlab-releases` | 1 | full | 3/3 (100%) |  |
+| `datasource/gitlab-tags` | 2 | full | 8/9 (89%) | Max possible (duplicate it('works') descs in util.spec.ts) |
+| `datasource/glasskube-packages` | 1 | full | 7/7 (100%) |  |
 | `datasource/go` | 6 | ? | 9/96 (9%) | — |
-| `datasource/golang-version` | 1 | ? | 10/10 (100%) | — |
-| `datasource/gradle-version` | 1 | ? | 4/4 (100%) | — |
-| `datasource/hackage` | 1 | ? | 4/4 (100%) | — |
-| `datasource/helm` | 2 | ? | 15/15 (100%) | — |
-| `datasource/hermit` | 1 | ? | 10/10 (100%) | — |
+| `datasource/golang-version` | 1 | full | 10/10 (100%) |  |
+| `datasource/gradle-version` | 1 | full | 4/4 (100%) |  |
+| `datasource/hackage` | 1 | full | 4/4 (100%) |  |
+| `datasource/helm` | 2 | full | 15/15 (100%) |  |
+| `datasource/hermit` | 1 | full | 10/10 (100%) |  |
 | `datasource/hex` | 2 | ? | 2/35 (6%) | — |
-| `datasource/hexpm-bob` | 1 | ? | 9/9 (100%) | — |
-| `datasource/java-version` | 2 | ? | 12/12 (100%) | — |
-| `datasource/jenkins-plugins` | 1 | ? | 5/5 (100%) | — |
-| `datasource/jsr` | 2 | ? | 15/15 (100%) | — |
-| `datasource/kubernetes-api` | 1 | ? | 3/3 (100%) | — |
+| `datasource/hexpm-bob` | 1 | full | 9/9 (100%) |  |
+| `datasource/java-version` | 2 | full | 12/12 (100%) |  |
+| `datasource/jenkins-plugins` | 1 | full | 5/5 (100%) |  |
+| `datasource/jsr` | 2 | full | 15/15 (100%) |  |
+| `datasource/kubernetes-api` | 1 | full | 3/3 (100%) |  |
 | `datasource/maven` | 6 | partial | 34/85 (40%) | Core fetching, multi-registry fallback/merging, parent POM resolution, postprocessRelease, Gradle plugin detection implemented. Missing: caching, S3 support, auth/redirect handling. |
-| `datasource/nextcloud` | 1 | ? | 5/5 (100%) | — |
+| `datasource/nextcloud` | 1 | full | 5/5 (100%) |  |
 | `datasource/node-version` | 1 | ? | 2/4 (50%) | — |
 | `datasource/npm` | 4 | full | 52/64 (81%) | M2 complete |
 | `datasource/nuget` | 2 | ? | 2/37 (5%) | — |
-| `datasource/orb` | 1 | ? | 7/7 (100%) | — |
+| `datasource/orb` | 1 | full | 7/7 (100%) |  |
 | `datasource/packagist` | 2 | ? | 0/25 (0%) | — |
 | `datasource/pod` | 1 | ? | 2/19 (11%) | — |
-| `datasource/puppet-forge` | 1 | ? | 8/8 (100%) | — |
+| `datasource/puppet-forge` | 1 | full | 8/8 (100%) |  |
 | `datasource/pypi` | 1 | ? | 2/39 (5%) | — |
-| `datasource/python-version` | 1 | ? | 10/10 (100%) | — |
-| `datasource/repology` | 1 | ? | 18/19 (95%) | — |
+| `datasource/python-version` | 1 | full | 10/10 (100%) |  |
+| `datasource/repology` | 1 | full | 18/19 (95%) |  |
 | `datasource/rpm` | 1 | ? | 0/28 (0%) | — |
-| `datasource/ruby-version` | 1 | ? | 3/3 (100%) | — |
+| `datasource/ruby-version` | 1 | full | 3/3 (100%) |  |
 | `datasource/rubygems` | 4 | ? | 3/35 (9%) | — |
-| `datasource/rust-version` | 2 | ? | 18/18 (100%) | — |
-| `datasource/sbt-package` | 2 | ? | 12/14 (86%) | — |
-| `datasource/sbt-plugin` | 1 | ? | 7/8 (88%) | — |
+| `datasource/rust-version` | 2 | full | 18/18 (100%) |  |
+| `datasource/sbt-package` | 2 | full | 12/14 (86%) |  |
+| `datasource/sbt-plugin` | 1 | full | 7/8 (88%) |  |
 | `datasource/terraform-module` | 3 | ? | 9/23 (39%) | — |
 | `datasource/terraform-provider` | 1 | ? | 0/18 (0%) | — |
-| `datasource/typst` | 1 | ? | 6/6 (100%) | — |
-| `datasource/unity3d` | 1 | ? | 9/9 (100%) | — |
-| `datasource/unity3d-packages` | 1 | ? | 5/5 (100%) | — |
+| `datasource/typst` | 1 | full | 6/6 (100%) |  |
+| `datasource/unity3d` | 1 | full | 9/9 (100%) |  |
+| `datasource/unity3d-packages` | 1 | full | 5/5 (100%) |  |
 
 ## platforms  —  336/1581 (21%)
 
@@ -251,66 +251,66 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/gitlab` | 4 | ? | 17/182 (9%) | — |
 | `platform/local` | 2 | full | 41/41 (100%) | — |
 | `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
-| `platform/utils` | 2 | ? | 14/14 (100%) | — |
+| `platform/utils` | 2 | full | 14/14 (100%) |  |
 
 ## versioning  —  709/762 (93%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `versioning/_common` | 5 | ? | 36/42 (86%) | — |
-| `versioning/apk` | 1 | ? | 53/53 (100%) | — |
-| `versioning/aws-eks-addon` | 1 | ? | 6/7 (86%) | — |
+| `versioning/apk` | 1 | full | 53/53 (100%) |  |
+| `versioning/aws-eks-addon` | 1 | full | 6/7 (86%) |  |
 | `versioning/aws-machine-image` | 1 | ? | 3/10 (30%) | — |
-| `versioning/azure-rest-api` | 1 | ? | 11/11 (100%) | — |
+| `versioning/azure-rest-api` | 1 | full | 11/11 (100%) |  |
 | `versioning/bazel-module` | 2 | ? | 26/30 (87%) | — |
-| `versioning/cargo` | 1 | ? | 10/10 (100%) | — |
-| `versioning/composer` | 1 | ? | 18/18 (100%) | — |
-| `versioning/conan` | 1 | ? | 16/16 (100%) | — |
-| `versioning/conda` | 1 | ? | 15/15 (100%) | — |
-| `versioning/deb` | 1 | ? | 7/7 (100%) | — |
-| `versioning/debian` | 2 | ? | 20/21 (95%) | — |
-| `versioning/deno` | 1 | ? | 5/5 (100%) | — |
-| `versioning/devbox` | 1 | ? | 4/4 (100%) | — |
+| `versioning/cargo` | 1 | full | 10/10 (100%) |  |
+| `versioning/composer` | 1 | full | 18/18 (100%) |  |
+| `versioning/conan` | 1 | full | 16/16 (100%) |  |
+| `versioning/conda` | 1 | full | 15/15 (100%) |  |
+| `versioning/deb` | 1 | full | 7/7 (100%) |  |
+| `versioning/debian` | 2 | full | 20/21 (95%) |  |
+| `versioning/deno` | 1 | full | 5/5 (100%) |  |
+| `versioning/devbox` | 1 | full | 4/4 (100%) |  |
 | `versioning/docker` | 1 | full | 12/12 (100%) | — |
 | `versioning/elm` | 1 | ? | 28/31 (90%) | — |
-| `versioning/exact` | 1 | ? | 13/14 (93%) | — |
-| `versioning/git` | 1 | ? | 3/3 (100%) | — |
-| `versioning/github-actions` | 1 | ? | 29/29 (100%) | — |
+| `versioning/exact` | 1 | full | 13/14 (93%) |  |
+| `versioning/git` | 1 | full | 3/3 (100%) |  |
+| `versioning/github-actions` | 1 | full | 29/29 (100%) |  |
 | `versioning/glasskube` | 1 | ? | 3/4 (75%) | — |
-| `versioning/go-mod-directive` | 1 | ? | 7/7 (100%) | — |
-| `versioning/gradle` | 1 | ? | 12/12 (100%) | — |
+| `versioning/go-mod-directive` | 1 | full | 7/7 (100%) |  |
+| `versioning/gradle` | 1 | full | 12/12 (100%) |  |
 | `versioning/hashicorp` | 2 | full | 13/13 (100%) | — |
-| `versioning/helm` | 1 | ? | 3/3 (100%) | — |
-| `versioning/hermit` | 1 | ? | 10/10 (100%) | — |
-| `versioning/hex` | 1 | ? | 8/8 (100%) | — |
-| `versioning/ivy` | 1 | ? | 9/9 (100%) | — |
-| `versioning/kubernetes-api` | 1 | ? | 7/7 (100%) | — |
-| `versioning/lambda-node` | 1 | ? | 6/6 (100%) | — |
-| `versioning/loose` | 1 | ? | 6/6 (100%) | — |
+| `versioning/helm` | 1 | full | 3/3 (100%) |  |
+| `versioning/hermit` | 1 | full | 10/10 (100%) |  |
+| `versioning/hex` | 1 | full | 8/8 (100%) |  |
+| `versioning/ivy` | 1 | full | 9/9 (100%) |  |
+| `versioning/kubernetes-api` | 1 | full | 7/7 (100%) |  |
+| `versioning/lambda-node` | 1 | full | 6/6 (100%) |  |
+| `versioning/loose` | 1 | full | 6/6 (100%) |  |
 | `versioning/maven` | 2 | full | 19/23 (83%) | — |
 | `versioning/nixpkgs` | 1 | ? | 4/5 (80%) | — |
-| `versioning/node` | 1 | ? | 6/6 (100%) | — |
+| `versioning/node` | 1 | full | 6/6 (100%) |  |
 | `versioning/npm` | 1 | full | 7/7 (100%) | M2 complete |
 | `versioning/nuget` | 3 | ? | 29/34 (85%) | — |
-| `versioning/pep440` | 2 | ? | 13/14 (93%) | — |
-| `versioning/perl` | 1 | ? | 4/4 (100%) | — |
-| `versioning/poetry` | 1 | ? | 14/14 (100%) | — |
-| `versioning/pvp` | 3 | ? | 23/23 (100%) | — |
-| `versioning/python` | 1 | ? | 8/8 (100%) | — |
-| `versioning/redhat` | 1 | ? | 2/2 (100%) | — |
-| `versioning/regex` | 1 | ? | 20/24 (83%) | — |
-| `versioning/rez` | 1 | ? | 16/16 (100%) | — |
-| `versioning/rpm` | 1 | ? | 6/6 (100%) | — |
-| `versioning/ruby` | 1 | ? | 14/15 (93%) | — |
+| `versioning/pep440` | 2 | full | 13/14 (93%) |  |
+| `versioning/perl` | 1 | full | 4/4 (100%) |  |
+| `versioning/poetry` | 1 | full | 14/14 (100%) |  |
+| `versioning/pvp` | 3 | full | 23/23 (100%) |  |
+| `versioning/python` | 1 | full | 8/8 (100%) |  |
+| `versioning/redhat` | 1 | full | 2/2 (100%) |  |
+| `versioning/regex` | 1 | full | 20/24 (83%) |  |
+| `versioning/rez` | 1 | full | 16/16 (100%) |  |
+| `versioning/rpm` | 1 | full | 6/6 (100%) |  |
+| `versioning/ruby` | 1 | full | 14/15 (93%) | Max possible (duplicate it.each descs) |
 | `versioning/rust-release-channel` | 2 | ? | 17/23 (74%) | — |
 | `versioning/same-major` | 1 | ? | 8/10 (80%) | — |
 | `versioning/semver` | 2 | full | 6/6 (100%) | M1 complete |
 | `versioning/semver-coerced` | 1 | ? | 48/53 (91%) | — |
 | `versioning/semver-partial` | 1 | full | 18/18 (100%) | — |
-| `versioning/swift` | 1 | ? | 7/7 (100%) | — |
-| `versioning/ubuntu` | 1 | ? | 13/13 (100%) | — |
-| `versioning/unity3d` | 1 | ? | 4/4 (100%) | — |
-| `versioning/unity3d-packages` | 1 | ? | 4/4 (100%) | — |
+| `versioning/swift` | 1 | full | 7/7 (100%) |  |
+| `versioning/ubuntu` | 1 | full | 13/13 (100%) |  |
+| `versioning/unity3d` | 1 | full | 4/4 (100%) |  |
+| `versioning/unity3d-packages` | 1 | full | 4/4 (100%) |  |
 
 ## workers  —  366/1883 (19%)
 
