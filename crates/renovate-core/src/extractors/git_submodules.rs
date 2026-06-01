@@ -549,7 +549,7 @@ mod tests {
 
     // --- updateDependency tests ---
 
-    // Rust-specific: git_submodules behavior test
+    // Ported: "update gitmodule branch value if value changed" — git-submodules/update.spec.ts line 107
     #[test]
     fn git_submodule_update_branch_value() {
         let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n\tbranch = v0.0.1\n";
@@ -570,7 +570,7 @@ mod tests {
         }
     }
 
-    // Rust-specific: git_submodules behavior test
+    // Ported: "do not update gitmodule branch value if value not changed" — git-submodules/update.spec.ts line 136
     #[test]
     fn git_submodule_update_same_value_unchanged() {
         let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n\tbranch = v0.0.1\n";
@@ -601,6 +601,22 @@ mod tests {
         assert_eq!(
             update_dependency(content, &config),
             GitSubmoduleUpdateResult::Unchanged
+        );
+    }
+
+    // Ported: "returns null on error" — git-submodules/update.spec.ts line 49
+    #[test]
+    fn git_submodule_update_returns_failed_on_empty_content() {
+        let config = GitSubmoduleUpdateConfig {
+            dep_name: "renovate".to_owned(),
+            current_value: Some("v0.0.1".to_owned()),
+            new_value: Some("v0.0.2".to_owned()),
+            new_digest: None,
+            package_file: Some(".gitmodules".to_owned()),
+        };
+        assert_eq!(
+            update_dependency("", &config),
+            GitSubmoduleUpdateResult::Failed
         );
     }
 
