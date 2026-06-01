@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/renovate-cli", "crates/renovate-core"]
+members = ["crates/parity-cli", "crates/renovate-cli", "crates/renovate-core"]
 resolver = "3"
 
 [workspace.package]
