@@ -271,7 +271,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/debian` | 2 | ? | 20/21 (95%) | — |
 | `versioning/deno` | 1 | ? | 5/5 (100%) | — |
 | `versioning/devbox` | 1 | ? | 4/4 (100%) | — |
-| `versioning/docker` | 1 | ? | 12/12 (100%) | — |
+| `versioning/docker` | 1 | full | 12/12 (100%) | — |
 | `versioning/elm` | 1 | ? | 28/31 (90%) | — |
 | `versioning/exact` | 1 | ? | 13/14 (93%) | — |
 | `versioning/git` | 1 | ? | 3/3 (100%) | — |
@@ -279,7 +279,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/glasskube` | 1 | ? | 3/4 (75%) | — |
 | `versioning/go-mod-directive` | 1 | ? | 7/7 (100%) | — |
 | `versioning/gradle` | 1 | ? | 12/12 (100%) | — |
-| `versioning/hashicorp` | 2 | ? | 13/13 (100%) | — |
+| `versioning/hashicorp` | 2 | full | 13/13 (100%) | — |
 | `versioning/helm` | 1 | ? | 3/3 (100%) | — |
 | `versioning/hermit` | 1 | ? | 10/10 (100%) | — |
 | `versioning/hex` | 1 | ? | 8/8 (100%) | — |
@@ -306,7 +306,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/same-major` | 1 | ? | 8/10 (80%) | — |
 | `versioning/semver` | 2 | full | 6/6 (100%) | M1 complete |
 | `versioning/semver-coerced` | 1 | ? | 48/53 (91%) | — |
-| `versioning/semver-partial` | 1 | ? | 18/18 (100%) | — |
+| `versioning/semver-partial` | 1 | full | 18/18 (100%) | — |
 | `versioning/swift` | 1 | ? | 7/7 (100%) | — |
 | `versioning/ubuntu` | 1 | ? | 13/13 (100%) | — |
 | `versioning/unity3d` | 1 | ? | 4/4 (100%) | — |
