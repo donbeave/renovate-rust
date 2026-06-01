@@ -885,7 +885,8 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
     let mut disabled_sources: std::collections::HashSet<String> = std::collections::HashSet::new();
     let mut in_package_sources = false;
     let mut in_disabled_sources = false;
-    let mut source_mapping: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+    let mut source_mapping: std::collections::HashMap<String, Vec<String>> =
+        std::collections::HashMap::new();
     let mut in_package_source_mapping = false;
     let mut current_mapping_key = String::new();
 
@@ -909,12 +910,15 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
                             let mut protocol_version = String::new();
                             for attr in e.attributes() {
                                 if let Ok(a) = attr {
-                                    let attr_name = String::from_utf8_lossy(a.key.as_ref()).into_owned();
+                                    let attr_name =
+                                        String::from_utf8_lossy(a.key.as_ref()).into_owned();
                                     if let Ok(val) = a.unescape_value() {
                                         match attr_name.as_str() {
                                             "key" => key = val.into_owned(),
                                             "value" => value = val.into_owned(),
-                                            "protocolVersion" => protocol_version = val.into_owned(),
+                                            "protocolVersion" => {
+                                                protocol_version = val.into_owned()
+                                            }
                                             _ => {}
                                         }
                                     }
@@ -938,7 +942,8 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
                             let mut value = String::new();
                             for attr in e.attributes() {
                                 if let Ok(a) = attr {
-                                    let attr_name = String::from_utf8_lossy(a.key.as_ref()).into_owned();
+                                    let attr_name =
+                                        String::from_utf8_lossy(a.key.as_ref()).into_owned();
                                     if let Ok(val) = a.unescape_value() {
                                         match attr_name.as_str() {
                                             "key" => key = val.into_owned(),
@@ -1002,12 +1007,17 @@ pub fn parse_nuget_config_registries_full(content: &str) -> Vec<NuGetRegistry> {
 
     // Apply disabled sources
     if !disabled_sources.is_empty() {
-        registries.retain(|r| r.name.as_ref().map_or(true, |n| !disabled_sources.contains(n)));
+        registries.retain(|r| {
+            r.name
+                .as_ref()
+                .map_or(true, |n| !disabled_sources.contains(n))
+        });
     }
 
     // Apply source mapping to default registries
     for reg in &mut registries {
-        if reg.name.as_deref() == Some("nuget.org") && reg.source_mapped_package_patterns.is_none() {
+        if reg.name.as_deref() == Some("nuget.org") && reg.source_mapped_package_patterns.is_none()
+        {
             if let Some(patterns) = source_mapping.get("nuget.org") {
                 reg.source_mapped_package_patterns = Some(patterns.clone());
             }
@@ -1047,7 +1057,9 @@ pub fn apply_registries_to_dep(dep: &mut NuGetPackageDependency, registries: &[N
         return;
     }
 
-    let has_source_mapping = registries.iter().any(|r| r.source_mapped_package_patterns.is_some());
+    let has_source_mapping = registries
+        .iter()
+        .any(|r| r.source_mapped_package_patterns.is_some());
     if !has_source_mapping {
         dep.registry_urls = Some(registries.iter().map(|r| r.url.clone()).collect());
         return;
@@ -1080,7 +1092,12 @@ pub fn apply_registries_to_dep(dep: &mut NuGetPackageDependency, registries: &[N
 
     for (pattern, urls) in &patterns {
         let glob = pattern.trim_end_matches('*');
-        if pattern == "*" || dep_name.eq_ignore_ascii_case(glob) || dep_name.to_ascii_lowercase().starts_with(&glob.to_ascii_lowercase()) {
+        if pattern == "*"
+            || dep_name.eq_ignore_ascii_case(glob)
+            || dep_name
+                .to_ascii_lowercase()
+                .starts_with(&glob.to_ascii_lowercase())
+        {
             matched_urls.extend(urls.iter().cloned());
             break;
         }
@@ -1116,7 +1133,8 @@ pub fn get_dependent_package_files_pure(
     is_global_json: bool,
 ) -> Result<Vec<ProjectFile>, String> {
     let package_files = get_all_package_files(file_list);
-    let mut graph: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+    let mut graph: std::collections::HashMap<String, Vec<String>> =
+        std::collections::HashMap::new();
 
     if is_props_file {
         graph.entry(package_file_name.to_owned()).or_default();
@@ -1155,7 +1173,9 @@ pub fn get_dependent_package_files_pure(
     }
 
     for f in &package_files {
-        let Some(content) = file_contents.get(f) else { continue };
+        let Some(content) = file_contents.get(f) else {
+            continue;
+        };
         let refs = extract_project_references(content);
         for r in refs {
             let normalized = reframe_relative_path_to_root_of_repo(f, &r);
@@ -1185,17 +1205,15 @@ fn get_all_package_files(file_list: &[String]) -> Vec<String> {
         .iter()
         .filter(|f| {
             let lower = f.to_lowercase();
-            lower.ends_with(".csproj")
-                || lower.ends_with(".vbproj")
-                || lower.ends_with(".fsproj")
+            lower.ends_with(".csproj") || lower.ends_with(".vbproj") || lower.ends_with(".fsproj")
         })
         .cloned()
         .collect()
 }
 
 fn extract_project_references(content: &str) -> Vec<String> {
-    use quick_xml::events::Event;
     use quick_xml::Reader;
+    use quick_xml::events::Event;
     let mut reader = Reader::from_reader(std::io::BufReader::new(content.as_bytes()));
     let mut buf = Vec::new();
     let mut in_item_group = false;
@@ -2669,7 +2687,10 @@ Console.WriteLine("Hello World!");
         let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3"/></packageSources></configuration>"#;
         let registries = parse_nuget_config_registries_full(config);
         assert_eq!(registries.len(), 1);
-        assert_eq!(registries[0].url, "https://api.nuget.org/v3/index.json#protocolVersion=3");
+        assert_eq!(
+            registries[0].url,
+            "https://api.nuget.org/v3/index.json#protocolVersion=3"
+        );
     }
 
     // Ported: "reads nuget config file with default registry" — nuget/util.spec.ts line 99
@@ -2731,15 +2752,16 @@ Console.WriteLine("Hello World!");
             dep_name: "Newtonsoft.Json".to_owned(),
             ..Default::default()
         };
-        let registries = vec![
-            NuGetRegistry {
-                name: Some("nuget.org".to_owned()),
-                url: "https://api.nuget.org/v3/index.json".to_owned(),
-                source_mapped_package_patterns: Some(vec!["*".to_owned()]),
-            },
-        ];
+        let registries = vec![NuGetRegistry {
+            name: Some("nuget.org".to_owned()),
+            url: "https://api.nuget.org/v3/index.json".to_owned(),
+            source_mapped_package_patterns: Some(vec!["*".to_owned()]),
+        }];
         apply_registries_to_dep(&mut dep, &registries);
-        assert_eq!(dep.registry_urls, Some(vec!["https://api.nuget.org/v3/index.json".to_owned()]));
+        assert_eq!(
+            dep.registry_urls,
+            Some(vec!["https://api.nuget.org/v3/index.json".to_owned()])
+        );
     }
 
     // Ported: "applies registry to package name case insensitive" — nuget/util.spec.ts line 323
@@ -2749,15 +2771,16 @@ Console.WriteLine("Hello World!");
             dep_name: "newtonsoft.json".to_owned(),
             ..Default::default()
         };
-        let registries = vec![
-            NuGetRegistry {
-                name: Some("nuget.org".to_owned()),
-                url: "https://api.nuget.org/v3/index.json".to_owned(),
-                source_mapped_package_patterns: Some(vec!["Newtonsoft*".to_owned()]),
-            },
-        ];
+        let registries = vec![NuGetRegistry {
+            name: Some("nuget.org".to_owned()),
+            url: "https://api.nuget.org/v3/index.json".to_owned(),
+            source_mapped_package_patterns: Some(vec!["Newtonsoft*".to_owned()]),
+        }];
         apply_registries_to_dep(&mut dep, &registries);
-        assert_eq!(dep.registry_urls, Some(vec!["https://api.nuget.org/v3/index.json".to_owned()]));
+        assert_eq!(
+            dep.registry_urls,
+            Some(vec!["https://api.nuget.org/v3/index.json".to_owned()])
+        );
     }
 
     // Ported: "applies all registries to package name" — nuget/util.spec.ts line 343
@@ -2780,10 +2803,13 @@ Console.WriteLine("Hello World!");
             },
         ];
         apply_registries_to_dep(&mut dep, &registries);
-        assert_eq!(dep.registry_urls, Some(vec![
-            "https://api.nuget.org/v3/index.json".to_owned(),
-            "https://contoso.com/packages/".to_owned(),
-        ]));
+        assert_eq!(
+            dep.registry_urls,
+            Some(vec![
+                "https://api.nuget.org/v3/index.json".to_owned(),
+                "https://contoso.com/packages/".to_owned(),
+            ])
+        );
     }
 
     // Ported: "applies nothing" — nuget/util.spec.ts line 371
@@ -2831,8 +2857,21 @@ Console.WriteLine("Hello World!");
     fn package_tree_returns_self_for_single_project() {
         let mut files = std::collections::HashMap::new();
         files.insert("single.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
-        let result = get_dependent_package_files_pure("single.csproj", &["single.csproj".to_owned()], &files, false, false).unwrap();
-        assert_eq!(result, vec![ProjectFile { name: "single.csproj".to_owned(), is_leaf: true }]);
+        let result = get_dependent_package_files_pure(
+            "single.csproj",
+            &["single.csproj".to_owned()],
+            &files,
+            false,
+            false,
+        )
+        .unwrap();
+        assert_eq!(
+            result,
+            vec![ProjectFile {
+                name: "single.csproj".to_owned(),
+                is_leaf: true
+            }]
+        );
     }
 
     // Ported: "returns self for two projects with no references" — manager/nuget/package-tree.spec.ts line 45
@@ -2842,10 +2881,26 @@ Console.WriteLine("Hello World!");
         files.insert("one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
         files.insert("two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
         let file_list = vec!["one.csproj".to_owned(), "two.csproj".to_owned()];
-        let result = get_dependent_package_files_pure("one.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![ProjectFile { name: "one.csproj".to_owned(), is_leaf: true }]);
-        let result = get_dependent_package_files_pure("two.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![ProjectFile { name: "two.csproj".to_owned(), is_leaf: true }]);
+        let result =
+            get_dependent_package_files_pure("one.csproj", &file_list, &files, false, false)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![ProjectFile {
+                name: "one.csproj".to_owned(),
+                is_leaf: true
+            }]
+        );
+        let result =
+            get_dependent_package_files_pure("two.csproj", &file_list, &files, false, false)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![ProjectFile {
+                name: "two.csproj".to_owned(),
+                is_leaf: true
+            }]
+        );
     }
 
     // Ported: "returns projects for two projects with one reference" — manager/nuget/package-tree.spec.ts line 60
@@ -2855,11 +2910,22 @@ Console.WriteLine("Hello World!");
         files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
         files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
         let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
-        let result = get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
-            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result =
+            get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![
+                ProjectFile {
+                    name: "one/one.csproj".to_owned(),
+                    is_leaf: false
+                },
+                ProjectFile {
+                    name: "two/two.csproj".to_owned(),
+                    is_leaf: true
+                },
+            ]
+        );
     }
 
     // Ported: "returns project for two projects with one reference and central versions" — manager/nuget/package-tree.spec.ts line 77
@@ -2869,11 +2935,27 @@ Console.WriteLine("Hello World!");
         files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
         files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
         let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
-        let result = get_dependent_package_files_pure("Directory.Packages.props", &file_list, &files, true, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
-            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result = get_dependent_package_files_pure(
+            "Directory.Packages.props",
+            &file_list,
+            &files,
+            true,
+            false,
+        )
+        .unwrap();
+        assert_eq!(
+            result,
+            vec![
+                ProjectFile {
+                    name: "one/one.csproj".to_owned(),
+                    is_leaf: false
+                },
+                ProjectFile {
+                    name: "two/two.csproj".to_owned(),
+                    is_leaf: true
+                },
+            ]
+        );
     }
 
     // Ported: "returns projects for two projects with one reference and Directory.Build.props" — manager/nuget/package-tree.spec.ts line 99
@@ -2883,11 +2965,27 @@ Console.WriteLine("Hello World!");
         files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
         files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
         let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
-        let result = get_dependent_package_files_pure("Directory.Build.props", &file_list, &files, true, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
-            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result = get_dependent_package_files_pure(
+            "Directory.Build.props",
+            &file_list,
+            &files,
+            true,
+            false,
+        )
+        .unwrap();
+        assert_eq!(
+            result,
+            vec![
+                ProjectFile {
+                    name: "one/one.csproj".to_owned(),
+                    is_leaf: false
+                },
+                ProjectFile {
+                    name: "two/two.csproj".to_owned(),
+                    is_leaf: true
+                },
+            ]
+        );
     }
 
     // Ported: "returns only projects under nested Directory.Build.props directory" — manager/nuget/package-tree.spec.ts line 121
@@ -2896,11 +2994,25 @@ Console.WriteLine("Hello World!");
         let mut files = std::collections::HashMap::new();
         files.insert("src/one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
         files.insert("other/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
-        let file_list = vec!["src/one/one.csproj".to_owned(), "other/two.csproj".to_owned()];
-        let result = get_dependent_package_files_pure("src/Directory.Build.props", &file_list, &files, true, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "src/one/one.csproj".to_owned(), is_leaf: true },
-        ]);
+        let file_list = vec![
+            "src/one/one.csproj".to_owned(),
+            "other/two.csproj".to_owned(),
+        ];
+        let result = get_dependent_package_files_pure(
+            "src/Directory.Build.props",
+            &file_list,
+            &files,
+            true,
+            false,
+        )
+        .unwrap();
+        assert_eq!(
+            result,
+            vec![ProjectFile {
+                name: "src/one/one.csproj".to_owned(),
+                is_leaf: true
+            },]
+        );
     }
 
     // Ported: "returns project for two projects with one reference and global.json" — manager/nuget/package-tree.spec.ts line 143
@@ -2910,11 +3022,22 @@ Console.WriteLine("Hello World!");
         files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
         files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
         let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
-        let result = get_dependent_package_files_pure("global.json", &file_list, &files, false, true).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
-            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result =
+            get_dependent_package_files_pure("global.json", &file_list, &files, false, true)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![
+                ProjectFile {
+                    name: "one/one.csproj".to_owned(),
+                    is_leaf: false
+                },
+                ProjectFile {
+                    name: "two/two.csproj".to_owned(),
+                    is_leaf: true
+                },
+            ]
+        );
     }
 
     // Ported: "returns projects for three projects with two linear references" — manager/nuget/package-tree.spec.ts line 163
@@ -2924,25 +3047,65 @@ Console.WriteLine("Hello World!");
         files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
         files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../three/three.csproj" /></ItemGroup></Project>"#.to_owned());
         files.insert("three/three.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
-        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned(), "three/three.csproj".to_owned()];
+        let file_list = vec![
+            "one/one.csproj".to_owned(),
+            "two/two.csproj".to_owned(),
+            "three/three.csproj".to_owned(),
+        ];
 
-        let result = get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
-            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: false },
-            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result =
+            get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![
+                ProjectFile {
+                    name: "one/one.csproj".to_owned(),
+                    is_leaf: false
+                },
+                ProjectFile {
+                    name: "two/two.csproj".to_owned(),
+                    is_leaf: false
+                },
+                ProjectFile {
+                    name: "three/three.csproj".to_owned(),
+                    is_leaf: true
+                },
+            ]
+        );
 
-        let result = get_dependent_package_files_pure("two/two.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: false },
-            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result =
+            get_dependent_package_files_pure("two/two.csproj", &file_list, &files, false, false)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![
+                ProjectFile {
+                    name: "two/two.csproj".to_owned(),
+                    is_leaf: false
+                },
+                ProjectFile {
+                    name: "three/three.csproj".to_owned(),
+                    is_leaf: true
+                },
+            ]
+        );
 
-        let result = get_dependent_package_files_pure("three/three.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result = get_dependent_package_files_pure(
+            "three/three.csproj",
+            &file_list,
+            &files,
+            false,
+            false,
+        )
+        .unwrap();
+        assert_eq!(
+            result,
+            vec![ProjectFile {
+                name: "three/three.csproj".to_owned(),
+                is_leaf: true
+            },]
+        );
     }
 
     // Ported: "returns projects for three projects with two tree-like references" — manager/nuget/package-tree.spec.ts line 197
@@ -2952,24 +3115,59 @@ Console.WriteLine("Hello World!");
         files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /><ProjectReference Include="../three/three.csproj" /></ItemGroup></Project>"#.to_owned());
         files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
         files.insert("three/three.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
-        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned(), "three/three.csproj".to_owned()];
+        let file_list = vec![
+            "one/one.csproj".to_owned(),
+            "two/two.csproj".to_owned(),
+            "three/three.csproj".to_owned(),
+        ];
 
-        let result = get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
-            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
-            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result =
+            get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![
+                ProjectFile {
+                    name: "one/one.csproj".to_owned(),
+                    is_leaf: false
+                },
+                ProjectFile {
+                    name: "two/two.csproj".to_owned(),
+                    is_leaf: true
+                },
+                ProjectFile {
+                    name: "three/three.csproj".to_owned(),
+                    is_leaf: true
+                },
+            ]
+        );
 
-        let result = get_dependent_package_files_pure("two/two.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result =
+            get_dependent_package_files_pure("two/two.csproj", &file_list, &files, false, false)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![ProjectFile {
+                name: "two/two.csproj".to_owned(),
+                is_leaf: true
+            },]
+        );
 
-        let result = get_dependent_package_files_pure("three/three.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![
-            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
-        ]);
+        let result = get_dependent_package_files_pure(
+            "three/three.csproj",
+            &file_list,
+            &files,
+            false,
+            false,
+        )
+        .unwrap();
+        assert_eq!(
+            result,
+            vec![ProjectFile {
+                name: "three/three.csproj".to_owned(),
+                is_leaf: true
+            },]
+        );
     }
 
     // Ported: "throws error on circular reference" — manager/nuget/package-tree.spec.ts line 229
@@ -2979,7 +3177,8 @@ Console.WriteLine("Hello World!");
         files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
         files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../one/one.csproj" /></ItemGroup></Project>"#.to_owned());
         let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
-        let result = get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false);
+        let result =
+            get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Circular reference"));
     }
@@ -2990,7 +3189,15 @@ Console.WriteLine("Hello World!");
         let mut files = std::collections::HashMap::new();
         files.insert("foo/bar.csproj".to_owned(), "<invalid".to_owned());
         let file_list = vec!["foo/bar.csproj".to_owned()];
-        let result = get_dependent_package_files_pure("foo/bar.csproj", &file_list, &files, false, false).unwrap();
-        assert_eq!(result, vec![ProjectFile { name: "foo/bar.csproj".to_owned(), is_leaf: true }]);
+        let result =
+            get_dependent_package_files_pure("foo/bar.csproj", &file_list, &files, false, false)
+                .unwrap();
+        assert_eq!(
+            result,
+            vec![ProjectFile {
+                name: "foo/bar.csproj".to_owned(),
+                is_leaf: true
+            }]
+        );
     }
 }

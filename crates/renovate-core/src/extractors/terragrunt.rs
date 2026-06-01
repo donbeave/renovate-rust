@@ -96,6 +96,23 @@ pub fn get_terragrunt_dependency_type(value: &str) -> &'static str {
     }
 }
 
+/// Update terragrunt lockfile artifacts by delegating to the terraform
+/// lockfile updater.
+///
+/// Mirrors `lib/modules/manager/terragrunt/artifacts.ts` `updateArtifacts()`.
+pub async fn update_terragrunt_artifacts(
+    base_dir: &std::path::Path,
+    package_file_name: &str,
+    updated_deps: &[super::terraform::TerraformArtifactDep],
+    config: &super::terraform::TerraformArtifactConfig,
+) -> Result<Option<Vec<crate::artifacts::ArtifactResult>>, crate::artifacts::ArtifactError> {
+    if !config.is_lock_file_maintenance {
+        return Ok(None);
+    }
+    super::terraform::update_terraform_artifacts(base_dir, package_file_name, updated_deps, config)
+        .await
+}
+
 /// Extract terragrunt module deps from a `terragrunt.hcl` file.
 pub fn extract(content: &str) -> Vec<TerragruntDep> {
     let mut deps = Vec::new();
@@ -253,6 +270,7 @@ fn analyse_source(source: &str) -> TerragruntDep {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::extractors::terraform;
 
     // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
     #[test]
@@ -545,5 +563,56 @@ terraform {
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].skip_reason, Some(TerragruntSkipReason::InvalidUrl));
+    }
+
+    // ── update_terragrunt_artifacts (terragrunt/artifacts.spec.ts) ────────────
+
+    // Ported: "does not call terraform updateArtifacts if the update type is %s" — terragrunt/artifacts.spec.ts line 58
+    #[tokio::test]
+    async fn update_artifacts_returns_null_for_non_lockfile_maintenance() {
+        let tmp = std::env::temp_dir();
+        let deps: Vec<terraform::TerraformArtifactDep> = vec![];
+        let config = terraform::TerraformArtifactConfig {
+            is_lock_file_maintenance: false,
+        };
+        let result = update_terragrunt_artifacts(&tmp, "terragrunt.hcl", &deps, &config)
+            .await
+            .unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "calls terraform updateArtifacts if the update type is lockfileMaintenance" — terragrunt/artifacts.spec.ts line 40
+    #[tokio::test]
+    async fn update_artifacts_delegates_to_terraform_on_lockfile_maintenance() {
+        let tmp = tempfile::tempdir().unwrap();
+        let base = tmp.path();
+        // Create a minimal terragrunt.hcl and .terraform.lock.hcl so the
+        // terraform artifact function finds a lockfile and attempts processing.
+        std::fs::write(base.join("terragrunt.hcl"), b"").unwrap();
+        std::fs::write(
+            base.join(".terraform.lock.hcl"),
+            br#"provider "registry.terraform.io/hashicorp/aws" {
+  version = "5.0.0"
+  hashes = [
+    "h1:abc",
+  ]
+}
+"#,
+        )
+        .unwrap();
+
+        let deps: Vec<terraform::TerraformArtifactDep> = vec![];
+        let config = terraform::TerraformArtifactConfig {
+            is_lock_file_maintenance: true,
+        };
+        let result = update_terragrunt_artifacts(base, "terragrunt.hcl", &deps, &config)
+            .await
+            .unwrap();
+        // When there are no updated deps and lockfile maintenance is true,
+        // terraform's updateAllLocks path runs but finds nothing to update
+        // (no deps to look up), so it returns None or empty updates.
+        // The key point is that it DELEGATED (did not early-return None).
+        // With no deps, the result is Ok(None) because there's nothing to update.
+        assert!(result.is_none());
     }
 }

@@ -702,16 +702,25 @@ mod 'stdlib2', :git => 'git@github.com:puppetlabs/puppetlabs-stdlib2.git' # This
         // apache git module — git present but tag commented out → GitNoTag
         let apache_git = deps.iter().find(|d| d.name == "apache");
         assert!(apache_git.is_some());
-        assert_eq!(apache_git.unwrap().skip_reason, Some(PuppetSkipReason::GitNoTag));
+        assert_eq!(
+            apache_git.unwrap().skip_reason,
+            Some(PuppetSkipReason::GitNoTag)
+        );
 
         // stdlib — only tag, no git → UnspecifiedVersion
         let stdlib_git = deps.iter().find(|d| d.name == "stdlib");
         assert!(stdlib_git.is_some());
-        assert_eq!(stdlib_git.unwrap().skip_reason, Some(PuppetSkipReason::UnspecifiedVersion));
+        assert_eq!(
+            stdlib_git.unwrap().skip_reason,
+            Some(PuppetSkipReason::UnspecifiedVersion)
+        );
 
         // stdlib2 — git present but tag commented out → GitNoTag
         let stdlib2 = deps.iter().find(|d| d.name == "stdlib2");
         assert!(stdlib2.is_some());
-        assert_eq!(stdlib2.unwrap().skip_reason, Some(PuppetSkipReason::GitNoTag));
+        assert_eq!(
+            stdlib2.unwrap().skip_reason,
+            Some(PuppetSkipReason::GitNoTag)
+        );
     }
 }

@@ -395,7 +395,6 @@ mod tests {
                 lock_file_dir: lock_dir,
                 ..Default::default()
             },
-
         }
     }
 
@@ -568,7 +567,6 @@ mod tests {
                 lock_file_dir: lock_dir,
                 ..Default::default()
             },
-
         }
     }
 

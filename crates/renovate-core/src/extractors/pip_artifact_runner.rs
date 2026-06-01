@@ -33,9 +33,8 @@ impl PipArtifactRunner {
     fn dependency_and_hash_pattern(dep_name: &str) -> regex::Regex {
         let escaped = regex::escape(dep_name);
         // extrasPattern from upstream: (?:\s*\[[^\]]+\])?
-        let pattern = format!(
-            r"^\s*(?P<depConstraint>{escaped}(?:\s*\[[^\]]+\])?\s*==.*?\S)\s+--hash=",
-        );
+        let pattern =
+            format!(r"^\s*(?P<depConstraint>{escaped}(?:\s*\[[^\]]+\])?\s*==.*?\S)\s+--hash=",);
         regex::Regex::new(&pattern).expect("valid regex")
     }
 
@@ -57,25 +56,16 @@ impl PipArtifactRunner {
             }
             let re = Self::dependency_and_hash_pattern(&dep.dep_name);
             if let Some(cap) = re.captures(&rewritten) {
-                let constraint = cap
-                    .name("depConstraint")
-                    .map(|m| m.as_str())
-                    .unwrap_or("");
+                let constraint = cap.name("depConstraint").map(|m| m.as_str()).unwrap_or("");
                 if !constraint.is_empty() {
                     let quoted_constraint = crate::util::shlex_quote(constraint);
                     let quoted_file = crate::util::shlex_quote(package_file_name);
-                    cmds.push(format!(
-                        "hashin {quoted_constraint} -r {quoted_file}"
-                    ));
+                    cmds.push(format!("hashin {quoted_constraint} -r {quoted_file}"));
                 }
             }
         }
 
-        if cmds.is_empty() {
-            None
-        } else {
-            Some(cmds)
-        }
+        if cmds.is_empty() { None } else { Some(cmds) }
     }
 
     /// Run a single hashin command.
@@ -125,11 +115,9 @@ impl ArtifactRunner for PipArtifactRunner {
                 .unwrap_or_else(|| lock_file_dir.clone());
 
             // 2. Build hashin commands.
-            let Some(cmds) = Self::build_commands(
-                &package_file_name,
-                &updated_deps,
-                &new_package_file_content,
-            ) else {
+            let Some(cmds) =
+                Self::build_commands(&package_file_name, &updated_deps, &new_package_file_content)
+            else {
                 return Ok(None);
             };
 
@@ -137,7 +125,11 @@ impl ArtifactRunner for PipArtifactRunner {
             let mut env = if config.env.is_empty() {
                 std::env::vars().collect::<HashMap<String, String>>()
             } else {
-                config.env.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+                config
+                    .env
+                    .iter()
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect()
             };
 
             // Set PIP_CACHE_DIR if not already set.
@@ -268,7 +260,11 @@ botocore==1.27.46 \\n\
     #[tokio::test]
     async fn returns_null_if_unchanged() {
         let dir = tempdir().unwrap();
-        std::fs::write(dir.path().join("requirements.txt"), NEW_PACKAGE_FILE_CONTENT).unwrap();
+        std::fs::write(
+            dir.path().join("requirements.txt"),
+            NEW_PACKAGE_FILE_CONTENT,
+        )
+        .unwrap();
 
         // Fake hashin binary that doesn't change the file.
         let fake_hashin = dir.path().join("hashin");
@@ -307,13 +303,18 @@ botocore==1.27.46 \\n\
     #[tokio::test]
     async fn returns_updated_file() {
         let dir = tempdir().unwrap();
-        std::fs::write(dir.path().join("requirements.txt"), NEW_PACKAGE_FILE_CONTENT).unwrap();
+        std::fs::write(
+            dir.path().join("requirements.txt"),
+            NEW_PACKAGE_FILE_CONTENT,
+        )
+        .unwrap();
 
         let fake_hashin = dir.path().join("hashin");
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_hashin).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'new content' > requirements.txt\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'new content' > requirements.txt\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_hashin).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_hashin, perms).unwrap();
@@ -357,13 +358,18 @@ botocore==1.27.46 \\n\
     #[tokio::test]
     async fn ignores_falsy_dep_names() {
         let dir = tempdir().unwrap();
-        std::fs::write(dir.path().join("requirements.txt"), NEW_PACKAGE_FILE_CONTENT).unwrap();
+        std::fs::write(
+            dir.path().join("requirements.txt"),
+            NEW_PACKAGE_FILE_CONTENT,
+        )
+        .unwrap();
 
         let fake_hashin = dir.path().join("hashin");
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_hashin).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'new content' > requirements.txt\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'new content' > requirements.txt\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_hashin).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_hashin, perms).unwrap();
@@ -407,13 +413,18 @@ botocore==1.27.46 \\n\
     #[tokio::test]
     async fn catches_and_returns_errors() {
         let dir = tempdir().unwrap();
-        std::fs::write(dir.path().join("requirements.txt"), NEW_PACKAGE_FILE_CONTENT).unwrap();
+        std::fs::write(
+            dir.path().join("requirements.txt"),
+            NEW_PACKAGE_FILE_CONTENT,
+        )
+        .unwrap();
 
         let fake_hashin = dir.path().join("hashin");
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_hashin).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'hashin error' >&2; exit 1\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'hashin error' >&2; exit 1\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_hashin).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_hashin, perms).unwrap();

@@ -73,7 +73,8 @@ impl BundlerArtifactRunner {
                 } else {
                     format!("{} ", flags.join(" "))
                 };
-                let quoted: Vec<String> = deps.iter().map(|d| crate::util::shlex_quote(d)).collect();
+                let quoted: Vec<String> =
+                    deps.iter().map(|d| crate::util::shlex_quote(d)).collect();
                 cmds.push(format!(
                     "bundler lock {}--update {}",
                     prefix,
@@ -135,7 +136,12 @@ impl ArtifactRunner for BundlerArtifactRunner {
                 .unwrap_or_else(|| lock_file_dir.clone());
 
             // 1. Determine lock file path.
-            let lock_path = match crate::extractors::bundler::get_lock_file_path(&package_file_name, lock_file_dir).await {
+            let lock_path = match crate::extractors::bundler::get_lock_file_path(
+                &package_file_name,
+                lock_file_dir,
+            )
+            .await
+            {
                 Ok(p) => p,
                 Err(_) => return Ok(None),
             };
@@ -170,7 +176,11 @@ impl ArtifactRunner for BundlerArtifactRunner {
             let env = if config.env.is_empty() {
                 std::env::vars().collect::<HashMap<String, String>>()
             } else {
-                config.env.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+                config
+                    .env
+                    .iter()
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect()
             };
 
             for cmd in &cmds {
@@ -315,7 +325,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_bundler).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'New Gemfile.lock' > Gemfile.lock\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'New Gemfile.lock' > Gemfile.lock\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_bundler).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_bundler, perms).unwrap();
@@ -358,7 +369,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_bundler).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'New Gemfile.lock' > Gemfile.lock\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'New Gemfile.lock' > Gemfile.lock\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_bundler).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_bundler, perms).unwrap();
@@ -401,7 +413,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_bundler).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'New Gemfile.lock' > Gemfile.lock\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'New Gemfile.lock' > Gemfile.lock\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_bundler).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_bundler, perms).unwrap();
@@ -446,7 +459,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_bundler).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'New Gemfile.lock' > Gemfile.lock\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'New Gemfile.lock' > Gemfile.lock\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_bundler).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_bundler, perms).unwrap();
@@ -490,7 +504,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_bundler).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'foo was resolved to' >&2; exit 1\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'foo was resolved to' >&2; exit 1\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_bundler).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_bundler, perms).unwrap();
@@ -558,10 +573,20 @@ mod tests {
         let mut bar = updated_dep("bar");
         bar.update_type = Some("patch".to_owned());
         let deps = vec![foo, bar];
-        let cmds = BundlerArtifactRunner::build_commands(&deps, false, &["bundlerConservative".to_owned()]);
+        let cmds = BundlerArtifactRunner::build_commands(
+            &deps,
+            false,
+            &["bundlerConservative".to_owned()],
+        );
         assert_eq!(cmds.len(), 2);
-        assert!(cmds.iter().any(|c| c == "bundler lock --patch --conservative --update 'bar'"));
-        assert!(cmds.iter().any(|c| c == "bundler lock --minor --conservative --update 'foo'"));
+        assert!(
+            cmds.iter()
+                .any(|c| c == "bundler lock --patch --conservative --update 'bar'")
+        );
+        assert!(
+            cmds.iter()
+                .any(|c| c == "bundler lock --minor --conservative --update 'foo'")
+        );
     }
 
     // Ported: "executes commands from lockFile path" — bundler/artifacts.spec.ts line 100
@@ -571,8 +596,16 @@ mod tests {
         let lock_dir = dir.path().to_path_buf();
 
         std::fs::create_dir(lock_dir.join("teamA")).unwrap();
-        std::fs::write(lock_dir.join("teamA").join("Gemfile"), "source 'https://rubygems.org'\n").unwrap();
-        std::fs::write(lock_dir.join("teamA").join("Gemfile.lock"), "Old Gemfile.lock\n").unwrap();
+        std::fs::write(
+            lock_dir.join("teamA").join("Gemfile"),
+            "source 'https://rubygems.org'\n",
+        )
+        .unwrap();
+        std::fs::write(
+            lock_dir.join("teamA").join("Gemfile.lock"),
+            "Old Gemfile.lock\n",
+        )
+        .unwrap();
 
         let fake_bundler = dir.path().join("bundler");
         #[cfg(unix)]

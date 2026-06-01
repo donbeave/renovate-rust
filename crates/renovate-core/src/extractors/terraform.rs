@@ -1193,8 +1193,7 @@ pub fn write_lock_updates(
     let mut last_end: usize = 0;
 
     static VERSION_LINE_RE: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
-        Regex::new(r#"^(?P<prefix>\s*version\s*=\s*")(?P<version>[^"']+)(?P<suffix>".*)$"#)
-            .unwrap()
+        Regex::new(r#"^(?P<prefix>\s*version\s*=\s*")(?P<version>[^"']+)(?P<suffix>".*)$"#).unwrap()
     });
     static CONSTRAINT_LINE_RE: std::sync::LazyLock<Regex> = std::sync::LazyLock::new(|| {
         Regex::new(r#"^(?P<prefix>\s*constraints\s*=\s*")(?P<constraint>[^"']+)(?P<suffix>".*)$"#)
@@ -1253,10 +1252,7 @@ pub fn write_lock_updates(
         last_end = update.line_numbers.block_end;
     }
 
-    let trailing: Vec<String> = lines[last_end..]
-        .iter()
-        .map(|&s| s.to_owned())
-        .collect();
+    let trailing: Vec<String> = lines[last_end..].iter().map(|&s| s.to_owned()).collect();
     sections.push(trailing);
 
     let new_content = sections
@@ -1564,14 +1560,17 @@ pub async fn update_terraform_artifacts(
 ) -> Result<Option<Vec<crate::artifacts::ArtifactResult>>, crate::artifacts::ArtifactError> {
     use crate::fs::{find_local_sibling_or_parent, read_local_string};
 
-    let lock_file_path = match find_local_sibling_or_parent(base_dir, package_file_name, ".terraform.lock.hcl") {
-        Ok(Some(p)) => p,
-        Ok(None) => return Ok(None),
-        Err(e) => return Err(crate::artifacts::ArtifactError {
-            lock_file: ".terraform.lock.hcl".to_owned(),
-            stderr: e.to_string(),
-        }),
-    };
+    let lock_file_path =
+        match find_local_sibling_or_parent(base_dir, package_file_name, ".terraform.lock.hcl") {
+            Ok(Some(p)) => p,
+            Ok(None) => return Ok(None),
+            Err(e) => {
+                return Err(crate::artifacts::ArtifactError {
+                    lock_file: ".terraform.lock.hcl".to_owned(),
+                    stderr: e.to_string(),
+                });
+            }
+        };
 
     let lock_content = match read_local_string(base_dir, &lock_file_path) {
         Ok(Some(c)) => c,
@@ -1595,7 +1594,12 @@ pub async fn update_terraform_artifacts(
 
     let provider_deps: Vec<_> = updated_deps
         .iter()
-        .filter(|d| matches!(d.dep_type.as_deref(), Some("provider") | Some("required_provider")))
+        .filter(|d| {
+            matches!(
+                d.dep_type.as_deref(),
+                Some("provider") | Some("required_provider")
+            )
+        })
         .collect();
 
     if provider_deps.is_empty() {
@@ -1611,7 +1615,9 @@ pub async fn update_terraform_artifacts(
         };
 
         if dep.is_lockfile_update {
-            if let (Some(new_ver), Some(ver_scheme)) = (dep.new_version.as_deref(), dep.versioning.as_deref()) {
+            if let (Some(new_ver), Some(ver_scheme)) =
+                (dep.new_version.as_deref(), dep.versioning.as_deref())
+            {
                 if ver_scheme == "hashicorp" {
                     let satisfies = crate::versioning::hashicorp::get_satisfying_version(
                         &[new_ver],
@@ -1624,7 +1630,9 @@ pub async fn update_terraform_artifacts(
             }
         }
 
-        let registry_url = dep.registry_urls.first()
+        let registry_url = dep
+            .registry_urls
+            .first()
             .cloned()
             .unwrap_or_else(|| update_lock.registry_url.clone());
 
@@ -1636,18 +1644,22 @@ pub async fn update_terraform_artifacts(
             Some(&new_version),
             Some(package_name),
             Some(&update_lock.constraints),
-        ).unwrap_or_else(|| new_version.clone());
+        )
+        .unwrap_or_else(|| new_version.clone());
 
-        let new_hashes = match TerraformProviderHash::create_hashes(&registry_url, package_name, &new_version).await {
-            Ok(Some(h)) => h,
-            Ok(None) => return Ok(None),
-            Err(e) => {
-                return Ok(Some(vec![crate::artifacts::ArtifactResult::error(
-                    lock_file_path,
-                    e,
-                )]));
-            }
-        };
+        let new_hashes =
+            match TerraformProviderHash::create_hashes(&registry_url, package_name, &new_version)
+                .await
+            {
+                Ok(Some(h)) => h,
+                Ok(None) => return Ok(None),
+                Err(e) => {
+                    return Ok(Some(vec![crate::artifacts::ArtifactResult::error(
+                        lock_file_path,
+                        e,
+                    )]));
+                }
+            };
 
         updates.push(TerraformProviderLockUpdate {
             package_name: update_lock.package_name.clone(),
@@ -3672,12 +3684,9 @@ provider "registry.opentofu.org/carlpett/sops" {
     // Ported: "returns null if getBuilds returns null" — terraform/lockfile/hash.spec.ts line 43
     #[tokio::test]
     async fn hash_returns_error_when_get_builds_fails() {
-        let result = TerraformProviderHash::create_hashes(
-            "https://example.com",
-            "test/gitlab",
-            "2.56.0",
-        )
-        .await;
+        let result =
+            TerraformProviderHash::create_hashes("https://example.com", "test/gitlab", "2.56.0")
+                .await;
         assert!(result.is_err());
     }
 

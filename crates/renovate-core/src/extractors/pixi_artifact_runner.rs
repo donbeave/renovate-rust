@@ -107,7 +107,11 @@ impl ArtifactRunner for PixiArtifactRunner {
             let mut env = if config.env.is_empty() {
                 std::env::vars().collect::<HashMap<String, String>>()
             } else {
-                config.env.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+                config
+                    .env
+                    .iter()
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect()
             };
 
             // Set PIXI_CACHE_DIR if not already set.
@@ -237,7 +241,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_pixi).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'Old pixi.lock' > pixi.lock\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'Old pixi.lock' > pixi.lock\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_pixi).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_pixi, perms).unwrap();
@@ -279,7 +284,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_pixi).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'New pixi.lock' > pixi.lock\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'New pixi.lock' > pixi.lock\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_pixi).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_pixi, perms).unwrap();
@@ -322,7 +328,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_pixi).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'New pixi.lock' > pixi.lock\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'New pixi.lock' > pixi.lock\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_pixi).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_pixi, perms).unwrap();
@@ -365,7 +372,8 @@ mod tests {
         #[cfg(unix)]
         {
             let mut f = std::fs::File::create(&fake_pixi).unwrap();
-            f.write_all(b"#!/bin/sh\necho 'pixi error' >&2; exit 1\n").unwrap();
+            f.write_all(b"#!/bin/sh\necho 'pixi error' >&2; exit 1\n")
+                .unwrap();
             let mut perms = std::fs::metadata(&fake_pixi).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&fake_pixi, perms).unwrap();

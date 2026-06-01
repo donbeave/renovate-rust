@@ -626,7 +626,10 @@ pub fn extract_ruby_version(txt: &str) -> Option<&str> {
 ///
 /// 1. Uses `config.constraints["bundler"]` if present.
 /// 2. Falls back to `BUNDLED WITH` section in the lock file.
-pub fn get_bundler_constraint(config: &crate::artifacts::ArtifactConfig, lock_content: &str) -> Option<String> {
+pub fn get_bundler_constraint(
+    config: &crate::artifacts::ArtifactConfig,
+    lock_content: &str,
+) -> Option<String> {
     if let Some(v) = config.constraints.get("bundler") {
         return Some(v.clone());
     }
@@ -1529,7 +1532,9 @@ end
     #[test]
     fn get_bundler_constraint_uses_existing() {
         let mut config = crate::artifacts::ArtifactConfig::default();
-        config.constraints.insert("bundler".to_owned(), "2.1.0".to_owned());
+        config
+            .constraints
+            .insert("bundler".to_owned(), "2.1.0".to_owned());
         let result = get_bundler_constraint(&config, "");
         assert_eq!(result, Some("2.1.0".to_owned()));
     }
@@ -1555,7 +1560,9 @@ end
     #[tokio::test]
     async fn get_ruby_constraint_uses_existing() {
         let mut config = crate::artifacts::ArtifactConfig::default();
-        config.constraints.insert("ruby".to_owned(), "2.1.0".to_owned());
+        config
+            .constraints
+            .insert("ruby".to_owned(), "2.1.0".to_owned());
         let result = get_ruby_constraint("Gemfile", "", &config).await;
         assert_eq!(result, Some("2.1.0".to_owned()));
     }
@@ -1588,9 +1595,12 @@ end
     #[tokio::test]
     async fn get_ruby_constraint_from_tool_versions() {
         let dir = tempfile::tempdir().unwrap();
-        tokio::fs::write(dir.path().join(".tool-versions"), "python\t3.8.10\nruby\t3.3.4\n")
-            .await
-            .unwrap();
+        tokio::fs::write(
+            dir.path().join(".tool-versions"),
+            "python\t3.8.10\nruby\t3.3.4\n",
+        )
+        .await
+        .unwrap();
         let config = crate::artifacts::ArtifactConfig {
             lock_file_dir: dir.path().to_path_buf(),
             ..Default::default()

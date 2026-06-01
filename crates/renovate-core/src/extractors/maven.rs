@@ -181,10 +181,8 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
     let (mut deps, prop_map, _parent) = parse_pom(content, "")?;
 
     // Flatten MavenProp values into plain strings for local resolution.
-    let properties: HashMap<String, String> = prop_map
-        .into_iter()
-        .map(|(k, v)| (k, v.val))
-        .collect();
+    let properties: HashMap<String, String> =
+        prop_map.into_iter().map(|(k, v)| (k, v.val)).collect();
 
     // Adjust file_replace_position to be relative to the first '<' in content,
     // matching what maven_update_dependency expects.
@@ -225,7 +223,10 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
 /// Extract a single Maven package file, returning raw deps, properties, and
 /// parent path without cross-file resolution.
 /// Mirrors upstream `extractPackageFile`.
-pub fn extract_package_file(content: &str, package_file: &str) -> Result<MavenPackageFile, MavenExtractError> {
+pub fn extract_package_file(
+    content: &str,
+    package_file: &str,
+) -> Result<MavenPackageFile, MavenExtractError> {
     let (mut deps, properties, parent) = parse_pom(content, package_file)?;
 
     // Adjust file_replace_position to be relative to the first '<' in content.
@@ -377,7 +378,10 @@ pub fn resolve_parents(package_files: &mut [MavenPackageFile]) {
 /// Convert a `HashMap<String, MavenProp>` to `HashMap<String, String>`
 /// for use with `substitute_props`.
 fn string_props(props: &HashMap<String, MavenProp>) -> HashMap<String, String> {
-    props.iter().map(|(k, v)| (k.clone(), v.val.clone())).collect()
+    props
+        .iter()
+        .map(|(k, v)| (k.clone(), v.val.clone()))
+        .collect()
 }
 
 /// Extract Maven registry URLs from a `settings.xml` file.
@@ -519,10 +523,7 @@ pub fn extract_all_package_file_infos(files: &[(&str, &str)]) -> Vec<MavenPackag
             continue;
         }
 
-        if path.ends_with(".xml")
-            && !is_settings_xml_path(path)
-            && !content.is_empty()
-        {
+        if path.ends_with(".xml") && !is_settings_xml_path(path) && !content.is_empty() {
             if let Ok(pkg) = extract_package_file(content, path) {
                 package_files.push(pkg);
             }
@@ -650,21 +651,20 @@ fn apply_registry_urls(deps: &mut [MavenExtractedDep], registry_urls: &[String])
 /// Resolve a parent POM file path from a `<relativePath>` value.
 /// Mirrors upstream `resolveParentFile`.
 fn resolve_parent_file(package_file: &str, parent_path: &str) -> String {
-    let (parent_file, parent_dir) = if parent_path.ends_with("pom.xml")
-        || parent_path.ends_with(".pom.xml")
-    {
-        let file_name = std::path::Path::new(parent_path)
-            .file_name()
-            .map(|s| s.to_string_lossy().to_string())
-            .unwrap_or_else(|| "pom.xml".to_owned());
-        let dir = std::path::Path::new(parent_path)
-            .parent()
-            .map(|s| s.to_string_lossy().to_string())
-            .unwrap_or_default();
-        (file_name, dir)
-    } else {
-        ("pom.xml".to_owned(), parent_path.to_owned())
-    };
+    let (parent_file, parent_dir) =
+        if parent_path.ends_with("pom.xml") || parent_path.ends_with(".pom.xml") {
+            let file_name = std::path::Path::new(parent_path)
+                .file_name()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_else(|| "pom.xml".to_owned());
+            let dir = std::path::Path::new(parent_path)
+                .parent()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_default();
+            (file_name, dir)
+        } else {
+            ("pom.xml".to_owned(), parent_path.to_owned())
+        };
 
     let dir = std::path::Path::new(package_file)
         .parent()
@@ -704,8 +704,14 @@ fn normalize_path(path: &str) -> String {
 fn parse_pom(
     content: &str,
     package_file: &str,
-) -> Result<(Vec<MavenExtractedDep>, HashMap<String, MavenProp>, Option<String>), MavenExtractError>
-{
+) -> Result<
+    (
+        Vec<MavenExtractedDep>,
+        HashMap<String, MavenProp>,
+        Option<String>,
+    ),
+    MavenExtractError,
+> {
     let offset = content.find('<').unwrap_or(0);
     let cursor = BufReader::new(content.as_bytes());
     let mut reader = Reader::from_reader(cursor);

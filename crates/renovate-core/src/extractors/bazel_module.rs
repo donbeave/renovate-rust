@@ -663,7 +663,10 @@ pub fn parse_module_bazel(input: &str) -> Vec<BazelFragment> {
 fn try_parse_use_repo_rule(line: &str) -> Option<BazelFragment> {
     let trimmed = line.trim();
     // Pattern: var = use_repo_rule("bzl_file", "rule_name")
-    let re = regex::Regex::new(r#"^(\w+)\s*=\s*use_repo_rule\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*\)$"#).ok()?;
+    let re = regex::Regex::new(
+        r#"^(\w+)\s*=\s*use_repo_rule\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*\)$"#,
+    )
+    .ok()?;
     let cap = re.captures(trimmed)?;
     let variable_name = cap.get(1)?.as_str();
     let bzl_file = cap.get(2)?.as_str();
@@ -3755,7 +3758,9 @@ local_path_override(
         let res = parse_module_bazel(input);
         assert_eq!(res.len(), 2);
         assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
-        assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "local_path_override"));
+        assert!(
+            matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "local_path_override")
+        );
     }
 
     // Ported: "finds single_version_override" — bazel-module/parser/index.spec.ts line 148
@@ -3770,7 +3775,9 @@ single_version_override(
         let res = parse_module_bazel(input);
         assert_eq!(res.len(), 2);
         assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
-        assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "single_version_override"));
+        assert!(
+            matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "single_version_override")
+        );
     }
 
     // Ported: "finds maven.artifact" — bazel-module/parser/index.spec.ts line 179
@@ -3784,7 +3791,9 @@ single_version_override(
 )"#;
         let res = parse_module_bazel(input);
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "artifact"));
+        assert!(
+            matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "artifact")
+        );
     }
 
     // Ported: "finds maven.install and maven.artifact" — bazel-module/parser/index.spec.ts line 248
@@ -3807,8 +3816,12 @@ maven.artifact(
 )"#;
         let res = parse_module_bazel(input);
         assert_eq!(res.len(), 2);
-        assert!(matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "install"));
-        assert!(matches!(&res[1], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "artifact"));
+        assert!(
+            matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "install")
+        );
+        assert!(
+            matches!(&res[1], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "maven" && tag == "artifact")
+        );
     }
 
     // Ported: "finds oci.pull" — bazel-module/parser/index.spec.ts line 335
@@ -3823,7 +3836,9 @@ maven.artifact(
 )"#;
         let res = parse_module_bazel(input);
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "oci" && tag == "pull"));
+        assert!(
+            matches!(&res[0], BazelFragment::ExtensionTag { extension, tag, .. } if extension == "oci" && tag == "pull")
+        );
     }
 
     // Ported: "finds the git_repository" — bazel-module/parser/index.spec.ts line 376
@@ -3846,8 +3861,12 @@ maven.artifact(
 pull(name = "nginx", tag = "1.27.1")"#;
         let res = parse_module_bazel(input);
         assert_eq!(res.len(), 2);
-        assert!(matches!(&res[0], BazelFragment::UseRepoRule { variable_name, .. } if variable_name == "pull"));
-        assert!(matches!(&res[1], BazelFragment::RepoRuleCall { function_name, .. } if function_name == "pull"));
+        assert!(
+            matches!(&res[0], BazelFragment::UseRepoRule { variable_name, .. } if variable_name == "pull")
+        );
+        assert!(
+            matches!(&res[1], BazelFragment::RepoRuleCall { function_name, .. } if function_name == "pull")
+        );
     }
 
     // Ported: "ignores use_repo_rule with insufficient args" — bazel-module/parser/index.spec.ts line 420

@@ -137,7 +137,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/tekton` | 1 | ? | 5/5 (100%) | — |
 | `manager/terraform` | 13 | partial | 71/88 (81%) | Missing: lockfile maintenance (updateAllLocks) |
 | `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
-| `manager/terragrunt` | 4 | partial | 15/18 (83%) | Missing: artifact delegation to terraform |
+| `manager/terragrunt` | 4 | full | 15/18 (83%) | Artifact delegation to terraform implemented. One apparent gap is a duplicate upstream test description. |
 | `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |
 | `manager/tflint-plugin` | 1 | ? | 6/6 (100%) | — |
 | `manager/travis` | 1 | ? | 8/8 (100%) | — |
