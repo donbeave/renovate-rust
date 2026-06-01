@@ -86,6 +86,7 @@ pub mod osgi;
 pub mod pep621;
 pub mod pep723;
 pub mod pip;
+pub mod pip_artifact_runner;
 pub mod pip_compile;
 pub mod pip_setup;
 pub mod pipfile;

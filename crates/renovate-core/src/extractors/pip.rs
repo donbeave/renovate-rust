@@ -782,7 +782,7 @@ mod tests {
         assert!(result.additional_registry_urls.is_empty());
     }
 
-    // Ported: "extracts --index-url short code" — modules/manager/pip_requirements/common.spec.ts line 12
+    // Ported: "extracts --index-url short code" — modules/manager/pip_requirements/common.spec.ts line 15
     #[test]
     fn pip_flags_extracts_index_url_short_code() {
         let content = "-i http://example.com/private-pypi/\nsome-package==0.3.1";
@@ -793,7 +793,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts --extra-index-url flag" — modules/manager/pip_requirements/common.spec.ts line 22
+    // Ported: "extracts --extra-index-url flag" — modules/manager/pip_requirements/common.spec.ts line 27
     #[test]
     fn pip_flags_extracts_extra_index_url() {
         let result = extract_package_file_flags("--extra-index-url https://example.com/pypi");
@@ -804,7 +804,7 @@ mod tests {
         assert!(result.registry_urls.is_empty());
     }
 
-    // Ported: "extracts --requirement short code option" — modules/manager/pip_requirements/common.spec.ts line 31
+    // Ported: "extracts --requirement short code option" — modules/manager/pip_requirements/common.spec.ts line 37
     #[test]
     fn pip_flags_extracts_requirements_file() {
         let content = "-r base.txt\nsome-package==0.3.1";
@@ -812,7 +812,7 @@ mod tests {
         assert_eq!(result.requirements_files, vec!["base.txt"]);
     }
 
-    // Ported: "extracts --constraints short code option" — modules/manager/pip_requirements/common.spec.ts line 42
+    // Ported: "extracts --constraints short code option" — modules/manager/pip_requirements/common.spec.ts line 48
     #[test]
     fn pip_flags_extracts_constraints_file() {
         let content = "-c constrain.txt\nsome-package==0.3.1";
