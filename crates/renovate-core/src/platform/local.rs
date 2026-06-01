@@ -10,8 +10,8 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 use crate::platform::scm::{CommitConfig, Scm, ScmResult};
+use crate::platform::{CombinedBranchStatus, CurrentUser, PlatformClient, PlatformError, RawFile};
 
 /// Platform client that reads from the local filesystem.
 #[derive(Debug, Clone)]
@@ -392,7 +392,10 @@ mod tests {
             message: "test".into(),
             files: vec![],
         };
-        assert!(matches!(scm.commit_and_push(&config).await, ScmResult::Ok(_)));
+        assert!(matches!(
+            scm.commit_and_push(&config).await,
+            ScmResult::Ok(_)
+        ));
     }
 
     // Ported: "checkoutBranch" — platform/local/scm.spec.ts line 52
@@ -415,6 +418,9 @@ mod tests {
     #[tokio::test]
     async fn local_scm_merge_and_push_returns_ok() {
         let scm = LocalScm::new(".");
-        assert!(matches!(scm.merge_and_push("branchName").await, ScmResult::Ok(_)));
+        assert!(matches!(
+            scm.merge_and_push("branchName").await,
+            ScmResult::Ok(_)
+        ));
     }
 }

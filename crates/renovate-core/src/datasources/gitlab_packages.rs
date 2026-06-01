@@ -248,8 +248,7 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let result = fetch_releases(&server.uri(), "group/project:mypkg", &http)
-            .await;
+        let result = fetch_releases(&server.uri(), "group/project:mypkg", &http).await;
         assert!(result.is_err());
     }
 }
