@@ -901,7 +901,9 @@ fn metadata_cache_get(url: &str) -> bool {
 
 fn metadata_cache_set(url: &str) {
     let mut guard = METADATA_NOT_FOUND_CACHE.lock().unwrap();
-    guard.get_or_insert_with(std::collections::HashSet::new).insert(url.to_owned());
+    guard
+        .get_or_insert_with(std::collections::HashSet::new)
+        .insert(url.to_owned());
 }
 
 #[allow(dead_code)]
