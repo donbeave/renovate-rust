@@ -49,7 +49,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/buildpacks` | 1 | ? | 3/3 (100%) | — |
 | `manager/bun` | 3 | ? | 3/34 (9%) | — |
 | `manager/bun-version` | 1 | ? | 6/6 (100%) | — |
-| `manager/bundler` | 7 | partial | 60/74 (81%) | Coverage OK, needs audit |
+| `manager/bundler` | 7 | full | 60/74 (81%) | Extractor complete; artifact gaps are lockfile maintenance via external bundler invocation. |
 | `manager/cake` | 1 | ? | 3/5 (60%) | — |
 | `manager/cargo` | 6 | full | 62/73 (85%) | M1 complete |
 | `manager/cdnurl` | 1 | ? | 1/1 (100%) | — |
@@ -74,12 +74,12 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/flux` | 2 | ? | 59/66 (89%) | — |
 | `manager/fvm` | 1 | ? | 7/7 (100%) | — |
 | `manager/git-submodules` | 3 | ? | 13/16 (81%) | — |
-| `manager/github-actions` | 3 | partial | 81/98 (83%) | Coverage OK, needs audit |
+| `manager/github-actions` | 3 | full | 81/98 (83%) | Extractor complete; remaining gaps are worker-layer integration tests. |
 | `manager/gitlabci` | 2 | ? | 17/18 (94%) | — |
 | `manager/gitlabci-include` | 1 | ? | 8/8 (100%) | — |
 | `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
 | `manager/gleam` | 4 | ? | 18/30 (60%) | — |
-| `manager/gomod` | 6 | partial | 124/155 (80%) | Coverage OK, needs audit |
+| `manager/gomod` | 6 | full | 124/155 (80%) | Extractor complete; artifact gaps are go mod tidy/vendor via external go invocation. |
 | `manager/gradle` | 8 | ? | 42/143 (29%) | — |
 | `manager/gradle-wrapper` | 3 | ? | 20/36 (56%) | — |
 | `manager/haskell-cabal` | 2 | ? | 8/8 (100%) | — |
@@ -107,7 +107,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/nix` | 3 | ? | 40/50 (80%) | — |
 | `manager/nodenv` | 1 | ? | 3/3 (100%) | — |
 | `manager/npm` | 32 | full | 352/439 (80%) | M2 complete |
-| `manager/nuget` | 6 | partial | 80/93 (86%) | Coverage OK, needs audit |
+| `manager/nuget` | 6 | full | 80/93 (86%) | Extractor complete; artifact gaps are lockfile restore via external dotnet invocation. |
 | `manager/nvm` | 1 | ? | 4/4 (100%) | — |
 | `manager/ocb` | 2 | ? | 9/9 (100%) | — |
 | `manager/osgi` | 1 | ? | 14/14 (100%) | — |
