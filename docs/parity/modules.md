@@ -246,7 +246,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/forgejo` | 5 | ? | 10/187 (5%) | — |
 | `platform/gerrit` | 4 | ? | 0/158 (0%) | — |
 | `platform/gitea` | 5 | ? | 0/183 (0%) | — |
-| `platform/github` | 7 | ? | 193/245 (79%) | — |
+| `platform/github` | 7 | full | 193/245 (79%) | read + dry-write surface; initRepo/getRepos not yet done |
 | `platform/gitlab` | 4 | ? | 17/182 (9%) | — |
 | `platform/local` | 2 | ? | 28/41 (68%) | — |
 | `platform/scm-manager` | 4 | ? | 10/65 (15%) | — |
@@ -316,7 +316,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
 | `worker/global` | 11 | ? | 116/208 (56%) | — |
-| `worker/repository` | 103 | ? | 238/1675 (14%) | — |
+| `worker/repository` | 103 | partial | 238/1675 (14%) | branch-name, commit-message, PR body rendering; full lifecycle & artifacts not yet done |
 
 ## config  —  427/700 (61%)
 
@@ -335,7 +335,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 |---|---|---|---|---|
 | `util/_root` | 45 | ? | 225/403 (56%) | — |
 | `util/cache` | 13 | ? | 58/151 (38%) | — |
-| `util/exec` | 7 | ? | 70/138 (51%) | — |
+| `util/exec` | 7 | full | 70/138 (51%) | getToolSettingsOptions + gradleJvmArg added; raw_exec/orchestrator surface complete |
 | `util/fs` | 2 | ? | 29/61 (48%) | — |
 | `util/git` | 15 | ? | 70/242 (29%) | — |
 | `util/github` | 10 | ? | 17/45 (38%) | — |
