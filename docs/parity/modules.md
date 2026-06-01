@@ -68,18 +68,18 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/devbox` | 2 | ? | 13/28 (46%) | — |
 | `manager/devcontainer` | 1 | ? | 15/15 (100%) | — |
 | `manager/docker-compose` | 1 | ? | 13/13 (100%) | — |
-| `manager/dockerfile` | 1 | ? | 76/76 (100%) | — |
+| `manager/dockerfile` | 1 | full | 76/76 (100%) | — |
 | `manager/droneci` | 1 | ? | 5/5 (100%) | — |
-| `manager/fleet` | 1 | ? | 8/10 (80%) | — |
-| `manager/flux` | 2 | ? | 59/66 (89%) | — |
+| `manager/fleet` | 1 | full | 8/10 (80%) | — |
+| `manager/flux` | 2 | full | 59/66 (89%) | — |
 | `manager/fvm` | 1 | ? | 7/7 (100%) | — |
 | `manager/git-submodules` | 3 | ? | 10/16 (62%) | — |
-| `manager/github-actions` | 3 | ? | 81/98 (83%) | — |
+| `manager/github-actions` | 3 | full | 81/98 (83%) | — |
 | `manager/gitlabci` | 2 | ? | 17/18 (94%) | — |
 | `manager/gitlabci-include` | 1 | ? | 8/8 (100%) | — |
 | `manager/glasskube` | 1 | ? | 3/5 (60%) | — |
 | `manager/gleam` | 4 | ? | 18/30 (60%) | — |
-| `manager/gomod` | 6 | ? | 124/155 (80%) | — |
+| `manager/gomod` | 6 | full | 124/155 (80%) | Extract and update full; artifacts: missing docker mode, install mode, vendor/workspace edge cases |
 | `manager/gradle` | 8 | ? | 42/143 (29%) | — |
 | `manager/gradle-wrapper` | 3 | ? | 20/36 (56%) | — |
 | `manager/haskell-cabal` | 2 | ? | 8/8 (100%) | — |
@@ -90,7 +90,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/helmv3` | 5 | ? | 26/52 (50%) | — |
 | `manager/hermit` | 4 | ? | 6/14 (43%) | — |
 | `manager/homeassistant-manifest` | 1 | ? | 16/16 (100%) | — |
-| `manager/homebrew` | 5 | ? | 53/64 (83%) | — |
+| `manager/homebrew` | 5 | full | 53/64 (83%) | — |
 | `manager/html` | 1 | ? | 2/2 (100%) | — |
 | `manager/jenkins` | 1 | ? | 5/5 (100%) | — |
 | `manager/jsonnet-bundler` | 2 | ? | 7/12 (58%) | — |
@@ -98,13 +98,13 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/kubernetes` | 1 | ? | 15/15 (100%) | — |
 | `manager/kustomize` | 3 | ? | 47/68 (69%) | — |
 | `manager/leiningen` | 1 | ? | 4/4 (100%) | — |
-| `manager/maven` | 3 | ? | 52/56 (93%) | — |
+| `manager/maven` | 3 | full | 52/56 (93%) | — |
 | `manager/maven-wrapper` | 2 | ? | 9/39 (23%) | — |
 | `manager/meteor` | 1 | ? | 2/2 (100%) | — |
 | `manager/mint` | 1 | ? | 5/5 (100%) | — |
 | `manager/mise` | 7 | ? | 90/113 (80%) | — |
 | `manager/mix` | 3 | ? | 8/28 (29%) | — |
-| `manager/nix` | 3 | ? | 40/50 (80%) | — |
+| `manager/nix` | 3 | full | 40/50 (80%) | — |
 | `manager/nodenv` | 1 | ? | 3/3 (100%) | — |
 | `manager/npm` | 32 | full | 353/439 (80%) | Extract and update full; artifacts: missing docker mode, install mode, pnpm workspace edge cases |
 | `manager/nuget` | 6 | ? | 51/93 (55%) | — |
@@ -119,7 +119,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/pipenv` | 2 | ? | 15/37 (41%) | — |
 | `manager/pixi` | 2 | ? | 16/26 (62%) | — |
 | `manager/poetry` | 4 | ? | 30/71 (42%) | — |
-| `manager/pre-commit` | 1 | ? | 12/12 (100%) | — |
+| `manager/pre-commit` | 1 | full | 12/12 (100%) | — |
 | `manager/proto` | 2 | ? | 16/16 (100%) | — |
 | `manager/pub` | 3 | ? | 6/21 (29%) | — |
 | `manager/puppet` | 3 | ? | 13/21 (62%) | — |
@@ -129,7 +129,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/ruby-version` | 1 | ? | 3/3 (100%) | — |
 | `manager/runtime-version` | 1 | ? | 2/2 (100%) | — |
 | `manager/rust-toolchain` | 2 | ? | 23/23 (100%) | — |
-| `manager/sbt` | 3 | ? | 38/38 (100%) | — |
+| `manager/sbt` | 3 | full | 38/38 (100%) | — |
 | `manager/scalafmt` | 1 | ? | 4/4 (100%) | — |
 | `manager/setup-cfg` | 1 | ? | 2/2 (100%) | — |
 | `manager/sveltos` | 1 | ? | 13/14 (93%) | — |
@@ -137,7 +137,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/tekton` | 1 | ? | 5/5 (100%) | — |
 | `manager/terraform` | 13 | ? | 43/88 (49%) | — |
 | `manager/terraform-version` | 1 | ? | 2/2 (100%) | — |
-| `manager/terragrunt` | 4 | ? | 15/18 (83%) | — |
+| `manager/terragrunt` | 4 | full | 15/18 (83%) | — |
 | `manager/terragrunt-version` | 1 | ? | 1/1 (100%) | — |
 | `manager/tflint-plugin` | 1 | ? | 6/6 (100%) | — |
 | `manager/travis` | 1 | ? | 8/8 (100%) | — |
@@ -194,10 +194,10 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/github-release-attachments` | 2 | ? | 0/16 (0%) | — |
 | `datasource/github-releases` | 1 | ? | 5/5 (100%) | — |
 | `datasource/github-runners` | 1 | ? | 4/4 (100%) | — |
-| `datasource/github-tags` | 1 | ? | 11/12 (92%) | — |
+| `datasource/github-tags` | 1 | full | 11/12 (92%) | — |
 | `datasource/gitlab-packages` | 1 | ? | 3/5 (60%) | — |
 | `datasource/gitlab-releases` | 1 | ? | 2/3 (67%) | — |
-| `datasource/gitlab-tags` | 2 | ? | 8/9 (89%) | — |
+| `datasource/gitlab-tags` | 2 | full | 8/9 (89%) | — |
 | `datasource/glasskube-packages` | 1 | ? | 7/7 (100%) | — |
 | `datasource/go` | 6 | ? | 9/96 (9%) | — |
 | `datasource/golang-version` | 1 | ? | 10/10 (100%) | — |
@@ -263,7 +263,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/aws-machine-image` | 1 | ? | 3/10 (30%) | — |
 | `versioning/azure-rest-api` | 1 | ? | 11/11 (100%) | — |
 | `versioning/bazel-module` | 2 | ? | 26/30 (87%) | — |
-| `versioning/cargo` | 1 | ? | 10/10 (100%) | — |
+| `versioning/cargo` | 1 | full | 10/10 (100%) | — |
 | `versioning/composer` | 1 | ? | 18/18 (100%) | — |
 | `versioning/conan` | 1 | ? | 16/16 (100%) | — |
 | `versioning/conda` | 1 | ? | 15/15 (100%) | — |
@@ -287,7 +287,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/kubernetes-api` | 1 | ? | 0/7 (0%) | — |
 | `versioning/lambda-node` | 1 | ? | 6/6 (100%) | — |
 | `versioning/loose` | 1 | ? | 6/6 (100%) | — |
-| `versioning/maven` | 2 | ? | 21/23 (91%) | — |
+| `versioning/maven` | 2 | full | 21/23 (91%) | — |
 | `versioning/nixpkgs` | 1 | ? | 4/5 (80%) | — |
 | `versioning/node` | 1 | ? | 6/6 (100%) | — |
 | `versioning/npm` | 1 | full | 7/7 (100%) | — |
@@ -305,7 +305,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/rust-release-channel` | 2 | ? | 17/23 (74%) | — |
 | `versioning/same-major` | 1 | ? | 8/10 (80%) | — |
 | `versioning/semver` | 2 | full | 6/6 (100%) | — |
-| `versioning/semver-coerced` | 1 | ? | 48/53 (91%) | — |
+| `versioning/semver-coerced` | 1 | full | 48/53 (91%) | — |
 | `versioning/semver-partial` | 1 | ? | 18/18 (100%) | — |
 | `versioning/swift` | 1 | ? | 7/7 (100%) | — |
 | `versioning/ubuntu` | 1 | ? | 13/13 (100%) | — |
