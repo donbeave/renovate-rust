@@ -368,6 +368,7 @@ mod tests {
 
     // Ported: "catches errors" — modules/manager/npm/artifacts.spec.ts line 221
     #[tokio::test]
+    #[allow(clippy::permissions_set_readonly_false)]
     async fn artifact_runner_catches_errors() {
         let dir = tempdir().unwrap();
         std::fs::write(dir.path().join("package-lock.json"), "{}").unwrap();
@@ -391,7 +392,6 @@ mod tests {
         assert!(result.is_err());
 
         // Restore permissions for cleanup.
-        #[allow(clippy::permissions_set_readonly_false)]
         let mut perms = std::fs::metadata(dir.path()).unwrap().permissions();
         perms.set_readonly(false);
         std::fs::set_permissions(dir.path(), perms).unwrap();
