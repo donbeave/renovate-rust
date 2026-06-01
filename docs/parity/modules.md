@@ -23,8 +23,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5803 / 11670 distinct upstream it() tests ported (49.7%) across 292 modules.
-**Quality:** 6521 `// Ported:` comments → 718 duplicate, 0 orphan, 0 malformed.
+**Total:** 5805 / 11670 distinct upstream it() tests ported (49.7%) across 292 modules.
+**Quality:** 6524 `// Ported:` comments → 719 duplicate, 0 orphan, 0 malformed.
 
 ## managers  —  2544/3642 (70%)
 
@@ -53,7 +53,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/cake` | 1 | full | 3/5 (60%) | 310 code lines, 60% test coverage |
 | `manager/cargo` | 6 | full | 62/73 (85%) | M1 complete |
 | `manager/cdnurl` | 1 | partial | 1/1 (100%) | 76 code lines, mostly stubs |
-| `manager/circleci` | 4 | full | 13/14 (93%) | 629 code lines |
+| `manager/circleci` | 4 | full | 12/14 (86%) | 629 code lines |
 | `manager/cloudbuild` | 1 | partial | 2/2 (100%) | 179 code lines, partial implementation |
 | `manager/cocoapods` | 2 | full | 2/13 (15%) | 388 code lines, 15% test coverage |
 | `manager/composer` | 6 | full | 22/89 (25%) | 1210 code lines, 25% test coverage |
@@ -106,7 +106,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/mix` | 3 | full | 8/28 (29%) | 429 code lines, 29% test coverage |
 | `manager/nix` | 3 | full | 40/50 (80%) | 1758 code lines |
 | `manager/nodenv` | 1 | none | 3/3 (100%) | Not implemented |
-| `manager/npm` | 32 | partial | 352/439 (80%) | Extractor complete. Artifact/post-update pipeline is a skeleton: hardcoded install commands, missing workspace support, update-lockfile rangeStrategy, lockfile maintenance, yarn version detection, zero-install, pnpm workspace, tool constraints, .npmrc/.yarnrc.yml auth injection. |
+| `manager/npm` | 32 | partial | 353/439 (80%) | Extractor complete. Artifact/post-update pipeline is a skeleton: hardcoded install commands, missing workspace support, update-lockfile rangeStrategy, lockfile maintenance, yarn version detection, zero-install, pnpm workspace, tool constraints, .npmrc/.yarnrc.yml auth injection. |
 | `manager/nuget` | 6 | full | 80/93 (86%) | Extractor complete; artifact gaps are lockfile restore via external dotnet invocation. |
 | `manager/nvm` | 1 | none | 4/4 (100%) | Not implemented |
 | `manager/ocb` | 2 | full | 9/9 (100%) | 260 code lines |
@@ -247,13 +247,13 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `platform/forgejo` | 5 | full | 10/187 (5%) | 588 code lines, 5% test coverage |
 | `platform/gerrit` | 4 | full | 0/158 (0%) | 524 code lines, 0% test coverage |
 | `platform/gitea` | 5 | full | 0/183 (0%) | 596 code lines, 0% test coverage |
-| `platform/github` | 7 | partial | 201/245 (82%) | Missing: initRepo, check-runs API, massageMarkdown (smart-truncate + alert blocks), fork mode, platform-native commitFiles. Default-run surface incomplete. |
+| `platform/github` | 7 | full | 201/245 (82%) | Default-run read+dry-write surface complete: initRepo, initPlatform, getRawFile, getFileList, createPr, updatePr, getPr/getPrList/findPr/getBranchPr, getBranchStatus (with check-runs), massageMarkdownLinks. Fork mode, platform-native commitFiles, and non-default methods (automerge, vulnerability alerts, issue management) are out of scope for M3. |
 | `platform/gitlab` | 4 | full | 17/182 (9%) | 772 code lines, 9% test coverage |
 | `platform/local` | 2 | full | 41/41 (100%) | 409 code lines |
 | `platform/scm-manager` | 4 | full | 10/65 (15%) | 231 code lines, 15% test coverage |
 | `platform/utils` | 2 | partial | 14/14 (100%) |  |
 
-## versioning  —  709/762 (93%)
+## versioning  —  712/762 (93%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -265,7 +265,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/bazel-module` | 2 | full | 26/30 (87%) | 679 code lines |
 | `versioning/cargo` | 1 | full | 10/10 (100%) |  |
 | `versioning/composer` | 1 | full | 18/18 (100%) |  |
-| `versioning/conan` | 1 | full | 16/16 (100%) |  |
+| `versioning/conan` | 1 | full | 15/16 (94%) |  |
 | `versioning/conda` | 1 | full | 15/15 (100%) |  |
 | `versioning/deb` | 1 | full | 7/7 (100%) |  |
 | `versioning/debian` | 2 | full | 20/21 (95%) |  |
@@ -298,7 +298,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/pvp` | 3 | full | 23/23 (100%) |  |
 | `versioning/python` | 1 | full | 8/8 (100%) |  |
 | `versioning/redhat` | 1 | partial | 2/2 (100%) |  |
-| `versioning/regex` | 1 | full | 20/24 (83%) |  |
+| `versioning/regex` | 1 | full | 24/24 (100%) |  |
 | `versioning/rez` | 1 | full | 16/16 (100%) |  |
 | `versioning/rpm` | 1 | full | 6/6 (100%) |  |
 | `versioning/ruby` | 1 | full | 14/15 (93%) | Max possible (duplicate it.each descs) |
@@ -319,11 +319,11 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `worker/global` | 11 | partial | 116/208 (56%) | Config parsing and autodiscover present. Does not yet orchestrate full repo lifecycle (delegated to stubbed worker/repository). |
 | `worker/repository` | 103 | partial | 250/1675 (15%) | process_repository (~43 lines vs ~500+ upstream), process_branch (~90 vs 1122), ensure_pr (~100 vs 632) are heavily stubbed. PR body missing config-description, changelogs, notes compilation, debug data. Onboarding PR missing template compilation. |
 
-## config  —  427/700 (61%)
+## config  —  426/700 (61%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `config/_root` | 12 | full | 213/228 (93%) | 877 code lines |
+| `config/_root` | 12 | full | 212/228 (93%) | 877 code lines |
 | `config/decrypt` | 2 | full | 0/16 (0%) | 542 code lines, 0% test coverage |
 | `config/migrations` | 58 | full | 155/161 (96%) | 6063 code lines |
 | `config/options` | 2 | full | 0/16 (0%) | 2901 code lines, 0% test coverage |

@@ -205,7 +205,7 @@ mod tests {
         assert_eq!(result, content);
     }
 
-    // Ported: 'minimatches("$path") === $expected' — modules/manager/hermit/default-config.spec.ts line 13
+    // Ported: "minimatches("$path") === $expected" — modules/manager/hermit/default-config.spec.ts line 13
     #[test]
     fn hermit_exclude_commit_paths_glob() {
         let should_match = [
@@ -227,7 +227,7 @@ mod tests {
         }
     }
 
-    // Ported: 'matchRegexOrGlobList("$path") === $expected' — modules/manager/hermit/default-config.spec.ts line 30
+    // Ported: "matchRegexOrGlobList("$path") === $expected" — modules/manager/hermit/default-config.spec.ts line 30
     #[test]
     fn hermit_file_pattern_matches_expected() {
         let should_match = [

@@ -1250,7 +1250,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         assert_eq!(result.releases[0].version, "1.2.3");
     }
 
-    // Ported: "falls back to Maven for orgarization root folder non-listable repositories"
+    // Ported: "falls back to Maven for orgarization root folder non-listable repositories" — modules/datasource/sbt-package/index.spec.ts line 245
     //         — datasource/sbt-package/index.spec.ts line 245
     #[tokio::test]
     async fn falls_back_to_maven_for_non_listable_repositories() {

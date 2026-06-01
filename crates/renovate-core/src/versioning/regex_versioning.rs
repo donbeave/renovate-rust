@@ -340,7 +340,7 @@ mod tests {
         assert!(re.is_valid("alpine"));
     }
 
-    // Ported: 'on invalid regex: "$regex"' — versioning/regex/index.spec.ts line 25
+    // Ported: "on invalid regex: "$regex"" — versioning/regex/index.spec.ts line 25
     #[test]
     fn regex_invalid_patterns() {
         // Unclosed paren
@@ -350,7 +350,7 @@ mod tests {
         assert!(RegexVersioning::new(r"^(?<major>\d+)?(?<=y)x$").is_err());
     }
 
-    // Ported: 'isValid("$version") === $expected' — versioning/regex/index.spec.ts line 35
+    // Ported: "isValid("$version") === $expected" — versioning/regex/index.spec.ts line 35
     #[test]
     fn regex_is_valid() {
         let re = semver_re();
@@ -368,7 +368,7 @@ mod tests {
         assert!(!re.is_valid("1.2a2.3"));
     }
 
-    // Ported: 'isCompatible("$version") === $expected' — versioning/regex/index.spec.ts line 58
+    // Ported: "isCompatible("$version") === $expected" — versioning/regex/index.spec.ts line 58
     #[test]
     fn regex_is_compatible() {
         let re = semver_re();
@@ -383,7 +383,7 @@ mod tests {
         assert!(!re.is_compatible("1.2.3-foo", "2.3.4-bar"));
     }
 
-    // Ported: 'isSingleVersion("$version") === $expected' — versioning/regex/index.spec.ts line 83
+    // Ported: "isSingleVersion("$version") === $expected" — versioning/regex/index.spec.ts line 83
     #[test]
     fn regex_is_single_version() {
         let re = semver_re();
@@ -391,7 +391,7 @@ mod tests {
         assert!(!re.is_valid("1"));
     }
 
-    // Ported: 'isStable("$version") === $expected' — versioning/regex/index.spec.ts line 104
+    // Ported: "isStable("$version") === $expected" — versioning/regex/index.spec.ts line 104
     #[test]
     fn regex_is_stable() {
         let re = semver_re();
@@ -401,7 +401,7 @@ mod tests {
         assert!(!re.is_stable("1.2.3b3-foo")); // prerelease + compatibility
     }
 
-    // Ported: 'isVersion("$version") === $expected' — versioning/regex/index.spec.ts line 115
+    // Ported: "isVersion("$version") === $expected" — versioning/regex/index.spec.ts line 115
     #[test]
     fn regex_is_version() {
         let re = semver_re();
@@ -410,7 +410,7 @@ mod tests {
         assert!(!re.is_valid("1"));
     }
 
-    // Ported: 'getMajor, getMinor, getPatch for "$version"' — versioning/regex/index.spec.ts line 135
+    // Ported: "getMajor, getMinor, getPatch for "$version"" — versioning/regex/index.spec.ts line 135
     #[test]
     fn regex_major_minor_patch() {
         let re = semver_re();
@@ -427,7 +427,7 @@ mod tests {
         assert_eq!(re.get_patch("1.2.3a1-foo"), Some(3));
     }
 
-    // Ported: 'equals($a, $b) === $expected' — versioning/regex/index.spec.ts line 149
+    // Ported: "equals($a, $b) === $expected" — versioning/regex/index.spec.ts line 149
     #[test]
     fn regex_equals() {
         let re = semver_re();
@@ -444,7 +444,7 @@ mod tests {
         assert!(!re.equals("1.2.3a1", "1.2.3a2"));
     }
 
-    // Ported: 'isGreaterThan("$a", "$b") === $expected' — versioning/regex/index.spec.ts line 171
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/regex/index.spec.ts line 171
     #[test]
     fn regex_is_greater_than() {
         let re = semver_re();
@@ -462,7 +462,7 @@ mod tests {
         assert!(!re.is_greater_than("3.0.0b2", "3.0.0")); // pre-release < release
     }
 
-    // Ported: 'isLessThanRange($version, $range) === $expected' — versioning/regex/index.spec.ts line 204
+    // Ported: "isLessThanRange($version, $range) === $expected" — versioning/regex/index.spec.ts line 204
     #[test]
     fn regex_is_less_than_range() {
         let re = semver_re();
@@ -473,7 +473,7 @@ mod tests {
         assert!(!re.is_less_than_range("1.2.4", "1.2.3")); // greater → not less
     }
 
-    // Ported: 'getSatisfyingVersion($versions, "$range") === $expected' — versioning/regex/index.spec.ts line 253
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/regex/index.spec.ts line 253
     #[test]
     fn regex_get_satisfying_version() {
         let re = semver_re();
@@ -491,7 +491,7 @@ mod tests {
         assert_eq!(re.get_satisfying_version(&["1.2.3", "1.2.4"], "!@#"), None);
     }
 
-    // Ported: 'minSatisfyingVersion($versions, "$range") === "$expected"' — versioning/regex/index.spec.ts line 267
+    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — versioning/regex/index.spec.ts line 267
     #[test]
     fn regex_min_satisfying_version() {
         let re = semver_re();
@@ -533,7 +533,7 @@ mod tests {
         assert_eq!(versions, vec!["1.2.3a1", "1.2.3", "1.3.4", "2.0.1"]);
     }
 
-    // Ported: 'matches("$version", "$range") === $expected' — versioning/regex/index.spec.ts line 304
+    // Ported: "matches("$version", "$range") === $expected" — versioning/regex/index.spec.ts line 304
     #[test]
     fn regex_matches() {
         let re = semver_re();
@@ -544,7 +544,7 @@ mod tests {
         assert!(!re.matches_range("1.2.4", "1.2.3"));
     }
 
-    // Ported: 'isValid("$version") === $expected' (4-part) — versioning/regex/index.spec.ts line 365
+    // Ported: "isValid(\"$version\") === $expected" — versioning/regex/index.spec.ts line 365
     #[test]
     fn regex_build_revision_is_valid() {
         let re = RegexVersioning::new(
@@ -555,7 +555,7 @@ mod tests {
         assert!(re.is_valid("12.7.0-debian-10-r100"));
     }
 
-    // Ported: 'isCompatible("$version") === $expected' (4-part) — versioning/regex/index.spec.ts line 373
+    // Ported: "isCompatible(\"$version\") === $expected" — versioning/regex/index.spec.ts line 373
     #[test]
     fn regex_build_revision_is_compatible() {
         let re = RegexVersioning::new(
@@ -565,7 +565,7 @@ mod tests {
         assert!(re.is_compatible("12.7.0-debian-10-r69", "12.7.0-debian-10-r100"));
     }
 
-    // Ported: 'isGreaterThan("$a", "$b") === $expected' (4-part) — versioning/regex/index.spec.ts line 384
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/regex/index.spec.ts line 384
     #[test]
     fn regex_build_revision_is_greater_than() {
         let re = RegexVersioning::new(
@@ -576,7 +576,7 @@ mod tests {
         assert!(re.is_greater_than("12.7.0-debian-10-r169", "12.7.0-debian-10-r100"));
     }
 
-    // Ported: 'matches("$version", "$range") === $expected' (4-part) — versioning/regex/index.spec.ts line 392
+    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/regex/index.spec.ts line 392
     #[test]
     fn regex_build_revision_matches() {
         let re = RegexVersioning::new(

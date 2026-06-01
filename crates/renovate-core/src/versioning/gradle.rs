@@ -931,7 +931,7 @@ mod tests {
         assert!(!is_stable("1.0-dev"));
     }
 
-    // Ported: '"$input" is represented as [$major, $minor, $patch]' — versioning/gradle/index.spec.ts line 216
+    // Ported: ""$input" is represented as [$major, $minor, $patch]" — versioning/gradle/index.spec.ts line 216
     #[test]
     fn gradle_major_minor_patch() {
         assert_eq!(get_major(""), None);
@@ -975,7 +975,7 @@ mod tests {
         assert_eq!(get_patch("1-rc42-1"), Some(0));
     }
 
-    // Ported: 'matches("$version", "$range") === $expected' — versioning/gradle/index.spec.ts line 239
+    // Ported: "matches("$version", "$range") === $expected" — versioning/gradle/index.spec.ts line 239
     #[test]
     fn gradle_matches() {
         assert!(!matches_range("1", "[[]]"));
@@ -1001,13 +1001,13 @@ mod tests {
         assert!(!matches_range("1.2.3", "[1.2.4]"));
     }
 
-    // Ported: 'isGreaterThan("$a", "$b") === $expected' — versioning/gradle/index.spec.ts line 271
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/gradle/index.spec.ts line 271
     #[test]
     fn gradle_is_greater_than() {
         assert!(is_greater_than("1.1", "1"));
     }
 
-    // Ported: 'minSatisfyingVersion($versions, "$range") === $expected' — versioning/gradle/index.spec.ts line 280
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/gradle/index.spec.ts line 280
     #[test]
     fn gradle_min_satisfying_version() {
         assert_eq!(
@@ -1016,7 +1016,7 @@ mod tests {
         );
     }
 
-    // Ported: 'getSatisfyingVersion($versions, "$range") === $expected' — versioning/gradle/index.spec.ts line 292
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/gradle/index.spec.ts line 292
     #[test]
     fn gradle_get_satisfying_version() {
         assert_eq!(
@@ -1025,7 +1025,7 @@ mod tests {
         );
     }
 
-    // Ported: 'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected' — versioning/gradle/index.spec.ts line 304
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/gradle/index.spec.ts line 304
     #[test]
     fn gradle_get_new_value() {
         // Plain version → returns new version.

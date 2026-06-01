@@ -248,7 +248,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "0.28");
     }
 
-    // Ported: "phase" — cpanfile/extract.spec.ts line 208 (parse modules with phases)
+    // Ported: "phase" — cpanfile/extract.spec.ts line 208
     #[test]
     fn extracts_test_phase_block() {
         let content = r#"
@@ -262,7 +262,7 @@ on 'test' => sub {
         assert_eq!(deps[0].phase, CpanDepPhase::Test);
     }
 
-    // Ported: "$shortcut" — cpanfile/extract.spec.ts line 297 (test.each table covers
+    // Ported: "$shortcut" — cpanfile/extract.spec.ts line 297
     // configure_requires / build_requires / test_requires / author_requires)
     #[test]
     fn extracts_phase_shortcut_keywords() {
@@ -346,7 +346,7 @@ on 'test' => sub {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "configure phase" — cpanfile/extract.spec.ts line 164 (parse modules with phases)
+    // Ported: "configure phase" — cpanfile/extract.spec.ts line 164
     #[test]
     fn parse_phase_configure() {
         let content = "on 'configure' => sub {\n  requires \"ExtUtils::MakeMaker\" => \"0\";\n};\n";
@@ -357,7 +357,7 @@ on 'test' => sub {
         assert_eq!(deps[0].phase, CpanDepPhase::Configure);
     }
 
-    // Ported: "build phase" — cpanfile/extract.spec.ts line 186 (parse modules with phases)
+    // Ported: "build phase" — cpanfile/extract.spec.ts line 186
     #[test]
     fn parse_phase_build_bareword() {
         // Bareword form `on build => sub {` (no quotes around phase name).
@@ -369,7 +369,7 @@ on 'test' => sub {
         assert_eq!(deps[0].phase, CpanDepPhase::Build);
     }
 
-    // Ported: "runtime phase" — cpanfile/extract.spec.ts line 237 (parse modules with phases)
+    // Ported: "runtime phase" — cpanfile/extract.spec.ts line 237
     #[test]
     fn parse_phase_runtime_bareword_suggests() {
         let content =
@@ -382,7 +382,7 @@ on 'test' => sub {
         }
     }
 
-    // Ported: "develop phase" — cpanfile/extract.spec.ts line 266 (parse modules with phases)
+    // Ported: "develop phase" — cpanfile/extract.spec.ts line 266
     #[test]
     fn parse_phase_develop() {
         let content = "on 'develop' => sub {\n  requires \"IPC::Open3\" => \"0\";\n  requires \"Term::Table\" => \"0.013\";\n};\n";
@@ -396,7 +396,7 @@ on 'test' => sub {
         assert_eq!(deps[1].phase, CpanDepPhase::Develop);
     }
 
-    // Ported: "$version" — cpanfile/extract.spec.ts line 12 (parse perl)
+    // Ported: "$version" — cpanfile/extract.spec.ts line 12
     #[test]
     fn parse_perl_core_dependency() {
         for (version, expected) in [

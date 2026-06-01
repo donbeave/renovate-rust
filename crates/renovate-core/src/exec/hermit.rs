@@ -81,7 +81,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: '("$dir") === $expected (hermit: $hermitLocation)'
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 37
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_same_dir() {
@@ -93,7 +93,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
-    // Ported: '("$dir") === $expected (hermit: $hermitLocation)'
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 37
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_nested_dir() {
@@ -107,7 +107,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
-    // Ported: '("$dir") === $expected (hermit: $hermitLocation)'
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 37
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_parent_dir() {
@@ -121,7 +121,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
-    // Ported: "should return hermit environment variables when hermit env returns successfully"
+    // Ported: "should return hermit environment variables when hermit env returns successfully" — util/exec/hermit.spec.ts line 62
     //         — util/exec/hermit.spec.ts line 62
     #[test]
     fn parse_hermit_env_output_parses_valid_lines() {
@@ -135,7 +135,7 @@ mod tests {
         assert_eq!(envs.get("PATH").unwrap(), "/usr/src/app/repository-a/bin");
     }
 
-    // Ported: "should return hermit environment variables when hermit env returns successfully"
+    // Ported: "should return hermit environment variables when hermit env returns successfully" — util/exec/hermit.spec.ts line 62
     //         — util/exec/hermit.spec.ts line 62
     #[test]
     fn parse_hermit_env_output_skips_comments_and_empty_lines() {
@@ -146,7 +146,7 @@ mod tests {
         assert_eq!(envs.get("BAZ").unwrap(), "qux");
     }
 
-    // Ported: "should return hermit environment variables when hermit env returns successfully"
+    // Ported: "should return hermit environment variables when hermit env returns successfully" — util/exec/hermit.spec.ts line 62
     //         — util/exec/hermit.spec.ts line 62
     #[test]
     fn parse_hermit_env_output_empty() {

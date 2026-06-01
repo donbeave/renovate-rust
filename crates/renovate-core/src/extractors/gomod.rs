@@ -2062,7 +2062,7 @@ require (
         assert_eq!(res, expected);
     }
 
-    // Ported: "correctly identifies and distinguishes toolchain updates vs go version updates when both are present"
+    // Ported: "correctly identifies and distinguishes toolchain updates vs go version updates when both are present" — modules/manager/gomod/artifacts-extra.spec.ts line 215
     //         — modules/manager/gomod/artifacts-extra.spec.ts line 215
     #[test]
     fn get_extra_deps_notice_both_go_and_toolchain() {
@@ -2109,7 +2109,7 @@ require (
         assert_eq!(res, expected);
     }
 
-    // Ported: "correctly handles the introduction of a toolchain directive by not indicating a change"
+    // Ported: "correctly handles the introduction of a toolchain directive by not indicating a change" — modules/manager/gomod/artifacts-extra.spec.ts line 266
     //         — modules/manager/gomod/artifacts-extra.spec.ts line 266
     #[test]
     fn get_extra_deps_notice_new_toolchain_directive() {

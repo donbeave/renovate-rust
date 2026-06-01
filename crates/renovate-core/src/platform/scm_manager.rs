@@ -69,7 +69,7 @@ pub fn match_pr_state(pr_state: &str, filter: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "should correctly map the scm-manager type of a PR with the $scmPrState to the Renovate PR type"
+    // Ported: "should correctly map the scm-manager type of a PR with the $scmPrState to the Renovate PR type" — modules/platform/scm-manager/mapper.spec.ts line 12
     //         — modules/platform/scm-manager/mapper.spec.ts line 5
     #[test]
     fn map_pr_state_all_cases() {
@@ -79,7 +79,7 @@ mod tests {
         assert_eq!(map_pr_state(ScmPrState::Merged), ("merged", false));
     }
 
-    // Ported: "map merge strategy $strategy on PR merge method $method"
+    // Ported: "map merge strategy $strategy on PR merge method $method" — modules/platform/scm-manager/utils.spec.ts line 25
     //         — modules/platform/scm-manager/utils.spec.ts line 16
     #[test]
     fn get_scm_merge_method_all_cases() {
@@ -104,7 +104,7 @@ mod tests {
         assert_eq!(smart_links("](../pull/"), "](pulls/");
     }
 
-    // Ported: "match scm pr state $pr.state to renovate pr state $state"
+    // Ported: "match scm pr state $pr.state to renovate pr state $state" — modules/platform/scm-manager/utils.spec.ts line 76
     //         — modules/platform/scm-manager/utils.spec.ts line 61
     #[test]
     fn match_pr_state_all_cases() {

@@ -3288,7 +3288,7 @@ mod tests {
         );
     }
 
-    // Ported: 'validates enabled managers for %s' (it.each) — config/validation.spec.ts line 497
+    // Ported: "validates enabled managers for %s" — config/validation.spec.ts line 497
     #[test]
     fn validate_config_allows_empty_configuration() {
         let result = validate_config_for_source("repo", &json!({}));
@@ -3296,7 +3296,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: 'errors if included not supported enabled managers for %s' (it.each) — config/validation.spec.ts line 516
+    // Ported: "errors if included not supported enabled managers for %s" — config/validation.spec.ts line 516
     #[test]
     fn validate_config_errors_for_unsupported_enabled_managers() {
         for config in [
@@ -4910,7 +4910,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: 'errors if hostRules.headers is defined but allowedHeaders is not' — config/validation.spec.ts line 2027
+    // Ported: "errors if hostRules.headers is defined but allowedHeaders is not" — config/validation.spec.ts line 2027
     #[test]
     fn validate_config_errors_for_headers_without_allowed_headers() {
         let result = validate_config_for_source(

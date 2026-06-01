@@ -3294,7 +3294,7 @@ mod tests {
 
     // ── is_date_expired ───────────────────────────────────────────────────────
 
-    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected"
+    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — util/github/graphql/util.spec.ts line 46
     //         — util/github/graphql/util.spec.ts line 35
     #[test]
     fn is_date_expired_hourly_cases() {

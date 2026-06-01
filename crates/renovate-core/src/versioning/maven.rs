@@ -1345,7 +1345,7 @@ mod tests {
         assert!(is_stable("Hoxton.SR1"));
     }
 
-    // Ported: '"$input" is represented as [$major, $minor, $patch]' — versioning/maven/index.spec.ts line 89
+    // Ported: ""$input" is represented as [$major, $minor, $patch]" — versioning/maven/index.spec.ts line 89
     #[test]
     #[allow(clippy::type_complexity)]
     fn get_major_minor_patch_matches_renovate_maven_index_spec() {
@@ -1368,7 +1368,7 @@ mod tests {
         }
     }
 
-    // Ported: 'matches("$version", "$range") === $expected' — versioning/maven/index.spec.ts line 111
+    // Ported: "matches("$version", "$range") === $expected" — versioning/maven/index.spec.ts line 111
     #[test]
     fn matches_range_matches_renovate_maven_index_spec() {
         let cases: &[(&str, &str, bool)] = &[
@@ -1420,13 +1420,13 @@ mod tests {
         }
     }
 
-    // Ported: 'isGreaterThan("$a", "$b") === $expected' — versioning/maven/index.spec.ts line 158
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/maven/index.spec.ts line 158
     #[test]
     fn is_greater_than_matches_renovate_maven_index_spec() {
         assert!(is_greater_than("1.1", "1"));
     }
 
-    // Ported: 'getSatisfyingVersion($versions, "$range") === $expected' — versioning/maven/index.spec.ts line 165
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/maven/index.spec.ts line 165
     #[test]
     fn get_satisfying_version_matches_renovate_maven_index_spec() {
         assert_eq!(get_satisfying_version(&["1"], "1"), Some("1"));
@@ -1439,7 +1439,7 @@ mod tests {
         );
     }
 
-    // Ported: 'minSatisfyingVersion($versions, "$range") === $expected' — versioning/maven/index.spec.ts line 179
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/maven/index.spec.ts line 179
     #[test]
     fn min_satisfying_version_matches_renovate_maven_index_spec() {
         assert_eq!(get_satisfying_version(&["1"], "1"), Some("1"));
@@ -1452,7 +1452,7 @@ mod tests {
         );
     }
 
-    // Ported: 'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected' — versioning/maven/index.spec.ts line 193
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/maven/index.spec.ts line 193
     #[test]
     fn get_new_value_matches_renovate_maven_index_spec() {
         let cases: &[(&str, Option<&str>, &str, &str)] = &[
@@ -1482,7 +1482,7 @@ mod tests {
         }
     }
 
-    // Ported: 'matches("$version", "${range}") === $expected' — versioning/maven/index.spec.ts line 228
+    // Ported: "matches("$version", "${range}") === $expected" — versioning/maven/index.spec.ts line 228
     #[test]
     fn matches_jenkins_range_excl_matches_renovate_maven_index_spec() {
         let range = "[2.164.0,2.165.0)";
@@ -1494,7 +1494,7 @@ mod tests {
         assert!(!matches_range("2.164.0-SNAPSHOT", range));
     }
 
-    // Ported: 'matches("$version", "${range}") === $expected' — versioning/maven/index.spec.ts line 247
+    // Ported: "matches("$version", "${range}") === $expected" — versioning/maven/index.spec.ts line 247
     #[test]
     fn matches_jenkins_range_incl_matches_renovate_maven_index_spec() {
         let range = "[2.164.0,2.165.0]";
@@ -1506,7 +1506,7 @@ mod tests {
         assert!(!matches_range("2.164.0-SNAPSHOT", range));
     }
 
-    // Ported: 'matches("$version", "${range}") === $expected' — versioning/maven/index.spec.ts line 266
+    // Ported: "matches("$version", "${range}") === $expected" — versioning/maven/index.spec.ts line 266
     #[test]
     fn matches_jenkins_range_lt_matches_renovate_maven_index_spec() {
         let range = "(,2.164.0)";

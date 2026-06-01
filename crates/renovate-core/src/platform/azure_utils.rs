@@ -201,7 +201,7 @@ mod tests {
         assert_eq!(result, "");
     }
 
-    // Ported: "should combine valid genre and name with slash"
+    // Ported: "should combine valid genre and name with slash" — modules/platform/azure/util.spec.ts line 21
     //         — modules/platform/azure/util.spec.ts line 21
     #[test]
     fn git_status_context_combined_name_genre_and_name() {
@@ -209,7 +209,7 @@ mod tests {
         assert_eq!(result, "my-genre/status-name");
     }
 
-    // Ported: "should combine valid empty genre and name without a slash"
+    // Ported: "should combine valid empty genre and name without a slash" — modules/platform/azure/util.spec.ts line 29
     //         — modules/platform/azure/util.spec.ts line 29
     #[test]
     fn git_status_context_combined_name_undefined_genre() {
@@ -223,7 +223,7 @@ mod tests {
         assert!(get_git_status_context_from_combined_name("").is_none());
     }
 
-    // Ported: "should parse valid genre and name with slash"
+    // Ported: "should parse valid genre and name with slash" — modules/platform/azure/util.spec.ts line 44
     //         — modules/platform/azure/util.spec.ts line 44
     #[test]
     fn git_status_context_from_combined_name_slash() {
@@ -234,7 +234,7 @@ mod tests {
         );
     }
 
-    // Ported: "should parse valid genre and name with multiple slashes"
+    // Ported: "should parse valid genre and name with multiple slashes" — modules/platform/azure/util.spec.ts line 54
     //         — modules/platform/azure/util.spec.ts line 54
     #[test]
     fn git_status_context_from_combined_name_multiple_slashes() {
@@ -248,7 +248,7 @@ mod tests {
         );
     }
 
-    // Ported: "should parse valid empty genre and name without a slash"
+    // Ported: "should parse valid empty genre and name without a slash" — modules/platform/azure/util.spec.ts line 64
     //         — modules/platform/azure/util.spec.ts line 64
     #[test]
     fn git_status_context_from_combined_name_no_slash() {

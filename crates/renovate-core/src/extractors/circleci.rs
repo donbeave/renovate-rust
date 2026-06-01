@@ -644,7 +644,7 @@ workflows:
         assert_eq!(get_range_strategy("auto"), "pin");
     }
 
-    // Ported: 'matchRegexOrGlobList("$path") === $expected' — modules/manager/circleci/index.spec.ts line 6
+    // Ported: "matchRegexOrGlobList("$path") === $expected" — modules/manager/circleci/index.spec.ts line 6
     #[test]
     fn circleci_file_pattern_matches_expected_paths() {
         let should_match = [

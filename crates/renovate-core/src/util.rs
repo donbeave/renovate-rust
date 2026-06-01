@@ -5706,7 +5706,7 @@ mod tests {
         assert_eq!(coerce_string(None, Some("foo")), "foo");
     }
 
-    // Ported: '"$input" -> "$expected"' — util/string.spec.ts line 51
+    // Ported: ""$input" -> "$expected"" — util/string.spec.ts line 51
     #[test]
     fn test_strip_templates() {
         assert_eq!(
@@ -5977,7 +5977,7 @@ mod tests {
         assert_eq!(result["nested"]["password"], "***********");
     }
 
-    // Ported: 'sanitizeValue("$input") == "$output"' — logger/utils.spec.ts line 11
+    // Ported: "sanitizeValue("$input") == "$output"" — logger/utils.spec.ts line 11
     #[test]
     fn test_sanitize_urls() {
         let cases = [
@@ -6379,7 +6379,7 @@ mod tests {
         assert_eq!(npm.total_ms, 700);
     }
 
-    // Ported: "wraps a function" — util/stats.spec.ts line 95 (LookupStats)
+    // Ported: "wraps a function" — util/stats.spec.ts line 95
     #[tokio::test]
     async fn test_lookup_stats_wraps_function() {
         let mut stats = LookupStats::new();
@@ -6393,7 +6393,7 @@ mod tests {
         assert!(npm.total_ms >= 0, "duration must be non-negative");
     }
 
-    // Ported: "wraps a function" — util/stats.spec.ts line 308 (GetDatasourceReleasesStats)
+    // Ported: "wraps a function" — util/stats.spec.ts line 308
     #[tokio::test]
     async fn test_get_datasource_releases_stats_wraps_function() {
         let mut stats = GetDatasourceReleasesStats::new();
@@ -6410,7 +6410,7 @@ mod tests {
         assert_eq!(npm.count, 1);
     }
 
-    // Ported: "wraps get function" — util/stats.spec.ts line 612 (PackageCacheStats)
+    // Ported: "wraps get function" — util/stats.spec.ts line 612
     #[tokio::test]
     async fn test_package_cache_stats_wraps_get_function() {
         let mut stats = PackageCacheStats::new();
@@ -6420,7 +6420,7 @@ mod tests {
         assert_eq!(gets.count, 1);
     }
 
-    // Ported: "wraps set function" — util/stats.spec.ts line 625 (PackageCacheStats)
+    // Ported: "wraps set function" — util/stats.spec.ts line 625
     #[tokio::test]
     async fn test_package_cache_stats_wraps_set_function() {
         let mut stats = PackageCacheStats::new();
@@ -8737,7 +8737,7 @@ mod tests {
     // slugify_url
     // -----------------------------------------------------------------------
 
-    // Ported: 'slugifyUrl("$url") === $expected' — workers/repository/update/pr/changelog/common.spec.ts line 5
+    // Ported: "slugifyUrl("$url") === $expected" — workers/repository/update/pr/changelog/common.spec.ts line 5
     #[test]
     fn test_slugify_url() {
         let cases: &[(&str, &str)] = &[
@@ -8910,7 +8910,7 @@ mod tests {
     // detect_platform
     // -----------------------------------------------------------------------
 
-    // Ported: '("$url") === $hostType' — util/common.spec.ts line 46
+    // Ported: "("$url") === $hostType" — util/common.spec.ts line 46
     #[test]
     fn test_detect_platform() {
         let cases: &[(&str, Option<&str>)] = &[
@@ -10119,7 +10119,7 @@ dep1 = "^1.0.0"
 
     // ── parse_repo_org ────────────────────────────────────────────────────────
 
-    // Ported: "should generate correct topLevelOrg/parentOrg with multiple levels"
+    // Ported: "should generate correct topLevelOrg/parentOrg with multiple levels" — workers/global/index.spec.ts line 56
     //         — workers/global/index.spec.ts line 56
     #[test]
     fn parse_repo_org_multiple_levels() {
@@ -10128,7 +10128,7 @@ dep1 = "^1.0.0"
         assert_eq!(parent, "a/b/c");
     }
 
-    // Ported: "should generate correct topLevelOrg/parentOrg with two levels"
+    // Ported: "should generate correct topLevelOrg/parentOrg with two levels" — workers/global/index.spec.ts line 67
     //         — workers/global/index.spec.ts line 67
     #[test]
     fn parse_repo_org_two_levels() {

@@ -1125,7 +1125,7 @@ mod registry_tests {
         assert!(dep.source_directory.is_none());
     }
 
-    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl"
+    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl" — modules/datasource/metadata.spec.ts line 140
     //         — modules/datasource/metadata.spec.ts line 134
     // Note: only GitLab cases tested here; "somehost.com" sub-path truncation is a known
     // limitation of the current massage_github_url implementation (5-segment limit).
@@ -1390,7 +1390,7 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should handle parsing/converting of GitHub sourceUrls with http and www correctly"
+    // Ported: "Should handle parsing/converting of GitHub sourceUrls with http and www correctly" — modules/datasource/metadata.spec.ts line 319
     //         — modules/datasource/metadata.spec.ts line 319
     #[test]
     fn add_metadata_github_http_www_url() {
@@ -1563,7 +1563,7 @@ mod registry_tests {
         assert_eq!(res.releases[0].version, "2.0.0");
     }
 
-    // Ported: "should allow constraintsVersioning to override the datasource's default versioning"
+    // Ported: "should allow constraintsVersioning to override the datasource's default versioning" — modules/datasource/common.spec.ts line 325
     //         — modules/datasource/common.spec.ts line 325
     // constraintsVersioning.rubygems = 'semver-coerced' → '^1.3' is valid semver
     #[test]

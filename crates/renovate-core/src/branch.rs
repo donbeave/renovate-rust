@@ -2138,7 +2138,7 @@ mod tests {
         assert!(parse_semantic_commit_message("test").is_none());
     }
 
-    // Ported: 'given subject $subject and prefix $prefix as arguments, returns $result' — workers/repository/model/custom-commit-message.spec.ts line 5
+    // Ported: "given subject $subject and prefix $prefix as arguments, returns $result" — workers/repository/model/custom-commit-message.spec.ts line 5
     #[test]
     fn custom_commit_message_formats_correctly() {
         assert_eq!(custom_commit_message_title("", "test"), "Test");

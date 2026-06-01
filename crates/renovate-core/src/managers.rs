@@ -2186,8 +2186,8 @@ mod tests {
     }
 
     // Ported: "gets something" — modules/manager/index.spec.ts line 38
-    // Ported: "returns true" — modules/manager/index.spec.ts line 252 (isKnownManager)
-    // Ported: "returns false" — modules/manager/index.spec.ts line 258 (isKnownManager)
+    // Ported: "returns true" — modules/manager/index.spec.ts line 252
+    // Ported: "returns false" — modules/manager/index.spec.ts line 258
     #[test]
     fn manager_registry_manager_exists() {
         assert!(manager_exists("dockerfile"));

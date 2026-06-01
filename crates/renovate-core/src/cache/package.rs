@@ -1325,7 +1325,7 @@ mod tests {
 
     // ── get_ttl_override ─────────────────────────────────────────────────
 
-    // Ported: "returns undefined when no cacheTtlOverride config exists"
+    // Ported: "returns undefined when no cacheTtlOverride config exists" — util/cache/package/ttl.spec.ts line 12
     //         — util/cache/package/ttl.spec.ts line 12
     #[test]
     fn get_ttl_override_returns_none_when_empty() {
@@ -1333,7 +1333,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), None);
     }
 
-    // Ported: "returns exact match when namespace exists in config"
+    // Ported: "returns exact match when namespace exists in config" — util/cache/package/ttl.spec.ts line 30
     //         — util/cache/package/ttl.spec.ts line 30
     #[test]
     fn get_ttl_override_returns_exact_match() {
@@ -1358,7 +1358,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "changelog-github-notes@v2"), None);
     }
 
-    // Ported: "matches wildcard pattern for all namespaces"
+    // Ported: "matches wildcard pattern for all namespaces" — util/cache/package/ttl.spec.ts line 88
     //         — util/cache/package/ttl.spec.ts line 88
     #[test]
     fn get_ttl_override_matches_wildcard_all() {
@@ -1374,7 +1374,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "any-namespace"), Some(45));
     }
 
-    // Ported: "matches complex glob patterns with braces"
+    // Ported: "matches complex glob patterns with braces" — util/cache/package/ttl.spec.ts line 108
     //         — util/cache/package/ttl.spec.ts line 108
     #[test]
     fn get_ttl_override_matches_brace_glob() {
@@ -1399,7 +1399,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "changelog-github-notes@v2"), None);
     }
 
-    // Ported: "prioritizes exact match over glob patterns"
+    // Ported: "prioritizes exact match over glob patterns" — util/cache/package/ttl.spec.ts line 179
     //         — util/cache/package/ttl.spec.ts line 179
     #[test]
     fn get_ttl_override_exact_beats_glob() {
@@ -1416,7 +1416,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-docker"), Some(90));
     }
 
-    // Ported: "returns longest matching pattern when multiple patterns apply"
+    // Ported: "returns longest matching pattern when multiple patterns apply" — util/cache/package/ttl.spec.ts line 195
     //         — util/cache/package/ttl.spec.ts line 195
     #[test]
     fn get_ttl_override_longest_pattern_wins() {

@@ -39,7 +39,7 @@ pub fn get_new_branch_name(branch_name: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: '("$repoId", "$endpoint") === $fingerprint' — modules/platform/util.spec.ts line 8
+    // Ported: "("$repoId", "$endpoint") === $fingerprint" — modules/platform/util.spec.ts line 8
     #[test]
     fn platform_util_repo_fingerprint() {
         assert_eq!(
