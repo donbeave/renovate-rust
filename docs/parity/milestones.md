@@ -10,7 +10,7 @@ later one. This is the project's prioritization tool.
 
 ---
 
-## M0 — Honest baseline (DONE when this file lands)
+## M0 — Honest baseline ✅
 
 Goal: the ledger reflects reality and the harness can run on one trivial
 fixture.
@@ -20,10 +20,10 @@ Acceptance:
 - [x] `scripts/parity_coverage.py report` produces a single, deduped,
       module-grouped coverage number.
 - [x] `docs/parity/modules.md` is the only ledger the agents maintain.
-- [ ] `docs/parity/renovate-test-map.md` and its per-spec detail files carry
-      a deprecation banner pointing at `modules.md`.
-- [ ] At least one `tests/parity/fixtures/` repo exists and the differential
-      harness runs (even if it diffs against a recorded expected output).
+- [x] `docs/parity/renovate-test-map.md` carries a deprecation banner pointing
+      at `modules.md`.
+- [x] `tests/parity/fixtures/` repos exist and the differential harness runs
+      (48 fixtures pass).
 
 ---
 
