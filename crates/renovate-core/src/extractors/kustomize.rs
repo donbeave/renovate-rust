@@ -1010,6 +1010,66 @@ images:
         );
     }
 
+    // Ported: "should return null for image with name only (no newTag/newName/digest)" — kustomize/extract.spec.ts line 270
+    #[test]
+    fn image_with_name_only_returns_no_deps() {
+        let deps = extract(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+  - name: foo
+"#,
+        );
+        let images: Vec<_> = deps
+            .into_iter()
+            .filter_map(|d| match d {
+                KustomizeDep::Image(img) => Some(img),
+                _ => None,
+            })
+            .collect();
+        assert!(images.is_empty());
+    }
+
+    // Ported: "extracts from newTag" — kustomize/extract.spec.ts line 680
+    #[test]
+    fn extracts_from_new_tag() {
+        let digest = "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c";
+        let content = format!(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+  - name: postgres
+    newTag: "11"
+  - name: postgres
+    newTag: 11@{digest}
+  - name: postgres
+    newTag: {digest}
+"#
+        );
+        let images: Vec<_> = extract(&content)
+            .into_iter()
+            .filter_map(|d| match d {
+                KustomizeDep::Image(img) => Some(img),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(images.len(), 3);
+        assert_eq!(images[0].image, "postgres");
+        assert_eq!(images[0].tag.as_deref(), Some("11"));
+        assert_eq!(images[0].digest, None);
+        assert_eq!(images[0].replace_string, "11");
+        assert_eq!(images[1].image, "postgres");
+        assert_eq!(images[1].tag.as_deref(), Some("11"));
+        assert_eq!(images[1].digest.as_deref(), Some(digest));
+        assert_eq!(images[1].replace_string, format!("11@{digest}"));
+        assert_eq!(
+            images[2].skip_reason,
+            Some(KustomizeImageSkipReason::InvalidValue)
+        );
+    }
+
     // Ported: "should return null for a local base" — kustomize/extract.spec.ts line 66
     #[test]
     fn local_base_returns_none() {

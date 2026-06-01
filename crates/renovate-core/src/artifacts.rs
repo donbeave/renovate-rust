@@ -35,6 +35,9 @@ pub struct ArtifactConfig {
     pub post_update_options: Vec<String>,
     pub skip_installs: bool,
     pub is_lockfile_maintenance: bool,
+    pub go_get_dirs: Vec<String>,
+    pub update_type: Option<String>,
+    pub allowed_unsafe_executions: Vec<String>,
 }
 
 /// A file change resulting from artifact update.
@@ -71,11 +74,19 @@ pub struct ArtifactError {
     pub stderr: String,
 }
 
+/// An informational notice attached to an artifact result.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct ArtifactNotice {
+    pub file: String,
+    pub message: String,
+}
+
 /// The result of an artifact update operation.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ArtifactResult {
     pub file: Option<FileChange>,
     pub artifact_error: Option<ArtifactError>,
+    pub notice: Option<ArtifactNotice>,
 }
 
 impl ArtifactResult {
@@ -83,6 +94,7 @@ impl ArtifactResult {
         Self {
             file: Some(FileChange::addition(path, contents)),
             artifact_error: None,
+            notice: None,
         }
     }
 
@@ -93,6 +105,7 @@ impl ArtifactResult {
                 lock_file: lock_file.into(),
                 stderr: stderr.into(),
             }),
+            notice: None,
         }
     }
 }

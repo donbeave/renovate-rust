@@ -13,10 +13,11 @@ use std::future::Future;
 use std::pin::Pin;
 
 use crate::artifacts::{
-    ArtifactResult, ArtifactRunner, UpdateArtifact,
+    ArtifactNotice, ArtifactResult, ArtifactRunner, UpdateArtifact,
 };
 use crate::exec::raw::raw_exec;
 use crate::exec::types::ExecOptions;
+use crate::extractors::gomod::get_extra_deps_notice;
 
 /// Artifact runner for Go modules.
 #[derive(Debug, Clone)]
@@ -45,6 +46,7 @@ impl ArtifactRunner for GomodArtifactRunner {
         let package_file_name = input.package_file_name.clone();
         let new_package_file_content = input.new_package_file_content.clone();
         let config = input.config.clone();
+        let updated_deps = input.updated_deps.clone();
 
         Box::pin(async move {
             let package_dir = lock_dir.join(&package_file_name);
@@ -75,31 +77,142 @@ impl ArtifactRunner for GomodArtifactRunner {
                 });
             }
 
-            // Build env for go mod tidy.
+            // Build env for go commands.
             let mut env = std::env::vars().collect::<HashMap<String, String>>();
             for (k, v) in &config.env {
                 env.insert(k.clone(), v.clone());
             }
 
-            // Run `go mod tidy`.
-            let tidy_cmd = if package_file_name == "go.mod" {
-                "go mod tidy".to_owned()
-            } else {
-                format!("go mod tidy -modfile={}", package_file_name)
-            };
             let opts = ExecOptions {
                 cwd: Some(package_dir.to_string_lossy().to_string()),
                 timeout: Some(300_000), // 5 minutes
                 ..Default::default()
             };
 
-            match raw_exec(&tidy_cmd, &opts, &env).await {
+            // Determine -modfile flag (used by go get and go mod tidy).
+            let modfile_flag = if package_file_name == "go.mod" {
+                "".to_owned()
+            } else {
+                format!(" -modfile={}", package_file_name)
+            };
+
+            // Build the `go get` target directories.
+            let get_target = if config.go_get_dirs.is_empty() {
+                "./...".to_owned()
+            } else {
+                let valid: Vec<&str> = config
+                    .go_get_dirs
+                    .iter()
+                    .filter(|d| is_valid_go_get_dir(d))
+                    .map(|d| d.as_str())
+                    .collect();
+                if valid.is_empty() {
+                    return Err(crate::artifacts::ArtifactError {
+                        lock_file: sum_file_name.clone(),
+                        stderr: "Invalid goGetDirs".to_owned(),
+                    });
+                }
+                valid.join(" ")
+            };
+
+            // Run `go get` to update dependencies.
+            let get_cmd = format!("go get{} -d -t {}", modfile_flag, get_target);
+            match raw_exec(&get_cmd, &opts, &env).await {
                 Ok(_) => {}
                 Err(e) => {
                     return Err(crate::artifacts::ArtifactError {
                         lock_file: sum_file_name.clone(),
-                        stderr: format!("go mod tidy failed: {}", e.message),
+                        stderr: format!("go get failed: {}", e.message),
                     });
+                }
+            }
+
+            // Run `go mod tidy` when explicitly requested or when import path
+            // updates are required on a major update.
+            // Skip tidy on major updates unless gomodUpdateImportPaths is set
+            // (mirrors upstream mustSkipGoModTidy logic).
+            let is_major = config.update_type.as_deref() == Some("major");
+            let has_import_paths = config.post_update_options.contains(&"gomodUpdateImportPaths".to_owned());
+            let skip_tidy = is_major && !has_import_paths;
+            let is_import_path_update_required = has_import_paths && is_major;
+            let run_tidy = !skip_tidy
+                && (config.post_update_options.contains(&"gomodTidy".to_owned())
+                    || config.post_update_options.contains(&"gomodTidy1.17".to_owned())
+                    || config.post_update_options.contains(&"gomodTidyE".to_owned())
+                    || is_import_path_update_required);
+            let tidy_cmd = format!("go mod tidy{}", modfile_flag);
+            if run_tidy {
+                match raw_exec(&tidy_cmd, &opts, &env).await {
+                    Ok(_) => {}
+                    Err(e) => {
+                        return Err(crate::artifacts::ArtifactError {
+                            lock_file: sum_file_name.clone(),
+                            stderr: format!("go mod tidy failed: {}", e.message),
+                        });
+                    }
+                }
+            }
+
+            // Run `go mod vendor` when explicitly requested or when a
+            // vendor directory with modules.txt exists and gomodSkipVendor
+            // is not requested.
+            let vendor_path = package_dir.join("vendor");
+            let vendor_modules_txt = vendor_path.join("modules.txt");
+            let explicit_vendor = config.post_update_options.contains(&"gomodVendor".to_owned());
+            let skip_vendor = config.post_update_options.contains(&"gomodSkipVendor".to_owned());
+            let use_vendor = explicit_vendor
+                || (!skip_vendor && vendor_path.exists() && vendor_modules_txt.exists());
+            if use_vendor {
+                let vendor_cmd = format!("go mod vendor{}", modfile_flag);
+                match raw_exec(&vendor_cmd, &opts, &env).await {
+                    Ok(_) => {}
+                    Err(e) => {
+                        return Err(crate::artifacts::ArtifactError {
+                            lock_file: sum_file_name.clone(),
+                            stderr: format!("go mod vendor failed: {}", e.message),
+                        });
+                    }
+                }
+                // Tidy again after vendor (mirrors upstream).
+                if run_tidy {
+                    match raw_exec(&tidy_cmd, &opts, &env).await {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Err(crate::artifacts::ArtifactError {
+                                lock_file: sum_file_name.clone(),
+                                stderr: format!("go mod tidy failed: {}", e.message),
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Run `go generate` when requested and permitted.
+            let use_go_generate = config.post_update_options.contains(&"goGenerate".to_owned());
+            let go_generate_allowed = config.allowed_unsafe_executions.contains(&"goGenerate".to_owned());
+            if use_go_generate && go_generate_allowed {
+                let gen_cmd = "go generate ./...";
+                match raw_exec(gen_cmd, &opts, &env).await {
+                    Ok(_) => {}
+                    Err(e) => {
+                        return Err(crate::artifacts::ArtifactError {
+                            lock_file: sum_file_name.clone(),
+                            stderr: format!("go generate failed: {}", e.message),
+                        });
+                    }
+                }
+            }
+
+            // Tidy one more time as a solution for upstream issue #6795.
+            if run_tidy {
+                match raw_exec(&tidy_cmd, &opts, &env).await {
+                    Ok(_) => {}
+                    Err(e) => {
+                        return Err(crate::artifacts::ArtifactError {
+                            lock_file: sum_file_name.clone(),
+                            stderr: format!("go mod tidy failed: {}", e.message),
+                        });
+                    }
                 }
             }
 
@@ -117,10 +230,24 @@ impl ArtifactRunner for GomodArtifactRunner {
                 }
             };
             if updated_go_mod != new_package_file_content {
-                results.push(ArtifactResult::file_change(
-                    package_file_name.clone(),
-                    updated_go_mod,
-                ));
+                let dep_names: Vec<&str> = updated_deps.iter().map(|d| d.dep_name.as_str()).collect();
+                let notice = get_extra_deps_notice(
+                    Some(&new_package_file_content),
+                    Some(&updated_go_mod),
+                    &dep_names,
+                )
+                .map(|msg| ArtifactNotice {
+                    file: package_file_name.clone(),
+                    message: msg,
+                });
+                results.push(ArtifactResult {
+                    file: Some(crate::artifacts::FileChange::addition(
+                        package_file_name.clone(),
+                        updated_go_mod,
+                    )),
+                    artifact_error: None,
+                    notice,
+                });
             }
 
             // Check go.sum changes.
@@ -157,6 +284,13 @@ impl ArtifactRunner for GomodArtifactRunner {
             }
         })
     }
+}
+
+/// Validate a `goGetDirs` entry.
+///
+/// Rejects paths that contain directory-traversal components.
+fn is_valid_go_get_dir(dir: &str) -> bool {
+    !dir.contains("..") && !dir.starts_with('/')
 }
 
 /// Derive the Go toolchain constraint from config and go.mod content.
@@ -299,6 +433,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let runner = GomodArtifactRunner::new();
         let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.post_update_options.push("gomodTidy".to_owned());
         input.config.env = make_fake_go(&dir, b"if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then echo 'updated sum' > go.sum; fi\n");
         let result = runner.update_artifacts(&input).await.unwrap().unwrap();
         assert_eq!(result.len(), 1);
@@ -314,6 +449,7 @@ mod tests {
         let runner = GomodArtifactRunner::new();
         let go_mod_input = "module example.com/test\n\ngo 1.22\n\nrequire github.com/foo/bar v1.1.0\n";
         let mut input = make_input(&dir, go_mod_input, Some("old sum\n"));
+        input.config.post_update_options.push("gomodTidy".to_owned());
         // Write a reference go.mod with extra trailing newline.
         let ref_go_mod = dir.path().join("ref_go.mod");
         std::fs::write(&ref_go_mod, "module example.com/test\n\ngo 1.22\n\nrequire github.com/foo/bar v1.1.0\n\n").unwrap();
@@ -338,7 +474,7 @@ mod tests {
         let result = runner.update_artifacts(&input).await;
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(err.stderr.contains("go mod tidy failed"));
+        assert!(err.stderr.contains("go get failed"));
     }
 
     #[test]
@@ -346,6 +482,301 @@ mod tests {
         let r1 = GomodArtifactRunner::new();
         let r2 = GomodArtifactRunner;
         assert_eq!(format!("{:?}", r1), format!("{:?}", r2));
+    }
+
+    fn make_input_with_name(
+        dir: &tempfile::TempDir,
+        package_file_name: &str,
+        go_mod: &str,
+        go_sum: Option<&str>,
+    ) -> UpdateArtifact {
+        let lock_dir = dir.path().to_path_buf();
+        let sum_file = if package_file_name.ends_with(".mod") {
+            format!("{}sum", &package_file_name[..package_file_name.len() - 3])
+        } else {
+            "go.sum".to_owned()
+        };
+        if let Some(sum) = go_sum {
+            std::fs::write(lock_dir.join(&sum_file), sum).unwrap();
+        }
+        UpdateArtifact {
+            package_file_name: package_file_name.to_owned(),
+            updated_deps: vec![UpdatedDep {
+                dep_name: "github.com/foo/bar".to_owned(),
+                package_name: None,
+                current_value: Some("v1.0.0".to_owned()),
+                new_value: Some("v1.1.0".to_owned()),
+                locked_version: None,
+                new_version: None,
+                package_file: package_file_name.to_owned(),
+                manager: "gomod".to_owned(),
+                datasource: None,
+            }],
+            new_package_file_content: go_mod.to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: lock_dir,
+                ..Default::default()
+            },
+        }
+    }
+
+    // Ported: "uses -modfile flag for non-default go.mod filename" — gomod/artifacts.spec.ts line 2698
+    #[tokio::test]
+    async fn uses_modfile_for_non_default_go_mod() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input_with_name(
+            &dir,
+            "tools.mod",
+            "module example.com/test\n\ngo 1.22\n",
+            Some("old sum\n"),
+        );
+        input.config.post_update_options.push("gomodTidy".to_owned());
+        // fake go that verifies -modfile and updates tools.sum
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                case \"$*\" in *-modfile=tools.mod*) ;; *) exit 1 ;; esac
+              fi
+              if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then
+                case \"$*\" in *-modfile=tools.mod*) ;; *) exit 1 ;; esac
+                echo 'updated sum' > tools.sum
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].file.as_ref().unwrap().path, "tools.sum");
+    }
+
+    // Ported: "uses -modfile flag with go mod tidy for non-default go.mod filename" — gomod/artifacts.spec.ts line 2733
+    #[tokio::test]
+    async fn uses_modfile_with_go_mod_tidy() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input_with_name(
+            &dir,
+            "tools.mod",
+            "module example.com/test\n\ngo 1.22\n",
+            Some("old sum\n"),
+        );
+        input.config.post_update_options.push("gomodTidy".to_owned());
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                case \"$*\" in *-modfile=tools.mod*) ;; *) exit 1 ;; esac
+              fi
+              if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then
+                case \"$*\" in *-modfile=tools.mod*) ;; *) exit 1 ;; esac
+                echo 'updated sum' > tools.sum
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].file.as_ref().unwrap().path, "tools.sum");
+    }
+
+    // Ported: "runs go mod vendor with gomodVendor" — gomod/artifacts.spec.ts line 192
+    #[tokio::test]
+    async fn runs_go_mod_vendor_with_gomod_vendor() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.post_update_options.push("gomodVendor".to_owned());
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"vendor\" ]; then
+                echo 'new sum' > go.sum
+                echo 'new mod' > go.mod
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
+    }
+
+    // Ported: "skips vendor directory update with gomodSkipVendor" — gomod/artifacts.spec.ts line 390
+    #[tokio::test]
+    async fn skips_vendor_with_gomod_skip_vendor() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.post_update_options.push("gomodSkipVendor".to_owned());
+        // Create vendor directory with modules.txt to trigger implicit vendor
+        std::fs::create_dir(dir.path().join("vendor")).unwrap();
+        std::fs::write(dir.path().join("vendor/modules.txt"), "txt").unwrap();
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                echo 'new sum' > go.sum
+                echo 'new mod' > go.mod
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
+    }
+
+    // Ported: "supports go generate when configured" — gomod/artifacts.spec.ts line 647
+    #[tokio::test]
+    async fn supports_go_generate_when_configured_and_allowed() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.post_update_options.push("goGenerate".to_owned());
+        input.config.allowed_unsafe_executions.push("goGenerate".to_owned());
+        input.config.post_update_options.push("gomodTidy".to_owned());
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"generate\" ]; then
+                echo 'new sum' > go.sum
+              fi
+              if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then
+                echo 'new mod' > go.mod
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
+    }
+
+    // Ported: "only allows go generate usage when permitted globally" — gomod/artifacts.spec.ts line 735
+    #[tokio::test]
+    async fn skips_go_generate_when_not_permitted() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.post_update_options.push("goGenerate".to_owned());
+        // allowed_unsafe_executions is empty, so go generate should be skipped
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"generate\" ]; then exit 1; fi
+              if [ \"$1\" = \"get\" ]; then
+                echo 'new sum' > go.sum
+                echo 'new mod' > go.mod
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
+    }
+
+    // Ported: "handles goGetDirs configuration correctly" — gomod/artifacts.spec.ts line 2582
+    #[tokio::test]
+    async fn handles_go_get_dirs_with_invalid_paths() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.go_get_dirs = vec![
+            ".".to_owned(),
+            "foo".to_owned(),
+            ".bar/...".to_owned(),
+            "&&".to_owned(),
+            "cat".to_owned(),
+            "/etc/passwd".to_owned(),
+        ];
+        // fake go that fails if it receives an invalid path
+        input.config.env = make_fake_go(
+            &dir,
+            b"case \"$*\" in *'/etc/passwd'*) exit 1 ;; esac
+              case \"$*\" in *'..'*) exit 1 ;; esac
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns updated go.sum when goGetDirs is specified" — gomod/artifacts.spec.ts line 2613
+    #[tokio::test]
+    async fn returns_updated_go_sum_with_go_get_dirs() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.go_get_dirs = vec![".".to_owned()];
+        input.config.post_update_options.push("gomodTidy".to_owned());
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then echo 'updated sum' > go.sum; fi\n",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].file.as_ref().unwrap().path, "go.sum");
+    }
+
+    // Ported: "errors when goGetDirs is specified with all invalid paths" — gomod/artifacts.spec.ts line 2654
+    #[tokio::test]
+    async fn errors_when_all_go_get_dirs_invalid() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.go_get_dirs = vec!["/etc".to_owned(), "../../../".to_owned()];
+        let result = runner.update_artifacts(&input).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.stderr.contains("Invalid goGetDirs"));
+    }
+
+    // Ported: "skips gomodTidy without gomodUpdateImportPaths on major update" — gomod/artifacts.spec.ts line 1998
+    #[tokio::test]
+    async fn skips_go_mod_tidy_on_major_without_import_paths() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.post_update_options.push("gomodTidy".to_owned());
+        input.config.update_type = Some("major".to_owned());
+        // Create vendor dir but no modules.txt, so vendor is not triggered
+        std::fs::create_dir(dir.path().join("vendor")).unwrap();
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                echo 'new sum' > go.sum
+                echo 'new mod' > go.mod
+              fi
+              if [ \"$1\" = \"mod\" ]; then exit 1; fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
+    }
+
+    // Ported: "does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set" — gomod/artifacts.spec.ts line 2036
+    #[tokio::test]
+    async fn skips_go_mod_tidy_without_gomod_tidy_or_import_paths() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        // Create vendor dir but no modules.txt, so vendor is not triggered
+        std::fs::create_dir(dir.path().join("vendor")).unwrap();
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                echo 'new sum' > go.sum
+                echo 'new mod' > go.mod
+              fi
+              if [ \"$1\" = \"mod\" ]; then exit 1; fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
     }
 
     // Ported: "returns config constraint when set" — gomod/artifacts.spec.ts line 2837
@@ -411,5 +842,167 @@ mod tests {
             derive_go_toolchain_constraints(None, "go 1.23.5"),
             Some("1.23.5".to_owned())
         );
+    }
+
+    // Ported: "skips updating import paths when incompatible version" — gomod/artifacts.spec.ts line 1948
+    #[tokio::test]
+    async fn skips_updating_import_paths_when_incompatible_version() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.update_type = Some("major".to_owned());
+        input.config.post_update_options.push("gomodUpdateImportPaths".to_owned());
+        input.updated_deps = vec![crate::artifacts::UpdatedDep {
+            dep_name: "github.com/docker/docker".to_owned(),
+            package_name: None,
+            current_value: None,
+            new_value: None,
+            locked_version: None,
+            new_version: Some("v23.0.0+incompatible".to_owned()),
+            package_file: "go.mod".to_owned(),
+            manager: "gomod".to_owned(),
+            datasource: None,
+        }];
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                echo 'new sum' > go.sum
+                echo 'new mod' > go.mod
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
+    }
+
+    // Ported: "skips updating import paths when invalid major version" — gomod/artifacts.spec.ts line 1902
+    #[tokio::test]
+    async fn skips_updating_import_paths_when_invalid_major_version() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.update_type = Some("major".to_owned());
+        input.config.post_update_options.push("gomodUpdateImportPaths".to_owned());
+        input.updated_deps = vec![crate::artifacts::UpdatedDep {
+            dep_name: "github.com/pkg/errors".to_owned(),
+            package_name: None,
+            current_value: None,
+            new_value: None,
+            locked_version: None,
+            new_version: Some("vx.0.0".to_owned()),
+            package_file: "go.mod".to_owned(),
+            manager: "gomod".to_owned(),
+            datasource: None,
+        }];
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                echo 'new sum' > go.sum
+                echo 'new mod' > go.mod
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
+    }
+
+    // Ported: "skips updating import paths with gomodUpdateImportPaths on v0 to v1" — gomod/artifacts.spec.ts line 1856
+    #[tokio::test]
+    async fn skips_updating_import_paths_on_v0_to_v1() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input(&dir, "module example.com/test\n\ngo 1.22\n", Some("old sum\n"));
+        input.config.update_type = Some("major".to_owned());
+        input.config.post_update_options.push("gomodUpdateImportPaths".to_owned());
+        input.updated_deps = vec![crate::artifacts::UpdatedDep {
+            dep_name: "github.com/pkg/errors".to_owned(),
+            package_name: None,
+            current_value: None,
+            new_value: None,
+            locked_version: None,
+            new_version: Some("v1.0.0".to_owned()),
+            package_file: "go.mod".to_owned(),
+            manager: "gomod".to_owned(),
+            datasource: None,
+        }];
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                echo 'new sum' > go.sum
+                echo 'new mod' > go.mod
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 2);
+        let paths: Vec<_> = result.iter().map(|r| r.file.as_ref().unwrap().path.clone()).collect();
+        assert!(paths.contains(&"go.sum".to_owned()));
+        assert!(paths.contains(&"go.mod".to_owned()));
+    }
+
+    // Ported: "returns artifact notices" — gomod/artifacts.spec.ts line 2466
+    #[tokio::test]
+    async fn returns_artifact_notices() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let go_mod_before = "module example.com/test\n\ngo 1.22\n\nrequire github.com/foo/foo v1.0.0\nrequire github.com/bar/bar v1.0.0\n";
+        let mut input = make_input(&dir, go_mod_before, Some("old sum\n"));
+        input.config.update_type = Some("major".to_owned());
+        input.config.post_update_options.push("gomodUpdateImportPaths".to_owned());
+        // fake go bumps an extra dependency in go.mod
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                echo 'new sum' > go.sum
+                printf 'module example.com/test\n\ngo 1.22\n\nrequire github.com/foo/foo v1.0.0\nrequire github.com/bar/bar v2.0.0\n' > go.mod
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        let go_mod_result = result.iter().find(|r| r.file.as_ref().unwrap().path == "go.mod").unwrap();
+        assert!(go_mod_result.notice.is_some());
+        let notice = go_mod_result.notice.as_ref().unwrap();
+        assert_eq!(notice.file, "go.mod");
+        assert!(notice.message.contains("github.com/bar/bar"));
+    }
+
+    // Ported: "uses -modfile flag with go mod vendor for non-default go.mod filename" — gomod/artifacts.spec.ts line 2779
+    #[tokio::test]
+    async fn uses_modfile_with_go_mod_vendor() {
+        let dir = tempfile::tempdir().unwrap();
+        let runner = GomodArtifactRunner::new();
+        let mut input = make_input_with_name(
+            &dir,
+            "tools.mod",
+            "module example.com/test\n\ngo 1.22\n",
+            Some("old sum\n"),
+        );
+        input.config.post_update_options.push("gomodTidy".to_owned());
+        // Create vendor directory with modules.txt to trigger implicit vendor
+        std::fs::create_dir(dir.path().join("vendor")).unwrap();
+        std::fs::write(dir.path().join("vendor/modules.txt"), "txt").unwrap();
+        input.config.env = make_fake_go(
+            &dir,
+            b"if [ \"$1\" = \"get\" ]; then
+                case \"$*\" in *-modfile=tools.mod*) ;; *) exit 1 ;; esac
+                echo 'new sum' > tools.sum
+              fi
+              if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"tidy\" ]; then
+                case \"$*\" in *-modfile=tools.mod*) ;; *) exit 1 ;; esac
+              fi
+              if [ \"$1\" = \"mod\" ] && [ \"$2\" = \"vendor\" ]; then
+                case \"$*\" in *-modfile=tools.mod*) ;; *) exit 1 ;; esac
+              fi
+            ",
+        );
+        let result = runner.update_artifacts(&input).await.unwrap().unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].file.as_ref().unwrap().path, "tools.sum");
     }
 }
