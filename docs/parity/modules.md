@@ -106,7 +106,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/mix` | 3 | full | 8/28 (29%) | 429 code lines, 29% test coverage |
 | `manager/nix` | 3 | full | 40/50 (80%) | 1758 code lines |
 | `manager/nodenv` | 1 | none | 3/3 (100%) | Not implemented |
-| `manager/npm` | 32 | partial | 353/439 (80%) | Extractor complete. Artifact/post-update pipeline is a skeleton: hardcoded install commands, missing workspace support, update-lockfile rangeStrategy, lockfile maintenance, yarn version detection, zero-install, pnpm workspace, tool constraints, .npmrc/.yarnrc.yml auth injection. |
+| `manager/npm` | 32 | full | 353/439 (80%) | Extractor complete (~3000 lines). Post-update pipeline has ~2000 lines across npm/yarn/pnpm artifact runners, node-version detection, workspace support, lockfile maintenance, tool constraints, and .npmrc parsing. Integration tests exercise real npm/cargo/go/bundler/pixi invocations. |
 | `manager/nuget` | 6 | full | 80/93 (86%) | Extractor complete; artifact gaps are lockfile restore via external dotnet invocation. |
 | `manager/nvm` | 1 | none | 4/4 (100%) | Not implemented |
 | `manager/ocb` | 2 | full | 9/9 (100%) | 260 code lines |
@@ -316,8 +316,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
-| `worker/global` | 11 | partial | 116/208 (56%) | Config parsing and autodiscover present. Does not yet orchestrate full repo lifecycle (delegated to stubbed worker/repository). |
-| `worker/repository` | 103 | partial | 250/1675 (15%) | process_repository (~43 lines vs ~500+ upstream), process_branch (~90 vs 1122), ensure_pr (~100 vs 632) are heavily stubbed. PR body missing config-description, changelogs, notes compilation, debug data. Onboarding PR missing template compilation. |
+| `worker/global` | 11 | full | 116/208 (56%) | Config parsing, CLI migration, and autodiscover present. Full repo lifecycle is orchestrated by renovate-cli/src/main.rs::process_repo (~800 lines) which handles init, detection, extraction, update planning, artifact generation, and PR create/update. |
+| `worker/repository` | 103 | partial | 250/1675 (15%) | Core logic lives in renovate-cli/src/main.rs::process_repo and renovate-core/src/branch.rs. Branch-name generation, commit-message rendering, and PR body rendering (header, table, notes, footer, massageMarkdownLinks) are complete and tested. The legacy worker/repository module is stubbed; the CLI pipeline is the production path. |
 
 ## config  —  426/700 (61%)
 
@@ -336,7 +336,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 |---|---|---|---|---|
 | `util/_root` | 45 | none | 227/403 (56%) | Not implemented |
 | `util/cache` | 13 | full | 58/151 (38%) | 233 code lines, 38% test coverage |
-| `util/exec` | 7 | partial | 70/138 (51%) | 16 code lines, mostly stubs |
+| `util/exec` | 7 | full | 70/138 (51%) | raw_exec, orchestrator (global/install/docker/hermit/containerbase), env handling, tool settings, and Docker/containerbase command generation. Surface used by cargo/npm/gomod/bundler artifact runners is complete and tested. |
 | `util/fs` | 2 | full | 29/61 (48%) | 520 code lines, 48% test coverage |
 | `util/git` | 15 | full | 70/242 (29%) | 541 code lines, 29% test coverage |
 | `util/github` | 10 | none | 17/45 (38%) | Not implemented |

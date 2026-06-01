@@ -1125,7 +1125,7 @@ mod registry_tests {
         assert!(dep.source_directory.is_none());
     }
 
-    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl" — modules/datasource/metadata.spec.ts line 140
+    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl" — modules/datasource/metadata.spec.ts line 134
     //         — modules/datasource/metadata.spec.ts line 134
     // Note: only GitLab cases tested here; "somehost.com" sub-path truncation is a known
     // limitation of the current massage_github_url implementation (5-segment limit).

@@ -81,7 +81,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 37
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 30
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_same_dir() {
@@ -93,7 +93,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
-    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 37
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 30
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_nested_dir() {
@@ -107,7 +107,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
-    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 37
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 30
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_parent_dir() {

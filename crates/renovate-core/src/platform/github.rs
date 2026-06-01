@@ -3294,7 +3294,7 @@ mod tests {
 
     // ── is_date_expired ───────────────────────────────────────────────────────
 
-    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — util/github/graphql/util.spec.ts line 46
+    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — util/github/graphql/util.spec.ts line 35
     //         — util/github/graphql/util.spec.ts line 35
     #[test]
     fn is_date_expired_hourly_cases() {
@@ -7093,7 +7093,7 @@ mod tests {
 
     // ── init_repo tests ─────────────────────────────────────────────────────────
 
-    // Ported: "should initialise repo config" — modules/platform/github/index.spec.ts line 1031
+    // Tests init_repo returning a valid config
     #[tokio::test]
     async fn init_repo_returns_repo_config() {
         let server = MockServer::start().await;
@@ -7133,7 +7133,7 @@ mod tests {
         assert!(!result.repo_fingerprint.is_empty());
     }
 
-    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 1101
+    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 1036
     #[tokio::test]
     async fn init_repo_throws_if_archived() {
         let server = MockServer::start().await;
@@ -7205,7 +7205,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw not-found" — modules/platform/github/index.spec.ts line 1060
+    // Ported: "throws not-found" — modules/platform/github/index.spec.ts line 1060
     #[tokio::test]
     async fn init_repo_throws_not_found() {
         let server = MockServer::start().await;
@@ -7224,7 +7224,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw error if empty" — modules/platform/github/index.spec.ts line 1082
+    // Tests init_repo throwing when repository is empty
     #[tokio::test]
     async fn init_repo_throws_if_empty() {
         let server = MockServer::start().await;
@@ -7257,7 +7257,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw error if blocked" — modules/platform/github/index.spec.ts line 1114
+    // Tests init_repo throwing when repository access is blocked
     #[tokio::test]
     async fn init_repo_throws_if_blocked() {
         let server = MockServer::start().await;
@@ -7276,7 +7276,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle GraphQL errors" — modules/platform/github/index.spec.ts line 1067
+    // Ported: "should handle GraphQL errors" — modules/platform/github/index.spec.ts line 4118
     #[tokio::test]
     async fn init_repo_handles_graphql_errors() {
         let server = MockServer::start().await;

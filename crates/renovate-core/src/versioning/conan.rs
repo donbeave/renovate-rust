@@ -1495,7 +1495,7 @@ mod tests {
         assert!(is_stable("1.0.7-prerelease.1, include_prerelease=True"));
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$result"" — modules/versioning/conan/index.spec.ts line 628
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$result"" — modules/versioning/conan/index.spec.ts line 565
     //         — lib/modules/versioning/conan/index.spec.ts line 565
     #[test]
     fn get_new_value_matches_renovate_conan_index_spec() {
@@ -1862,7 +1862,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor("$version") === $major getMinor("$version") === $minor getPatch("$version") === $patch" — modules/versioning/conan/index.spec.ts line 734
+    // Ported: "getMajor("$version") === $major getMinor("$version") === $minor getPatch("$version") === $patch" — modules/versioning/conan/index.spec.ts line 720
     //         — lib/modules/versioning/conan/index.spec.ts line 720
     #[test]
     #[allow(clippy::type_complexity)]
