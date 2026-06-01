@@ -1091,6 +1091,243 @@ pub fn apply_registries_to_dep(dep: &mut NuGetPackageDependency, registries: &[N
     }
 }
 
+// ── Package-tree helpers ──────────────────────────────────────────────────
+
+/// A project file in the dependency tree.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ProjectFile {
+    pub name: String,
+    pub is_leaf: bool,
+}
+
+const GLOBAL_JSON: &str = "global.json";
+const NUGET_CENTRAL_FILE: &str = "Directory.Packages.props";
+const MSBUILD_CENTRAL_FILE: &str = "Packages.props";
+const DIRECTORY_BUILD_PROPS: &str = "Directory.Build.props";
+
+/// Pure, testable version of `getDependentPackageFiles`.
+///
+/// Mirrors `getDependentPackageFiles()` from `lib/modules/manager/nuget/package-tree.ts`.
+pub fn get_dependent_package_files_pure(
+    package_file_name: &str,
+    file_list: &[String],
+    file_contents: &std::collections::HashMap<String, String>,
+    is_props_file: bool,
+    is_global_json: bool,
+) -> Result<Vec<ProjectFile>, String> {
+    let package_files = get_all_package_files(file_list);
+    let mut graph: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+
+    if is_props_file {
+        graph.entry(package_file_name.to_owned()).or_default();
+    }
+    if is_global_json {
+        graph.entry(GLOBAL_JSON.to_owned()).or_default();
+    }
+
+    let parent_dir = if package_file_name == NUGET_CENTRAL_FILE
+        || package_file_name == MSBUILD_CENTRAL_FILE
+        || package_file_name == GLOBAL_JSON
+        || package_file_name == DIRECTORY_BUILD_PROPS
+    {
+        ""
+    } else {
+        std::path::Path::new(package_file_name)
+            .parent()
+            .and_then(|p| p.to_str())
+            .unwrap_or("")
+    };
+
+    for f in &package_files {
+        graph.entry(f.clone()).or_default();
+        if (is_props_file || is_global_json)
+            && std::path::Path::new(f)
+                .parent()
+                .and_then(|p| p.to_str())
+                .unwrap_or("")
+                .starts_with(parent_dir)
+        {
+            graph
+                .entry(package_file_name.to_owned())
+                .or_default()
+                .push(f.clone());
+        }
+    }
+
+    for f in &package_files {
+        let Some(content) = file_contents.get(f) else { continue };
+        let refs = extract_project_references(content);
+        for r in refs {
+            let normalized = reframe_relative_path_to_root_of_repo(f, &r);
+            graph.entry(f.clone()).or_default().push(normalized);
+        }
+        if has_cycle(&graph) {
+            return Err("Circular reference detected in NuGet package files".to_owned());
+        }
+    }
+
+    let mut deps: Vec<(String, bool)> = Vec::new();
+    recursively_get_dependent_package_files(package_file_name, &graph, &mut deps);
+
+    if is_props_file || is_global_json {
+        deps.retain(|(name, _)| name != package_file_name);
+    }
+
+    let result: Vec<ProjectFile> = deps
+        .into_iter()
+        .map(|(name, is_leaf)| ProjectFile { name, is_leaf })
+        .collect();
+    Ok(result)
+}
+
+fn get_all_package_files(file_list: &[String]) -> Vec<String> {
+    file_list
+        .iter()
+        .filter(|f| {
+            let lower = f.to_lowercase();
+            lower.ends_with(".csproj")
+                || lower.ends_with(".vbproj")
+                || lower.ends_with(".fsproj")
+        })
+        .cloned()
+        .collect()
+}
+
+fn extract_project_references(content: &str) -> Vec<String> {
+    use quick_xml::events::Event;
+    use quick_xml::Reader;
+    let mut reader = Reader::from_reader(std::io::BufReader::new(content.as_bytes()));
+    let mut buf = Vec::new();
+    let mut in_item_group = false;
+    let mut refs = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) | Ok(Event::Empty(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if name == "ItemGroup" {
+                    in_item_group = true;
+                } else if in_item_group && name == "ProjectReference" {
+                    for attr in e.attributes() {
+                        if let Ok(a) = attr {
+                            if String::from_utf8_lossy(a.key.as_ref()) == "Include" {
+                                if let Ok(val) = a.unescape_value() {
+                                    let v = val.into_owned();
+                                    if !v.is_empty() {
+                                        refs.push(v);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(Event::End(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if name == "ItemGroup" {
+                    in_item_group = false;
+                }
+            }
+            Ok(Event::Eof) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+    refs
+}
+
+fn normalize_relative_path(path: &str) -> String {
+    let mut parts = Vec::new();
+    for part in path.split('/') {
+        match part {
+            ".." => {
+                parts.pop();
+            }
+            "." | "" => {}
+            _ => parts.push(part),
+        }
+    }
+    parts.join("/")
+}
+
+fn reframe_relative_path_to_root_of_repo(
+    dependent_project_relative_path: &str,
+    project_reference: &str,
+) -> String {
+    let dir = std::path::Path::new(dependent_project_relative_path)
+        .parent()
+        .and_then(|p| p.to_str())
+        .unwrap_or("");
+    let resolved = if dir.is_empty() {
+        project_reference.to_owned()
+    } else {
+        format!("{}/{}", dir, project_reference)
+    };
+    normalize_relative_path(&resolved)
+}
+
+fn has_cycle(graph: &std::collections::HashMap<String, Vec<String>>) -> bool {
+    let mut visited = std::collections::HashSet::new();
+    let mut stack = std::collections::HashSet::new();
+
+    for node in graph.keys() {
+        if !visited.contains(node) {
+            if dfs_cycle(node, graph, &mut visited, &mut stack) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn dfs_cycle(
+    node: &str,
+    graph: &std::collections::HashMap<String, Vec<String>>,
+    visited: &mut std::collections::HashSet<String>,
+    stack: &mut std::collections::HashSet<String>,
+) -> bool {
+    visited.insert(node.to_owned());
+    stack.insert(node.to_owned());
+
+    if let Some(neighbors) = graph.get(node) {
+        for neighbor in neighbors {
+            if !visited.contains(neighbor) {
+                if dfs_cycle(neighbor, graph, visited, stack) {
+                    return true;
+                }
+            } else if stack.contains(neighbor) {
+                return true;
+            }
+        }
+    }
+
+    stack.remove(node);
+    false
+}
+
+fn recursively_get_dependent_package_files(
+    package_file_name: &str,
+    graph: &std::collections::HashMap<String, Vec<String>>,
+    deps: &mut Vec<(String, bool)>,
+) {
+    if deps.iter().any(|(n, _)| n == package_file_name) {
+        return;
+    }
+
+    let dependents = graph.get(package_file_name).cloned().unwrap_or_default();
+
+    if dependents.is_empty() {
+        deps.push((package_file_name.to_owned(), true));
+        return;
+    }
+
+    deps.push((package_file_name.to_owned(), false));
+
+    for dep in dependents {
+        recursively_get_dependent_package_files(&dep, graph, deps);
+    }
+}
+
 fn bump_csproj_semver(version: &semver::Version, bump_type: &str) -> Option<String> {
     let mut new = version.clone();
     match bump_type {
@@ -2585,5 +2822,175 @@ Console.WriteLine("Hello World!");
         let result = extract_global_json(content).unwrap();
         assert_eq!(result.dotnet_sdk_constraint, Some("5.0.302".to_owned()));
         assert_eq!(result.deps.len(), 2);
+    }
+
+    // ── package-tree tests ──────────────────────────────────────────────────
+
+    // Ported: "returns self for single project" — manager/nuget/package-tree.spec.ts line 32
+    #[test]
+    fn package_tree_returns_self_for_single_project() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("single.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let result = get_dependent_package_files_pure("single.csproj", &["single.csproj".to_owned()], &files, false, false).unwrap();
+        assert_eq!(result, vec![ProjectFile { name: "single.csproj".to_owned(), is_leaf: true }]);
+    }
+
+    // Ported: "returns self for two projects with no references" — manager/nuget/package-tree.spec.ts line 45
+    #[test]
+    fn package_tree_returns_self_for_two_projects_no_references() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        files.insert("two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let file_list = vec!["one.csproj".to_owned(), "two.csproj".to_owned()];
+        let result = get_dependent_package_files_pure("one.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![ProjectFile { name: "one.csproj".to_owned(), is_leaf: true }]);
+        let result = get_dependent_package_files_pure("two.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![ProjectFile { name: "two.csproj".to_owned(), is_leaf: true }]);
+    }
+
+    // Ported: "returns projects for two projects with one reference" — manager/nuget/package-tree.spec.ts line 60
+    #[test]
+    fn package_tree_returns_projects_for_two_with_one_reference() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
+        files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
+        let result = get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
+            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
+        ]);
+    }
+
+    // Ported: "returns project for two projects with one reference and central versions" — manager/nuget/package-tree.spec.ts line 77
+    #[test]
+    fn package_tree_returns_projects_with_central_versions() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
+        files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
+        let result = get_dependent_package_files_pure("Directory.Packages.props", &file_list, &files, true, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
+            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
+        ]);
+    }
+
+    // Ported: "returns projects for two projects with one reference and Directory.Build.props" — manager/nuget/package-tree.spec.ts line 99
+    #[test]
+    fn package_tree_returns_projects_with_directory_build_props() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
+        files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
+        let result = get_dependent_package_files_pure("Directory.Build.props", &file_list, &files, true, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
+            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
+        ]);
+    }
+
+    // Ported: "returns only projects under nested Directory.Build.props directory" — manager/nuget/package-tree.spec.ts line 121
+    #[test]
+    fn package_tree_returns_only_projects_under_nested_props() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("src/one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        files.insert("other/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let file_list = vec!["src/one/one.csproj".to_owned(), "other/two.csproj".to_owned()];
+        let result = get_dependent_package_files_pure("src/Directory.Build.props", &file_list, &files, true, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "src/one/one.csproj".to_owned(), is_leaf: true },
+        ]);
+    }
+
+    // Ported: "returns project for two projects with one reference and global.json" — manager/nuget/package-tree.spec.ts line 143
+    #[test]
+    fn package_tree_returns_projects_with_global_json() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
+        files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
+        let result = get_dependent_package_files_pure("global.json", &file_list, &files, false, true).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
+            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
+        ]);
+    }
+
+    // Ported: "returns projects for three projects with two linear references" — manager/nuget/package-tree.spec.ts line 163
+    #[test]
+    fn package_tree_returns_projects_three_linear() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
+        files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../three/three.csproj" /></ItemGroup></Project>"#.to_owned());
+        files.insert("three/three.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned(), "three/three.csproj".to_owned()];
+
+        let result = get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
+            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: false },
+            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
+        ]);
+
+        let result = get_dependent_package_files_pure("two/two.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: false },
+            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
+        ]);
+
+        let result = get_dependent_package_files_pure("three/three.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
+        ]);
+    }
+
+    // Ported: "returns projects for three projects with two tree-like references" — manager/nuget/package-tree.spec.ts line 197
+    #[test]
+    fn package_tree_returns_projects_three_treelike() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /><ProjectReference Include="../three/three.csproj" /></ItemGroup></Project>"#.to_owned());
+        files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        files.insert("three/three.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#.to_owned());
+        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned(), "three/three.csproj".to_owned()];
+
+        let result = get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "one/one.csproj".to_owned(), is_leaf: false },
+            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
+            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
+        ]);
+
+        let result = get_dependent_package_files_pure("two/two.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "two/two.csproj".to_owned(), is_leaf: true },
+        ]);
+
+        let result = get_dependent_package_files_pure("three/three.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![
+            ProjectFile { name: "three/three.csproj".to_owned(), is_leaf: true },
+        ]);
+    }
+
+    // Ported: "throws error on circular reference" — manager/nuget/package-tree.spec.ts line 229
+    #[test]
+    fn package_tree_throws_on_circular_reference() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("one/one.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../two/two.csproj" /></ItemGroup></Project>"#.to_owned());
+        files.insert("two/two.csproj".to_owned(), r#"<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../one/one.csproj" /></ItemGroup></Project>"#.to_owned());
+        let file_list = vec!["one/one.csproj".to_owned(), "two/two.csproj".to_owned()];
+        let result = get_dependent_package_files_pure("one/one.csproj", &file_list, &files, false, false);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Circular reference"));
+    }
+
+    // Ported: "skips on invalid xml file" — manager/nuget/package-tree.spec.ts line 245
+    #[test]
+    fn package_tree_skips_invalid_xml() {
+        let mut files = std::collections::HashMap::new();
+        files.insert("foo/bar.csproj".to_owned(), "<invalid".to_owned());
+        let file_list = vec!["foo/bar.csproj".to_owned()];
+        let result = get_dependent_package_files_pure("foo/bar.csproj", &file_list, &files, false, false).unwrap();
+        assert_eq!(result, vec![ProjectFile { name: "foo/bar.csproj".to_owned(), is_leaf: true }]);
     }
 }
