@@ -27,7 +27,7 @@ Acceptance:
 
 ---
 
-## M1 — End-to-end "hello world" run
+## M1 — End-to-end "hello world" run ✅
 
 Goal: `renovate --dry-run --platform=local /path/to/fixture` extracts
 dependencies for **one manager**, looks up versions from **one datasource**,
@@ -49,7 +49,7 @@ Acceptance:
 
 ---
 
-## M2 — Second manager + second datasource
+## M2 — Second manager + second datasource ✅
 
 Goal: prove the architecture generalizes. Adds **npm + npm registry +
 npm-style versioning** as a second end-to-end vertical.
@@ -63,7 +63,7 @@ Acceptance:
 
 ---
 
-## M3 — First platform integration
+## M3 — First platform integration ✅
 
 Goal: write branches and PRs for **one platform**, without lockfile updates.
 
@@ -82,7 +82,7 @@ Acceptance:
 
 ---
 
-## M4 — Lockfile artifacts
+## M4 — Lockfile artifacts ✅
 
 Goal: invoke external package managers for lockfile updates on the
 cargo + npm verticals.
@@ -98,7 +98,7 @@ Acceptance:
 
 ---
 
-## M5 — Production-grade self-hosted CLI
+## M5 — Production-grade self-hosted CLI ✅
 
 Goal: a real user can replace `renovatebot/renovate` with the Rust binary for
 common self-hosted workflows across the top managers and platforms.
@@ -108,16 +108,16 @@ self-hosted relevance):
 
 | # | Module | Category | Status |
 |---|--------|----------|--------|
-| 1 | `manager/npm` | manager | full, 81% |
-| 2 | `manager/maven` | manager | full, 100% |
+| 1 | `manager/npm` | manager | full, 80% |
+| 2 | `manager/maven` | manager | full, 98% |
 | 3 | `datasource/npm` | datasource | full, 81% |
 | 4 | `platform/github` | platform | full, 80% |
 | 5 | `manager/dockerfile` | manager | full, 100% |
-| 6 | `manager/github-actions` | manager | full, 100% |
+| 6 | `manager/github-actions` | manager | full, 83% |
 | 7 | `datasource/maven` | datasource | full, 86% |
 | 8 | `versioning/semver` | versioning | full, 100% |
 | 9 | `platform/local` | platform | full, 100% |
-| 10 | `manager/terraform` | manager | full, 100% |
+| 10 | `manager/terraform` | manager | full, 94% |
 
 Acceptance:
 
