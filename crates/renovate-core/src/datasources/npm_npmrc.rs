@@ -155,9 +155,10 @@ fn env_replace_config(
         return;
     }
     if let Some(ref mut registry) = config.registry
-        && let Ok(replaced) = env_replace(registry, env) {
-            *registry = replaced;
-        }
+        && let Ok(replaced) = env_replace(registry, env)
+    {
+        *registry = replaced;
+    }
     for entry in &mut config.entries {
         if let Ok(replaced) = env_replace(&entry.value, env) {
             entry.value = replaced;
@@ -184,41 +185,40 @@ fn extract_secrets(config: &NpmrcConfig) -> Vec<String> {
                     secrets.push(entry.value.clone());
                 }
             }
-            "_password"
-                if !entry.value.is_empty() => {
-                    let host = if key_parts.len() > 1 {
-                        Some(key_parts[1])
-                    } else {
-                        None
-                    };
-                    let decoded = String::from_utf8(
-                        base64::Engine::decode(
-                            &base64::engine::general_purpose::STANDARD,
-                            &entry.value,
-                        )
-                        .unwrap_or_default(),
+            "_password" if !entry.value.is_empty() => {
+                let host = if key_parts.len() > 1 {
+                    Some(key_parts[1])
+                } else {
+                    None
+                };
+                let decoded = String::from_utf8(
+                    base64::Engine::decode(
+                        &base64::engine::general_purpose::STANDARD,
+                        &entry.value,
                     )
-                    .unwrap_or_default();
-                    // Find matching username for this host and add base64(username:password)
-                    let mut added_combined = false;
-                    if let Some(host) = host {
-                        for e2 in &config.entries {
-                            if e2.key == format!("{}:username", host) && !e2.value.is_empty() {
-                                let combined = format!("{}:{}", e2.value, decoded);
-                                secrets.push(
-                                    base64::engine::general_purpose::STANDARD
-                                        .encode(combined.as_bytes()),
-                                );
-                                added_combined = true;
-                                break;
-                            }
+                    .unwrap_or_default(),
+                )
+                .unwrap_or_default();
+                // Find matching username for this host and add base64(username:password)
+                let mut added_combined = false;
+                if let Some(host) = host {
+                    for e2 in &config.entries {
+                        if e2.key == format!("{}:username", host) && !e2.value.is_empty() {
+                            let combined = format!("{}:{}", e2.value, decoded);
+                            secrets.push(
+                                base64::engine::general_purpose::STANDARD
+                                    .encode(combined.as_bytes()),
+                            );
+                            added_combined = true;
+                            break;
                         }
                     }
-                    // Only add raw password if no username was found to combine with
-                    if !added_combined {
-                        secrets.push(entry.value.clone());
-                    }
                 }
+                // Only add raw password if no username was found to combine with
+                if !added_combined {
+                    secrets.push(entry.value.clone());
+                }
+            }
             _ => {}
         }
     }
@@ -229,9 +229,10 @@ fn extract_secrets(config: &NpmrcConfig) -> Vec<String> {
 /// Check if any registry entry points to localhost (and we don't have exposeAllEnv).
 fn has_localhost_registry(config: &NpmrcConfig) -> bool {
     if let Some(ref registry) = config.registry
-        && registry.contains("localhost") {
-            return true;
-        }
+        && registry.contains("localhost")
+    {
+        return true;
+    }
     for entry in &config.entries {
         if entry.key.ends_with("registry") && entry.value.contains("localhost") {
             return true;

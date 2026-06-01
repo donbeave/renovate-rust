@@ -47,10 +47,11 @@ fn parse_link_header_next(header: &str) -> Option<String> {
         let part = part.trim();
         if (part.contains(r#"rel="next""#) || part.contains("rel='next'"))
             && let Some(start) = part.find('<')
-                && let Some(end) = part.find('>')
-                    && start < end {
-                        return Some(part[start + 1..end].to_owned());
-                    }
+            && let Some(end) = part.find('>')
+            && start < end
+        {
+            return Some(part[start + 1..end].to_owned());
+        }
     }
     None
 }
@@ -221,7 +222,9 @@ impl GithubClient {
             return Ok(());
         }
 
-        let Ok(resp) = self.http.head_json(&self.api_base).await else { return Ok(()) };
+        let Ok(resp) = self.http.head_json(&self.api_base).await else {
+            return Ok(());
+        };
 
         let ghe_version = resp
             .headers()
@@ -1298,15 +1301,14 @@ impl GithubClient {
                     for rule in rules {
                         if let Some(t) = rule.get("type").and_then(|v| v.as_str())
                             && t == "required_status_checks"
-                                && let Some(params) = rule.get("parameters")
-                                    && params.get("strict_required_status_checks_policy")
-                                        == Some(&serde_json::Value::Bool(true))
-                                    {
-                                        let mut cache =
-                                            self.branch_force_rebase_cache.lock().unwrap();
-                                        cache.insert(cache_key, true);
-                                        return Ok(true);
-                                    }
+                            && let Some(params) = rule.get("parameters")
+                            && params.get("strict_required_status_checks_policy")
+                                == Some(&serde_json::Value::Bool(true))
+                        {
+                            let mut cache = self.branch_force_rebase_cache.lock().unwrap();
+                            cache.insert(cache_key, true);
+                            return Ok(true);
+                        }
                     }
                 }
             }
@@ -1470,9 +1472,10 @@ impl GithubClient {
                 return false;
             }
             if let Some(title) = pr_title
-                && title.to_uppercase() != pr.title.to_uppercase() {
-                    return false;
-                }
+                && title.to_uppercase() != pr.title.to_uppercase()
+            {
+                return false;
+            }
             if !matches_state(&pr.state, state) {
                 return false;
             }
@@ -1555,9 +1558,10 @@ impl GithubClient {
                     "PR created successfully"
                 );
                 if let Some(ms) = milestone
-                    && let Err(e) = self.add_milestone(owner, repo, pr.number, ms).await {
-                        tracing::warn!(err = %e, pr = pr.number, milestone = ms, "Unable to add milestone to PR");
-                    }
+                    && let Err(e) = self.add_milestone(owner, repo, pr.number, ms).await
+                {
+                    tracing::warn!(err = %e, pr = pr.number, milestone = ms, "Unable to add milestone to PR");
+                }
                 Ok(Some(pr.number))
             }
             Err(HttpError::Status { status, .. })
@@ -3423,10 +3427,10 @@ mod tests {
 
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let prs = client.list_prs("owner", "repo", None).await.unwrap();
-        assert_eq!(prs
-            .into_iter()
-            .filter(|p| p.title == "Update deps")
-            .count(), 1);
+        assert_eq!(
+            prs.into_iter().filter(|p| p.title == "Update deps").count(),
+            1
+        );
     }
 
     // Ported: "caches pr list" — modules/platform/github/index.spec.ts line 3687

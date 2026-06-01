@@ -24,7 +24,9 @@ impl RawToolSettings {
             map.get(key).and_then(|v| {
                 if let Some(n) = v.as_u64() {
                     Some(n as f64)
-                } else { v.as_f64() }
+                } else {
+                    v.as_f64()
+                }
             })
         };
         Self {
@@ -60,9 +62,10 @@ pub fn get_tool_settings_options(
     if let Some(repo_cfg) = repo {
         if let Some(repo_max) = repo_cfg.jvm_max_memory {
             if let Some(global_max) = options.jvm_max_memory
-                && repo_max as u64 > global_max {
-                    // Log would go here in full implementation.
-                }
+                && repo_max as u64 > global_max
+            {
+                // Log would go here in full implementation.
+            }
             options.jvm_max_memory = Some(
                 options
                     .jvm_max_memory
@@ -95,13 +98,15 @@ pub fn get_tool_settings_options(
 
     // Enforce minimum of 512M for JVM settings.
     if let Some(max) = options.jvm_max_memory
-        && max < 512 {
-            options.jvm_max_memory = Some(512);
-        }
+        && max < 512
+    {
+        options.jvm_max_memory = Some(512);
+    }
     if let Some(mem) = options.jvm_memory
-        && mem < 512 {
-            options.jvm_memory = Some(512);
-        }
+        && mem < 512
+    {
+        options.jvm_memory = Some(512);
+    }
 
     options
 }

@@ -23,8 +23,8 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 ---
 
 
-**Total:** 5722 / 11670 distinct upstream it() tests ported (49.0%) across 292 modules.
-**Quality:** 6432 `// Ported:` comments → 710 duplicate, 0 orphan, 0 malformed.
+**Total:** 5748 / 11670 distinct upstream it() tests ported (49.3%) across 292 modules.
+**Quality:** 6466 `// Ported:` comments → 718 duplicate, 0 orphan, 0 malformed.
 
 ## managers  —  2535/3642 (70%)
 
@@ -148,7 +148,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/woodpecker` | 1 | ? | 11/11 (100%) | — |
 | `manager/xcodegen` | 1 | ? | 24/24 (100%) | — |
 
-## datasources  —  613/1379 (44%)
+## datasources  —  639/1379 (46%)
 
 | Module | Spec files | Impl | Coverage | Notes |
 |---|---|---|---|---|
@@ -211,7 +211,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/jenkins-plugins` | 1 | ? | 5/5 (100%) | — |
 | `datasource/jsr` | 2 | ? | 15/15 (100%) | — |
 | `datasource/kubernetes-api` | 1 | ? | 3/3 (100%) | — |
-| `datasource/maven` | 6 | partial | 8/85 (9%) | Core fetching implemented (latest, releases, POM parsing). Missing: multi-registry fallback/merging, snapshot handling, caching, S3 support. |
+| `datasource/maven` | 6 | partial | 34/85 (40%) | Core fetching, multi-registry fallback/merging, parent POM resolution, postprocessRelease, Gradle plugin detection implemented. Missing: caching, S3 support, auth/redirect handling. |
 | `datasource/nextcloud` | 1 | ? | 5/5 (100%) | — |
 | `datasource/node-version` | 1 | ? | 2/4 (50%) | — |
 | `datasource/npm` | 4 | full | 52/64 (81%) | M2 complete |

@@ -1021,14 +1021,15 @@ images:
   - name: foo
 "#,
         );
-        assert!(deps
-            .into_iter()
-            .filter_map(|d| match d {
-                KustomizeDep::Image(img) => Some(img),
-                _ => None,
-            })
-            .next()
-            .is_none());
+        assert!(
+            deps.into_iter()
+                .filter_map(|d| match d {
+                    KustomizeDep::Image(img) => Some(img),
+                    _ => None,
+                })
+                .next()
+                .is_none()
+        );
     }
 
     // Ported: "extracts from newTag" — kustomize/extract.spec.ts line 680

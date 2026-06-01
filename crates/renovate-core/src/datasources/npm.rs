@@ -465,12 +465,12 @@ pub async fn get_npm_releases(
     // If latest version has a repository, use it as fallback.
     if source_url.is_none()
         && let Some(entry) = latest_version_entry
-            && let Some(ref repo) = entry.repository
-        {
-            let (su, sd) = parse_source(repo);
-            source_url = su;
-            source_directory = sd;
-        }
+        && let Some(ref repo) = entry.repository
+    {
+        let (su, sd) = parse_source(repo);
+        source_url = su;
+        source_directory = sd;
+    }
 
     // Deprecation message when the latest version is deprecated.
     let deprecation_message = latest_version_entry
@@ -562,7 +562,10 @@ pub async fn get_npm_releases(
     // Detect isPrivate from cache-control header.
     let is_private = {
         let cache_control = cache_control_header.as_deref().unwrap_or("");
-        !cache_control.split(',').map(|s| s.trim()).any(|x| x == "public")
+        !cache_control
+            .split(',')
+            .map(|s| s.trim())
+            .any(|x| x == "public")
     };
 
     let result = crate::datasources::ReleaseResult {

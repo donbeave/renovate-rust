@@ -1463,28 +1463,31 @@ pub fn get_new_constraint(
 
     // If current and new values are the same, preserve the old constraint.
     if let (Some(cv), Some(nv)) = (current_value, new_value.as_deref())
-        && cv == nv {
-            return Some(old_constraint.to_owned());
-        }
+        && cv == nv
+    {
+        return Some(old_constraint.to_owned());
+    }
 
     // Replace currentValue inside oldConstraint.
     if let (Some(cv), Some(nv)) = (current_value, new_value.as_deref())
-        && old_constraint.contains(cv) {
-            let pattern = format!(r"(,\s|^){}(\.0)*", regex::escape(cv));
-            let re = regex::Regex::new(&pattern).ok()?;
-            return Some(
-                re.replace(old_constraint, |caps: &regex::Captures| {
-                    format!("{}{}", &caps[1], nv)
-                })
-                .into_owned(),
-            );
-        }
+        && old_constraint.contains(cv)
+    {
+        let pattern = format!(r"(,\s|^){}(\.0)*", regex::escape(cv));
+        let re = regex::Regex::new(&pattern).ok()?;
+        return Some(
+            re.replace(old_constraint, |caps: &regex::Captures| {
+                format!("{}{}", &caps[1], nv)
+            })
+            .into_owned(),
+        );
+    }
 
     // Replace currentVersion inside oldConstraint.
     if let (Some(cv), Some(nv)) = (current_version, new_version)
-        && old_constraint.contains(cv) {
-            return Some(old_constraint.replace(cv, nv));
-        }
+        && old_constraint.contains(cv)
+    {
+        return Some(old_constraint.replace(cv, nv));
+    }
 
     // If the new value is a pinned exact version, return newVersion.
     if new_value.as_deref().is_some_and(is_pinned_version) {
@@ -1528,8 +1531,7 @@ where
         };
 
         let version_refs: Vec<&str> = versions.iter().map(|s| s.as_str()).collect();
-        let new_version = get_satisfying_version(&version_refs, constraints)
-            .map(|s| s.to_owned());
+        let new_version = get_satisfying_version(&version_refs, constraints).map(|s| s.to_owned());
 
         let Some(new_version) = new_version else {
             continue;
@@ -1539,11 +1541,14 @@ where
             continue;
         }
 
-        let new_hashes = match TerraformProviderHash::create_hashes(registry_url, package_name, &new_version).await {
-            Ok(Some(h)) => h,
-            Ok(None) => continue,
-            Err(e) => return Err(e),
-        };
+        let new_hashes =
+            match TerraformProviderHash::create_hashes(registry_url, package_name, &new_version)
+                .await
+            {
+                Ok(Some(h)) => h,
+                Ok(None) => continue,
+                Err(e) => return Err(e),
+            };
 
         updates.push(TerraformProviderLockUpdate {
             package_name: package_name.clone(),
@@ -1651,7 +1656,9 @@ pub async fn update_terraform_artifacts(
         return Ok(None);
     }
 
-    let Some(locks) = extract_terraform_locks(&lock_content) else { return Ok(None) };
+    let Some(locks) = extract_terraform_locks(&lock_content) else {
+        return Ok(None);
+    };
 
     // Lockfile maintenance: update ALL locks, not just the ones with dep updates.
     let updates: Vec<TerraformProviderLockUpdate> = if _config.is_lock_file_maintenance {
@@ -1700,44 +1707,48 @@ pub async fn update_terraform_artifacts(
 
         let mut updates = Vec::new();
         for dep in provider_deps {
-        let package_name = dep.package_name.as_deref().unwrap_or(&dep.dep_name);
-        let Some(update_lock) = locks.iter().find(|l| l.package_name == package_name) else {
-            continue;
-        };
+            let package_name = dep.package_name.as_deref().unwrap_or(&dep.dep_name);
+            let Some(update_lock) = locks.iter().find(|l| l.package_name == package_name) else {
+                continue;
+            };
 
-        if dep.is_lockfile_update
-            && let (Some(new_ver), Some(ver_scheme)) =
-                (dep.new_version.as_deref(), dep.versioning.as_deref())
-                && ver_scheme == "hashicorp" {
-                    let satisfies = crate::versioning::hashicorp::get_satisfying_version(
-                        &[new_ver],
-                        &update_lock.constraints,
-                    );
-                    if satisfies.is_none() {
-                        continue;
-                    }
+            if dep.is_lockfile_update
+                && let (Some(new_ver), Some(ver_scheme)) =
+                    (dep.new_version.as_deref(), dep.versioning.as_deref())
+                && ver_scheme == "hashicorp"
+            {
+                let satisfies = crate::versioning::hashicorp::get_satisfying_version(
+                    &[new_ver],
+                    &update_lock.constraints,
+                );
+                if satisfies.is_none() {
+                    continue;
                 }
+            }
 
-        let registry_url = dep
-            .registry_urls
-            .first()
-            .cloned()
-            .unwrap_or_else(|| update_lock.registry_url.clone());
+            let registry_url = dep
+                .registry_urls
+                .first()
+                .cloned()
+                .unwrap_or_else(|| update_lock.registry_url.clone());
 
-        let new_version = dep.new_version.clone().unwrap_or_default();
-        let new_constraint = get_new_constraint(
-            dep.current_value.as_deref(),
-            dep.current_version.as_deref(),
-            dep.new_value.as_deref(),
-            Some(&new_version),
-            Some(package_name),
-            Some(&update_lock.constraints),
-        )
-        .unwrap_or_else(|| new_version.clone());
+            let new_version = dep.new_version.clone().unwrap_or_default();
+            let new_constraint = get_new_constraint(
+                dep.current_value.as_deref(),
+                dep.current_version.as_deref(),
+                dep.new_value.as_deref(),
+                Some(&new_version),
+                Some(package_name),
+                Some(&update_lock.constraints),
+            )
+            .unwrap_or_else(|| new_version.clone());
 
-        let new_hashes =
-            match TerraformProviderHash::create_hashes(&registry_url, package_name, &new_version)
-                .await
+            let new_hashes = match TerraformProviderHash::create_hashes(
+                &registry_url,
+                package_name,
+                &new_version,
+            )
+            .await
             {
                 Ok(Some(h)) => h,
                 Ok(None) => return Ok(None),
@@ -1749,17 +1760,17 @@ pub async fn update_terraform_artifacts(
                 }
             };
 
-        updates.push(TerraformProviderLockUpdate {
-            package_name: update_lock.package_name.clone(),
-            registry_url,
-            version: update_lock.version.clone(),
-            constraints: update_lock.constraints.clone(),
-            hashes: update_lock.hashes.clone(),
-            line_numbers: update_lock.line_numbers.clone(),
-            new_version,
-            new_constraint,
-            new_hashes,
-        });
+            updates.push(TerraformProviderLockUpdate {
+                package_name: update_lock.package_name.clone(),
+                registry_url,
+                version: update_lock.version.clone(),
+                constraints: update_lock.constraints.clone(),
+                hashes: update_lock.hashes.clone(),
+                line_numbers: update_lock.line_numbers.clone(),
+                new_version,
+                new_constraint,
+                new_hashes,
+            });
         }
         updates
     };

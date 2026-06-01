@@ -435,12 +435,136 @@ fn process_scm_url(raw: &str) -> Option<String> {
         s
     };
 
+    // git://path  →  https://path
+    let s = if let Some(rest) = s.strip_prefix("git://") {
+        format!("https://{rest}")
+    } else {
+        s
+    };
+
+    // Strip leading @ in host part (e.g. https://@github.com/...)
+    let s = s.replace("://@", "://");
+
+    // Normalize www.github.com → github.com and http://github.com → https://github.com
+    let s = s.replace("www.github.com", "github.com");
+    let s = s.replace("http://github.com", "https://github.com");
+
     // Skip if any ${...} placeholders remain
     if s.contains("${") {
         return None;
     }
 
     Some(s)
+}
+
+/// Returns `true` when `dep_name` looks like a Gradle plugin and should be
+/// skipped on Maven Central (upstream `MavenDatasource.getReleases` behaviour).
+fn is_suspected_gradle_plugin(dep_name: &str) -> bool {
+    dep_name.contains(".gradle.plugin:") || dep_name.ends_with(".gradle.plugin")
+}
+
+/// Extract parent coordinates (`groupId`, `artifactId`, `version`) from a POM
+/// XML string.  Returns `None` when any required field is missing.
+fn parse_parent_coords(xml: &str) -> Option<(String, String, String)> {
+    let cursor = BufReader::new(xml.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut in_parent = false;
+    let mut current_tag: Option<String> = None;
+    let mut group_id: Option<String> = None;
+    let mut artifact_id: Option<String> = None;
+    let mut version: Option<String> = None;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                if tag == "parent" {
+                    in_parent = true;
+                }
+                current_tag = Some(tag);
+            }
+            Ok(Event::Text(e)) => {
+                if in_parent {
+                    if let Some(ref tag) = current_tag {
+                        let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                        if !text.is_empty() {
+                            match tag.as_str() {
+                                "groupId" if group_id.is_none() => group_id = Some(text),
+                                "artifactId" if artifact_id.is_none() => artifact_id = Some(text),
+                                "version" if version.is_none() => version = Some(text),
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(Event::End(e)) => {
+                let tag = String::from_utf8_lossy(e.local_name().as_ref()).into_owned();
+                if tag == "parent" {
+                    break;
+                }
+                current_tag = None;
+            }
+            Ok(Event::Eof) | Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    Some((group_id?, artifact_id?, version?))
+}
+
+/// Recursively fetch POM info, resolving parent POMs when `homepage` or
+/// `source_url` is missing.
+///
+/// `recursion_limit` defaults to 5 (matching upstream).
+pub fn fetch_pom_info_with_parent<'a>(
+    http: &'a HttpClient,
+    group_id: &'a str,
+    artifact_id: &'a str,
+    version: &'a str,
+    registry: &'a str,
+    recursion_limit: usize,
+) -> std::pin::Pin<Box<dyn std::future::Future<Output = PomInfo> + Send + 'a>> {
+    Box::pin(async move {
+        let group_path = group_id.replace('.', "/");
+        let base = registry.trim_end_matches('/');
+        let pom_url = format!("{base}/{group_path}/{artifact_id}/{version}/{artifact_id}-{version}.pom");
+
+        let pom_body = match http.get_retrying(&pom_url).await.ok() {
+            Some(r) if r.status().is_success() => r.text().await.ok().unwrap_or_default(),
+            _ => return PomInfo::default(),
+        };
+
+        let mut info = parse_pom_info(&pom_body);
+
+        // If missing info and recursion allowed, try parent POM
+        if recursion_limit > 0 && (info.homepage.is_none() || info.source_url.is_none()) {
+            if let Some((parent_group, parent_artifact, parent_version)) = parse_parent_coords(&pom_body)
+            {
+                let parent_info = fetch_pom_info_with_parent(
+                    http,
+                    &parent_group,
+                    &parent_artifact,
+                    &parent_version,
+                    registry,
+                    recursion_limit - 1,
+                )
+                .await;
+                if info.source_url.is_none() && parent_info.source_url.is_some() {
+                    info.source_url = parent_info.source_url;
+                }
+                if info.homepage.is_none() && parent_info.homepage.is_some() {
+                    info.homepage = parent_info.homepage;
+                }
+            }
+        }
+
+        info
+    })
 }
 
 /// Return the "latest suitable" version: highest stable version, falling back
@@ -498,6 +622,11 @@ pub async fn fetch_releases_from_registry(
         return None;
     }
 
+    // Skip Gradle plugins on Maven Central
+    if is_suspected_gradle_plugin(dep_name) && is_maven_central(registry) {
+        return None;
+    }
+
     let (group_id, artifact_id) = dep_name.split_once(':')?;
     let group_path = group_id.replace('.', "/");
     let base = registry.trim_end_matches('/');
@@ -512,17 +641,7 @@ pub async fn fetch_releases_from_registry(
 
     // Fetch POM for the latest suitable version to get homepage / sourceUrl
     let pom_info = if let Some(latest) = find_latest_suitable(&metadata.versions) {
-        let pom_url =
-            format!("{base}/{group_path}/{artifact_id}/{latest}/{artifact_id}-{latest}.pom");
-        match http.get_retrying(&pom_url).await.ok() {
-            Some(r) if r.status().is_success() => r
-                .text()
-                .await
-                .ok()
-                .map(|b| parse_pom_info(&b))
-                .unwrap_or_default(),
-            _ => PomInfo::default(),
-        }
+        fetch_pom_info_with_parent(http, group_id, artifact_id, latest, registry, 5).await
     } else {
         PomInfo::default()
     };
@@ -541,6 +660,151 @@ pub async fn fetch_releases_from_registry(
         tags: metadata.tags,
         is_private,
         respect_latest,
+    })
+}
+
+/// Fetch releases for `dep_name` by trying multiple `registry_urls` in order.
+///
+/// Returns the first successful result, or `None` if all registries fail.
+/// Mirrors upstream `MavenDatasource.getReleases` registry fallback.
+pub async fn fetch_releases(
+    dep_name: &str,
+    registry_urls: &[&str],
+    http: &HttpClient,
+    default_registries: &[&str],
+) -> Option<MavenReleasesResult> {
+    for registry in registry_urls {
+        if let Some(result) =
+            fetch_releases_from_registry(dep_name, registry, http, default_registries).await
+        {
+            return Some(result);
+        }
+    }
+    None
+}
+
+/// Fetch releases for `dep_name` by querying all `registry_urls` and merging
+/// the version lists. Returns `None` if no registry succeeds.
+///
+/// Mirrors upstream `MavenDatasource.getReleases` with `registryStrategy: 'merge'`.
+pub async fn fetch_releases_merged(
+    dep_name: &str,
+    registry_urls: &[&str],
+    http: &HttpClient,
+    default_registries: &[&str],
+) -> Option<MavenReleasesResult> {
+    let mut all_versions: Vec<String> = Vec::new();
+    let mut merged_tags: HashMap<String, String> = HashMap::new();
+    let mut source_url: Option<String> = None;
+    let mut homepage: Option<String> = None;
+    let mut any_success = false;
+    let mut first_registry_url = String::new();
+    let mut is_private = true;
+    let mut respect_latest = false;
+
+    for registry in registry_urls {
+        if let Some(result) =
+            fetch_releases_from_registry(dep_name, registry, http, default_registries).await
+        {
+            any_success = true;
+            if first_registry_url.is_empty() {
+                first_registry_url = result.registry_url.clone();
+                source_url = result.source_url;
+                homepage = result.homepage;
+                is_private = result.is_private;
+                respect_latest = result.respect_latest;
+            }
+            for ver in result.releases {
+                if !all_versions.contains(&ver) {
+                    all_versions.push(ver);
+                }
+            }
+            merged_tags.extend(result.tags);
+        }
+    }
+
+    if !any_success {
+        return None;
+    }
+
+    // Sort versions using maven versioning compare (descending)
+    all_versions.sort_by(|a, b| crate::versioning::maven::compare(b, a));
+
+    Some(MavenReleasesResult {
+        releases: all_versions,
+        source_url,
+        homepage,
+        registry_url: first_registry_url,
+        tags: merged_tags,
+        is_private,
+        respect_latest,
+    })
+}
+
+/// Result of post-processing a single Maven release.
+#[derive(Debug, Clone)]
+pub struct MavenRelease {
+    pub version: String,
+    /// ISO 8601 timestamp from the POM's `Last-Modified` header, if available.
+    pub release_timestamp: Option<String>,
+}
+
+/// Post-process a single release by fetching its POM and extracting metadata.
+///
+/// Mirrors upstream `MavenDatasource.postprocessRelease`.
+/// - Returns `None` (reject) when the POM returns 404.
+/// - Returns the release unchanged on other errors or when `package_name` /
+///   `registry_url` are missing.
+/// - Sets `release_timestamp` from the `Last-Modified` response header on success.
+pub async fn postprocess_release(
+    http: &HttpClient,
+    package_name: &str,
+    registry_url: &str,
+    version: &str,
+) -> Option<MavenRelease> {
+    if package_name.is_empty() || registry_url.is_empty() {
+        return Some(MavenRelease {
+            version: version.to_owned(),
+            release_timestamp: None,
+        });
+    }
+
+    let (group_id, artifact_id) = package_name.split_once(':')?;
+    let group_path = group_id.replace('.', "/");
+    let base = registry_url.trim_end_matches('/');
+    let pom_url = format!("{base}/{group_path}/{artifact_id}/{version}/{artifact_id}-{version}.pom");
+
+    let resp = match http.get_retrying(&pom_url).await {
+        Ok(r) => r,
+        Err(_) => {
+            return Some(MavenRelease {
+                version: version.to_owned(),
+                release_timestamp: None,
+            });
+        }
+    };
+
+    let status = resp.status();
+    if status.as_u16() == 404 {
+        return None;
+    }
+    if !status.is_success() {
+        return Some(MavenRelease {
+            version: version.to_owned(),
+            release_timestamp: None,
+        });
+    }
+
+    // Extract Last-Modified header
+    let release_timestamp = resp
+        .headers()
+        .get("last-modified")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_owned());
+
+    Some(MavenRelease {
+        version: version.to_owned(),
+        release_timestamp,
     })
 }
 
@@ -795,6 +1059,338 @@ mod tests {
         assert!(result.is_none());
     }
 
+    // Ported: "falls back to next registry url" — modules/datasource/maven/index.spec.ts line 273
+    #[tokio::test]
+    async fn fetch_releases_falls_back_to_next_registry() {
+        let server1 = MockServer::start().await;
+        let server2 = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server1)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>1.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server2)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(
+            "com.example:lib",
+            &[&server1.uri(), &server2.uri()],
+            &http,
+            &[],
+        )
+        .await;
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().releases, vec!["1.0.0"]);
+    }
+
+    // Ported: "merges releases from multiple registries" — modules/datasource/maven/index.spec.ts line 304
+    #[tokio::test]
+    async fn fetch_releases_merges_from_multiple_registries() {
+        let server1 = MockServer::start().await;
+        let server2 = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>1.0.0</version>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server1)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>2.0.0</version>
+      <version>3.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server2)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_merged(
+            "com.example:lib",
+            &[&server1.uri(), &server2.uri()],
+            &http,
+            &[],
+        )
+        .await;
+        assert!(result.is_some());
+        let releases = result.unwrap().releases;
+        assert!(releases.contains(&"1.0.0".to_owned()));
+        assert!(releases.contains(&"2.0.0".to_owned()));
+        assert!(releases.contains(&"3.0.0".to_owned()));
+        assert_eq!(releases.len(), 3);
+    }
+
+    // Ported: "returns releases when only snapshot" — modules/datasource/maven/index.spec.ts line 198
+    #[tokio::test]
+    async fn fetch_releases_snapshot_only() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <versioning>
+    <latest>1.0.3-SNAPSHOT</latest>
+    <release>1.0.3-SNAPSHOT</release>
+    <versions>
+      <version>1.0.3-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20210101000000</lastUpdated>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:package",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.releases, vec!["1.0.3-SNAPSHOT"]);
+        assert_eq!(r.tags.get("latest"), Some(&"1.0.3-SNAPSHOT".to_owned()));
+        assert_eq!(r.tags.get("release"), Some(&"1.0.3-SNAPSHOT".to_owned()));
+    }
+
+    // Ported: "handles invalid snapshot" — modules/datasource/maven/index.spec.ts line 229
+    #[tokio::test]
+    async fn fetch_releases_invalid_snapshot_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<?xml version="1.0" encoding="UTF-8"?><metadata>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <version>1.0.4-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <buildNumber>4</buildNumber>
+    </snapshot>
+    <lastUpdated>20130301200000</lastUpdated>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:package",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns releases from custom repository" — modules/datasource/maven/index.spec.ts line 265
+    #[tokio::test]
+    async fn fetch_releases_from_custom_repository() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>1.0.0</version>
+      <version>1.1.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result =
+            fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[]).await;
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().releases, vec!["1.0.0", "1.1.0"]);
+    }
+
+    // Ported: "skips registry with invalid metadata structure" — modules/datasource/maven/index.spec.ts line 347
+    #[tokio::test]
+    async fn fetch_releases_invalid_metadata_structure_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(r#"<metadata><versioning></versioning></metadata>"#),
+            )
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result =
+            fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()])
+                .await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "handles optional slash at the end of registry url" — modules/datasource/maven/index.spec.ts line 379
+    #[tokio::test]
+    async fn fetch_releases_handles_trailing_slash() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>1.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let registry_with_slash = format!("{}/", server.uri());
+        let result =
+            fetch_releases_from_registry("com.example:lib", &registry_with_slash, &http, &[]).await;
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().releases, vec!["1.0.0"]);
+    }
+
+    // Ported: "returns null for 404" — modules/datasource/maven/index.spec.ts line 795
+    #[tokio::test]
+    async fn fetch_releases_404_on_pom_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>1.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/com/example/lib/1.0.0/lib-1.0.0.pom"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result =
+            fetch_releases_from_registry("com.example:lib", &server.uri(), &http, &[&server.uri()])
+                .await;
+        // 404 on POM should still return releases; POM info is best-effort.
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().releases, vec!["1.0.0"]);
+    }
+
+    // Ported: "returns null for invalid registryUrls" — modules/datasource/maven/index.spec.ts line 389
+    #[tokio::test]
+    async fn fetch_releases_invalid_registry_url_returns_none() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases("com.example:lib", &["not-a-url"], &http, &[]).await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "with only groupId present" — modules/datasource/maven/index.spec.ts line 408
+    #[test]
+    fn parse_pom_info_only_group_id() {
+        let xml = r#"<project>
+  <groupId>org.example</groupId>
+</project>"#;
+        let info = parse_pom_info(xml);
+        assert_eq!(info.homepage, None);
+        assert_eq!(info.source_url, None);
+    }
+
+    // Ported: "with only artifactId present" — modules/datasource/maven/index.spec.ts line 428
+    #[test]
+    fn parse_pom_info_only_artifact_id() {
+        let xml = r#"<project>
+  <artifactId>package</artifactId>
+</project>"#;
+        let info = parse_pom_info(xml);
+        assert_eq!(info.homepage, None);
+        assert_eq!(info.source_url, None);
+    }
+
+    // Ported: "should get homepage and source from own pom" — modules/datasource/maven/index.spec.ts line 736
+    #[test]
+    fn parse_pom_info_homepage_and_source_from_own_pom() {
+        let xml = r#"<project>
+  <url>https://example.com</url>
+  <scm>
+    <url>https://github.com/example/project</url>
+  </scm>
+</project>"#;
+        let info = parse_pom_info(xml);
+        assert_eq!(info.homepage, Some("https://example.com".to_owned()));
+        assert_eq!(
+            info.source_url,
+            Some("https://github.com/example/project".to_owned())
+        );
+    }
+
+    // Ported: "should be able to detect git@github.com/child-scm as valid sourceUrl" — modules/datasource/maven/index.spec.ts line 765
+    #[test]
+    fn process_scm_url_git_at_github_slash() {
+        assert_eq!(
+            process_scm_url("git@github.com/foo/bar"),
+            Some("https://github.com/foo/bar".to_owned())
+        );
+    }
+
+    // Ported: "should be able to detect git://@github.com/child-scm as valid sourceUrl" — modules/datasource/maven/index.spec.ts line 779
+    #[test]
+    fn process_scm_url_git_protocol() {
+        assert_eq!(
+            process_scm_url("git://@github.com/foo/bar"),
+            Some("https://github.com/foo/bar".to_owned())
+        );
+    }
+
     #[test]
     fn parse_all_versions_extracts_versions_and_tags() {
         let xml = r#"<metadata>
@@ -834,6 +1430,195 @@ mod tests {
         assert_eq!(
             info.source_url,
             Some("https://github.com/example/project".to_owned())
+        );
+    }
+
+    // Ported: "should get source and homepage from parent" — modules/datasource/maven/index.spec.ts line 635
+    #[tokio::test]
+    async fn fetch_pom_info_with_parent_inherits_source_and_homepage() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/parent/1.0.0/parent-1.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <scm>
+    <url>scm:git:git://www.github.com/parent-scm/parent</url>
+  </scm>
+  <url>https://parent-home.example.com</url>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let info = fetch_pom_info_with_parent(
+            &http, "org.example", "package", "2.0.0", &server.uri(), 5,
+        )
+        .await;
+        assert_eq!(
+            info.source_url,
+            Some("https://github.com/parent-scm/parent".to_owned())
+        );
+        assert_eq!(info.homepage, Some("https://parent-home.example.com".to_owned()));
+    }
+
+    // Ported: "should deal with missing parent fields" — modules/datasource/maven/index.spec.ts line 651
+    #[tokio::test]
+    async fn fetch_pom_info_with_parent_missing_fields() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent></parent>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let info = fetch_pom_info_with_parent(
+            &http, "org.example", "package", "2.0.0", &server.uri(), 5,
+        )
+        .await;
+        assert_eq!(info.source_url, None);
+        assert_eq!(info.homepage, None);
+    }
+
+    // Ported: "should deal with circular hierarchy" — modules/datasource/maven/index.spec.ts line 669
+    #[tokio::test]
+    async fn fetch_pom_info_with_parent_circular_hierarchy() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/child/2.0.0/child-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.0.0</version>
+  </parent>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/parent/2.0.0/parent-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>child</artifactId>
+    <version>2.0.0</version>
+  </parent>
+  <url>https://parent-home.example.com</url>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let info = fetch_pom_info_with_parent(
+            &http, "org.example", "child", "2.0.0", &server.uri(), 5,
+        )
+        .await;
+        assert_eq!(info.homepage, Some("https://parent-home.example.com".to_owned()));
+    }
+
+    // Ported: "should get source from own pom and homepage from parent" — modules/datasource/maven/index.spec.ts line 704
+    #[tokio::test]
+    async fn fetch_pom_info_source_from_own_homepage_from_parent() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <scm>
+    <url>scm:git:https://www.github.com/child-scm/child</url>
+  </scm>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/parent/1.0.0/parent-1.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <url>https://parent-home.example.com</url>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let info = fetch_pom_info_with_parent(
+            &http, "org.example", "package", "2.0.0", &server.uri(), 5,
+        )
+        .await;
+        assert_eq!(
+            info.source_url,
+            Some("https://github.com/child-scm/child".to_owned())
+        );
+        assert_eq!(info.homepage, Some("https://parent-home.example.com".to_owned()));
+    }
+
+    // Ported: "should get homepage from own pom and source from parent" — modules/datasource/maven/index.spec.ts line 720
+    #[tokio::test]
+    async fn fetch_pom_info_homepage_from_own_source_from_parent() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <url>https://child-home.example.com</url>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/parent/1.0.0/parent-1.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <scm>
+    <url>scm:git:git://www.github.com/parent-scm/parent</url>
+  </scm>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let info = fetch_pom_info_with_parent(
+            &http, "org.example", "package", "2.0.0", &server.uri(), 5,
+        )
+        .await;
+        assert_eq!(info.homepage, Some("https://child-home.example.com".to_owned()));
+        assert_eq!(
+            info.source_url,
+            Some("https://github.com/parent-scm/parent".to_owned())
         );
     }
 
@@ -900,5 +1685,469 @@ mod tests {
         let summary = summary_from_cache("1.0.0", &Some("2.0.0".into()));
         assert_eq!(summary.latest.as_deref(), Some("2.0.0"));
         assert!(summary.update_available);
+    }
+
+    // Ported: "when using primary registry URL" — modules/datasource/maven/index.spec.ts line 136
+    #[tokio::test]
+    async fn gradle_plugin_group_id_on_central_returns_none() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "io.github.ramanji025.gradle.plugin:typescript-gradle-plugin",
+            MAVEN_CENTRAL_BASE,
+            &http,
+            &[MAVEN_CENTRAL_BASE],
+        )
+        .await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "when using mirror URL" — modules/datasource/maven/index.spec.ts line 145
+    #[tokio::test]
+    async fn gradle_plugin_group_id_on_mirror_returns_none() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "io.github.ramanji025.gradle.plugin:typescript-gradle-plugin",
+            MAVEN_CENTRAL_MIRROR,
+            &http,
+            &[MAVEN_CENTRAL_MIRROR],
+        )
+        .await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "when using primary registry URL" — modules/datasource/maven/index.spec.ts line 156
+    #[tokio::test]
+    async fn gradle_plugin_artifact_id_on_central_returns_none() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:org.example.gradle.plugin",
+            MAVEN_CENTRAL_BASE,
+            &http,
+            &[MAVEN_CENTRAL_BASE],
+        )
+        .await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "when using mirror URL" — modules/datasource/maven/index.spec.ts line 165
+    #[tokio::test]
+    async fn gradle_plugin_artifact_id_on_mirror_returns_none() {
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:org.example.gradle.plugin",
+            MAVEN_CENTRAL_MIRROR,
+            &http,
+            &[MAVEN_CENTRAL_MIRROR],
+        )
+        .await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "fetches Gradle plugins from non-Maven-Central registries" — modules/datasource/maven/index.spec.ts line 176
+    #[tokio::test]
+    async fn gradle_plugin_from_custom_registry() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/org/example/org.example.gradle.plugin/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>1.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/org.example.gradle.plugin/1.0.0/org.example.gradle.plugin-1.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("<project/>"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:org.example.gradle.plugin",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(result.is_some());
+    }
+
+    // Ported: "should get source and homepage from parent" — modules/datasource/maven/index.spec.ts line 635
+    #[tokio::test]
+    async fn parent_pom_provides_source_and_homepage() {
+        let server = MockServer::start().await;
+
+        // metadata
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        // child POM — no info, but has parent
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        // parent POM — has scm and url
+        Mock::given(method("GET"))
+            .and(path("/org/example/parent/1.0.0/parent-1.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <scm>
+    <url>scm:git:git://www.github.com/parent-scm/parent</url>
+  </scm>
+  <url>https://parent-home.example.com</url>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:package",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.source_url, Some("https://github.com/parent-scm/parent".to_owned()));
+        assert_eq!(r.homepage, Some("https://parent-home.example.com".to_owned()));
+    }
+
+    // Ported: "should deal with missing parent fields" — modules/datasource/maven/index.spec.ts line 651
+    #[tokio::test]
+    async fn parent_pom_empty_parent_returns_no_source_or_homepage() {
+        let server = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project><parent></parent></project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:package",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.source_url, None);
+        assert_eq!(r.homepage, None);
+    }
+
+    // Ported: "should deal with circular hierarchy" — modules/datasource/maven/index.spec.ts line 669
+    #[tokio::test]
+    async fn parent_pom_circular_hierarchy_stops_at_limit() {
+        let server = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/child/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        // child POM references parent
+        Mock::given(method("GET"))
+            .and(path("/org/example/child/2.0.0/child-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.0.0</version>
+  </parent>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        // parent POM references child back (circular)
+        Mock::given(method("GET"))
+            .and(path("/org/example/parent/2.0.0/parent-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>child</artifactId>
+    <version>2.0.0</version>
+  </parent>
+  <url>https://parent-home.example.com</url>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:child",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        // Should get homepage from parent before recursion limit hits
+        assert_eq!(r.homepage, Some("https://parent-home.example.com".to_owned()));
+    }
+
+    // Ported: "should get source from own pom and homepage from parent" — modules/datasource/maven/index.spec.ts line 704
+    #[tokio::test]
+    async fn parent_pom_source_from_own_homepage_from_parent() {
+        let server = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <scm>
+    <url>scm:git:https://www.github.com/child-scm/child</url>
+  </scm>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/parent/1.0.0/parent-1.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <url>https://parent-home.example.com</url>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:package",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.source_url, Some("https://github.com/child-scm/child".to_owned()));
+        assert_eq!(r.homepage, Some("https://parent-home.example.com".to_owned()));
+    }
+
+    // Ported: "should get homepage from own pom and source from parent" — modules/datasource/maven/index.spec.ts line 720
+    #[tokio::test]
+    async fn parent_pom_homepage_from_own_source_from_parent() {
+        let server = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/maven-metadata.xml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<metadata>
+  <versioning>
+    <versions>
+      <version>2.0.0</version>
+    </versions>
+  </versioning>
+</metadata>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/package/2.0.0/package-2.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <url>https://child-home.example.com</url>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        Mock::given(method("GET"))
+            .and(path("/org/example/parent/1.0.0/parent-1.0.0.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(
+                r#"<project>
+  <scm>
+    <url>scm:git:git://www.github.com/parent-scm/parent</url>
+  </scm>
+</project>"#,
+            ))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases_from_registry(
+            "org.example:package",
+            &server.uri(),
+            &http,
+            &[&server.uri()],
+        )
+        .await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.source_url, Some("https://github.com/parent-scm/parent".to_owned()));
+        assert_eq!(r.homepage, Some("https://child-home.example.com".to_owned()));
+    }
+
+    // Ported: "returns null for 404" — modules/datasource/maven/index.spec.ts line 795
+    #[tokio::test]
+    async fn postprocess_release_404_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foo/bar/1.2.3/bar-1.2.3.pom"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3").await;
+        assert!(result.is_none());
+    }
+
+    // Ported: "returns original value for unknown error" — modules/datasource/maven/index.spec.ts line 806
+    #[tokio::test]
+    async fn postprocess_release_unknown_error_returns_original() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foo/bar/1.2.3/bar-1.2.3.pom"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3").await;
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().version, "1.2.3");
+    }
+
+    // Ported: "returns original value for 200 response" — modules/datasource/maven/index.spec.ts line 821
+    #[tokio::test]
+    async fn postprocess_release_200_returns_original() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foo/bar/1.2.3/bar-1.2.3.pom"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("<project/>"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3").await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.version, "1.2.3");
+        assert_eq!(r.release_timestamp, None);
+    }
+
+    // Ported: "returns original value for invalid configs" — modules/datasource/maven/index.spec.ts line 845
+    #[tokio::test]
+    async fn postprocess_release_invalid_config_returns_original() {
+        let http = HttpClient::new().unwrap();
+        // missing package_name
+        let result = postprocess_release(&http, "", "https://example.com", "1.2.3").await;
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().version, "1.2.3");
+        // missing registry_url
+        let result = postprocess_release(&http, "foo:bar", "", "1.2.3").await;
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().version, "1.2.3");
+    }
+
+    // Ported: "adds releaseTimestamp" — modules/datasource/maven/index.spec.ts line 861
+    #[tokio::test]
+    async fn postprocess_release_adds_release_timestamp() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foo/bar/1.2.3/bar-1.2.3.pom"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string("<project/>")
+                    .insert_header("last-modified", "2024-01-01T00:00:00.000Z"),
+            )
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = postprocess_release(&http, "foo:bar", &server.uri(), "1.2.3").await;
+        assert!(result.is_some());
+        let r = result.unwrap();
+        assert_eq!(r.version, "1.2.3");
+        assert_eq!(r.release_timestamp, Some("2024-01-01T00:00:00.000Z".to_owned()));
     }
 }

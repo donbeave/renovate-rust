@@ -136,11 +136,12 @@ impl ArtifactRunner for BundlerArtifactRunner {
                 .unwrap_or_else(|| lock_file_dir.clone());
 
             // 1. Determine lock file path.
-            let Ok(lock_path) = crate::extractors::bundler::get_lock_file_path(
-                &package_file_name,
-                lock_file_dir,
-            )
-            .await else { return Ok(None) };
+            let Ok(lock_path) =
+                crate::extractors::bundler::get_lock_file_path(&package_file_name, lock_file_dir)
+                    .await
+            else {
+                return Ok(None);
+            };
 
             // 2. Read existing lock file.
             let Ok(original_lock) = tokio::fs::read_to_string(&lock_path).await else {

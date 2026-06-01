@@ -102,8 +102,12 @@ impl CargoArtifactRunner {
                 continue;
             }
             let pkg = dep.package_name.as_deref().unwrap_or(&dep.dep_name);
-            let Some(locked) = &dep.locked_version else { continue };
-            let Some(new_ver) = &dep.new_version else { continue };
+            let Some(locked) = &dep.locked_version else {
+                continue;
+            };
+            let Some(new_ver) = &dep.new_version else {
+                continue;
+            };
             let pkg_quoted = crate::util::shlex_quote(&format!("{}@{}", pkg, locked));
             let precise_quoted = crate::util::shlex_quote(new_ver);
             cmds.push(format!(

@@ -280,7 +280,8 @@ fn matches_glob(val: &str, pattern: &str) -> bool {
     if pattern == exact {
         return true;
     }
-    Glob::new(pattern).map(|g| g.compile_matcher().is_match(val))
+    Glob::new(pattern)
+        .map(|g| g.compile_matcher().is_match(val))
         .unwrap_or(false)
 }
 

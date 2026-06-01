@@ -106,7 +106,7 @@ impl HttpClient {
     /// behaviour is identical to [`get`][Self::get].
     pub fn get_with_auth(&self, url: &str, auth: Option<&str>) -> RequestBuilder {
         let rb = self.inner.get(url);
-        
+
         match auth {
             Some(a) => rb.header("Authorization", a),
             None => match &self.token {

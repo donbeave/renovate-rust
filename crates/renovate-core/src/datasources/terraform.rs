@@ -173,7 +173,11 @@ pub async fn fetch_provider_releases(
         .map(|e| e.attributes.version)
         .collect();
 
-    Ok(if versions.is_empty() { None } else { Some(versions) })
+    Ok(if versions.is_empty() {
+        None
+    } else {
+        Some(versions)
+    })
 }
 
 /// Fetch the latest version of a Terraform module.

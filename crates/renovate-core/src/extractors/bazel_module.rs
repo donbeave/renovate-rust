@@ -611,42 +611,46 @@ pub fn parse_module_bazel(input: &str) -> Vec<BazelFragment> {
         // Only match if it looks like a simple rule call (not an extension tag or known rule)
         if let Some(rule_name) = extract_rule_name(line)
             && !rule_name.contains('.')
-                && rule_name != "bazel_dep"
-                && rule_name != "git_override"
-                && rule_name != "archive_override"
-                && rule_name != "local_path_override"
-                && rule_name != "single_version_override"
-                && rule_name != "git_repository"
-                && let Some((_fragment, consumed)) = try_parse_rule_block(&lines[i..]) {
-                    // Could be a repo rule call
-                    if let Some(children) =
-                        parse_rule_children(&extract_rule_body(&lines[i..]).unwrap_or_default())
-                    {
-                        results.push(BazelFragment::RepoRuleCall {
-                            function_name: rule_name.to_owned(),
-                            children,
-                            is_complete: true,
-                        });
-                        i += consumed;
-                        continue;
-                    }
-                }
-
-        // Try extension tag: ext.tag(...)
-        if line.contains('.') && line.contains('(')
-            && let Some((fragment, consumed)) = try_parse_extension_tag_block(&lines[i..]) {
-                results.push(fragment);
+            && rule_name != "bazel_dep"
+            && rule_name != "git_override"
+            && rule_name != "archive_override"
+            && rule_name != "local_path_override"
+            && rule_name != "single_version_override"
+            && rule_name != "git_repository"
+            && let Some((_fragment, consumed)) = try_parse_rule_block(&lines[i..])
+        {
+            // Could be a repo rule call
+            if let Some(children) =
+                parse_rule_children(&extract_rule_body(&lines[i..]).unwrap_or_default())
+            {
+                results.push(BazelFragment::RepoRuleCall {
+                    function_name: rule_name.to_owned(),
+                    children,
+                    is_complete: true,
+                });
                 i += consumed;
                 continue;
             }
+        }
+
+        // Try extension tag: ext.tag(...)
+        if line.contains('.')
+            && line.contains('(')
+            && let Some((fragment, consumed)) = try_parse_extension_tag_block(&lines[i..])
+        {
+            results.push(fragment);
+            i += consumed;
+            continue;
+        }
 
         // Try regular rule call
         if line.contains('(')
-            && let Some((fragment, consumed)) = try_parse_rule_block(&lines[i..]) {
-                results.push(fragment);
-                i += consumed;
-                continue;
-            }
+            && let Some((fragment, consumed)) = try_parse_rule_block(&lines[i..])
+        {
+            results.push(fragment);
+            i += consumed;
+            continue;
+        }
 
         i += 1;
     }
