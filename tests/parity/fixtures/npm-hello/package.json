@@ -1,0 +1,7 @@
+{
+  "name": "npm-hello",
+  "version": "1.0.0",
+  "dependencies": {
+    "lodash": "^4.0.0"
+  }
+}

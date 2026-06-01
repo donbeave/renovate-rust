@@ -106,7 +106,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `manager/mix` | 3 | ? | 8/28 (29%) | — |
 | `manager/nix` | 3 | ? | 40/50 (80%) | — |
 | `manager/nodenv` | 1 | ? | 3/3 (100%) | — |
-| `manager/npm` | 32 | ? | 353/439 (80%) | — |
+| `manager/npm` | 32 | full | 353/439 (80%) | Extract and update full; artifacts: missing docker mode, install mode, pnpm workspace edge cases |
 | `manager/nuget` | 6 | ? | 51/93 (55%) | — |
 | `manager/nvm` | 1 | ? | 4/4 (100%) | — |
 | `manager/ocb` | 2 | ? | 9/9 (100%) | — |
@@ -214,7 +214,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `datasource/maven` | 6 | ? | 1/85 (1%) | — |
 | `datasource/nextcloud` | 1 | ? | 5/5 (100%) | — |
 | `datasource/node-version` | 1 | ? | 2/4 (50%) | — |
-| `datasource/npm` | 4 | ? | 53/64 (83%) | — |
+| `datasource/npm` | 4 | full | 53/64 (83%) | Core registry lookup full; missing: hostRules auth paths, cache revalidation, some error-handling edge cases |
 | `datasource/nuget` | 2 | ? | 2/37 (5%) | — |
 | `datasource/orb` | 1 | ? | 7/7 (100%) | — |
 | `datasource/packagist` | 2 | ? | 0/25 (0%) | — |
@@ -290,7 +290,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/maven` | 2 | ? | 21/23 (91%) | — |
 | `versioning/nixpkgs` | 1 | ? | 4/5 (80%) | — |
 | `versioning/node` | 1 | ? | 6/6 (100%) | — |
-| `versioning/npm` | 1 | ? | 7/7 (100%) | — |
+| `versioning/npm` | 1 | full | 7/7 (100%) | — |
 | `versioning/nuget` | 3 | ? | 29/34 (85%) | — |
 | `versioning/pep440` | 2 | ? | 13/14 (93%) | — |
 | `versioning/perl` | 1 | ? | 4/4 (100%) | — |

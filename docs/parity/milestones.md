@@ -59,7 +59,7 @@ Acceptance:
 - [x] `manager/npm` Impl=`full`, Coverage ≥ 80%.
 - [x] `datasource/npm` Impl=`full`, Coverage ≥ 80%.
 - [x] `versioning/npm` Impl=`full`, Coverage ≥ 80%.
-- [ ] `tests/parity/fixtures/npm-hello/` matches via the diff harness.
+- [x] `tests/parity/fixtures/npm-hello/` matches via the diff harness.
 
 ---
 

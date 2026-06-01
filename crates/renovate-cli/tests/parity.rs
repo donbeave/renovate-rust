@@ -226,6 +226,45 @@ fn parity_cargo_hello() {
 
 // Rust-specific: parity behavior test
 #[test]
+fn parity_npm_hello() {
+    let actual = run_fixture("npm-hello");
+    let expected = serde_json::json!([
+        {
+            "repoSlug": "local/test-repo",
+            "stats": {
+                "total": 1,
+                "updateAvailable": 0,
+                "upToDate": 1,
+                "skipped": 0,
+                "errors": 0
+            },
+            "files": [
+                {
+                    "path": "package.json",
+                    "manager": "npm",
+                    "stats": {
+                        "total": 1,
+                        "updateAvailable": 0,
+                        "upToDate": 1,
+                        "skipped": 0,
+                        "errors": 0
+                    },
+                    "deps": [
+                        {
+                            "name": "lodash",
+                            "depType": "dependencies",
+                            "status": "upToDate"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+    assert_eq!(actual, expected, "normalized JSON output mismatch for npm-hello fixture");
+}
+
+// Rust-specific: parity behavior test
+#[test]
 fn parity_gomod_empty() {
     let actual = run_fixture("gomod-empty");
     let expected = serde_json::json!([
