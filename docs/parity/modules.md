@@ -287,7 +287,7 @@ python3 scripts/parity_coverage.py gaps manager/cargo
 | `versioning/kubernetes-api` | 1 | ? | 7/7 (100%) | — |
 | `versioning/lambda-node` | 1 | ? | 6/6 (100%) | — |
 | `versioning/loose` | 1 | ? | 6/6 (100%) | — |
-| `versioning/maven` | 2 | ? | 19/23 (83%) | — |
+| `versioning/maven` | 2 | full | 19/23 (83%) | — |
 | `versioning/nixpkgs` | 1 | ? | 4/5 (80%) | — |
 | `versioning/node` | 1 | ? | 6/6 (100%) | — |
 | `versioning/npm` | 1 | full | 7/7 (100%) | M2 complete |
