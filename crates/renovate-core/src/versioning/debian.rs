@@ -1043,7 +1043,6 @@ mod tests {
         }
     }
 
-    // Ported: 'matches("$version", "$range") === $expected' — versioning/debian/index.spec.ts line 436
     #[test]
     fn test_debian_matches() {
         assert!(!debian_matches("10", "10-slim"));

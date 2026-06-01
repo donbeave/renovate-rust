@@ -1158,7 +1158,6 @@ mod tests {
 
     // ── subset ───────────────────────────────────────────────────────────────
 
-    // Ported: "subset("$a", "$b") === $expected" — poetry/index.spec.ts line 287
     #[test]
     fn subset_cases() {
         assert_eq!(subset("1.0.0", "1.0.0"), Some(true));

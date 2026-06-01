@@ -630,7 +630,6 @@ pub fn debian_is_eol_lts_at(input: &str, now_date: &str, ignore_eol: bool) -> bo
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 7
     #[test]
     fn is_valid_matches_renovate_ubuntu_spec() {
         let cases = [

@@ -1187,7 +1187,6 @@ mod tests {
         assert_eq!(get_pinned_value("v1.2.3"), "1.2.3");
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — modules/versioning/ruby/index.spec.ts line 281
     #[test]
     fn ruby_get_new_value_cases() {
         // (currentValue, rangeStrategy, currentVersion, newVersion, expected)

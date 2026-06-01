@@ -2180,7 +2180,6 @@ replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.
         assert!(replacement.skip_reason.is_none());
     }
 
-    // Ported: "the extracted version can be used as a SemVer constraint" — gomod/extract.spec.ts line 582
     #[test]
     fn go_directive_constraint_is_valid_semver_coerced() {
         // `go 1.19` → constraint `~1.19.x` (semver-coerced compatible)

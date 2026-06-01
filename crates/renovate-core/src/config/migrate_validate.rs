@@ -3288,7 +3288,6 @@ mod tests {
         );
     }
 
-    // Ported: "empty configuration" — config/validation.spec.ts line 484
     #[test]
     fn validate_config_allows_empty_configuration() {
         let result = validate_config_for_source("repo", &json!({}));
@@ -3296,7 +3295,6 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "single not supported manager" — config/validation.spec.ts line 503
     #[test]
     fn validate_config_errors_for_unsupported_enabled_managers() {
         for config in [
@@ -4910,7 +4908,6 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "errors if allowedHeaders is empty or not defined" — config/validation.spec.ts line 1728
     #[test]
     fn validate_config_errors_for_headers_without_allowed_headers() {
         let result = validate_config_for_source(

@@ -1359,7 +1359,6 @@ mod www_auth_tests {
         WwwAuthParams::Map(m)
     }
 
-    // Ported: "parses: bearer" (it.each) — util/http/www-authenticate.spec.ts line 4
     #[test]
     fn www_auth_parses_bearer() {
         let parsed = parse_www_authenticate(&[
