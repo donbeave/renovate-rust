@@ -1,9 +1,9 @@
-# Loop Prompt Improvement Suggestions
+# Prompt Improvement Suggestions
 
-This file captures suggested improvements to `prompts/claude-loop-renovate-rust.md`.
-The loop prompt is operator-owned configuration and cannot be modified during
-loop execution. Improvements are recorded here for the operator to review and
-apply.
+This file captures suggested improvements to the operator-owned prompts
+(`prompts/implementation.md`, `prompts/test-parity.md`). Agents running them
+cannot modify them; improvements are recorded here for the operator to review
+and apply. (Earlier entries reference the now-retired `claude-loop-*` prompts.)
 
 ---
 

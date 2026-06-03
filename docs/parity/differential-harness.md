@@ -2,8 +2,9 @@
 
 Objective proof that `renovate-rust` is a drop-in replacement: run upstream
 Renovate and `renovate-rust` over the same fixture repositories with equivalent
-invocations and assert the observable output is identical. This is terminal-state
-gate #4 in `prompts/claude-loop-renovate-rust.md`.
+invocations and assert the observable output is identical. The fixtures live in
+`tests/parity/fixtures/`; the harness is the M0 acceptance gate in
+`docs/parity/milestones.md`.
 
 ## How it works
 
