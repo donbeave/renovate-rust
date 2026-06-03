@@ -1,3 +1,32 @@
+//! @parity lib/versioning-list.generated.ts partial
+//! @parity lib/renovate.ts partial
+//! @parity lib/manager-list.generated.ts partial
+//! @parity lib/manager-default-configs.generated.ts partial
+//! @parity lib/logger/with-sanitizer.ts partial
+//! @parity lib/logger/utils.ts partial
+//! @parity lib/logger/types.ts partial
+//! @parity lib/logger/renovate-logger.ts partial
+//! @parity lib/logger/remap.ts partial
+//! @parity lib/logger/problem-stream.ts partial
+//! @parity lib/logger/pretty-stdout.ts partial
+//! @parity lib/logger/once.ts partial
+//! @parity lib/logger/index.ts partial
+//! @parity lib/logger/err-serializer.ts partial
+//! @parity lib/logger/config-serializer.ts partial
+//! @parity lib/logger/cmd-serializer.ts partial
+//! @parity lib/logger/bunyan.ts partial
+//! @parity lib/instrumentation/with-instrumenting.ts partial
+//! @parity lib/instrumentation/utils.ts partial
+//! @parity lib/instrumentation/types.ts partial
+//! @parity lib/instrumentation/reporting.ts partial
+//! @parity lib/instrumentation/index.ts partial
+//! @parity lib/instrumentation/detectors.ts partial
+//! @parity lib/globals.d.ts partial
+//! @parity lib/global-config-option-defaults.generated.ts partial
+//! @parity lib/expose.ts partial
+//! @parity lib/datasource-list.generated.ts partial
+//! @parity lib/data-files.generated.ts partial
+//! @parity lib/config-validator.ts partial
 //! Core domain types for the Rust reimplementation of Renovate.
 
 pub mod artifacts;

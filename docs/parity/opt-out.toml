@@ -39,6 +39,14 @@
 file   = "lib/modules/versioning/nuget/types.ts"
 reason = "Type-only declarations and interfaces with no direct Rust runtime equivalent"
 
+[[source]]
+file   = "lib/modules/versioning/types.ts"
+reason = "Type-only declarations and interfaces without a Rust runtime analogue"
+
+[[source]]
+file   = "lib/commander.d.ts"
+reason = "Type declaration shim for Commander typings; no Rust runtime analogue is needed."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
