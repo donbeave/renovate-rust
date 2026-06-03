@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 45/96 in-scope files mapped (full=44 partial=1 stub=0 pending=51 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 46/96 in-scope files mapped (full=44 partial=2 stub=0 pending=50 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -231,7 +231,7 @@
 |---|---|---|---|
 | `lib/modules/versioning/nuget/index.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
 | `lib/modules/versioning/nuget/parser.ts` | partial | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
-| `lib/modules/versioning/nuget/range.ts` | pending | — | — |
+| `lib/modules/versioning/nuget/range.ts` | partial | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
 | `lib/modules/versioning/nuget/types.ts` | pending | — | — |
 | `lib/modules/versioning/nuget/version.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
 
