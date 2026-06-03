@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/nixpkgs/index.ts full
 //! NixPkgs versioning scheme.
 //!
 //! Valid versions match:

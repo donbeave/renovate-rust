@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/devbox/index.ts full
 //! Devbox versioning scheme.
 //!
 //! Accepts numeric-only versions of 1–3 components (no leading zeros).
