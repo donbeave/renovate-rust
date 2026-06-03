@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/gradle/index.ts full
+//! @parity lib/modules/versioning/gradle/compare.ts full
 //! Gradle versioning and update-decision logic.
 //!
 //! Ports `lib/modules/versioning/gradle/compare.ts` and `index.ts`.

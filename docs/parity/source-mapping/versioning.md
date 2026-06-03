@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 30/96 in-scope files mapped (full=30 partial=0 stub=0 pending=66 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 32/96 in-scope files mapped (full=32 partial=0 stub=0 pending=64 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -144,8 +144,8 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/gradle/compare.ts` | pending | — | — |
-| `lib/modules/versioning/gradle/index.ts` | pending | — | — |
+| `lib/modules/versioning/gradle/compare.ts` | full | [`crates/renovate-core/src/versioning/gradle.rs`](../../../crates/renovate-core/src/versioning/gradle.rs) | — |
+| `lib/modules/versioning/gradle/index.ts` | full | [`crates/renovate-core/src/versioning/gradle.rs`](../../../crates/renovate-core/src/versioning/gradle.rs) | — |
 
 ### `versioning/hashicorp`
 
