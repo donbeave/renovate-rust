@@ -39,3 +39,13 @@
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
 reason = "GraphQL-specific behavior: the Rust implementation uses the GitHub REST API, where /tags always includes commit.sha"
+
+[[test]]
+spec   = "lib/modules/datasource/sbt-plugin/index.spec.ts"
+test   = "uses proper hostType"
+reason = "asserts a TypeScript class property shape (http.hostType) with no Rust equivalent"
+
+[[test]]
+spec   = "lib/modules/manager/circleci/schema.spec.ts"
+test   = "catches invalid nested orbs value"
+reason = "Zod schema-validation test; the Rust implementation uses regex-based extraction without a schema parser"

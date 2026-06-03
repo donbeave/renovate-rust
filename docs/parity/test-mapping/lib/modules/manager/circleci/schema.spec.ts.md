@@ -2,9 +2,9 @@
 
 [← `manager/circleci`](../../../../_by-module/manager/circleci.md) · [all modules](../../../../README.md)
 
-**0/1 in-scope tests ported** (1 pending, 0 opt-out) · status: pending
+**0/0 in-scope tests ported** (0 pending, 1 opt-out) · status: opt-out
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | catches invalid nested orbs value | pending | — |
+| 5 | catches invalid nested orbs value | opt-out | Zod schema-validation test; the Rust implementation uses regex-based extraction without a schema parser |
 

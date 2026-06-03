@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/exact/index.spec.ts`](../../lib/modules/versioning/exact/index.spec.ts.md) | 14 | 13 | 1 | 0 | [`crates/renovate-core/src/versioning/exact.rs:72`](../../../../../crates/renovate-core/src/versioning/exact.rs#L72) | partial |
+| [`lib/modules/versioning/exact/index.spec.ts`](../../lib/modules/versioning/exact/index.spec.ts.md) | 14 | 13 | 1 | 0 | [`crates/renovate-core/src/versioning/exact.rs:71`](../../../../../crates/renovate-core/src/versioning/exact.rs#L71) | partial |
 
