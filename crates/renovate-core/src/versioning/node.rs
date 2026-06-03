@@ -1,5 +1,6 @@
 //! Node.js versioning.
 //! @parity lib/modules/versioning/node/index.ts full
+//! @parity lib/modules/versioning/node/schedule.ts full
 //!
 //! Ports `lib/modules/versioning/node/index.ts`.
 //! Wraps npm versioning with Node.js codename support and LTS-based stability.
