@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 24/96 in-scope files mapped (full=24 partial=0 stub=0 pending=72 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 25/96 in-scope files mapped (full=25 partial=0 stub=0 pending=71 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -164,7 +164,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/hermit/index.ts` | pending | — | — |
+| `lib/modules/versioning/hermit/index.ts` | full | [`crates/renovate-core/src/versioning/hermit.rs`](../../../crates/renovate-core/src/versioning/hermit.rs) | — |
 
 ### `versioning/hex`
 

@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/hermit/index.ts full
 //! Hermit versioning.
 //!
 //! Ports `lib/modules/versioning/hermit/index.ts`.
