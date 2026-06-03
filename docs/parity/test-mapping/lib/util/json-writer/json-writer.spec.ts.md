@@ -1,0 +1,13 @@
+# `lib/util/json-writer/json-writer.spec.ts`
+
+[← `util/json-writer`](../../../_by-module/util/json-writer.md) · [all modules](../../../README.md)
+
+**4/4 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 8 | should apply 2 spaces indentation by default | ported | `crates/renovate-core/src/json_writer.rs:75` |
+| 14 | should apply indentation size | ported | `crates/renovate-core/src/json_writer.rs:83` |
+| 23 | should apply indentation type | ported | `crates/renovate-core/src/json_writer.rs:95` |
+| 31 | new line at the end should be optional | ported | `crates/renovate-core/src/json_writer.rs:107` |
+

@@ -1,0 +1,16 @@
+# `lib/modules/datasource/bitrise/index.spec.ts`
+
+[← `datasource/bitrise`](../../../../_by-module/datasource/bitrise.md) · [all modules](../../../../README.md)
+
+**7/7 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 9 | returns null for unsupported registryurl | ported | `crates/renovate-core/src/datasources/bitrise.rs:270` |
+| 19 | support github enterprise api url | ported | `crates/renovate-core/src/datasources/bitrise.rs:284` |
+| 63 | returns version and filters out the asset folder | ported | `crates/renovate-core/src/datasources/bitrise.rs:329` |
+| 137 | returns null if there are no releases | ported | `crates/renovate-core/src/datasources/bitrise.rs:381` |
+| 159 | returns null if the package has an unexpected format | ported | `crates/renovate-core/src/datasources/bitrise.rs:403` |
+| 179 | returns null if the file object has no content | ported | `crates/renovate-core/src/datasources/bitrise.rs:425` |
+| 206 | returns null if the file object has an unexpected encoding | ported | `crates/renovate-core/src/datasources/bitrise.rs:459` |
+

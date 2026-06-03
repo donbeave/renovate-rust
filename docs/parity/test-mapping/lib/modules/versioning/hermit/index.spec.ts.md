@@ -1,0 +1,19 @@
+# `lib/modules/versioning/hermit/index.spec.ts`
+
+[← `versioning/hermit`](../../../../_by-module/versioning/hermit.md) · [all modules](../../../../README.md)
+
+**10/10 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 6 | _(it.each / template — verify manually)_ | ? | — |
+| 19 | _(it.each / template — verify manually)_ | ? | — |
+| 46 | _(it.each / template — verify manually)_ | ? | — |
+| 65 | _(it.each / template — verify manually)_ | ? | — |
+| 83 | _(it.each / template — verify manually)_ | ? | — |
+| 110 | _(it.each / template — verify manually)_ | ? | — |
+| 139 | _(it.each / template — verify manually)_ | ? | — |
+| 166 | getsatisfyingversion | ported | `crates/renovate-core/src/versioning/hermit.rs:443` |
+| 184 | minsatisfyingversion | ported | `crates/renovate-core/src/versioning/hermit.rs:460` |
+| 203 | sorts versions in an ascending order | ported | `crates/renovate-core/src/versioning/hermit.rs:477` |
+

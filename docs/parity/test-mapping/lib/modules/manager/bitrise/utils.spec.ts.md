@@ -1,0 +1,12 @@
+# `lib/modules/manager/bitrise/utils.spec.ts`
+
+[← `manager/bitrise`](../../../../_by-module/manager/bitrise.md) · [all modules](../../../../README.md)
+
+**3/3 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 6 | returns null on an empty string | ported | `crates/renovate-core/src/extractors/bitrise.rs:452` |
+| 10 | returns dependency for step | ported | `crates/renovate-core/src/extractors/bitrise.rs:458` |
+| 19 | parses missing version | ported | `crates/renovate-core/src/extractors/bitrise.rs:468` |
+

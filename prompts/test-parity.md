@@ -16,17 +16,19 @@ Run autonomously. Do not ask questions. If you cannot port a test because the
 Rust implementation does not exist yet, **leave it alone** — that's the
 implementation agent's job. Pick another spec.
 
-## Your single source of truth: the test map
+## Your single source of truth: the test mapping
 
-**`docs/parity/test-map.md`** is the comparison table. It is **generated** —
-never hand-edit it. Regenerate it with the raw tool:
+**`docs/parity/test-mapping/`** is the comparison surface — a split, linked
+tree. It is **generated**; never hand-edit it. Regenerate with the raw tool:
 
 ```sh
-cargo run -p parity-cli -- test     # rewrites docs/parity/test-map.md
+cargo run -p parity-cli -- test     # rewrites the docs/parity/test-mapping/ tree
 ```
 
-Every upstream test (`it()`/`test()` in any `*.spec.ts`, scanned across the
-whole upstream repo) is in one of three states:
+Navigate it: `test-mapping/README.md` (module index) → a module page (its spec
+files + status) → a spec page (every `it()` with its status and Rust
+destination). Every upstream test (`it()`/`test()` in any `*.spec.ts`, scanned
+across the whole upstream repo) is in one of three states:
 
 - `ported`  — the upstream test exists and a matching `// Ported:` comment does.
 - `pending` — the upstream test exists with no Rust counterpart. **Your work.**
@@ -34,13 +36,13 @@ whole upstream repo) is in one of three states:
   removed/renamed). The Rust test is **kept** and listed for review — never
   auto-deleted. A rename upstream is just an old `deleted` + a new `pending`.
 
-The table groups specs by module and shows `it() / ported / pending` per file.
 **`docs/parity/milestones.md`** orders which modules to tackle first; always
 work inside the first incomplete milestone.
 
 ## How to pick the work
 
-1. Regenerate the table (`parity-cli -- test`) and open `docs/parity/test-map.md`.
+1. Regenerate the tree (`parity-cli -- test`) and open the module page under
+   `docs/parity/test-mapping/_by-module/<module>.md`.
 2. Inside the first incomplete milestone, pick **one** spec file with
    `pending > 0`. Skip specs whose implementation does not exist yet — check
    `docs/parity/source-map.md`; if the module is all `pending` there, the
@@ -138,7 +140,7 @@ for `#[tokio::test]`, above `#[tokio::test]`; for `it.each` / `test.each`, one
 - **Do not write duplicate `// Ported:` comments** for the same upstream test.
   One Rust test per upstream `it()`. Extra Rust tests are welcome **without** a
   `// Ported:` comment — they're useful but not ports.
-- **Do not hand-edit `docs/parity/test-map.md`** — it is generated.
+- **Do not hand-edit anything under `docs/parity/test-mapping/`** — generated.
 - **Do not delete a Rust test just because it shows as `deleted`.** That state
   means "review later"; the operator decides whether to remove or re-point it.
 

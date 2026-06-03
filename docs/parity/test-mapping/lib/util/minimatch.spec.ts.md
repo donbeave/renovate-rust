@@ -1,0 +1,14 @@
+# `lib/util/minimatch.spec.ts`
+
+[← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
+
+**2/5 ported** (3 pending) · status: partial
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 5 | caches minimatch | pending | — |
+| 12 | does not cache minimatch | pending | — |
+| 20 | matches | ported | `crates/renovate-core/src/string_match.rs:616` |
+| 32 | should return a function | pending | — |
+| 37 | should correctly match filenames | ported | `crates/renovate-core/src/string_match.rs:638` |
+

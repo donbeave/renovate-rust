@@ -1,0 +1,14 @@
+# `lib/modules/manager/mint/extract.spec.ts`
+
+[← `manager/mint`](../../../../_by-module/manager/mint.md) · [all modules](../../../../README.md)
+
+**5/5 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 6 | returns null for empty | ported | `crates/renovate-core/src/extractors/mint.rs:84` |
+| 10 | mintfile with version description | ported | `crates/renovate-core/src/extractors/mint.rs:90` |
+| 41 | mintfile without version description | ported | `crates/renovate-core/src/extractors/mint.rs:109` |
+| 60 | complex mintfile | ported | `crates/renovate-core/src/extractors/mint.rs:121` |
+| 88 | mintfile includes commented out | ported | `crates/renovate-core/src/extractors/mint.rs:136` |
+

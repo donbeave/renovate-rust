@@ -1,0 +1,16 @@
+# `lib/util/sample.spec.ts`
+
+[← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
+
+**4/7 ported** (3 pending) · status: partial
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 7 | returns correct sized array | ported | `crates/renovate-core/src/util.rs:7935` |
+| 12 | returns full array for undefined number | ported | `crates/renovate-core/src/util.rs:7948` |
+| 16 | returns full array for null number | pending | — |
+| 20 | returns full array for 0 number | ported | `crates/renovate-core/src/util.rs:7960` |
+| 24 | returns empty array for null array | pending | — |
+| 28 | returns empty array for undefined array | pending | — |
+| 32 | returns empty array for empty array | ported | `crates/renovate-core/src/util.rs:7972` |
+

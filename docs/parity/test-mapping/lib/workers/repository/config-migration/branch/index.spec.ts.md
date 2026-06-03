@@ -1,0 +1,21 @@
+# `lib/workers/repository/config-migration/branch/index.spec.ts`
+
+[← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
+
+**0/12 ported** (12 pending) · status: pending
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 31 | does nothing when migration disabled and checkbox unchecked | pending | — |
+| 50 | creates migration branch when migration disabled but checkbox checked | pending | — |
+| 71 | does not create a branch if migration branch is modified | pending | — |
+| 102 | updates migration branch & refreshes pr when migration disabled but open pr exists | pending | — |
+| 134 | creates migration branch when migration enabled but no pr exists | pending | — |
+| 157 | updates migration branch & refresh pr when migration enabled and open pr exists | pending | — |
+| 184 | dry runs update migration branch | pending | — |
+| 209 | dry runs create migration pr | pending | — |
+| 236 | does not create a branch when migration is disabled but needed and a closed pr exists | pending | — |
+| 255 | deletes old branch and creates new migration branch when migration is disabled but needed, a closed pr exists and checkbox is checked | pending | — |
+| 280 | does not create a branch when migration is enabled and a closed pr exists | pending | — |
+| 299 | dry run:deletes old branch and creates new migration branch when migration is disabled but needed, a closed pr exists and checkbox is checked | pending | — |
+

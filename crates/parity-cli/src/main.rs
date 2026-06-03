@@ -32,9 +32,9 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 /// Default on-disk locations the CLI writes to (relative to the working dir,
-/// i.e. the `renovate-rust/` repo root).
+/// i.e. the `renovate-rust/` repo root). The test map is a split tree (see
+/// `test_map::MAPPING_DIR`), not a single file.
 const SOURCE_MAP_PATH: &str = "docs/parity/source-map.md";
-const TEST_MAP_PATH: &str = "docs/parity/test-map.md";
 
 #[derive(Parser)]
 #[command(
@@ -87,15 +87,18 @@ fn main() -> ExitCode {
 
     match cli.cmd.unwrap_or(Cmd::All) {
         Cmd::All => {
-            let s = gen_source(&lib, &cli.rust);
-            let t = gen_test(&cli.upstream, &cli.rust);
-            match (s, t) {
-                (Ok(s), Ok(t)) => {
-                    emit(&s, SOURCE_MAP_PATH, cli.stdout);
-                    emit(&t, TEST_MAP_PATH, cli.stdout);
-                    ExitCode::SUCCESS
+            let source_ok = match gen_source(&lib, &cli.rust) {
+                Ok(md) => {
+                    emit(&md, SOURCE_MAP_PATH, cli.stdout);
+                    true
                 }
-                _ => ExitCode::FAILURE,
+                Err(()) => false,
+            };
+            let test_ok = write_test_pages(&cli.upstream, &cli.rust);
+            if source_ok && test_ok {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::FAILURE
             }
         }
         Cmd::Source => match gen_source(&lib, &cli.rust) {
@@ -105,13 +108,13 @@ fn main() -> ExitCode {
             }
             Err(()) => ExitCode::FAILURE,
         },
-        Cmd::Test => match gen_test(&cli.upstream, &cli.rust) {
-            Ok(md) => {
-                emit(&md, TEST_MAP_PATH, cli.stdout);
+        Cmd::Test => {
+            if write_test_pages(&cli.upstream, &cli.rust) {
                 ExitCode::SUCCESS
+            } else {
+                ExitCode::FAILURE
             }
-            Err(()) => ExitCode::FAILURE,
-        },
+        }
         Cmd::Check => check(&cli.upstream, &cli.rust),
         Cmd::Gaps { module } => {
             let specs = test_map::scan_specs(&cli.upstream);
@@ -152,11 +155,26 @@ fn gen_source(lib: &Path, rust: &Path) -> Result<String, ()> {
     Ok(source::render_report(&upstream, &tags))
 }
 
-fn gen_test(upstream: &Path, rust: &Path) -> Result<String, ()> {
+/// Regenerate the split test-mapping tree. Returns false on error.
+fn write_test_pages(upstream: &Path, rust: &Path) -> bool {
     let specs = test_map::scan_specs(upstream);
-    let ported =
-        test_map::scan_ported(rust).map_err(|e| eprintln!("error scanning ported: {e}"))?;
-    Ok(test_map::render_report(&specs, &ported))
+    let ported = match test_map::scan_ported(rust) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("error scanning ported: {e}");
+            return false;
+        }
+    };
+    match test_map::write_pages(Path::new(test_map::MAPPING_DIR), &specs, &ported) {
+        Ok(n) => {
+            eprintln!("wrote {n} pages under {}", test_map::MAPPING_DIR);
+            true
+        }
+        Err(e) => {
+            eprintln!("error writing test-mapping pages: {e}");
+            false
+        }
+    }
 }
 
 /// Write `md` to `path`, or print it if `--stdout`.

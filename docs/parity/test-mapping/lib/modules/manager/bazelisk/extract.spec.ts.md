@@ -1,0 +1,13 @@
+# `lib/modules/manager/bazelisk/extract.spec.ts`
+
+[← `manager/bazelisk`](../../../../_by-module/manager/bazelisk.md) · [all modules](../../../../README.md)
+
+**4/4 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 5 | returns a result | ported | `crates/renovate-core/src/extractors/version_file.rs:467` |
+| 17 | supports ranges | ported | `crates/renovate-core/src/extractors/version_file.rs:477` |
+| 29 | skips non ranges | ported | `crates/renovate-core/src/extractors/version_file.rs:484` |
+| 41 | ignores comments past the first line | ported | `crates/renovate-core/src/extractors/version_file.rs:491` |
+

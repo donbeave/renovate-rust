@@ -1,0 +1,21 @@
+# `lib/modules/manager/gradle/utils.spec.ts`
+
+[← `manager/gradle`](../../../../_by-module/manager/gradle.md) · [all modules](../../../../README.md)
+
+**11/12 ported** (1 pending) · status: partial
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 23 | extracts the actual version | ported | `crates/renovate-core/src/extractors/gradle.rs:2152` |
+| 41 | returns null for invalid inputs | ported | `crates/renovate-core/src/extractors/gradle.rs:2173` |
+| 57 | _(it.each / template — verify manually)_ | ? | — |
+| 85 | _(it.each / template — verify manually)_ | ? | — |
+| 105 | filetype checks | ported | `crates/renovate-core/src/extractors/gradle.rs:2275` |
+| 120 | reorderfiles | ported | `crates/renovate-core/src/extractors/gradle.rs:2292` |
+| 250 | getvars | ported | `crates/renovate-core/src/extractors/gradle.rs:2443` |
+| 276 | empty registry | ported | `crates/renovate-core/src/extractors/gradle.rs:2537` |
+| 285 | updates the registry | ported | `crates/renovate-core/src/extractors/gradle.rs:2557` |
+| 306 | no default catalog file | ported | `crates/renovate-core/src/extractors/gradle.rs:2607` |
+| 317 | adds variables with default "libs" prefix | ported | `crates/renovate-core/src/extractors/gradle.rs:2620` |
+| 357 | adds variables with custom libraries extension name | ported | `crates/renovate-core/src/extractors/gradle.rs:2665` |
+

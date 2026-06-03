@@ -1,0 +1,32 @@
+# `lib/modules/manager/npm/artifacts.spec.ts`
+
+[← `manager/npm`](../../../../_by-module/manager/npm.md) · [all modules](../../../../README.md)
+
+**10/23 ported** (13 pending) · status: partial
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 57 | returns null if no packagemanager updates present | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:178` |
+| 68 | returns null if currentvalue is undefined | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:327` |
+| 79 | returns null if currentvalue has no hash | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:400` |
+| 90 | returns null if unchanged | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:348` |
+| 105 | returns updated package.json | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:145` |
+| 131 | supports docker mode | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:421` |
+| 180 | supports install mode | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:185` |
+| 221 | catches errors | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:369` |
+| 243 | returns null if no security updates are found | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:428` |
+| 254 | returns null if pnpm workspace file does not exist | ported | `crates/renovate-core/src/extractors/npm.rs:8144` |
+| 274 | returns null if the pnpmshrinkwrap file is not found | pending | — |
+| 305 | returns null if no minimumreleaseage setting found | pending | — |
+| 326 | returns null if minimumreleaseageexclude excludes all versions of updated dep | pending | — |
+| 359 | updates pnpm workspace - adds minimumreleaseageexclude block if not found | pending | — |
+| 390 | updates pnpm workspace - appends new minimumreleaseageexclude setting | pending | — |
+| 423 | updates pnpm workspace - expands existing minimumreleaseageexclude setting | pending | — |
+| 466 | updates pnpm workspace - handles comment with version already present on an inner minimumreleaseageexclude setting | pending | — |
+| 497 | updates pnpm workspace - handles comment on an inner minimumreleaseageexclude setting | pending | — |
+| 537 | updates pnpm workspace - uses newversion over newvalue in minimumreleaseageexclude | pending | — |
+| 573 | handles multiple security upgrades of the same package (at different versions) in a monorepo | pending | — |
+| 644 | handles multiple security upgrades of the same package (at the same version) in a monorepo | pending | — |
+| 707 | preserves catalog changes in pnpm-workspace.yaml when adding minimumreleaseageexclude | pending | — |
+| 747 | handles multiple security upgrades correctly (bug fix test) | pending | — |
+

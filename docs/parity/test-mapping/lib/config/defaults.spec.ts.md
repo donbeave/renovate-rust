@@ -1,0 +1,12 @@
+# `lib/config/defaults.spec.ts`
+
+[← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
+
+**3/3 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 6 | returns new instances of arrays when called repeatedly | ported | `crates/renovate-core/src/config.rs:955` |
+| 20 | returns true for boolean values | ported | `crates/renovate-core/src/config.rs:973` |
+| 31 | _(it.each / template — verify manually)_ | ? | — |
+

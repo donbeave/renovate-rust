@@ -1,0 +1,12 @@
+# `lib/util/git/set-branch-commit.spec.ts`
+
+[← `util/git`](../../../_by-module/util/git.md) · [all modules](../../../README.md)
+
+**0/3 ported** (3 pending) · status: pending
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 21 | sets new branch in cache if it does not exist | pending | — |
+| 42 | sets new values in branch when old state exists | pending | — |
+| 74 | sets committimestamp when datetime is provided | pending | — |
+

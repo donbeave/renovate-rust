@@ -1,0 +1,13 @@
+# `lib/util/package-rules/dep-names.spec.ts`
+
+[← `util/package-rules`](../../../_by-module/util/package-rules.md) · [all modules](../../../README.md)
+
+**4/4 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 7 | should return false if packagefile is not defined | ported | `crates/renovate-core/src/package_rule.rs:1359` |
+| 19 | should return false if depname is excluded prefix | ported | `crates/renovate-core/src/package_rule.rs:1367` |
+| 42 | should return true if depname is included prefix | ported | `crates/renovate-core/src/package_rule.rs:1377` |
+| 65 | should return false if for wrong prefix | ported | `crates/renovate-core/src/package_rule.rs:1387` |
+

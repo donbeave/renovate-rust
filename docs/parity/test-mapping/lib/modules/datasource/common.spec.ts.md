@@ -1,0 +1,39 @@
+# `lib/modules/datasource/common.spec.ts`
+
+[← `datasource/_common`](../../../_by-module/datasource/_common.md) · [all modules](../../../README.md)
+
+**30/30 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 21 | returns null for unknown datasource | ported | `crates/renovate-core/src/datasources.rs:875` |
+| 25 | supports custom datasource | ported | `crates/renovate-core/src/datasources.rs:881` |
+| 31 | returns datasource for known datasource | ported | `crates/renovate-core/src/datasources.rs:890` |
+| 39 | returns default versioning for undefined datasource | ported | `crates/renovate-core/src/datasources.rs:897` |
+| 43 | returns default versioning for unknown datasource | ported | `crates/renovate-core/src/datasources.rs:903` |
+| 52 | returns default versioning for datasource with missing default versioning configuration | ported | `crates/renovate-core/src/datasources.rs:912` |
+| 56 | returns datasource-defined default versioning | ported | `crates/renovate-core/src/datasources.rs:922` |
+| 62 | returns true for valid input | ported | `crates/renovate-core/src/datasources.rs:929` |
+| 70 | returns false for invalid input | ported | `crates/renovate-core/src/datasources.rs:936` |
+| 78 | returns false for input with missing properties | ported | `crates/renovate-core/src/datasources.rs:943` |
+| 85 | returns false for input with non-string properties | ported | `crates/renovate-core/src/datasources.rs:950` |
+| 95 | should return the same release result if extractversion is not defined | ported | `crates/renovate-core/src/util.rs:10772` |
+| 103 | should extract version from release using provided regex | ported | `crates/renovate-core/src/util.rs:10780` |
+| 116 | should return null for releases with invalid version | ported | `crates/renovate-core/src/util.rs:10791` |
+| 136 | should filter out invalid versions | ported | `crates/renovate-core/src/util.rs:10800` |
+| 144 | should use default versioning if none is specified | ported | `crates/renovate-core/src/util.rs:10826` |
+| 152 | should use specified versioning if provided | ported | `crates/renovate-core/src/util.rs:10814` |
+| 162 | sorts releases by version and removes duplicates | ported | `crates/renovate-core/src/util.rs:10932` |
+| 183 | uses default versioning if none is specified | ported | `crates/renovate-core/src/util.rs:10852` |
+| 201 | should remove constraints from releases if constraintsfiltering is not strict | ported | `crates/renovate-core/src/datasources.rs:1414` |
+| 230 | should filter releases based on constraints if constraintsfiltering is strict | ported | `crates/renovate-core/src/datasources.rs:1443` |
+| 250 | should return all releases when no configconstraints | ported | `crates/renovate-core/src/datasources.rs:1480` |
+| 268 | should match exact constraints | ported | `crates/renovate-core/src/datasources.rs:1506` |
+| 287 | should handle config with a range constraint, and a release with an exact version | ported | `crates/renovate-core/src/datasources.rs:1536` |
+| 306 | should handle config with an exact version, and a release with a range constraint | ported | `crates/renovate-core/src/datasources.rs:1615` |
+| 325 | should allow constraintsversioning to override the datasource's default versioning | ported | `crates/renovate-core/src/datasources.rs:1566` |
+| 378 | returns immediately if no versioncompatibility | ported | `crates/renovate-core/src/util.rs:10864` |
+| 383 | filters out non-matching | ported | `crates/renovate-core/src/util.rs:10872` |
+| 395 | filters out incompatible | ported | `crates/renovate-core/src/util.rs:10888` |
+| 407 | does not override versionorig from extractversion | ported | `crates/renovate-core/src/util.rs:10909` |
+

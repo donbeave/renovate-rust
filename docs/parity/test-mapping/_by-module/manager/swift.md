@@ -1,0 +1,13 @@
+# Module: `manager/swift`
+
+[← all modules](../../README.md)
+
+**Coverage:** 28/59 tests ported across 4 spec files.
+
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| [`lib/modules/manager/swift/artifacts.spec.ts`](../../lib/modules/manager/swift/artifacts.spec.ts.md) | 31 | 0 | 31 | — | pending |
+| [`lib/modules/manager/swift/extract.spec.ts`](../../lib/modules/manager/swift/extract.spec.ts.md) | 21 | 21 | 0 | `crates/renovate-core/src/extractors/spm.rs` | ported |
+| [`lib/modules/manager/swift/index.spec.ts`](../../lib/modules/manager/swift/index.spec.ts.md) | 5 | 5 | 0 | `crates/renovate-core/src/extractors/spm.rs` | ported |
+| [`lib/modules/manager/swift/range.spec.ts`](../../lib/modules/manager/swift/range.spec.ts.md) | 2 | 2 | 0 | `crates/renovate-core/src/extractors/spm.rs` | ported |
+

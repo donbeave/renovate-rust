@@ -1,0 +1,25 @@
+# `lib/modules/manager/pipenv/extract.spec.ts`
+
+[← `manager/pipenv`](../../../../_by-module/manager/pipenv.md) · [all modules](../../../../README.md)
+
+**16/16 ported** (0 pending) · status: ported
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 37 | returns null for empty | ported | `crates/renovate-core/src/extractors/pipfile.rs:374` |
+| 41 | returns null for invalid toml file | ported | `crates/renovate-core/src/extractors/pipfile.rs:368` |
+| 45 | extracts dependencies | ported | `crates/renovate-core/src/extractors/pipfile.rs:290` |
+| 136 | marks packages with "extras" as skipreason === unspecified-version | ported | `crates/renovate-core/src/extractors/pipfile.rs:380` |
+| 142 | extracts multiple dependencies | ported | `crates/renovate-core/src/extractors/pipfile.rs:668` |
+| 192 | ignores git dependencies | ported | `crates/renovate-core/src/extractors/pipfile.rs:325` |
+| 202 | ignores invalid package names | ported | `crates/renovate-core/src/extractors/pipfile.rs:409` |
+| 213 | ignores relative path dependencies | ported | `crates/renovate-core/src/extractors/pipfile.rs:333` |
+| 223 | ignores invalid versions | ported | `crates/renovate-core/src/extractors/pipfile.rs:317` |
+| 234 | extracts all sources | ported | `crates/renovate-core/src/extractors/pipfile.rs:450` |
+| 247 | extracts example pipfile | ported | `crates/renovate-core/src/extractors/pipfile.rs:468` |
+| 313 | supports custom index | ported | `crates/renovate-core/src/extractors/pipfile.rs:574` |
+| 338 | gets python constraint from python_version | ported | `crates/renovate-core/src/extractors/pipfile.rs:610` |
+| 350 | gets python constraint from python_full_version | ported | `crates/renovate-core/src/extractors/pipfile.rs:626` |
+| 362 | gets pipenv constraint from packages | ported | `crates/renovate-core/src/extractors/pipfile.rs:642` |
+| 372 | gets pipenv constraint from dev-packages | ported | `crates/renovate-core/src/extractors/pipfile.rs:655` |
+

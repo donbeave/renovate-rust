@@ -121,14 +121,16 @@ the smallest possible diff.
 
 ## Parity Tracking (agent-only)
 
-Parity is tracked by two generated tables, both owned by the Rust `parity-cli`
+Parity is tracked by two generated surfaces, both owned by the Rust `parity-cli`
 tool and **never hand-edited**:
 
 - `docs/parity/source-map.md` — every upstream `lib/**/*.ts` implementation file
   → Rust file(s) + status, from `@parity` tags in the Rust source. Regenerate
   with `cargo run -p parity-cli -- source`.
-- `docs/parity/test-map.md` — every upstream `it()`/`test()` → ported / pending
-  / deleted, from `// Ported:` comments. Regenerate with
+- `docs/parity/test-mapping/` — a split, linked tree (root `README.md` → one
+  page per module → one page per spec, with each `it()`'s status and Rust
+  destination) mapping every upstream `it()`/`test()` → ported / pending /
+  deleted, from `// Ported:` comments. Regenerate with
   `cargo run -p parity-cli -- test`.
 
 The ordered milestones in `docs/parity/milestones.md` decide what to work on
@@ -142,7 +144,7 @@ next. The implementation agent owns `@parity` tags; the test parity agent owns
   is hosted-only infrastructure (Mend SaaS, GitHub App, marketplace plugin,
   hosted dashboards, webhook ingestors, billing).
 - The per-module Coverage target is **≥ 80% `ported / upstream_it()`** (the
-  by-module summary in `test-map.md`). If a few upstream tests exercise
+  module table in `test-mapping/README.md`). If a few upstream tests exercise
   TypeScript-internal behavior with no Rust analogue, coverage caps below 100% —
   that is acceptable. There is no `not-applicable` mechanism; do not invent one.
 - Additional Rust tests beyond the upstream baseline are welcome but they do
@@ -242,7 +244,7 @@ async fn returns_latest_release() {
 4. **Em dash, not hyphen,** before the spec reference.
 5. **Verify your work** before committing:
    ```sh
-   cargo run -p parity-cli -- test    # refresh test-map.md; your test moves pending → ported
+   cargo run -p parity-cli -- test    # refresh test-mapping/; your test moves pending → ported
    cargo run -p parity-cli -- check   # flags any deleted: wrong path or stale/typo'd description
    ```
    A `// Ported:` whose `(spec file, description)` does not match a live upstream

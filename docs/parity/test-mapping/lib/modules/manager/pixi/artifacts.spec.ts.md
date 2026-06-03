@@ -1,0 +1,19 @@
+# `lib/modules/manager/pixi/artifacts.spec.ts`
+
+[← `manager/pixi`](../../../../_by-module/manager/pixi.md) · [all modules](../../../../README.md)
+
+**6/10 ported** (4 pending) · status: partial
+
+| Line | Test | Status | Rust destination |
+|--:|---|---|---|
+| 70 | returns null if no pixi.lock found | ported | `crates/renovate-core/src/extractors/pixi_artifact_runner.rs:191` |
+| 83 | returns null if updateddeps is empty | ported | `crates/renovate-core/src/extractors/pixi_artifact_runner.rs:210` |
+| 96 | returns null if unchanged | ported | `crates/renovate-core/src/extractors/pixi_artifact_runner.rs:228` |
+| 122 | handle temporary_error | pending | — |
+| 140 | returns updated pixi.lock using docker | ported | `crates/renovate-core/src/extractors/pixi_artifact_runner.rs:271` |
+| 196 | returns updated pixi.lock using install mode | pending | — |
+| 235 | returns updated pixi.lock using install mode for old version lock file | pending | — |
+| 273 | returns pixi version defined in requires-pixi | pending | — |
+| 328 | catches errors | ported | `crates/renovate-core/src/extractors/pixi_artifact_runner.rs:359` |
+| 348 | returns updated pixi.lock when doing lockfile maintenance | ported | `crates/renovate-core/src/extractors/pixi_artifact_runner.rs:315` |
+

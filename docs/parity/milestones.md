@@ -18,9 +18,9 @@ fixture.
 Acceptance:
 
 - [x] `cargo run -p parity-cli` regenerates the two parity tables
-      (`source-map.md`, `test-map.md`) with module-grouped coverage.
-- [x] `docs/parity/source-map.md` + `docs/parity/test-map.md` are the only
-      tables the agents maintain (via `@parity` tags and `// Ported:` comments).
+      (`source-map.md`, `test-mapping/`) with module-grouped coverage.
+- [x] `docs/parity/source-map.md` + `docs/parity/test-mapping/` are the only
+      surfaces the agents maintain (via `@parity` tags and `// Ported:` comments).
 - [x] `tests/parity/fixtures/` repos exist and the differential harness runs
       (48 fixtures pass).
 
