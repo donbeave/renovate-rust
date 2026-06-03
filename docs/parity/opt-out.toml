@@ -34,3 +34,8 @@
 # reason = "entirely TypeScript type-shape checks, not business logic"
 
 # --- Active exclusions below this line ---
+
+[[test]]
+spec   = "lib/modules/datasource/github-tags/index.spec.ts"
+test   = "returns null for missing hash"
+reason = "GraphQL-specific behavior: the Rust implementation uses the GitHub REST API, where /tags always includes commit.sha"

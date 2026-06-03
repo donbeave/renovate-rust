@@ -2,7 +2,7 @@
 
 [← `datasource/github-tags`](../../../../_by-module/datasource/github-tags.md) · [all modules](../../../../README.md)
 
-**11/12 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
+**11/11 in-scope tests ported** (0 pending, 1 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -10,7 +10,7 @@
 | 36 | returns null for missing commit | ported | [`crates/renovate-core/src/datasources/github_tags.rs:486`](../../../../../../../crates/renovate-core/src/datasources/github_tags.rs#L486) |
 | 45 | returns untagged commit digest | ported | [`crates/renovate-core/src/datasources/github_tags.rs:501`](../../../../../../../crates/renovate-core/src/datasources/github_tags.rs#L501) |
 | 54 | returns tagged commit digest | ported | [`crates/renovate-core/src/datasources/github_tags.rs:518`](../../../../../../../crates/renovate-core/src/datasources/github_tags.rs#L518) |
-| 73 | returns null for missing hash | pending | — |
+| 73 | returns null for missing hash | opt-out | GraphQL-specific behavior: the Rust implementation uses the GitHub REST API, where /tags always includes commit.sha |
 | 91 | returns null for missing tagged commit digest | ported | [`crates/renovate-core/src/datasources/github_tags.rs:536`](../../../../../../../crates/renovate-core/src/datasources/github_tags.rs#L536) |
 | 110 | returns null for error | ported | [`crates/renovate-core/src/datasources/github_tags.rs:551`](../../../../../../../crates/renovate-core/src/datasources/github_tags.rs#L551) |
 | 120 | returns tags | ported | [`crates/renovate-core/src/datasources/github_tags.rs:566`](../../../../../../../crates/renovate-core/src/datasources/github_tags.rs#L566) |
