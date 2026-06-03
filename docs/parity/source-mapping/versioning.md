@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 27/96 in-scope files mapped (full=27 partial=0 stub=0 pending=69 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 28/96 in-scope files mapped (full=28 partial=0 stub=0 pending=68 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -177,7 +177,7 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/ivy/index.ts` | full | [`crates/renovate-core/src/versioning/ivy.rs`](../../../crates/renovate-core/src/versioning/ivy.rs) | — |
-| `lib/modules/versioning/ivy/parse.ts` | pending | — | — |
+| `lib/modules/versioning/ivy/parse.ts` | full | [`crates/renovate-core/src/versioning/ivy.rs`](../../../crates/renovate-core/src/versioning/ivy.rs) | — |
 
 ### `versioning/kubernetes-api`
 

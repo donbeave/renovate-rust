@@ -1,4 +1,5 @@
 //! @parity lib/modules/versioning/ivy/index.ts full
+//! @parity lib/modules/versioning/ivy/parse.ts full
 //! Ivy versioning (Apache Ivy / Gradle-compatible dynamic revision syntax).
 //!
 //! Ports `lib/modules/versioning/ivy/parse.ts` and `index.ts`.
