@@ -1,11 +1,11 @@
+//! @parity lib/modules/versioning/loose/index.ts full
+//!
 //! Loose versioning scheme.
 //!
 //! Accepts any `[vV]?MAJOR(.MINOR)*SUFFIX` string.
 //! Commit-hash-like strings (7–40 lowercase hex chars that are not pure
 //! numeric) are rejected.  Versions with more than 6 numeric components
 //! are also rejected.
-//!
-//! Renovate reference: `lib/modules/versioning/loose/index.ts`
 
 use std::cmp::Ordering;
 
