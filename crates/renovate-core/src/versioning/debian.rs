@@ -1,5 +1,7 @@
 //! Debian versioning API with distro-info awareness.
 //!
+//! @parity lib/modules/versioning/debian/index.ts full
+//!
 //! Ports `lib/modules/versioning/debian/index.ts`.
 //!
 //! Wraps the low-level `deb` comparison with codename/version resolution,

@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 19/96 in-scope files mapped (full=19 partial=0 stub=0 pending=77 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 20/96 in-scope files mapped (full=20 partial=0 stub=0 pending=76 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -84,7 +84,7 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/debian/common.ts` | pending | — | — |
-| `lib/modules/versioning/debian/index.ts` | pending | — | — |
+| `lib/modules/versioning/debian/index.ts` | full | [`crates/renovate-core/src/versioning/debian.rs`](../../../crates/renovate-core/src/versioning/debian.rs) | — |
 
 ### `versioning/deno`
 
