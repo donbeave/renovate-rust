@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 28/96 in-scope files mapped (full=28 partial=0 stub=0 pending=68 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 30/96 in-scope files mapped (full=30 partial=0 stub=0 pending=66 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -151,8 +151,8 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/hashicorp/convertor.ts` | pending | — | — |
-| `lib/modules/versioning/hashicorp/index.ts` | pending | — | — |
+| `lib/modules/versioning/hashicorp/convertor.ts` | full | [`crates/renovate-core/src/versioning/hashicorp.rs`](../../../crates/renovate-core/src/versioning/hashicorp.rs) | — |
+| `lib/modules/versioning/hashicorp/index.ts` | full | [`crates/renovate-core/src/versioning/hashicorp.rs`](../../../crates/renovate-core/src/versioning/hashicorp.rs) | — |
 
 ### `versioning/helm`
 

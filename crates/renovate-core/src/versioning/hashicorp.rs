@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/hashicorp/index.ts full
+//! @parity lib/modules/versioning/hashicorp/convertor.ts full
 //! HashiCorp versioning and update-decision logic.
 //!
 //! Used by Terraform providers and modules. The constraint syntax is a superset
