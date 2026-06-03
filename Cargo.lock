@@ -1275,6 +1275,10 @@ name = "parity-cli"
 version = "0.0.0"
 dependencies = [
  "clap",
+ "regex",
+ "serde",
+ "serde_json",
+ "walkdir",
 ]
 
 [[package]]
