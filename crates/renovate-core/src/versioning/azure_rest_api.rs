@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/azure-rest-api/index.ts full
 //! Azure REST API versioning.
 //!
 //! Ports `lib/modules/versioning/azure-rest-api/index.ts`.

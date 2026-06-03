@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 16/96 in-scope files mapped (full=16 partial=0 stub=0 pending=80 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 17/96 in-scope files mapped (full=17 partial=0 stub=0 pending=79 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -38,7 +38,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/azure-rest-api/index.ts` | pending | — | — |
+| `lib/modules/versioning/azure-rest-api/index.ts` | full | [`crates/renovate-core/src/versioning/azure_rest_api.rs`](../../../crates/renovate-core/src/versioning/azure_rest_api.rs) | — |
 
 ### `versioning/bazel-module`
 
