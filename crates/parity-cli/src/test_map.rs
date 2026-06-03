@@ -67,6 +67,9 @@ pub(crate) struct SpecFile {
     /// True if every call site's description was extractable, so a vanished
     /// description can be trusted to mean the test was removed.
     pub(crate) complete: bool,
+    /// Every call site: `(1-based line, normalized description if parseable)`.
+    /// Drives the `gaps` listing.
+    pub(crate) sites: Vec<(usize, Option<String>)>,
 }
 
 /// One `// Ported:` comment harvested from a Rust test.
@@ -84,8 +87,8 @@ pub(crate) struct Ported {
 // ---------------------------------------------------------------------------
 
 /// Module id for a spec path relative to the repo root. Paths under `lib/` use
-/// the same taxonomy as `scripts/parity_coverage.py`; anything else is grouped
-/// by its top-level directory (e.g. `test`, `tools`).
+/// the Renovate module taxonomy (manager/datasource/platform/versioning/…);
+/// anything else is grouped by its top-level directory (e.g. `test`, `tools`).
 fn classify(repo_rel: &str) -> String {
     let Some(rel) = repo_rel.strip_prefix("lib/") else {
         return repo_rel.split('/').next().unwrap_or("other").to_string();
@@ -201,19 +204,21 @@ pub(crate) fn scan_specs(repo_root: &Path) -> Vec<SpecFile> {
             Err(_) => continue,
         };
         let text = std::fs::read_to_string(entry.path()).unwrap_or_default();
-        let mut it_count = 0;
         let mut extracted = 0;
         let mut descs = HashSet::new();
-        for line in text.lines() {
+        let mut sites = Vec::new();
+        for (i, line) in text.lines().enumerate() {
             if !res.is_site(line) {
                 continue;
             }
-            it_count += 1;
-            if let Some(d) = res.extract_desc(line) {
+            let desc = res.extract_desc(line);
+            if let Some(d) = &desc {
                 extracted += 1;
-                descs.insert(d);
+                descs.insert(d.clone());
             }
+            sites.push((i + 1, desc));
         }
+        let it_count = sites.len();
         let module = classify(&rel);
         specs.push(SpecFile {
             rel,
@@ -221,6 +226,7 @@ pub(crate) fn scan_specs(repo_root: &Path) -> Vec<SpecFile> {
             it_count,
             descs,
             complete: extracted == it_count,
+            sites,
         });
     }
     specs.sort_by(|a, b| a.rel.cmp(&b.rel));
@@ -607,6 +613,57 @@ pub(crate) fn report_orphans(specs: &[SpecFile], ported: &[Ported]) -> bool {
         );
     }
     !deleted.is_empty()
+}
+
+// ---------------------------------------------------------------------------
+// Gaps — pending upstream tests for a module
+// ---------------------------------------------------------------------------
+
+/// List the upstream `it()` call sites that have no `// Ported:` counterpart,
+/// for every spec whose module id or path contains `filter`. Prints to stdout.
+pub(crate) fn gaps(specs: &[SpecFile], ported: &[Ported], filter: &str) -> bool {
+    let resolver = Resolver::new(specs, false);
+    let mut covered: HashMap<&str, HashSet<&str>> = HashMap::new();
+    for p in ported {
+        if let Some(spec) = resolver.resolve(&p.spec_ref) {
+            covered
+                .entry(spec.rel.as_str())
+                .or_default()
+                .insert(p.desc_norm.as_str());
+        }
+    }
+
+    let mut matched = false;
+    for spec in specs {
+        if !(spec.module == filter || spec.module.contains(filter) || spec.rel.contains(filter)) {
+            continue;
+        }
+        let cov = covered.get(spec.rel.as_str());
+        let ported_n = cov.map_or(0, HashSet::len).min(spec.it_count);
+        if ported_n >= spec.it_count {
+            continue;
+        }
+        matched = true;
+        println!(
+            "## {}  —  {}/{} ({} missing)",
+            spec.rel,
+            ported_n,
+            spec.it_count,
+            spec.it_count - ported_n
+        );
+        for (line, desc) in &spec.sites {
+            match desc {
+                Some(d) if cov.is_some_and(|c| c.contains(d.as_str())) => {} // ported
+                Some(d) => println!("  L{line:<5} {d}"),
+                None => println!("  L{line:<5} (it.each / template — verify manually)"),
+            }
+        }
+        println!();
+    }
+    if !matched {
+        eprintln!("no pending specs match `{filter}` (already fully ported, or unknown module)");
+    }
+    matched
 }
 
 // ---------------------------------------------------------------------------

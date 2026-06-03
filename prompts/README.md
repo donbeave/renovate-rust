@@ -28,6 +28,7 @@ cargo run -p parity-cli                # regenerate BOTH maps
 cargo run -p parity-cli -- source      # docs/parity/source-map.md (TS impl → Rust, @parity tags)
 cargo run -p parity-cli -- test        # docs/parity/test-map.md   (upstream it() → // Ported:)
 cargo run -p parity-cli -- check       # CI guard: stale @parity tags + deleted-upstream tests
+cargo run -p parity-cli -- gaps <mod>  # list pending upstream it()s for a module (e.g. manager/cargo)
 cargo run -p parity-cli -- normalize   # one-time: canonicalize all // Ported: refs to lib/... form
 ```
 
@@ -39,11 +40,9 @@ cargo run -p parity-cli -- normalize   # one-time: canonicalize all // Ported: r
   identity is gone — kept for review, never auto-removed).
 
 Per-file lookups are intentionally absent — `grep docs/parity/source-map.md`
-(or `test-map.md`) answers them against the generated table.
-
-The Python `scripts/parity_coverage.py` remains the older **module-level**
-ledger (`modules.md`); it is complementary but the per-file `parity-cli` maps
-are the primary surface the prompts drive.
+(or `test-map.md`) answers them against the generated table. Per-module
+coverage is the by-module summary inside each map. `parity-cli` is the only
+parity tool; the previous Python scripts have been removed.
 
 ## Invocations
 

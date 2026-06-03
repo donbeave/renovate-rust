@@ -12,16 +12,15 @@ later one. This is the project's prioritization tool.
 
 ## M0 — Honest baseline ✅
 
-Goal: the ledger reflects reality and the harness can run on one trivial
+Goal: the parity tables reflect reality and the harness can run on one trivial
 fixture.
 
 Acceptance:
 
-- [x] `cargo run -p parity-cli -- report` produces a single, deduped,
-      module-grouped coverage number.
-- [x] `docs/parity/modules.md` is the only ledger the agents maintain.
-- [x] `docs/parity/renovate-test-map.md` carries a deprecation banner pointing
-      at `modules.md`.
+- [x] `cargo run -p parity-cli` regenerates the two parity tables
+      (`source-map.md`, `test-map.md`) with module-grouped coverage.
+- [x] `docs/parity/source-map.md` + `docs/parity/test-map.md` are the only
+      tables the agents maintain (via `@parity` tags and `// Ported:` comments).
 - [x] `tests/parity/fixtures/` repos exist and the differential harness runs
       (48 fixtures pass).
 

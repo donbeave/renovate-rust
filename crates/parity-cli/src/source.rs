@@ -315,4 +315,3 @@ pub(crate) fn report_stale(upstream: &[String], tags: &[Tag]) -> bool {
     }
     bad
 }
-

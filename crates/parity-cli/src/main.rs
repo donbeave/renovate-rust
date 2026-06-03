@@ -68,6 +68,8 @@ enum Cmd {
     Test,
     /// CI guard: exit non-zero on stale `@parity` tags or deleted-upstream tests.
     Check,
+    /// List upstream `it()`s with no `// Ported:` for a module (e.g. `manager/cargo`).
+    Gaps { module: String },
     /// One-time: rewrite all `// Ported:` refs to canonical `lib/...` form.
     Normalize,
 }
@@ -111,6 +113,19 @@ fn main() -> ExitCode {
             Err(()) => ExitCode::FAILURE,
         },
         Cmd::Check => check(&cli.upstream, &cli.rust),
+        Cmd::Gaps { module } => {
+            let specs = test_map::scan_specs(&cli.upstream);
+            match test_map::scan_ported(&cli.rust) {
+                Ok(ported) => {
+                    test_map::gaps(&specs, &ported, &module);
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("error scanning ported: {e}");
+                    ExitCode::FAILURE
+                }
+            }
+        }
         Cmd::Normalize => {
             let specs = test_map::scan_specs(&cli.upstream);
             match test_map::normalize(&cli.rust, &specs) {

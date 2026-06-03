@@ -45,12 +45,13 @@ work inside the first incomplete milestone.
    `pending > 0`. Skip specs whose implementation does not exist yet — check
    `docs/parity/source-map.md`; if the module is all `pending` there, the
    implementation agent must go first.
-3. The pending `it()`s are the ones in the upstream spec with no `// Ported:`
-   referencing them yet. Open the upstream spec and cross-check against existing
-   comments:
+3. List the exact pending `it()`s for that module — line number + description:
    ```sh
-   grep -rn "lib/modules/manager/cargo/extract.spec.ts" crates   # already ported
+   cargo run -p parity-cli -- gaps manager/cargo
    ```
+   Each printed line is an upstream `it()` with no `// Ported:` yet. (Sites
+   shown as `it.each / template` could not be parsed automatically — open the
+   spec and check by hand.)
 
 ## How to port one test
 
