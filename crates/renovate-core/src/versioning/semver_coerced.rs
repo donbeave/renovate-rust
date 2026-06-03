@@ -1,7 +1,6 @@
-//! Coerced semantic versioning.
+//! @parity lib/modules/versioning/semver-coerced/index.ts full
 //!
-//! Renovate reference:
-//! - `lib/modules/versioning/semver-coerced/index.ts`
+//! Coerced semantic versioning.
 
 use std::cmp::Ordering;
 use std::sync::LazyLock;
