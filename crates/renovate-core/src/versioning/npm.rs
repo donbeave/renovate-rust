@@ -1,5 +1,6 @@
 //! npm (node-semver) versioning and update decision logic.
 //! @parity lib/modules/versioning/npm/index.ts full
+//! @parity lib/modules/versioning/npm/range.ts full
 //!
 //! Renovate reference: `lib/modules/versioning/npm/index.ts`
 //!
