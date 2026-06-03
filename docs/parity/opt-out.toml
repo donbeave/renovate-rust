@@ -35,6 +35,10 @@
 
 # --- Active exclusions below this line ---
 
+[[source]]
+file   = "lib/modules/versioning/nuget/types.ts"
+reason = "Type-only declarations and interfaces with no direct Rust runtime equivalent"
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
